@@ -12,4 +12,9 @@ test() {
 	go test main/reconciler
 }
 
+format() {
+	go fmt main.go
+	go fmt reconciler/*
+}
+
 $1 ${@:2}
