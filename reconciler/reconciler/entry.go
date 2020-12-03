@@ -4,6 +4,8 @@ import (
 	"cloud.google.com/go/civil"
 )
 
+type Minutes int
+
 type Period struct {
 	Start civil.Time
 	End civil.Time
@@ -12,12 +14,12 @@ type Period struct {
 type Entry struct {
 	Date civil.Date
 	Summary string
-	Times []int64
+	Times []Minutes
 	Periods []Period
 }
 
-func (d Entry) TotalTime() (int64) {
-	total := int64(0)
+func (d Entry) TotalTime() (Minutes) {
+	total := Minutes(0)
 	for _, t := range d.Times {
 		total += t
 	}
