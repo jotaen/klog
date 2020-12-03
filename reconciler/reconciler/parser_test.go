@@ -19,6 +19,23 @@ summary: Just a normal day
 	})
 }
 
+func TestAbsentDatePropertyFails(t *testing.T) {
+	yaml := `
+summary: Just a normal day
+`
+	_, err := Parse(yaml)
+	assert.Error(t, err)
+}
+
+func TestSummaryIsOptional(t *testing.T) {
+	yaml := `
+date: 2020-01-01
+`
+	entry, err := Parse(yaml)
+	assert.Equal(t, entry.Summary, "")
+	assert.Equal(t, err, nil)
+}
+
 func TestParseEntryWithTime(t *testing.T) {
 	yaml := `
 date: 2020-01-01
