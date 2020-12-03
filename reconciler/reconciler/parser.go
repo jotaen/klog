@@ -36,6 +36,11 @@ func Parse(serialisedData string) (Entry, error) {
 			minutes := t.Minute + 60 * t.Hour
 			e.Times = append(e.Times, Minutes(minutes))
 		}
+		if h.Start != "" && h.End != "" {
+			start, _ := civil.ParseTime(h.Start + ":00")
+			end, _ := civil.ParseTime(h.End + ":00")
+			e.Ranges = append(e.Ranges, Range{ Start: start, End: end })
+		}
 	}
 
 	return e, nil
