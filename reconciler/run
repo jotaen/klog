@@ -1,0 +1,15 @@
+#!/bin/bash
+
+install() {
+	go get
+}
+
+convert() {
+	go run main.go
+}
+
+test() {
+	go test main/reconciler
+}
+
+$1 ${@:2}
