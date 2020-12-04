@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
-	"main/reconciler"
+	"main/parser"
 )
 
 func main() {
-	entry, err := reconciler.Parse("")
+	entry, err := parser.Parse("")
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}

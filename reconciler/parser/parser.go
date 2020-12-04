@@ -1,8 +1,9 @@
-package reconciler
+package parser
 
 import (
 	"cloud.google.com/go/civil"
 	"gopkg.in/yaml.v2"
+	"main/entry"
 )
 
 type data struct {
@@ -15,17 +16,17 @@ type data struct {
 	}
 }
 
-func Parse(serialisedData string) (Entry, error) {
+func Parse(serialisedData string) (entry.Entry, error) {
 	d, err := deserialise(serialisedData)
 	if err != nil {
-		return Entry{}, err
+		return entry.Entry{}, err
 	}
 
-	e := Entry{}
+	e := entry.Entry{}
 
 	date, err := civil.ParseDate(d.Date)
 	if err != nil {
-		return Entry{}, err
+		return entry.Entry{}, err
 	}
 	e.Date = date
 
@@ -37,15 +38,15 @@ func Parse(serialisedData string) (Entry, error) {
 		if h.Time != "" {
 			t, err := civil.ParseTime(h.Time + ":00")
 			if err != nil {
-				return Entry{}, err
+				return entry.Entry{}, err
 			}
 			minutes := t.Minute + 60*t.Hour
-			e.Times = append(e.Times, Minutes(minutes))
+			e.Times = append(e.Times, entry.Minutes(minutes))
 		}
 		if h.Start != "" && h.End != "" {
 			start, _ := civil.ParseTime(h.Start + ":00")
 			end, _ := civil.ParseTime(h.End + ":00")
-			e.Ranges = append(e.Ranges, Range{Start: start, End: end})
+			e.Ranges = append(e.Ranges, entry.Range{Start: start, End: end})
 		}
 	}
 

@@ -9,12 +9,14 @@ convert() {
 }
 
 test() {
-	go test main/reconciler
+	go test main/parser
+	go test main/entry
 }
 
 format() {
 	go fmt main.go
-	go fmt reconciler/*
+	go fmt entry/*
+	go fmt parser/*
 }
 
 $1 ${@:2}
