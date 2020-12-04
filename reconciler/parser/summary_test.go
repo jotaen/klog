@@ -11,5 +11,5 @@ date: 2020-01-01
 summary: Just a normal day
 `
 	e, _ := Parse(yaml)
-	assert.Equal(t, e.Summary, "Just a normal day")
+	assert.Equal(t, e.Summary(), "Just a normal day")
 }

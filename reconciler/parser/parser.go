@@ -19,32 +19,37 @@ type data struct {
 func Parse(serialisedData string) (entry.Entry, error) {
 	d, err := deserialise(serialisedData)
 	if err != nil {
-		return entry.Entry{}, err
+		return nil, err
 	}
-
-	e := entry.Entry{}
 
 	date, err := civil.ParseDate(d.Date)
 	if err != nil {
-		return entry.Entry{}, err
+		return nil, err
 	}
-	e.Date = date
+	e, _ := entry.Create(entry.Date{
+		Year: date.Year,
+		Month: date.Month,
+		Day: date.Day,
+	})
 
-	e.Summary = d.Summary
+	e.SetSummary(d.Summary)
 
 	for _, h := range d.Hours {
 		if h.Time != "" {
-			t, err := civil.ParseTime(h.Time + ":00")
+			time, err := civil.ParseTime(h.Time + ":00")
 			if err != nil {
-				return entry.Entry{}, err
+				return nil, err
 			}
-			minutes := t.Minute + 60*t.Hour
-			e.Times = append(e.Times, entry.Minutes(minutes))
+			minutes := time.Minute + 60 * time.Hour
+			e.AddTime(entry.Minutes(minutes))
 		}
 		if h.Start != "" && h.End != "" {
 			start, _ := civil.ParseTime(h.Start + ":00")
 			end, _ := civil.ParseTime(h.End + ":00")
-			e.Ranges = append(e.Ranges, entry.Range{Start: start, End: end})
+			e.AddRange(
+				entry.Time{ Hour: start.Hour, Minute: start.Minute },
+				entry.Time{ Hour: end.Hour, Minute: end.Minute },
+			)
 		}
 	}
 

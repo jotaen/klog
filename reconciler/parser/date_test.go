@@ -2,7 +2,6 @@ package parser
 
 import (
 	"github.com/stretchr/testify/assert"
-	"main/entry"
 	"testing"
 )
 
@@ -11,7 +10,7 @@ func TestAbsentDatePropertyFails(t *testing.T) {
 summary: Just a normal day
 `
 	e, err := Parse(yaml)
-	assert.Equal(t, e, entry.Entry{})
+	assert.Equal(t, e, nil)
 	assert.Error(t, err)
 }
 
@@ -20,6 +19,6 @@ func TestMalformedDateFails(t *testing.T) {
 date: 01.01.2020
 `
 	e, err := Parse(yaml)
-	assert.Equal(t, e, entry.Entry{})
+	assert.Equal(t, e, nil)
 	assert.Error(t, err)
 }

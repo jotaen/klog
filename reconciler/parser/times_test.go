@@ -14,7 +14,7 @@ hours:
 - time: 5:00
 `
 	e, _ := Parse(yaml)
-	assert.Equal(t, e.Times, []entry.Minutes{entry.Minutes(2 * 60), entry.Minutes(5 * 60)})
+	assert.Equal(t, e.Times(), []entry.Minutes{entry.Minutes(2 * 60), entry.Minutes(5 * 60)})
 }
 
 func TestParseEntryWithMalformedTimesFails(t *testing.T) {
@@ -24,7 +24,7 @@ hours:
 - time: asdf
 `
 	e, err := Parse(yaml)
-	assert.Equal(t, e, entry.Entry{})
+	assert.Equal(t, e, nil)
 	assert.Error(t, err)
 }
 
@@ -35,6 +35,6 @@ hours:
 - time: 23:87
 `
 	e, err := Parse(yaml)
-	assert.Equal(t, e, entry.Entry{})
+	assert.Equal(t, e, nil)
 	assert.Error(t, err)
 }
