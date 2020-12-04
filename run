@@ -5,12 +5,16 @@ install() {
 }
 
 test() {
-	go test klog/parser klog/entry
+	go test klog/parser klog/workday
 }
 
 format() {
-	go fmt entry/*
+	go fmt workday/*
 	go fmt parser/*
+}
+
+cli() {
+	go run cli.go
 }
 
 $1 ${@:2}

@@ -3,7 +3,7 @@ package parser
 import (
 	"cloud.google.com/go/civil"
 	"gopkg.in/yaml.v2"
-	"klog/entry"
+	"klog/workday"
 )
 
 type data struct {
@@ -16,7 +16,7 @@ type data struct {
 	}
 }
 
-func Parse(serialisedData string) (entry.Entry, []error) {
+func Parse(serialisedData string) (workday.WorkDay, []error) {
 	errs := []error{}
 
 	d, err := deserialise(serialisedData)
@@ -26,13 +26,13 @@ func Parse(serialisedData string) (entry.Entry, []error) {
 	}
 
 	date, _ := civil.ParseDate(d.Date)
-	res, err := entry.Create(entry.Date{
+	res, err := workday.Create(workday.Date{
 		Year:  date.Year,
 		Month: date.Month,
 		Day:   date.Day,
 	})
 	if res == nil {
-		errs = append(errs, fromEntryError(err))
+		errs = append(errs, fromWorkDayError(err))
 		return nil, errs
 	}
 
@@ -45,14 +45,14 @@ func Parse(serialisedData string) (entry.Entry, []error) {
 				errs = append(errs, parserError(INVALID_TIME))
 			}
 			minutes := time.Minute + 60*time.Hour
-			res.AddTime(entry.Minutes(minutes))
+			res.AddTime(workday.Minutes(minutes))
 		}
 		if h.Start != "" && h.End != "" {
 			start, _ := civil.ParseTime(h.Start + ":00")
 			end, _ := civil.ParseTime(h.End + ":00")
 			res.AddRange(
-				entry.Time{Hour: start.Hour, Minute: start.Minute},
-				entry.Time{Hour: end.Hour, Minute: end.Minute},
+				workday.Time{Hour: start.Hour, Minute: start.Minute},
+				workday.Time{Hour: end.Hour, Minute: end.Minute},
 			)
 		}
 	}

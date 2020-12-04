@@ -2,7 +2,7 @@ package parser
 
 import (
 	"errors"
-	"klog/entry"
+	"klog/workday"
 )
 
 const (
@@ -17,10 +17,10 @@ func parserError(code string) error {
 	return errors.New(code)
 }
 
-func fromEntryError(err error) error {
+func fromWorkDayError(err error) error {
 	dict := map[string]string{
-		entry.INVALID_DATE:  INVALID_DATE,
-		entry.NEGATIVE_TIME: NEGATIVE_TIME,
+		workday.INVALID_DATE:  INVALID_DATE,
+		workday.NEGATIVE_TIME: NEGATIVE_TIME,
 	}
-	return parserError(dict[err.(*entry.EntryError).Code])
+	return parserError(dict[err.(*workday.WorkDayError).Code])
 }

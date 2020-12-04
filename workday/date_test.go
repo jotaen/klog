@@ -1,4 +1,4 @@
-package entry
+package workday
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -8,13 +8,13 @@ import (
 
 func TestOkayWhenValidDateIsPresent(t *testing.T) {
 	date := Date{Year: 2020, Month: time.January, Day: 1}
-	entry, err := Create(date)
+	workDay, err := Create(date)
 	assert.Nil(t, err)
-	assert.Equal(t, entry.Date(), date)
+	assert.Equal(t, workDay.Date(), date)
 }
 
 func TestErrorWhenDateIsInvalid(t *testing.T) {
-	entry, err := Create(Date{Year: 2020, Month: time.January, Day: 99})
-	assert.Nil(t, entry)
-	assert.Equal(t, err.(*EntryError).Code, INVALID_DATE)
+	workDay, err := Create(Date{Year: 2020, Month: time.January, Day: 99})
+	assert.Nil(t, workDay)
+	assert.Equal(t, err.(*WorkDayError).Code, INVALID_DATE)
 }

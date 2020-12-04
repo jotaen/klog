@@ -1,14 +1,14 @@
-package entry
+package workday
 
 const (
 	INVALID_DATE  = "INVALID_DATE"
 	NEGATIVE_TIME = "NEGATIVE_TIME"
 )
 
-type EntryError struct {
+type WorkDayError struct {
 	Code string
 }
 
-func (e *EntryError) Error() string {
+func (e *WorkDayError) Error() string {
 	return e.Code
 }

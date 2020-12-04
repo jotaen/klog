@@ -5,12 +5,12 @@ import (
 	"testing"
 )
 
-func TestMinimalValidEntry(t *testing.T) {
+func TestMinimalValidWorkDay(t *testing.T) {
 	yaml := `
 date: 2020-01-01
 `
-	e, errs := Parse(yaml)
-	assert.Equal(t, e.Summary(), "")
+	w, errs := Parse(yaml)
+	assert.Equal(t, w.Summary(), "")
 	assert.Nil(t, errs)
 }
 
@@ -20,7 +20,7 @@ date: 2020-01-01
 foo: 1
 bar: test
 `
-	e, errs := Parse(yaml)
-	assert.Equal(t, e, nil)
+	w, errs := Parse(yaml)
+	assert.Equal(t, w, nil)
 	assert.Contains(t, errs, parserError(MALFORMED_YAML))
 }

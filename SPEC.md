@@ -18,7 +18,7 @@
 date: 2020-01-31
 summary: Some text
 tags: [custom, keywords]
-worktime: 8h
+scheduled: 8h
 log:
 - start: 09:00
 	end: 1:00pm
@@ -38,7 +38,7 @@ log:
 - Is optional
 - Must be a list of string values
 
-### Field `worktime`
+### Field `scheduled`
 - Is optional
 - Is of type “period of time”
 

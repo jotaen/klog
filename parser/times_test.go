@@ -2,11 +2,11 @@ package parser
 
 import (
 	"github.com/stretchr/testify/assert"
-	"klog/entry"
+	"klog/workday"
 	"testing"
 )
 
-func TestParseEntryWithTimes(t *testing.T) {
+func TestParseWorkDayWithTimes(t *testing.T) {
 	yaml := `
 date: 1985-03-14
 hours:
@@ -14,10 +14,10 @@ hours:
 - time: 5:00
 `
 	e, _ := Parse(yaml)
-	assert.Equal(t, e.Times(), []entry.Minutes{entry.Minutes(2 * 60), entry.Minutes(5 * 60)})
+	assert.Equal(t, e.Times(), []workday.Minutes{workday.Minutes(2 * 60), workday.Minutes(5 * 60)})
 }
 
-func TestParseEntryWithMalformedTimesFails(t *testing.T) {
+func TestParseWorkDayWithMalformedTimesFails(t *testing.T) {
 	yaml := `
 date: 1985-03-14
 hours:
@@ -28,7 +28,7 @@ hours:
 	assert.Contains(t, errs, parserError(INVALID_TIME))
 }
 
-func TestParseEntryWithInvalidTimesFails(t *testing.T) {
+func TestParseWorkDayWithInvalidTimesFails(t *testing.T) {
 	yaml := `
 date: 1985-03-14
 hours:
