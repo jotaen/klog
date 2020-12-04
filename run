@@ -4,16 +4,11 @@ install() {
 	go get
 }
 
-convert() {
-	go run main.go
-}
-
 test() {
-	go test main/parser main/entry
+	go test klog/parser klog/entry
 }
 
 format() {
-	go fmt main.go
 	go fmt entry/*
 	go fmt parser/*
 }

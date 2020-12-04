@@ -3,7 +3,7 @@ package parser
 import (
 	"cloud.google.com/go/civil"
 	"gopkg.in/yaml.v2"
-	"main/entry"
+	"klog/entry"
 )
 
 type data struct {
@@ -27,9 +27,9 @@ func Parse(serialisedData string) (entry.Entry, []error) {
 
 	date, _ := civil.ParseDate(d.Date)
 	res, err := entry.Create(entry.Date{
-		Year: date.Year,
+		Year:  date.Year,
 		Month: date.Month,
-		Day: date.Day,
+		Day:   date.Day,
 	})
 	if res == nil {
 		errs = append(errs, fromEntryError(err))
@@ -44,15 +44,15 @@ func Parse(serialisedData string) (entry.Entry, []error) {
 			if err != nil {
 				errs = append(errs, parserError(INVALID_TIME))
 			}
-			minutes := time.Minute + 60 * time.Hour
+			minutes := time.Minute + 60*time.Hour
 			res.AddTime(entry.Minutes(minutes))
 		}
 		if h.Start != "" && h.End != "" {
 			start, _ := civil.ParseTime(h.Start + ":00")
 			end, _ := civil.ParseTime(h.End + ":00")
 			res.AddRange(
-				entry.Time{ Hour: start.Hour, Minute: start.Minute },
-				entry.Time{ Hour: end.Hour, Minute: end.Minute },
+				entry.Time{Hour: start.Hour, Minute: start.Minute},
+				entry.Time{Hour: end.Hour, Minute: end.Minute},
 			)
 		}
 	}

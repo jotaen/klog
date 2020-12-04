@@ -2,7 +2,7 @@ package parser
 
 import (
 	"github.com/stretchr/testify/assert"
-	"main/entry"
+	"klog/entry"
 	"testing"
 )
 

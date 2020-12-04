@@ -1,4 +1,4 @@
-module main
+module klog
 
 go 1.15
 

@@ -11,7 +11,7 @@ func TestOkayWhenAddingValidTimes(t *testing.T) {
 	entry, _ := Create(date)
 	err := entry.AddTime(Minutes(1))
 	assert.Nil(t, err)
-	assert.Equal(t, entry.Times(), []Minutes{ Minutes(1) })
+	assert.Equal(t, entry.Times(), []Minutes{Minutes(1)})
 }
 
 func TestErrorWhenAddingInvalidTimes(t *testing.T) {

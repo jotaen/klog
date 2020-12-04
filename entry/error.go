@@ -1,7 +1,7 @@
 package entry
 
 const (
-	INVALID_DATE = "INVALID_DATE"
+	INVALID_DATE  = "INVALID_DATE"
 	NEGATIVE_TIME = "NEGATIVE_TIME"
 )
 
