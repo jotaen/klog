@@ -4,7 +4,7 @@ import (
 	"cloud.google.com/go/civil"
 )
 
-type Minutes int
+type Minutes int64
 
 type Range struct {
 	Start civil.Time
@@ -18,12 +18,31 @@ type Entry struct {
 	Ranges  []Range
 }
 
-func (d Entry) TotalTime() Minutes {
+func (e Entry) Check() []EntryError {
+	errs := []EntryError{}
+
+	if !e.Date.IsValid() {
+		errs = append(errs, EntryError{Code: INVALID_DATE})
+	}
+
+	for _, t := range e.Times {
+		if t < 0 {
+			errs = append(errs, EntryError{Code: NEGATIVE_TIME})
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+	return errs
+}
+
+func (e Entry) TotalTime() Minutes {
 	total := Minutes(0)
-	for _, t := range d.Times {
+	for _, t := range e.Times {
 		total += t
 	}
-	for _, t := range d.Ranges {
+	for _, t := range e.Ranges {
 		start := t.Start.Minute + 60*t.Start.Hour
 		end := t.End.Minute + 60*t.End.Hour
 		total += Minutes(end - start)

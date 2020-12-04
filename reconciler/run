@@ -9,8 +9,7 @@ convert() {
 }
 
 test() {
-	go test main/parser
-	go test main/entry
+	go test main/parser main/entry
 }
 
 format() {

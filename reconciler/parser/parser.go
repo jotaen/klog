@@ -30,9 +30,7 @@ func Parse(serialisedData string) (entry.Entry, error) {
 	}
 	e.Date = date
 
-	if d.Summary != "" {
-		e.Summary = d.Summary
-	}
+	e.Summary = d.Summary
 
 	for _, h := range d.Hours {
 		if h.Time != "" {
