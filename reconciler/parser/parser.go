@@ -16,44 +16,51 @@ type data struct {
 	}
 }
 
-func Parse(serialisedData string) (entry.Entry, error) {
+func Parse(serialisedData string) (entry.Entry, []error) {
+	errs := []error{}
+
 	d, err := deserialise(serialisedData)
 	if err != nil {
-		return nil, err
+		errs = append(errs, parserError(MALFORMED_YAML))
+		return nil, errs
 	}
 
-	date, err := civil.ParseDate(d.Date)
-	if err != nil {
-		return nil, err
-	}
-	e, _ := entry.Create(entry.Date{
+	date, _ := civil.ParseDate(d.Date)
+	res, err := entry.Create(entry.Date{
 		Year: date.Year,
 		Month: date.Month,
 		Day: date.Day,
 	})
+	if res == nil {
+		errs = append(errs, fromEntryError(err))
+		return nil, errs
+	}
 
-	e.SetSummary(d.Summary)
+	res.SetSummary(d.Summary)
 
 	for _, h := range d.Hours {
 		if h.Time != "" {
 			time, err := civil.ParseTime(h.Time + ":00")
 			if err != nil {
-				return nil, err
+				errs = append(errs, parserError(INVALID_TIME))
 			}
 			minutes := time.Minute + 60 * time.Hour
-			e.AddTime(entry.Minutes(minutes))
+			res.AddTime(entry.Minutes(minutes))
 		}
 		if h.Start != "" && h.End != "" {
 			start, _ := civil.ParseTime(h.Start + ":00")
 			end, _ := civil.ParseTime(h.End + ":00")
-			e.AddRange(
+			res.AddRange(
 				entry.Time{ Hour: start.Hour, Minute: start.Minute },
 				entry.Time{ Hour: end.Hour, Minute: end.Minute },
 			)
 		}
 	}
 
-	return e, nil
+	if len(errs) != 0 {
+		return nil, errs
+	}
+	return res, nil
 }
 
 func deserialise(serialisedData string) (data, error) {

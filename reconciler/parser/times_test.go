@@ -23,9 +23,9 @@ date: 1985-03-14
 hours:
 - time: asdf
 `
-	e, err := Parse(yaml)
+	e, errs := Parse(yaml)
 	assert.Equal(t, e, nil)
-	assert.Error(t, err)
+	assert.Contains(t, errs, parserError(INVALID_TIME))
 }
 
 func TestParseEntryWithInvalidTimesFails(t *testing.T) {
@@ -34,7 +34,7 @@ date: 1985-03-14
 hours:
 - time: 23:87
 `
-	e, err := Parse(yaml)
+	e, errs := Parse(yaml)
 	assert.Equal(t, e, nil)
-	assert.Error(t, err)
+	assert.Contains(t, errs, parserError(INVALID_TIME))
 }

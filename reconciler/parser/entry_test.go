@@ -9,9 +9,9 @@ func TestMinimalValidEntry(t *testing.T) {
 	yaml := `
 date: 2020-01-01
 `
-	e, err := Parse(yaml)
+	e, errs := Parse(yaml)
 	assert.Equal(t, e.Summary(), "")
-	assert.Equal(t, err, nil)
+	assert.Nil(t, errs)
 }
 
 func TestFailOnUnknownProperties(t *testing.T) {
@@ -20,7 +20,7 @@ date: 2020-01-01
 foo: 1
 bar: test
 `
-	e, err := Parse(yaml)
+	e, errs := Parse(yaml)
 	assert.Equal(t, e, nil)
-	assert.Error(t, err)
+	assert.Contains(t, errs, parserError(MALFORMED_YAML))
 }

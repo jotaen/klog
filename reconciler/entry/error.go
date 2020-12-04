@@ -1,8 +1,8 @@
 package entry
 
 const (
-	INVALID_DATE = "The date does not represent a valid day in the calendar"
-	NEGATIVE_TIME = "A time cannot be a negative value"
+	INVALID_DATE = "INVALID_DATE"
+	NEGATIVE_TIME = "NEGATIVE_TIME"
 )
 
 type EntryError struct {
