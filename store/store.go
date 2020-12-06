@@ -4,12 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"klog/datetime"
+	"klog/parser"
+	"klog/serialiser"
 	"klog/workday"
-	"os"
 )
 
 type Store interface {
-	Get(datetime.Date) (workday.WorkDay, error)
+	Get(datetime.Date) (workday.WorkDay, []error)
 	Save(workday.WorkDay) error
 	// List() ([]workday.WorkDay, error)
 }
@@ -27,33 +28,27 @@ func CreateFsStore(path string) (Store, error) {
 	}, nil
 }
 
-func (fs fileStore) Get(date datetime.Date) (workday.WorkDay, error) {
-	if fileExists(fs.makePath(date)) {
-		return nil, nil
+func (fs fileStore) Get(date datetime.Date) (workday.WorkDay, []error) {
+	props := fs.createFileProps(date)
+	contents, err := readFile(props)
+	if err != nil {
+		return nil, []error{err}
 	}
-	return nil, errors.New("No such entry")
+	workDay, errs := parser.Parse(contents)
+	return workDay, errs
 }
 
-func (fs fileStore) Save(date workday.WorkDay) error {
+func (fs fileStore) Save(workDay workday.WorkDay) error {
+	props := fs.createFileProps(workDay.Date())
+	writeFile(props, serialiser.Serialise(workDay))
 	return nil
 }
 
-func (fs fileStore) makePath(date datetime.Date) string {
-	return fmt.Sprintf("%v/%v/%v/%v", fs.basePath, date.Year, date.Month, date.Day)
-}
-
-func dirExists(path string) bool {
-	file, err := os.Stat(path)
-	if err == nil && file.Mode().IsDir() {
-		return true
+func (fs fileStore) createFileProps(date datetime.Date) fileProps {
+	props := fileProps{
+		dir:  fmt.Sprintf("%v/%v/%02v", fs.basePath, date.Year, date.Month),
+		name: fmt.Sprintf("%02v.yml", date.Day),
 	}
-	return false
-}
-
-func fileExists(path string) bool {
-	file, err := os.Stat(path)
-	if err == nil && file.Mode().IsRegular() {
-		return true
-	}
-	return false
+	props.path = props.dir + "/" + props.name
+	return props
 }
