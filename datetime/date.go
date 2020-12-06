@@ -26,19 +26,19 @@ func CreateDate(year int, month int, day int) (Date, error) {
 		Month: gotime.Month(month),
 		Day:   day,
 	}
-	if !cd.IsValid() {
-		return nil, errors.New(INVALID_DATE)
-	}
-	return date{
-		year:  year,
-		month: month,
-		day:   day,
-	}, nil
+	return cd2Date(cd)
 }
 
 func CreateDateFromString(yyyymmdd string) (Date, error) {
 	cd, err := civil.ParseDate(yyyymmdd)
-	if err != nil || !cd.IsValid() {
+	if err != nil {
+		return nil, errors.New(INVALID_DATE)
+	}
+	return cd2Date(cd)
+}
+
+func cd2Date(cd civil.Date) (Date, error) {
+	if !cd.IsValid() {
 		return nil, errors.New(INVALID_DATE)
 	}
 	return date{

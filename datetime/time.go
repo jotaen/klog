@@ -30,18 +30,19 @@ func CreateTime(hour int, minute int) (Time, error) {
 		Second:     0,
 		Nanosecond: 0,
 	}
-	if !ct.IsValid() {
-		return nil, errors.New(INVALID_TIME)
-	}
-	return time{
-		hour:   ct.Hour,
-		minute: ct.Minute,
-	}, nil
+	return ct2Time(ct)
 }
 
 func CreateTimeFromString(hhmm string) (Time, error) {
 	ct, err := civil.ParseTime(hhmm + ":00")
-	if err != nil || !ct.IsValid() {
+	if err != nil {
+		return nil, errors.New(INVALID_TIME)
+	}
+	return ct2Time(ct)
+}
+
+func ct2Time(ct civil.Time) (Time, error) {
+	if !ct.IsValid() {
 		return nil, errors.New(INVALID_TIME)
 	}
 	return time{
