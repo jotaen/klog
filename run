@@ -5,12 +5,13 @@ install() {
 }
 
 test() {
-	go test klog/parser klog/workday
+	go test klog/parser klog/workday klog/store
 }
 
 format() {
 	go fmt workday/*
 	go fmt parser/*
+	go fmt store/*
 }
 
 cli() {
