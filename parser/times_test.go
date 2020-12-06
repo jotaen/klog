@@ -14,7 +14,7 @@ hours:
 - time: 5:00
 `
 	e, _ := Parse(yaml)
-	assert.Equal(t, e.Times(), []datetime.Minutes{datetime.Minutes(2 * 60), datetime.Minutes(5 * 60)})
+	assert.Equal(t, e.Times(), []datetime.Duration{datetime.Duration(2 * 60), datetime.Duration(5 * 60)})
 }
 
 func TestParseWorkDayWithMalformedTimesFails(t *testing.T) {

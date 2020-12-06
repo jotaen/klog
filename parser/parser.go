@@ -46,7 +46,7 @@ func Parse(serialisedData string) (workday.WorkDay, []error) {
 				errs = append(errs, parserError(INVALID_TIME))
 			}
 			minutes := time.Minute + 60*time.Hour
-			res.AddTime(datetime.Minutes(minutes))
+			res.AddTime(datetime.Duration(minutes))
 		}
 		if h.Start != "" && h.End != "" {
 			start, _ := civil.ParseTime(h.Start + ":00")

@@ -11,11 +11,11 @@ type WorkDay interface {
 	SetDate(datetime.Date) error
 	Summary() string
 	SetSummary(string) error
-	Times() []datetime.Minutes
-	AddTime(datetime.Minutes) error
+	Times() []datetime.Duration
+	AddTime(datetime.Duration) error
 	Ranges() [][]datetime.Time // tuple of [start, end]
 	AddRange(datetime.Time, datetime.Time) error
-	TotalTime() datetime.Minutes
+	TotalTime() datetime.Duration
 }
 
 func Create(date datetime.Date) (WorkDay, error) {
@@ -30,7 +30,7 @@ func Create(date datetime.Date) (WorkDay, error) {
 type workday struct {
 	date    civil.Date
 	summary string
-	times   []datetime.Minutes
+	times   []datetime.Duration
 	ranges  [][]civil.Time
 }
 
@@ -64,11 +64,11 @@ func (e *workday) SetSummary(summary string) error {
 	return nil
 }
 
-func (e *workday) Times() []datetime.Minutes {
+func (e *workday) Times() []datetime.Duration {
 	return e.times
 }
 
-func (e *workday) AddTime(time datetime.Minutes) error {
+func (e *workday) AddTime(time datetime.Duration) error {
 	if time < 0 {
 		return &WorkDayError{Code: NEGATIVE_TIME}
 	}
@@ -95,15 +95,15 @@ func (e *workday) AddRange(start datetime.Time, end datetime.Time) error {
 	return nil
 }
 
-func (e *workday) TotalTime() datetime.Minutes {
-	total := datetime.Minutes(0)
+func (e *workday) TotalTime() datetime.Duration {
+	total := datetime.Duration(0)
 	for _, t := range e.times {
 		total += t
 	}
 	for _, rs := range e.ranges {
 		start := rs[0].Minute + 60*rs[0].Hour
 		end := rs[1].Minute + 60*rs[1].Hour
-		total += datetime.Minutes(end - start)
+		total += datetime.Duration(end - start)
 	}
 	return total
 }

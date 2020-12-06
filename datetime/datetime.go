@@ -11,10 +11,10 @@ type Date struct {
 }
 
 func (d Date) ToString() string {
-	return fmt.Sprintf("%v-%02v-%02v", d.Year, d.Month, d.Day)
+	return fmt.Sprintf("%04v-%02v-%02v", d.Year, d.Month, d.Day)
 }
 
-type Minutes int64
+type Duration int64 // in minutes
 
 type Time struct {
 	Hour   int
