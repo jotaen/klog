@@ -1,7 +1,9 @@
 package parser
 
 import (
+	"errors"
 	"github.com/stretchr/testify/assert"
+	"klog/datetime"
 	"testing"
 )
 
@@ -11,7 +13,7 @@ summary: Just a normal day
 `
 	w, errs := Parse(yaml)
 	assert.Equal(t, w, nil)
-	assert.Contains(t, errs, parserError(INVALID_DATE))
+	assert.Contains(t, errs, errors.New(datetime.INVALID_DATE))
 }
 
 func TestMalformedDateFails(t *testing.T) {
@@ -20,5 +22,5 @@ date: 01.01.2020
 `
 	w, errs := Parse(yaml)
 	assert.Equal(t, w, nil)
-	assert.Contains(t, errs, parserError(INVALID_DATE))
+	assert.Contains(t, errs, errors.New(datetime.INVALID_DATE))
 }

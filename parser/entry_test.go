@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"errors"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -22,5 +23,5 @@ bar: test
 `
 	w, errs := Parse(yaml)
 	assert.Equal(t, w, nil)
-	assert.Contains(t, errs, parserError(MALFORMED_YAML))
+	assert.Contains(t, errs, errors.New(MALFORMED_YAML))
 }

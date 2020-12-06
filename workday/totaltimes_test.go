@@ -7,22 +7,31 @@ import (
 )
 
 func TestSumUpTimes(t *testing.T) {
-	w, _ := Create(datetime.Date{Year: 2020, Month: 1, Day: 1})
+	date, _ := datetime.CreateDate(2020, 1, 1)
+	w := Create(date)
 	w.AddTime(datetime.Duration(60))
 	w.AddTime(datetime.Duration(120))
 	assert.Equal(t, datetime.Duration(180), w.TotalTime())
 }
 
 func TestSumUpRanges(t *testing.T) {
-	w, _ := Create(datetime.Date{Year: 2020, Month: 1, Day: 1})
-	w.AddRange(datetime.Time{Hour: 9, Minute: 07}, datetime.Time{Hour: 12, Minute: 59})
-	w.AddRange(datetime.Time{Hour: 13, Minute: 49}, datetime.Time{Hour: 17, Minute: 12})
+	date, _ := datetime.CreateDate(2020, 1, 1)
+	time1, _ := datetime.CreateTime(9, 7)
+	time2, _ := datetime.CreateTime(12, 59)
+	time3, _ := datetime.CreateTime(13, 49)
+	time4, _ := datetime.CreateTime(17, 12)
+	w := Create(date)
+	w.AddRange(time1, time2)
+	w.AddRange(time3, time4)
 	assert.Equal(t, datetime.Duration(435), w.TotalTime())
 }
 
 func TestSumUpTimesAndRanges(t *testing.T) {
-	w, _ := Create(datetime.Date{Year: 2020, Month: 1, Day: 1})
+	date, _ := datetime.CreateDate(2020, 1, 1)
+	time1, _ := datetime.CreateTime(8, 0)
+	time2, _ := datetime.CreateTime(12, 0)
+	w := Create(date)
 	w.AddTime(datetime.Duration(93))
-	w.AddRange(datetime.Time{Hour: 8, Minute: 00}, datetime.Time{Hour: 12, Minute: 00})
+	w.AddRange(time1, time2)
 	assert.Equal(t, datetime.Duration(333), w.TotalTime())
 }

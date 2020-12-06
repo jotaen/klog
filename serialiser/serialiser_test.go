@@ -8,14 +8,16 @@ import (
 )
 
 func TestSerialiseDate(t *testing.T) {
-	workDay, _ := workday.Create(datetime.Date{Year: 1859, Month: 6, Day: 2})
+	date, _ := datetime.CreateDate(1859, 6, 2)
+	workDay := workday.Create(date)
 	text := Serialise(workDay)
 	assert.Equal(t, `date: 1859-06-02
 `, text)
 }
 
 func TestSerialiseSummaryIfPresent(t *testing.T) {
-	workDay, _ := workday.Create(datetime.Date{Year: 1859, Month: 6, Day: 2})
+	date, _ := datetime.CreateDate(1859, 6, 2)
+	workDay := workday.Create(date)
 	workDay.SetSummary("Hello World!")
 	text := Serialise(workDay)
 	assert.Equal(t, `date: 1859-06-02

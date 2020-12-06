@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"cloud.google.com/go/civil"
+	"errors"
 	"gopkg.in/yaml.v2"
 	"klog/datetime"
 	"klog/workday"
@@ -22,39 +22,34 @@ func Parse(serialisedData string) (workday.WorkDay, []error) {
 
 	d, err := deserialise(serialisedData)
 	if err != nil {
-		errs = append(errs, parserError(MALFORMED_YAML))
+		errs = append(errs, errors.New(MALFORMED_YAML))
 		return nil, errs
 	}
 
-	date, _ := civil.ParseDate(d.Date)
-	res, err := workday.Create(datetime.Date{
-		Year:  date.Year,
-		Month: int(date.Month),
-		Day:   date.Day,
-	})
-	if res == nil {
-		errs = append(errs, fromWorkDayError(err))
+	date, err := datetime.CreateDateFromString(d.Date)
+	if err != nil {
+		errs = append(errs, err)
 		return nil, errs
 	}
+
+	res := workday.Create(date)
 
 	res.SetSummary(d.Summary)
 
 	for _, h := range d.Hours {
 		if h.Time != "" {
-			time, err := civil.ParseTime(h.Time + ":00")
+			time, err := datetime.CreateTimeFromString(h.Time)
 			if err != nil {
-				errs = append(errs, parserError(INVALID_TIME))
+				errs = append(errs, err)
+			} else {
+				minutes := time.Minute() + 60*time.Hour()
+				res.AddTime(datetime.Duration(minutes))
 			}
-			minutes := time.Minute + 60*time.Hour
-			res.AddTime(datetime.Duration(minutes))
 		}
 		if h.Start != "" && h.End != "" {
-			start, _ := civil.ParseTime(h.Start + ":00")
-			end, _ := civil.ParseTime(h.End + ":00")
-			res.AddRange(
-				datetime.Time{Hour: start.Hour, Minute: start.Minute},
-				datetime.Time{Hour: end.Hour, Minute: end.Minute},
-			)
+			start, _ := datetime.CreateTimeFromString(h.Start)
+			end, _ := datetime.CreateTimeFromString(h.End)
+			res.AddRange(start, end)
 		}
 	}
 

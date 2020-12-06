@@ -6,15 +6,8 @@ import (
 	"testing"
 )
 
-func TestOkayWhenValidDateIsPresent(t *testing.T) {
-	date := datetime.Date{Year: 2020, Month: 1, Day: 1}
-	workDay, err := Create(date)
-	assert.Nil(t, err)
+func TestSavesDateUponCreation(t *testing.T) {
+	date, _ := datetime.CreateDate(2020, 1, 1)
+	workDay := Create(date)
 	assert.Equal(t, workDay.Date(), date)
-}
-
-func TestErrorWhenDateIsInvalid(t *testing.T) {
-	workDay, err := Create(datetime.Date{Year: 2020, Month: 1, Day: 99})
-	assert.Nil(t, workDay)
-	assert.Equal(t, err.(*WorkDayError).Code, INVALID_DATE)
 }

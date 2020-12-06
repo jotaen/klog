@@ -35,16 +35,17 @@ func TestFailsToInitialiseFileStoreIfPathDoesNotExists(t *testing.T) {
 func TestGetFailsIfDateDoesNotExist(t *testing.T) {
 	run(func(path string) {
 		store, _ := CreateFsStore(path)
-		_, errs := store.Get(datetime.Date{Year: 2020, Month: 1, Day: 31})
+		date, _ := datetime.CreateDate(2020, 1, 31)
+		_, errs := store.Get(date)
 		assert.Error(t, errs[0])
 	})
 }
 
 func TestSavePersists(t *testing.T) {
 	run(func(path string) {
-		date := datetime.Date{Year: 2000, Month: 3, Day: 15}
 		store, _ := CreateFsStore(path)
-		originalWd, _ := workday.Create(date)
+		date, _ := datetime.CreateDate(1999, 3, 15)
+		originalWd := workday.Create(date)
 		err := store.Save(originalWd)
 		assert.Nil(t, err)
 

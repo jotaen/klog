@@ -1,14 +1,13 @@
 package workday
 
 import (
-	"cloud.google.com/go/civil"
+	"errors"
 	"klog/datetime"
-	"time"
 )
 
 type WorkDay interface {
 	Date() datetime.Date
-	SetDate(datetime.Date) error
+	SetDate(datetime.Date)
 	Summary() string
 	SetSummary(string) error
 	Times() []datetime.Duration
@@ -18,41 +17,25 @@ type WorkDay interface {
 	TotalTime() datetime.Duration
 }
 
-func Create(date datetime.Date) (WorkDay, error) {
-	e := workday{}
-	err := e.SetDate(date)
-	if err != nil {
-		return nil, err
+func Create(date datetime.Date) WorkDay {
+	return &workday{
+		date: date,
 	}
-	return &e, nil
 }
 
 type workday struct {
-	date    civil.Date
+	date    datetime.Date
 	summary string
 	times   []datetime.Duration
-	ranges  [][]civil.Time
+	ranges  [][]datetime.Time
 }
 
 func (e *workday) Date() datetime.Date {
-	return datetime.Date{
-		Year:  e.date.Year,
-		Month: int(e.date.Month),
-		Day:   e.date.Day,
-	}
+	return e.date
 }
 
-func (e *workday) SetDate(date datetime.Date) error {
-	d := civil.Date{
-		Year:  date.Year,
-		Month: time.Month(date.Month),
-		Day:   date.Day,
-	}
-	if !d.IsValid() {
-		return &WorkDayError{Code: INVALID_DATE}
-	}
-	e.date = d
-	return nil
+func (e *workday) SetDate(date datetime.Date) {
+	e.date = date
 }
 
 func (e *workday) Summary() string {
@@ -70,7 +53,7 @@ func (e *workday) Times() []datetime.Duration {
 
 func (e *workday) AddTime(time datetime.Duration) error {
 	if time < 0 {
-		return &WorkDayError{Code: NEGATIVE_TIME}
+		return errors.New(NEGATIVE_TIME)
 	}
 	e.times = append(e.times, time)
 	return nil
@@ -79,19 +62,13 @@ func (e *workday) AddTime(time datetime.Duration) error {
 func (e *workday) Ranges() [][]datetime.Time {
 	ts := [][]datetime.Time{}
 	for _, r := range e.ranges {
-		ts = append(ts, []datetime.Time{
-			datetime.Time{Hour: r[0].Hour, Minute: r[0].Minute},
-			datetime.Time{Hour: r[1].Hour, Minute: r[1].Minute},
-		})
+		ts = append(ts, []datetime.Time{r[0], r[1]})
 	}
 	return ts
 }
 
 func (e *workday) AddRange(start datetime.Time, end datetime.Time) error {
-	e.ranges = append(e.ranges, []civil.Time{
-		civil.Time{Hour: start.Hour, Minute: start.Minute, Second: 0, Nanosecond: 0},
-		civil.Time{Hour: end.Hour, Minute: end.Minute, Second: 0, Nanosecond: 0},
-	})
+	e.ranges = append(e.ranges, []datetime.Time{start, end})
 	return nil
 }
 
@@ -101,8 +78,8 @@ func (e *workday) TotalTime() datetime.Duration {
 		total += t
 	}
 	for _, rs := range e.ranges {
-		start := rs[0].Minute + 60*rs[0].Hour
-		end := rs[1].Minute + 60*rs[1].Hour
+		start := rs[0].Minute() + 60*rs[0].Hour()
+		end := rs[1].Minute() + 60*rs[1].Hour()
 		total += datetime.Duration(end - start)
 	}
 	return total

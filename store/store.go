@@ -46,8 +46,8 @@ func (fs fileStore) Save(workDay workday.WorkDay) error {
 
 func (fs fileStore) createFileProps(date datetime.Date) fileProps {
 	props := fileProps{
-		dir:  fmt.Sprintf("%v/%v/%02v", fs.basePath, date.Year, date.Month),
-		name: fmt.Sprintf("%02v.yml", date.Day),
+		dir:  fmt.Sprintf("%v/%v/%02v", fs.basePath, date.Year(), date.Month()),
+		name: fmt.Sprintf("%02v.yml", date.Day()),
 	}
 	props.path = props.dir + "/" + props.name
 	return props
