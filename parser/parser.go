@@ -3,6 +3,7 @@ package parser
 import (
 	"cloud.google.com/go/civil"
 	"gopkg.in/yaml.v2"
+	"klog/datetime"
 	"klog/workday"
 )
 
@@ -26,9 +27,9 @@ func Parse(serialisedData string) (workday.WorkDay, []error) {
 	}
 
 	date, _ := civil.ParseDate(d.Date)
-	res, err := workday.Create(workday.Date{
+	res, err := workday.Create(datetime.Date{
 		Year:  date.Year,
-		Month: date.Month,
+		Month: int(date.Month),
 		Day:   date.Day,
 	})
 	if res == nil {
@@ -45,14 +46,14 @@ func Parse(serialisedData string) (workday.WorkDay, []error) {
 				errs = append(errs, parserError(INVALID_TIME))
 			}
 			minutes := time.Minute + 60*time.Hour
-			res.AddTime(workday.Minutes(minutes))
+			res.AddTime(datetime.Minutes(minutes))
 		}
 		if h.Start != "" && h.End != "" {
 			start, _ := civil.ParseTime(h.Start + ":00")
 			end, _ := civil.ParseTime(h.End + ":00")
 			res.AddRange(
-				workday.Time{Hour: start.Hour, Minute: start.Minute},
-				workday.Time{Hour: end.Hour, Minute: end.Minute},
+				datetime.Time{Hour: start.Hour, Minute: start.Minute},
+				datetime.Time{Hour: end.Hour, Minute: end.Minute},
 			)
 		}
 	}

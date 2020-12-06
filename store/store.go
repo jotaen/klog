@@ -3,14 +3,15 @@ package store
 import (
 	"errors"
 	"fmt"
+	"klog/datetime"
 	"klog/workday"
 	"os"
 )
 
 type Store interface {
-	Get(workday.Date) (workday.WorkDay, error)
+	Get(datetime.Date) (workday.WorkDay, error)
+	Save(workday.WorkDay) error
 	// List() ([]workday.WorkDay, error)
-	// Save(workday.WorkDay) error
 }
 
 type fileStore struct {
@@ -26,14 +27,18 @@ func CreateFsStore(path string) (Store, error) {
 	}, nil
 }
 
-func (fs fileStore) Get(date workday.Date) (workday.WorkDay, error) {
+func (fs fileStore) Get(date datetime.Date) (workday.WorkDay, error) {
 	if fileExists(fs.makePath(date)) {
 		return nil, nil
 	}
 	return nil, errors.New("No such entry")
 }
 
-func (fs fileStore) makePath(date workday.Date) string {
+func (fs fileStore) Save(date workday.WorkDay) error {
+	return nil
+}
+
+func (fs fileStore) makePath(date datetime.Date) string {
 	return fmt.Sprintf("%v/%v/%v/%v", fs.basePath, date.Year, date.Month, date.Day)
 }
 

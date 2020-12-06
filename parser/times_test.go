@@ -2,7 +2,7 @@ package parser
 
 import (
 	"github.com/stretchr/testify/assert"
-	"klog/workday"
+	"klog/datetime"
 	"testing"
 )
 
@@ -14,7 +14,7 @@ hours:
 - time: 5:00
 `
 	e, _ := Parse(yaml)
-	assert.Equal(t, e.Times(), []workday.Minutes{workday.Minutes(2 * 60), workday.Minutes(5 * 60)})
+	assert.Equal(t, e.Times(), []datetime.Minutes{datetime.Minutes(2 * 60), datetime.Minutes(5 * 60)})
 }
 
 func TestParseWorkDayWithMalformedTimesFails(t *testing.T) {

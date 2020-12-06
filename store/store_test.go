@@ -2,10 +2,10 @@ package store
 
 import (
 	"github.com/stretchr/testify/assert"
+	"klog/datetime"
 	"klog/workday"
 	"os"
 	"testing"
-	"time"
 )
 
 const (
@@ -34,6 +34,14 @@ func TestFailsToInitialiseFileStoreIfPathDoesNotExists(t *testing.T) {
 func TestGetFailsIfDateDoesNotExist(t *testing.T) {
 	setup()
 	store, _ := CreateFsStore(TEST_PATH)
-	_, err := store.Get(workday.Date{Year: 2020, Month: time.January, Day: 31})
+	_, err := store.Get(datetime.Date{Year: 2020, Month: 1, Day: 31})
 	assert.Error(t, err)
+}
+
+func TestSavePersists(t *testing.T) {
+	setup()
+	store, _ := CreateFsStore(TEST_PATH)
+	workDay, _ := workday.Create(datetime.Date{Year: 2000, Month: 3, Day: 15})
+	err := store.Save(workDay)
+	assert.Nil(t, err)
 }
