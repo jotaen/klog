@@ -5,20 +5,11 @@ install() {
 }
 
 test() {
-	go test \
-		klog/parser \
-		klog/workday \
-		klog/store \
-		klog/serialiser \
-		klog/datetime
+	go test ./...
 }
 
 format() {
-	go fmt workday/*
-	go fmt parser/*
-	go fmt store/*
-	go fmt serialiser/*
-	go fmt datetime/*
+	go fmt ./...
 }
 
 cli() {
