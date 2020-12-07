@@ -32,14 +32,14 @@ func CreateDate(year int, month int, day int) (Date, error) {
 func CreateDateFromString(yyyymmdd string) (Date, error) {
 	cd, err := civil.ParseDate(yyyymmdd)
 	if err != nil {
-		return nil, errors.New(INVALID_DATE)
+		return nil, errors.New("INVALID_DATE")
 	}
 	return cd2Date(cd)
 }
 
 func cd2Date(cd civil.Date) (Date, error) {
 	if !cd.IsValid() {
-		return nil, errors.New(INVALID_DATE)
+		return nil, errors.New("INVALID_DATE")
 	}
 	return date{
 		year:  cd.Year,

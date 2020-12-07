@@ -36,14 +36,14 @@ func CreateTime(hour int, minute int) (Time, error) {
 func CreateTimeFromString(hhmm string) (Time, error) {
 	ct, err := civil.ParseTime(hhmm + ":00")
 	if err != nil {
-		return nil, errors.New(INVALID_TIME)
+		return nil, errors.New("INVALID_TIME")
 	}
 	return ct2Time(ct)
 }
 
 func ct2Time(ct civil.Time) (Time, error) {
 	if !ct.IsValid() {
-		return nil, errors.New(INVALID_TIME)
+		return nil, errors.New("INVALID_TIME")
 	}
 	return time{
 		hour:   ct.Hour,

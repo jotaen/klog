@@ -22,7 +22,7 @@ func Parse(serialisedData string) (workday.WorkDay, []error) {
 
 	d, err := deserialise(serialisedData)
 	if err != nil {
-		errs = append(errs, errors.New(MALFORMED_YAML))
+		errs = append(errs, errors.New("MALFORMED_YAML"))
 		return nil, errs
 	}
 

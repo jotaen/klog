@@ -18,6 +18,6 @@ func TestErrorWhenAddingInvalidTimes(t *testing.T) {
 	date, _ := datetime.CreateDate(2020, 1, 1)
 	w := Create(date)
 	err := w.AddTime(datetime.Duration(-1))
-	assert.Equal(t, err.Error(), NEGATIVE_TIME)
+	assert.Equal(t, err.Error(), "NEGATIVE_TIME")
 	assert.Equal(t, len(w.Times()), 0)
 }

@@ -26,7 +26,7 @@ hours:
 `
 	e, errs := Parse(yaml)
 	assert.Equal(t, e, nil)
-	assert.Contains(t, errs, errors.New(datetime.INVALID_TIME))
+	assert.Contains(t, errs, errors.New("INVALID_TIME"))
 }
 
 func TestParseWorkDayWithInvalidTimesFails(t *testing.T) {
@@ -37,5 +37,5 @@ hours:
 `
 	e, errs := Parse(yaml)
 	assert.Equal(t, e, nil)
-	assert.Contains(t, errs, errors.New(datetime.INVALID_TIME))
+	assert.Contains(t, errs, errors.New("INVALID_TIME"))
 }

@@ -23,5 +23,5 @@ bar: test
 `
 	w, errs := Parse(yaml)
 	assert.Equal(t, w, nil)
-	assert.Contains(t, errs, errors.New(MALFORMED_YAML))
+	assert.Contains(t, errs, errors.New("MALFORMED_YAML"))
 }
