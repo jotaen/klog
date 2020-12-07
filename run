@@ -22,7 +22,7 @@ format() {
 }
 
 cli() {
-	go run cli/main.go
+	go run cli/main.go $@
 }
 
 $1 ${@:2}

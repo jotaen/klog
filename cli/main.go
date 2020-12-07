@@ -2,17 +2,18 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
+	"os"
+	klogstore "klog/store"
 )
 
 func main() {
-	files, err := ioutil.ReadDir(".")
-	if err != nil {
-		log.Fatal(err)
+	path, _ := os.Getwd()
+	if len(os.Args) >= 2 {
+		path += "/" + os.Args[1]
 	}
-
-	for _, file := range files {
-		fmt.Println(file.Name())
+	store, _ := klogstore.CreateFsStore(path)
+	list, _ := store.List()
+	for _, date := range list {
+		fmt.Printf("%v\n", date.ToString())
 	}
 }

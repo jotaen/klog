@@ -1,6 +1,7 @@
 package store
 
 import (
+	"errors"
 	"github.com/stretchr/testify/assert"
 	"klog/datetime"
 	"klog/workday"
@@ -28,7 +29,7 @@ func TestFailsToInitialiseFileStoreIfPathDoesNotExists(t *testing.T) {
 	run(func(path string) {
 		store, err := CreateFsStore(path + "/qwerty123")
 		assert.Nil(t, store)
-		assert.Error(t, err)
+		assert.Equal(t, err, errors.New("NO_SUCH_PATH"))
 	})
 }
 
@@ -51,5 +52,21 @@ func TestSavePersists(t *testing.T) {
 
 		readWd, _ := store.Get(date)
 		assert.Equal(t, originalWd, readWd)
+	})
+}
+
+func TestListReturnsPersistedWorkdays(t *testing.T) {
+	run(func(path string) {
+		store, _ := CreateFsStore(path)
+
+		date1, _ := datetime.CreateDate(1999, 1, 13)
+		store.Save(workday.Create(date1))
+		date2, _ := datetime.CreateDate(1999, 1, 14)
+		store.Save(workday.Create(date2))
+		date3, _ := datetime.CreateDate(1999, 2, 5)
+		store.Save(workday.Create(date3))
+
+		wds, _ := store.List()
+		assert.Equal(t, []datetime.Date{date1, date2, date3}, wds)
 	})
 }
