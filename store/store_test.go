@@ -10,7 +10,7 @@ import (
 )
 
 func run(fn func(string)) {
-	path := "../tmp"
+	path := "../tmp/test"
 	os.RemoveAll(path)
 	os.MkdirAll(path, os.ModePerm)
 	fn(path)
