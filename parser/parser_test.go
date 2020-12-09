@@ -23,21 +23,19 @@ summary: Just a normal day
 hours:
 - start: 9:12
   end: 12:05
-- start: 13:03
-  end: 16:47
+- start: 17:15
 - time: 2:00
 - time: 5:00
 `
 	time1, _ := datetime.CreateTime(9, 12)
 	time2, _ := datetime.CreateTime(12, 05)
-	time3, _ := datetime.CreateTime(13, 3)
-	time4, _ := datetime.CreateTime(16, 47)
+	time3, _ := datetime.CreateTime(17, 15)
 
 	w, errs := Parse(yaml)
 	assert.Equal(t, 0, len(errs))
 	assert.Equal(t, w.Ranges(), [][]datetime.Time{
 		[]datetime.Time{time1, time2},
-		[]datetime.Time{time3, time4},
+		[]datetime.Time{time3, nil},
 	})
 	assert.Equal(t, w.Times(), []datetime.Duration{datetime.Duration(2 * 60), datetime.Duration(5 * 60)})
 	assert.Equal(t, w.Summary(), "Just a normal day")

@@ -46,10 +46,14 @@ func Parse(serialisedData string) (workday.WorkDay, []error) {
 				res.AddTime(datetime.Duration(minutes))
 			}
 		}
-		if h.Start != "" && h.End != "" {
+		if h.Start != "" {
 			start, _ := datetime.CreateTimeFromString(h.Start)
-			end, _ := datetime.CreateTimeFromString(h.End)
-			res.AddRange(start, end)
+			if h.End != "" {
+				end, _ := datetime.CreateTimeFromString(h.End)
+				res.AddRange(start, end)
+			} else {
+				res.AddOpenRange(start)
+			}
 		}
 	}
 
