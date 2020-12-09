@@ -46,11 +46,11 @@ func TestSerialiseTimes(t *testing.T) {
 	date, _ := datetime.CreateDate(1859, 6, 2)
 	workDay := workday.Create(date)
 	workDay.AddDuration(datetime.Duration(3))
-	workDay.AddDuration(datetime.Duration(819))
+	workDay.AddDuration(datetime.Duration(399))
 	text := Serialise(workDay)
 	assert.Equal(t, `date: 1859-06-02
 hours:
-- time: 0:03
-- time: 13:39
+- time: 3m
+- time: 6h 39m
 `, text)
 }

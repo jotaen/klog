@@ -4,21 +4,13 @@ import (
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"klog/datetime"
+	"klog/testutil"
 	"klog/workday"
-	"os"
 	"testing"
 )
 
-func run(fn func(string)) {
-	path := "../tmp/test"
-	os.RemoveAll(path)
-	os.MkdirAll(path, os.ModePerm)
-	fn(path)
-	os.RemoveAll(path)
-}
-
 func TestInitialisesFileStoreIfPathExists(t *testing.T) {
-	run(func(path string) {
+	testutil.WithDisk(func(path string) {
 		store, err := CreateFsStore(path)
 		assert.Nil(t, err)
 		assert.NotNil(t, store)
@@ -26,7 +18,7 @@ func TestInitialisesFileStoreIfPathExists(t *testing.T) {
 }
 
 func TestFailsToInitialiseFileStoreIfPathDoesNotExists(t *testing.T) {
-	run(func(path string) {
+	testutil.WithDisk(func(path string) {
 		store, err := CreateFsStore(path + "/qwerty123")
 		assert.Nil(t, store)
 		assert.Equal(t, err, errors.New("NO_SUCH_PATH"))
@@ -34,7 +26,7 @@ func TestFailsToInitialiseFileStoreIfPathDoesNotExists(t *testing.T) {
 }
 
 func TestGetFailsIfDateDoesNotExist(t *testing.T) {
-	run(func(path string) {
+	testutil.WithDisk(func(path string) {
 		store, _ := CreateFsStore(path)
 		date, _ := datetime.CreateDate(2020, 1, 31)
 		_, errs := store.Get(date)
@@ -43,7 +35,7 @@ func TestGetFailsIfDateDoesNotExist(t *testing.T) {
 }
 
 func TestSavePersists(t *testing.T) {
-	run(func(path string) {
+	testutil.WithDisk(func(path string) {
 		store, _ := CreateFsStore(path)
 		date, _ := datetime.CreateDate(1999, 3, 15)
 		originalWd := workday.Create(date)
@@ -56,7 +48,7 @@ func TestSavePersists(t *testing.T) {
 }
 
 func TestListReturnsPersistedWorkdays(t *testing.T) {
-	run(func(path string) {
+	testutil.WithDisk(func(path string) {
 		store, _ := CreateFsStore(path)
 
 		date1, _ := datetime.CreateDate(1999, 1, 13)

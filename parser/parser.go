@@ -38,12 +38,11 @@ func Parse(serialisedData string) (workday.WorkDay, []error) {
 
 	for _, h := range d.Hours {
 		if h.Time != "" {
-			time, err := datetime.CreateTimeFromString(h.Time)
+			duration, err := datetime.CreateDurationFromString(h.Time)
 			if err != nil {
 				errs = append(errs, err)
 			} else {
-				minutes := time.Minute() + 60*time.Hour()
-				res.AddDuration(datetime.Duration(minutes))
+				res.AddDuration(duration)
 			}
 		}
 		if h.Start != "" {
