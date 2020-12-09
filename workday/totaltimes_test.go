@@ -14,6 +14,12 @@ func TestSumUpTimes(t *testing.T) {
 	assert.Equal(t, datetime.Duration(180), w.TotalTime())
 }
 
+func TestSumUpZeroIfNoTimesAvailable(t *testing.T) {
+	date, _ := datetime.CreateDate(2020, 1, 1)
+	w := Create(date)
+	assert.Equal(t, datetime.Duration(0), w.TotalTime())
+}
+
 func TestSumUpRanges(t *testing.T) {
 	date, _ := datetime.CreateDate(2020, 1, 1)
 	time1, _ := datetime.CreateTime(9, 7)
@@ -34,4 +40,12 @@ func TestSumUpTimesAndRanges(t *testing.T) {
 	w.AddTime(datetime.Duration(93))
 	w.AddRange(time1, time2)
 	assert.Equal(t, datetime.Duration(333), w.TotalTime())
+}
+
+func TestDisregardsOpenRanges(t *testing.T) {
+	date, _ := datetime.CreateDate(2020, 1, 1)
+	time1, _ := datetime.CreateTime(9, 7)
+	w := Create(date)
+	w.AddOpenRange(time1)
+	assert.Equal(t, datetime.Duration(0), w.TotalTime())
 }
