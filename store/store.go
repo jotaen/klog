@@ -2,7 +2,6 @@ package store
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"klog/datetime"
 	"klog/parser"
@@ -16,6 +15,7 @@ type Store interface {
 	Get(datetime.Date) (workday.WorkDay, []error)
 	Save(workday.WorkDay) error
 	List() ([]datetime.Date, error)
+	GetFileProps(workday.WorkDay) FileProps
 }
 
 type fileStore struct {
@@ -32,7 +32,7 @@ func CreateFsStore(path string) (Store, error) {
 }
 
 func (fs fileStore) Get(date datetime.Date) (workday.WorkDay, []error) {
-	props := fs.createFileProps(date)
+	props := createFileProps(fs.basePath, date)
 	contents, err := readFile(props)
 	if err != nil {
 		return nil, []error{err}
@@ -42,7 +42,7 @@ func (fs fileStore) Get(date datetime.Date) (workday.WorkDay, []error) {
 }
 
 func (fs fileStore) Save(workDay workday.WorkDay) error {
-	props := fs.createFileProps(workDay.Date())
+	props := createFileProps(fs.basePath, workDay.Date())
 	writeFile(props, serialiser.Serialise(workDay))
 	return nil
 }
@@ -88,11 +88,6 @@ func walkDir(
 	return result
 }
 
-func (fs fileStore) createFileProps(date datetime.Date) fileProps {
-	props := fileProps{
-		dir:  fmt.Sprintf("%v/%v/%02v", fs.basePath, date.Year(), date.Month()),
-		name: fmt.Sprintf("%02v.yml", date.Day()),
-	}
-	props.path = props.dir + "/" + props.name
-	return props
+func (fs fileStore) GetFileProps(workDay workday.WorkDay) FileProps {
+	return createFileProps(fs.basePath, workDay.Date())
 }
