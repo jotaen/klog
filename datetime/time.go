@@ -26,7 +26,7 @@ type time struct {
 }
 
 func (t time) ToString() string {
-	return fmt.Sprintf("%02v:%02v", t.hour, t.minute)
+	return fmt.Sprintf("%v:%02v", t.hour, t.minute)
 }
 
 func CreateTime(hour int, minute int) (Time, error) {

@@ -36,7 +36,7 @@ func TestSerialiseRanges(t *testing.T) {
 	text := Serialise(workDay)
 	assert.Equal(t, `date: 1859-06-02
 hours:
-- start: 08:31
+- start: 8:31
   end: 14:02
 - start: 15:00
 `, text)
@@ -50,7 +50,7 @@ func TestSerialiseTimes(t *testing.T) {
 	text := Serialise(workDay)
 	assert.Equal(t, `date: 1859-06-02
 hours:
-- time: 00:03
+- time: 0:03
 - time: 13:39
 `, text)
 }

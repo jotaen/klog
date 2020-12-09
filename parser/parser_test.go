@@ -21,15 +21,15 @@ func TestParsingAllFieldsCorrectly(t *testing.T) {
 date: 2008-12-03
 summary: Just a normal day
 hours:
-- start: 9:12
-  end: 12:05
-- start: 17:15
+- start: 8:12
+  end: 09:05
+- start: 10:15
 - time: 2:00
-- time: 5:00
+- time: 05:00
 `
-	time1, _ := datetime.CreateTime(9, 12)
-	time2, _ := datetime.CreateTime(12, 05)
-	time3, _ := datetime.CreateTime(17, 15)
+	time1, _ := datetime.CreateTime(8, 12)
+	time2, _ := datetime.CreateTime(9, 05)
+	time3, _ := datetime.CreateTime(10, 15)
 
 	w, errs := Parse(yaml)
 	assert.Equal(t, 0, len(errs))
