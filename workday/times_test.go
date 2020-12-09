@@ -6,18 +6,18 @@ import (
 	"testing"
 )
 
-func TestOkayWhenAddingValidTimes(t *testing.T) {
+func TestOkayWhenAddingValidDuration(t *testing.T) {
 	date, _ := datetime.CreateDate(2020, 1, 1)
 	w := Create(date)
-	err := w.AddTime(datetime.Duration(1))
+	err := w.AddDuration(datetime.Duration(1))
 	assert.Nil(t, err)
 	assert.Equal(t, w.Times(), []datetime.Duration{datetime.Duration(1)})
 }
 
-func TestErrorWhenAddingInvalidTimes(t *testing.T) {
+func TestErrorWhenAddingInvalidDuration(t *testing.T) {
 	date, _ := datetime.CreateDate(2020, 1, 1)
 	w := Create(date)
-	err := w.AddTime(datetime.Duration(-1))
-	assert.Equal(t, err.Error(), "NEGATIVE_TIME")
+	err := w.AddDuration(datetime.Duration(-1))
+	assert.Equal(t, err.Error(), "NEGATIVE_DURATION")
 	assert.Equal(t, len(w.Times()), 0)
 }

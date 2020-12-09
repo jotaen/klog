@@ -6,5 +6,5 @@ import (
 
 type Environment struct {
 	WorkDir string
-	Store store.Store
+	Store   store.Store
 }

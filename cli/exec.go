@@ -27,7 +27,7 @@ func Execute(workDir string, args []string) int {
 	}
 	env := lib.Environment{
 		WorkDir: workDir,
-		Store: store,
+		Store:   store,
 	}
 	c := cmdDict[args[0]]
 	return c(env, args[1:])

@@ -15,7 +15,7 @@ func Log(env lib.Environment, args []string) int {
 		return 182763
 	}
 	duration, _ := datetime.CreateDurationFromString(args[0])
-	wd.AddTime(duration)
+	wd.AddDuration(duration)
 	env.Store.Save(wd)
 	return lib.OK
 }

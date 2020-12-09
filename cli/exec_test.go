@@ -17,7 +17,7 @@ func run(fn func(string)) {
 
 func TestErrorIfPathDoesNotExist(t *testing.T) {
 	run(func(path string) {
-		code := Execute(path + "asdf1234", []string{"create"})
+		code := Execute(path+"asdf1234", []string{"create"})
 		assert.Equal(t, lib.PROJECT_PATH_INVALID, code)
 	})
 }

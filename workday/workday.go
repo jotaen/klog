@@ -11,11 +11,11 @@ type WorkDay interface {
 	Summary() string
 	SetSummary(string) error
 	Times() []datetime.Duration
-	AddTime(datetime.Duration) error
+	AddDuration(datetime.Duration) error
 	Ranges() [][]datetime.Time // tuple of start and end time (end can be `nil`)
 	AddRange(datetime.Time, datetime.Time) error
 	AddOpenRange(datetime.Time) error
-	TotalTime() datetime.Duration
+	TotalWorkTime() datetime.Duration
 }
 
 func Create(date datetime.Date) WorkDay {
@@ -52,9 +52,9 @@ func (e *workday) Times() []datetime.Duration {
 	return e.times
 }
 
-func (e *workday) AddTime(time datetime.Duration) error {
+func (e *workday) AddDuration(time datetime.Duration) error {
 	if time < 0 {
-		return errors.New("NEGATIVE_TIME")
+		return errors.New("NEGATIVE_DURATION")
 	}
 	e.times = append(e.times, time)
 	return nil
@@ -74,7 +74,7 @@ func (e *workday) AddOpenRange(start datetime.Time) error {
 	return nil
 }
 
-func (e *workday) TotalTime() datetime.Duration {
+func (e *workday) TotalWorkTime() datetime.Duration {
 	total := datetime.Duration(0)
 	for _, t := range e.times {
 		total += t

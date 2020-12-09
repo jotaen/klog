@@ -12,5 +12,5 @@ func CreateDurationFromString(hhmm string) (Duration, error) {
 	if err != nil {
 		return 0, err
 	}
-	return Duration(t.Hour() * 60 + t.Minute()), nil
+	return Duration(t.Hour()*60 + t.Minute()), nil
 }

@@ -43,7 +43,7 @@ func Parse(serialisedData string) (workday.WorkDay, []error) {
 				errs = append(errs, err)
 			} else {
 				minutes := time.Minute() + 60*time.Hour()
-				res.AddTime(datetime.Duration(minutes))
+				res.AddDuration(datetime.Duration(minutes))
 			}
 		}
 		if h.Start != "" {
