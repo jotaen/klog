@@ -54,7 +54,7 @@ log:
 
 ### Type “date”
 - Denotes a day in the gregorian calendar
-- Must be formatted either `YYYY-MM-DD` or `DD.MM.YYYY`
+- Must be formatted either `YYYY-MM-DD`
 
 ### Type “time of day”
 - Denotes a point-in-time of the day (as represented by a wall clock)
