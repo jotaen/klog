@@ -41,3 +41,16 @@ hours:
 - start: 15:00
 `, text)
 }
+
+func TestSerialiseTimes(t *testing.T) {
+	date, _ := datetime.CreateDate(1859, 6, 2)
+	workDay := workday.Create(date)
+	workDay.AddTime(datetime.Duration(3))
+	workDay.AddTime(datetime.Duration(819))
+	text := Serialise(workDay)
+	assert.Equal(t, `date: 1859-06-02
+hours:
+- time: 00:03
+- time: 13:39
+`, text)
+}
