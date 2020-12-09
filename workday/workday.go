@@ -1,7 +1,6 @@
 package workday
 
 import (
-	"errors"
 	"klog/datetime"
 )
 
@@ -53,9 +52,6 @@ func (e *workday) Times() []datetime.Duration {
 }
 
 func (e *workday) AddDuration(time datetime.Duration) error {
-	if time < 0 {
-		return errors.New("NEGATIVE_DURATION")
-	}
 	e.times = append(e.times, time)
 	return nil
 }
