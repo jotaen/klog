@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/civil"
 	"errors"
 	"fmt"
+	gotime "time"
 )
 
 type Duration int64 // in minutes
@@ -39,6 +40,10 @@ func CreateTimeFromString(hhmm string) (Time, error) {
 		return nil, errors.New("INVALID_TIME")
 	}
 	return ct2Time(ct)
+}
+
+func CreateTimeFromTime(t gotime.Time) (Time, error) {
+	return CreateTime(t.Hour(), t.Minute())
 }
 
 func ct2Time(ct civil.Time) (Time, error) {

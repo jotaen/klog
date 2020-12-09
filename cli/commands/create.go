@@ -9,8 +9,7 @@ import (
 )
 
 func Create(st store.Store) int {
-	now := time.Now()
-	today, _ := datetime.CreateDate(now.Year(), int(now.Month()), now.Day())
+	today, _ := datetime.CreateDateFromTime(time.Now())
 	wd := workday.Create(today)
 	st.Save(wd)
 	return lib.OK

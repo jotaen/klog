@@ -37,6 +37,10 @@ func CreateDateFromString(yyyymmdd string) (Date, error) {
 	return cd2Date(cd)
 }
 
+func CreateDateFromTime(t gotime.Time) (Date, error) {
+	return CreateDate(t.Year(), int(t.Month()), t.Day())
+}
+
 func cd2Date(cd civil.Date) (Date, error) {
 	if !cd.IsValid() {
 		return nil, errors.New("INVALID_DATE")

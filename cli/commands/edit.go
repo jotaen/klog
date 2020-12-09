@@ -11,8 +11,7 @@ import (
 )
 
 func Edit(store klogstore.Store) int {
-	now := time.Now()
-	today, _ := datetime.CreateDate(now.Year(), int(now.Month()), now.Day())
+	today, _ := datetime.CreateDateFromTime(time.Now())
 	wd, err := store.Get(today)
 	if err != nil {
 		fmt.Println("No no no no no no!")

@@ -15,6 +15,7 @@ var cmdDict map[string]cmd = map[string]cmd{
 	"new":    commands.Create,
 	"edit":   commands.Edit,
 	"open":   commands.Edit,
+	"start":  commands.Start,
 }
 
 type Environment struct {
