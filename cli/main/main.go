@@ -7,10 +7,5 @@ import (
 
 func main() {
 	path, _ := os.Getwd()
-	env := cli.Environment{
-		WorkDir: path + "/tmp/cli",
-	}
-	if len(os.Args) > 1 {
-		cli.Execute(env, os.Args[1:])
-	}
+	cli.Execute(path + "/tmp/cli", os.Args[1:])
 }

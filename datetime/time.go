@@ -7,13 +7,6 @@ import (
 	gotime "time"
 )
 
-type Duration int // in minutes
-
-func (d Duration) ToString() string {
-	t := time{hour: int(int(d) / 60), minute: int(d) % 60}
-	return t.ToString()
-}
-
 type Time interface {
 	Hour() int
 	Minute() int

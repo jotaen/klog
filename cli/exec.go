@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"klog/cli/commands"
 	"klog/cli/lib"
-	klogstore "klog/store"
+	"klog/store"
 )
 
-type cmd func(klogstore.Store) int
+type cmd func(lib.Environment, []string) int
 
 var cmdDict map[string]cmd = map[string]cmd{
 	"list":   commands.List,
@@ -16,18 +16,19 @@ var cmdDict map[string]cmd = map[string]cmd{
 	"edit":   commands.Edit,
 	"open":   commands.Edit,
 	"start":  commands.Start,
+	"log":    commands.Log,
 }
 
-type Environment struct {
-	WorkDir string
-}
-
-func Execute(env Environment, args []string) int {
-	store, err := klogstore.CreateFsStore(env.WorkDir)
+func Execute(workDir string, args []string) int {
+	store, err := store.CreateFsStore(workDir)
 	if err != nil {
 		fmt.Printf("Project not found")
 		return lib.PROJECT_PATH_INVALID
 	}
+	env := lib.Environment{
+		WorkDir: workDir,
+		Store: store,
+	}
 	c := cmdDict[args[0]]
-	return c(store)
+	return c(env, args[1:])
 }

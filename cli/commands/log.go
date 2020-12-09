@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func Start(env lib.Environment, args []string) int {
+func Log(env lib.Environment, args []string) int {
 	now := time.Now()
 	today, _ := datetime.CreateDateFromTime(now)
 	wd, err := env.Store.Get(today)
@@ -14,8 +14,8 @@ func Start(env lib.Environment, args []string) int {
 		// todo create new
 		return 182763
 	}
-	nowTime, _ := datetime.CreateTimeFromTime(now)
-	wd.AddOpenRange(nowTime)
+	duration, _ := datetime.CreateDurationFromString(args[0])
+	wd.AddTime(duration)
 	env.Store.Save(wd)
 	return lib.OK
 }

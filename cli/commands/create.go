@@ -3,14 +3,13 @@ package commands
 import (
 	"klog/cli/lib"
 	"klog/datetime"
-	"klog/store"
 	"klog/workday"
 	"time"
 )
 
-func Create(st store.Store) int {
+func Create(env lib.Environment, args []string) int {
 	today, _ := datetime.CreateDateFromTime(time.Now())
 	wd := workday.Create(today)
-	st.Save(wd)
+	env.Store.Save(wd)
 	return lib.OK
 }
