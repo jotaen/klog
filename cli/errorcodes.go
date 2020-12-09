@@ -1,4 +1,4 @@
-package lib
+package cli
 
 const (
 	OK                   = 0

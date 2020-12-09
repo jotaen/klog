@@ -1,11 +1,12 @@
 package main
 
 import (
-	"klog/cli"
+	"klog/cli/core"
 	"os"
 )
 
 func main() {
 	path, _ := os.Getwd()
-	cli.Execute(path+"/tmp/cli", os.Args[1:])
+	code := core.Execute(path+"/tmp", os.Args[1:])
+	os.Exit(code)
 }

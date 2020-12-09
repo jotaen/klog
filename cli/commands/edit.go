@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"klog/cli/lib"
+	"klog/cli"
 	"klog/datetime"
 	"klog/store"
 	"os"
@@ -10,17 +10,17 @@ import (
 	"time"
 )
 
-func Edit(env lib.Environment, args []string) int {
+func Edit(env cli.Environment, args []string) int {
 	today, _ := datetime.CreateDateFromTime(time.Now())
 	wd, err := env.Store.Get(today)
 	if err != nil {
 		fmt.Println("No no no no no no!")
-		return lib.FILE_NOT_FOUND
+		return cli.FILE_NOT_FOUND
 	}
 
 	file := env.Store.GetFileProps(wd)
 	openEditor(file)
-	return lib.OK
+	return cli.OK
 }
 
 func openEditor(file store.FileProps) {

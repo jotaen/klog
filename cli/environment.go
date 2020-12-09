@@ -1,4 +1,4 @@
-package lib
+package cli
 
 import (
 	"klog/store"

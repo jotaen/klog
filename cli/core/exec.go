@@ -1,13 +1,13 @@
-package cli
+package core
 
 import (
 	"fmt"
+	"klog/cli"
 	"klog/cli/commands"
-	"klog/cli/lib"
 	"klog/store"
 )
 
-type cmd func(lib.Environment, []string) int
+type cmd func(cli.Environment, []string) int
 
 var cmdDict map[string]cmd = map[string]cmd{
 	"list":   commands.List,
@@ -23,9 +23,9 @@ func Execute(workDir string, args []string) int {
 	store, err := store.CreateFsStore(workDir)
 	if err != nil {
 		fmt.Printf("Project not found")
-		return lib.PROJECT_PATH_INVALID
+		return cli.PROJECT_PATH_INVALID
 	}
-	env := lib.Environment{
+	env := cli.Environment{
 		WorkDir: workDir,
 		Store:   store,
 	}

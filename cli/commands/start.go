@@ -1,12 +1,12 @@
 package commands
 
 import (
-	"klog/cli/lib"
+	"klog/cli"
 	"klog/datetime"
 	"time"
 )
 
-func Start(env lib.Environment, args []string) int {
+func Start(env cli.Environment, args []string) int {
 	now := time.Now()
 	today, _ := datetime.CreateDateFromTime(now)
 	wd, err := env.Store.Get(today)
@@ -17,5 +17,5 @@ func Start(env lib.Environment, args []string) int {
 	nowTime, _ := datetime.CreateTimeFromTime(now)
 	wd.AddOpenRange(nowTime)
 	env.Store.Save(wd)
-	return lib.OK
+	return cli.OK
 }
