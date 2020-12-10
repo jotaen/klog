@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"klog/datetime"
@@ -14,8 +13,14 @@ func TestMinimalValidDocument(t *testing.T) {
 date: 2020-01-01
 `
 	w, errs := Parse(yaml)
-	assert.Equal(t, w.Summary(), "")
-	assert.Nil(t, errs)
+
+	require.Nil(t, errs)
+	require.NotNil(t, w)
+
+	assert.Equal(t, "", w.Summary())
+	assert.Nil(t, w.Times())
+	assert.Nil(t, w.Ranges())
+	assert.Nil(t, w.OpenRangeStart())
 }
 
 func TestParsingAllFieldsCorrectly(t *testing.T) {
@@ -25,24 +30,41 @@ summary: Just a normal day
 hours:
 - start: 8:12
   end: 09:05
+- start: 9:18
+  end: 10:59
 - start: 10:15
 - time: 2h
 - time: 05h 03m
-- time: -4h 45m
+- time: -1h 12m
 `
-	range1 := testutil.Range_(testutil.Time_(8, 12), testutil.Time_(9, 05))
-
 	w, errs := Parse(yaml)
-	require.Equal(t, 0, len(errs))
 
-	assert.Equal(t, w.Ranges(), []datetime.TimeRange{range1})
-	assert.Equal(t, w.OpenRangeStart(), testutil.Time_(10, 15))
-	assert.Equal(t, w.Times(), []datetime.Duration{
+	require.Equal(t, 0, len(errs))
+	require.NotNil(t, w)
+
+	assert.Equal(t, "Just a normal day", w.Summary())
+	assert.Equal(t, []datetime.TimeRange{
+		testutil.Range_(testutil.Time_(8, 12), testutil.Time_(9, 05)),
+		testutil.Range_(testutil.Time_(9, 18), testutil.Time_(10, 59)),
+	}, w.Ranges())
+	assert.Equal(t, testutil.Time_(10, 15), w.OpenRangeStart())
+	assert.Equal(t, []datetime.Duration{
 		datetime.Duration(2 * 60),
 		datetime.Duration(5*60 + 3),
-		datetime.Duration(-(4*60 + 45)),
-	})
-	assert.Equal(t, w.Summary(), "Just a normal day")
+		datetime.Duration(-(1*60 + 12)),
+	}, w.Times())
+}
+
+func TestMalformedYamlFails(t *testing.T) {
+	yaml := `
+date: 2005-05-01
+foo
+bar
+`
+	w, errs := Parse(yaml)
+	assert.Nil(t, w)
+	assert.Error(t, errs[0])
+	assert.Contains(t, errs, parserError("MALFORMED_YAML", ""))
 }
 
 func TestAbsentRequiredPropertiesFails(t *testing.T) {
@@ -50,17 +72,52 @@ func TestAbsentRequiredPropertiesFails(t *testing.T) {
 summary: Just a normal day
 `
 	w, errs := Parse(yaml)
-	assert.Equal(t, w, nil)
-	assert.Contains(t, errs, errors.New("INVALID_DATE"))
+	assert.Nil(t, w)
+	assert.Contains(t, errs, parserError("INVALID_DATE", "date: "))
+}
+
+func TestTimeAndRangeCannotAppearTogether(t *testing.T) {
+	yaml := `
+date: 1999-12-31
+hours:
+- end: 8:00
+- start: 10:00
+  end: 11:00
+  time: 1:00
+- start: 9:00
+  time: 10:00
+- end: 9:00
+  time: 10:00
+`
+	_, errs := Parse(yaml)
+	assert.Equal(t, []ParserError{
+		parserError("MALFORMED_HOURS", "hours"),
+		parserError("MALFORMED_HOURS", "hours"),
+		parserError("MALFORMED_HOURS", "hours"),
+		parserError("MALFORMED_HOURS", "hours"),
+	}, errs)
 }
 
 func TestMalformedValuesFails(t *testing.T) {
 	yaml := `
-date: 01.01.2020
+date: 1999-12-31
 hours:
+- start: asdf
+  end: 9:00
+- start: 8:00
+  end: asdf
+- start: asdf
+  end: asdf
+- start: asdf
 - time: asdf
 `
 	w, errs := Parse(yaml)
 	assert.Equal(t, w, nil)
-	assert.Contains(t, errs, errors.New("INVALID_DATE"))
+	assert.Equal(t, []ParserError{
+		parserError("INVALID_TIME", "start: asdf"),
+		parserError("INVALID_TIME", "end: asdf"),
+		parserError("INVALID_TIME", "start: asdf"),
+		parserError("INVALID_TIME", "start: asdf"),
+		parserError("INVALID_DURATION", "time: asdf"),
+	}, errs)
 }

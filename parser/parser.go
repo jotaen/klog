@@ -1,73 +1,84 @@
 package parser
 
 import (
-	"errors"
-	"gopkg.in/yaml.v2"
+	"fmt"
 	"klog/datetime"
 	"klog/workday"
 )
 
-type data struct {
-	Date    string
-	Summary string
-	Hours   []struct {
-		Time  string
-		Start string
-		End   string
-	}
-}
+func Parse(serialisedData string) (workday.WorkDay, []ParserError) {
+	errors := &errorCollection{}
 
-func Parse(serialisedData string) (workday.WorkDay, []error) {
-	errs := []error{}
-
-	d, err := deserialise(serialisedData)
+	// Parse document
+	d, err := parseYamlText(serialisedData)
 	if err != nil {
-		errs = append(errs, errors.New("MALFORMED_YAML"))
-		return nil, errs
+		errors.add(parserError("MALFORMED_YAML", ""))
+		return nil, errors.collection
 	}
 
+	// Parse date
 	date, err := datetime.CreateDateFromString(d.Date)
 	if err != nil {
-		errs = append(errs, err)
-		return nil, errs
+		errors.add(fromError(err, fmt.Sprintf("date: %v", d.Date)))
+		return nil, errors.collection
 	}
 
-	res := workday.Create(date)
+	workDay := workday.Create(date)
+	workDay.SetSummary(d.Summary)
 
-	res.SetSummary(d.Summary)
-
+	// Parse hours
 	for _, h := range d.Hours {
-		if h.Time != "" {
+		hasTime := h.Time != ""
+		hasStart := h.Start != ""
+		hasEnd := h.End != ""
+		if (hasTime && (hasStart || hasEnd)) || (hasEnd && !hasStart) {
+			errors.add(parserError("MALFORMED_HOURS", "hours"))
+			continue
+		}
+
+		// Parse time
+		if hasTime {
 			duration, err := datetime.CreateDurationFromString(h.Time)
 			if err != nil {
-				errs = append(errs, err)
-			} else {
-				res.AddDuration(duration)
+				errors.add(fromError(err, fmt.Sprintf("time: %v", h.Time)))
+				continue
 			}
+			workDay.AddDuration(duration)
 		}
-		if h.Start != "" && h.End != "" {
-			start, _ := datetime.CreateTimeFromString(h.Start)
-			end, _ := datetime.CreateTimeFromString(h.End)
-			timerange, _ := datetime.CreateTimeRange(start, end)
-			res.AddRange(timerange)
+
+		// Parse range
+		if hasStart && hasEnd {
+			start, err := datetime.CreateTimeFromString(h.Start)
+			if err != nil {
+				errors.add(fromError(err, fmt.Sprintf("start: %v", h.Start)))
+				continue
+			}
+			end, err := datetime.CreateTimeFromString(h.End)
+			if err != nil {
+				errors.add(fromError(err, fmt.Sprintf("end: %v", h.End)))
+				continue
+			}
+			timerange, err := datetime.CreateTimeRange(start, end)
+			if err != nil {
+				errors.add(fromError(err, ""))
+				continue
+			}
+			workDay.AddRange(timerange)
 		}
-		if h.Start != "" && h.End == "" {
-			start, _ := datetime.CreateTimeFromString(h.Start)
-			res.SetOpenRangeStart(start)
+
+		// Parse open range
+		if hasStart && !hasEnd {
+			start, err := datetime.CreateTimeFromString(h.Start)
+			if err != nil {
+				errors.add(fromError(err, fmt.Sprintf("start: %v", h.Start)))
+				continue
+			}
+			workDay.SetOpenRangeStart(start)
 		}
 	}
 
-	if len(errs) != 0 {
-		return nil, errs
+	if len(errors.collection) != 0 {
+		return nil, errors.collection
 	}
-	return res, nil
-}
-
-func deserialise(serialisedData string) (data, error) {
-	d := data{}
-	err := yaml.UnmarshalStrict([]byte(serialisedData), &d)
-	if err != nil {
-		return data{}, err
-	}
-	return d, nil
+	return workDay, nil
 }

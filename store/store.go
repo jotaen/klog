@@ -37,8 +37,11 @@ func (fs fileStore) Get(date datetime.Date) (workday.WorkDay, []error) {
 	if err != nil {
 		return nil, []error{err}
 	}
-	workDay, errs := parser.Parse(contents)
-	return workDay, errs
+	workDay, parserErrors := parser.Parse(contents)
+	if parserErrors != nil {
+		return nil, parser.ToErrors(parserErrors)
+	}
+	return workDay, nil
 }
 
 func (fs fileStore) Save(workDay workday.WorkDay) error {
