@@ -7,7 +7,7 @@ import (
 type TimeRange interface {
 	Start() Time
 	End() Time
-	IsOpen() bool
+	Duration() Duration
 }
 
 type timeRange struct {
@@ -17,14 +17,9 @@ type timeRange struct {
 
 func CreateTimeRange(start Time, end Time) (TimeRange, error) {
 	startMinutes := start.Hour()*60 + start.Minute()
-	if end == nil {
-		return timeRange{
-			start: start,
-		}, nil
-	}
 	endMinutes := end.Hour()*60 + end.Minute()
 	if endMinutes < startMinutes {
-		return nil, errors.New("ILLEGAL_ORDER")
+		return nil, errors.New("ILLEGAL_RANGE")
 	}
 	return timeRange{
 		start: start,
@@ -40,6 +35,8 @@ func (tr timeRange) End() Time {
 	return tr.end
 }
 
-func (tr timeRange) IsOpen() bool {
-	return tr.end == nil
+func (tr timeRange) Duration() Duration {
+	start := tr.Start().MinutesSinceMidnight()
+	end := tr.End().MinutesSinceMidnight()
+	return Duration(end - start)
 }

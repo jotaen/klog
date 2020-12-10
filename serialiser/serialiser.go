@@ -17,17 +17,18 @@ func Serialise(workDay workday.WorkDay) string {
 	}
 
 	// Hours
-	hasHours := len(workDay.Ranges()) > 0 || len(workDay.Times()) > 0
+	hasHours := len(workDay.Ranges()) > 0 || len(workDay.Times()) > 0 || workDay.OpenRangeStart() != nil
 	if hasHours {
 		text += "\nhours:"
 		for _, r := range workDay.Ranges() {
 			text += fmt.Sprintf("\n- start: %v", r.Start().ToString())
-			if !r.IsOpen() {
-				text += fmt.Sprintf("\n  end: %v", r.End().ToString())
-			}
+			text += fmt.Sprintf("\n  end: %v", r.End().ToString())
 		}
 		for _, t := range workDay.Times() {
 			text += fmt.Sprintf("\n- time: %v", t.ToString())
+		}
+		if workDay.OpenRangeStart() != nil {
+			text += fmt.Sprintf("\n- start: %v", workDay.OpenRangeStart().ToString())
 		}
 	}
 

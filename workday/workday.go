@@ -6,14 +6,14 @@ import (
 
 type WorkDay interface {
 	Date() datetime.Date
-	SetDate(datetime.Date)
 	Summary() string
-	SetSummary(string) error
+	SetSummary(string)
 	Times() []datetime.Duration
-	AddDuration(datetime.Duration) error
+	AddDuration(datetime.Duration)
 	Ranges() []datetime.TimeRange
-	AddRange(datetime.TimeRange) error
-	OpenRange() datetime.TimeRange
+	AddRange(datetime.TimeRange)
+	OpenRangeStart() datetime.Time
+	SetOpenRangeStart(datetime.Time)
 	TotalWorkTime() datetime.Duration
 }
 
@@ -24,56 +24,47 @@ func Create(date datetime.Date) WorkDay {
 }
 
 type workday struct {
-	date      datetime.Date
-	summary   string
-	times     []datetime.Duration
-	ranges    []datetime.TimeRange
-	openRange datetime.TimeRange
+	date           datetime.Date
+	summary        string
+	times          []datetime.Duration
+	ranges         []datetime.TimeRange
+	openRangeStart datetime.Time
 }
 
 func (e *workday) Date() datetime.Date {
 	return e.date
 }
 
-func (e *workday) SetDate(date datetime.Date) {
-	e.date = date
-}
-
 func (e *workday) Summary() string {
 	return e.summary
 }
 
-func (e *workday) SetSummary(summary string) error {
+func (e *workday) SetSummary(summary string) {
 	e.summary = summary
-	return nil
 }
 
 func (e *workday) Times() []datetime.Duration {
 	return e.times
 }
 
-func (e *workday) AddDuration(time datetime.Duration) error {
+func (e *workday) AddDuration(time datetime.Duration) {
 	e.times = append(e.times, time)
-	return nil
 }
 
 func (e *workday) Ranges() []datetime.TimeRange {
 	return e.ranges
 }
 
-func (e *workday) AddRange(r datetime.TimeRange) error {
+func (e *workday) AddRange(r datetime.TimeRange) {
 	e.ranges = append(e.ranges, r)
-	return nil
 }
 
-func (e *workday) OpenRange() datetime.TimeRange {
-	var res datetime.TimeRange
-	for _, r := range e.ranges {
-		if r.IsOpen() {
-			return r
-		}
-	}
-	return res
+func (e *workday) OpenRangeStart() datetime.Time {
+	return e.openRangeStart
+}
+
+func (e *workday) SetOpenRangeStart(start datetime.Time) {
+	e.openRangeStart = start
 }
 
 func (e *workday) TotalWorkTime() datetime.Duration {
@@ -82,10 +73,7 @@ func (e *workday) TotalWorkTime() datetime.Duration {
 		total += t
 	}
 	for _, r := range e.ranges {
-		if r.IsOpen() {
-			continue
-		}
-		total += datetime.Duration(r.End().MinutesSinceMidnight() - r.Start().MinutesSinceMidnight())
+		total += r.Duration()
 	}
 	return total
 }

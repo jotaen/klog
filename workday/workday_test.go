@@ -23,16 +23,15 @@ func TestAddRanges(t *testing.T) {
 }
 
 func TestAddOpenRange(t *testing.T) {
-	range1 := testutil.Range_(testutil.Time_(9, 7), nil)
+	time := testutil.Time_(11, 23)
 	w := Create(testutil.Date_(2020, 1, 1))
-	assert.Equal(t, nil, w.OpenRange())
-	w.AddRange(range1)
-	assert.Equal(t, range1, w.OpenRange())
+	assert.Equal(t, nil, w.OpenRangeStart())
+	w.SetOpenRangeStart(time)
+	assert.Equal(t, time, w.OpenRangeStart())
 }
 
 func TestOkayWhenAddingValidDuration(t *testing.T) {
 	w := Create(testutil.Date_(2020, 1, 1))
-	err := w.AddDuration(datetime.Duration(1))
-	assert.Nil(t, err)
+	w.AddDuration(datetime.Duration(1))
 	assert.Equal(t, []datetime.Duration{datetime.Duration(1)}, w.Times())
 }

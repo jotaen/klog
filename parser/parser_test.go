@@ -31,13 +31,12 @@ hours:
 - time: -4h 45m
 `
 	range1 := testutil.Range_(testutil.Time_(8, 12), testutil.Time_(9, 05))
-	range2 := testutil.Range_(testutil.Time_(10, 15), nil)
 
 	w, errs := Parse(yaml)
 	require.Equal(t, 0, len(errs))
 
-	assert.Equal(t, w.Ranges(), []datetime.TimeRange{range1, range2})
-	assert.Equal(t, w.OpenRange(), range2)
+	assert.Equal(t, w.Ranges(), []datetime.TimeRange{range1})
+	assert.Equal(t, w.OpenRangeStart(), testutil.Time_(10, 15))
 	assert.Equal(t, w.Times(), []datetime.Duration{
 		datetime.Duration(2 * 60),
 		datetime.Duration(5*60 + 3),

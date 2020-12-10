@@ -35,10 +35,3 @@ func TestSumUpTimesAndRanges(t *testing.T) {
 	w.AddRange(range1)
 	assert.Equal(t, datetime.Duration(333), w.TotalWorkTime())
 }
-
-func TestDisregardsOpenRanges(t *testing.T) {
-	range1 := testutil.Range_(testutil.Time_(9, 7), nil)
-	w := Create(testutil.Date_(2020, 1, 1))
-	w.AddRange(range1)
-	assert.Equal(t, datetime.Duration(0), w.TotalWorkTime())
-}

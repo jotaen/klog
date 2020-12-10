@@ -45,11 +45,15 @@ func Parse(serialisedData string) (workday.WorkDay, []error) {
 				res.AddDuration(duration)
 			}
 		}
-		if h.Start != "" {
+		if h.Start != "" && h.End != "" {
 			start, _ := datetime.CreateTimeFromString(h.Start)
 			end, _ := datetime.CreateTimeFromString(h.End)
 			timerange, _ := datetime.CreateTimeRange(start, end)
 			res.AddRange(timerange)
+		}
+		if h.Start != "" && h.End == "" {
+			start, _ := datetime.CreateTimeFromString(h.Start)
+			res.SetOpenRangeStart(start)
 		}
 	}
 

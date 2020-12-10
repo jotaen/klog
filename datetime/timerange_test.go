@@ -1,6 +1,7 @@
 package datetime
 
 import (
+	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -21,14 +22,5 @@ func TestCreationFailsIfStartIsBeforeEnd(t *testing.T) {
 	time2, _ := CreateTime(13, 59)
 	tr, err := CreateTimeRange(time1, time2)
 	assert.Nil(t, tr)
-	assert.Error(t, err)
-}
-
-func TestCreateOpenTimeRange(t *testing.T) {
-	time1, _ := CreateTime(12, 00)
-	tr, err := CreateTimeRange(time1, nil)
-	require.Nil(t, err)
-	require.NotNil(t, tr)
-	assert.Equal(t, tr.Start(), time1)
-	assert.Equal(t, tr.End(), nil)
+	assert.Equal(t, errors.New("ILLEGAL_RANGE"), err)
 }
