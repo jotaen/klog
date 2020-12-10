@@ -30,9 +30,11 @@ func TestSerialiseRanges(t *testing.T) {
 	workDay := workday.Create(date)
 	time1, _ := datetime.CreateTime(8, 31)
 	time2, _ := datetime.CreateTime(14, 2)
-	workDay.AddRange(time1, time2)
+	range1, _ := datetime.CreateTimeRange(time1, time2)
+	workDay.AddRange(range1)
 	time3, _ := datetime.CreateTime(15, 0)
-	workDay.AddOpenRange(time3)
+	range2, _ := datetime.CreateTimeRange(time3, nil)
+	workDay.AddRange(range2)
 	text := Serialise(workDay)
 	assert.Equal(t, `date: 1859-06-02
 hours:

@@ -10,6 +10,7 @@ import (
 type Time interface {
 	Hour() int
 	Minute() int
+	MinutesSinceMidnight() int
 	ToString() string
 }
 
@@ -60,4 +61,8 @@ func (t time) Hour() int {
 
 func (t time) Minute() int {
 	return t.minute
+}
+
+func (t time) MinutesSinceMidnight() int {
+	return t.hour*60 + t.minute
 }

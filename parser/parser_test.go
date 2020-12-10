@@ -31,15 +31,15 @@ hours:
 `
 	time1, _ := datetime.CreateTime(8, 12)
 	time2, _ := datetime.CreateTime(9, 05)
+	range1, _ := datetime.CreateTimeRange(time1, time2)
 	time3, _ := datetime.CreateTime(10, 15)
+	range2, _ := datetime.CreateTimeRange(time3, nil)
 
 	w, errs := Parse(yaml)
 	require.Equal(t, 0, len(errs))
 
-	assert.Equal(t, w.Ranges(), [][]datetime.Time{
-		[]datetime.Time{time1, time2},
-		[]datetime.Time{time3, nil},
-	})
+	assert.Equal(t, w.Ranges(), []datetime.TimeRange{range1, range2})
+	assert.Equal(t, w.OpenRange(), range2)
 	assert.Equal(t, w.Times(), []datetime.Duration{
 		datetime.Duration(2 * 60),
 		datetime.Duration(5*60 + 3),

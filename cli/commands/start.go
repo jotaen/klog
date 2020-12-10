@@ -15,7 +15,8 @@ func Start(env cli.Environment, args []string) int {
 		return 182763
 	}
 	nowTime, _ := datetime.CreateTimeFromTime(now)
-	wd.AddOpenRange(nowTime)
+	openTimeRange, _ := datetime.CreateTimeRange(nowTime, nil)
+	wd.AddRange(openTimeRange)
 	env.Store.Save(wd)
 	return cli.OK
 }

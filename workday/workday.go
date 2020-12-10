@@ -11,9 +11,9 @@ type WorkDay interface {
 	SetSummary(string) error
 	Times() []datetime.Duration
 	AddDuration(datetime.Duration) error
-	Ranges() [][]datetime.Time // tuple of start and end time (end can be `nil`)
-	AddRange(datetime.Time, datetime.Time) error
-	AddOpenRange(datetime.Time) error
+	Ranges() []datetime.TimeRange
+	AddRange(datetime.TimeRange) error
+	OpenRange() datetime.TimeRange
 	TotalWorkTime() datetime.Duration
 }
 
@@ -24,10 +24,11 @@ func Create(date datetime.Date) WorkDay {
 }
 
 type workday struct {
-	date    datetime.Date
-	summary string
-	times   []datetime.Duration
-	ranges  [][]datetime.Time
+	date      datetime.Date
+	summary   string
+	times     []datetime.Duration
+	ranges    []datetime.TimeRange
+	openRange datetime.TimeRange
 }
 
 func (e *workday) Date() datetime.Date {
@@ -56,18 +57,23 @@ func (e *workday) AddDuration(time datetime.Duration) error {
 	return nil
 }
 
-func (e *workday) Ranges() [][]datetime.Time {
+func (e *workday) Ranges() []datetime.TimeRange {
 	return e.ranges
 }
 
-func (e *workday) AddRange(start datetime.Time, end datetime.Time) error {
-	e.ranges = append(e.ranges, []datetime.Time{start, end})
+func (e *workday) AddRange(r datetime.TimeRange) error {
+	e.ranges = append(e.ranges, r)
 	return nil
 }
 
-func (e *workday) AddOpenRange(start datetime.Time) error {
-	e.ranges = append(e.ranges, []datetime.Time{start, nil})
-	return nil
+func (e *workday) OpenRange() datetime.TimeRange {
+	var res datetime.TimeRange
+	for _, r := range e.ranges {
+		if r.IsOpen() {
+			return r
+		}
+	}
+	return res
 }
 
 func (e *workday) TotalWorkTime() datetime.Duration {
@@ -75,13 +81,11 @@ func (e *workday) TotalWorkTime() datetime.Duration {
 	for _, t := range e.times {
 		total += t
 	}
-	for _, rs := range e.ranges {
-		if rs[1] == nil {
+	for _, r := range e.ranges {
+		if r.IsOpen() {
 			continue
 		}
-		start := rs[0].Minute() + 60*rs[0].Hour()
-		end := rs[1].Minute() + 60*rs[1].Hour()
-		total += datetime.Duration(end - start)
+		total += datetime.Duration(r.End().MinutesSinceMidnight() - r.Start().MinutesSinceMidnight())
 	}
 	return total
 }
