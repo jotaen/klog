@@ -28,8 +28,7 @@ func TestFailsToInitialiseFileStoreIfPathDoesNotExists(t *testing.T) {
 func TestGetFailsIfDateDoesNotExist(t *testing.T) {
 	testutil.WithDisk(func(path string) {
 		store, _ := CreateFsStore(path)
-		date, _ := datetime.CreateDate(2020, 1, 31)
-		_, errs := store.Get(date)
+		_, errs := store.Get(testutil.Date_(2020, 1, 31))
 		assert.Error(t, errs[0])
 	})
 }
@@ -37,7 +36,7 @@ func TestGetFailsIfDateDoesNotExist(t *testing.T) {
 func TestSavePersists(t *testing.T) {
 	testutil.WithDisk(func(path string) {
 		store, _ := CreateFsStore(path)
-		date, _ := datetime.CreateDate(1999, 3, 15)
+		date := testutil.Date_(1999, 3, 15)
 		originalWd := workday.Create(date)
 		err := store.Save(originalWd)
 		assert.Nil(t, err)
@@ -51,11 +50,11 @@ func TestListReturnsPersistedWorkdays(t *testing.T) {
 	testutil.WithDisk(func(path string) {
 		store, _ := CreateFsStore(path)
 
-		date1, _ := datetime.CreateDate(1999, 1, 13)
+		date1 := testutil.Date_(1999, 1, 13)
 		store.Save(workday.Create(date1))
-		date2, _ := datetime.CreateDate(1999, 1, 14)
+		date2 := testutil.Date_(1999, 1, 14)
 		store.Save(workday.Create(date2))
-		date3, _ := datetime.CreateDate(1999, 2, 5)
+		date3 := testutil.Date_(1999, 2, 5)
 		store.Save(workday.Create(date3))
 
 		wds, _ := store.List()

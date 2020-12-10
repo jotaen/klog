@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"klog/datetime"
+	"klog/testutil"
 	"testing"
 )
 
@@ -29,11 +30,8 @@ hours:
 - time: 05h 03m
 - time: -4h 45m
 `
-	time1, _ := datetime.CreateTime(8, 12)
-	time2, _ := datetime.CreateTime(9, 05)
-	range1, _ := datetime.CreateTimeRange(time1, time2)
-	time3, _ := datetime.CreateTime(10, 15)
-	range2, _ := datetime.CreateTimeRange(time3, nil)
+	range1 := testutil.Range_(testutil.Time_(8, 12), testutil.Time_(9, 05))
+	range2 := testutil.Range_(testutil.Time_(10, 15), nil)
 
 	w, errs := Parse(yaml)
 	require.Equal(t, 0, len(errs))
