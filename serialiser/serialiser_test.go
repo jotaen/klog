@@ -3,20 +3,20 @@ package serialiser
 import (
 	"github.com/stretchr/testify/assert"
 	"klog/datetime"
-	"klog/testutil"
+	datetime2 "klog/testutil/datetime"
 	"klog/workday"
 	"testing"
 )
 
 func TestSerialiseDate(t *testing.T) {
-	workDay := workday.Create(testutil.Date_(1859, 6, 2))
+	workDay := workday.Create(datetime2.Date_(1859, 6, 2))
 	text := Serialise(workDay)
 	assert.Equal(t, `date: 1859-06-02
 `, text)
 }
 
 func TestSerialiseSummaryIfPresent(t *testing.T) {
-	workDay := workday.Create(testutil.Date_(1859, 6, 2))
+	workDay := workday.Create(datetime2.Date_(1859, 6, 2))
 	workDay.SetSummary("Hello World!")
 	text := Serialise(workDay)
 	assert.Equal(t, `date: 1859-06-02
@@ -25,9 +25,9 @@ summary: Hello World!
 }
 
 func TestSerialiseRanges(t *testing.T) {
-	workDay := workday.Create(testutil.Date_(1859, 6, 2))
-	workDay.AddRange(testutil.Range_(testutil.Time_(8, 31), testutil.Time_(14, 2)))
-	workDay.AddRange(testutil.Range_(testutil.Time_(15, 12), testutil.Time_(18, 7)))
+	workDay := workday.Create(datetime2.Date_(1859, 6, 2))
+	workDay.AddRange(datetime2.Range_(datetime2.Time_(8, 31), datetime2.Time_(14, 2)))
+	workDay.AddRange(datetime2.Range_(datetime2.Time_(15, 12), datetime2.Time_(18, 7)))
 	text := Serialise(workDay)
 	assert.Equal(t, `date: 1859-06-02
 hours:
@@ -39,8 +39,8 @@ hours:
 }
 
 func TestSerialiseOpenRange(t *testing.T) {
-	workDay := workday.Create(testutil.Date_(1859, 6, 2))
-	workDay.SetOpenRangeStart(testutil.Time_(15, 0))
+	workDay := workday.Create(datetime2.Date_(1859, 6, 2))
+	workDay.SetOpenRangeStart(datetime2.Time_(15, 0))
 	text := Serialise(workDay)
 	assert.Equal(t, `date: 1859-06-02
 hours:
@@ -49,7 +49,7 @@ hours:
 }
 
 func TestSerialiseTimes(t *testing.T) {
-	workDay := workday.Create(testutil.Date_(1859, 6, 2))
+	workDay := workday.Create(datetime2.Date_(1859, 6, 2))
 	workDay.AddDuration(datetime.Duration(3))
 	workDay.AddDuration(datetime.Duration(399))
 	text := Serialise(workDay)

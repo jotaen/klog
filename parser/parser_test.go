@@ -4,7 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"klog/datetime"
-	"klog/testutil"
+	datetime2 "klog/testutil/datetime"
 	"testing"
 )
 
@@ -44,10 +44,10 @@ hours:
 
 	assert.Equal(t, "Just a normal day", w.Summary())
 	assert.Equal(t, []datetime.TimeRange{
-		testutil.OverlappingRange_(testutil.Time_(23, 55), true, testutil.Time_(9, 5), false),
-		testutil.OverlappingRange_(testutil.Time_(19, 12), false, testutil.Time_(1, 59), true),
+		datetime2.OverlappingRange_(datetime2.Time_(23, 55), true, datetime2.Time_(9, 5), false),
+		datetime2.OverlappingRange_(datetime2.Time_(19, 12), false, datetime2.Time_(1, 59), true),
 	}, w.Ranges())
-	assert.Equal(t, testutil.Time_(10, 15), w.OpenRangeStart())
+	assert.Equal(t, datetime2.Time_(10, 15), w.OpenRangeStart())
 	assert.Equal(t, []datetime.Duration{
 		datetime.Duration(2 * 60),
 		datetime.Duration(5*60 + 3),

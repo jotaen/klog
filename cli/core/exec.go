@@ -9,7 +9,7 @@ import (
 
 type cmd func(cli.Environment, []string) int
 
-var cmdDict map[string]cmd = map[string]cmd{
+var cmdDict = map[string]cmd{
 	"list":   commands.List,
 	"create": commands.Create,
 	"new":    commands.Create,
@@ -20,15 +20,15 @@ var cmdDict map[string]cmd = map[string]cmd{
 }
 
 func Execute(workDir string, args []string) int {
-	store, err := store.CreateFsStore(workDir)
+	st, err := store.CreateFsStore(workDir)
 	if err != nil {
 		fmt.Printf("Project not found")
 		return cli.PROJECT_PATH_INVALID
 	}
 	env := cli.Environment{
 		WorkDir: workDir,
-		Store:   store,
+		Store:   st,
 	}
 	c := cmdDict[args[0]]
-	return c(env, args[1:])
+	return c(env, args)
 }

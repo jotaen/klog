@@ -1,4 +1,4 @@
-package testutil
+package datetime
 
 import (
 	"klog/datetime"
