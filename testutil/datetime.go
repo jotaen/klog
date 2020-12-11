@@ -27,3 +27,11 @@ func Range_(start datetime.Time, end datetime.Time) datetime.TimeRange {
 	}
 	return timeRange
 }
+
+func OverlappingRange_(start datetime.Time, isStartYesterday bool, end datetime.Time, isEndTomorrow bool) datetime.TimeRange {
+	timeRange, err := datetime.CreateOverlappingTimeRange(start, isStartYesterday, end, isEndTomorrow)
+	if err != nil {
+		panic("Operation failed!")
+	}
+	return timeRange
+}
