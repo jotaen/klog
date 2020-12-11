@@ -13,3 +13,10 @@ func TestErrorIfPathDoesNotExist(t *testing.T) {
 		assert.Equal(t, cli.PROJECT_PATH_INVALID, code)
 	})
 }
+
+func TestErrorSubcommandNotExist(t *testing.T) {
+	WithDisk(func(path string) {
+		code := Execute(path, []string{"aus6dfri6asydfh"})
+		assert.Equal(t, cli.SUBCOMMAND_NOT_FOUND, code)
+	})
+}

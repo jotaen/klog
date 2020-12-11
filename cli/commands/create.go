@@ -8,7 +8,18 @@ import (
 	"time"
 )
 
-func Create(env cli.Environment, args []string) int {
+var Create cli.Command
+
+func init() {
+	Create = cli.Command{
+		Name:        "create",
+		Alias:       []string{"new"},
+		Description: "Create a new entry",
+		Main:        create,
+	}
+}
+
+func create(env cli.Environment, args []string) int {
 	opts, err := parseArgs(args)
 	if err != nil {
 		return cli.INVALID_CLI_ARGS
@@ -23,10 +34,11 @@ type opts struct {
 }
 
 func parseArgs(args []string) (opts, error) {
-	argParser := argparse.NewParser("create", "")
+	argParser := argparse.NewParser(Create.Name, Create.Description)
 	dateArg := argParser.String("d", "date", &argparse.Options{
 		Required: false,
 		Default:  "today",
+		Help:     "Provide a date (format: YYYY-MM-DD or `today`)",
 	})
 	err := argParser.Parse(args)
 	opts := opts{}

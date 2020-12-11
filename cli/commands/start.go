@@ -6,7 +6,18 @@ import (
 	"time"
 )
 
-func Start(env cli.Environment, args []string) int {
+var Start cli.Command
+
+func init() {
+	Start = cli.Command{
+		Name:        "start",
+		Alias:       []string{},
+		Description: "Create a new entry",
+		Main:        start,
+	}
+}
+
+func start(env cli.Environment, args []string) int {
 	now := time.Now()
 	today, _ := datetime.CreateDateFromTime(now)
 	wd, err := env.Store.Get(today)

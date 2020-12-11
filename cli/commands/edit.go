@@ -10,7 +10,18 @@ import (
 	"time"
 )
 
-func Edit(env cli.Environment, args []string) int {
+var Edit cli.Command
+
+func init() {
+	Edit = cli.Command{
+		Name:        "edit",
+		Alias:       []string{"open"},
+		Description: "Open entry in editor",
+		Main:        edit,
+	}
+}
+
+func edit(env cli.Environment, args []string) int {
 	today, _ := datetime.CreateDateFromTime(time.Now())
 	wd, err := env.Store.Get(today)
 	if err != nil {

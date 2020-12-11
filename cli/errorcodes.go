@@ -1,8 +1,9 @@
 package cli
 
 const (
-	OK                   = 0
-	PROJECT_PATH_INVALID = 1
-	FILE_NOT_FOUND       = 2
-	INVALID_CLI_ARGS     = 3
+	OK = 0
+	SUBCOMMAND_NOT_FOUND
+	PROJECT_PATH_INVALID
+	FILE_NOT_FOUND
+	INVALID_CLI_ARGS
 )

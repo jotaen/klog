@@ -7,16 +7,12 @@ import (
 	"klog/store"
 )
 
-type cmd func(cli.Environment, []string) int
-
-var cmdDict = map[string]cmd{
-	"list":   commands.List,
-	"create": commands.Create,
-	"new":    commands.Create,
-	"edit":   commands.Edit,
-	"open":   commands.Edit,
-	"start":  commands.Start,
-	"log":    commands.Log,
+var allCommands = []cli.Command{
+	commands.Create,
+	commands.Edit,
+	commands.List,
+	commands.Log,
+	commands.Start,
 }
 
 func Execute(workDir string, args []string) int {
@@ -29,6 +25,11 @@ func Execute(workDir string, args []string) int {
 		WorkDir: workDir,
 		Store:   st,
 	}
-	c := cmdDict[args[0]]
-	return c(env, args)
+	reqSubCmd := args[0]
+	for _, cmd := range allCommands {
+		if cmd.Name == reqSubCmd {
+			return cmd.Main(env, args)
+		}
+	}
+	return cli.SUBCOMMAND_NOT_FOUND
 }

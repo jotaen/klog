@@ -7,7 +7,18 @@ import (
 	"time"
 )
 
-func Log(env cli.Environment, args []string) int {
+var Log cli.Command
+
+func init() {
+	Log = cli.Command{
+		Name:        "log",
+		Alias:       []string{},
+		Description: "Create a new entry",
+		Main:        log,
+	}
+}
+
+func log(env cli.Environment, args []string) int {
 	now := time.Now()
 	today, _ := datetime.CreateDateFromTime(now)
 	wd, err := env.Store.Get(today)
