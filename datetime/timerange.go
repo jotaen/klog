@@ -54,7 +54,14 @@ func (tr timeRange) IsEndTomorrow() bool {
 }
 
 func (tr timeRange) Duration() Duration {
+	DAY := 24 * 60
 	start := tr.Start().MinutesSinceMidnight()
+	if tr.IsStartYesterday() {
+		start = -(DAY - tr.Start().MinutesSinceMidnight())
+	}
 	end := tr.End().MinutesSinceMidnight()
+	if tr.IsEndTomorrow() {
+		end = DAY + tr.End().MinutesSinceMidnight()
+	}
 	return Duration(end - start)
 }

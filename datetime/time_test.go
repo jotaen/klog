@@ -31,3 +31,23 @@ func TestSerialiseTimeWithoutLeadingZeros(t *testing.T) {
 	tm, _ := NewTime(8, 5)
 	assert.Equal(t, "8:05", tm.ToString())
 }
+
+func TestParseTime(t *testing.T) {
+	tm, err := NewTimeFromString("9:42")
+	assert.Nil(t, err)
+	should, _ := NewTime(9, 42)
+	assert.Equal(t, tm, should)
+}
+
+func TestParseTimeFailsIfMalformed(t *testing.T) {
+	for _, s := range []string{
+		"009:42",
+		"asdf",
+		"12",
+		"13:3",
+	} {
+		tm, err := NewTimeFromString(s)
+		assert.Nil(t, tm)
+		assert.EqualError(t, err, "MALFORMED_TIME")
+	}
+}

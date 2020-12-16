@@ -35,12 +35,12 @@ func (d Duration) ToString() string {
 	return result
 }
 
-var pattern = regexp.MustCompile(`^ *(-)?((\d+)h)? *((\d+)m)? *$`)
+var durationPattern = regexp.MustCompile(`^\s*(-)?((\d+)h)? *((\d+)m)?\s*$`)
 
 func NewDurationFromString(hhmm string) (Duration, error) {
-	match := pattern.FindStringSubmatch(hhmm)
+	match := durationPattern.FindStringSubmatch(hhmm)
 	if match == nil {
-		return 0, errors.New("INVALID_DURATION")
+		return 0, errors.New("MALFORMED_DURATION")
 	}
 	sign := 1
 	if match[1] == "-" {
@@ -49,7 +49,7 @@ func NewDurationFromString(hhmm string) (Duration, error) {
 	hours, _ := strconv.Atoi(match[3])
 	minutes, _ := strconv.Atoi(match[5])
 	if minutes > 60 {
-		return 0, errors.New("INVALID_DURATION")
+		return 0, errors.New("UNREPRESENTABLE_DURATION")
 	}
 	return Duration(sign * (hours*60 + minutes)), nil
 }

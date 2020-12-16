@@ -1,7 +1,6 @@
 package datetime
 
 import (
-	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	// "klog/testutil" REMINDER: can not use `testutil` because of circular import
@@ -14,20 +13,34 @@ func TestCreateTimeRange(t *testing.T) {
 	tr, err := NewTimeRange(time1, time2)
 	require.Nil(t, err)
 	require.NotNil(t, tr)
-	assert.Equal(t, tr.Start(), time1)
-	assert.Equal(t, tr.End(), time2)
+	assert.Equal(t, time1, tr.Start())
+	assert.Equal(t, time2, tr.End())
 }
 
-func TestCreateOverlappingTimeRange(t *testing.T) {
+func TestCreateOverlappingTimeRangeYesterday(t *testing.T) {
 	time1, _ := NewTime(23, 30)
-	time2, _ := NewTime(17, 10)
+	time2, _ := NewTime(8, 10)
 	tr, err := NewOverlappingTimeRange(time1, true, time2, false)
 	require.Nil(t, err)
 	require.NotNil(t, tr)
-	assert.Equal(t, tr.Start(), time1)
-	assert.Equal(t, tr.End(), time2)
-	assert.Equal(t, tr.IsStartYesterday(), true)
-	assert.Equal(t, tr.IsEndTomorrow(), false)
+	assert.Equal(t, time1, tr.Start())
+	assert.Equal(t, time2, tr.End())
+	assert.Equal(t, true, tr.IsStartYesterday())
+	assert.Equal(t, false, tr.IsEndTomorrow())
+	assert.Equal(t, Duration(8*60+40), tr.Duration())
+}
+
+func TestCreateOverlappingTimeRangeTomorrow(t *testing.T) {
+	time1, _ := NewTime(18, 15)
+	time2, _ := NewTime(1, 45)
+	tr, err := NewOverlappingTimeRange(time1, false, time2, true)
+	require.Nil(t, err)
+	require.NotNil(t, tr)
+	assert.Equal(t, time1, tr.Start())
+	assert.Equal(t, time2, tr.End())
+	assert.Equal(t, false, tr.IsStartYesterday())
+	assert.Equal(t, true, tr.IsEndTomorrow())
+	assert.Equal(t, Duration(7*60+30), tr.Duration())
 }
 
 func TestCreationFailsIfStartIsBeforeEnd(t *testing.T) {
@@ -35,5 +48,5 @@ func TestCreationFailsIfStartIsBeforeEnd(t *testing.T) {
 	time2, _ := NewTime(13, 59)
 	tr, err := NewTimeRange(time1, time2)
 	assert.Nil(t, tr)
-	assert.Equal(t, errors.New("ILLEGAL_RANGE"), err)
+	assert.EqualError(t, err, "ILLEGAL_RANGE")
 }

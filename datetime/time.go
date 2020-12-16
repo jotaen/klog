@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/civil"
 	"errors"
 	"fmt"
+	"regexp"
 	gotime "time"
 )
 
@@ -18,6 +19,8 @@ type time struct {
 	hour   int
 	minute int
 }
+
+var timePattern = regexp.MustCompile(`^\s*\d{1,2}:\d{2}\s*$`)
 
 func (t time) ToString() string {
 	return fmt.Sprintf("%v:%02v", t.hour, t.minute)
@@ -34,6 +37,9 @@ func NewTime(hour int, minute int) (Time, error) {
 }
 
 func NewTimeFromString(hhmm string) (Time, error) {
+	if !timePattern.MatchString(hhmm) {
+		return nil, errors.New("MALFORMED_TIME")
+	}
 	ct, err := civil.ParseTime(hhmm + ":00")
 	if err != nil {
 		return nil, errors.New("INVALID_TIME")

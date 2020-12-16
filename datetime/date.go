@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/civil"
 	"errors"
 	"fmt"
+	"regexp"
 	gotime "time"
 )
 
@@ -20,6 +21,8 @@ type date struct {
 	day   int
 }
 
+var datePattern = regexp.MustCompile(`^\s*\d{4}-\d{2}-\d{2}\s*$`)
+
 func NewDate(year int, month int, day int) (Date, error) {
 	cd := civil.Date{
 		Year:  year,
@@ -30,9 +33,12 @@ func NewDate(year int, month int, day int) (Date, error) {
 }
 
 func NewDateFromString(yyyymmdd string) (Date, error) {
+	if !datePattern.MatchString(yyyymmdd) {
+		return nil, errors.New("MALFORMED_DATE")
+	}
 	cd, err := civil.ParseDate(yyyymmdd)
 	if err != nil {
-		return nil, errors.New("INVALID_DATE")
+		return nil, errors.New("UNREPRESENTABLE_DATE")
 	}
 	return cd2Date(cd)
 }
@@ -43,7 +49,7 @@ func NewDateFromTime(t gotime.Time) (Date, error) {
 
 func cd2Date(cd civil.Date) (Date, error) {
 	if !cd.IsValid() {
-		return nil, errors.New("INVALID_DATE")
+		return nil, errors.New("UNREPRESENTABLE_DATE")
 	}
 	return date{
 		year:  cd.Year,

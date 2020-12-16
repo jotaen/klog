@@ -78,13 +78,13 @@ func TestParsingFailsWithInvalidValue(t *testing.T) {
 		"qwer 30m",
 	} {
 		duration, err := NewDurationFromString(d)
-		assert.Error(t, err)
+		assert.EqualError(t, err, "MALFORMED_DURATION")
 		assert.Equal(t, Duration(0), duration)
 	}
 }
 
 func TestParsingFailsWithMinutesGreaterThan60(t *testing.T) {
 	duration, err := NewDurationFromString("8h 1653m")
-	assert.Error(t, err)
+	assert.EqualError(t, err, "UNREPRESENTABLE_DURATION")
 	assert.Equal(t, Duration(0), duration)
 }

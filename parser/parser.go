@@ -18,6 +18,10 @@ func Parse(serialisedData string) (workday.WorkDay, []ParserError) {
 	}
 
 	// Parse date
+	if d.Date == "" {
+		errors.add(parserError("MISSING_REQUIRED_PROPERTY", "date"))
+		return nil, errors.collection
+	}
 	date, err := datetime.NewDateFromString(d.Date)
 	if err != nil {
 		errors.add(fromError(err, fmt.Sprintf("date: %v", d.Date)))

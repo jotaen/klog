@@ -73,7 +73,7 @@ summary: Just a normal day
 `
 	w, errs := Parse(yaml)
 	assert.Nil(t, w)
-	assert.Contains(t, errs, parserError("INVALID_DATE", "date: "))
+	assert.Contains(t, errs, parserError("MISSING_REQUIRED_PROPERTY", "date"))
 }
 
 func TestTimeAndRangeCannotAppearTogether(t *testing.T) {
@@ -114,10 +114,10 @@ hours:
 	w, errs := Parse(yaml)
 	assert.Equal(t, w, nil)
 	assert.Equal(t, []ParserError{
-		parserError("INVALID_TIME", "start: asdf"),
-		parserError("INVALID_TIME", "end: asdf"),
-		parserError("INVALID_TIME", "start: asdf"),
-		parserError("INVALID_TIME", "start: asdf"),
-		parserError("INVALID_DURATION", "time: asdf"),
+		parserError("MALFORMED_TIME", "start: asdf"),
+		parserError("MALFORMED_TIME", "end: asdf"),
+		parserError("MALFORMED_TIME", "start: asdf"),
+		parserError("MALFORMED_TIME", "start: asdf"),
+		parserError("MALFORMED_DURATION", "time: asdf"),
 	}, errs)
 }
