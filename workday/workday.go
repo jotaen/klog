@@ -6,14 +6,20 @@ import (
 
 type WorkDay interface {
 	Date() datetime.Date
+
 	Summary() string
 	SetSummary(string)
+
 	Times() []datetime.Duration
 	AddDuration(datetime.Duration)
+
 	Ranges() []datetime.TimeRange
 	AddRange(datetime.TimeRange)
-	OpenRangeStart() datetime.Time
-	SetOpenRangeStart(datetime.Time)
+
+	OpenRange() datetime.Time
+	StartOpenRange(datetime.Time)
+	EndOpenRange(datetime.Time)
+
 	TotalWorkTime() datetime.Duration
 }
 
@@ -28,7 +34,7 @@ type workday struct {
 	summary        string
 	times          []datetime.Duration
 	ranges         []datetime.TimeRange
-	openRangeStart datetime.Time
+	openRangeBegin datetime.Time
 }
 
 func (e *workday) Date() datetime.Date {
@@ -59,12 +65,18 @@ func (e *workday) AddRange(r datetime.TimeRange) {
 	e.ranges = append(e.ranges, r)
 }
 
-func (e *workday) OpenRangeStart() datetime.Time {
-	return e.openRangeStart
+func (e *workday) OpenRange() datetime.Time {
+	return e.openRangeBegin
 }
 
-func (e *workday) SetOpenRangeStart(start datetime.Time) {
-	e.openRangeStart = start
+func (e *workday) StartOpenRange(start datetime.Time) {
+	e.openRangeBegin = start
+}
+
+func (e *workday) EndOpenRange(end datetime.Time) {
+	r, _ := datetime.CreateTimeRange(e.openRangeBegin, end)
+	e.openRangeBegin = nil
+	e.AddRange(r)
 }
 
 func (e *workday) TotalWorkTime() datetime.Duration {

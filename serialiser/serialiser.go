@@ -17,7 +17,7 @@ func Serialise(workDay workday.WorkDay) string {
 	}
 
 	// Hours
-	hasHours := len(workDay.Ranges()) > 0 || len(workDay.Times()) > 0 || workDay.OpenRangeStart() != nil
+	hasHours := len(workDay.Ranges()) > 0 || len(workDay.Times()) > 0 || workDay.OpenRange() != nil
 	if hasHours {
 		text += "\nhours:"
 		for _, r := range workDay.Ranges() {
@@ -27,8 +27,8 @@ func Serialise(workDay workday.WorkDay) string {
 		for _, t := range workDay.Times() {
 			text += fmt.Sprintf("\n- time: %v", t.ToString())
 		}
-		if workDay.OpenRangeStart() != nil {
-			text += fmt.Sprintf("\n- start: %v", workDay.OpenRangeStart().ToString())
+		if workDay.OpenRange() != nil {
+			text += fmt.Sprintf("\n- start: %v", workDay.OpenRange().ToString())
 		}
 	}
 

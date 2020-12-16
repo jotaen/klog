@@ -87,7 +87,7 @@ func Parse(serialisedData string) (workday.WorkDay, []ParserError) {
 				errors.add(fromError(err, fmt.Sprintf("start: %v", h.Start)))
 				continue
 			}
-			workDay.SetOpenRangeStart(start)
+			workDay.StartOpenRange(start)
 		}
 	}
 

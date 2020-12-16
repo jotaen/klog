@@ -20,7 +20,7 @@ date: 2020-01-01
 	assert.Equal(t, "", w.Summary())
 	assert.Nil(t, w.Times())
 	assert.Nil(t, w.Ranges())
-	assert.Nil(t, w.OpenRangeStart())
+	assert.Nil(t, w.OpenRange())
 }
 
 func TestParsingAllFieldsCorrectly(t *testing.T) {
@@ -47,7 +47,7 @@ hours:
 		datetime2.OverlappingRange_(datetime2.Time_(23, 55), true, datetime2.Time_(9, 5), false),
 		datetime2.OverlappingRange_(datetime2.Time_(19, 12), false, datetime2.Time_(1, 59), true),
 	}, w.Ranges())
-	assert.Equal(t, datetime2.Time_(10, 15), w.OpenRangeStart())
+	assert.Equal(t, datetime2.Time_(10, 15), w.OpenRange())
 	assert.Equal(t, []datetime.Duration{
 		datetime.Duration(2 * 60),
 		datetime.Duration(5*60 + 3),

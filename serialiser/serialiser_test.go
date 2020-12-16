@@ -40,7 +40,7 @@ hours:
 
 func TestSerialiseOpenRange(t *testing.T) {
 	workDay := workday.Create(datetime2.Date_(1859, 6, 2))
-	workDay.SetOpenRangeStart(datetime2.Time_(15, 0))
+	workDay.StartOpenRange(datetime2.Time_(15, 0))
 	text := Serialise(workDay)
 	assert.Equal(t, `date: 1859-06-02
 hours:
