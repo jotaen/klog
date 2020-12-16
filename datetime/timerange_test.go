@@ -9,9 +9,9 @@ import (
 )
 
 func TestCreateTimeRange(t *testing.T) {
-	time1, _ := CreateTime(11, 25)
-	time2, _ := CreateTime(17, 10)
-	tr, err := CreateTimeRange(time1, time2)
+	time1, _ := NewTime(11, 25)
+	time2, _ := NewTime(17, 10)
+	tr, err := NewTimeRange(time1, time2)
 	require.Nil(t, err)
 	require.NotNil(t, tr)
 	assert.Equal(t, tr.Start(), time1)
@@ -19,9 +19,9 @@ func TestCreateTimeRange(t *testing.T) {
 }
 
 func TestCreateOverlappingTimeRange(t *testing.T) {
-	time1, _ := CreateTime(23, 30)
-	time2, _ := CreateTime(17, 10)
-	tr, err := CreateOverlappingTimeRange(time1, true, time2, false)
+	time1, _ := NewTime(23, 30)
+	time2, _ := NewTime(17, 10)
+	tr, err := NewOverlappingTimeRange(time1, true, time2, false)
 	require.Nil(t, err)
 	require.NotNil(t, tr)
 	assert.Equal(t, tr.Start(), time1)
@@ -31,9 +31,9 @@ func TestCreateOverlappingTimeRange(t *testing.T) {
 }
 
 func TestCreationFailsIfStartIsBeforeEnd(t *testing.T) {
-	time1, _ := CreateTime(14, 00)
-	time2, _ := CreateTime(13, 59)
-	tr, err := CreateTimeRange(time1, time2)
+	time1, _ := NewTime(14, 00)
+	time2, _ := NewTime(13, 59)
+	tr, err := NewTimeRange(time1, time2)
 	assert.Nil(t, tr)
 	assert.Equal(t, errors.New("ILLEGAL_RANGE"), err)
 }

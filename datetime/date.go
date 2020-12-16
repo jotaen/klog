@@ -20,7 +20,7 @@ type date struct {
 	day   int
 }
 
-func CreateDate(year int, month int, day int) (Date, error) {
+func NewDate(year int, month int, day int) (Date, error) {
 	cd := civil.Date{
 		Year:  year,
 		Month: gotime.Month(month),
@@ -29,7 +29,7 @@ func CreateDate(year int, month int, day int) (Date, error) {
 	return cd2Date(cd)
 }
 
-func CreateDateFromString(yyyymmdd string) (Date, error) {
+func NewDateFromString(yyyymmdd string) (Date, error) {
 	cd, err := civil.ParseDate(yyyymmdd)
 	if err != nil {
 		return nil, errors.New("INVALID_DATE")
@@ -37,8 +37,8 @@ func CreateDateFromString(yyyymmdd string) (Date, error) {
 	return cd2Date(cd)
 }
 
-func CreateDateFromTime(t gotime.Time) (Date, error) {
-	return CreateDate(t.Year(), int(t.Month()), t.Day())
+func NewDateFromTime(t gotime.Time) (Date, error) {
+	return NewDate(t.Year(), int(t.Month()), t.Day())
 }
 
 func cd2Date(cd civil.Date) (Date, error) {

@@ -25,7 +25,7 @@ func TestSerialiseDurationOfNegativeValues(t *testing.T) {
 }
 
 func TestParsingDurationWithHoursAndMinutes(t *testing.T) {
-	duration, err := CreateDurationFromString("2h 6m")
+	duration, err := NewDurationFromString("2h 6m")
 	assert.Nil(t, err)
 	assert.Equal(t, Duration(2*60+6), duration)
 }
@@ -35,7 +35,7 @@ func TestParsingDurationWithHoursOnly(t *testing.T) {
 		"13h",
 		"13h 0m",
 	} {
-		duration, err := CreateDurationFromString(d)
+		duration, err := NewDurationFromString(d)
 		assert.Nil(t, err)
 		assert.Equal(t, Duration(13*60), duration)
 	}
@@ -46,14 +46,14 @@ func TestParsingDurationWithMinutesOnly(t *testing.T) {
 		"48m",
 		"0h 48m",
 	} {
-		duration, err := CreateDurationFromString(d)
+		duration, err := NewDurationFromString(d)
 		assert.Nil(t, err)
 		assert.Equal(t, Duration(48), duration)
 	}
 }
 
 func TestParsingNegativeDuration(t *testing.T) {
-	duration, err := CreateDurationFromString("-2h 5m")
+	duration, err := NewDurationFromString("-2h 5m")
 	assert.Nil(t, err)
 	assert.Equal(t, Duration(-(2*60 + 5)), duration)
 }
@@ -65,7 +65,7 @@ func TestParsingIgnoresWhiteSpace(t *testing.T) {
 		"  1h 11m  ",
 		"1h     11m",
 	} {
-		duration, err := CreateDurationFromString(d)
+		duration, err := NewDurationFromString(d)
 		assert.Nil(t, err)
 		assert.Equal(t, Duration(71), duration)
 	}
@@ -77,14 +77,14 @@ func TestParsingFailsWithInvalidValue(t *testing.T) {
 		"6h asdf",
 		"qwer 30m",
 	} {
-		duration, err := CreateDurationFromString(d)
+		duration, err := NewDurationFromString(d)
 		assert.Error(t, err)
 		assert.Equal(t, Duration(0), duration)
 	}
 }
 
 func TestParsingFailsWithMinutesGreaterThan60(t *testing.T) {
-	duration, err := CreateDurationFromString("8h 1653m")
+	duration, err := NewDurationFromString("8h 1653m")
 	assert.Error(t, err)
 	assert.Equal(t, Duration(0), duration)
 }

@@ -5,7 +5,7 @@ import (
 )
 
 func Date_(year int, month int, day int) datetime.Date {
-	date, err := datetime.CreateDate(year, month, day)
+	date, err := datetime.NewDate(year, month, day)
 	if err != nil {
 		panic("Operation failed!")
 	}
@@ -13,7 +13,7 @@ func Date_(year int, month int, day int) datetime.Date {
 }
 
 func Time_(hour int, minute int) datetime.Time {
-	time, err := datetime.CreateTime(hour, minute)
+	time, err := datetime.NewTime(hour, minute)
 	if err != nil {
 		panic("Operation failed!")
 	}
@@ -21,7 +21,7 @@ func Time_(hour int, minute int) datetime.Time {
 }
 
 func Range_(start datetime.Time, end datetime.Time) datetime.TimeRange {
-	timeRange, err := datetime.CreateTimeRange(start, end)
+	timeRange, err := datetime.NewTimeRange(start, end)
 	if err != nil {
 		panic("Operation failed!")
 	}
@@ -29,7 +29,7 @@ func Range_(start datetime.Time, end datetime.Time) datetime.TimeRange {
 }
 
 func OverlappingRange_(start datetime.Time, isStartYesterday bool, end datetime.Time, isEndTomorrow bool) datetime.TimeRange {
-	timeRange, err := datetime.CreateOverlappingTimeRange(start, isStartYesterday, end, isEndTomorrow)
+	timeRange, err := datetime.NewOverlappingTimeRange(start, isStartYesterday, end, isEndTomorrow)
 	if err != nil {
 		panic("Operation failed!")
 	}

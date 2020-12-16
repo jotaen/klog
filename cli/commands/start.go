@@ -23,10 +23,10 @@ func init() {
 
 func start(env cli.Environment, args []string) int {
 	start := time.Now()
-	today, _ := datetime.CreateDateFromTime(start)
+	today, _ := datetime.NewDateFromTime(start)
 	wd, _ := env.Store.Get(today)
 	if wd == nil {
-		wd = workday.Create(today)
+		wd = workday.NewWorkDay(today)
 	}
 	startTime, _ := datetime.CreateTimeFromTime(start)
 	wd.StartOpenRange(startTime)

@@ -18,13 +18,13 @@ func Parse(serialisedData string) (workday.WorkDay, []ParserError) {
 	}
 
 	// Parse date
-	date, err := datetime.CreateDateFromString(d.Date)
+	date, err := datetime.NewDateFromString(d.Date)
 	if err != nil {
 		errors.add(fromError(err, fmt.Sprintf("date: %v", d.Date)))
 		return nil, errors.collection
 	}
 
-	workDay := workday.Create(date)
+	workDay := workday.NewWorkDay(date)
 	workDay.SetSummary(d.Summary)
 
 	// Parse hours
@@ -39,7 +39,7 @@ func Parse(serialisedData string) (workday.WorkDay, []ParserError) {
 
 		// Parse time
 		if hasTime {
-			duration, err := datetime.CreateDurationFromString(h.Time)
+			duration, err := datetime.NewDurationFromString(h.Time)
 			if err != nil {
 				errors.add(fromError(err, fmt.Sprintf("time: %v", h.Time)))
 				continue
@@ -51,7 +51,7 @@ func Parse(serialisedData string) (workday.WorkDay, []ParserError) {
 		if hasStart && hasEnd {
 			// Start time
 			startTime := strings.Split(h.Start, " ")
-			start, err := datetime.CreateTimeFromString(startTime[0])
+			start, err := datetime.NewTimeFromString(startTime[0])
 			if err != nil {
 				errors.add(fromError(err, fmt.Sprintf("start: %v", h.Start)))
 				continue
@@ -63,7 +63,7 @@ func Parse(serialisedData string) (workday.WorkDay, []ParserError) {
 
 			// End time
 			endTime := strings.Split(h.End, " ")
-			end, err := datetime.CreateTimeFromString(endTime[0])
+			end, err := datetime.NewTimeFromString(endTime[0])
 			isEndTomorrow := false
 			if len(endTime) == 2 && endTime[1] == "tomorrow" {
 				isEndTomorrow = true
@@ -72,7 +72,7 @@ func Parse(serialisedData string) (workday.WorkDay, []ParserError) {
 				errors.add(fromError(err, fmt.Sprintf("end: %v", h.End)))
 				continue
 			}
-			timeRange, err := datetime.CreateOverlappingTimeRange(start, isStartYesterday, end, isEndTomorrow)
+			timeRange, err := datetime.NewOverlappingTimeRange(start, isStartYesterday, end, isEndTomorrow)
 			if err != nil {
 				errors.add(fromError(err, ""))
 				continue
@@ -82,7 +82,7 @@ func Parse(serialisedData string) (workday.WorkDay, []ParserError) {
 
 		// Parse open range
 		if hasStart && !hasEnd {
-			start, err := datetime.CreateTimeFromString(h.Start)
+			start, err := datetime.NewTimeFromString(h.Start)
 			if err != nil {
 				errors.add(fromError(err, fmt.Sprintf("start: %v", h.Start)))
 				continue

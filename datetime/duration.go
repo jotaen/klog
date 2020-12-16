@@ -37,7 +37,7 @@ func (d Duration) ToString() string {
 
 var pattern = regexp.MustCompile(`^ *(-)?((\d+)h)? *((\d+)m)? *$`)
 
-func CreateDurationFromString(hhmm string) (Duration, error) {
+func NewDurationFromString(hhmm string) (Duration, error) {
 	match := pattern.FindStringSubmatch(hhmm)
 	if match == nil {
 		return 0, errors.New("INVALID_DURATION")

@@ -23,7 +23,7 @@ type WorkDay interface {
 	TotalWorkTime() datetime.Duration
 }
 
-func Create(date datetime.Date) WorkDay {
+func NewWorkDay(date datetime.Date) WorkDay {
 	return &workday{
 		date: date,
 	}
@@ -74,7 +74,7 @@ func (e *workday) StartOpenRange(start datetime.Time) {
 }
 
 func (e *workday) EndOpenRange(end datetime.Time) {
-	r, _ := datetime.CreateTimeRange(e.openRangeBegin, end)
+	r, _ := datetime.NewTimeRange(e.openRangeBegin, end)
 	e.openRangeBegin = nil
 	e.AddRange(r)
 }

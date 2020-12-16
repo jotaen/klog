@@ -22,7 +22,7 @@ type fileStore struct {
 	basePath string
 }
 
-func CreateFsStore(path string) (Store, error) {
+func NewFsStore(path string) (Store, error) {
 	if !dirExists(path) {
 		return nil, errors.New("NO_SUCH_PATH")
 	}
@@ -55,14 +55,14 @@ var monthPattern = regexp.MustCompile("^[0-9]{2}$")
 var dayPattern = regexp.MustCompile("^[0-9]{2}.yml$")
 
 func (fs fileStore) List() ([]datetime.Date, error) {
-	result := []datetime.Date{}
+	var result []datetime.Date
 	walkDir(fs.basePath, true, datePattern, func(year string) {
 		walkDir(fs.basePath+"/"+year, true, monthPattern, func(month string) {
 			walkDir(fs.basePath+"/"+year+"/"+month, false, dayPattern, func(day string) {
 				yyyy, _ := strconv.Atoi(year)
 				mm, _ := strconv.Atoi(month)
 				dd, _ := strconv.Atoi(day[0:2])
-				date, err := datetime.CreateDate(yyyy, mm, dd)
+				date, err := datetime.NewDate(yyyy, mm, dd)
 				if err == nil {
 					result = append(result, date)
 				}

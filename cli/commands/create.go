@@ -24,7 +24,7 @@ func create(env cli.Environment, args []string) int {
 	if err != nil {
 		return cli.INVALID_CLI_ARGS
 	}
-	wd := workday.Create(opts.date)
+	wd := workday.NewWorkDay(opts.date)
 	env.Store.Save(wd)
 	return cli.OK
 }
@@ -46,11 +46,11 @@ func parseArgs(args []string) (opts, error) {
 		return opts, err
 	}
 	if *dateArg == "" || *dateArg == "today" {
-		date, _ := datetime.CreateDateFromTime(time.Now())
+		date, _ := datetime.NewDateFromTime(time.Now())
 		opts.date = date
 		return opts, nil
 	} else {
-		date, err := datetime.CreateDateFromString(*dateArg)
+		date, err := datetime.NewDateFromString(*dateArg)
 		if err != nil {
 			return opts, err
 		}

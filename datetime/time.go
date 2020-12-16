@@ -23,7 +23,7 @@ func (t time) ToString() string {
 	return fmt.Sprintf("%v:%02v", t.hour, t.minute)
 }
 
-func CreateTime(hour int, minute int) (Time, error) {
+func NewTime(hour int, minute int) (Time, error) {
 	ct := civil.Time{
 		Hour:       hour,
 		Minute:     minute,
@@ -33,7 +33,7 @@ func CreateTime(hour int, minute int) (Time, error) {
 	return ct2Time(ct)
 }
 
-func CreateTimeFromString(hhmm string) (Time, error) {
+func NewTimeFromString(hhmm string) (Time, error) {
 	ct, err := civil.ParseTime(hhmm + ":00")
 	if err != nil {
 		return nil, errors.New("INVALID_TIME")
@@ -42,7 +42,7 @@ func CreateTimeFromString(hhmm string) (Time, error) {
 }
 
 func CreateTimeFromTime(t gotime.Time) (Time, error) {
-	return CreateTime(t.Hour(), t.Minute())
+	return NewTime(t.Hour(), t.Minute())
 }
 
 func ct2Time(ct civil.Time) (Time, error) {

@@ -22,7 +22,7 @@ func init() {
 }
 
 func edit(env cli.Environment, args []string) int {
-	today, _ := datetime.CreateDateFromTime(time.Now())
+	today, _ := datetime.NewDateFromTime(time.Now())
 	wd, err := env.Store.Get(today)
 	if err != nil {
 		fmt.Println("No no no no no no!")

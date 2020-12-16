@@ -16,7 +16,7 @@ var allCommands = []cli.Command{
 }
 
 func Execute(workDir string, args []string) int {
-	st, err := store.CreateFsStore(workDir)
+	st, err := store.NewFsStore(workDir)
 	if err != nil {
 		fmt.Printf("Project not found")
 		return cli.PROJECT_PATH_INVALID

@@ -20,14 +20,14 @@ func init() {
 
 func log(env cli.Environment, args []string) int {
 	now := time.Now()
-	today, _ := datetime.CreateDateFromTime(now)
+	today, _ := datetime.NewDateFromTime(now)
 	wd, err := env.Store.Get(today)
 	if err != nil {
 		// todo create new
 		return 182763
 	}
 	value := strings.Join(args[:], "")
-	duration, _ := datetime.CreateDurationFromString(value)
+	duration, _ := datetime.NewDurationFromString(value)
 	wd.AddDuration(duration)
 	env.Store.Save(wd)
 	return cli.OK

@@ -19,11 +19,11 @@ type timeRange struct {
 	isEndTomorrow    bool
 }
 
-func CreateTimeRange(start Time, end Time) (TimeRange, error) {
-	return CreateOverlappingTimeRange(start, false, end, false)
+func NewTimeRange(start Time, end Time) (TimeRange, error) {
+	return NewOverlappingTimeRange(start, false, end, false)
 }
 
-func CreateOverlappingTimeRange(start Time, isStartYesterday bool, end Time, isEndTomorrow bool) (TimeRange, error) {
+func NewOverlappingTimeRange(start Time, isStartYesterday bool, end Time, isEndTomorrow bool) (TimeRange, error) {
 	startMinutes := start.Hour()*60 + start.Minute()
 	endMinutes := end.Hour()*60 + end.Minute()
 	if !isStartYesterday && !isEndTomorrow && endMinutes < startMinutes {
