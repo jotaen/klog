@@ -2,7 +2,7 @@ package withenv
 
 import (
 	"klog/app/cli"
-	"klog/store"
+	"klog/project"
 	"os"
 )
 
@@ -10,9 +10,9 @@ func WithEnvironment(fn func(environment cli.Environment)) {
 	path := "./tmp/test"
 	os.RemoveAll(path)
 	os.MkdirAll(path, os.ModePerm)
-	st, err := store.NewFsStore(path)
+	st, err := project.NewProject(path)
 	if err != nil {
-		panic("Could not create store")
+		panic("Could not create project")
 	}
 	env := cli.Environment{
 		WorkDir: path,

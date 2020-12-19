@@ -17,6 +17,9 @@ func abs(x int) int {
 }
 
 func (d Duration) ToString() string {
+	if d == 0 {
+		return "0m"
+	}
 	hours := abs(int((int(d) / 60)))
 	minutes := abs(int(d) % 60)
 	result := ""

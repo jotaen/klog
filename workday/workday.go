@@ -1,6 +1,7 @@
 package workday
 
 import (
+	"errors"
 	"klog/datetime"
 )
 
@@ -18,9 +19,10 @@ type WorkDay interface {
 
 	OpenRange() datetime.Time
 	StartOpenRange(datetime.Time)
-	EndOpenRange(datetime.Time)
+	EndOpenRange(datetime.Time) error
 
 	TotalWorkTime() datetime.Duration
+	TotalWorkTimeWithOpenRange(time datetime.Time) (datetime.Duration, error)
 }
 
 func NewWorkDay(date datetime.Date) WorkDay {
@@ -73,10 +75,11 @@ func (e *workday) StartOpenRange(start datetime.Time) {
 	e.openRangeBegin = start
 }
 
-func (e *workday) EndOpenRange(end datetime.Time) {
+func (e *workday) EndOpenRange(end datetime.Time) error {
 	r, _ := datetime.NewTimeRange(e.openRangeBegin, end)
 	e.openRangeBegin = nil
 	e.AddRange(r)
+	return nil // TODO
 }
 
 func (e *workday) TotalWorkTime() datetime.Duration {
@@ -88,4 +91,14 @@ func (e *workday) TotalWorkTime() datetime.Duration {
 		total += r.Duration()
 	}
 	return total
+}
+
+func (e *workday) TotalWorkTimeWithOpenRange(end datetime.Time) (datetime.Duration, error) {
+	if e.openRangeBegin == nil {
+		return 0, errors.New("NO_OPEN_RANGE")
+	}
+	total := e.TotalWorkTime()
+	r, _ := datetime.NewTimeRange(e.openRangeBegin, end)
+	total += r.Duration()
+	return total, nil
 }

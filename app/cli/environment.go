@@ -1,10 +1,10 @@
 package cli
 
 import (
-	"klog/store"
+	"klog/project"
 )
 
 type Environment struct {
 	WorkDir string
-	Store   store.Store
+	Store   project.Project
 }

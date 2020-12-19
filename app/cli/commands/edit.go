@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"klog/app/cli"
 	"klog/datetime"
-	"klog/store"
+	"klog/project"
 	"os"
 	"os/exec"
 	"time"
@@ -34,7 +34,7 @@ func edit(env cli.Environment, args []string) int {
 	return cli.OK
 }
 
-func openEditor(file store.FileProps) {
+func openEditor(file project.FileProps) {
 	cmd := exec.Command("vi", file.Path)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

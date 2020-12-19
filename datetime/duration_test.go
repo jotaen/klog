@@ -6,6 +6,7 @@ import (
 )
 
 func TestSerialiseDurationOnlyWithMeaningfulValues(t *testing.T) {
+	assert.Equal(t, "0m", Duration(0).ToString())
 	assert.Equal(t, "1m", Duration(1).ToString())
 	assert.Equal(t, "15h", Duration(15*60).ToString())
 }

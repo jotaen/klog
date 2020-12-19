@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"klog/app/cli"
 	"klog/app/cli/commands"
-	"klog/store"
+	"klog/project"
 )
 
 var allCommands = []cli.Command{
@@ -17,7 +17,7 @@ var allCommands = []cli.Command{
 }
 
 func Execute(workDir string, args []string) int {
-	st, err := store.NewFsStore(workDir)
+	st, err := project.NewProject(workDir)
 	if err != nil {
 		fmt.Printf("Project not found")
 		return cli.PROJECT_PATH_INVALID
