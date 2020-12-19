@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"klog/cli"
+	"klog/app/cli"
 	"klog/datetime"
 	"klog/store"
 	"os"

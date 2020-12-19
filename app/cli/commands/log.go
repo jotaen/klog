@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"klog/cli"
+	"klog/app/cli"
 	"klog/datetime"
 	"strings"
 	"time"

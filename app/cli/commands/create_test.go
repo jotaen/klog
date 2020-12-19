@@ -2,7 +2,7 @@ package commands
 
 import (
 	"github.com/stretchr/testify/assert"
-	"klog/cli"
+	"klog/app/cli"
 	. "klog/testutil/withenv"
 	"testing"
 )

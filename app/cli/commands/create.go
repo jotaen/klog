@@ -2,7 +2,7 @@ package commands
 
 import (
 	"github.com/akamensky/argparse"
-	"klog/cli"
+	"klog/app/cli"
 	"klog/datetime"
 	"klog/workday"
 	"time"

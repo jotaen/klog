@@ -1,9 +1,9 @@
-package core
+package exec
 
 import (
 	"fmt"
-	"klog/cli"
-	"klog/cli/commands"
+	"klog/app/cli"
+	"klog/app/cli/commands"
 	"klog/store"
 )
 
@@ -13,6 +13,7 @@ var allCommands = []cli.Command{
 	commands.List,
 	commands.Log,
 	commands.Start,
+	commands.Tray,
 }
 
 func Execute(workDir string, args []string) int {

@@ -1,8 +1,8 @@
-package core
+package exec
 
 import (
 	"github.com/stretchr/testify/assert"
-	"klog/cli"
+	"klog/app/cli"
 	. "klog/testutil/withdisk"
 	"testing"
 )

@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"klog/cli"
+	"klog/app/cli"
 )
 
 var List cli.Command

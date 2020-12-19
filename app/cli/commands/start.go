@@ -3,7 +3,7 @@ package commands
 import (
 	"bufio"
 	"fmt"
-	"klog/cli"
+	"klog/app/cli"
 	"klog/datetime"
 	"klog/workday"
 	"os"

@@ -1,7 +1,7 @@
 package withenv
 
 import (
-	"klog/cli"
+	"klog/app/cli"
 	"klog/store"
 	"os"
 )
