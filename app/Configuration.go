@@ -3,7 +3,7 @@ package app
 import "klog/project"
 
 type Configuration interface {
-	Projects() []project.Project
+	SavedProjects() []project.Project
 }
 
 type configuration struct {
@@ -18,6 +18,6 @@ func NewConfiguration(homeFolderPath string) Configuration {
 	}
 }
 
-func (c configuration) Projects() []project.Project {
+func (c configuration) SavedProjects() []project.Project {
 	return c.projects
 }

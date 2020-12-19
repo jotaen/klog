@@ -4,9 +4,9 @@ import (
 	"errors"
 	"io/ioutil"
 	"klog/datetime"
-	"klog/parser"
-	"klog/serialiser"
 	"klog/workday"
+	"klog/workday/parser"
+	"klog/workday/serialiser"
 	"regexp"
 	"strconv"
 )

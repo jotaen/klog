@@ -6,29 +6,29 @@ import (
 )
 
 func TestSerialiseDurationOnlyWithMeaningfulValues(t *testing.T) {
-	assert.Equal(t, "0m", Duration(0).ToString())
-	assert.Equal(t, "1m", Duration(1).ToString())
-	assert.Equal(t, "15h", Duration(15*60).ToString())
+	assert.Equal(t, "0m", NewDuration(0, 0).ToString())
+	assert.Equal(t, "1m", NewDuration(0, 1).ToString())
+	assert.Equal(t, "15h", NewDuration(15, 0).ToString())
 }
 
 func TestSerialiseDurationOfLargeValues(t *testing.T) {
-	assert.Equal(t, "265h 45m", Duration(265*60+45).ToString())
+	assert.Equal(t, "265h 45m", NewDuration(265, 45).ToString())
 }
 
 func TestSerialiseDurationWithoutLeadingZeros(t *testing.T) {
-	assert.Equal(t, "2h 6m", Duration(2*60+6).ToString())
+	assert.Equal(t, "2h 6m", NewDuration(2, 6).ToString())
 }
 
 func TestSerialiseDurationOfNegativeValues(t *testing.T) {
-	assert.Equal(t, "-3h 18m", Duration(-(3*60 + 18)).ToString())
-	assert.Equal(t, "-3h", Duration(-(3 * 60)).ToString())
-	assert.Equal(t, "-18m", Duration(-(18)).ToString())
+	assert.Equal(t, "-3h 18m", NewDuration(-3, -18).ToString())
+	assert.Equal(t, "-3h", NewDuration(-3, 0).ToString())
+	assert.Equal(t, "-18m", NewDuration(0, -18).ToString())
 }
 
 func TestParsingDurationWithHoursAndMinutes(t *testing.T) {
 	duration, err := NewDurationFromString("2h 6m")
 	assert.Nil(t, err)
-	assert.Equal(t, Duration(2*60+6), duration)
+	assert.Equal(t, NewDuration(2, 6), duration)
 }
 
 func TestParsingDurationWithHoursOnly(t *testing.T) {
@@ -38,7 +38,7 @@ func TestParsingDurationWithHoursOnly(t *testing.T) {
 	} {
 		duration, err := NewDurationFromString(d)
 		assert.Nil(t, err)
-		assert.Equal(t, Duration(13*60), duration)
+		assert.Equal(t, NewDuration(13, 0), duration)
 	}
 }
 
@@ -49,14 +49,14 @@ func TestParsingDurationWithMinutesOnly(t *testing.T) {
 	} {
 		duration, err := NewDurationFromString(d)
 		assert.Nil(t, err)
-		assert.Equal(t, Duration(48), duration)
+		assert.Equal(t, NewDuration(0, 48), duration)
 	}
 }
 
 func TestParsingNegativeDuration(t *testing.T) {
 	duration, err := NewDurationFromString("-2h 5m")
 	assert.Nil(t, err)
-	assert.Equal(t, Duration(-(2*60 + 5)), duration)
+	assert.Equal(t, NewDuration(-2, -5), duration)
 }
 
 func TestParsingIgnoresWhiteSpace(t *testing.T) {
@@ -68,7 +68,7 @@ func TestParsingIgnoresWhiteSpace(t *testing.T) {
 	} {
 		duration, err := NewDurationFromString(d)
 		assert.Nil(t, err)
-		assert.Equal(t, Duration(71), duration)
+		assert.Equal(t, NewDuration(0, 71), duration)
 	}
 }
 
@@ -80,12 +80,12 @@ func TestParsingFailsWithInvalidValue(t *testing.T) {
 	} {
 		duration, err := NewDurationFromString(d)
 		assert.EqualError(t, err, "MALFORMED_DURATION")
-		assert.Equal(t, Duration(0), duration)
+		assert.Equal(t, nil, duration)
 	}
 }
 
 func TestParsingFailsWithMinutesGreaterThan60(t *testing.T) {
 	duration, err := NewDurationFromString("8h 1653m")
 	assert.EqualError(t, err, "UNREPRESENTABLE_DURATION")
-	assert.Equal(t, Duration(0), duration)
+	assert.Equal(t, nil, duration)
 }

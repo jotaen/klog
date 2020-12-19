@@ -83,22 +83,22 @@ func (e *workday) EndOpenRange(end datetime.Time) error {
 }
 
 func (e *workday) TotalWorkTime() datetime.Duration {
-	total := datetime.Duration(0)
+	total := datetime.NewDuration(0, 0)
 	for _, t := range e.times {
-		total += t
+		total = total.Add(t)
 	}
 	for _, r := range e.ranges {
-		total += r.Duration()
+		total = total.Add(r.Duration())
 	}
 	return total
 }
 
 func (e *workday) TotalWorkTimeWithOpenRange(end datetime.Time) (datetime.Duration, error) {
 	if e.openRangeBegin == nil {
-		return 0, errors.New("NO_OPEN_RANGE")
+		return nil, errors.New("NO_OPEN_RANGE")
 	}
 	total := e.TotalWorkTime()
 	r, _ := datetime.NewTimeRange(e.openRangeBegin, end)
-	total += r.Duration()
+	total = total.Add(r.Duration())
 	return total, nil
 }

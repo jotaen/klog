@@ -27,7 +27,7 @@ func TestCreateOverlappingTimeRangeYesterday(t *testing.T) {
 	assert.Equal(t, time2, tr.End())
 	assert.Equal(t, true, tr.IsStartYesterday())
 	assert.Equal(t, false, tr.IsEndTomorrow())
-	assert.Equal(t, Duration(8*60+40), tr.Duration())
+	assert.Equal(t, NewDuration(8, 40), tr.Duration())
 }
 
 func TestCreateOverlappingTimeRangeTomorrow(t *testing.T) {
@@ -40,7 +40,7 @@ func TestCreateOverlappingTimeRangeTomorrow(t *testing.T) {
 	assert.Equal(t, time2, tr.End())
 	assert.Equal(t, false, tr.IsStartYesterday())
 	assert.Equal(t, true, tr.IsEndTomorrow())
-	assert.Equal(t, Duration(7*60+30), tr.Duration())
+	assert.Equal(t, NewDuration(7, 30), tr.Duration())
 }
 
 func TestCreationFailsIfStartIsBeforeEnd(t *testing.T) {

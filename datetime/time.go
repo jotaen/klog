@@ -11,7 +11,7 @@ import (
 type Time interface {
 	Hour() int
 	Minute() int
-	MinutesSinceMidnight() int
+	SinceMidnight() Duration
 	ToString() string
 }
 
@@ -69,6 +69,6 @@ func (t time) Minute() int {
 	return t.minute
 }
 
-func (t time) MinutesSinceMidnight() int {
-	return t.hour*60 + t.minute
+func (t time) SinceMidnight() Duration {
+	return NewDuration(t.Hour(), t.Minute())
 }

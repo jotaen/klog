@@ -20,7 +20,7 @@ func Start() {
 	menuet.App().Label = "net.jotaen.klog.menuapp"
 	menuet.App().Children = render
 
-	currentProject = config.Projects()[0]
+	currentProject = config.SavedProjects()[0]
 
 	go updateTimer()
 	menuet.App().RunApplication()
@@ -65,44 +65,49 @@ func render() []menuet.MenuItem {
 				})
 			} else {
 				items = append(items, menuet.MenuItem{
-					Text: "Start time",
+					Text:    "Start time",
 					Clicked: func() {},
 				})
 			}
 		}
+
+		items = append(items, menuet.MenuItem{
+			Text: "History",
+			Children: func() []menuet.MenuItem {
+				items := []menuet.MenuItem{
+					{Text: "Create", Clicked: func() {}},
+					{Text: "Open folder", Clicked: func() {}},
+				}
+				wds, _ := currentProject.List()
+				if len(wds) > 0 {
+					items = append(items, menuet.MenuItem{Type: menuet.Separator})
+					for _, wd := range wds {
+						items = append(items, menuet.MenuItem{
+							Text: wd.ToString(), Clicked: func() {},
+						})
+					}
+				}
+				return items
+			},
+		})
 	}
 
-	items = append(items, menuet.MenuItem{
-		Text: "History",
-		Children: func() []menuet.MenuItem {
-			return []menuet.MenuItem{
-				{Text: "Create", Clicked: func() {}},
-				{Text: "Open folder", Clicked: func() {}},
-				{Type: menuet.Separator},
-				{Text: "Latest 10", FontSize: 10},
-				{Text: "2020-12-15", Clicked: func() {}},
-				{Text: "2020-12-14", Clicked: func() {}},
-				{Text: "2020-12-12", Clicked: func() {}},
-				{Text: "2020-12-09", Clicked: func() {}},
-			}
-		},
-	})
 	items = append(items, menuet.MenuItem{
 		Type: menuet.Separator,
 	})
 
 	// Switch Project
 	items = append(items, menuet.MenuItem{
-		Text: "Switch Project",
+		Text: "Starred Projects",
 		Children: func() []menuet.MenuItem {
-			var projects []menuet.MenuItem
-			for _, p := range config.Projects() {
-				projects = append(projects, menuet.MenuItem{
+			var items []menuet.MenuItem
+			for _, p := range config.SavedProjects() {
+				items = append(items, menuet.MenuItem{
 					Text:  p.Name(),
 					State: currentProject == p,
 				})
 			}
-			return projects
+			return items
 		},
 	})
 

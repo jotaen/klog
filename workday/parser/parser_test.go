@@ -49,9 +49,9 @@ hours:
 	}, w.Ranges())
 	assert.Equal(t, datetime2.Time_(10, 15), w.OpenRange())
 	assert.Equal(t, []datetime.Duration{
-		datetime.Duration(2 * 60),
-		datetime.Duration(5*60 + 3),
-		datetime.Duration(-(1*60 + 12)),
+		datetime.NewDuration(2, 0),
+		datetime.NewDuration(5, 3),
+		datetime.NewDuration(-1, -12),
 	}, w.Times())
 }
 

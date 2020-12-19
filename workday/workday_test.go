@@ -42,6 +42,6 @@ func TestCloseOpenRange(t *testing.T) {
 
 func TestOkayWhenAddingValidDuration(t *testing.T) {
 	w := NewWorkDay(Date_(2020, 1, 1))
-	w.AddDuration(datetime.Duration(1))
-	assert.Equal(t, []datetime.Duration{datetime.Duration(1)}, w.Times())
+	w.AddDuration(datetime.NewDuration(0, 1))
+	assert.Equal(t, []datetime.Duration{datetime.NewDuration(0, 1)}, w.Times())
 }

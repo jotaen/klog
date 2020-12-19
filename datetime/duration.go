@@ -7,7 +7,13 @@ import (
 	"strconv"
 )
 
-type Duration int // in minutes
+type duration int
+
+type Duration interface {
+	InMinutes() int
+	Add(Duration) Duration
+	ToString() string
+}
 
 func abs(x int) int {
 	if x < 0 {
@@ -16,7 +22,19 @@ func abs(x int) int {
 	return x
 }
 
-func (d Duration) ToString() string {
+func NewDuration(amountHours int, amountMinutes int) Duration {
+	return duration(amountHours*60) + duration(amountMinutes)
+}
+
+func (d duration) InMinutes() int {
+	return int(d)
+}
+
+func (d duration) Add(additional Duration) Duration {
+	return NewDuration(0, d.InMinutes()+additional.InMinutes())
+}
+
+func (d duration) ToString() string {
 	if d == 0 {
 		return "0m"
 	}
@@ -43,7 +61,7 @@ var durationPattern = regexp.MustCompile(`^\s*(-)?((\d+)h)? *((\d+)m)?\s*$`)
 func NewDurationFromString(hhmm string) (Duration, error) {
 	match := durationPattern.FindStringSubmatch(hhmm)
 	if match == nil {
-		return 0, errors.New("MALFORMED_DURATION")
+		return nil, errors.New("MALFORMED_DURATION")
 	}
 	sign := 1
 	if match[1] == "-" {
@@ -52,7 +70,7 @@ func NewDurationFromString(hhmm string) (Duration, error) {
 	hours, _ := strconv.Atoi(match[3])
 	minutes, _ := strconv.Atoi(match[5])
 	if minutes > 60 {
-		return 0, errors.New("UNREPRESENTABLE_DURATION")
+		return nil, errors.New("UNREPRESENTABLE_DURATION")
 	}
-	return Duration(sign * (hours*60 + minutes)), nil
+	return NewDuration(sign*hours, sign*minutes), nil
 }
