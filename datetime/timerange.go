@@ -7,33 +7,21 @@ import (
 type TimeRange interface {
 	Start() Time
 	End() Time
-	IsStartYesterday() bool
-	IsEndTomorrow() bool
 	Duration() Duration
 }
 
 type timeRange struct {
-	start            Time
-	end              Time
-	isStartYesterday bool
-	isEndTomorrow    bool
+	start Time
+	end   Time
 }
 
 func NewTimeRange(start Time, end Time) (TimeRange, error) {
-	return NewOverlappingTimeRange(start, false, end, false)
-}
-
-func NewOverlappingTimeRange(start Time, isStartYesterday bool, end Time, isEndTomorrow bool) (TimeRange, error) {
-	startMinutes := start.Hour()*60 + start.Minute()
-	endMinutes := end.Hour()*60 + end.Minute()
-	if !isStartYesterday && !isEndTomorrow && endMinutes < startMinutes {
+	if !end.IsAfterOrEqual(start) {
 		return nil, errors.New("ILLEGAL_RANGE")
 	}
 	return timeRange{
-		start:            start,
-		end:              end,
-		isStartYesterday: isStartYesterday,
-		isEndTomorrow:    isEndTomorrow,
+		start: start,
+		end:   end,
 	}, nil
 }
 
@@ -45,23 +33,8 @@ func (tr timeRange) End() Time {
 	return tr.end
 }
 
-func (tr timeRange) IsStartYesterday() bool {
-	return tr.isStartYesterday
-}
-
-func (tr timeRange) IsEndTomorrow() bool {
-	return tr.isEndTomorrow
-}
-
 func (tr timeRange) Duration() Duration {
-	ONE_DAY := 24 * 60
-	start := tr.Start().SinceMidnight().InMinutes()
-	if tr.IsStartYesterday() {
-		start -= ONE_DAY
-	}
-	end := tr.End().SinceMidnight().InMinutes()
-	if tr.IsEndTomorrow() {
-		end += ONE_DAY
-	}
+	start := tr.Start().MidnightOffset().InMinutes()
+	end := tr.End().MidnightOffset().InMinutes()
 	return NewDuration(0, end-start)
 }

@@ -20,16 +20,24 @@ func Time_(hour int, minute int) datetime.Time {
 	return time
 }
 
-func Range_(start datetime.Time, end datetime.Time) datetime.TimeRange {
-	timeRange, err := datetime.NewTimeRange(start, end)
+func TimeYesterday_(hour int, minute int) datetime.Time {
+	time, err := datetime.NewTimeYesterday(hour, minute)
 	if err != nil {
 		panic("Operation failed!")
 	}
-	return timeRange
+	return time
 }
 
-func OverlappingRange_(start datetime.Time, isStartYesterday bool, end datetime.Time, isEndTomorrow bool) datetime.TimeRange {
-	timeRange, err := datetime.NewOverlappingTimeRange(start, isStartYesterday, end, isEndTomorrow)
+func TimeTomorrow_(hour int, minute int) datetime.Time {
+	time, err := datetime.NewTimeTomorrow(hour, minute)
+	if err != nil {
+		panic("Operation failed!")
+	}
+	return time
+}
+
+func Range_(start datetime.Time, end datetime.Time) datetime.TimeRange {
+	timeRange, err := datetime.NewTimeRange(start, end)
 	if err != nil {
 		panic("Operation failed!")
 	}

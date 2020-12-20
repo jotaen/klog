@@ -28,6 +28,10 @@ func TestParsingAllFieldsCorrectly(t *testing.T) {
 date: 2008-12-03
 summary: Just a normal day
 hours:
+- start: 12:00
+  end: 12:50
+- start: 12:00
+  end: 12:00
 - start: 23:55 yesterday
   end: 09:05
 - start: 19:12
@@ -44,8 +48,10 @@ hours:
 
 	assert.Equal(t, "Just a normal day", w.Summary())
 	assert.Equal(t, []datetime.TimeRange{
-		datetime2.OverlappingRange_(datetime2.Time_(23, 55), true, datetime2.Time_(9, 5), false),
-		datetime2.OverlappingRange_(datetime2.Time_(19, 12), false, datetime2.Time_(1, 59), true),
+		datetime2.Range_(datetime2.Time_(12, 00), datetime2.Time_(12, 50)),
+		datetime2.Range_(datetime2.Time_(12, 00), datetime2.Time_(12, 00)),
+		datetime2.Range_(datetime2.TimeYesterday_(23, 55), datetime2.Time_(9, 5)),
+		datetime2.Range_(datetime2.Time_(19, 12), datetime2.TimeTomorrow_(1, 59)),
 	}, w.Ranges())
 	assert.Equal(t, datetime2.Time_(10, 15), w.OpenRange())
 	assert.Equal(t, []datetime.Duration{

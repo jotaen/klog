@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"klog/datetime"
 	"klog/workday"
-	"strings"
 )
 
 func Parse(serialisedData string) (workday.WorkDay, []ParserError) {
@@ -54,29 +53,19 @@ func Parse(serialisedData string) (workday.WorkDay, []ParserError) {
 		// Parse range
 		if hasStart && hasEnd {
 			// Start time
-			startTime := strings.Split(h.Start, " ")
-			start, err := datetime.NewTimeFromString(startTime[0])
+			start, err := datetime.NewTimeFromString(h.Start)
 			if err != nil {
 				errors.add(fromError(err, fmt.Sprintf("start: %v", h.Start)))
 				continue
 			}
-			isStartYesterday := false
-			if len(startTime) == 2 && startTime[1] == "yesterday" {
-				isStartYesterday = true
-			}
 
 			// End time
-			endTime := strings.Split(h.End, " ")
-			end, err := datetime.NewTimeFromString(endTime[0])
-			isEndTomorrow := false
-			if len(endTime) == 2 && endTime[1] == "tomorrow" {
-				isEndTomorrow = true
-			}
+			end, err := datetime.NewTimeFromString(h.End)
 			if err != nil {
 				errors.add(fromError(err, fmt.Sprintf("end: %v", h.End)))
 				continue
 			}
-			timeRange, err := datetime.NewOverlappingTimeRange(start, isStartYesterday, end, isEndTomorrow)
+			timeRange, err := datetime.NewTimeRange(start, end)
 			if err != nil {
 				errors.add(fromError(err, ""))
 				continue

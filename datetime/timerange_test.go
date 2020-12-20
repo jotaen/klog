@@ -17,36 +17,59 @@ func TestCreateTimeRange(t *testing.T) {
 	assert.Equal(t, time2, tr.End())
 }
 
-func TestCreateOverlappingTimeRangeYesterday(t *testing.T) {
-	time1, _ := NewTime(23, 30)
-	time2, _ := NewTime(8, 10)
-	tr, err := NewOverlappingTimeRange(time1, true, time2, false)
+func TestCreateVoidTimeRange(t *testing.T) {
+	time1, _ := NewTime(12, 00)
+	time2, _ := NewTime(12, 00)
+	tr, err := NewTimeRange(time1, time2)
 	require.Nil(t, err)
 	require.NotNil(t, tr)
 	assert.Equal(t, time1, tr.Start())
 	assert.Equal(t, time2, tr.End())
-	assert.Equal(t, true, tr.IsStartYesterday())
-	assert.Equal(t, false, tr.IsEndTomorrow())
+	assert.Equal(t, NewDuration(0, 00), tr.Duration())
+}
+
+func TestCreateOverlappingTimeRangeStartingYesterday(t *testing.T) {
+	time1, _ := NewTimeYesterday(23, 30)
+	time2, _ := NewTime(8, 10)
+	tr, err := NewTimeRange(time1, time2)
+	require.Nil(t, err)
+	require.NotNil(t, tr)
+	assert.Equal(t, time1, tr.Start())
+	assert.Equal(t, time2, tr.End())
 	assert.Equal(t, NewDuration(8, 40), tr.Duration())
 }
 
-func TestCreateOverlappingTimeRangeTomorrow(t *testing.T) {
+func TestCreateOverlappingTimeRangeEndingTomorrow(t *testing.T) {
 	time1, _ := NewTime(18, 15)
-	time2, _ := NewTime(1, 45)
-	tr, err := NewOverlappingTimeRange(time1, false, time2, true)
+	time2, _ := NewTimeTomorrow(1, 45)
+	tr, err := NewTimeRange(time1, time2)
 	require.Nil(t, err)
 	require.NotNil(t, tr)
 	assert.Equal(t, time1, tr.Start())
 	assert.Equal(t, time2, tr.End())
-	assert.Equal(t, false, tr.IsStartYesterday())
-	assert.Equal(t, true, tr.IsEndTomorrow())
 	assert.Equal(t, NewDuration(7, 30), tr.Duration())
 }
 
 func TestCreationFailsIfStartIsBeforeEnd(t *testing.T) {
-	time1, _ := NewTime(14, 00)
-	time2, _ := NewTime(13, 59)
-	tr, err := NewTimeRange(time1, time2)
-	assert.Nil(t, tr)
-	assert.EqualError(t, err, "ILLEGAL_RANGE")
+	for _, p := range []func() (TimeRange, error){
+		func() (TimeRange, error) {
+			start, _ := NewTime(15, 00)
+			end, _ := NewTime(14, 00)
+			return NewTimeRange(start, end)
+		},
+		func() (TimeRange, error) {
+			start, _ := NewTime(14, 00)
+			end, _ := NewTimeYesterday(15, 00)
+			return NewTimeRange(start, end)
+		},
+		func() (TimeRange, error) {
+			start, _ := NewTimeTomorrow(14, 00)
+			end, _ := NewTime(15, 00)
+			return NewTimeRange(start, end)
+		},
+	} {
+		tr, err := p()
+		assert.Nil(t, tr)
+		assert.EqualError(t, err, "ILLEGAL_RANGE")
+	}
 }
