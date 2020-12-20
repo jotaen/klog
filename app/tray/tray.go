@@ -3,24 +3,22 @@ package tray
 import (
 	"github.com/caseymrm/menuet"
 	"klog/app"
-	"klog/datetime"
 	"klog/project"
 	"time"
 )
 
 var currentProject project.Project
 var ticker = time.NewTicker(1 * time.Second)
-var config = app.NewConfiguration("~")
 
-func Start() {
+func Start(env app.Environment) {
 	menuet.App().SetMenuState(&menuet.MenuState{
 		Title: "⏱",
 	})
 	menuet.App().Name = "klog menu bar app"
 	menuet.App().Label = "net.jotaen.klog.menuapp"
-	menuet.App().Children = render
+	menuet.App().Children = func() []menuet.MenuItem { return render(env) }
 
-	currentProject = config.SavedProjects()[0]
+	currentProject = env.SavedProjects()[0]
 
 	go updateTimer()
 	menuet.App().RunApplication()
@@ -33,75 +31,21 @@ func updateTimer() {
 	}
 }
 
-func render() []menuet.MenuItem {
+func render(env app.Environment) []menuet.MenuItem {
 	var items []menuet.MenuItem
 
 	if currentProject != nil {
+		items = append(items, renderProject(currentProject)...)
 		items = append(items, menuet.MenuItem{
-			Text: currentProject.Name(),
-		})
-
-		now := time.Now()
-		nowTime, _ := datetime.NewTime(now.Hour(), now.Minute())
-		nowDate, _ := datetime.NewDateFromTime(now)
-		currentDay, _ := currentProject.Get(nowDate)
-
-		if currentDay != nil {
-			timer, err := currentDay.TotalWorkTimeWithOpenRange(nowTime)
-			if err == nil {
-				stopwatch := menuet.MenuItem{
-					Text: "Today: " + timer.ToString(),
-				}
-				items = append(items, stopwatch)
-				items = append(items, menuet.MenuItem{
-					Text: "Stop time",
-					Clicked: func() {
-						menuet.App().Alert(menuet.Alert{
-							MessageText:     "Error",
-							InformativeText: "Could not read file",
-							Buttons:         []string{"Okay"},
-						})
-					},
-				})
-			} else {
-				items = append(items, menuet.MenuItem{
-					Text:    "Start time",
-					Clicked: func() {},
-				})
-			}
-		}
-
-		items = append(items, menuet.MenuItem{
-			Text: "History",
-			Children: func() []menuet.MenuItem {
-				items := []menuet.MenuItem{
-					{Text: "Create", Clicked: func() {}},
-					{Text: "Open folder", Clicked: func() {}},
-				}
-				wds, _ := currentProject.List()
-				if len(wds) > 0 {
-					items = append(items, menuet.MenuItem{Type: menuet.Separator})
-					for _, wd := range wds {
-						items = append(items, menuet.MenuItem{
-							Text: wd.ToString(), Clicked: func() {},
-						})
-					}
-				}
-				return items
-			},
+			Type: menuet.Separator,
 		})
 	}
 
 	items = append(items, menuet.MenuItem{
-		Type: menuet.Separator,
-	})
-
-	// Switch Project
-	items = append(items, menuet.MenuItem{
-		Text: "Starred Projects",
+		Text: "Projects",
 		Children: func() []menuet.MenuItem {
 			var items []menuet.MenuItem
-			for _, p := range config.SavedProjects() {
+			for _, p := range env.SavedProjects() {
 				items = append(items, menuet.MenuItem{
 					Text:  p.Name(),
 					State: currentProject == p,

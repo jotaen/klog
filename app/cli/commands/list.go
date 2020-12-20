@@ -2,7 +2,9 @@ package commands
 
 import (
 	"fmt"
+	"klog/app"
 	"klog/app/cli"
+	"klog/project"
 )
 
 var List cli.Command
@@ -16,8 +18,8 @@ func init() {
 	}
 }
 
-func list(env cli.Environment, args []string) int {
-	list, _ := env.Store.List()
+func list(env app.Environment, project project.Project, args []string) int {
+	list, _ := project.List()
 	for _, date := range list {
 		fmt.Printf("%v\n", date.ToString())
 	}

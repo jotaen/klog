@@ -47,15 +47,15 @@ func TestSavePersists(t *testing.T) {
 	})
 }
 
-func TestListReturnsPersistedWorkdays(t *testing.T) {
+func TestListReturnsPersistedWorkdaysInDescendingOrder(t *testing.T) {
 	WithDisk(func(path string) {
 		store, _ := NewProject(path)
 
-		date1 := datetime2.Date_(1999, 1, 13)
+		date1 := datetime2.Date_(1999, 2, 5)
 		store.Save(workday.NewWorkDay(date1))
 		date2 := datetime2.Date_(1999, 1, 14)
 		store.Save(workday.NewWorkDay(date2))
-		date3 := datetime2.Date_(1999, 2, 5)
+		date3 := datetime2.Date_(1999, 1, 13)
 		store.Save(workday.NewWorkDay(date3))
 
 		wds, _ := store.List()

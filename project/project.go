@@ -8,6 +8,7 @@ import (
 	"klog/workday/parser"
 	"klog/workday/serialiser"
 	"regexp"
+	"sort"
 	"strconv"
 )
 
@@ -78,6 +79,9 @@ func (p project) List() ([]datetime.Date, error) {
 				}
 			})
 		})
+	})
+	sort.SliceStable(result, func(i, j int) bool {
+		return result[i].ToString() > result[j].ToString()
 	})
 	return result, nil
 }

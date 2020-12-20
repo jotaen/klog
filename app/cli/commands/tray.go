@@ -1,8 +1,10 @@
 package commands
 
 import (
+	"klog/app"
 	"klog/app/cli"
 	systray "klog/app/tray"
+	"klog/project"
 )
 
 var Tray cli.Command
@@ -16,7 +18,7 @@ func init() {
 	}
 }
 
-func tray(env cli.Environment, args []string) int {
-	systray.Start()
+func tray(env app.Environment, project project.Project, args []string) int {
+	systray.Start(env)
 	return cli.OK
 }

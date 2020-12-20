@@ -2,8 +2,10 @@ package commands
 
 import (
 	"github.com/akamensky/argparse"
+	"klog/app"
 	"klog/app/cli"
 	"klog/datetime"
+	"klog/project"
 	"klog/workday"
 	"time"
 )
@@ -19,13 +21,13 @@ func init() {
 	}
 }
 
-func create(env cli.Environment, args []string) int {
+func create(env app.Environment, project project.Project, args []string) int {
 	opts, err := parseArgs(args)
 	if err != nil {
 		return cli.INVALID_CLI_ARGS
 	}
 	wd := workday.NewWorkDay(opts.date)
-	env.Store.Save(wd)
+	project.Save(wd)
 	return cli.OK
 }
 

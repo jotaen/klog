@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"klog/app"
 	"klog/app/cli"
 	"klog/datetime"
 	"klog/project"
@@ -21,15 +22,15 @@ func init() {
 	}
 }
 
-func edit(env cli.Environment, args []string) int {
+func edit(env app.Environment, project project.Project, args []string) int {
 	today, _ := datetime.NewDateFromTime(time.Now())
-	wd, err := env.Store.Get(today)
+	wd, err := project.Get(today)
 	if err != nil {
 		fmt.Println("No no no no no no!")
 		return cli.FILE_NOT_FOUND
 	}
 
-	file := env.Store.GetFileProps(wd)
+	file := project.GetFileProps(wd)
 	openEditor(file)
 	return cli.OK
 }

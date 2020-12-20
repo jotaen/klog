@@ -3,8 +3,10 @@ package commands
 import (
 	"bufio"
 	"fmt"
+	"klog/app"
 	"klog/app/cli"
 	"klog/datetime"
+	"klog/project"
 	"klog/workday"
 	"os"
 	"time"
@@ -21,16 +23,16 @@ func init() {
 	}
 }
 
-func start(env cli.Environment, args []string) int {
+func start(env app.Environment, project project.Project, args []string) int {
 	start := time.Now()
 	today, _ := datetime.NewDateFromTime(start)
-	wd, _ := env.Store.Get(today)
+	wd, _ := project.Get(today)
 	if wd == nil {
 		wd = workday.NewWorkDay(today)
 	}
 	startTime, _ := datetime.CreateTimeFromTime(start)
 	wd.StartOpenRange(startTime)
-	env.Store.Save(wd)
+	project.Save(wd)
 	ticker := time.NewTicker(1 * time.Second)
 	fmt.Print("\n")
 	go func() {
@@ -56,6 +58,6 @@ func start(env cli.Environment, args []string) int {
 	later := time.Now()
 	laterTime, _ := datetime.CreateTimeFromTime(later)
 	wd.EndOpenRange(laterTime)
-	env.Store.Save(wd)
+	project.Save(wd)
 	return cli.OK
 }

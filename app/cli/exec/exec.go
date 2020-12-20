@@ -2,6 +2,7 @@ package exec
 
 import (
 	"fmt"
+	"klog/app"
 	"klog/app/cli"
 	"klog/app/cli/commands"
 	"klog/project"
@@ -22,14 +23,11 @@ func Execute(workDir string, args []string) int {
 		fmt.Printf("Project not found")
 		return cli.PROJECT_PATH_INVALID
 	}
-	env := cli.Environment{
-		WorkDir: workDir,
-		Store:   st,
-	}
+	env := app.NewEnvironment("~")
 	reqSubCmd := args[0]
 	for _, cmd := range allCommands {
 		if cmd.Name == reqSubCmd {
-			return cmd.Main(env, args)
+			return cmd.Main(env, st, args)
 		}
 	}
 	return cli.SUBCOMMAND_NOT_FOUND
