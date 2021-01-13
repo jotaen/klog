@@ -9,10 +9,10 @@ import (
 )
 
 func TestMinimalValidDocument(t *testing.T) {
-	yaml := `
+	text := `
 date: 2020-01-01
 `
-	w, errs := Parse(yaml)
+	w, errs := Parse(text)
 
 	require.Nil(t, errs)
 	require.NotNil(t, w)
