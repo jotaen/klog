@@ -4,9 +4,8 @@ import (
 	"errors"
 	"io/ioutil"
 	"klog/datetime"
+	parser2 "klog/parser"
 	"klog/workday"
-	"klog/workday/parser"
-	"klog/workday/serialiser"
 	"regexp"
 	"sort"
 	"strconv"
@@ -48,16 +47,16 @@ func (p project) Get(date datetime.Date) (workday.WorkDay, []error) {
 	if err != nil {
 		return nil, []error{err}
 	}
-	workDay, parserErrors := parser.Parse(contents)
+	workDay, parserErrors := parser2.Parse(contents)
 	if parserErrors != nil {
-		return nil, parser.ToErrors(parserErrors)
+		return nil, parser2.ToErrors(parserErrors)
 	}
 	return workDay, nil
 }
 
 func (p project) Save(workDay workday.WorkDay) error {
 	props := createFileProps(p.basePath, workDay.Date())
-	writeFile(props, serialiser.Serialise(workDay))
+	writeFile(props, parser2.Serialise(workDay))
 	return nil
 }
 

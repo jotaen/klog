@@ -1,4 +1,4 @@
-package serialiser
+package parser
 
 import (
 	"fmt"
