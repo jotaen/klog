@@ -38,12 +38,20 @@ func renderProject(project project.Project) []menuet.MenuItem {
 		}
 	}
 
+	isRunning := currentDay != nil && currentDay.OpenRange() != nil
 	items = append(items, menuet.MenuItem{
 		Text: "Today: " + totalTimeValue,
 	}, menuet.MenuItem{
-		Text:    "Run Timer",
-		State:   currentDay != nil,
-		Clicked: func() {},
+		Text:  "Run Timer",
+		State: isRunning,
+		Clicked: func() {
+			now := time.Now()
+			if isRunning {
+				app.Stop(project, now)
+			} else {
+				app.Start(project, now)
+			}
+		},
 	})
 
 	items = append(items, menuet.MenuItem{

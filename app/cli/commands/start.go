@@ -7,7 +7,6 @@ import (
 	"klog/app/cli"
 	"klog/datetime"
 	"klog/project"
-	"klog/workday"
 	"os"
 	"time"
 )
@@ -25,14 +24,7 @@ func init() {
 
 func start(env app.Environment, project project.Project, args []string) int {
 	start := time.Now()
-	today, _ := datetime.NewDateFromTime(start)
-	wd, _ := project.Get(today)
-	if wd == nil {
-		wd = workday.NewWorkDay(today)
-	}
-	startTime, _ := datetime.CreateTimeFromTime(start)
-	wd.StartOpenRange(startTime)
-	project.Save(wd)
+	wd, _ := app.Start(project, start)
 	ticker := time.NewTicker(1 * time.Second)
 	fmt.Print("\n")
 	go func() {
