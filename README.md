@@ -52,3 +52,4 @@ Learn more about klog and how to use it by reading the [guide](docs/Guide.md).
 
 ## About
 
+klog is free and open-source software distributed under the [MIT license](LICENSE.txt).
