@@ -6,7 +6,7 @@ import (
 	"klog/app/cli"
 	"klog/datetime"
 	"klog/project"
-	"klog/workday"
+	"klog/record"
 	"time"
 )
 
@@ -26,7 +26,7 @@ func create(env app.Environment, project project.Project, args []string) int {
 	if err != nil {
 		return cli.INVALID_CLI_ARGS
 	}
-	wd := workday.NewWorkDay(opts.date)
+	wd := record.NewRecord(opts.date)
 	project.Save(wd)
 	return cli.OK
 }

@@ -5,6 +5,7 @@ import (
 	"klog/app"
 	"klog/datetime"
 	"klog/project"
+	"klog/record"
 	"time"
 )
 
@@ -25,7 +26,7 @@ func renderProject(project project.Project) []menuet.MenuItem {
 		if currentDay.OpenRange() != nil {
 			untilNow, _ := datetime.NewTimeRange(currentDay.OpenRange(), nowTime)
 			if untilNow != nil {
-				totalTimeValue = currentDay.TotalWorkTime().Add(untilNow.Duration()).ToString()
+				totalTimeValue = record.TotalWorkTime(currentDay).Add(untilNow.Duration()).ToString()
 				totalTimeValue += "  "
 				if now.Second()%2 == 0 {
 					totalTimeValue += "◑"
@@ -34,7 +35,7 @@ func renderProject(project project.Project) []menuet.MenuItem {
 				}
 			}
 		} else {
-			totalTimeValue = currentDay.TotalWorkTime().ToString()
+			totalTimeValue = record.TotalWorkTime(currentDay).ToString()
 		}
 	}
 

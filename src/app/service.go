@@ -3,12 +3,12 @@ package app
 import (
 	"klog/datetime"
 	"klog/project"
-	"klog/workday"
+	"klog/record"
 	"os/exec"
 	"time"
 )
 
-func OpenInEditor(project project.Project, workDay workday.WorkDay) error {
+func OpenInEditor(project project.Project, workDay record.Record) error {
 	props := project.GetFileProps(workDay)
 	// open -t ...
 	cmd := exec.Command("subl", props.Path)
@@ -20,11 +20,11 @@ func OpenInFileBrowser(project project.Project) error {
 	return cmd.Run()
 }
 
-func Start(project project.Project, start time.Time) (workday.WorkDay, error) {
+func Start(project project.Project, start time.Time) (record.Record, error) {
 	today, _ := datetime.NewDateFromTime(start)
 	wd, _ := project.Get(today)
 	if wd == nil {
-		wd = workday.NewWorkDay(today)
+		wd = record.NewRecord(today)
 	}
 	startTime, _ := datetime.CreateTimeFromTime(start)
 	wd.StartOpenRange(startTime)
@@ -32,7 +32,7 @@ func Start(project project.Project, start time.Time) (workday.WorkDay, error) {
 	return wd, nil
 }
 
-func Stop(project project.Project, end time.Time) (workday.WorkDay, error) {
+func Stop(project project.Project, end time.Time) (record.Record, error) {
 	today, _ := datetime.NewDateFromTime(end)
 	wd, err := project.Get(today)
 	if wd == nil {

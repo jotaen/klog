@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"klog/datetime"
 	parser2 "klog/parser"
-	"klog/workday"
+	"klog/record"
 	"regexp"
 	"sort"
 	"strconv"
@@ -14,10 +14,10 @@ import (
 type Project interface {
 	Name() string
 	Path() string
-	Get(datetime.Date) (workday.WorkDay, []error)
-	Save(workday.WorkDay) error
+	Get(datetime.Date) (record.Record, []error)
+	Save(record.Record) error
 	List() ([]datetime.Date, error)
-	GetFileProps(workday.WorkDay) FileProps
+	GetFileProps(record.Record) FileProps
 }
 
 type project struct {
@@ -41,7 +41,7 @@ func (p project) Path() string {
 	return p.basePath
 }
 
-func (p project) Get(date datetime.Date) (workday.WorkDay, []error) {
+func (p project) Get(date datetime.Date) (record.Record, []error) {
 	props := createFileProps(p.basePath, date)
 	contents, err := readFile(props)
 	if err != nil {
@@ -54,7 +54,7 @@ func (p project) Get(date datetime.Date) (workday.WorkDay, []error) {
 	return workDay, nil
 }
 
-func (p project) Save(workDay workday.WorkDay) error {
+func (p project) Save(workDay record.Record) error {
 	props := createFileProps(p.basePath, workDay.Date())
 	writeFile(props, parser2.Serialise(workDay))
 	return nil
@@ -104,6 +104,6 @@ func walkDir(
 	return result
 }
 
-func (p project) GetFileProps(workDay workday.WorkDay) FileProps {
+func (p project) GetFileProps(workDay record.Record) FileProps {
 	return createFileProps(p.basePath, workDay.Date())
 }

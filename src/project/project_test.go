@@ -6,7 +6,7 @@ import (
 	"klog/datetime"
 	datetime2 "klog/testutil/datetime"
 	. "klog/testutil/withdisk"
-	"klog/workday"
+	"klog/record"
 	"testing"
 )
 
@@ -38,7 +38,7 @@ func TestSavePersists(t *testing.T) {
 	WithDisk(func(path string) {
 		store, _ := NewProject(path)
 		date := datetime2.Date_(1999, 3, 15)
-		originalWd := workday.NewWorkDay(date)
+		originalWd := record.NewRecord(date)
 		err := store.Save(originalWd)
 		assert.Nil(t, err)
 
@@ -52,11 +52,11 @@ func TestListReturnsPersistedWorkdaysInDescendingOrder(t *testing.T) {
 		store, _ := NewProject(path)
 
 		date1 := datetime2.Date_(1999, 2, 5)
-		store.Save(workday.NewWorkDay(date1))
+		store.Save(record.NewRecord(date1))
 		date2 := datetime2.Date_(1999, 1, 14)
-		store.Save(workday.NewWorkDay(date2))
+		store.Save(record.NewRecord(date2))
 		date3 := datetime2.Date_(1999, 1, 13)
-		store.Save(workday.NewWorkDay(date3))
+		store.Save(record.NewRecord(date3))
 
 		wds, _ := store.List()
 		assert.Equal(t, []datetime.Date{date1, date2, date3}, wds)
@@ -68,11 +68,11 @@ func TestListReturnsFilteredWorkdays(t *testing.T) {
 		store, _ := NewProject(path)
 
 		date1 := datetime2.Date_(1999, 2, 5)
-		store.Save(workday.NewWorkDay(date1))
+		store.Save(record.NewRecord(date1))
 		date2 := datetime2.Date_(1999, 1, 14)
-		store.Save(workday.NewWorkDay(date2))
+		store.Save(record.NewRecord(date2))
 		date3 := datetime2.Date_(1999, 1, 13)
-		store.Save(workday.NewWorkDay(date3))
+		store.Save(record.NewRecord(date3))
 
 		wds, _ := store.List()
 		assert.Equal(t, []datetime.Date{date1, date2, date3}, wds)

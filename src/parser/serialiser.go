@@ -2,10 +2,10 @@ package parser
 
 import (
 	"fmt"
-	"klog/workday"
+	"klog/record"
 )
 
-func Serialise(workDay workday.WorkDay) string {
+func Serialise(workDay record.Record) string {
 	text := ""
 
 	// Date
@@ -17,14 +17,14 @@ func Serialise(workDay workday.WorkDay) string {
 	}
 
 	// Hours
-	hasHours := len(workDay.Ranges()) > 0 || len(workDay.Times()) > 0 || workDay.OpenRange() != nil
+	hasHours := len(workDay.Ranges()) > 0 || len(workDay.Durations()) > 0 || workDay.OpenRange() != nil
 	if hasHours {
 		text += "\nhours:"
 		for _, r := range workDay.Ranges() {
 			text += fmt.Sprintf("\n- start: %v", r.Start().ToString())
 			text += fmt.Sprintf("\n  end: %v", r.End().ToString())
 		}
-		for _, t := range workDay.Times() {
+		for _, t := range workDay.Durations() {
 			text += fmt.Sprintf("\n- time: %v", t.ToString())
 		}
 		if workDay.OpenRange() != nil {

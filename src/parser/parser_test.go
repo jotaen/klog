@@ -18,7 +18,7 @@ date: 2020-01-01
 	require.NotNil(t, w)
 
 	assert.Equal(t, "", w.Summary())
-	assert.Nil(t, w.Times())
+	assert.Nil(t, w.Durations())
 	assert.Nil(t, w.Ranges())
 	assert.Nil(t, w.OpenRange())
 }
@@ -58,7 +58,7 @@ hours:
 		datetime.NewDuration(2, 0),
 		datetime.NewDuration(5, 3),
 		datetime.NewDuration(-1, -12),
-	}, w.Times())
+	}, w.Durations())
 }
 
 func TestMalformedYamlFails(t *testing.T) {

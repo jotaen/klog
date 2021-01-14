@@ -3,10 +3,10 @@ package parser
 import (
 	"fmt"
 	"klog/datetime"
-	"klog/workday"
+	"klog/record"
 )
 
-func Parse(serialisedData string) (workday.WorkDay, []ParserError) {
+func Parse(serialisedData string) (record.Record, []ParserError) {
 	errors := &errorCollection{}
 
 	// Parse document
@@ -27,7 +27,7 @@ func Parse(serialisedData string) (workday.WorkDay, []ParserError) {
 		return nil, errors.collection
 	}
 
-	workDay := workday.NewWorkDay(date)
+	workDay := record.NewRecord(date)
 	workDay.SetSummary(d.Summary)
 
 	// Parse hours
