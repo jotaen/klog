@@ -6,7 +6,6 @@ import (
 )
 
 func main() {
-	path, _ := os.Getwd()
-	code := exec.Execute(path+"/tmp", os.Args[1:])
+	code := exec.Execute(os.Args[1:])
 	os.Exit(code)
 }

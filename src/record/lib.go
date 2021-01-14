@@ -2,13 +2,19 @@ package record
 
 import "klog/datetime"
 
-func TotalWorkTime(r Record) datetime.Duration {
+func Total(r Record) datetime.Duration {
 	total := datetime.NewDuration(0, 0)
-	for _, t := range r.Durations() {
-		total = total.Add(t)
-	}
-	for _, r := range r.Ranges() {
-		total = total.Add(r.Duration())
+	for _, e := range r.Entries() {
+		total = total.Add(e.Total())
 	}
 	return total
+}
+
+func Find(date datetime.Date, rs []Record) Record {
+	for _, r := range rs {
+		if r.Date() == date {
+			return r
+		}
+	}
+	return nil
 }

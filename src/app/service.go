@@ -1,45 +1,88 @@
 package app
 
 import (
+	"errors"
 	"klog/datetime"
-	"klog/project"
 	"klog/record"
+	"os"
 	"os/exec"
-	"time"
 )
 
-func OpenInEditor(project project.Project, workDay record.Record) error {
-	props := project.GetFileProps(workDay)
+type Service interface {
+	Input() []record.Record
+	Save([]record.Record) error
+	CurrentFile() string
+	BookmarkedFiles() []string
+	OpenInEditor() error
+	OpenInFileBrowser(string) error
+	QuickStartAt(datetime.Date, datetime.Time) error
+	QuickStopAt(datetime.Date, datetime.Time) error
+}
+
+type context struct {
+	path *os.File
+}
+
+func NewService(destinationFilePath *os.File) Service {
+	return &context{
+		path: destinationFilePath,
+	}
+}
+
+func (c *context) Input() []record.Record {
+	return nil // TODO
+}
+
+func (c *context) Save([]record.Record) error {
+	return nil // TODO
+}
+
+func (c *context) CurrentFile() string {
+	return ""
+}
+
+func (c *context) BookmarkedFiles() []string {
+	return nil
+}
+
+func (c *context) OpenInEditor() error {
 	// open -t ...
-	cmd := exec.Command("subl", props.Path)
+	cmd := exec.Command("subl", c.path.Name())
 	return cmd.Run()
 }
 
-func OpenInFileBrowser(project project.Project) error {
-	cmd := exec.Command("open", project.Path())
+func (c *context) OpenInFileBrowser(path string) error {
+	cmd := exec.Command("open", path)
 	return cmd.Run()
 }
 
-func Start(project project.Project, start time.Time) (record.Record, error) {
-	today, _ := datetime.NewDateFromTime(start)
-	wd, _ := project.Get(today)
-	if wd == nil {
-		wd = record.NewRecord(today)
+func (c *context) QuickStartAt(date datetime.Date, time datetime.Time) error {
+	rs := c.Input()
+	var recordToAlter *record.Record
+	for _, r := range rs {
+		if r.Date() == date {
+			recordToAlter = &r
+		}
 	}
-	startTime, _ := datetime.CreateTimeFromTime(start)
-	wd.StartOpenRange(startTime)
-	project.Save(wd)
-	return wd, nil
+	if recordToAlter == nil {
+		r := record.NewRecord(date)
+		recordToAlter = &r
+	}
+	(*recordToAlter).StartOpenRange(time)
+	return c.Save(rs)
 }
 
-func Stop(project project.Project, end time.Time) (record.Record, error) {
-	today, _ := datetime.NewDateFromTime(end)
-	wd, err := project.Get(today)
-	if wd == nil {
-		return nil, err[0] // todo
+func (c *context) QuickStopAt(date datetime.Date, time datetime.Time) error {
+	rs := c.Input()
+	var recordToAlter *record.Record
+	for _, r := range rs {
+		if r.Date() == date && r.OpenRange() != nil {
+			recordToAlter = &r
+		}
 	}
-	startTime, _ := datetime.CreateTimeFromTime(end)
-	wd.EndOpenRange(startTime)
-	project.Save(wd)
-	return wd, nil
+	if recordToAlter == nil {
+		return errors.New("NO_OPEN_RANGE")
+	}
+	(*recordToAlter).StartOpenRange(time)
+	return c.Save(rs)
 }

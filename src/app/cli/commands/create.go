@@ -5,7 +5,6 @@ import (
 	"klog/app"
 	"klog/app/cli"
 	"klog/datetime"
-	"klog/project"
 	"klog/record"
 	"time"
 )
@@ -15,19 +14,20 @@ var Create cli.Command
 func init() {
 	Create = cli.Command{
 		Name:        "create",
-		Alias:       []string{"new"},
 		Description: "Create a new entry",
 		Main:        create,
 	}
 }
 
-func create(env app.Environment, project project.Project, args []string) int {
+func create(service app.Service, args []string) int {
 	opts, err := parseArgs(args)
 	if err != nil {
 		return cli.INVALID_CLI_ARGS
 	}
-	wd := record.NewRecord(opts.date)
-	project.Save(wd)
+	rs := service.Input()
+	r := record.NewRecord(opts.date)
+	newRecords := append(rs, r)
+	service.Save(newRecords)
 	return cli.OK
 }
 

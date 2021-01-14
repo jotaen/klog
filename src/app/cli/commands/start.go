@@ -6,7 +6,6 @@ import (
 	"klog/app"
 	"klog/app/cli"
 	"klog/datetime"
-	"klog/project"
 	"os"
 	"time"
 )
@@ -16,15 +15,20 @@ var Start cli.Command
 func init() {
 	Start = cli.Command{
 		Name:        "start",
-		Alias:       []string{},
 		Description: "Create a new entry",
 		Main:        start,
 	}
 }
 
-func start(env app.Environment, project project.Project, args []string) int {
+func start(service app.Service, args []string) int {
 	start := time.Now()
-	wd, _ := app.Start(project, start)
+	date, _ := datetime.NewDateFromTime(start)
+
+	{
+		t, _ := datetime.NewTime(start.Hour(), start.Minute())
+		service.QuickStartAt(date, t)
+	}
+
 	ticker := time.NewTicker(1 * time.Second)
 	fmt.Print("\n")
 	go func() {
@@ -47,9 +51,10 @@ func start(env app.Environment, project project.Project, args []string) int {
 		}
 	}
 
-	later := time.Now()
-	laterTime, _ := datetime.CreateTimeFromTime(later)
-	wd.EndOpenRange(laterTime)
-	project.Save(wd)
-	return cli.OK
+	{
+		end := time.Now()
+		t, _ := datetime.CreateTimeFromTime(end)
+		service.QuickStopAt(date, t)
+		return cli.OK
+	}
 }

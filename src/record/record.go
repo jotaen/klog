@@ -11,15 +11,15 @@ type Record interface {
 	Summary() string
 	SetSummary(string)
 
-	Durations() []datetime.Duration
+	Entries() []Entry
 	AddDuration(datetime.Duration)
-
-	Ranges() []datetime.TimeRange
 	AddRange(datetime.TimeRange)
-
 	OpenRange() datetime.Time
 	StartOpenRange(datetime.Time)
 	EndOpenRange(datetime.Time) error
+
+	Ranges() []datetime.TimeRange
+	Durations() []datetime.Duration
 }
 
 func NewRecord(date datetime.Date) Record {
@@ -29,9 +29,9 @@ func NewRecord(date datetime.Date) Record {
 }
 
 type record struct {
-	date           datetime.Date
-	summary        string
-	entries        []interface{}
+	date    datetime.Date
+	summary string
+	entries []Entry
 }
 
 func (r *record) Date() datetime.Date {
@@ -46,10 +46,14 @@ func (r *record) SetSummary(summary string) {
 	r.summary = summary
 }
 
+func (r *record) Entries() []Entry {
+	return r.entries
+}
+
 func (r *record) Durations() []datetime.Duration {
 	var durations []datetime.Duration
 	for _, e := range r.entries {
-		d, isDuration := e.(datetime.Duration)
+		d, isDuration := e.val().(datetime.Duration)
 		if isDuration {
 			durations = append(durations, d)
 		}
@@ -58,13 +62,13 @@ func (r *record) Durations() []datetime.Duration {
 }
 
 func (r *record) AddDuration(d datetime.Duration) {
-	r.entries = append(r.entries, d)
+	r.entries = append(r.entries, entry{value: d, summary: ""})
 }
 
 func (r *record) Ranges() []datetime.TimeRange {
 	var ranges []datetime.TimeRange
 	for _, e := range r.entries {
-		tr, isTimeRange := e.(datetime.TimeRange)
+		tr, isTimeRange := e.val().(datetime.TimeRange)
 		if isTimeRange {
 			ranges = append(ranges, tr)
 		}
@@ -73,12 +77,12 @@ func (r *record) Ranges() []datetime.TimeRange {
 }
 
 func (r *record) AddRange(tr datetime.TimeRange) {
-	r.entries = append(r.entries, tr)
+	r.entries = append(r.entries, entry{value: tr, summary: ""})
 }
 
 func (r *record) OpenRange() datetime.Time {
 	for _, e := range r.entries {
-		t, isStartTime := e.(datetime.Time)
+		t, isStartTime := e.val().(datetime.Time)
 		if isStartTime {
 			return t
 		}
@@ -87,18 +91,18 @@ func (r *record) OpenRange() datetime.Time {
 }
 
 func (r *record) StartOpenRange(t datetime.Time) {
-	r.entries = append(r.entries, t)
+	r.entries = append(r.entries, entry{value: t, summary: ""})
 }
 
 func (r *record) EndOpenRange(end datetime.Time) error {
 	for i, e := range r.entries {
-		t, isStartTime := e.(datetime.Time)
+		t, isStartTime := e.val().(datetime.Time)
 		if isStartTime {
 			tr, err := datetime.NewTimeRange(t, end)
 			if err != nil {
 				return err
 			}
-			r.entries[i] = tr
+			r.entries[i] = entry{value: tr, summary: ""}
 			return nil
 		}
 	}
