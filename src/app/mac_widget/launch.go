@@ -3,7 +3,6 @@ package mac_widget
 import (
 	"github.com/caseymrm/menuet"
 	"klog/app"
-	"klog/datetime"
 	"klog/record"
 	"time"
 )
@@ -62,8 +61,8 @@ func render(service app.Service) []menuet.MenuItem {
 func renderRecords(service app.Service) []menuet.MenuItem {
 	var items []menuet.MenuItem
 	now := time.Now()
-	nowTime, _ := datetime.NewTime(now.Hour(), now.Minute())
-	nowDate, _ := datetime.NewDateFromTime(now)
+	nowTime, _ := record.NewTime(now.Hour(), now.Minute())
+	nowDate, _ := record.NewDateFromTime(now)
 	today := record.Find(nowDate, service.Input())
 
 	items = append(items, menuet.MenuItem{
@@ -73,7 +72,7 @@ func renderRecords(service app.Service) []menuet.MenuItem {
 	totalTimeValue := (func() string {
 		if today != nil {
 			if today.OpenRange() != nil {
-				untilNow, _ := datetime.NewTimeRange(today.OpenRange(), nowTime)
+				untilNow, _ := record.NewRange(today.OpenRange(), nowTime)
 				if untilNow != nil {
 					result := ""
 					result = record.Total(today).Add(untilNow.Duration()).ToString()

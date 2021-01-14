@@ -1,11 +1,10 @@
-package withcontext
+package app
 
 import (
-	"klog/app"
 	"os"
 )
 
-func WithService(fn func(app.Service)) {
+func WithService(fn func(Service)) {
 	path := "./tmp.klg"
 	_ = os.Remove(path)
 	file, err := os.Create(path)
@@ -13,7 +12,7 @@ func WithService(fn func(app.Service)) {
 		panic("Could not create context")
 	}
 	defer file.Close()
-	service := app.NewService(file)
+	service := NewService(file)
 	fn(service)
 	_ = os.Remove(path)
 }

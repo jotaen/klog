@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"klog/app"
 	"klog/app/cli"
-	"klog/datetime"
+	"klog/record"
 	"os"
 	"time"
 )
@@ -22,10 +22,10 @@ func init() {
 
 func start(service app.Service, args []string) int {
 	start := time.Now()
-	date, _ := datetime.NewDateFromTime(start)
+	date, _ := record.NewDateFromTime(start)
 
 	{
-		t, _ := datetime.NewTime(start.Hour(), start.Minute())
+		t, _ := record.NewTime(start.Hour(), start.Minute())
 		service.QuickStartAt(date, t)
 	}
 
@@ -53,7 +53,7 @@ func start(service app.Service, args []string) int {
 
 	{
 		end := time.Now()
-		t, _ := datetime.CreateTimeFromTime(end)
+		t, _ := record.CreateTimeFromTime(end)
 		service.QuickStopAt(date, t)
 		return cli.OK
 	}

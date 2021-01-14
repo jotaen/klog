@@ -1,9 +1,9 @@
-package project
+package app
 
 import (
 	"fmt"
 	"io/ioutil"
-	"klog/datetime"
+	"klog/record"
 	"os"
 )
 
@@ -13,7 +13,7 @@ type FileProps struct {
 	Path string
 }
 
-func createFileProps(basePath string, date datetime.Date) FileProps {
+func createFileProps(basePath string, date record.Date) FileProps {
 	props := FileProps{
 		Dir:  fmt.Sprintf("%v/%v/%02v", basePath, date.Year(), date.Month()),
 		Name: fmt.Sprintf("%02v.yml", date.Day()),

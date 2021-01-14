@@ -1,4 +1,4 @@
-package datetime
+package record
 
 import (
 	"cloud.google.com/go/civil"

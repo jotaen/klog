@@ -1,4 +1,4 @@
-package datetime
+package record
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -12,21 +12,21 @@ func TestSerialiseDurationOnlyWithMeaningfulValues(t *testing.T) {
 }
 
 func TestSerialiseDurationOfLargeValues(t *testing.T) {
-	assert.Equal(t, "265h 45m", NewDuration(265, 45).ToString())
+	assert.Equal(t, "265h45m", NewDuration(265, 45).ToString())
 }
 
 func TestSerialiseDurationWithoutLeadingZeros(t *testing.T) {
-	assert.Equal(t, "2h 6m", NewDuration(2, 6).ToString())
+	assert.Equal(t, "2h6m", NewDuration(2, 6).ToString())
 }
 
 func TestSerialiseDurationOfNegativeValues(t *testing.T) {
-	assert.Equal(t, "-3h 18m", NewDuration(-3, -18).ToString())
+	assert.Equal(t, "-3h18m", NewDuration(-3, -18).ToString())
 	assert.Equal(t, "-3h", NewDuration(-3, 0).ToString())
 	assert.Equal(t, "-18m", NewDuration(0, -18).ToString())
 }
 
 func TestParsingDurationWithHoursAndMinutes(t *testing.T) {
-	duration, err := NewDurationFromString("2h 6m")
+	duration, err := NewDurationFromString("2h6m")
 	assert.Nil(t, err)
 	assert.Equal(t, NewDuration(2, 6), duration)
 }
@@ -34,6 +34,7 @@ func TestParsingDurationWithHoursAndMinutes(t *testing.T) {
 func TestParsingDurationWithHoursOnly(t *testing.T) {
 	for _, d := range []string{
 		"13h",
+		"13h0m",
 		"13h 0m",
 	} {
 		duration, err := NewDurationFromString(d)
@@ -45,6 +46,7 @@ func TestParsingDurationWithHoursOnly(t *testing.T) {
 func TestParsingDurationWithMinutesOnly(t *testing.T) {
 	for _, d := range []string{
 		"48m",
+		"0h48m",
 		"0h 48m",
 	} {
 		duration, err := NewDurationFromString(d)
@@ -54,17 +56,15 @@ func TestParsingDurationWithMinutesOnly(t *testing.T) {
 }
 
 func TestParsingNegativeDuration(t *testing.T) {
-	duration, err := NewDurationFromString("-2h 5m")
+	duration, err := NewDurationFromString("-2h5m")
 	assert.Nil(t, err)
 	assert.Equal(t, NewDuration(-2, -5), duration)
 }
 
-func TestParsingIgnoresWhiteSpace(t *testing.T) {
+func TestParsingIgnoresSpaceInBetween(t *testing.T) {
 	for _, d := range []string{
 		"1h11m",
 		"1h 11m",
-		"  1h 11m  ",
-		"1h     11m",
 	} {
 		duration, err := NewDurationFromString(d)
 		assert.Nil(t, err)

@@ -1,4 +1,4 @@
-package datetime
+package record
 
 import (
 	"cloud.google.com/go/civil"
@@ -27,10 +27,18 @@ type time struct {
 	dayShift int8
 }
 
-var timePattern = regexp.MustCompile(`^\s*\d{1,2}:\d{2}( yesterday| tomorrow)?\s*$`)
+var timePattern = regexp.MustCompile(`^<?\d{1,2}:\d{2}>?$`)
 
 func (t time) ToString() string {
-	return fmt.Sprintf("%v:%02v", t.hour, t.minute)
+	prefix := ""
+	if t.IsYesterday() {
+		prefix = "<"
+	}
+	suffix := ""
+	if t.IsTomorrow() {
+		suffix = ">"
+	}
+	return fmt.Sprintf("%s%v:%02v%s", prefix, t.hour, t.minute, suffix)
 }
 
 func newTime(hour int, minute int, dayShift int8) (Time, error) {
@@ -58,16 +66,16 @@ func NewTimeTomorrow(hour int, minute int) (Time, error) {
 }
 
 func NewTimeFromString(hhmm string) (Time, error) {
-	if !timePattern.MatchString(hhmm) {
+	if !timePattern.MatchString(hhmm) || (strings.HasPrefix(hhmm, "<") && strings.HasSuffix(hhmm, ">")) {
 		return nil, errors.New("MALFORMED_TIME")
 	}
 	dayShift := int8(0)
-	if strings.HasSuffix(hhmm, "yesterday") {
+	if strings.HasPrefix(hhmm, "<") {
 		dayShift = -1
-		hhmm = strings.TrimSuffix(hhmm, "yesterday")
-	} else if strings.HasSuffix(hhmm, "tomorrow") {
+		hhmm = strings.TrimPrefix(hhmm, "<")
+	} else if strings.HasSuffix(hhmm, ">") {
 		dayShift = +1
-		hhmm = strings.TrimSuffix(hhmm, "tomorrow")
+		hhmm = strings.TrimSuffix(hhmm, ">")
 	}
 	hhmm = strings.TrimSpace(hhmm)
 	parts := strings.Split(hhmm, ":")

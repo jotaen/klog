@@ -2,7 +2,6 @@ package app
 
 import (
 	"errors"
-	"klog/datetime"
 	"klog/record"
 	"os"
 	"os/exec"
@@ -15,8 +14,8 @@ type Service interface {
 	BookmarkedFiles() []string
 	OpenInEditor() error
 	OpenInFileBrowser(string) error
-	QuickStartAt(datetime.Date, datetime.Time) error
-	QuickStopAt(datetime.Date, datetime.Time) error
+	QuickStartAt(record.Date, record.Time) error
+	QuickStopAt(record.Date, record.Time) error
 }
 
 type context struct {
@@ -56,7 +55,7 @@ func (c *context) OpenInFileBrowser(path string) error {
 	return cmd.Run()
 }
 
-func (c *context) QuickStartAt(date datetime.Date, time datetime.Time) error {
+func (c *context) QuickStartAt(date record.Date, time record.Time) error {
 	rs := c.Input()
 	var recordToAlter *record.Record
 	for _, r := range rs {
@@ -72,7 +71,7 @@ func (c *context) QuickStartAt(date datetime.Date, time datetime.Time) error {
 	return c.Save(rs)
 }
 
-func (c *context) QuickStopAt(date datetime.Date, time datetime.Time) error {
+func (c *context) QuickStopAt(date record.Date, time record.Time) error {
 	rs := c.Input()
 	var recordToAlter *record.Record
 	for _, r := range rs {

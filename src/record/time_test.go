@@ -1,4 +1,4 @@
-package datetime
+package record
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -31,26 +31,36 @@ func TestDetectsInvalidTimes(t *testing.T) {
 }
 
 func TestSerialiseTime(t *testing.T) {
-	tm, _ := NewTime(13, 45)
+	tm := Ɀ_Time_(13, 45)
 	assert.Equal(t, "13:45", tm.ToString())
 }
 
 func TestSerialiseTimeWithoutLeadingZeros(t *testing.T) {
-	tm, _ := NewTime(8, 5)
+	tm := Ɀ_Time_(8, 5)
 	assert.Equal(t, "8:05", tm.ToString())
+}
+
+func TestSerialiseTimeYesterday(t *testing.T) {
+	tm := Ɀ_TimeYesterday_(23, 0)
+	assert.Equal(t, "<23:00", tm.ToString())
+}
+
+func TestSerialiseTimeTomorrow(t *testing.T) {
+	tm := Ɀ_TimeTomorrow_(0, 2)
+	assert.Equal(t, "0:02>", tm.ToString())
 }
 
 func TestParseTime(t *testing.T) {
 	tm, err := NewTimeFromString("9:42")
 	require.Nil(t, err)
-	should, _ := NewTime(9, 42)
+	should := Ɀ_Time_(9, 42)
 	assert.Equal(t, should, tm)
 }
 
 func TestParseTimeYesterday(t *testing.T) {
-	tm, err := NewTimeFromString("22:43 yesterday")
+	tm, err := NewTimeFromString("<22:43")
 	require.Nil(t, err)
-	should, _ := NewTimeYesterday(22, 43)
+	should := Ɀ_TimeYesterday_(22, 43)
 	assert.Equal(t, should, tm)
 	assert.Equal(t, false, tm.IsToday())
 	assert.Equal(t, true, tm.IsYesterday())
@@ -58,9 +68,9 @@ func TestParseTimeYesterday(t *testing.T) {
 }
 
 func TestParseTimeTomorrow(t *testing.T) {
-	tm, err := NewTimeFromString("02:12 tomorrow")
+	tm, err := NewTimeFromString("02:12>")
 	require.Nil(t, err)
-	should, _ := NewTimeTomorrow(2, 12)
+	should := Ɀ_TimeTomorrow_(2, 12)
 	assert.Equal(t, should, tm)
 	assert.Equal(t, false, tm.IsToday())
 	assert.Equal(t, false, tm.IsYesterday())
@@ -69,10 +79,12 @@ func TestParseTimeTomorrow(t *testing.T) {
 
 func TestParseTimeFailsfMalformed(t *testing.T) {
 	for _, s := range []string{
-		"009:42",
+		"009:42", // Hours cannot have infinite leading 0s
+		"09:042", // Minutes cannot have infinite leading 0s
+		"<2:15>", // Markers cannot appear on both sides
 		"asdf",
 		"12",
-		"13:3",
+		"13:3", // Minutes must have 2 digits
 	} {
 		tm, err := NewTimeFromString(s)
 		require.Nil(t, tm)
@@ -89,8 +101,8 @@ func TestCalculateMinutesSinceMidnight(t *testing.T) {
 		{in: "0:01", exp: NewDuration(0, 1)},
 		{in: "14:59", exp: NewDuration(14, 59)},
 		{in: "23:59", exp: NewDuration(23, 59)},
-		{in: "18:35 yesterday", exp: NewDuration(-5, -25)},
-		{in: "5:35 tomorrow", exp: NewDuration(24+5, 35)},
+		{in: "<18:35", exp: NewDuration(-5, -25)},
+		{in: "5:35>", exp: NewDuration(24+5, 35)},
 	} {
 		tm, err := NewTimeFromString(s.in)
 		require.Nil(t, err)

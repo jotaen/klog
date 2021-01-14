@@ -1,4 +1,4 @@
-package datetime
+package record
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -24,12 +24,12 @@ func TestDetectsUnrepresentableDates(t *testing.T) {
 }
 
 func TestSerialiseDate(t *testing.T) {
-	d, _ := NewDate(2005, 12, 31)
+	d := Ɀ_Date_(2005, 12, 31)
 	assert.Equal(t, "2005-12-31", d.ToString())
 }
 
 func TestSerialiseDatePadsLeadingZeros(t *testing.T) {
-	d, _ := NewDate(2005, 3, 9)
+	d := Ɀ_Date_(2005, 3, 9)
 	assert.Equal(t, "2005-03-09", d.ToString())
 }
 

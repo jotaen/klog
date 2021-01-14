@@ -1,4 +1,4 @@
-package datetime
+package record
 
 import (
 	"errors"
@@ -47,16 +47,13 @@ func (d duration) ToString() string {
 	if hours > 0 {
 		result += fmt.Sprintf("%dh", hours)
 	}
-	if hours > 0 && minutes > 0 {
-		result += " "
-	}
 	if minutes > 0 {
 		result += fmt.Sprintf("%dm", minutes)
 	}
 	return result
 }
 
-var durationPattern = regexp.MustCompile(`^\s*(-)?((\d+)h)? *((\d+)m)?\s*$`)
+var durationPattern = regexp.MustCompile(`^(-)?((\d+)h)? ?((\d+)m)?$`)
 
 func NewDurationFromString(hhmm string) (Duration, error) {
 	match := durationPattern.FindStringSubmatch(hhmm)

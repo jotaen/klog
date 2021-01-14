@@ -1,4 +1,5 @@
 package mac_widget
+
 //
 //import (
 //	"github.com/caseymrm/menuet"

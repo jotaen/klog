@@ -4,7 +4,6 @@ import (
 	"github.com/akamensky/argparse"
 	"klog/app"
 	"klog/app/cli"
-	"klog/datetime"
 	"klog/record"
 	"time"
 )
@@ -32,7 +31,7 @@ func create(service app.Service, args []string) int {
 }
 
 type opts struct {
-	date datetime.Date
+	date record.Date
 }
 
 func parseArgs(args []string) (opts, error) {
@@ -48,11 +47,11 @@ func parseArgs(args []string) (opts, error) {
 		return opts, err
 	}
 	if *dateArg == "" || *dateArg == "today" {
-		date, _ := datetime.NewDateFromTime(time.Now())
+		date, _ := record.NewDateFromTime(time.Now())
 		opts.date = date
 		return opts, nil
 	} else {
-		date, err := datetime.NewDateFromString(*dateArg)
+		date, err := record.NewDateFromString(*dateArg)
 		if err != nil {
 			return opts, err
 		}

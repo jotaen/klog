@@ -2,39 +2,35 @@ package record
 
 import (
 	"errors"
-	"klog/datetime"
 )
 
 type Record interface {
-	Date() datetime.Date
+	Date() Date
 
 	Summary() string
 	SetSummary(string)
 
 	Entries() []Entry
-	AddDuration(datetime.Duration)
-	AddRange(datetime.TimeRange)
-	OpenRange() datetime.Time
-	StartOpenRange(datetime.Time)
-	EndOpenRange(datetime.Time) error
-
-	Ranges() []datetime.TimeRange
-	Durations() []datetime.Duration
+	AddDuration(Duration)
+	AddRange(Range)
+	OpenRange() OpenRangeStart
+	StartOpenRange(OpenRangeStart)
+	EndOpenRange(Time) error
 }
 
-func NewRecord(date datetime.Date) Record {
+func NewRecord(date Date) Record {
 	return &record{
 		date: date,
 	}
 }
 
 type record struct {
-	date    datetime.Date
+	date    Date
 	summary string
 	entries []Entry
 }
 
-func (r *record) Date() datetime.Date {
+func (r *record) Date() Date {
 	return r.date
 }
 
@@ -50,10 +46,10 @@ func (r *record) Entries() []Entry {
 	return r.entries
 }
 
-func (r *record) Durations() []datetime.Duration {
-	var durations []datetime.Duration
+func (r *record) Durations() []Duration {
+	var durations []Duration
 	for _, e := range r.entries {
-		d, isDuration := e.val().(datetime.Duration)
+		d, isDuration := e.Value().(Duration)
 		if isDuration {
 			durations = append(durations, d)
 		}
@@ -61,28 +57,28 @@ func (r *record) Durations() []datetime.Duration {
 	return durations
 }
 
-func (r *record) AddDuration(d datetime.Duration) {
+func (r *record) AddDuration(d Duration) {
 	r.entries = append(r.entries, entry{value: d, summary: ""})
 }
 
-func (r *record) Ranges() []datetime.TimeRange {
-	var ranges []datetime.TimeRange
+func (r *record) Ranges() []Range {
+	var ranges []Range
 	for _, e := range r.entries {
-		tr, isTimeRange := e.val().(datetime.TimeRange)
-		if isTimeRange {
+		tr, isRange := e.Value().(Range)
+		if isRange {
 			ranges = append(ranges, tr)
 		}
 	}
 	return ranges
 }
 
-func (r *record) AddRange(tr datetime.TimeRange) {
+func (r *record) AddRange(tr Range) {
 	r.entries = append(r.entries, entry{value: tr, summary: ""})
 }
 
-func (r *record) OpenRange() datetime.Time {
+func (r *record) OpenRange() OpenRangeStart {
 	for _, e := range r.entries {
-		t, isStartTime := e.val().(datetime.Time)
+		t, isStartTime := e.Value().(Time)
 		if isStartTime {
 			return t
 		}
@@ -90,15 +86,15 @@ func (r *record) OpenRange() datetime.Time {
 	return nil
 }
 
-func (r *record) StartOpenRange(t datetime.Time) {
+func (r *record) StartOpenRange(t OpenRangeStart) {
 	r.entries = append(r.entries, entry{value: t, summary: ""})
 }
 
-func (r *record) EndOpenRange(end datetime.Time) error {
+func (r *record) EndOpenRange(end Time) error {
 	for i, e := range r.entries {
-		t, isStartTime := e.val().(datetime.Time)
+		t, isStartTime := e.Value().(Time)
 		if isStartTime {
-			tr, err := datetime.NewTimeRange(t, end)
+			tr, err := NewRange(t, end)
 			if err != nil {
 				return err
 			}

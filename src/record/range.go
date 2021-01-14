@@ -1,10 +1,10 @@
-package datetime
+package record
 
 import (
 	"errors"
 )
 
-type TimeRange interface {
+type Range interface {
 	Start() Time
 	End() Time
 	Duration() Duration
@@ -15,7 +15,7 @@ type timeRange struct {
 	end   Time
 }
 
-func NewTimeRange(start Time, end Time) (TimeRange, error) {
+func NewRange(start Time, end Time) (Range, error) {
 	if !end.IsAfterOrEqual(start) {
 		return nil, errors.New("ILLEGAL_RANGE")
 	}
