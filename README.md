@@ -8,34 +8,35 @@
 
 [Specification](docs/Specification.md) – Understand the file format in-depth
 
-## How does it work?
+## What is klog?
 
-Tracking time with klog is based on the idea of storing the data in
-plain text files that are formatted in a human-readable way, as an example:
+Time tracking with klog is based on the idea of storing data in
+plain text files in a human-readable format. Here is an example:
 
-```
+```klg
 2018-03-24
-	| First day at my new job 🎉 
-	| Mostly #onboarding and getting to know everyone
+First day at my new job
+Setup computer and started onboarding
 	8:00 - 17:15
-	-1h | Lunch break
+	-1h Lunch #break at Sushi place
 ```
 
-Let’s see: someone apparently started a new job here and wants to use
-klog for tracking work times. At the 24th of March 2018 they started to
-work at 8:00 in the morning and went home at 17:15 in the afternoon.
-Somewhere in between they took a one-hour lunch break. This results
-in a net total time of 8 hours and 15 minutes for that particular day.
+In this example someone started a new job and uses klog for tracking
+work times. At the 24th of March 2018 they came to the office at 8:00
+in the morning and went home at 17:15 in the afternoon. Somewhere in
+between there was a one-hour lunch break.
 
-You can store this record in a file (e.g. `times.klg`) and then use
-the klog command line tool to run all sorts of evaluations, for instance:
+You can store this data in a file (e.g. `times.klg`) and use the
+klog command line tool to run all sorts of evaluations. For instance,
+you could check what the net total time is:
 
 ```bash
-$ klog total times.klg
+$ klog total
 Total time: 8h15m
 ```
 
-You can also conveniently manipulate it, like so:
+You can manipulate the data by editing the file manually, or you can use
+the command line tool. Let’s say you wanted to add another 15 minutes:
 
 ```bash
 $ klog track 15m --date=2018-03-24 times.klg
@@ -44,9 +45,9 @@ Added entry: 15m
 New total: 8h30m
 ```
 
-For MacOS there is also a menu bar widget bundled into the command line tool
+For MacOS users there is a menu bar widget bundled into the command line tool
 that allows quick and convenient access to the most important functionalities.
-In order to start it up, just run `klog widget` and take it from there.
+Just run `klog widget` to start it up and take it from there.
 
 Learn more about klog and how to use it by reading the [guide](docs/Guide.md).
 

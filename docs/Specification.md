@@ -1,108 +1,176 @@
-# klog Specification
+# klog – File Format Specification
 
-*klog* is a file format for personal time tracking.
+klog is a file format for tracking times.
+It is free and open-source software distributed under the MIT-License.
 
 ## Preface
 
-The key words “MUST”, “MUST NOT”, “SHOULD”, “SHOULD NOT”, and “MAY” in this document are to be interpreted as described in [RFC 2119](https://tools.ietf.org/html/rfc2119).
+The keywords “MUST”, “MUST NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “NOT RECOMMENDED” and “MAY”
+in this document are to be interpreted as described in [RFC 2119](https://tools.ietf.org/html/rfc2119).
 
+Whenever a word has special meaning in klog, it is formatted in *italics*.
 
-## Concepts
+Other technical terms are surrounded by “quotes”. These are defined at the end of this specification.
 
-### Record
-A *record* 
-It MUST contain a *date*;
-it MAY contain *entries* (i.e. *ranges* and/or *durations*);
+## I. Records
+
+A *record* is a self-contained and atomic unit of data.
+
+Each *record* MUST appear as one consecutive block in the file,
+without any “blank lines” appearing within.
+
+The first line of a *record* MUST start with a *date*.
+On the same line there MAY follow a list of *properties*.
+This list MUST be enclosed in “parentheses” and
+preceded by at least one “space”.
+If there are multiple *properties* they MUST be separated
+by a `,` followed by a “space”.
+The list of *properties* MUST NOT be empty.
+
+A *summary* MAY appear on the subsequent lines.
+Any amount of *entries* MAY appear afterwards.
 
 ### Date
-SHOULD be `YYYY-MM-DD`, MAY be `YYYY/MM/DD`
+A *date* is a day that is representable in the Gregorian calendar.
+
+Each *record* MUST contain a *date*.
+
+It MUST be either formatted according to one of the following patterns:
+- `YYYY-MM-DD` (RECOMMENDED),
+- `YYYY/MM/DD`
+
+(Where `Y` is a digit to denote the year, `M` the month, `D` the day.)
+
+### Properties
+*Property* is an abstract term that denotes additional information
+or configuration of a *record*.
+A *should-total* is an instance of a *property*.
+
+### Should-Total
+A *should-total* is a *property* to denote the targeted total time of a *record*.
+
+A *should-total* MUST be a *duration* value followed by a `!`,
+e.g. `8h!` or `5h30m!`.
 
 ### Summary
-A *summary* is text for holding user-provided information.
-It MAY appear as a block above the *entries* of a record,
-or it MAY appear inline at the end of *entries*.
+A *summary* is user-provided text for holding arbitrary information.
+There are two places where *summary* text MAY appear in *records*:
 
-*Summary* text MUST be commenced with a `|` character.
+- After the *date*:
+  In this case the *summary* is considered to be associated with the entire *record*.
+  The *summary* MAY span multiple lines.
+  Each of its lines MUST NOT be indented.
+- Behind *entries*:
+  In this case the *summary* is only considered to be referring to the corresponding *entry*.
+  The *summary* text follows the *entry* on the same line, until the end of the line.
+  It MUST be separated from the *entry* by at least one “space”.
 
 ### Tags
+The purpose of *tags* is to help categorise records and entries.
+
+Any amount of *tags* MAY appear anywhere within *summaries*.
+A *tag* MUST be a sequence of “letters” preceded by a single `#` character,
+e.g. `#commute` or `#sport`.
 
 ### Entry
-*Entry* is the general term for time-related data, i.e. either a *range* or a *duration*.
-Each *entry* MAY 
+*Entry* is an abstract term for time-related data.
+A *range* and a *duration* are instances of *entries*.
+
+Each *entry* MUST appear on its own line and
+MUST be indented in one of the following ways:
+- by one “tab” (RECOMMENDED)
+- by two, three or four “spaces”
 
 ### Time
-A *time* is a value that represents a point in time throughout a day as it would be displayed by a digital wall clock.
-It MUST consist of an hour part and a minute part.
+A *time* is a value that represents a point in time throughout a day
+as it would be displayed by a wall clock (which divides a day into
+24 hours and every hour into 60 minutes),
+e.g. `9:00`, `23:18`, `6:30am`, `9:23pm` 
 
-The hour part MUST be a number between `0` and `23` (both inclusive).
-Single digit numbers MAY be preceded with a leading `0`.
+A *time* value MUST consist of both an hour part and a minute part.
+Single-digit hour parts MAY be padded with a `0`.
+The minute part MUST always contain two digits.
 
-The minute part MUST be a number between `0` and `59` (both inclusive).
-Single digit numbers MUST be preceded with a leading `0`.
+As default, *times* are to be interpreted as 24-hour clock values.
+An `am` or `pm` suffix MAY be used to denote that the value is
+to be interpreted as 12-hour clock value.
 
 ### Range
-...
-<8:00 etc.
+A *range* is an *entry* that represents the time span between two points in time.
+
+It MUST consist of two *time* values that denote the start and the end.
+Start and end MUST be written in chronological order.
+
+There MUST be a `-` between the two *times*,
+which MAY be surrounded by one “space” on each side.
+
+The start *time* MAY be prefixed with a `<` to indicate that
+this *time* is referring to the day before the *record’s* date,
+e.g. `<23:00`.
+Equivalently, the end *time* MAY be suffixed with a `>` to indicate
+that this *time* is referring to the day after the *record’s* date,
+e.g. `0:30>`.
 
 ### Duration
-A *duration* represents a time span.
+A *duration* is an *entry* that represents a period of time.
 It contains an amount of hours and/or an amount of minutes.
 (So it MUST contain either one of these two or both.)
 The hour part MUST be written first.
-The two parts MAY be separated by one space character (` `).
+Examples are: `1h`, `5m`, `4h12m`, `-8h30m`.
 
 The hour part MUST be an unsigned number
 which MUST be immediately followed by the character `h`.
 It MAY be `0h`.
-(Though it SHOULD be omitted then.)
-It MAY be greater than `24h`.
+It MAY be greater than `24h`,
+e.g. `50h`.
 If the hour part is missing, a value of `0h` is assumed.
 
 The minute part MUST be an unsigned number
 which MUST be immediately followed by the character `m`.
 It MAY be `0m`.
-(Though it SHOULD be omitted then.)
-It MAY be greater than `59m`.
-(Though it SHOULD be broken down into hours then.)
+It MAY be greater than `59m`,
+e.g. `150m`;
+it is generally RECOMMENDED to break this up, though.
 If the hour part is missing, a value of `0m` is assumed.
 
-The *duration* is always a signed value:
-That means it is either positive (i.e. additional) or negative (i.e. deductible).
+While the hour and minute parts itself are unsigned,
+the *duration* as a whole is always a signed value:
+That means it is either positive (i.e. adding to the total time)
+or negative (i.e. deducting from the total time).
 As default a *duration* is positive,
-which MAY be indicated by a leading `+` character.
+which MAY be indicated by a leading `+` character,
+e.g. `+4h12m`.
 If the *duration* is supposed to be negative, it MUST be preceded by a `-` character.
-There MUST NOT be whitespace between the sign and the *duration*.
 
-#### Examples
-- `1h`
-- `5m`
-- `4h12m`
-- `-4h12m`
-- `+4h12m` (leading `+` MAY appear)
-- `4h 12m` (Space character MAY appear between parts)
-- `0h 0m` (not recommended; SHOULD BE omitted altogether, if possible)
-- `150m` (not recommended; SHOULD BE `2h30m`)
+## II. Organizing records in files
 
+A file MAY hold any amount of *records*.
+Apart from that it MUST NOT contain anything
+but what is allowed by this specification.
 
-## File layout
+Subsequent *records* SHOULD be separated by one “blank line”;
+there MAY be additional blank lines.
 
-In order to be persisted, *records* MUST be stored in plain text files.
+The *records* don’t have to appear in any order.
+There MAY exist multiple *records* for the same day.
+These are treated as distinct.
+
+### Technical remarks
+
 The file extension MUST be `.klg`, e.g. `times.klg`.
+
 The file encoding MUST be UTF-8.
-Newlines MUST be encoded through the sequence `\n`.
 
-A file MAY hold any amount of records (including none).
-It MUST NOT contain anything but what is allowed by this specification.
+Newlines MUST be encoded with the LF linefeed character (escape sequence `\n`).
+There SHOULD be a “newline” at the end of the file.
 
-Each *record* appears as one consecutive block without any blank lines within.
-Subsequent *records* SHOULD be divided by one blank line;
-there MAY be more than one blank line.
-(A blank line is a line that is either empty or contains whitespace exclusively.)
+## III. Appendix
 
-The first line of a *record* MUST start with a *date*.
-There MUST NOT appear any preceding whitespace.
+### Glossary of technical terms
 
-The subsequent lines MAY contain the *summary* and/or the *entries*.
-These MUST be indented; the indentation
-SHOULD be one “tab” sequence (`\t`),
-or MAY be two or more “space” characters (` `).
+- “space”: The whitespace character ` ` (U+0020)
+- “tab”: The tab character (U+0009), escape sequence `\t`
+- “parenthesis”: The opening and closing parentheses `(` and `)` (U+0028 and U+0029)
+- “newline”: The LF linefeed character (U+0010), escape sequence `\n`
+- “blank line”: A line that only contains whitespace characters
+- “letter”: A character as defined by the Unicode letter category, regex `\p{L}`
