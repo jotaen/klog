@@ -59,7 +59,7 @@ There are two places where *summary* text MAY appear in *records*:
 - After the *date*:
   In this case the *summary* is considered to be associated with the entire *record*.
   The *summary* MAY span multiple lines.
-  Each of its lines MUST NOT be indented.
+  Each of its lines MUST NOT start with “whitespace”.
 - Behind *entries*:
   In this case the *summary* is only considered to be referring to the corresponding *entry*.
   The *summary* text follows the *entry* on the same line,
@@ -150,7 +150,7 @@ A file MAY hold any amount of *records*.
 Apart from that it MUST NOT contain anything
 but what is allowed by this specification.
 
-Subsequent *records* SHOULD be separated by one “blank line”;
+Subsequent *records* MUST be separated by one “blank line”;
 there MAY be additional blank lines.
 
 The *records* don’t have to appear in any order.
@@ -170,8 +170,9 @@ There SHOULD be a “newline” at the end of the file.
 
 ### Glossary of technical terms
 
-- “space”: The whitespace character ` ` (U+0020)
+- “space”: The character ` ` (U+0020)
 - “tab”: The tab character (U+0009), escape sequence `\t`
+- “whitespace”: A “space”, a “tab”, or another character that appears blank
 - “parenthesis”: The opening and closing parentheses `(` and `)` (U+0028 and U+0029)
 - “newline”: The LF linefeed character (U+0010), escape sequence `\n`
 - “blank line”: A line that only contains whitespace characters
