@@ -16,7 +16,7 @@ func Launch() {
 	menuet.App().Name = "klog widget"
 	menuet.App().Label = "net.jotaen.klog.widget"
 	menuet.App().Children = func() []menuet.MenuItem {
-		service := app.NewService(nil)
+		service, _ := app.NewServiceWithConfigFiles() // TODO error handling
 		return render(service)
 	}
 
@@ -42,13 +42,13 @@ func render(service app.Service) []menuet.MenuItem {
 	}
 
 	items = append(items, menuet.MenuItem{
-		Text: "Bookmarks",
+		Text: "File History",
 		Children: func() []menuet.MenuItem {
 			var items []menuet.MenuItem
-			for _, b := range service.BookmarkedFiles() {
+			for _, b := range service.LatestFiles() {
 				items = append(items, menuet.MenuItem{
 					Text:  b,
-					State: service.CurrentFile() == b,
+					State: service.OutputFilePath() == b,
 				})
 			}
 			return items
@@ -66,10 +66,10 @@ func renderRecords(service app.Service) []menuet.MenuItem {
 	today := record.Find(nowDate, service.Input())
 
 	items = append(items, menuet.MenuItem{
-		Text: service.CurrentFile(),
+		Text: service.OutputFilePath(),
 	})
 
-	totalTimeValue := (func() string {
+	totalTimeValue := func() string {
 		if today != nil {
 			if today.OpenRange() != nil {
 				untilNow, _ := record.NewRange(today.OpenRange(), nowTime)
@@ -89,7 +89,7 @@ func renderRecords(service app.Service) []menuet.MenuItem {
 			}
 		}
 		return "–"
-	})()
+	}()
 
 	isRunning := today != nil && today.OpenRange() != nil
 	items = append(items, menuet.MenuItem{

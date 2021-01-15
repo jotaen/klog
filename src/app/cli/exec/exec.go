@@ -14,7 +14,7 @@ var allCommands = []cli.Command{
 }
 
 func Execute(args []string) int {
-	service := app.NewService(nil) // TODO
+	service, _ := app.NewServiceWithConfigFiles() // TODO error handling
 	reqSubCmd := args[0]
 	for _, cmd := range allCommands {
 		if cmd.Name == reqSubCmd {

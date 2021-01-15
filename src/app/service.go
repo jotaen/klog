@@ -2,51 +2,90 @@ package app
 
 import (
 	"errors"
+	"klog/parser"
 	"klog/record"
-	"os"
 	"os/exec"
+	"strings"
 )
 
 type Service interface {
 	Input() []record.Record
+	SetInput(string) error
 	Save([]record.Record) error
-	CurrentFile() string
-	BookmarkedFiles() []string
+	OutputFilePath() string
+	LatestFiles() []string
 	OpenInEditor() error
 	OpenInFileBrowser(string) error
-	QuickStartAt(record.Date, record.Time) error
-	QuickStopAt(record.Date, record.Time) error
+	QuickStartAt(record.Date, record.Time) (record.Record, error)
+	QuickStopAt(record.Date, record.Time) (record.Record, error)
 }
 
 type context struct {
-	path *os.File
+	input          []record.Record
+	outputFilePath string
+	config         Config
+	history        []string
 }
 
-func NewService(destinationFilePath *os.File) Service {
-	return &context{
-		path: destinationFilePath,
+func NewService(configToml string, history []string) (Service, error) {
+	cfg, err := NewConfigFromToml(configToml)
+	if err != nil {
+		return nil, err
 	}
+	return &context{
+		config:  cfg,
+		history: history,
+	}, nil
+}
+
+func NewServiceWithConfigFiles() (Service, error) {
+	configToml, err := readFile("~/.klog.toml")
+	if err != nil {
+		return nil, err
+	}
+	history := func() []string {
+		h, _ := readFile("~/.klog/history")
+		hs := strings.Split(h, "\n")
+		var result []string
+		for _, x := range hs {
+			result = append(result, strings.TrimSpace(x))
+		}
+		return result
+	}()
+	return NewService(configToml, history)
 }
 
 func (c *context) Input() []record.Record {
-	return nil // TODO
+	return c.input
 }
 
-func (c *context) Save([]record.Record) error {
-	return nil // TODO
-}
-
-func (c *context) CurrentFile() string {
-	return ""
-}
-
-func (c *context) BookmarkedFiles() []string {
+func (c *context) SetInput(recordsText string) error {
+	rs, err := parser.Parse(recordsText)
+	if err != nil {
+		return err
+	}
+	c.input = rs
 	return nil
+}
+
+func (c *context) Save(rs []record.Record) error {
+	if c.outputFilePath == "" {
+		return errors.New("NO_OUTPUT_TARGET")
+	}
+	return writeFile(c.outputFilePath, parser.ToPlainText(rs))
+}
+
+func (c *context) OutputFilePath() string {
+	return c.outputFilePath
+}
+
+func (c *context) LatestFiles() []string {
+	return c.history
 }
 
 func (c *context) OpenInEditor() error {
 	// open -t ...
-	cmd := exec.Command("subl", c.path.Name())
+	cmd := exec.Command("subl", c.outputFilePath)
 	return cmd.Run()
 }
 
@@ -55,7 +94,7 @@ func (c *context) OpenInFileBrowser(path string) error {
 	return cmd.Run()
 }
 
-func (c *context) QuickStartAt(date record.Date, time record.Time) error {
+func (c *context) QuickStartAt(date record.Date, time record.Time) (record.Record, error) {
 	rs := c.Input()
 	var recordToAlter *record.Record
 	for _, r := range rs {
@@ -68,10 +107,11 @@ func (c *context) QuickStartAt(date record.Date, time record.Time) error {
 		recordToAlter = &r
 	}
 	(*recordToAlter).StartOpenRange(time)
-	return c.Save(rs)
+	err := c.Save(rs)
+	return *recordToAlter, err
 }
 
-func (c *context) QuickStopAt(date record.Date, time record.Time) error {
+func (c *context) QuickStopAt(date record.Date, time record.Time) (record.Record, error) {
 	rs := c.Input()
 	var recordToAlter *record.Record
 	for _, r := range rs {
@@ -80,8 +120,9 @@ func (c *context) QuickStopAt(date record.Date, time record.Time) error {
 		}
 	}
 	if recordToAlter == nil {
-		return errors.New("NO_OPEN_RANGE")
+		return nil, errors.New("NO_OPEN_RANGE")
 	}
 	(*recordToAlter).StartOpenRange(time)
-	return c.Save(rs)
+	err := c.Save(rs)
+	return *recordToAlter, err
 }

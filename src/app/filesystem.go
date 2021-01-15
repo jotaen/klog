@@ -1,34 +1,9 @@
 package app
 
 import (
-	"fmt"
 	"io/ioutil"
-	"klog/record"
 	"os"
 )
-
-type FileProps struct {
-	Dir  string
-	Name string
-	Path string
-}
-
-func createFileProps(basePath string, date record.Date) FileProps {
-	props := FileProps{
-		Dir:  fmt.Sprintf("%v/%v/%02v", basePath, date.Year(), date.Month()),
-		Name: fmt.Sprintf("%02v.yml", date.Day()),
-	}
-	props.Path = props.Dir + "/" + props.Name
-	return props
-}
-
-func dirExists(path string) bool {
-	file, err := os.Stat(path)
-	if err == nil && file.Mode().IsDir() {
-		return true
-	}
-	return false
-}
 
 func fileExists(path string) bool {
 	file, err := os.Stat(path)
@@ -38,16 +13,16 @@ func fileExists(path string) bool {
 	return false
 }
 
-func readFile(props FileProps) (string, error) {
-	contents, err := ioutil.ReadFile(props.Path)
+func readFile(path string) (string, error) {
+	contents, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", err
 	}
 	return string(contents), nil
 }
 
-func writeFile(props FileProps, contents string) error {
-	os.MkdirAll(props.Dir, os.ModePerm)
-	ioutil.WriteFile(props.Path, []byte(contents), 0644)
+func writeFile(path string, contents string) error {
+	//os.MkdirAll(props.Dir, os.ModePerm)
+	ioutil.WriteFile(path, []byte(contents), 0644)
 	return nil
 }

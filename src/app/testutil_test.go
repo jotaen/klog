@@ -12,7 +12,7 @@ func WithService(fn func(Service)) {
 		panic("Could not create context")
 	}
 	defer file.Close()
-	service := NewService(file)
+	service := &context{}
 	fn(service)
 	_ = os.Remove(path)
 }
