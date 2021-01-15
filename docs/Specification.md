@@ -62,8 +62,10 @@ There are two places where *summary* text MAY appear in *records*:
   Each of its lines MUST NOT be indented.
 - Behind *entries*:
   In this case the *summary* is only considered to be referring to the corresponding *entry*.
-  The *summary* text follows the *entry* on the same line, until the end of the line.
+  The *summary* text follows the *entry* on the same line,
+  and it ends at the end of that line.
   It MUST be separated from the *entry* by at least one “space”.
+  It MUST start with a “letter” or a `#`.
 
 ### Tags
 The purpose of *tags* is to help categorise records and entries.

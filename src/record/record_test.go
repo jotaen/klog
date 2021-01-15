@@ -6,10 +6,25 @@ import (
 	"testing"
 )
 
-func TestSavesDateUponCreation(t *testing.T) {
+func TestInitialiseRecord(t *testing.T) {
 	date := Ɀ_Date_(2020, 1, 1)
 	r := NewRecord(date)
 	assert.Equal(t, r.Date(), date)
+	assert.Equal(t, nil, r.ShouldTotal())
+	assert.Equal(t, "", r.Summary())
+	assert.Len(t, r.Entries(), 0)
+}
+
+func TestSavesSummary(t *testing.T) {
+	r := NewRecord(Ɀ_Date_(2020, 1, 1))
+	r.SetSummary("Hello World")
+	assert.Equal(t, "Hello World", r.Summary())
+}
+
+func TestSavesShouldTotal(t *testing.T) {
+	r := NewRecord(Ɀ_Date_(2020, 1, 1))
+	r.SetShouldTotal(NewDuration(5, 0))
+	assert.Equal(t, NewDuration(5, 0), r.ShouldTotal())
 }
 
 func TestAddRanges(t *testing.T) {

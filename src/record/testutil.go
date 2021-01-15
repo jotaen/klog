@@ -1,14 +1,14 @@
 package record
 
 /**
-	Only use these functions in test code.
-	(They cannot live in a `_test.go` file
-	because they need to be imported elsewhere.
-	They cannot live in a separate package
-	neither due to circular imports.)
-	The `Deprecated` markers and the funny naming
-	are supposed to act as a reminder for this.
- */
+Only use these functions in test code.
+(They cannot live in a `_test.go` file
+because they need to be imported elsewhere.
+They cannot live in a separate package
+neither due to circular imports.)
+The `Deprecated` markers and the funny naming
+are supposed to act as a reminder for this.
+*/
 
 // Deprecated
 func Ɀ_Date_(year int, month int, day int) Date {

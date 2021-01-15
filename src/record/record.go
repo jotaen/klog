@@ -7,15 +7,20 @@ import (
 type Record interface {
 	Date() Date
 
+	ShouldTotal() Duration
+	SetShouldTotal(Duration)
+
 	Summary() string
-	SetSummary(string)
+	SetSummary(string) // TODO no blank lines; no indentation
 
 	Entries() []Entry
-	AddDuration(Duration)
-	AddRange(Range)
+	AddDuration(Duration) // TODO summary
+	AddRange(Range)       // TODO summary
 	OpenRange() OpenRangeStart
-	StartOpenRange(OpenRangeStart)
+	StartOpenRange(OpenRangeStart) // TODO summary
 	EndOpenRange(Time) error
+
+	//FindEntriesWithHashtags([]string) []Entry // TODO
 }
 
 func NewRecord(date Date) Record {
@@ -25,13 +30,22 @@ func NewRecord(date Date) Record {
 }
 
 type record struct {
-	date    Date
-	summary string
-	entries []Entry
+	date        Date
+	shouldTotal Duration
+	summary     string
+	entries     []Entry
 }
 
 func (r *record) Date() Date {
 	return r.date
+}
+
+func (r *record) ShouldTotal() Duration {
+	return r.shouldTotal
+}
+
+func (r *record) SetShouldTotal(t Duration) {
+	r.shouldTotal = t
 }
 
 func (r *record) Summary() string {

@@ -4,10 +4,14 @@ import (
 	"klog/record"
 )
 
-func Serialise(rs []record.Record) string {
+func ToPlainText(rs []record.Record) string {
 	text := ""
 	for _, r := range rs {
-		text += r.Date().ToString() + "\n"
+		text += r.Date().ToString()
+		if r.ShouldTotal() != nil {
+			text += " (" + r.ShouldTotal().ToString() + "!)"
+		}
+		text += "\n"
 		if r.Summary() != "" {
 			text += r.Summary() + "\n"
 		}
