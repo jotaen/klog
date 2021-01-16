@@ -1,11 +1,11 @@
 package engine
 
-func substr(text []rune, start int, length int) string {
+func SubRune(text []rune, start int, length int) []rune {
 	if start >= len(text) {
-		return ""
+		return nil
 	}
 	if start+length > len(text) {
 		length = len(text) - start
 	}
-	return string(text[start : start+length])
+	return text[start : start+length]
 }

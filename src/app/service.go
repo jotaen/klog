@@ -3,7 +3,6 @@ package app
 import (
 	"errors"
 	"klog/parser"
-	"klog/parser/engine"
 	"klog/record"
 	"os/exec"
 	"strings"
@@ -11,7 +10,7 @@ import (
 
 type Service interface {
 	Input() []record.Record
-	SetInput(string) error
+	SetInput(string) []error
 	Save([]record.Record) error
 	OutputFilePath() string
 	LatestFiles() []string
@@ -60,10 +59,10 @@ func (c *context) Input() []record.Record {
 	return c.input
 }
 
-func (c *context) SetInput(recordsText string) error {
-	rs, err := parser.Parse(recordsText)
-	if err != nil {
-		return err
+func (c *context) SetInput(recordsText string) []error {
+	rs, errs := parser.Parse(recordsText)
+	if errs != nil {
+		return errs
 	}
 	c.input = rs
 	return nil
@@ -107,7 +106,7 @@ func (c *context) QuickStartAt(date record.Date, time record.Time) (record.Recor
 		r := record.NewRecord(date)
 		recordToAlter = &r
 	}
-	(*recordToAlter).StartOpenRange(time)
+	(*recordToAlter).StartOpenRange(time, "")
 	err := c.Save(rs)
 	return *recordToAlter, err
 }
@@ -123,7 +122,12 @@ func (c *context) QuickStopAt(date record.Date, time record.Time) (record.Record
 	if recordToAlter == nil {
 		return nil, errors.New("NO_OPEN_RANGE")
 	}
-	(*recordToAlter).StartOpenRange(time)
-	err := c.Save(rs)
+	newRange, err := record.NewRange((*recordToAlter).OpenRange(), time)
+	if err != nil {
+		return nil, err
+	}
+	(*recordToAlter).AddRange(newRange, "") // TODO take over summary
+	(*recordToAlter).StartOpenRange(time, "")
+	err = c.Save(rs)
 	return *recordToAlter, err
 }

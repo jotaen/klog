@@ -4,6 +4,8 @@ import (
 	"errors"
 )
 
+type Summary string
+
 type Record interface {
 	Date() Date
 
@@ -14,10 +16,10 @@ type Record interface {
 	SetSummary(string) // TODO no blank lines; no indentation
 
 	Entries() []Entry
-	AddDuration(Duration) // TODO summary
-	AddRange(Range)       // TODO summary
+	AddDuration(Duration, Summary)
+	AddRange(Range, Summary)
 	OpenRange() OpenRangeStart
-	StartOpenRange(OpenRangeStart) // TODO summary
+	StartOpenRange(OpenRangeStart, Summary)
 	EndOpenRange(Time) error
 
 	//FindEntriesWithHashtags([]string) []Entry // TODO
@@ -71,8 +73,8 @@ func (r *record) Durations() []Duration {
 	return durations
 }
 
-func (r *record) AddDuration(d Duration) {
-	r.entries = append(r.entries, entry{value: d, summary: ""})
+func (r *record) AddDuration(d Duration, s Summary) {
+	r.entries = append(r.entries, Entry{value: d, summary: s})
 }
 
 func (r *record) Ranges() []Range {
@@ -86,8 +88,8 @@ func (r *record) Ranges() []Range {
 	return ranges
 }
 
-func (r *record) AddRange(tr Range) {
-	r.entries = append(r.entries, entry{value: tr, summary: ""})
+func (r *record) AddRange(tr Range, s Summary) {
+	r.entries = append(r.entries, Entry{value: tr, summary: s})
 }
 
 func (r *record) OpenRange() OpenRangeStart {
@@ -100,8 +102,8 @@ func (r *record) OpenRange() OpenRangeStart {
 	return nil
 }
 
-func (r *record) StartOpenRange(t OpenRangeStart) {
-	r.entries = append(r.entries, entry{value: t, summary: ""})
+func (r *record) StartOpenRange(t OpenRangeStart, s Summary) {
+	r.entries = append(r.entries, Entry{value: t, summary: s})
 }
 
 func (r *record) EndOpenRange(end Time) error {
@@ -112,7 +114,7 @@ func (r *record) EndOpenRange(end Time) error {
 			if err != nil {
 				return err
 			}
-			r.entries[i] = entry{value: tr, summary: ""}
+			r.entries[i] = Entry{value: tr, summary: ""}
 			return nil
 		}
 	}

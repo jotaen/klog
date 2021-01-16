@@ -1,21 +1,16 @@
 package record
 
-type Entry interface {
-	Value() interface{}
-	Summary() string
-}
-
 type OpenRangeStart Time
 
-type entry struct {
+type Entry struct {
 	value   interface{}
-	summary string
+	summary Summary
 }
 
-func (e entry) Summary() string {
-	return e.summary
+func (e Entry) SummaryAsString() string {
+	return string(e.summary)
 }
 
-func (e entry) Value() interface{} {
+func (e Entry) Value() interface{} {
 	return e.value
 }

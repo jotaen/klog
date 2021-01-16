@@ -1,21 +1,20 @@
 package engine
 
 import (
-	"errors"
 	"regexp"
 	"strings"
 )
 
 type (
-	Chunk   []Line
+	Chunk   []Text
 	ParseFn func(Chunk) error
 )
 
-var blankLinePattern = regexp.MustCompile(
+var blankTextPattern = regexp.MustCompile(
 	`^[  \t]*$`, // match space, non-breaking space, tab
 )
 
-func Parse(text string, fn ParseFn) error {
+func Parse(text string, fn ParseFn) []error {
 	p := splitIntoChunksOfLines(text)
 	var errs []error
 	for _, chunk := range p {
@@ -24,26 +23,29 @@ func Parse(text string, fn ParseFn) error {
 			errs = append(errs, err)
 		}
 	}
-	if len(errs) == 0 {
-		return nil
-	}
-	return errors.New("PARSER_ERROR")
+	return errs
 }
 
 func splitIntoChunksOfLines(text string) []Chunk {
 	var chunks []Chunk
 	var currentChunk Chunk
+	currentIndentation := 0
 	for nr, l := range strings.Split(text, "\n") {
-		if blankLinePattern.MatchString(l) {
+		if blankTextPattern.MatchString(l) {
 			if currentChunk != nil {
 				chunks = append(chunks, currentChunk)
 			}
 			currentChunk = nil
+			currentIndentation = 0
 			continue
 		}
-		currentChunk = append(currentChunk, Line{
-			Text: []rune(l),
-			Nr:   nr,
+		if regexp.MustCompile(`^\t`).MatchString(l) {
+			currentIndentation = 1
+		}
+		currentChunk = append(currentChunk, Text{
+			Value:            []rune(l)[currentIndentation:],
+			IndentationLevel: currentIndentation,
+			LineNumber:       nr,
 		})
 	}
 	return chunks
