@@ -7,6 +7,8 @@ type Text struct {
 	IndentationLevel int
 }
 
+type Chunk []Text
+
 var END_OF_TEXT int32 = -1
 
 func (t *Text) Peek() rune {

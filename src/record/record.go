@@ -2,6 +2,7 @@ package record
 
 import (
 	"errors"
+	"regexp"
 )
 
 type Summary string
@@ -13,7 +14,7 @@ type Record interface {
 	SetShouldTotal(Duration)
 
 	Summary() string
-	SetSummary(string) // TODO no blank lines; no indentation
+	SetSummary(string) error
 
 	Entries() []Entry
 	AddDuration(Duration, Summary)
@@ -21,8 +22,6 @@ type Record interface {
 	OpenRange() OpenRangeStart
 	StartOpenRange(OpenRangeStart, Summary)
 	EndOpenRange(Time) error
-
-	//FindEntriesWithHashtags([]string) []Entry // TODO
 }
 
 func NewRecord(date Date) Record {
@@ -54,8 +53,12 @@ func (r *record) Summary() string {
 	return r.summary
 }
 
-func (r *record) SetSummary(summary string) {
+func (r *record) SetSummary(summary string) error {
+	if regexp.MustCompile(`(^|\n) `).MatchString(summary) {
+		return errors.New("MALFORMED_SUMMARY")
+	}
 	r.summary = summary
+	return nil
 }
 
 func (r *record) Entries() []Entry {
@@ -114,7 +117,7 @@ func (r *record) EndOpenRange(end Time) error {
 			if err != nil {
 				return err
 			}
-			r.entries[i] = Entry{value: tr, summary: ""}
+			r.entries[i] = Entry{value: tr, summary: e.summary}
 			return nil
 		}
 	}

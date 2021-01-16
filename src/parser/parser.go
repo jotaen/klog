@@ -2,23 +2,30 @@ package parser
 
 import (
 	"errors"
-	"klog/parser/engine"
+	. "klog/parser/engine"
 	. "klog/record"
 	"strings"
 )
 
-type Result []Record
+type Records []Record
 
 func Parse(recordsAsText string) ([]Record, []error) {
-	var result Result
-	errs := engine.Parse(recordsAsText, result.parseRecord)
+	var result Records
+	var errs []error
+	cs := SplitIntoChunksOfLines(recordsAsText)
+	for _, c := range cs {
+		err := result.parseRecord(c)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
 	if len(errs) > 0 {
 		return nil, errs
 	}
 	return result, nil
 }
 
-func (result *Result) parseRecord(c engine.Chunk) error {
+func (records *Records) parseRecord(c Chunk) error {
 	// Date
 	headline := c[0]
 	dateText := headline.PeekUntil(func(r rune) bool { return r == ' ' })
@@ -48,7 +55,7 @@ func (result *Result) parseRecord(c engine.Chunk) error {
 		headline.Advance(1)
 		headline.SkipWhitespace()
 	}
-	if headline.Peek() != engine.END_OF_TEXT {
+	if headline.Peek() != END_OF_TEXT {
 		return errors.New("UNEXPECTED_CHARACTER")
 	}
 	c = c[1:] // Done with headline
@@ -61,7 +68,10 @@ func (result *Result) parseRecord(c engine.Chunk) error {
 		}
 		summaryLines = append(summaryLines, sLine.ToString())
 	}
-	r.SetSummary(strings.Join(summaryLines, "\n"))
+	err = r.SetSummary(strings.Join(summaryLines, "\n"))
+	if err != nil {
+		return err
+	}
 	c = c[len(summaryLines):] // Done with Summary
 
 	// Entries
@@ -105,6 +115,6 @@ func (result *Result) parseRecord(c engine.Chunk) error {
 		r.AddRange(timeRange, Summary(summaryText.ToString()))
 	}
 
-	*result = append(*result, r)
+	*records = append(*records, r)
 	return nil
 }
