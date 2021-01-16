@@ -20,7 +20,7 @@ type Record interface {
 	AddDuration(Duration, Summary)
 	AddRange(Range, Summary)
 	OpenRange() OpenRangeStart
-	StartOpenRange(OpenRangeStart, Summary)
+	StartOpenRange(OpenRangeStart, Summary) error
 	EndOpenRange(Time) error
 }
 
@@ -105,8 +105,12 @@ func (r *record) OpenRange() OpenRangeStart {
 	return nil
 }
 
-func (r *record) StartOpenRange(t OpenRangeStart, s Summary) {
+func (r *record) StartOpenRange(t OpenRangeStart, s Summary) error {
+	if r.OpenRange() != nil {
+		return errors.New("DUPLICATE_OPEN_RANGE")
+	}
 	r.entries = append(r.entries, Entry{value: t, summary: s})
+	return nil
 }
 
 func (r *record) EndOpenRange(end Time) error {

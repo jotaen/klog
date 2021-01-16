@@ -1,18 +1,22 @@
 #!/bin/bash
 
 install() {
+  cd src
 	go get -t ./...
 }
 
 test() {
+  cd src
 	go test ./...
 }
 
 format() {
+  cd src
 	go fmt ./...
 }
 
 cli() {
+  cd src
 	go run cli.go $@
 }
 

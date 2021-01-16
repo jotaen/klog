@@ -53,6 +53,10 @@ func (t *Text) Length() int {
 	return len(t.Value)
 }
 
+func (t *Text) RemainingLength() int {
+	return t.Length() - t.PointerPosition
+}
+
 func (t *Text) ToString() string {
 	return string(t.Value)
 }

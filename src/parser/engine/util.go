@@ -23,22 +23,24 @@ func SplitIntoChunksOfLines(text string) []Chunk {
 	var chunks []Chunk
 	var currentChunk Chunk
 	currentIndentation := 0
-	for nr, l := range strings.Split(text, "\n") {
+	text = text + "\n"
+	for i, l := range strings.Split(text, "\n") {
 		if blankTextPattern.MatchString(l) {
 			if currentChunk != nil {
 				chunks = append(chunks, currentChunk)
 			}
 			currentChunk = nil
-			currentIndentation = 0
 			continue
 		}
 		if regexp.MustCompile(`^\t`).MatchString(l) {
 			currentIndentation = 1
+		} else {
+			currentIndentation = 0
 		}
 		currentChunk = append(currentChunk, Text{
 			Value:            []rune(l)[currentIndentation:],
 			IndentationLevel: currentIndentation,
-			LineNumber:       nr,
+			LineNumber:       i + 1,
 		})
 	}
 	return chunks

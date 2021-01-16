@@ -3,6 +3,7 @@ package parser
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	. "klog/parser/engine"
 	. "klog/record"
 	"testing"
 )
@@ -21,6 +22,14 @@ func TestParseBlankDocument(t *testing.T) {
 	rs, errs := Parse(text)
 	require.Nil(t, errs)
 	require.Nil(t, rs)
+}
+
+func TestParseMinimalDocument(t *testing.T) {
+	text := `2000-01-01`
+	rs, errs := Parse(text)
+	require.Nil(t, errs)
+	require.Len(t, rs, 1)
+	assert.Equal(t, Ɀ_Date_(2000, 1, 1), rs[0].Date())
 }
 
 func TestParseMultipleRecords(t *testing.T) {
@@ -79,4 +88,78 @@ multiline summary
 	assert.Equal(t, Ɀ_Range_(Ɀ_Time_(22, 17), Ɀ_TimeTomorrow_(1, 00)), rs[0].Entries()[8].Value())
 	assert.Equal(t, Ɀ_Time_(18, 45), rs[0].Entries()[9].Value())
 	assert.Equal(t, "Just started something", rs[0].Entries()[9].SummaryAsString())
+}
+
+func TestMalformedRecord(t *testing.T) {
+	text := `
+1999-05-31
+	5h30m This and that
+Why is there a summary at the end?
+`
+	rs, errs := Parse(text)
+	require.Nil(t, rs)
+	require.Len(t, errs, 1)
+	assert.Equal(t, Err{ILLEGAL_INDENTATION, 4, 0, 34}, toErr(errs[0].(Error)))
+}
+
+func TestReportErrorsInHeadline(t *testing.T) {
+	text := `Hello 123
+
+  2020-01-01
+
+2020-01-01 (asdf)
+
+2020-01-01 5h30m!
+
+2020-01-01 (5h30m!
+`
+	rs, errs := Parse(text)
+	require.Nil(t, rs)
+	require.Len(t, errs, 5)
+	assert.Equal(t, Err{INVALID_VALUE, 1, 0, 5}, toErr(errs[0].(Error)))
+	assert.Equal(t, Err{ILLEGAL_WHITESPACE, 3, 0, 2}, toErr(errs[1].(Error)))
+	assert.Equal(t, Err{INVALID_VALUE, 5, 12, 5}, toErr(errs[2].(Error)))
+	assert.Equal(t, Err{INVALID_VALUE, 7, 11, 6}, toErr(errs[3].(Error)))
+	assert.Equal(t, Err{INVALID_VALUE, 9, 18, 1}, toErr(errs[4].(Error)))
+}
+
+func TestReportErrorsInSummary(t *testing.T) {
+	text := `
+2020-01-01
+This is a summary that contains
+ whitespace at the beginning of the line.
+That is not allowed.
+`
+	rs, errs := Parse(text)
+	require.Nil(t, rs)
+	require.Len(t, errs, 1)
+	assert.Equal(t, Err{INVALID_VALUE, 4, 0, 41}, toErr(errs[0].(Error)))
+}
+
+func TestReportErrorsInEntries(t *testing.T) {
+	text := `
+2020-01-01
+	5h1
+
+2020-01-01
+	15:30
+
+2020-01-01
+	asdf Test 123
+
+2020-01-01
+	08:00-
+	09:00 -
+
+2020-01-01
+	15:00 - 14:00
+`
+	rs, errs := Parse(text)
+	require.Nil(t, rs)
+	require.Len(t, errs, 5)
+	assert.Equal(t, Err{INVALID_VALUE, 3, 0, 3}, toErr(errs[0].(Error)))
+	assert.Equal(t, Err{INVALID_VALUE, 6, 5, 5}, toErr(errs[1].(Error)))
+	assert.Equal(t, Err{INVALID_VALUE, 9, 0, 4}, toErr(errs[2].(Error)))
+	assert.Equal(t, Err{DUPLICATE_OPEN_RANGE, 13, 0, 7}, toErr(errs[3].(Error)))
+	assert.Equal(t, Err{ILLEGAL_RANGE, 16, 0, 13}, toErr(errs[4].(Error)))
 }
