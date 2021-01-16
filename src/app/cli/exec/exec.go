@@ -1,3 +1,4 @@
+// Must be in separate package due to import cycle
 package exec
 
 import (
@@ -7,14 +8,20 @@ import (
 )
 
 var allCommands = []cli.Command{
-	commands.Create,
+	commands.Help,
 	commands.Edit,
 	commands.Start,
 	commands.Widget,
 }
 
 func Execute(args []string) int {
-	service, _ := app.NewServiceWithConfigFiles() // TODO error handling
+	service, err := app.NewServiceWithConfigFiles()
+	if err != nil {
+		return cli.INITIALISATION_ERROR
+	}
+	if len(args) == 0 {
+		args = []string{"help"}
+	}
 	reqSubCmd := args[0]
 	for _, cmd := range allCommands {
 		if cmd.Name == reqSubCmd {

@@ -3,6 +3,7 @@ package cli
 const (
 	OK                   = 0
 	EXECUTION_FAILED     = 1
-	SUBCOMMAND_NOT_FOUND = 2
-	INVALID_CLI_ARGS     = 3
+	INITIALISATION_ERROR = 2
+	SUBCOMMAND_NOT_FOUND = 3
+	INVALID_CLI_ARGS     = 4
 )

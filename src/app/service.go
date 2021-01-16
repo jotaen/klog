@@ -27,22 +27,25 @@ type context struct {
 	history        []string
 }
 
-func NewService(configToml string, history []string) (Service, error) {
-	cfg, err := NewConfigFromToml(configToml)
-	if err != nil {
-		return nil, err
-	}
+func NewService(config Config, history []string) (Service, error) {
 	return &context{
-		config:  cfg,
+		config:  config,
 		history: history,
 	}, nil
 }
 
 func NewServiceWithConfigFiles() (Service, error) {
-	configToml, err := readFile("~/.klog.toml")
+	config, err := func() (Config, error) {
+		configToml, err := readFile("~/.klog.toml")
+		if err != nil {
+			return NewDefaultConfig(), nil
+		}
+		return NewConfigFromToml(configToml)
+	}()
 	if err != nil {
 		return nil, err
 	}
+
 	history := func() []string {
 		h, _ := readFile("~/.klog/history")
 		hs := strings.Split(h, "\n")
@@ -52,7 +55,7 @@ func NewServiceWithConfigFiles() (Service, error) {
 		}
 		return result
 	}()
-	return NewService(configToml, history)
+	return NewService(config, history)
 }
 
 func (c *context) Input() []record.Record {
