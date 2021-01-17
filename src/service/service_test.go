@@ -59,8 +59,31 @@ func TestHashTagReturnsEntriesThatMatch(t *testing.T) {
 	assert.Equal(t, Summary("Foo #fizzbuzz"), es[0].Summary())
 }
 
+func TestFindFilterWithNoClauses(t *testing.T) {
+	rs, es := FindFilter([]Record{
+		func() Record {
+			r := NewRecord(Ɀ_Date_(2000, 1, 15))
+			r.AddDuration(NewDuration(1, 0), "")
+			return r
+		}(),
+		func() Record {
+			r := NewRecord(Ɀ_Date_(2000, 1, 16))
+			r.AddDuration(NewDuration(1, 0), "")
+			return r
+		}(),
+		func() Record {
+			r := NewRecord(Ɀ_Date_(2000, 1, 16))
+			r.AddDuration(NewDuration(1, 0), "")
+			return r
+		}(),
+	}, Filter{})
+
+	require.Len(t, rs, 3)
+	assert.Equal(t, NewDuration(3, 0), TotalEntries(es))
+}
+
 func TestFindFilterWithAfter(t *testing.T) {
-	rs := FindFilter([]Record{
+	rs, _ := FindFilter([]Record{
 		NewRecord(Ɀ_Date_(2000, 1, 15)),
 		NewRecord(Ɀ_Date_(2000, 1, 16)),
 		NewRecord(Ɀ_Date_(2000, 1, 17)),
@@ -72,7 +95,7 @@ func TestFindFilterWithAfter(t *testing.T) {
 }
 
 func TestFindFilterWithBefore(t *testing.T) {
-	rs := FindFilter([]Record{
+	rs, _ := FindFilter([]Record{
 		NewRecord(Ɀ_Date_(2000, 1, 15)),
 		NewRecord(Ɀ_Date_(2000, 1, 16)),
 		NewRecord(Ɀ_Date_(2000, 1, 17)),
@@ -84,15 +107,16 @@ func TestFindFilterWithBefore(t *testing.T) {
 }
 
 func TestFindFilterWithHash(t *testing.T) {
-	rs := FindFilter([]Record{
+	rs, es := FindFilter([]Record{
 		func() Record {
 			r := NewRecord(Ɀ_Date_(2000, 1, 15))
 			_ = r.SetSummary("Contains #foo")
+			r.AddDuration(NewDuration(3, 0), "")
 			return r
 		}(),
 		func() Record {
 			r := NewRecord(Ɀ_Date_(2000, 1, 16))
-			r.AddDuration(NewDuration(1, 0), "Contains #foo")
+			r.AddDuration(NewDuration(1, 0), "Contains #foo too")
 			return r
 		}(),
 		func() Record {
@@ -102,6 +126,8 @@ func TestFindFilterWithHash(t *testing.T) {
 	}, Filter{Tags: []string{"foo"}})
 
 	require.Len(t, rs, 2)
+	require.Len(t, es, 2)
 	assert.Equal(t, 15, rs[0].Date().Day())
 	assert.Equal(t, 16, rs[1].Date().Day())
+	assert.Equal(t, NewDuration(4, 0), TotalEntries(es))
 }

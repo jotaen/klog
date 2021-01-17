@@ -20,15 +20,24 @@ func Total(r Record) Duration {
 	return total
 }
 
+func TotalEntries(es []Entry) Duration {
+	total := NewDuration(0, 0)
+	for _, e := range es {
+		total = total.Add(e.Duration())
+	}
+	return total
+}
+
 type Filter struct {
 	Tags     []string
 	BeforeEq Date
 	AfterEq  Date
 }
 
-func FindFilter(rs []Record, f Filter) []Record {
+func FindFilter(rs []Record, f Filter) ([]Record, []Entry) {
 	tags := NewTagSet(f.Tags...)
-	var result []Record
+	var records []Record
+	var entries []Entry
 	for _, r := range rs {
 		if f.BeforeEq != nil && !f.BeforeEq.IsAfterOrEqual(r.Date()) {
 			continue
@@ -36,13 +45,18 @@ func FindFilter(rs []Record, f Filter) []Record {
 		if f.AfterEq != nil && !r.Date().IsAfterOrEqual(f.AfterEq) {
 			continue
 		}
-		_, hasMatched := FindEntriesWithHashtags(tags, r)
-		if len(tags) > 0 && !hasMatched {
-			continue
+		es := r.Entries()
+		if len(tags) > 0 {
+			matchingEs, hasMatched := FindEntriesWithHashtags(tags, r)
+			if !hasMatched {
+				continue
+			}
+			es = matchingEs
 		}
-		result = append(result, r)
+		entries = append(entries, es...)
+		records = append(records, r)
 	}
-	return result
+	return records, entries
 }
 
 func FindEntriesWithHashtags(tags TagSet, r Record) ([]Entry, bool) {

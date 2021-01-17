@@ -16,12 +16,11 @@ type Print struct {
 }
 
 func (args *Print) Run(ctx *app.Context) error {
-	rs, err := ctx.Read("../../../../" + args.File)
+	rs, err := ctx.Read(args.File)
 	if err != nil {
-		fmt.Println(err)
 		return errors.New("EXECUTION_FAILED")
 	}
-	rs = service.FindFilter(rs, args.FilterArgs.ToFilter())
+	rs, _ = service.FindFilter(rs, args.FilterArgs.ToFilter())
 	h := printHooks{}
 	fmt.Println(parser.SerialiseRecords(rs, h))
 	return nil

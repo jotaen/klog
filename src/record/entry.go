@@ -24,3 +24,15 @@ func (e Entry) ToString() string {
 	}
 	panic("Incomplete switch statement")
 }
+
+func (e Entry) Duration() Duration {
+	switch x := e.Value().(type) {
+	case Range:
+		return x.Duration()
+	case Duration:
+		return x
+	case OpenRange:
+		return NewDuration(0, 0)
+	}
+	panic("Incomplete switch statement")
+}

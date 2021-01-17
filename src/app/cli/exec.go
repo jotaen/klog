@@ -10,6 +10,7 @@ import (
 
 var cli struct {
 	Print  Print  `cmd help:"Show records in a file"`
+	Total  Total  `cmd help:"Sum up the total time"`
 	Edit   Edit   `cmd help:"Open file in editor"`
 	Start  Start  `cmd help:"Start to track"`
 	Widget Widget `cmd help:"Launch menu bar widget (MacOS only)"`

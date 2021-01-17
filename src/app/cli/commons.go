@@ -10,10 +10,10 @@ type FileArgs struct {
 }
 
 type FilterArgs struct {
-	Tags     []string    `short:"t" long:"tag" help:"Only records that contain this tag"`
-	Date     record.Date `short:"d" long:"date" help:"Only records at this date"`
-	AfterEq  record.Date `short:"a" long:"after" help:"Only records at or after this date"`
-	BeforeEq record.Date `short:"b" long:"before" help:"Only records at or before this date"`
+	Tags     []string    `short:"t" name:"tag" help:"Only records that contain this tag"`
+	Date     record.Date `short:"d" name:"date" help:"Only records at this date"`
+	AfterEq  record.Date `short:"a" name:"after" help:"Only records at or after this date"`
+	BeforeEq record.Date `short:"b" name:"before" help:"Only records at or before this date"`
 }
 
 func (args *FilterArgs) ToFilter() service.Filter {

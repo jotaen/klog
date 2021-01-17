@@ -64,7 +64,7 @@ func renderRecords(ctx app.Context) []menuet.MenuItem {
 	now := time.Now()
 	nowTime, _ := record.NewTime(now.Hour(), now.Minute())
 	nowDate, _ := record.NewDateFromTime(now)
-	rs := service.FindFilter(ctx.BookmarkedFile(), service.Filter{
+	rs, _ := service.FindFilter(ctx.BookmarkedFile(), service.Filter{
 		BeforeEq: nowDate, AfterEq: nowDate,
 	})
 	var today record.Record

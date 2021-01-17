@@ -5,6 +5,13 @@ install() {
 	go get -t ./...
 }
 
+build() {
+  cd src
+	go build \
+	  -o ../out/klog \
+	  app/cli/main/main.go
+}
+
 test() {
   cd src
 	go test ./...
@@ -16,8 +23,9 @@ format() {
 }
 
 cli() {
-  cd src/app/cli/main
-	go run main.go $@
+  # When passing in a file, remember to prepend `../`
+  cd src
+	go run app/cli/main/main.go $@
 }
 
 $1 ${@:2}
