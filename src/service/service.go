@@ -1,6 +1,8 @@
-package record
+package service
 
 import (
+	"errors"
+	. "klog/record"
 	"regexp"
 	"strings"
 )
@@ -59,4 +61,39 @@ func TagList(tags ...string) map[string]bool {
 		result[strings.ToLower(t)] = true
 	}
 	return result
+}
+
+
+func QuickStartAt(rs []Record, date Date, time Time) (Record, error) {
+	var recordToAlter *Record
+	for _, r := range rs {
+		if r.Date() == date {
+			recordToAlter = &r
+		}
+	}
+	if recordToAlter == nil {
+		r := NewRecord(date)
+		recordToAlter = &r
+	}
+	(*recordToAlter).StartOpenRange(time, "")
+	return *recordToAlter, nil
+}
+
+func QuickStopAt(rs []Record, date Date, time Time) (Record, error) {
+	var recordToAlter *Record
+	for _, r := range rs {
+		if r.Date() == date && r.OpenRange() != nil {
+			recordToAlter = &r
+		}
+	}
+	if recordToAlter == nil {
+		return nil, errors.New("NO_OPEN_RANGE")
+	}
+	newRange, err := NewRange((*recordToAlter).OpenRange(), time)
+	if err != nil {
+		return nil, err
+	}
+	(*recordToAlter).AddRange(newRange, "") // TODO take over summary
+	(*recordToAlter).StartOpenRange(time, "")
+	return *recordToAlter, nil
 }

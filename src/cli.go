@@ -1,11 +1,11 @@
 package main
 
 import (
-	"klog/app/cli/exec"
+	"klog/app/cli"
 	"os"
 )
 
 func main() {
-	code := exec.Execute(os.Args[1:])
+	code := cli.Execute(os.Args[1:])
 	os.Exit(code)
 }

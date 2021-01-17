@@ -1,32 +1,30 @@
-package commands
+package cli
 
 import (
 	"bufio"
 	"fmt"
 	"klog/app"
-	"klog/app/cli"
-	"klog/record"
 	"os"
 	"time"
 )
 
-var Start cli.Command
+var Start Command
 
 func init() {
-	Start = cli.Command{
+	Start = Command{
 		Name:        "start",
 		Description: "Create a new entry",
 		Main:        start,
 	}
 }
 
-func start(service app.Service, args []string) int {
+func start(ctx app.Context, args []string) int {
 	start := time.Now()
-	date, _ := record.NewDateFromTime(start)
+	//date, _ := record.NewDateFromTime(start)
 
 	{
-		t, _ := record.NewTime(start.Hour(), start.Minute())
-		service.QuickStartAt(date, t)
+		//t, _ := record.NewTime(start.Hour(), start.Minute())
+		//ctx.QuickStartAt(date, t)
 	}
 
 	ticker := time.NewTicker(1 * time.Second)
@@ -52,9 +50,9 @@ func start(service app.Service, args []string) int {
 	}
 
 	{
-		end := time.Now()
-		t, _ := record.CreateTimeFromTime(end)
-		service.QuickStopAt(date, t)
-		return cli.OK
+		//end := time.Now()
+		//t, _ := record.CreateTimeFromTime(end)
+		//ctx.QuickStopAt(date, t)
 	}
+	return OK
 }

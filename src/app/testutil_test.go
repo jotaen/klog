@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-func WithService(fn func(Service)) {
+func WithContext(fn func(Context)) {
 	path := "./tmp.klg"
 	_ = os.Remove(path)
 	file, err := os.Create(path)
@@ -12,7 +12,7 @@ func WithService(fn func(Service)) {
 		panic("Could not create context")
 	}
 	defer file.Close()
-	service := &context{}
-	fn(service)
+	ctx := &context{}
+	fn(ctx)
 	_ = os.Remove(path)
 }

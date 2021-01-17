@@ -4,6 +4,7 @@ import (
 	"github.com/caseymrm/menuet"
 	"klog/app"
 	"klog/record"
+	"klog/service"
 	"time"
 )
 
@@ -16,8 +17,8 @@ func Launch() {
 	menuet.App().Name = "klog widget"
 	menuet.App().Label = "net.jotaen.klog.widget"
 	menuet.App().Children = func() []menuet.MenuItem {
-		service, _ := app.NewServiceWithConfigFiles() // TODO error handling
-		return render(service)
+		ctx, _ := app.NewContextFromEnv() // TODO error handling
+		return render(ctx)
 	}
 
 	go updateTimer()
@@ -31,11 +32,11 @@ func updateTimer() {
 	}
 }
 
-func render(service app.Service) []menuet.MenuItem {
+func render(ctx app.Context) []menuet.MenuItem {
 	var items []menuet.MenuItem
 
-	if service.Input() != nil {
-		items = append(items, renderRecords(service)...)
+	if ctx.BookmarkedFile() != nil {
+		items = append(items, renderRecords(ctx)...)
 		items = append(items, menuet.MenuItem{
 			Type: menuet.Separator,
 		})
@@ -45,10 +46,10 @@ func render(service app.Service) []menuet.MenuItem {
 		Text: "File History",
 		Children: func() []menuet.MenuItem {
 			var items []menuet.MenuItem
-			for _, b := range service.LatestFiles() {
+			for _, b := range ctx.LatestFiles() {
 				items = append(items, menuet.MenuItem{
 					Text:  b,
-					State: service.OutputFilePath() == b,
+					State: ctx.OutputFilePath() == b,
 				})
 			}
 			return items
@@ -58,15 +59,15 @@ func render(service app.Service) []menuet.MenuItem {
 	return items
 }
 
-func renderRecords(service app.Service) []menuet.MenuItem {
+func renderRecords(ctx app.Context) []menuet.MenuItem {
 	var items []menuet.MenuItem
 	now := time.Now()
 	nowTime, _ := record.NewTime(now.Hour(), now.Minute())
 	nowDate, _ := record.NewDateFromTime(now)
-	today := record.Find(nowDate, service.Input())
+	today := service.Find(nowDate, ctx.BookmarkedFile())
 
 	items = append(items, menuet.MenuItem{
-		Text: service.OutputFilePath(),
+		Text: ctx.OutputFilePath(),
 	})
 
 	totalTimeValue := func() string {
@@ -75,7 +76,7 @@ func renderRecords(service app.Service) []menuet.MenuItem {
 				untilNow, _ := record.NewRange(today.OpenRange(), nowTime)
 				if untilNow != nil {
 					result := ""
-					result = record.Total(today).Add(untilNow.Duration()).ToString()
+					result = service.Total(today).Add(untilNow.Duration()).ToString()
 					result += "  "
 					if now.Second()%2 == 0 {
 						result += "◑"
@@ -85,7 +86,7 @@ func renderRecords(service app.Service) []menuet.MenuItem {
 					return result
 				}
 			} else {
-				return record.Total(today).ToString()
+				return service.Total(today).ToString()
 			}
 		}
 		return "–"
@@ -99,9 +100,9 @@ func renderRecords(service app.Service) []menuet.MenuItem {
 		State: isRunning,
 		Clicked: func() {
 			if isRunning {
-				service.QuickStopAt(nowDate, nowTime)
+				//ctx.QuickStopAt(nowDate, nowTime)
 			} else {
-				service.QuickStartAt(nowDate, nowTime)
+				//ctx.QuickStartAt(nowDate, nowTime)
 			}
 		},
 	})

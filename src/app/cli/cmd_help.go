@@ -1,22 +1,21 @@
-package commands
+package cli
 
 import (
 	"fmt"
 	"klog/app"
-	"klog/app/cli"
 )
 
-var Help cli.Command
+var Help Command
 
 func init() {
-	Help = cli.Command{
+	Help = Command{
 		Name:        "help",
 		Description: "Display help",
 		Main:        help,
 	}
 }
 
-func help(_ app.Service, _ []string) int {
+func help(_ app.Context, _ []string) int {
 	fmt.Printf("Help!\n")
-	return cli.OK
+	return OK
 }
