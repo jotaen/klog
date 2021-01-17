@@ -29,7 +29,7 @@ func parseRecord(c Chunk) (Record, error) {
 	if headline.PointerPosition != 0 {
 		return nil, ErrorIllegalWhitespace(NewError(headline, 0, headline.PointerPosition))
 	}
-	dateText := headline.PeekUntil(func(r rune) bool { return r == ' ' })
+	dateText := headline.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
 	date, err := NewDateFromString(dateText.ToString())
 	if err != nil {
 		return nil, ErrorMalformedDate(NewError(headline, headline.PointerPosition, dateText.Length()))
@@ -82,7 +82,7 @@ func parseRecord(c Chunk) (Record, error) {
 		if eLine.IndentationLevel != 1 {
 			return nil, ErrorIllegalIndentation(NewError(eLine, 0, eLine.Length()))
 		}
-		durationCandidate := eLine.PeekUntil(func(r rune) bool { return r == ' ' })
+		durationCandidate := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
 		duration, err := NewDurationFromString(durationCandidate.ToString())
 		if err == nil {
 			eLine.Advance(durationCandidate.Length())
@@ -91,7 +91,7 @@ func parseRecord(c Chunk) (Record, error) {
 			r.AddDuration(duration, Summary(summaryText.ToString()))
 			continue
 		}
-		startCandidate := eLine.PeekUntil(func(r rune) bool { return r == ' ' || r == '-' })
+		startCandidate := eLine.PeekUntil(func(r rune) bool { return r == '-' || IsWhitespace(r) })
 		start, err := NewTimeFromString(startCandidate.ToString())
 		if err != nil {
 			return nil, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, startCandidate.Length()))
@@ -103,7 +103,7 @@ func parseRecord(c Chunk) (Record, error) {
 		}
 		eLine.Advance(1)
 		eLine.SkipWhitespace()
-		endCandidate := eLine.PeekUntil(func(r rune) bool { return r == ' ' })
+		endCandidate := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
 		end, err := NewTimeFromString(endCandidate.ToString())
 		if err != nil { // if there’s an “error” here we assume this entry to be an open range
 			eLine.SkipWhitespace()

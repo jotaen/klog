@@ -36,6 +36,9 @@ func SerialiseRecord(r record.Record) string {
 			text += x.ToString() + " -"
 			break
 		}
+		if e.SummaryAsString() != "" {
+			text += " " + e.SummaryAsString()
+		}
 		text += "\n"
 	}
 	return text

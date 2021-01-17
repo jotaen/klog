@@ -43,7 +43,7 @@ func (t *Text) Advance(increment int) {
 }
 
 func (t *Text) SkipWhitespace() {
-	for t.Peek() == ' ' {
+	for IsWhitespace(t.Peek()) {
 		t.Advance(1)
 	}
 	return

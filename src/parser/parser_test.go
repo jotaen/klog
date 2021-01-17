@@ -32,6 +32,25 @@ func TestParseMinimalDocument(t *testing.T) {
 	assert.Equal(t, Ɀ_Date_(2000, 1, 1), rs[0].Date())
 }
 
+func TestAcceptTabOrSpacesAsIndentation(t *testing.T) {
+	text := `
+2000-01-01
+	8h
+
+2000-05-31
+  6h
+
+2000-05-31
+   6h
+
+2000-05-31
+    6h
+`
+	rs, errs := Parse(text)
+	require.Nil(t, errs)
+	require.Len(t, rs, 4)
+}
+
 func TestParseMultipleRecords(t *testing.T) {
 	text := `
 1999-05-31
@@ -105,7 +124,7 @@ Why is there a summary at the end?
 func TestReportErrorsInHeadline(t *testing.T) {
 	text := `Hello 123
 
-  2020-01-01
+ 2020-01-01
 
 2020-01-01 (asdf)
 
@@ -117,7 +136,7 @@ func TestReportErrorsInHeadline(t *testing.T) {
 	require.Nil(t, rs)
 	require.Len(t, errs, 5)
 	assert.Equal(t, Err{INVALID_VALUE, 1, 0, 5}, toErr(errs[0].(Error)))
-	assert.Equal(t, Err{ILLEGAL_WHITESPACE, 3, 0, 2}, toErr(errs[1].(Error)))
+	assert.Equal(t, Err{ILLEGAL_WHITESPACE, 3, 0, 1}, toErr(errs[1].(Error)))
 	assert.Equal(t, Err{INVALID_VALUE, 5, 12, 5}, toErr(errs[2].(Error)))
 	assert.Equal(t, Err{INVALID_VALUE, 7, 11, 6}, toErr(errs[3].(Error)))
 	assert.Equal(t, Err{INVALID_VALUE, 9, 18, 1}, toErr(errs[4].(Error)))

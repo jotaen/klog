@@ -15,9 +15,15 @@ func SubRune(text []rune, start int, length int) []rune {
 	return text[start : start+length]
 }
 
+func IsWhitespace(r rune) bool {
+	return r == ' ' || r == '\t'
+}
+
 var blankTextPattern = regexp.MustCompile(
 	`^[  \t]*$`, // match space, non-breaking space, tab
 )
+
+var indentationPattern = regexp.MustCompile(`^(\t| {2,4})`)
 
 func SplitIntoChunksOfLines(text string) []Chunk {
 	var chunks []Chunk
@@ -32,13 +38,14 @@ func SplitIntoChunksOfLines(text string) []Chunk {
 			currentChunk = nil
 			continue
 		}
-		if regexp.MustCompile(`^\t`).MatchString(l) {
-			currentIndentation = 1
-		} else {
+		indent := indentationPattern.FindString(l)
+		if indent == "" {
 			currentIndentation = 0
+		} else {
+			currentIndentation = 1
 		}
 		currentChunk = append(currentChunk, Text{
-			Value:            []rune(l)[currentIndentation:],
+			Value:            []rune(l)[len(indent):],
 			IndentationLevel: currentIndentation,
 			LineNumber:       i + 1,
 		})
