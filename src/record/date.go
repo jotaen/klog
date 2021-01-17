@@ -12,6 +12,7 @@ type Date interface {
 	Year() int
 	Month() int
 	Day() int
+	IsAfterOrEqual(Date) bool
 	ToString() string
 }
 
@@ -72,4 +73,8 @@ func (d date) Month() int {
 
 func (d date) Day() int {
 	return d.day
+}
+
+func (d date) IsAfterOrEqual(otherDate Date) bool {
+	return d.ToString() >= otherDate.ToString()
 }

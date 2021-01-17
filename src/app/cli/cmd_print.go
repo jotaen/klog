@@ -7,11 +7,12 @@ import (
 	. "klog/lib/tf"
 	"klog/parser"
 	"klog/record"
+	"klog/service"
 )
 
 type Print struct {
-	FileArgs
 	FilterArgs
+	FileArgs
 }
 
 func (args *Print) Run(ctx *app.Context) error {
@@ -20,6 +21,7 @@ func (args *Print) Run(ctx *app.Context) error {
 		fmt.Println(err)
 		return errors.New("EXECUTION_FAILED")
 	}
+	rs = service.FindFilter(rs, args.FilterArgs.ToFilter())
 	h := printHooks{}
 	fmt.Println(parser.SerialiseRecords(rs, h))
 	return nil
