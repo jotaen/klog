@@ -34,8 +34,8 @@ type printHooks struct{}
 func (h printHooks) PrintDate(d record.Date) string {
 	return Style{Color: "222", IsUnderlined: true}.Format(d.ToString())
 }
-func (h printHooks) PrintShouldTotal(d record.Duration) string {
-	return Style{Color: "213"}.Format(d.ToString())
+func (h printHooks) PrintShouldTotal(d record.Duration, symbol string) string {
+	return Style{Color: "213"}.Format(d.ToString()) + Style{Color: "201"}.Format(symbol)
 }
 func (h printHooks) PrintSummary(s record.Summary) string {
 	txt := s.ToString()

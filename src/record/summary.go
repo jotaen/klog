@@ -11,7 +11,7 @@ func (s Summary) ToString() string {
 	return string(s)
 }
 
-var HashTagPattern = regexp.MustCompile(`#(\p{L}+)`)
+var HashTagPattern = regexp.MustCompile(`#([\p{L}\d_]+)`)
 
 func ContainsOneOfTags(tags map[string]bool, searchText string) bool {
 	for _, t := range HashTagPattern.FindAllStringSubmatch(searchText, -1) {

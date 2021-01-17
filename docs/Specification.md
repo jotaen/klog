@@ -71,8 +71,10 @@ There are two places where *summary* text MAY appear in *records*:
 The purpose of *tags* is to help categorise records and entries.
 
 Any amount of *tags* MAY appear anywhere within *summaries*.
-A *tag* MUST be a sequence of “letters” preceded by a single `#` character,
-e.g. `#commute` or `#sport`.
+A *tag* MUST be a sequence of “letters”, “digits” or the `_` character,
+preceded by a single `#` character,
+e.g. `#gym`, `#24hours` or `#home_office`.
+
 
 ### Entry
 *Entry* is an abstract term for time-related data.
@@ -178,3 +180,4 @@ There SHOULD be a “newline” at the end of the file.
 - “newline”: The LF linefeed character (U+0010), escape sequence `\n`
 - “blank line”: A line that only contains whitespace characters
 - “letter”: A character as defined by the Unicode letter category, regex `\p{L}`
+- “digit” Any of 0, 1, 2, 3, 4, 5, 6, 7, 8, 9

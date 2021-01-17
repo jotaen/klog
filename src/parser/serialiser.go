@@ -23,7 +23,7 @@ func SerialiseRecord(r Record, h FormattingHooks) string {
 	text := ""
 	text += h.PrintDate(r.Date())
 	if r.ShouldTotal() != nil {
-		text += " (" + h.PrintShouldTotal(r.ShouldTotal()) + "!)"
+		text += " (" + h.PrintShouldTotal(r.ShouldTotal(), "!") + ")"
 	}
 	text += "\n"
 	if r.Summary() != "" {
@@ -63,7 +63,7 @@ func SerialiseRecord(r Record, h FormattingHooks) string {
 
 type FormattingHooks interface {
 	PrintDate(Date) string
-	PrintShouldTotal(Duration) string
+	PrintShouldTotal(Duration, string) string
 	PrintSummary(Summary) string
 	PrintRange(Range) string
 	PrintOpenRange(OpenRange) string
@@ -72,8 +72,10 @@ type FormattingHooks interface {
 
 type defaultHooks struct{}
 
-func (h defaultHooks) PrintDate(d Date) string            { return d.ToString() }
-func (h defaultHooks) PrintShouldTotal(d Duration) string { return d.ToString() }
+func (h defaultHooks) PrintDate(d Date) string { return d.ToString() }
+func (h defaultHooks) PrintShouldTotal(d Duration, symbol string) string {
+	return d.ToString() + symbol
+}
 func (h defaultHooks) PrintSummary(s Summary) string      { return string(s) }
 func (h defaultHooks) PrintRange(r Range) string          { return r.ToString() }
 func (h defaultHooks) PrintOpenRange(or OpenRange) string { return or.ToString() }

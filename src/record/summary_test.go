@@ -21,7 +21,7 @@ func TestSummaryCannotContainWhitespaceAtBeginningOfLine(t *testing.T) {
 }
 
 func TestHashTagMatches(t *testing.T) {
-	tags := TagList("this", "THAT")
+	tags := TagList("this", "THAT", "numb3rs", "under_score")
 	for _, txt := range []string{
 		"#this at the beginning",
 		"#this, with punctuation afterwards",
@@ -30,6 +30,8 @@ func TestHashTagMatches(t *testing.T) {
 		"or both #this and #that",
 		"or #that as well (case-insensitive)",
 		"not case sensitive #THIS",
+		"can also contain #numb3rs!",
+		"or #under_score's",
 	} {
 		isMatch := ContainsOneOfTags(tags, txt)
 		assert.True(t, isMatch)
