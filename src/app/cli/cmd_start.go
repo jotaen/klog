@@ -8,13 +8,11 @@ import (
 	"time"
 )
 
-var Start = Command{
-	Name:        "start",
-	Description: "Create a new entry",
-	Main:        start,
+type Start struct {
+	FileArgs
 }
 
-func start(ctx app.Context, args []string) int {
+func (args *Start) Run(ctx *app.Context) error {
 	start := time.Now()
 	//date, _ := record.NewDateFromTime(start)
 
@@ -50,5 +48,5 @@ func start(ctx app.Context, args []string) int {
 		//t, _ := record.CreateTimeFromTime(end)
 		//ctx.QuickStopAt(date, t)
 	}
-	return OK
+	return nil
 }

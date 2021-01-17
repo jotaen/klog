@@ -16,8 +16,8 @@ format() {
 }
 
 cli() {
-  cd src
-	go run cli.go $@
+  cd src/app/cli/main
+	go run main.go $@
 }
 
 $1 ${@:2}

@@ -5,13 +5,10 @@ import (
 	systray "klog/app/mac_widget"
 )
 
-var Widget = Command{
-	Name:        "widget",
-	Description: "Launch widget in systray",
-	Main:        widget,
+type Widget struct {
 }
 
-func widget(_ app.Context, _ []string) int {
+func (args *Print) Widget(ctx *app.Context) error {
 	systray.Launch()
-	return OK
+	return nil
 }

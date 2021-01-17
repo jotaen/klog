@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	code := cli.Execute(os.Args[1:])
+	code := cli.Execute()
 	os.Exit(code)
 }

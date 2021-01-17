@@ -1,45 +1,32 @@
-// Must be in separate package due to import cycle
 package cli
 
 import (
+	"fmt"
+	"github.com/alecthomas/kong"
 	"klog/app"
 )
 
-type Command struct {
-	Main        func(app.Context, []string) int
-	Name        string
-	Description string
+var cli struct {
+	Print  Print  `cmd help:"Show records in a file"`
+	Edit   Edit   `cmd help:"Open file in editor"`
+	Start  Start  `cmd help:"Start to track"`
+	Widget Widget `cmd help:"Launch menu bar widget (MacOS only)"`
 }
 
-const (
-	OK                   = 0
-	EXECUTION_FAILED     = 1
-	INITIALISATION_ERROR = 2
-	SUBCOMMAND_NOT_FOUND = 3
-	INVALID_CLI_ARGS     = 4
-)
-
-var allCommands = []Command{
-	Help,
-	Print,
-	Edit,
-	Start,
-	Widget,
-}
-
-func Execute(args []string) int {
+func Execute() int {
 	ctx, err := app.NewContextFromEnv()
 	if err != nil {
-		return INITIALISATION_ERROR
+		return -1
 	}
-	if len(args) == 0 {
-		args = []string{"help"}
+	args := kong.Parse(
+		&cli,
+		kong.Name("klog"),
+		kong.Description("klog time tracking\nCommand line interface for interacting with `.klg` files."),
+	)
+	err = args.Run(ctx)
+	if err != nil {
+		fmt.Println(err)
+		return -1
 	}
-	subcommand := args[0]
-	for _, cmd := range allCommands {
-		if cmd.Name == subcommand {
-			return cmd.Main(*ctx, args[1:])
-		}
-	}
-	return SUBCOMMAND_NOT_FOUND
+	return 0
 }

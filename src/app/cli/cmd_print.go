@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"klog/app"
 	. "klog/lib/tf"
@@ -8,25 +9,20 @@ import (
 	"klog/record"
 )
 
-var Print = Command{
-	Name:        "print",
-	Description: "Print a file",
-	Main:        print,
+type Print struct {
+	FileArgs
+	FilterArgs
 }
 
-func print(ctx app.Context, args []string) int {
-	if len(args) == 0 {
-		fmt.Println("Please specify a file")
-		return INVALID_CLI_ARGS
-	}
-	rs, err := ctx.Read("../" + args[0])
+func (args *Print) Run(ctx *app.Context) error {
+	rs, err := ctx.Read("../../../../" + args.File)
 	if err != nil {
 		fmt.Println(err)
-		return EXECUTION_FAILED
+		return errors.New("EXECUTION_FAILED")
 	}
 	h := printHooks{}
 	fmt.Println(parser.SerialiseRecords(rs, h))
-	return OK
+	return nil
 }
 
 type printHooks struct{}

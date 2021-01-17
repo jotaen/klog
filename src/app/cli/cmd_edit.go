@@ -1,19 +1,18 @@
 package cli
 
 import (
+	"errors"
 	"klog/app"
 )
 
-var Edit = Command{
-	Name:        "edit",
-	Description: "Open file in editor",
-	Main:        edit,
+type Edit struct {
+	FileArgs
 }
 
-func edit(ctx app.Context, args []string) int {
+func (args *Edit) Run(ctx *app.Context) error {
 	err := ctx.OpenInEditor()
 	if err != nil {
-		return EXECUTION_FAILED
+		return errors.New("EXECUTION_FAILED")
 	}
-	return OK
+	return nil
 }
