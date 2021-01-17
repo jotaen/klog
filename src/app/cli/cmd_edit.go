@@ -4,14 +4,10 @@ import (
 	"klog/app"
 )
 
-var Edit Command
-
-func init() {
-	Edit = Command{
-		Name:        "edit",
-		Description: "Open file in editor",
-		Main:        edit,
-	}
+var Edit = Command{
+	Name:        "edit",
+	Description: "Open file in editor",
+	Main:        edit,
 }
 
 func edit(ctx app.Context, args []string) int {

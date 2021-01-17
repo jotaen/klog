@@ -5,14 +5,10 @@ import (
 	systray "klog/app/mac_widget"
 )
 
-var Widget Command
-
-func init() {
-	Widget = Command{
-		Name:        "widget",
-		Description: "Launch widget in systray",
-		Main:        widget,
-	}
+var Widget = Command{
+	Name:        "widget",
+	Description: "Launch widget in systray",
+	Main:        widget,
 }
 
 func widget(_ app.Context, _ []string) int {

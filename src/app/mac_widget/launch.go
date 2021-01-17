@@ -18,7 +18,7 @@ func Launch() {
 	menuet.App().Label = "net.jotaen.klog.widget"
 	menuet.App().Children = func() []menuet.MenuItem {
 		ctx, _ := app.NewContextFromEnv() // TODO error handling
-		return render(ctx)
+		return render(*ctx)
 	}
 
 	go updateTimer()

@@ -35,10 +35,10 @@ func Execute(args []string) int {
 	if len(args) == 0 {
 		args = []string{"help"}
 	}
-	reqSubCmd := args[0]
+	subcommand := args[0]
 	for _, cmd := range allCommands {
-		if cmd.Name == reqSubCmd {
-			return cmd.Main(ctx, args[1:])
+		if cmd.Name == subcommand {
+			return cmd.Main(*ctx, args[1:])
 		}
 	}
 	return SUBCOMMAND_NOT_FOUND

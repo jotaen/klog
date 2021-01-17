@@ -5,14 +5,10 @@ import (
 	"klog/app"
 )
 
-var Help Command
-
-func init() {
-	Help = Command{
-		Name:        "help",
-		Description: "Display help",
-		Main:        help,
-	}
+var Help = Command{
+	Name:        "help",
+	Description: "Display help",
+	Main:        help,
 }
 
 func help(_ app.Context, _ []string) int {

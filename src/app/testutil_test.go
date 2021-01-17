@@ -12,7 +12,7 @@ func WithContext(fn func(Context)) {
 		panic("Could not create context")
 	}
 	defer file.Close()
-	ctx := &context{}
+	ctx := Context{}
 	fn(ctx)
 	_ = os.Remove(path)
 }

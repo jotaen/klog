@@ -63,7 +63,6 @@ func TagList(tags ...string) map[string]bool {
 	return result
 }
 
-
 func QuickStartAt(rs []Record, date Date, time Time) (Record, error) {
 	var recordToAlter *Record
 	for _, r := range rs {

@@ -8,14 +8,10 @@ import (
 	"time"
 )
 
-var Start Command
-
-func init() {
-	Start = Command{
-		Name:        "start",
-		Description: "Create a new entry",
-		Main:        start,
-	}
+var Start = Command{
+	Name:        "start",
+	Description: "Create a new entry",
+	Main:        start,
 }
 
 func start(ctx app.Context, args []string) int {

@@ -1,34 +1,27 @@
 package app
 
 import (
+	"errors"
+	"klog/parser"
 	"klog/record"
 	"os/exec"
 	"strings"
 )
 
-type Context interface {
-	Config() Config
-	BookmarkedFile() []record.Record
-	OutputFilePath() string
-	LatestFiles() []string
-	OpenInEditor() error
-	OpenInFileBrowser(string) error
-}
-
-type context struct {
+type Context struct {
 	outputFilePath string
 	config         Config
 	history        []string
 }
 
-func NewContext(config Config, history []string) (Context, error) {
-	return &context{
+func NewContext(config Config, history []string) (*Context, error) {
+	return &Context{
 		config:  config,
 		history: history,
 	}, nil
 }
 
-func NewContextFromEnv() (Context, error) {
+func NewContextFromEnv() (*Context, error) {
 	config, err := func() (Config, error) {
 		configToml, err := readFile("~/.klog.toml")
 		if err != nil {
@@ -52,29 +45,41 @@ func NewContextFromEnv() (Context, error) {
 	return NewContext(config, history)
 }
 
-func (c *context) Config() Config {
+func (c *Context) Config() Config {
 	return Config{} // TODO
 }
 
-func (c *context) BookmarkedFile() []record.Record {
+func (c *Context) Read(path string) ([]record.Record, error) {
+	text, err := readFile(path)
+	if err != nil {
+		return nil, errors.New("NO_SUCH_FILE")
+	}
+	rs, errs := parser.Parse(text)
+	if len(errs) > 0 {
+		return nil, errors.New("PARSING_FAILED")
+	}
+	return rs, nil
+}
+
+func (c *Context) BookmarkedFile() []record.Record {
 	return nil // TODO
 }
 
-func (c *context) OutputFilePath() string {
+func (c *Context) OutputFilePath() string {
 	return c.outputFilePath
 }
 
-func (c *context) LatestFiles() []string {
+func (c *Context) LatestFiles() []string {
 	return c.history
 }
 
-func (c *context) OpenInEditor() error {
+func (c *Context) OpenInEditor() error {
 	// open -t ...
 	cmd := exec.Command("subl", c.outputFilePath)
 	return cmd.Run()
 }
 
-func (c *context) OpenInFileBrowser(path string) error {
+func (c *Context) OpenInFileBrowser(path string) error {
 	cmd := exec.Command("open", path)
 	return cmd.Run()
 }

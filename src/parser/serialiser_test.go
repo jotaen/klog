@@ -7,12 +7,12 @@ import (
 )
 
 func TestSerialiseNoRecordsToEmptyString(t *testing.T) {
-	text := ToPlainText(nil)
+	text := SerialiseRecords(nil)
 	assert.Equal(t, "", text)
 }
 
 func TestSerialiseEndsWithNewlineIfContainsContent(t *testing.T) {
-	text := ToPlainText([]Record{
+	text := SerialiseRecords([]Record{
 		NewRecord(Ɀ_Date_(2020, 01, 15)),
 	})
 	lastChar := []rune(text)[len(text)-1]
@@ -20,7 +20,7 @@ func TestSerialiseEndsWithNewlineIfContainsContent(t *testing.T) {
 }
 
 func TestSerialiseRecordWithMinimalRecord(t *testing.T) {
-	text := ToPlainText([]Record{
+	text := SerialiseRecords([]Record{
 		NewRecord(Ɀ_Date_(2020, 01, 15)),
 	})
 	assert.Equal(t, `2020-01-15
@@ -37,7 +37,7 @@ func TestSerialiseRecordWithCompleteRecord(t *testing.T) {
 	r.AddDuration(NewDuration(-1, -51), "")
 	r.AddRange(Ɀ_Range_(Ɀ_TimeYesterday_(23, 23), Ɀ_Time_(4, 3)), "")
 	r.AddRange(Ɀ_Range_(Ɀ_Time_(22, 0), Ɀ_TimeTomorrow_(0, 1)), "")
-	text := ToPlainText([]Record{r})
+	text := SerialiseRecords([]Record{r})
 	assert.Equal(t, `2020-01-15 (7h30m!)
 This is a
 multiline summary
@@ -47,5 +47,16 @@ multiline summary
 	-1h51m
 	<23:23 - 4:03
 	22:00 - 0:01>
+`, text)
+}
+
+func TestSerialiseMultipleRecords(t *testing.T) {
+	text := SerialiseRecords([]Record{
+		NewRecord(Ɀ_Date_(2020, 01, 15)),
+		NewRecord(Ɀ_Date_(2020, 01, 20)),
+	})
+	assert.Equal(t, `2020-01-15
+
+2020-01-20
 `, text)
 }
