@@ -64,7 +64,7 @@ func renderRecords(ctx app.Context) []menuet.MenuItem {
 	now := time.Now()
 	nowTime, _ := record.NewTime(now.Hour(), now.Minute())
 	nowDate, _ := record.NewDateFromTime(now)
-	today := service.Find(nowDate, ctx.BookmarkedFile())
+	today := service.Find(ctx.BookmarkedFile(), nowDate)
 
 	items = append(items, menuet.MenuItem{
 		Text: ctx.OutputFilePath(),

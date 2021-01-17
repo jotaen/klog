@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	. "klog/record"
-	"strings"
 )
 
 func Total(r Record) Duration {
@@ -21,7 +20,7 @@ func Total(r Record) Duration {
 	return total
 }
 
-func Find(date Date, rs []Record) Record {
+func Find(rs []Record, date Date) Record {
 	for _, r := range rs {
 		if r.Date() == date {
 			return r
@@ -41,23 +40,6 @@ func FindEntriesWithHashtags(tags map[string]bool, r Record) []Entry {
 		}
 	}
 	return matches
-}
-
-func ContainsOneOfTags(tags map[string]bool, searchText string) bool {
-	for _, t := range HashTagPattern.FindAllStringSubmatch(searchText, -1) {
-		if tags[strings.ToLower(t[1])] == true {
-			return true
-		}
-	}
-	return false
-}
-
-func TagList(tags ...string) map[string]bool {
-	result := map[string]bool{}
-	for _, t := range tags {
-		result[strings.ToLower(t)] = true
-	}
-	return result
 }
 
 func QuickStartAt(rs []Record, date Date, time Time) (Record, error) {
