@@ -11,22 +11,8 @@ func TestInitialiseRecord(t *testing.T) {
 	r := NewRecord(date)
 	assert.Equal(t, r.Date(), date)
 	assert.Equal(t, nil, r.ShouldTotal())
-	assert.Equal(t, "", r.Summary())
+	assert.Equal(t, Summary(""), r.Summary())
 	assert.Len(t, r.Entries(), 0)
-}
-
-func TestSavesSummary(t *testing.T) {
-	r := NewRecord(Ɀ_Date_(2020, 1, 1))
-	err := r.SetSummary("Hello World")
-	require.Nil(t, err)
-	assert.Equal(t, "Hello World", r.Summary())
-}
-
-func TestSummaryCannotContainWhitespaceAtBeginningOfLine(t *testing.T) {
-	r := NewRecord(Ɀ_Date_(2020, 1, 1))
-	require.Error(t, r.SetSummary("Hello\n World"))
-	require.Error(t, r.SetSummary(" Hello"))
-	assert.Equal(t, "", r.Summary()) // Still empty
 }
 
 func TestSavesShouldTotal(t *testing.T) {
@@ -43,9 +29,9 @@ func TestAddRanges(t *testing.T) {
 	w.AddRange(range2, "Range 2")
 	require.Len(t, w.Entries(), 2)
 	assert.Equal(t, range1, w.Entries()[0].Value())
-	assert.Equal(t, "Range 1", w.Entries()[0].SummaryAsString())
+	assert.Equal(t, Summary("Range 1"), w.Entries()[0].Summary())
 	assert.Equal(t, range2, w.Entries()[1].Value())
-	assert.Equal(t, "Range 2", w.Entries()[1].SummaryAsString())
+	assert.Equal(t, Summary("Range 2"), w.Entries()[1].Summary())
 }
 
 func TestStartOpenRange(t *testing.T) {
@@ -55,7 +41,7 @@ func TestStartOpenRange(t *testing.T) {
 	_ = w.StartOpenRange(time, "Open Range")
 	require.Len(t, w.Entries(), 1)
 	assert.Equal(t, time, w.Entries()[0].Value())
-	assert.Equal(t, "Open Range", w.Entries()[0].SummaryAsString())
+	assert.Equal(t, Summary("Open Range"), w.Entries()[0].Summary())
 }
 
 func TestCannotStartSecondOpenRange(t *testing.T) {
@@ -77,7 +63,7 @@ func TestCloseOpenRange(t *testing.T) {
 	assert.Nil(t, w.OpenRange())
 	require.Len(t, w.Entries(), 1)
 	assert.Equal(t, Ɀ_Range_(start, end), w.Entries()[0].Value())
-	assert.Equal(t, "Started", w.Entries()[0].SummaryAsString())
+	assert.Equal(t, Summary("Started"), w.Entries()[0].Summary())
 }
 
 func TestCloseOpenRangeFailsIfResultingRangeIsInvalid(t *testing.T) {
@@ -99,7 +85,7 @@ func TestAddDurations(t *testing.T) {
 	w.AddDuration(d2, "Duration 2")
 	require.Len(t, w.Entries(), 2)
 	assert.Equal(t, d1, w.Entries()[0].Value())
-	assert.Equal(t, "Duration 1", w.Entries()[0].SummaryAsString())
+	assert.Equal(t, Summary("Duration 1"), w.Entries()[0].Summary())
 	assert.Equal(t, d2, w.Entries()[1].Value())
-	assert.Equal(t, "Duration 2", w.Entries()[1].SummaryAsString())
+	assert.Equal(t, Summary("Duration 2"), w.Entries()[1].Summary())
 }

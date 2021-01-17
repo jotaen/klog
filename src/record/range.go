@@ -8,6 +8,7 @@ type Range interface {
 	Start() Time
 	End() Time
 	Duration() Duration
+	ToString() string
 }
 
 type timeRange struct {
@@ -37,4 +38,8 @@ func (tr timeRange) Duration() Duration {
 	start := tr.Start().MidnightOffset().InMinutes()
 	end := tr.End().MidnightOffset().InMinutes()
 	return NewDuration(0, end-start)
+}
+
+func (tr timeRange) ToString() string {
+	return tr.Start().ToString() + " - " + tr.End().ToString()
 }

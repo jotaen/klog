@@ -61,6 +61,12 @@ func TestParsingNegativeDuration(t *testing.T) {
 	assert.Equal(t, NewDuration(-2, -5), duration)
 }
 
+func TestParsingExplicitlyPositiveDuration(t *testing.T) {
+	duration, err := NewDurationFromString("+2h5m")
+	assert.Nil(t, err)
+	assert.Equal(t, NewDuration(2, 5), duration)
+}
+
 func TestParsingIgnoresSpaceInBetween(t *testing.T) {
 	for _, d := range []string{
 		"1h11m",

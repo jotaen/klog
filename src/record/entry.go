@@ -7,8 +7,8 @@ type Entry struct {
 	summary Summary
 }
 
-func (e Entry) SummaryAsString() string {
-	return string(e.summary)
+func (e Entry) Summary() Summary {
+	return e.summary
 }
 
 func (e Entry) Value() interface{} {

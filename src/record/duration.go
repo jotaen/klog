@@ -53,7 +53,7 @@ func (d duration) ToString() string {
 	return result
 }
 
-var durationPattern = regexp.MustCompile(`^(-)?((\d+)h)? ?((\d+)m)?$`)
+var durationPattern = regexp.MustCompile(`^(-|\+)?((\d+)h)? ?((\d+)m)?$`)
 
 func NewDurationFromString(hhmm string) (Duration, error) {
 	match := durationPattern.FindStringSubmatch(hhmm)

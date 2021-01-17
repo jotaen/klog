@@ -70,8 +70,8 @@ func TestHashTagAllEntriesAreReturnedIfMatchIsInSummary(t *testing.T) {
 	r.AddRange(record.Ɀ_Range_(record.Ɀ_Time_(13, 49), record.Ɀ_Time_(17, 12)), "Bar")
 	es := FindEntriesWithHashtags(TagList("that"), r)
 	require.Len(t, es, 2)
-	assert.Equal(t, es[0].SummaryAsString(), "Foo")
-	assert.Equal(t, es[1].SummaryAsString(), "Bar")
+	assert.Equal(t, record.Summary("Foo"), es[0].Summary())
+	assert.Equal(t, record.Summary("Bar"), es[1].Summary())
 }
 
 func TestHashTagReturnsEntriesThatMatch(t *testing.T) {
@@ -81,5 +81,5 @@ func TestHashTagReturnsEntriesThatMatch(t *testing.T) {
 	r.AddRange(record.Ɀ_Range_(record.Ɀ_Time_(13, 49), record.Ɀ_Time_(17, 12)), "Bar #barbaz")
 	es := FindEntriesWithHashtags(TagList("fizzbuzz"), r)
 	require.Len(t, es, 1)
-	assert.Equal(t, es[0].SummaryAsString(), "Foo #fizzbuzz")
+	assert.Equal(t, record.Summary("Foo #fizzbuzz"), es[0].Summary())
 }

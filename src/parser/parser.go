@@ -70,7 +70,7 @@ func parseRecord(c Chunk) (Record, error) {
 		if i > 0 {
 			lineBreak = "\n"
 		}
-		err := r.SetSummary(r.Summary() + lineBreak + sLine.ToString())
+		err := r.SetSummary(r.Summary().ToString() + lineBreak + sLine.ToString())
 		c = c[1:]
 		if err != nil {
 			return nil, ErrorMalformedSummary(NewError(sLine, 0, sLine.Length()))

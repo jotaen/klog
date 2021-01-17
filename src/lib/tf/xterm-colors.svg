@@ -1,0 +1,1564 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="960" height="1400">
+  <style>
+     /* rect { stroke: black; stroke-width:0.15pt; } */
+     text {
+       font-size:9pt;
+       font-family: "Bitstream Vera Sans Mono", "Droid Sans Mono", "Menlo", "Monaco", "Consolas", "Inconsolata", "Courier New";
+       fill: white;
+     }
+     .head {
+       font-family: 'Helvetica Neue', Helvetica, Calibri, Arial, sans-serif;
+       font-size: 20pt;
+     }
+     .tiny { font-size: 6pt; }
+  </style>
+  <rect x="0" y="0" width="960" height="1400" style="fill:black"/>
+  <g transform="translate(0,0)">
+      <g transform="translate(0,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#000000;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >000000</text>
+    <text x="2" y="57" style="fill:#ffffff;" >016</text>
+  </g>
+
+  <g transform="translate(0,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00005f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >00005f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >017</text>
+  </g>
+
+  <g transform="translate(0,120)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#000087;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >000087</text>
+    <text x="2" y="57" style="fill:#ffffff;" >018</text>
+  </g>
+
+  <g transform="translate(0,180)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#0000af;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >0000af</text>
+    <text x="2" y="57" style="fill:#ffffff;" >019</text>
+  </g>
+
+  <g transform="translate(0,240)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#0000d7;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >0000d7</text>
+    <text x="2" y="57" style="fill:#ffffff;" >020</text>
+  </g>
+
+  <g transform="translate(0,300)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#0000ff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >0000ff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >021</text>
+  </g>
+
+  <g transform="translate(80,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#005f00;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >005f00</text>
+    <text x="2" y="57" style="fill:#ffffff;" >022</text>
+  </g>
+
+  <g transform="translate(80,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#005f5f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >005f5f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >023</text>
+  </g>
+
+  <g transform="translate(80,120)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#005f87;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >005f87</text>
+    <text x="2" y="57" style="fill:#ffffff;" >024</text>
+  </g>
+
+  <g transform="translate(80,180)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#005faf;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >005faf</text>
+    <text x="2" y="57" style="fill:#ffffff;" >025</text>
+  </g>
+
+  <g transform="translate(80,240)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#005fd7;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >005fd7</text>
+    <text x="2" y="57" style="fill:#ffffff;" >026</text>
+  </g>
+
+  <g transform="translate(80,300)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#005fff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >005fff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >027</text>
+  </g>
+
+  <g transform="translate(160,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#008700;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >008700</text>
+    <text x="2" y="57" style="fill:#ffffff;" >028</text>
+  </g>
+
+  <g transform="translate(160,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00875f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >00875f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >029</text>
+  </g>
+
+  <g transform="translate(160,120)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#008787;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >008787</text>
+    <text x="2" y="57" style="fill:#ffffff;" >030</text>
+  </g>
+
+  <g transform="translate(160,180)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#0087af;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >0087af</text>
+    <text x="2" y="57" style="fill:#ffffff;" >031</text>
+  </g>
+
+  <g transform="translate(160,240)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#0087d7;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >0087d7</text>
+    <text x="2" y="57" style="fill:#ffffff;" >032</text>
+  </g>
+
+  <g transform="translate(160,300)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#0087ff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >0087ff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >033</text>
+  </g>
+
+  <g transform="translate(240,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00af00;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >00af00</text>
+    <text x="2" y="57" style="fill:#ffffff;" >034</text>
+  </g>
+
+  <g transform="translate(240,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00af5f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >00af5f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >035</text>
+  </g>
+
+  <g transform="translate(240,120)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00af87;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >00af87</text>
+    <text x="2" y="57" style="fill:#ffffff;" >036</text>
+  </g>
+
+  <g transform="translate(240,180)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00afaf;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >00afaf</text>
+    <text x="2" y="57" style="fill:#ffffff;" >037</text>
+  </g>
+
+  <g transform="translate(240,240)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00afd7;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00afd7</text>
+    <text x="2" y="57" style="fill:#000000;" >038</text>
+  </g>
+
+  <g transform="translate(240,300)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00afff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00afff</text>
+    <text x="2" y="57" style="fill:#000000;" >039</text>
+  </g>
+
+  <g transform="translate(320,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00d700;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00d700</text>
+    <text x="2" y="57" style="fill:#000000;" >040</text>
+  </g>
+
+  <g transform="translate(320,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00d75f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00d75f</text>
+    <text x="2" y="57" style="fill:#000000;" >041</text>
+  </g>
+
+  <g transform="translate(320,120)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00d787;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00d787</text>
+    <text x="2" y="57" style="fill:#000000;" >042</text>
+  </g>
+
+  <g transform="translate(320,180)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00d7af;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00d7af</text>
+    <text x="2" y="57" style="fill:#000000;" >043</text>
+  </g>
+
+  <g transform="translate(320,240)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00d7d7;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00d7d7</text>
+    <text x="2" y="57" style="fill:#000000;" >044</text>
+  </g>
+
+  <g transform="translate(320,300)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00d7ff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00d7ff</text>
+    <text x="2" y="57" style="fill:#000000;" >045</text>
+  </g>
+
+  <g transform="translate(400,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00ff00;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00ff00</text>
+    <text x="2" y="57" style="fill:#000000;" >046</text>
+  </g>
+
+  <g transform="translate(400,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00ff5f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00ff5f</text>
+    <text x="2" y="57" style="fill:#000000;" >047</text>
+  </g>
+
+  <g transform="translate(400,120)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00ff87;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00ff87</text>
+    <text x="2" y="57" style="fill:#000000;" >048</text>
+  </g>
+
+  <g transform="translate(400,180)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00ffaf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00ffaf</text>
+    <text x="2" y="57" style="fill:#000000;" >049</text>
+  </g>
+
+  <g transform="translate(400,240)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00ffd7;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00ffd7</text>
+    <text x="2" y="57" style="fill:#000000;" >050</text>
+  </g>
+
+  <g transform="translate(400,300)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00ffff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00ffff</text>
+    <text x="2" y="57" style="fill:#000000;" >051</text>
+  </g>
+
+  <g transform="translate(480,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5fff00;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5fff00</text>
+    <text x="2" y="57" style="fill:#000000;" >082</text>
+  </g>
+
+  <g transform="translate(480,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5fff5f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5fff5f</text>
+    <text x="2" y="57" style="fill:#000000;" >083</text>
+  </g>
+
+  <g transform="translate(480,120)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5fff87;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5fff87</text>
+    <text x="2" y="57" style="fill:#000000;" >084</text>
+  </g>
+
+  <g transform="translate(480,180)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5fffaf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5fffaf</text>
+    <text x="2" y="57" style="fill:#000000;" >085</text>
+  </g>
+
+  <g transform="translate(480,240)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5fffd7;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5fffd7</text>
+    <text x="2" y="57" style="fill:#000000;" >086</text>
+  </g>
+
+  <g transform="translate(480,300)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5fffff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5fffff</text>
+    <text x="2" y="57" style="fill:#000000;" >087</text>
+  </g>
+
+  <g transform="translate(560,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5fd700;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5fd700</text>
+    <text x="2" y="57" style="fill:#000000;" >076</text>
+  </g>
+
+  <g transform="translate(560,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5fd75f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5fd75f</text>
+    <text x="2" y="57" style="fill:#000000;" >077</text>
+  </g>
+
+  <g transform="translate(560,120)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5fd787;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5fd787</text>
+    <text x="2" y="57" style="fill:#000000;" >078</text>
+  </g>
+
+  <g transform="translate(560,180)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5fd7af;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5fd7af</text>
+    <text x="2" y="57" style="fill:#000000;" >079</text>
+  </g>
+
+  <g transform="translate(560,240)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5fd7d7;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5fd7d7</text>
+    <text x="2" y="57" style="fill:#000000;" >080</text>
+  </g>
+
+  <g transform="translate(560,300)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5fd7ff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5fd7ff</text>
+    <text x="2" y="57" style="fill:#000000;" >081</text>
+  </g>
+
+  <g transform="translate(640,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5faf00;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5faf00</text>
+    <text x="2" y="57" style="fill:#ffffff;" >070</text>
+  </g>
+
+  <g transform="translate(640,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5faf5f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5faf5f</text>
+    <text x="2" y="57" style="fill:#000000;" >071</text>
+  </g>
+
+  <g transform="translate(640,120)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5faf87;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5faf87</text>
+    <text x="2" y="57" style="fill:#000000;" >072</text>
+  </g>
+
+  <g transform="translate(640,180)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5fafaf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5fafaf</text>
+    <text x="2" y="57" style="fill:#000000;" >073</text>
+  </g>
+
+  <g transform="translate(640,240)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5fafd7;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5fafd7</text>
+    <text x="2" y="57" style="fill:#000000;" >074</text>
+  </g>
+
+  <g transform="translate(640,300)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5fafff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >5fafff</text>
+    <text x="2" y="57" style="fill:#000000;" >075</text>
+  </g>
+
+  <g transform="translate(720,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f8700;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f8700</text>
+    <text x="2" y="57" style="fill:#ffffff;" >064</text>
+  </g>
+
+  <g transform="translate(720,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f875f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f875f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >065</text>
+  </g>
+
+  <g transform="translate(720,120)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f8787;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f8787</text>
+    <text x="2" y="57" style="fill:#ffffff;" >066</text>
+  </g>
+
+  <g transform="translate(720,180)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f87af;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f87af</text>
+    <text x="2" y="57" style="fill:#ffffff;" >067</text>
+  </g>
+
+  <g transform="translate(720,240)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f87d7;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f87d7</text>
+    <text x="2" y="57" style="fill:#ffffff;" >068</text>
+  </g>
+
+  <g transform="translate(720,300)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f87ff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f87ff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >069</text>
+  </g>
+
+  <g transform="translate(800,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f5f00;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f5f00</text>
+    <text x="2" y="57" style="fill:#ffffff;" >058</text>
+  </g>
+
+  <g transform="translate(800,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f5f5f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f5f5f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >059</text>
+  </g>
+
+  <g transform="translate(800,120)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f5f87;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f5f87</text>
+    <text x="2" y="57" style="fill:#ffffff;" >060</text>
+  </g>
+
+  <g transform="translate(800,180)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f5faf;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f5faf</text>
+    <text x="2" y="57" style="fill:#ffffff;" >061</text>
+  </g>
+
+  <g transform="translate(800,240)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f5fd7;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f5fd7</text>
+    <text x="2" y="57" style="fill:#ffffff;" >062</text>
+  </g>
+
+  <g transform="translate(800,300)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f5fff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f5fff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >063</text>
+  </g>
+
+  <g transform="translate(880,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f0000;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f0000</text>
+    <text x="2" y="57" style="fill:#ffffff;" >052</text>
+  </g>
+
+  <g transform="translate(880,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f005f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f005f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >053</text>
+  </g>
+
+  <g transform="translate(880,120)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f0087;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f0087</text>
+    <text x="2" y="57" style="fill:#ffffff;" >054</text>
+  </g>
+
+  <g transform="translate(880,180)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f00af;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f00af</text>
+    <text x="2" y="57" style="fill:#ffffff;" >055</text>
+  </g>
+
+  <g transform="translate(880,240)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f00d7;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f00d7</text>
+    <text x="2" y="57" style="fill:#ffffff;" >056</text>
+  </g>
+
+  <g transform="translate(880,300)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#5f00ff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >5f00ff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >057</text>
+  </g>
+
+  <g transform="translate(0,380)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#8700ff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >8700ff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >093</text>
+  </g>
+
+  <g transform="translate(0,440)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#8700d7;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >8700d7</text>
+    <text x="2" y="57" style="fill:#ffffff;" >092</text>
+  </g>
+
+  <g transform="translate(0,500)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#8700af;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >8700af</text>
+    <text x="2" y="57" style="fill:#ffffff;" >091</text>
+  </g>
+
+  <g transform="translate(0,560)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#870087;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >870087</text>
+    <text x="2" y="57" style="fill:#ffffff;" >090</text>
+  </g>
+
+  <g transform="translate(0,620)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87005f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >87005f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >089</text>
+  </g>
+
+  <g transform="translate(0,680)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#870000;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >870000</text>
+    <text x="2" y="57" style="fill:#ffffff;" >088</text>
+  </g>
+
+  <g transform="translate(80,380)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#875fff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >875fff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >099</text>
+  </g>
+
+  <g transform="translate(80,440)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#875fd7;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >875fd7</text>
+    <text x="2" y="57" style="fill:#ffffff;" >098</text>
+  </g>
+
+  <g transform="translate(80,500)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#875faf;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >875faf</text>
+    <text x="2" y="57" style="fill:#ffffff;" >097</text>
+  </g>
+
+  <g transform="translate(80,560)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#875f87;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >875f87</text>
+    <text x="2" y="57" style="fill:#ffffff;" >096</text>
+  </g>
+
+  <g transform="translate(80,620)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#875f5f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >875f5f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >095</text>
+  </g>
+
+  <g transform="translate(80,680)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#875f00;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >875f00</text>
+    <text x="2" y="57" style="fill:#ffffff;" >094</text>
+  </g>
+
+  <g transform="translate(160,380)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#8787ff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >8787ff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >105</text>
+  </g>
+
+  <g transform="translate(160,440)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#8787d7;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >8787d7</text>
+    <text x="2" y="57" style="fill:#ffffff;" >104</text>
+  </g>
+
+  <g transform="translate(160,500)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#8787af;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >8787af</text>
+    <text x="2" y="57" style="fill:#ffffff;" >103</text>
+  </g>
+
+  <g transform="translate(160,560)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#878787;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >878787</text>
+    <text x="2" y="57" style="fill:#ffffff;" >102</text>
+  </g>
+
+  <g transform="translate(160,620)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87875f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >87875f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >101</text>
+  </g>
+
+  <g transform="translate(160,680)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#878700;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >878700</text>
+    <text x="2" y="57" style="fill:#ffffff;" >100</text>
+  </g>
+
+  <g transform="translate(240,380)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87afff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87afff</text>
+    <text x="2" y="57" style="fill:#000000;" >111</text>
+  </g>
+
+  <g transform="translate(240,440)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87afd7;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87afd7</text>
+    <text x="2" y="57" style="fill:#000000;" >110</text>
+  </g>
+
+  <g transform="translate(240,500)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87afaf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87afaf</text>
+    <text x="2" y="57" style="fill:#000000;" >109</text>
+  </g>
+
+  <g transform="translate(240,560)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87af87;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87af87</text>
+    <text x="2" y="57" style="fill:#000000;" >108</text>
+  </g>
+
+  <g transform="translate(240,620)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87af5f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87af5f</text>
+    <text x="2" y="57" style="fill:#000000;" >107</text>
+  </g>
+
+  <g transform="translate(240,680)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87af00;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87af00</text>
+    <text x="2" y="57" style="fill:#000000;" >106</text>
+  </g>
+
+  <g transform="translate(320,380)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87d7ff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87d7ff</text>
+    <text x="2" y="57" style="fill:#000000;" >117</text>
+  </g>
+
+  <g transform="translate(320,440)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87d7d7;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87d7d7</text>
+    <text x="2" y="57" style="fill:#000000;" >116</text>
+  </g>
+
+  <g transform="translate(320,500)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87d7af;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87d7af</text>
+    <text x="2" y="57" style="fill:#000000;" >115</text>
+  </g>
+
+  <g transform="translate(320,560)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87d787;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87d787</text>
+    <text x="2" y="57" style="fill:#000000;" >114</text>
+  </g>
+
+  <g transform="translate(320,620)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87d75f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87d75f</text>
+    <text x="2" y="57" style="fill:#000000;" >113</text>
+  </g>
+
+  <g transform="translate(320,680)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87d700;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87d700</text>
+    <text x="2" y="57" style="fill:#000000;" >112</text>
+  </g>
+
+  <g transform="translate(400,380)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87ffff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87ffff</text>
+    <text x="2" y="57" style="fill:#000000;" >123</text>
+  </g>
+
+  <g transform="translate(400,440)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87ffd7;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87ffd7</text>
+    <text x="2" y="57" style="fill:#000000;" >122</text>
+  </g>
+
+  <g transform="translate(400,500)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87ffaf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87ffaf</text>
+    <text x="2" y="57" style="fill:#000000;" >121</text>
+  </g>
+
+  <g transform="translate(400,560)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87ff87;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87ff87</text>
+    <text x="2" y="57" style="fill:#000000;" >120</text>
+  </g>
+
+  <g transform="translate(400,620)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87ff5f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87ff5f</text>
+    <text x="2" y="57" style="fill:#000000;" >119</text>
+  </g>
+
+  <g transform="translate(400,680)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#87ff00;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >87ff00</text>
+    <text x="2" y="57" style="fill:#000000;" >118</text>
+  </g>
+
+  <g transform="translate(480,380)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afffff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afffff</text>
+    <text x="2" y="57" style="fill:#000000;" >159</text>
+  </g>
+
+  <g transform="translate(480,440)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afffd7;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afffd7</text>
+    <text x="2" y="57" style="fill:#000000;" >158</text>
+  </g>
+
+  <g transform="translate(480,500)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afffaf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afffaf</text>
+    <text x="2" y="57" style="fill:#000000;" >157</text>
+  </g>
+
+  <g transform="translate(480,560)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afff87;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afff87</text>
+    <text x="2" y="57" style="fill:#000000;" >156</text>
+  </g>
+
+  <g transform="translate(480,620)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afff5f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afff5f</text>
+    <text x="2" y="57" style="fill:#000000;" >155</text>
+  </g>
+
+  <g transform="translate(480,680)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afff00;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afff00</text>
+    <text x="2" y="57" style="fill:#000000;" >154</text>
+  </g>
+
+  <g transform="translate(560,380)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afd7ff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afd7ff</text>
+    <text x="2" y="57" style="fill:#000000;" >153</text>
+  </g>
+
+  <g transform="translate(560,440)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afd7d7;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afd7d7</text>
+    <text x="2" y="57" style="fill:#000000;" >152</text>
+  </g>
+
+  <g transform="translate(560,500)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afd7af;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afd7af</text>
+    <text x="2" y="57" style="fill:#000000;" >151</text>
+  </g>
+
+  <g transform="translate(560,560)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afd787;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afd787</text>
+    <text x="2" y="57" style="fill:#000000;" >150</text>
+  </g>
+
+  <g transform="translate(560,620)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afd75f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afd75f</text>
+    <text x="2" y="57" style="fill:#000000;" >149</text>
+  </g>
+
+  <g transform="translate(560,680)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afd700;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afd700</text>
+    <text x="2" y="57" style="fill:#000000;" >148</text>
+  </g>
+
+  <g transform="translate(640,380)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afafff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afafff</text>
+    <text x="2" y="57" style="fill:#000000;" >147</text>
+  </g>
+
+  <g transform="translate(640,440)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afafd7;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afafd7</text>
+    <text x="2" y="57" style="fill:#000000;" >146</text>
+  </g>
+
+  <g transform="translate(640,500)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afafaf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afafaf</text>
+    <text x="2" y="57" style="fill:#000000;" >145</text>
+  </g>
+
+  <g transform="translate(640,560)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afaf87;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afaf87</text>
+    <text x="2" y="57" style="fill:#000000;" >144</text>
+  </g>
+
+  <g transform="translate(640,620)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afaf5f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afaf5f</text>
+    <text x="2" y="57" style="fill:#000000;" >143</text>
+  </g>
+
+  <g transform="translate(640,680)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#afaf00;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >afaf00</text>
+    <text x="2" y="57" style="fill:#000000;" >142</text>
+  </g>
+
+  <g transform="translate(720,380)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af87ff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >af87ff</text>
+    <text x="2" y="57" style="fill:#000000;" >141</text>
+  </g>
+
+  <g transform="translate(720,440)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af87d7;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af87d7</text>
+    <text x="2" y="57" style="fill:#ffffff;" >140</text>
+  </g>
+
+  <g transform="translate(720,500)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af87af;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af87af</text>
+    <text x="2" y="57" style="fill:#ffffff;" >139</text>
+  </g>
+
+  <g transform="translate(720,560)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af8787;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af8787</text>
+    <text x="2" y="57" style="fill:#ffffff;" >138</text>
+  </g>
+
+  <g transform="translate(720,620)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af875f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af875f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >137</text>
+  </g>
+
+  <g transform="translate(720,680)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af8700;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af8700</text>
+    <text x="2" y="57" style="fill:#ffffff;" >136</text>
+  </g>
+
+  <g transform="translate(800,380)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af5fff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af5fff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >135</text>
+  </g>
+
+  <g transform="translate(800,440)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af5fd7;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af5fd7</text>
+    <text x="2" y="57" style="fill:#ffffff;" >134</text>
+  </g>
+
+  <g transform="translate(800,500)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af5faf;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af5faf</text>
+    <text x="2" y="57" style="fill:#ffffff;" >133</text>
+  </g>
+
+  <g transform="translate(800,560)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af5f87;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af5f87</text>
+    <text x="2" y="57" style="fill:#ffffff;" >132</text>
+  </g>
+
+  <g transform="translate(800,620)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af5f5f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af5f5f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >131</text>
+  </g>
+
+  <g transform="translate(800,680)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af5f00;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af5f00</text>
+    <text x="2" y="57" style="fill:#ffffff;" >130</text>
+  </g>
+
+  <g transform="translate(880,380)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af00ff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af00ff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >129</text>
+  </g>
+
+  <g transform="translate(880,440)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af00d7;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af00d7</text>
+    <text x="2" y="57" style="fill:#ffffff;" >128</text>
+  </g>
+
+  <g transform="translate(880,500)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af00af;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af00af</text>
+    <text x="2" y="57" style="fill:#ffffff;" >127</text>
+  </g>
+
+  <g transform="translate(880,560)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af0087;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af0087</text>
+    <text x="2" y="57" style="fill:#ffffff;" >126</text>
+  </g>
+
+  <g transform="translate(880,620)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af005f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af005f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >125</text>
+  </g>
+
+  <g transform="translate(880,680)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#af0000;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >af0000</text>
+    <text x="2" y="57" style="fill:#ffffff;" >124</text>
+  </g>
+
+  <g transform="translate(0,760)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d70000;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >d70000</text>
+    <text x="2" y="57" style="fill:#ffffff;" >160</text>
+  </g>
+
+  <g transform="translate(0,820)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d7005f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >d7005f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >161</text>
+  </g>
+
+  <g transform="translate(0,880)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d70087;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >d70087</text>
+    <text x="2" y="57" style="fill:#ffffff;" >162</text>
+  </g>
+
+  <g transform="translate(0,940)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d700af;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >d700af</text>
+    <text x="2" y="57" style="fill:#ffffff;" >163</text>
+  </g>
+
+  <g transform="translate(0,1000)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d700d7;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >d700d7</text>
+    <text x="2" y="57" style="fill:#ffffff;" >164</text>
+  </g>
+
+  <g transform="translate(0,1060)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d700ff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >d700ff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >165</text>
+  </g>
+
+  <g transform="translate(80,760)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d75f00;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >d75f00</text>
+    <text x="2" y="57" style="fill:#ffffff;" >166</text>
+  </g>
+
+  <g transform="translate(80,820)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d75f5f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >d75f5f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >167</text>
+  </g>
+
+  <g transform="translate(80,880)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d75f87;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >d75f87</text>
+    <text x="2" y="57" style="fill:#ffffff;" >168</text>
+  </g>
+
+  <g transform="translate(80,940)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d75faf;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >d75faf</text>
+    <text x="2" y="57" style="fill:#ffffff;" >169</text>
+  </g>
+
+  <g transform="translate(80,1000)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d75fd7;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >d75fd7</text>
+    <text x="2" y="57" style="fill:#ffffff;" >170</text>
+  </g>
+
+  <g transform="translate(80,1060)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d75fff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >d75fff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >171</text>
+  </g>
+
+  <g transform="translate(160,760)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d78700;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >d78700</text>
+    <text x="2" y="57" style="fill:#000000;" >172</text>
+  </g>
+
+  <g transform="translate(160,820)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d7875f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >d7875f</text>
+    <text x="2" y="57" style="fill:#000000;" >173</text>
+  </g>
+
+  <g transform="translate(160,880)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d78787;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >d78787</text>
+    <text x="2" y="57" style="fill:#000000;" >174</text>
+  </g>
+
+  <g transform="translate(160,940)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d787af;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >d787af</text>
+    <text x="2" y="57" style="fill:#000000;" >175</text>
+  </g>
+
+  <g transform="translate(160,1000)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d787d7;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >d787d7</text>
+    <text x="2" y="57" style="fill:#000000;" >176</text>
+  </g>
+
+  <g transform="translate(160,1060)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d787ff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >d787ff</text>
+    <text x="2" y="57" style="fill:#000000;" >177</text>
+  </g>
+
+  <g transform="translate(240,760)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfaf00;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfaf00</text>
+    <text x="2" y="57" style="fill:#000000;" >178</text>
+  </g>
+
+  <g transform="translate(240,820)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfaf5f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfaf5f</text>
+    <text x="2" y="57" style="fill:#000000;" >179</text>
+  </g>
+
+  <g transform="translate(240,880)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfaf87;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfaf87</text>
+    <text x="2" y="57" style="fill:#000000;" >180</text>
+  </g>
+
+  <g transform="translate(240,940)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfafaf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfafaf</text>
+    <text x="2" y="57" style="fill:#000000;" >181</text>
+  </g>
+
+  <g transform="translate(240,1000)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfafdf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfafdf</text>
+    <text x="2" y="57" style="fill:#000000;" >182</text>
+  </g>
+
+  <g transform="translate(240,1060)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfafff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfafff</text>
+    <text x="2" y="57" style="fill:#000000;" >183</text>
+  </g>
+
+  <g transform="translate(320,760)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfdf00;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfdf00</text>
+    <text x="2" y="57" style="fill:#000000;" >184</text>
+  </g>
+
+  <g transform="translate(320,820)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfdf5f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfdf5f</text>
+    <text x="2" y="57" style="fill:#000000;" >185</text>
+  </g>
+
+  <g transform="translate(320,880)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfdf87;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfdf87</text>
+    <text x="2" y="57" style="fill:#000000;" >186</text>
+  </g>
+
+  <g transform="translate(320,940)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfdfaf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfdfaf</text>
+    <text x="2" y="57" style="fill:#000000;" >187</text>
+  </g>
+
+  <g transform="translate(320,1000)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfdfdf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfdfdf</text>
+    <text x="2" y="57" style="fill:#000000;" >188</text>
+  </g>
+
+  <g transform="translate(320,1060)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfdfff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfdfff</text>
+    <text x="2" y="57" style="fill:#000000;" >189</text>
+  </g>
+
+  <g transform="translate(400,760)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfff00;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfff00</text>
+    <text x="2" y="57" style="fill:#000000;" >190</text>
+  </g>
+
+  <g transform="translate(400,820)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfff5f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfff5f</text>
+    <text x="2" y="57" style="fill:#000000;" >191</text>
+  </g>
+
+  <g transform="translate(400,880)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfff87;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfff87</text>
+    <text x="2" y="57" style="fill:#000000;" >192</text>
+  </g>
+
+  <g transform="translate(400,940)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfffaf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfffaf</text>
+    <text x="2" y="57" style="fill:#000000;" >193</text>
+  </g>
+
+  <g transform="translate(400,1000)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfffdf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfffdf</text>
+    <text x="2" y="57" style="fill:#000000;" >194</text>
+  </g>
+
+  <g transform="translate(400,1060)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dfffff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dfffff</text>
+    <text x="2" y="57" style="fill:#000000;" >195</text>
+  </g>
+
+  <g transform="translate(480,760)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffff00;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffff00</text>
+    <text x="2" y="57" style="fill:#000000;" >226</text>
+  </g>
+
+  <g transform="translate(480,820)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffff5f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffff5f</text>
+    <text x="2" y="57" style="fill:#000000;" >227</text>
+  </g>
+
+  <g transform="translate(480,880)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffff87;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffff87</text>
+    <text x="2" y="57" style="fill:#000000;" >228</text>
+  </g>
+
+  <g transform="translate(480,940)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffffaf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffffaf</text>
+    <text x="2" y="57" style="fill:#000000;" >229</text>
+  </g>
+
+  <g transform="translate(480,1000)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffffdf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffffdf</text>
+    <text x="2" y="57" style="fill:#000000;" >230</text>
+  </g>
+
+  <g transform="translate(480,1060)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffffff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffffff</text>
+    <text x="2" y="57" style="fill:#000000;" >231</text>
+  </g>
+
+  <g transform="translate(560,760)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffdf00;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffdf00</text>
+    <text x="2" y="57" style="fill:#000000;" >220</text>
+  </g>
+
+  <g transform="translate(560,820)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffdf5f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffdf5f</text>
+    <text x="2" y="57" style="fill:#000000;" >221</text>
+  </g>
+
+  <g transform="translate(560,880)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffdf87;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffdf87</text>
+    <text x="2" y="57" style="fill:#000000;" >222</text>
+  </g>
+
+  <g transform="translate(560,940)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffdfaf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffdfaf</text>
+    <text x="2" y="57" style="fill:#000000;" >223</text>
+  </g>
+
+  <g transform="translate(560,1000)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffdfdf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffdfdf</text>
+    <text x="2" y="57" style="fill:#000000;" >224</text>
+  </g>
+
+  <g transform="translate(560,1060)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffdfff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffdfff</text>
+    <text x="2" y="57" style="fill:#000000;" >225</text>
+  </g>
+
+  <g transform="translate(640,760)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffaf00;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffaf00</text>
+    <text x="2" y="57" style="fill:#000000;" >214</text>
+  </g>
+
+  <g transform="translate(640,820)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffaf5f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffaf5f</text>
+    <text x="2" y="57" style="fill:#000000;" >215</text>
+  </g>
+
+  <g transform="translate(640,880)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffaf87;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffaf87</text>
+    <text x="2" y="57" style="fill:#000000;" >216</text>
+  </g>
+
+  <g transform="translate(640,940)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffafaf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffafaf</text>
+    <text x="2" y="57" style="fill:#000000;" >217</text>
+  </g>
+
+  <g transform="translate(640,1000)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffafdf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffafdf</text>
+    <text x="2" y="57" style="fill:#000000;" >218</text>
+  </g>
+
+  <g transform="translate(640,1060)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffafff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffafff</text>
+    <text x="2" y="57" style="fill:#000000;" >219</text>
+  </g>
+
+  <g transform="translate(720,760)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff8700;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ff8700</text>
+    <text x="2" y="57" style="fill:#000000;" >208</text>
+  </g>
+
+  <g transform="translate(720,820)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff875f;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ff875f</text>
+    <text x="2" y="57" style="fill:#000000;" >209</text>
+  </g>
+
+  <g transform="translate(720,880)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff8787;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ff8787</text>
+    <text x="2" y="57" style="fill:#000000;" >210</text>
+  </g>
+
+  <g transform="translate(720,940)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff87af;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ff87af</text>
+    <text x="2" y="57" style="fill:#000000;" >211</text>
+  </g>
+
+  <g transform="translate(720,1000)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff87df;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ff87df</text>
+    <text x="2" y="57" style="fill:#000000;" >212</text>
+  </g>
+
+  <g transform="translate(720,1060)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff87ff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ff87ff</text>
+    <text x="2" y="57" style="fill:#000000;" >213</text>
+  </g>
+
+  <g transform="translate(800,760)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff5f00;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >ff5f00</text>
+    <text x="2" y="57" style="fill:#ffffff;" >202</text>
+  </g>
+
+  <g transform="translate(800,820)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff5f5f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >ff5f5f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >203</text>
+  </g>
+
+  <g transform="translate(800,880)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff5f87;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >ff5f87</text>
+    <text x="2" y="57" style="fill:#ffffff;" >204</text>
+  </g>
+
+  <g transform="translate(800,940)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff5faf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ff5faf</text>
+    <text x="2" y="57" style="fill:#000000;" >205</text>
+  </g>
+
+  <g transform="translate(800,1000)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff5fdf;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ff5fdf</text>
+    <text x="2" y="57" style="fill:#000000;" >206</text>
+  </g>
+
+  <g transform="translate(800,1060)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff5fff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ff5fff</text>
+    <text x="2" y="57" style="fill:#000000;" >207</text>
+  </g>
+
+  <g transform="translate(880,760)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff0000;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >ff0000</text>
+    <text x="2" y="57" style="fill:#ffffff;" >196</text>
+  </g>
+
+  <g transform="translate(880,820)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff005f;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >ff005f</text>
+    <text x="2" y="57" style="fill:#ffffff;" >197</text>
+  </g>
+
+  <g transform="translate(880,880)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff0087;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >ff0087</text>
+    <text x="2" y="57" style="fill:#ffffff;" >198</text>
+  </g>
+
+  <g transform="translate(880,940)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff00af;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >ff00af</text>
+    <text x="2" y="57" style="fill:#ffffff;" >199</text>
+  </g>
+
+  <g transform="translate(880,1000)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff00df;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >ff00df</text>
+    <text x="2" y="57" style="fill:#ffffff;" >200</text>
+  </g>
+
+  <g transform="translate(880,1060)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff00ff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >ff00ff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >201</text>
+  </g>
+
+  </g>
+  <g transform="translate(0,1140)">
+      <g transform="translate(0,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#080808;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >080808</text>
+    <text x="2" y="57" style="fill:#ffffff;" >232</text>
+  </g>
+
+  <g transform="translate(80,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#121212;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >121212</text>
+    <text x="2" y="57" style="fill:#ffffff;" >233</text>
+  </g>
+
+  <g transform="translate(160,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#1c1c1c;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >1c1c1c</text>
+    <text x="2" y="57" style="fill:#ffffff;" >234</text>
+  </g>
+
+  <g transform="translate(240,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#262626;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >262626</text>
+    <text x="2" y="57" style="fill:#ffffff;" >235</text>
+  </g>
+
+  <g transform="translate(320,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#303030;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >303030</text>
+    <text x="2" y="57" style="fill:#ffffff;" >236</text>
+  </g>
+
+  <g transform="translate(400,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#3a3a3a;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >3a3a3a</text>
+    <text x="2" y="57" style="fill:#ffffff;" >237</text>
+  </g>
+
+  <g transform="translate(480,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#444444;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >444444</text>
+    <text x="2" y="57" style="fill:#ffffff;" >238</text>
+  </g>
+
+  <g transform="translate(560,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#4e4e4e;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >4e4e4e</text>
+    <text x="2" y="57" style="fill:#ffffff;" >239</text>
+  </g>
+
+  <g transform="translate(640,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#585858;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >585858</text>
+    <text x="2" y="57" style="fill:#ffffff;" >240</text>
+  </g>
+
+  <g transform="translate(720,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#626262;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >626262</text>
+    <text x="2" y="57" style="fill:#ffffff;" >241</text>
+  </g>
+
+  <g transform="translate(800,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#6c6c6c;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >6c6c6c</text>
+    <text x="2" y="57" style="fill:#ffffff;" >242</text>
+  </g>
+
+  <g transform="translate(880,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#767676;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >767676</text>
+    <text x="2" y="57" style="fill:#ffffff;" >243</text>
+  </g>
+
+  <g transform="translate(0,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#eeeeee;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >eeeeee</text>
+    <text x="2" y="57" style="fill:#000000;" >255</text>
+  </g>
+
+  <g transform="translate(80,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#e4e4e4;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >e4e4e4</text>
+    <text x="2" y="57" style="fill:#000000;" >254</text>
+  </g>
+
+  <g transform="translate(160,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#dadada;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >dadada</text>
+    <text x="2" y="57" style="fill:#000000;" >253</text>
+  </g>
+
+  <g transform="translate(240,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#d0d0d0;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >d0d0d0</text>
+    <text x="2" y="57" style="fill:#000000;" >252</text>
+  </g>
+
+  <g transform="translate(320,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#c6c6c6;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >c6c6c6</text>
+    <text x="2" y="57" style="fill:#000000;" >251</text>
+  </g>
+
+  <g transform="translate(400,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#bcbcbc;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >bcbcbc</text>
+    <text x="2" y="57" style="fill:#000000;" >250</text>
+  </g>
+
+  <g transform="translate(480,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#b2b2b2;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >b2b2b2</text>
+    <text x="2" y="57" style="fill:#000000;" >249</text>
+  </g>
+
+  <g transform="translate(560,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#a8a8a8;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >a8a8a8</text>
+    <text x="2" y="57" style="fill:#000000;" >248</text>
+  </g>
+
+  <g transform="translate(640,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#9e9e9e;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >9e9e9e</text>
+    <text x="2" y="57" style="fill:#000000;" >247</text>
+  </g>
+
+  <g transform="translate(720,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#949494;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >949494</text>
+    <text x="2" y="57" style="fill:#ffffff;" >246</text>
+  </g>
+
+  <g transform="translate(800,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#8a8a8a;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >8a8a8a</text>
+    <text x="2" y="57" style="fill:#ffffff;" >245</text>
+  </g>
+
+  <g transform="translate(880,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#808080;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >808080</text>
+    <text x="2" y="57" style="fill:#ffffff;" >244</text>
+  </g>
+
+  </g>
+  <g transform="translate(0,1280)">
+      <g transform="translate(0,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#000000;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >000000</text>
+    <text x="2" y="57" style="fill:#ffffff;" >000</text>
+  </g>
+
+  <g transform="translate(80,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#800000;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >800000</text>
+    <text x="2" y="57" style="fill:#ffffff;" >001</text>
+  </g>
+
+  <g transform="translate(160,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#008000;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >008000</text>
+    <text x="2" y="57" style="fill:#ffffff;" >002</text>
+  </g>
+
+  <g transform="translate(240,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#808000;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >808000</text>
+    <text x="2" y="57" style="fill:#ffffff;" >003</text>
+  </g>
+
+  <g transform="translate(320,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#000080;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >000080</text>
+    <text x="2" y="57" style="fill:#ffffff;" >004</text>
+  </g>
+
+  <g transform="translate(400,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#800080;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >800080</text>
+    <text x="2" y="57" style="fill:#ffffff;" >005</text>
+  </g>
+
+  <g transform="translate(480,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#008080;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >008080</text>
+    <text x="2" y="57" style="fill:#ffffff;" >006</text>
+  </g>
+
+  <g transform="translate(560,0)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#c0c0c0;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >c0c0c0</text>
+    <text x="2" y="57" style="fill:#000000;" >007</text>
+  </g>
+
+  <g transform="translate(0,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#808080;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >808080</text>
+    <text x="2" y="57" style="fill:#ffffff;" >008</text>
+  </g>
+
+  <g transform="translate(80,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff0000;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >ff0000</text>
+    <text x="2" y="57" style="fill:#ffffff;" >009</text>
+  </g>
+
+  <g transform="translate(160,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00ff00;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00ff00</text>
+    <text x="2" y="57" style="fill:#000000;" >010</text>
+  </g>
+
+  <g transform="translate(240,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffff00;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffff00</text>
+    <text x="2" y="57" style="fill:#000000;" >011</text>
+  </g>
+
+  <g transform="translate(320,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#0000ff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >0000ff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >012</text>
+  </g>
+
+  <g transform="translate(400,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ff00ff;" />
+    <text x="40" y="32" style="fill:#ffffff;text-anchor:middle;" >ff00ff</text>
+    <text x="2" y="57" style="fill:#ffffff;" >013</text>
+  </g>
+
+  <g transform="translate(480,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#00ffff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >00ffff</text>
+    <text x="2" y="57" style="fill:#000000;" >014</text>
+  </g>
+
+  <g transform="translate(560,60)">
+    <rect x="0" y="0" width="80" height="60" style="fill:#ffffff;" />
+    <text x="40" y="32" style="fill:#000000;text-anchor:middle;" >ffffff</text>
+    <text x="2" y="57" style="fill:#000000;" >015</text>
+  </g>
+
+  </g>
+  <g transform="translate(640, 1280)">
+    <text x="20" y="32" class="head">xterm-256-color chart</text>
+    <text x="20" y="78" class="head tiny">Spooned carefully into SVG by Jason Milkins in 2012</text>
+    <text x="20" y="90" class="head tiny">this SVG is in the public domain</text>
+   <a xlink:href="https://gist.github.com/2868981"><text x="20" y="102" class="head tiny">https://gist.github.com/2868981 - contains the dataset in yaml</text></a>
+  </g>
+</svg>

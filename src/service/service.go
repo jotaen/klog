@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	. "klog/record"
-	"regexp"
 	"strings"
 )
 
@@ -31,15 +30,13 @@ func Find(date Date, rs []Record) Record {
 	return nil
 }
 
-var hashTagPattern = regexp.MustCompile(`#(\p{L}+)`)
-
 func FindEntriesWithHashtags(tags map[string]bool, r Record) []Entry {
-	if ContainsOneOfTags(tags, r.Summary()) {
+	if ContainsOneOfTags(tags, r.Summary().ToString()) {
 		return r.Entries()
 	}
 	var matches []Entry
 	for _, e := range r.Entries() {
-		if ContainsOneOfTags(tags, e.SummaryAsString()) {
+		if ContainsOneOfTags(tags, e.Summary().ToString()) {
 			matches = append(matches, e)
 		}
 	}
@@ -47,7 +44,7 @@ func FindEntriesWithHashtags(tags map[string]bool, r Record) []Entry {
 }
 
 func ContainsOneOfTags(tags map[string]bool, searchText string) bool {
-	for _, t := range hashTagPattern.FindAllStringSubmatch(searchText, -1) {
+	for _, t := range HashTagPattern.FindAllStringSubmatch(searchText, -1) {
 		if tags[strings.ToLower(t[1])] == true {
 			return true
 		}

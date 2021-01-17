@@ -5,15 +5,13 @@ import (
 	"regexp"
 )
 
-type Summary string
-
 type Record interface {
 	Date() Date
 
 	ShouldTotal() Duration
 	SetShouldTotal(Duration)
 
-	Summary() string
+	Summary() Summary
 	SetSummary(string) error
 
 	Entries() []Entry
@@ -33,7 +31,7 @@ func NewRecord(date Date) Record {
 type record struct {
 	date        Date
 	shouldTotal Duration
-	summary     string
+	summary     Summary
 	entries     []Entry
 }
 
@@ -49,7 +47,7 @@ func (r *record) SetShouldTotal(t Duration) {
 	r.shouldTotal = t
 }
 
-func (r *record) Summary() string {
+func (r *record) Summary() Summary {
 	return r.summary
 }
 
@@ -57,7 +55,7 @@ func (r *record) SetSummary(summary string) error {
 	if regexp.MustCompile(`(^|\n) `).MatchString(summary) {
 		return errors.New("MALFORMED_SUMMARY")
 	}
-	r.summary = summary
+	r.summary = Summary(summary)
 	return nil
 }
 
