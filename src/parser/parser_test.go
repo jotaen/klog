@@ -111,7 +111,7 @@ multiline summary
 	assert.Equal(t, Summary("Did this and that"), rs[0].Entries()[9].Summary())
 	assert.Equal(t, Ɀ_Range_(Ɀ_TimeYesterday_(23, 30), Ɀ_Time_(0, 10)), rs[0].Entries()[10].Value())
 	assert.Equal(t, Ɀ_Range_(Ɀ_Time_(22, 17), Ɀ_TimeTomorrow_(1, 00)), rs[0].Entries()[11].Value())
-	assert.Equal(t, Ɀ_Time_(18, 45), rs[0].Entries()[12].Value())
+	assert.Equal(t, NewOpenRange(Ɀ_Time_(18, 45)), rs[0].Entries()[12].Value())
 	assert.Equal(t, Summary("Just started something"), rs[0].Entries()[12].Summary())
 }
 

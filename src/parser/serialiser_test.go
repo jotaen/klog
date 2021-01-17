@@ -37,12 +37,12 @@ func TestSerialiseRecordWithCompleteRecord(t *testing.T) {
 	assert.Equal(t, `2020-01-15 (7h30m!)
 This is a
 multiline summary
-	8:00 - 12:15 Foo
-	2h15m Bar
-	14:38 - Baz
-	-1h51m
-	<23:23 - 4:03
-	22:00 - 0:01>
+    8:00 - 12:15  Foo
+    2h15m         Bar
+    14:38 -       Baz
+    -1h51m
+    <23:23 - 4:03
+    22:00 - 0:01>
 `, text)
 }
 

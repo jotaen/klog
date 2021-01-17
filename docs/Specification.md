@@ -80,8 +80,9 @@ A *range* and a *duration* are instances of *entries*.
 
 Each *entry* MUST appear on its own line and
 MUST be indented in one of the following ways:
-- by one “tab” (RECOMMENDED)
-- by two, three or four “spaces”
+- by four “spaces” (RECOMMENDED)
+- by two or three “spaces”
+- by one “tab”
 
 ### Time
 A *time* is a value that represents a point in time throughout a day

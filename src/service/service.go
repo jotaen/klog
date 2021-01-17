@@ -85,7 +85,7 @@ func QuickStopAt(rs []Record, date Date, time Time) (Record, error) {
 	if recordToAlter == nil {
 		return nil, errors.New("NO_OPEN_RANGE")
 	}
-	newRange, err := NewRange((*recordToAlter).OpenRange(), time)
+	newRange, err := NewRange((*recordToAlter).OpenRange().Start(), time)
 	if err != nil {
 		return nil, err
 	}

@@ -17,8 +17,8 @@ type Record interface {
 	Entries() []Entry
 	AddDuration(Duration, Summary)
 	AddRange(Range, Summary)
-	OpenRange() OpenRangeStart
-	StartOpenRange(OpenRangeStart, Summary) error
+	OpenRange() OpenRange
+	StartOpenRange(Time, Summary) error
 	EndOpenRange(Time) error
 }
 
@@ -93,29 +93,29 @@ func (r *record) AddRange(tr Range, s Summary) {
 	r.entries = append(r.entries, Entry{value: tr, summary: s})
 }
 
-func (r *record) OpenRange() OpenRangeStart {
+func (r *record) OpenRange() OpenRange {
 	for _, e := range r.entries {
-		t, isStartTime := e.Value().(Time)
-		if isStartTime {
+		t, isOpenRange := e.Value().(openRange)
+		if isOpenRange {
 			return t
 		}
 	}
 	return nil
 }
 
-func (r *record) StartOpenRange(t OpenRangeStart, s Summary) error {
+func (r *record) StartOpenRange(t Time, s Summary) error {
 	if r.OpenRange() != nil {
 		return errors.New("DUPLICATE_OPEN_RANGE")
 	}
-	r.entries = append(r.entries, Entry{value: t, summary: s})
+	r.entries = append(r.entries, Entry{value: NewOpenRange(t), summary: s})
 	return nil
 }
 
 func (r *record) EndOpenRange(end Time) error {
 	for i, e := range r.entries {
-		t, isStartTime := e.Value().(Time)
-		if isStartTime {
-			tr, err := NewRange(t, end)
+		t, isOpenRange := e.Value().(openRange)
+		if isOpenRange {
+			tr, err := NewRange(t.Start(), end)
 			if err != nil {
 				return err
 			}

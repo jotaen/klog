@@ -40,7 +40,7 @@ func TestStartOpenRange(t *testing.T) {
 	assert.Equal(t, nil, w.OpenRange())
 	_ = w.StartOpenRange(time, "Open Range")
 	require.Len(t, w.Entries(), 1)
-	assert.Equal(t, time, w.Entries()[0].Value())
+	assert.Equal(t, NewOpenRange(time), w.Entries()[0].Value())
 	assert.Equal(t, Summary("Open Range"), w.Entries()[0].Summary())
 }
 

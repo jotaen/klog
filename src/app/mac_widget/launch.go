@@ -73,7 +73,7 @@ func renderRecords(ctx app.Context) []menuet.MenuItem {
 	totalTimeValue := func() string {
 		if today != nil {
 			if today.OpenRange() != nil {
-				untilNow, _ := record.NewRange(today.OpenRange(), nowTime)
+				untilNow, _ := record.NewRange(today.OpenRange().Start(), nowTime)
 				if untilNow != nil {
 					result := ""
 					result = service.Total(today).Add(untilNow.Duration()).ToString()

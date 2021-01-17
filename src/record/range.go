@@ -11,9 +11,18 @@ type Range interface {
 	ToString() string
 }
 
+type OpenRange interface {
+	Start() Time
+	ToString() string
+}
+
 type timeRange struct {
 	start Time
 	end   Time
+}
+
+type openRange struct {
+	start Time
 }
 
 func NewRange(start Time, end Time) (Range, error) {
@@ -24,6 +33,10 @@ func NewRange(start Time, end Time) (Range, error) {
 		start: start,
 		end:   end,
 	}, nil
+}
+
+func NewOpenRange(start Time) OpenRange {
+	return openRange{start: start}
 }
 
 func (tr timeRange) Start() Time {
@@ -42,4 +55,12 @@ func (tr timeRange) Duration() Duration {
 
 func (tr timeRange) ToString() string {
 	return tr.Start().ToString() + " - " + tr.End().ToString()
+}
+
+func (or openRange) Start() Time {
+	return or.start
+}
+
+func (or openRange) ToString() string {
+	return or.start.ToString() + " -"
 }

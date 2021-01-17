@@ -40,14 +40,17 @@ func (h printHooks) PrintShouldTotal(d record.Duration) string {
 func (h printHooks) PrintSummary(s record.Summary) string {
 	txt := s.ToString()
 	style := Style{Color: "249"}
+	hashStyle := style.ChangedBold(true).ChangedColor("251")
 	txt = record.HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
-		hashStyle := style.ChangedBold(true).ChangedColor("251")
 		return hashStyle.FormatAndRestore(h, style)
 	})
 	return style.Format(txt)
 }
 func (h printHooks) PrintRange(r record.Range) string {
 	return Style{Color: "117"}.Format(r.ToString())
+}
+func (h printHooks) PrintOpenRange(or record.OpenRange) string {
+	return Style{Color: "027"}.Format(or.ToString())
 }
 func (h printHooks) PrintDuration(d record.Duration) string {
 	f := Style{Color: "120"}

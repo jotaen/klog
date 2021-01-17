@@ -29,20 +29,31 @@ func SerialiseRecord(r Record, h FormattingHooks) string {
 	if r.Summary() != "" {
 		text += h.PrintSummary(r.Summary()) + "\n"
 	}
+	maxLength := 0
 	for _, e := range r.Entries() {
-		text += "\t"
+		length := len(e.ToString())
+		if length > maxLength {
+			maxLength = length
+		}
+	}
+	for _, e := range r.Entries() {
+		text += "    " // indentation
+		length := 0
 		switch x := e.Value().(type) {
 		case Range:
+			length = len(x.ToString())
 			text += h.PrintRange(x)
-			break
 		case Duration:
+			length = len(x.ToString())
 			text += h.PrintDuration(x)
-			break
-		case OpenRangeStart:
-			text += x.ToString() + " -"
-			break
+		case OpenRange:
+			length = len(x.ToString())
+			text += h.PrintOpenRange(x)
+		default:
+			panic("Incomplete switch statement")
 		}
 		if e.Summary() != "" {
+			text += strings.Repeat(" ", maxLength-length)
 			text += " " + h.PrintSummary(e.Summary())
 		}
 		text += "\n"
@@ -55,6 +66,7 @@ type FormattingHooks interface {
 	PrintShouldTotal(Duration) string
 	PrintSummary(Summary) string
 	PrintRange(Range) string
+	PrintOpenRange(OpenRange) string
 	PrintDuration(Duration) string
 }
 
@@ -64,4 +76,5 @@ func (h defaultHooks) PrintDate(d Date) string            { return d.ToString() 
 func (h defaultHooks) PrintShouldTotal(d Duration) string { return d.ToString() }
 func (h defaultHooks) PrintSummary(s Summary) string      { return string(s) }
 func (h defaultHooks) PrintRange(r Range) string          { return r.ToString() }
+func (h defaultHooks) PrintOpenRange(or OpenRange) string { return or.ToString() }
 func (h defaultHooks) PrintDuration(d Duration) string    { return d.ToString() }
