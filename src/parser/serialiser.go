@@ -22,7 +22,7 @@ func SerialiseRecord(r Record, h FormattingHooks) string {
 	}
 	text := ""
 	text += h.PrintDate(r.Date())
-	if r.ShouldTotal() != nil {
+	if r.ShouldTotal().InMinutes() != 0 {
 		text += " (" + h.PrintShouldTotal(r.ShouldTotal(), "!") + ")"
 	}
 	text += "\n"

@@ -34,6 +34,12 @@ func ContainsOneOfTags(tags TagSet, searchText string) bool {
 func NewTagSet(tags ...string) TagSet {
 	result := map[Tag]bool{}
 	for _, v := range tags {
+		if len(v) == 0 {
+			continue
+		}
+		if v[0] == '#' {
+			v = v[1:]
+		}
 		tag := NewTag(v)
 		result[tag] = true
 	}

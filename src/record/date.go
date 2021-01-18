@@ -44,8 +44,13 @@ func NewDateFromString(yyyymmdd string) (Date, error) {
 	return cd2Date(cd)
 }
 
-func NewDateFromTime(t gotime.Time) (Date, error) {
-	return NewDate(t.Year(), int(t.Month()), t.Day())
+func NewDateFromTime(t gotime.Time) Date {
+	d, err := NewDate(t.Year(), int(t.Month()), t.Day())
+	if err != nil {
+		// This can/should never occur
+		panic("ILLEGAL_DATE")
+	}
+	return d
 }
 
 func cd2Date(cd civil.Date) (Date, error) {
@@ -60,7 +65,7 @@ func cd2Date(cd civil.Date) (Date, error) {
 }
 
 func (d *date) ToString() string {
-	return fmt.Sprintf("%04v-%02v-%02v", d.year, d.month, d.day)
+	return fmt.Sprintf("%04d-%02d-%02d", d.year, d.month, d.day)
 }
 
 func (d *date) Year() int {

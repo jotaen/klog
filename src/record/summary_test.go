@@ -21,7 +21,8 @@ func TestSummaryCannotContainWhitespaceAtBeginningOfLine(t *testing.T) {
 }
 
 func TestHashTagMatches(t *testing.T) {
-	tags := NewTagSet("this", "THAT", "numb3rs", "under_score")
+	// `#` is stripped
+	tags := NewTagSet("this", "#THAT", "numb3rs", "under_score")
 	for _, txt := range []string{
 		"#this at the beginning",
 		"#this, with punctuation afterwards",

@@ -38,7 +38,7 @@ func (t *time) ToString() string {
 	if t.IsTomorrow() {
 		suffix = ">"
 	}
-	return fmt.Sprintf("%s%v:%02v%s", prefix, t.hour, t.minute, suffix)
+	return fmt.Sprintf("%s%d:%02d%s", prefix, t.hour, t.minute, suffix)
 }
 
 func newTime(hour int, minute int, dayShift int8) (Time, error) {

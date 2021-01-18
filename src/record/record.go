@@ -40,6 +40,9 @@ func (r *record) Date() Date {
 }
 
 func (r *record) ShouldTotal() Duration {
+	if r.shouldTotal == nil {
+		return NewDuration(0, 0)
+	}
 	return r.shouldTotal
 }
 

@@ -18,7 +18,6 @@ func (args *Print) Run(ctx *app.Context) error {
 		return err
 	}
 	rs, _ = service.FindFilter(rs, args.FilterArgs.toFilter())
-	h := cliPrinter{}
-	fmt.Println(parser.SerialiseRecords(rs, h))
+	fmt.Println(parser.SerialiseRecords(rs, styler))
 	return nil
 }

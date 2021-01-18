@@ -57,15 +57,17 @@ func breakLines(text string, maxLength int) []string {
 	return lines
 }
 
-type cliPrinter struct{}
+type stylerT struct{}
 
-func (h cliPrinter) PrintDate(d record.Date) string {
+var styler stylerT
+
+func (h stylerT) PrintDate(d record.Date) string {
 	return Style{Background: "090", Color: "015"}.Format(d.ToString())
 }
-func (h cliPrinter) PrintShouldTotal(d record.Duration, symbol string) string {
+func (h stylerT) PrintShouldTotal(d record.Duration, symbol string) string {
 	return Style{Color: "213"}.Format(d.ToString()) + Style{Color: "201"}.Format(symbol)
 }
-func (h cliPrinter) PrintSummary(s record.Summary) string {
+func (h stylerT) PrintSummary(s record.Summary) string {
 	txt := s.ToString()
 	style := Style{Color: "249"}
 	hashStyle := style.ChangedBold(true).ChangedColor("251")
@@ -74,13 +76,13 @@ func (h cliPrinter) PrintSummary(s record.Summary) string {
 	})
 	return style.Format(txt)
 }
-func (h cliPrinter) PrintRange(r record.Range) string {
+func (h stylerT) PrintRange(r record.Range) string {
 	return Style{Color: "117"}.Format(r.ToString())
 }
-func (h cliPrinter) PrintOpenRange(or record.OpenRange) string {
+func (h stylerT) PrintOpenRange(or record.OpenRange) string {
 	return Style{Color: "027"}.Format(or.ToString())
 }
-func (h cliPrinter) PrintDuration(d record.Duration) string {
+func (h stylerT) PrintDuration(d record.Duration) string {
 	f := Style{Color: "120"}
 	if d.InMinutes() < 0 {
 		f.Color = "167"

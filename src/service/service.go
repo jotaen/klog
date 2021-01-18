@@ -20,6 +20,14 @@ func Total(r Record) Duration {
 	return total
 }
 
+func ShouldTotalAll(rs []Record) Duration {
+	total := NewDuration(0, 0)
+	for _, r := range rs {
+		total = total.Add(r.ShouldTotal())
+	}
+	return total
+}
+
 func TotalEntries(es []Entry) Duration {
 	total := NewDuration(0, 0)
 	for _, e := range es {
