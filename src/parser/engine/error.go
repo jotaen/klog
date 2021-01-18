@@ -41,20 +41,20 @@ type err struct {
 	message  string
 }
 
-func (e err) Error() string   { return e.message }
-func (e err) Context() Text   { return e.context }
-func (e err) Position() int   { return e.position }
-func (e err) Length() int     { return e.length }
-func (e err) Code() string    { return e.code }
-func (e err) Message() string { return e.message }
-func (e err) Set(code string, message string) Error {
+func (e *err) Error() string   { return e.message }
+func (e *err) Context() Text   { return e.context }
+func (e *err) Position() int   { return e.position }
+func (e *err) Length() int     { return e.length }
+func (e *err) Code() string    { return e.code }
+func (e *err) Message() string { return e.message }
+func (e *err) Set(code string, message string) Error {
 	e.code = code
 	e.message = message
 	return e
 }
 
 func NewError(t Text, start int, length int) Error {
-	return err{
+	return &err{
 		context:  t,
 		position: start,
 		length:   length,

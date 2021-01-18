@@ -59,7 +59,7 @@ func parseRecord(c Chunk) (Record, Error) {
 	if headline.Peek() != END_OF_TEXT {
 		return nil, ErrorMalformedShouldTotal(NewError(headline, headline.PointerPosition, headline.RemainingLength()))
 	}
-	c = c[1:] // Done with headline
+	c = c.Pop()
 
 	// Summary
 	for i, sLine := range c {
@@ -71,7 +71,7 @@ func parseRecord(c Chunk) (Record, Error) {
 			lineBreak = "\n"
 		}
 		err := r.SetSummary(r.Summary().ToString() + lineBreak + sLine.ToString())
-		c = c[1:]
+		c = c.Pop()
 		if err != nil {
 			return nil, ErrorMalformedSummary(NewError(sLine, 0, sLine.Length()))
 		}

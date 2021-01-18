@@ -5,15 +5,15 @@ type Entry struct {
 	summary Summary
 }
 
-func (e Entry) Summary() Summary {
+func (e *Entry) Summary() Summary {
 	return e.summary
 }
 
-func (e Entry) Value() interface{} {
+func (e *Entry) Value() interface{} {
 	return e.value
 }
 
-func (e Entry) ToString() string {
+func (e *Entry) ToString() string {
 	switch x := e.Value().(type) {
 	case Range:
 		return x.ToString()
@@ -25,7 +25,7 @@ func (e Entry) ToString() string {
 	panic("Incomplete switch statement")
 }
 
-func (e Entry) Duration() Duration {
+func (e *Entry) Duration() Duration {
 	switch x := e.Value().(type) {
 	case Range:
 		return x.Duration()

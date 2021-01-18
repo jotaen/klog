@@ -52,29 +52,29 @@ func cd2Date(cd civil.Date) (Date, error) {
 	if !cd.IsValid() {
 		return nil, errors.New("UNREPRESENTABLE_DATE")
 	}
-	return date{
+	return &date{
 		year:  cd.Year,
 		month: int(cd.Month),
 		day:   cd.Day,
 	}, nil
 }
 
-func (d date) ToString() string {
+func (d *date) ToString() string {
 	return fmt.Sprintf("%04v-%02v-%02v", d.year, d.month, d.day)
 }
 
-func (d date) Year() int {
+func (d *date) Year() int {
 	return d.year
 }
 
-func (d date) Month() int {
+func (d *date) Month() int {
 	return d.month
 }
 
-func (d date) Day() int {
+func (d *date) Day() int {
 	return d.day
 }
 
-func (d date) IsAfterOrEqual(otherDate Date) bool {
+func (d *date) IsAfterOrEqual(otherDate Date) bool {
 	return d.ToString() >= otherDate.ToString()
 }

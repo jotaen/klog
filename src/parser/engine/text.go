@@ -11,6 +11,10 @@ type Chunk []Text
 
 var END_OF_TEXT int32 = -1
 
+func (c Chunk) Pop() Chunk {
+	return c[1:]
+}
+
 func (t *Text) Peek() rune {
 	char := SubRune(t.Value, t.PointerPosition, 1)
 	if char == nil {

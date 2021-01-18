@@ -95,7 +95,7 @@ func (r *record) AddRange(tr Range, s Summary) {
 
 func (r *record) OpenRange() OpenRange {
 	for _, e := range r.entries {
-		t, isOpenRange := e.Value().(openRange)
+		t, isOpenRange := e.Value().(*openRange)
 		if isOpenRange {
 			return t
 		}
@@ -113,7 +113,7 @@ func (r *record) StartOpenRange(t Time, s Summary) error {
 
 func (r *record) EndOpenRange(end Time) error {
 	for i, e := range r.entries {
-		t, isOpenRange := e.Value().(openRange)
+		t, isOpenRange := e.Value().(*openRange)
 		if isOpenRange {
 			tr, err := NewRange(t.Start(), end)
 			if err != nil {

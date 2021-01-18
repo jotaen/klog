@@ -29,7 +29,7 @@ type time struct {
 
 var timePattern = regexp.MustCompile(`^<?\d{1,2}:\d{2}>?$`)
 
-func (t time) ToString() string {
+func (t *time) ToString() string {
 	prefix := ""
 	if t.IsYesterday() {
 		prefix = "<"
@@ -46,7 +46,7 @@ func newTime(hour int, minute int, dayShift int8) (Time, error) {
 	if !ct.IsValid() {
 		return nil, errors.New("INVALID_TIME")
 	}
-	return time{
+	return &time{
 		hour:     ct.Hour,
 		minute:   ct.Minute,
 		dayShift: dayShift,
@@ -88,15 +88,15 @@ func CreateTimeFromTime(t gotime.Time) (Time, error) {
 	return NewTime(t.Hour(), t.Minute())
 }
 
-func (t time) Hour() int {
+func (t *time) Hour() int {
 	return t.hour
 }
 
-func (t time) Minute() int {
+func (t *time) Minute() int {
 	return t.minute
 }
 
-func (t time) MidnightOffset() Duration {
+func (t *time) MidnightOffset() Duration {
 	if t.IsYesterday() {
 		return NewDuration(-23+t.Hour(), -60+t.Minute())
 	} else if t.IsTomorrow() {
@@ -105,19 +105,19 @@ func (t time) MidnightOffset() Duration {
 	return NewDuration(t.Hour(), t.Minute())
 }
 
-func (t time) IsToday() bool {
+func (t *time) IsToday() bool {
 	return t.dayShift == 0
 }
 
-func (t time) IsYesterday() bool {
+func (t *time) IsYesterday() bool {
 	return t.dayShift < 0
 }
 
-func (t time) IsTomorrow() bool {
+func (t *time) IsTomorrow() bool {
 	return t.dayShift > 0
 }
 
-func (t time) IsAfterOrEqual(otherTime Time) bool {
+func (t *time) IsAfterOrEqual(otherTime Time) bool {
 	first := t.MidnightOffset()
 	second := otherTime.MidnightOffset()
 	return first.InMinutes() >= second.InMinutes()
