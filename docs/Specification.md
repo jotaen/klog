@@ -103,16 +103,21 @@ to be interpreted as 12-hour clock value.
 ### Range
 A *range* is an *entry* that represents the time span between two points in time.
 
-It MUST consist of two *time* values that denote the start and the end.
+It MUST consist of two values that denote the start and the end.
 Start and end MUST be written in chronological order.
 
-There MUST be a `-` between the two *times*,
+There MUST be a `-` between the two values,
 which MAY be surrounded by one “space” on each side.
 
-The start *time* MAY be prefixed with a `<` to indicate that
+The start value MUST be a *time*.
+It MAY be prefixed with a `<` to indicate that
 this *time* is referring to the day before the *record’s* date,
 e.g. `<23:00`.
-Equivalently, the end *time* MAY be suffixed with a `>` to indicate
+
+The end value MAY be a *time*;
+it MAY also be substituted by one or more `?` to denote that the end is not determined yet.
+This MUST NOT occur more than once per record.
+If the end value is a *time* it MAY be suffixed with a `>` to indicate
 that this *time* is referring to the day after the *record’s* date,
 e.g. `0:30>`.
 

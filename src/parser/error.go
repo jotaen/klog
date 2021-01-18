@@ -40,7 +40,7 @@ func ErrorMalformedShouldTotal(e Error) Error {
 	return e.Set(
 		INVALID_VALUE,
 		"Malformed property: please review the syntax of the should-total property. "+
-			"Valid examples for it would be: (8h!), (4h30m!) or (45m!)",
+			"Valid examples for it would be: (8h!) or (4h30m!) or (45m!)",
 	)
 }
 
@@ -83,7 +83,8 @@ func ErrorMalformedEntry(e Error) Error {
 		INVALID_VALUE,
 		"Malformed entry: please review the syntax of the entry. "+
 			"It must start with a duration or a time range. "+
-			"Valid examples would be: 3h20m or 8:00-10:00",
+			"Valid examples would be: 3h20m or 8:00-10:00 or 8:00-? "+
+			"or <23:00-6:00 or 18:00-0:30>",
 	)
 }
 

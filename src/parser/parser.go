@@ -91,6 +91,7 @@ func parseRecord(c Chunk) (Record, []Error) {
 	}
 
 	// ========== ENTRIES ==========
+entries:
 	for _, eLine := range c {
 		if eLine.IndentationLevel != 1 {
 			errs = append(errs, ErrorIllegalIndentation(NewError(eLine, 0, eLine.Length()), "entry"))
@@ -125,25 +126,42 @@ func parseRecord(c Chunk) (Record, []Error) {
 		}
 		eLine.Advance(1) // '-'
 		eLine.SkipWhitespace()
-		endCandidate, _ := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
-		end, err := NewTimeFromString(endCandidate.ToString())
-		if err != nil { // if there’s an “error” here we assume this entry to be an open range
+		if eLine.Peek() == '?' {
+			eLine.Advance(1)
+			placeholder, _ := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
+			for _, p := range placeholder.Value {
+				if p != '?' {
+					errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, placeholder.Length())))
+					continue entries
+				}
+			}
+			eLine.Advance(placeholder.Length())
 			eLine.SkipWhitespace()
 			summaryText, _ := eLine.PeekUntil(func(r rune) bool { return false })
 			err := r.StartOpenRange(start, Summary(summaryText.ToString()))
 			if err != nil {
 				errs = append(errs, ErrorDuplicateOpenRange(NewError(eLine, 0, eLine.PointerPosition)))
 			}
-			continue
+		} else {
+			endCandidate, _ := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
+			if endCandidate.Length() == 0 {
+				errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, 1)))
+				continue
+			}
+			end, err := NewTimeFromString(endCandidate.ToString())
+			if err != nil {
+				errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, endCandidate.Length())))
+				continue
+			}
+			eLine.Advance(endCandidate.Length())
+			timeRange, err := NewRange(start, end)
+			if err != nil {
+				errs = append(errs, ErrorIllegalRange(NewError(eLine, 0, eLine.PointerPosition)))
+			}
+			eLine.SkipWhitespace()
+			summaryText, _ := eLine.PeekUntil(func(r rune) bool { return false })
+			r.AddRange(timeRange, Summary(summaryText.ToString()))
 		}
-		timeRange, err := NewRange(start, end)
-		eLine.Advance(endCandidate.Length())
-		if err != nil {
-			errs = append(errs, ErrorIllegalRange(NewError(eLine, 0, eLine.PointerPosition)))
-		}
-		eLine.SkipWhitespace()
-		summaryText, _ := eLine.PeekUntil(func(r rune) bool { return false })
-		r.AddRange(timeRange, Summary(summaryText.ToString()))
 	}
 
 	if len(errs) > 0 {

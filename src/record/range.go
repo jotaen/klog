@@ -62,5 +62,5 @@ func (or *openRange) Start() Time {
 }
 
 func (or *openRange) ToString() string {
-	return or.start.ToString() + " -"
+	return or.start.ToString() + " - ?"
 }
