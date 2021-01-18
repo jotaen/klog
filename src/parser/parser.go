@@ -7,61 +7,74 @@ import (
 
 func Parse(recordsAsText string) ([]Record, Errors) {
 	var records []Record
-	var errs []Error
+	var allErrs []Error
 	cs := SplitIntoChunksOfLines(recordsAsText)
 	for _, c := range cs {
-		r, err := parseRecord(c)
-		if err != nil {
-			errs = append(errs, err)
+		r, errs := parseRecord(c)
+		if len(errs) > 0 {
+			allErrs = append(allErrs, errs...)
 		}
 		records = append(records, r)
 	}
-	if len(errs) > 0 {
-		return nil, NewErrors(errs)
+	if len(allErrs) > 0 {
+		return nil, NewErrors(allErrs)
 	}
 	return records, nil
 }
 
-func parseRecord(c Chunk) (Record, Error) {
-	// Date
-	headline := c[0]
-	headline.SkipWhitespace()
-	if headline.PointerPosition != 0 {
-		return nil, ErrorIllegalWhitespace(NewError(headline, 0, headline.PointerPosition))
-	}
-	dateText := headline.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
-	date, err := NewDateFromString(dateText.ToString())
-	if err != nil {
-		return nil, ErrorMalformedDate(NewError(headline, headline.PointerPosition, dateText.Length()))
-	}
-	headline.Advance(dateText.Length())
-	r := NewRecord(date)
-	headline.SkipWhitespace()
+func parseRecord(c Chunk) (Record, []Error) {
+	var errs []Error
 
-	// Properties
-	if headline.Peek() == '(' {
-		headline.Advance(1)
+	// ========== HEADLINE ==========
+	r := func(headline Text) Record {
 		headline.SkipWhitespace()
-		shouldTotalText := headline.PeekUntil(func(r rune) bool { return r == '!' })
-		shouldTotal, err := NewDurationFromString(shouldTotalText.ToString())
+		if headline.PointerPosition != 0 {
+			errs = append(errs, ErrorIllegalWhitespace(NewError(headline, 0, headline.PointerPosition)))
+		}
+		dateText, _ := headline.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
+		date, err := NewDateFromString(dateText.ToString())
 		if err != nil {
-			return nil, ErrorMalformedShouldTotal(NewError(headline, headline.PointerPosition, shouldTotalText.Length()))
+			errs = append(errs, ErrorMalformedDate(NewError(headline, headline.PointerPosition, dateText.Length())))
+			// Generate dummy record to ensure that we have something to work with
+			// during parsing. That allows us to continue even if there are errors early on.
+			dummyDate, _ := NewDate(0, 0, 0)
+			return NewRecord(dummyDate)
 		}
-		r.SetShouldTotal(shouldTotal)
-		headline.Advance(shouldTotalText.Length() + 1)
+		headline.Advance(dateText.Length())
 		headline.SkipWhitespace()
-		if headline.Peek() != ')' {
-			return nil, ErrorMalformedShouldTotal(NewError(headline, headline.PointerPosition, 1))
+		r := NewRecord(date)
+		if headline.Peek() == '(' {
+			headline.Advance(1) // '('
+			headline.SkipWhitespace()
+			if _, hasClosingParenthesis := headline.PeekUntil(func(r rune) bool { return r == ')' }); !hasClosingParenthesis {
+				errs = append(errs, ErrorMalformedPropertiesSyntax(NewError(headline, headline.Length(), 1)))
+				return r
+			}
+			shouldTotalText, hasExclamationMark := headline.PeekUntil(func(r rune) bool { return r == '!' })
+			if !hasExclamationMark {
+				errs = append(errs, ErrorUnrecognisedProperty(NewError(headline, headline.PointerPosition, shouldTotalText.Length()-1)))
+				return r
+			}
+			shouldTotal, err := NewDurationFromString(shouldTotalText.ToString())
+			if err != nil {
+				errs = append(errs, ErrorMalformedShouldTotal(NewError(headline, headline.PointerPosition, shouldTotalText.Length())))
+				return r
+			}
+			r.SetShouldTotal(shouldTotal)
+			headline.Advance(shouldTotalText.Length())
+			headline.Advance(1) // '!'
+			headline.SkipWhitespace()
+			headline.Advance(1) // ')'
 		}
-		headline.Advance(1)
 		headline.SkipWhitespace()
-	}
-	if headline.Peek() != END_OF_TEXT {
-		return nil, ErrorMalformedShouldTotal(NewError(headline, headline.PointerPosition, headline.RemainingLength()))
-	}
+		if headline.RemainingLength() > 0 {
+			errs = append(errs, ErrorUnrecognisedTextInHeadline(NewError(headline, headline.PointerPosition, headline.RemainingLength())))
+		}
+		return r
+	}(c[0])
 	c = c.Pop()
 
-	// Summary
+	// ========== SUMMARY LINES ==========
 	for i, sLine := range c {
 		if sLine.IndentationLevel > 0 {
 			break
@@ -73,56 +86,68 @@ func parseRecord(c Chunk) (Record, Error) {
 		err := r.SetSummary(r.Summary().ToString() + lineBreak + sLine.ToString())
 		c = c.Pop()
 		if err != nil {
-			return nil, ErrorMalformedSummary(NewError(sLine, 0, sLine.Length()))
+			errs = append(errs, ErrorMalformedSummary(NewError(sLine, 0, sLine.Length())))
 		}
 	}
 
-	// Entries
+	// ========== ENTRIES ==========
 	for _, eLine := range c {
 		if eLine.IndentationLevel != 1 {
-			return nil, ErrorIllegalIndentation(NewError(eLine, 0, eLine.Length()))
+			errs = append(errs, ErrorIllegalIndentation(NewError(eLine, 0, eLine.Length()), "entry"))
+			continue
 		}
-		durationCandidate := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
+		durationCandidate, _ := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
 		duration, err := NewDurationFromString(durationCandidate.ToString())
 		if err == nil {
 			eLine.Advance(durationCandidate.Length())
 			eLine.SkipWhitespace()
-			summaryText := eLine.PeekUntil(func(r rune) bool { return false })
+			summaryText, _ := eLine.PeekUntil(func(r rune) bool { return false })
 			r.AddDuration(duration, Summary(summaryText.ToString()))
 			continue
 		}
-		startCandidate := eLine.PeekUntil(func(r rune) bool { return r == '-' || IsWhitespace(r) })
+		startCandidate, _ := eLine.PeekUntil(func(r rune) bool { return r == '-' || IsWhitespace(r) })
+		if startCandidate.Length() == 0 {
+			// Handle case where `-` appears right at the beginning of the line
+			firstToken, _ := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
+			errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, firstToken.Length())))
+			continue
+		}
 		start, err := NewTimeFromString(startCandidate.ToString())
 		if err != nil {
-			return nil, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, startCandidate.Length()))
+			errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, startCandidate.Length())))
+			continue
 		}
 		eLine.Advance(startCandidate.Length())
 		eLine.SkipWhitespace()
 		if eLine.Peek() != '-' {
-			return nil, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, startCandidate.Length()))
+			errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, 1)))
+			continue
 		}
-		eLine.Advance(1)
+		eLine.Advance(1) // '-'
 		eLine.SkipWhitespace()
-		endCandidate := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
+		endCandidate, _ := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
 		end, err := NewTimeFromString(endCandidate.ToString())
 		if err != nil { // if there’s an “error” here we assume this entry to be an open range
 			eLine.SkipWhitespace()
-			summaryText := eLine.PeekUntil(func(r rune) bool { return false })
+			summaryText, _ := eLine.PeekUntil(func(r rune) bool { return false })
 			err := r.StartOpenRange(start, Summary(summaryText.ToString()))
 			if err != nil {
-				return nil, ErrorDuplicateOpenRange(NewError(eLine, 0, eLine.PointerPosition))
+				errs = append(errs, ErrorDuplicateOpenRange(NewError(eLine, 0, eLine.PointerPosition)))
 			}
 			continue
 		}
 		timeRange, err := NewRange(start, end)
 		eLine.Advance(endCandidate.Length())
 		if err != nil {
-			return nil, ErrorIllegalRange(NewError(eLine, 0, eLine.PointerPosition))
+			errs = append(errs, ErrorIllegalRange(NewError(eLine, 0, eLine.PointerPosition)))
 		}
 		eLine.SkipWhitespace()
-		summaryText := eLine.PeekUntil(func(r rune) bool { return false })
+		summaryText, _ := eLine.PeekUntil(func(r rune) bool { return false })
 		r.AddRange(timeRange, Summary(summaryText.ToString()))
 	}
 
+	if len(errs) > 0 {
+		return nil, errs
+	}
 	return r, nil
 }

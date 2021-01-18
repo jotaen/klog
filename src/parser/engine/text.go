@@ -23,23 +23,20 @@ func (t *Text) Peek() rune {
 	return char[0]
 }
 
-func (t *Text) PeekUntil(isMatch func(rune) bool) Text {
+func (t *Text) PeekUntil(isMatch func(rune) bool) (Text, bool) {
 	result := Text{
 		PointerPosition: t.PointerPosition,
 		Value:           nil,
 		LineNumber:      t.LineNumber,
 	}
-	for i := t.PointerPosition; true; i++ {
+	for i := t.PointerPosition; i < len(t.Value); i++ {
 		next := SubRune(t.Value, i, 1)
-		if next == nil { // end of text
-			return result
-		}
 		if isMatch(next[0]) {
-			return result
+			return result, true
 		}
 		result.Value = append(result.Value, next[0])
 	}
-	return result
+	return result, false
 }
 
 func (t *Text) Advance(increment int) {

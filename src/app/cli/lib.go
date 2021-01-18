@@ -18,33 +18,49 @@ func retrieveRecords(ctx *app.Context, file string) ([]record.Record, error) {
 	pe, isParserErrors := err.(engine.Errors)
 	if isParserErrors {
 		message := ""
+		INDENT := "    "
 		for _, e := range pe.Get() {
 			message += fmt.Sprintf(
-				Style{Color: "160"}.Format("▶︎ Syntax error in line %d:\n"),
+				Style{Background: "160", Color: "015"}.Format(" Error in line %d: "),
 				e.Context().LineNumber,
-			)
+			) + "\n"
 			message += fmt.Sprintf(
-				Style{Color: "247"}.Format("  %s\n"),
+				Style{Color: "247"}.Format(INDENT+"%s"),
 				string(e.Context().Value),
-			)
+			) + "\n"
 			message += fmt.Sprintf(
-				Style{Color: "160"}.Format("  %s%s\n"),
+				Style{Color: "160"}.Format(INDENT+"%s%s"),
 				strings.Repeat(" ", e.Position()), strings.Repeat("^", e.Length()),
-			)
+			) + "\n"
 			message += fmt.Sprintf(
-				Style{Color: "214"}.Format("  %s\n\n"),
-				e.Message(),
-			)
+				Style{Color: "227"}.Format(INDENT+"%s"),
+				strings.Join(breakLines(e.Message(), 60), "\n"+INDENT),
+			) + "\n\n"
 		}
 		return nil, errors.New(message)
 	}
 	return nil, err
 }
 
+func breakLines(text string, maxLength int) []string {
+	SPACE := " "
+	words := strings.Split(text, SPACE)
+	lines := []string{""}
+	for i, w := range words {
+		lastLine := lines[len(lines)-1]
+		isLastWord := i == len(words)-1
+		if !isLastWord && len(lastLine)+len(words[i+1]) > maxLength {
+			lines = append(lines, "")
+		}
+		lines[len(lines)-1] += w + SPACE
+	}
+	return lines
+}
+
 type cliPrinter struct{}
 
 func (h cliPrinter) PrintDate(d record.Date) string {
-	return Style{Color: "222", IsUnderlined: true}.Format(d.ToString())
+	return Style{Background: "090", Color: "015"}.Format(d.ToString())
 }
 func (h cliPrinter) PrintShouldTotal(d record.Duration, symbol string) string {
 	return Style{Color: "213"}.Format(d.ToString()) + Style{Color: "201"}.Format(symbol)

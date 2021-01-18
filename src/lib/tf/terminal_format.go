@@ -2,6 +2,7 @@ package tf
 
 type Style struct {
 	Color        string
+	Background   string
 	IsBold       bool
 	IsUnderlined bool
 }
@@ -22,6 +23,12 @@ func (s Style) ChangedColor(color string) Style {
 	return newS
 }
 
+func (s Style) ChangedBackground(color string) Style {
+	newS := s
+	newS.Background = color
+	return newS
+}
+
 func (s Style) ChangedBold(isBold bool) Style {
 	newS := s
 	newS.IsBold = isBold
@@ -39,6 +46,10 @@ func (s Style) seqs() string {
 
 	if s.Color != "" {
 		seqs = seqs + "\033[38;5;" + s.Color + "m"
+	}
+
+	if s.Background != "" {
+		seqs = seqs + "\033[48;5;" + s.Background + "m"
 	}
 
 	if s.IsUnderlined {

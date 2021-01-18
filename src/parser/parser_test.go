@@ -137,16 +137,22 @@ func TestReportErrorsInHeadline(t *testing.T) {
 2020-01-01 5h30m!
 
 2020-01-01 (5h30m!
+
+2020-01-01 (
+
+2020-01-01 (5h!) foo
 `
 	rs, errs := Parse(text)
 	require.Nil(t, rs)
 	require.NotNil(t, errs)
-	require.Len(t, errs.Get(), 5)
+	require.Len(t, errs.Get(), 7)
 	assert.Equal(t, Err{INVALID_VALUE, 1, 0, 5}, toErr(errs.Get()[0]))
 	assert.Equal(t, Err{ILLEGAL_WHITESPACE, 3, 0, 1}, toErr(errs.Get()[1]))
-	assert.Equal(t, Err{INVALID_VALUE, 5, 12, 5}, toErr(errs.Get()[2]))
-	assert.Equal(t, Err{INVALID_VALUE, 7, 11, 6}, toErr(errs.Get()[3]))
-	assert.Equal(t, Err{INVALID_VALUE, 9, 18, 1}, toErr(errs.Get()[4]))
+	assert.Equal(t, Err{UNRECOGNISED_TOKEN, 5, 12, 4}, toErr(errs.Get()[2]))
+	assert.Equal(t, Err{ILLEGAL_SYNTAX, 7, 11, 6}, toErr(errs.Get()[3]))
+	assert.Equal(t, Err{ILLEGAL_SYNTAX, 9, 18, 1}, toErr(errs.Get()[4]))
+	assert.Equal(t, Err{ILLEGAL_SYNTAX, 11, 12, 1}, toErr(errs.Get()[5]))
+	assert.Equal(t, Err{ILLEGAL_SYNTAX, 13, 17, 3}, toErr(errs.Get()[6]))
 }
 
 func TestReportErrorsInSummary(t *testing.T) {
@@ -180,14 +186,22 @@ func TestReportErrorsInEntries(t *testing.T) {
 
 2020-01-01
 	15:00 - 14:00
+
+2020-01-01
+	-18:00
+
+2020-01-01
+	15:30 Foo Bar Baz
 `
 	rs, errs := Parse(text)
 	require.Nil(t, rs)
 	require.NotNil(t, errs)
-	require.Len(t, errs.Get(), 5)
+	require.Len(t, errs.Get(), 7)
 	assert.Equal(t, Err{INVALID_VALUE, 3, 0, 3}, toErr(errs.Get()[0]))
-	assert.Equal(t, Err{INVALID_VALUE, 6, 5, 5}, toErr(errs.Get()[1]))
+	assert.Equal(t, Err{INVALID_VALUE, 6, 5, 1}, toErr(errs.Get()[1]))
 	assert.Equal(t, Err{INVALID_VALUE, 9, 0, 4}, toErr(errs.Get()[2]))
 	assert.Equal(t, Err{DUPLICATE_OPEN_RANGE, 13, 0, 7}, toErr(errs.Get()[3]))
 	assert.Equal(t, Err{ILLEGAL_RANGE, 16, 0, 13}, toErr(errs.Get()[4]))
+	assert.Equal(t, Err{INVALID_VALUE, 19, 0, 6}, toErr(errs.Get()[5]))
+	assert.Equal(t, Err{INVALID_VALUE, 22, 6, 1}, toErr(errs.Get()[6]))
 }

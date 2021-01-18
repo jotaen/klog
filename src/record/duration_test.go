@@ -80,6 +80,7 @@ func TestParsingIgnoresSpaceInBetween(t *testing.T) {
 
 func TestParsingFailsWithInvalidValue(t *testing.T) {
 	for _, d := range []string{
+		"",
 		"asdf",
 		"6h asdf",
 		"qwer 30m",

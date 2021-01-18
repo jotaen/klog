@@ -24,7 +24,8 @@ func Execute() int {
 	args := kong.Parse(
 		&cli,
 		kong.Name("klog"),
-		kong.Description("klog time tracking\nCommand line interface for interacting with `.klg` files."),
+		kong.Description("klog time tracking: command line app for interacting with `.klg` files."),
+		kong.UsageOnError(),
 		func() kong.Option {
 			datePrototype, _ := record.NewDate(1, 1, 1)
 			return kong.TypeMapper(reflect.TypeOf(&datePrototype).Elem(), dateDecoder())

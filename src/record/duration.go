@@ -64,6 +64,9 @@ func NewDurationFromString(hhmm string) (Duration, error) {
 	if match[1] == "-" {
 		sign = -1
 	}
+	if match[3] == "" && match[5] == "" {
+		return nil, errors.New("MALFORMED_DURATION")
+	}
 	hours, _ := strconv.Atoi(match[3])
 	minutes, _ := strconv.Atoi(match[5])
 	if minutes > 60 {
