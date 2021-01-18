@@ -5,9 +5,9 @@ import (
 	. "klog/record"
 )
 
-func Parse(recordsAsText string) ([]Record, []error) {
+func Parse(recordsAsText string) ([]Record, Errors) {
 	var records []Record
-	var errs []error
+	var errs []Error
 	cs := SplitIntoChunksOfLines(recordsAsText)
 	for _, c := range cs {
 		r, err := parseRecord(c)
@@ -17,12 +17,12 @@ func Parse(recordsAsText string) ([]Record, []error) {
 		records = append(records, r)
 	}
 	if len(errs) > 0 {
-		return nil, errs
+		return nil, NewErrors(errs)
 	}
 	return records, nil
 }
 
-func parseRecord(c Chunk) (Record, error) {
+func parseRecord(c Chunk) (Record, Error) {
 	// Date
 	headline := c[0]
 	headline.SkipWhitespace()

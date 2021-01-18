@@ -3,7 +3,6 @@ package parser
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	. "klog/parser/engine"
 	. "klog/record"
 	"testing"
 )
@@ -123,8 +122,9 @@ Why is there a summary at the end?
 `
 	rs, errs := Parse(text)
 	require.Nil(t, rs)
-	require.Len(t, errs, 1)
-	assert.Equal(t, Err{ILLEGAL_INDENTATION, 4, 0, 34}, toErr(errs[0].(Error)))
+	require.NotNil(t, errs)
+	require.Len(t, errs.Get(), 1)
+	assert.Equal(t, Err{ILLEGAL_INDENTATION, 4, 0, 34}, toErr(errs.Get()[0]))
 }
 
 func TestReportErrorsInHeadline(t *testing.T) {
@@ -140,12 +140,13 @@ func TestReportErrorsInHeadline(t *testing.T) {
 `
 	rs, errs := Parse(text)
 	require.Nil(t, rs)
-	require.Len(t, errs, 5)
-	assert.Equal(t, Err{INVALID_VALUE, 1, 0, 5}, toErr(errs[0].(Error)))
-	assert.Equal(t, Err{ILLEGAL_WHITESPACE, 3, 0, 1}, toErr(errs[1].(Error)))
-	assert.Equal(t, Err{INVALID_VALUE, 5, 12, 5}, toErr(errs[2].(Error)))
-	assert.Equal(t, Err{INVALID_VALUE, 7, 11, 6}, toErr(errs[3].(Error)))
-	assert.Equal(t, Err{INVALID_VALUE, 9, 18, 1}, toErr(errs[4].(Error)))
+	require.NotNil(t, errs)
+	require.Len(t, errs.Get(), 5)
+	assert.Equal(t, Err{INVALID_VALUE, 1, 0, 5}, toErr(errs.Get()[0]))
+	assert.Equal(t, Err{ILLEGAL_WHITESPACE, 3, 0, 1}, toErr(errs.Get()[1]))
+	assert.Equal(t, Err{INVALID_VALUE, 5, 12, 5}, toErr(errs.Get()[2]))
+	assert.Equal(t, Err{INVALID_VALUE, 7, 11, 6}, toErr(errs.Get()[3]))
+	assert.Equal(t, Err{INVALID_VALUE, 9, 18, 1}, toErr(errs.Get()[4]))
 }
 
 func TestReportErrorsInSummary(t *testing.T) {
@@ -157,8 +158,9 @@ That is not allowed.
 `
 	rs, errs := Parse(text)
 	require.Nil(t, rs)
-	require.Len(t, errs, 1)
-	assert.Equal(t, Err{INVALID_VALUE, 4, 0, 41}, toErr(errs[0].(Error)))
+	require.NotNil(t, errs)
+	require.Len(t, errs.Get(), 1)
+	assert.Equal(t, Err{INVALID_VALUE, 4, 0, 41}, toErr(errs.Get()[0]))
 }
 
 func TestReportErrorsInEntries(t *testing.T) {
@@ -181,10 +183,11 @@ func TestReportErrorsInEntries(t *testing.T) {
 `
 	rs, errs := Parse(text)
 	require.Nil(t, rs)
-	require.Len(t, errs, 5)
-	assert.Equal(t, Err{INVALID_VALUE, 3, 0, 3}, toErr(errs[0].(Error)))
-	assert.Equal(t, Err{INVALID_VALUE, 6, 5, 5}, toErr(errs[1].(Error)))
-	assert.Equal(t, Err{INVALID_VALUE, 9, 0, 4}, toErr(errs[2].(Error)))
-	assert.Equal(t, Err{DUPLICATE_OPEN_RANGE, 13, 0, 7}, toErr(errs[3].(Error)))
-	assert.Equal(t, Err{ILLEGAL_RANGE, 16, 0, 13}, toErr(errs[4].(Error)))
+	require.NotNil(t, errs)
+	require.Len(t, errs.Get(), 5)
+	assert.Equal(t, Err{INVALID_VALUE, 3, 0, 3}, toErr(errs.Get()[0]))
+	assert.Equal(t, Err{INVALID_VALUE, 6, 5, 5}, toErr(errs.Get()[1]))
+	assert.Equal(t, Err{INVALID_VALUE, 9, 0, 4}, toErr(errs.Get()[2]))
+	assert.Equal(t, Err{DUPLICATE_OPEN_RANGE, 13, 0, 7}, toErr(errs.Get()[3]))
+	assert.Equal(t, Err{ILLEGAL_RANGE, 16, 0, 13}, toErr(errs.Get()[4]))
 }

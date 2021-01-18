@@ -10,5 +10,5 @@ type Err struct {
 }
 
 func toErr(e Error) Err {
-	return Err{e.Code, e.Context.LineNumber, e.Position, e.Length}
+	return Err{e.Code(), e.Context().LineNumber, e.Position(), e.Length()}
 }

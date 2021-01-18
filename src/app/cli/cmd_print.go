@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"errors"
 	"fmt"
 	"klog/app"
 	. "klog/lib/tf"
@@ -16,11 +15,11 @@ type Print struct {
 }
 
 func (args *Print) Run(ctx *app.Context) error {
-	rs, err := ctx.Read(args.File)
+	rs, err := retrieveRecords(ctx, args.File)
 	if err != nil {
-		return errors.New("EXECUTION_FAILED")
+		return err
 	}
-	rs, _ = service.FindFilter(rs, args.FilterArgs.ToFilter())
+	rs, _ = service.FindFilter(rs, args.FilterArgs.toFilter())
 	h := printHooks{}
 	fmt.Println(parser.SerialiseRecords(rs, h))
 	return nil

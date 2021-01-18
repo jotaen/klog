@@ -54,9 +54,9 @@ func (c *Context) Read(path string) ([]record.Record, error) {
 	if err != nil {
 		return nil, errors.New("NO_SUCH_FILE")
 	}
-	rs, errs := parser.Parse(text)
-	if len(errs) > 0 {
-		return nil, errors.New("PARSING_FAILED")
+	rs, err := parser.Parse(text)
+	if err != nil {
+		return nil, err
 	}
 	return rs, nil
 }

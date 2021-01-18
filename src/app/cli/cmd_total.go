@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"errors"
 	"fmt"
 	"klog/app"
 	"klog/service"
@@ -13,11 +12,11 @@ type Total struct {
 }
 
 func (args *Total) Run(ctx *app.Context) error {
-	rs, err := ctx.Read(args.File)
+	rs, err := retrieveRecords(ctx, args.File)
 	if err != nil {
-		return errors.New("EXECUTION_FAILED")
+		return err
 	}
-	rs, es := service.FindFilter(rs, args.FilterArgs.ToFilter())
+	rs, es := service.FindFilter(rs, args.FilterArgs.toFilter())
 	total := service.TotalEntries(es)
 	fmt.Printf("Total: %s\n", total.ToString())
 	fmt.Printf("(In %d records)\n", len(rs))
