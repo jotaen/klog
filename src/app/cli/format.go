@@ -10,10 +10,11 @@ import (
 )
 
 func prettifyError(err error) error {
-	if pErrs, isParserErrors := err.(engine.Errors); isParserErrors {
+	switch e := err.(type) {
+	case engine.Errors:
 		message := ""
 		INDENT := "    "
-		for _, e := range pErrs.Get() {
+		for _, e := range e.Get() {
 			message += fmt.Sprintf(
 				Style{Background: "160", Color: "015"}.Format(" Error in line %d: "),
 				e.Context().LineNumber,
@@ -32,9 +33,8 @@ func prettifyError(err error) error {
 			) + "\n\n"
 		}
 		return errors.New(message)
-	} else {
-		return err
 	}
+	return err
 }
 
 func breakLines(text string, maxLength int) []string {

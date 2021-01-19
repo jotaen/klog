@@ -20,7 +20,7 @@ func (args *Print) Run(ctx *app.Context) error {
 	}
 	rs, _ = service.FindFilter(rs, args.FilterArgs.toFilter())
 	if args.Sort {
-		service.Sort(rs)
+		rs = service.Sort(rs, true)
 	}
 	fmt.Println("\n" + parser.SerialiseRecords(rs, styler))
 	return nil

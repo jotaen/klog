@@ -14,6 +14,7 @@ type Date interface {
 	Day() int
 	IsAfterOrEqual(Date) bool
 	ToString() string
+	PlusDays(int) Date
 }
 
 type date struct {
@@ -82,4 +83,14 @@ func (d *date) Day() int {
 
 func (d *date) IsAfterOrEqual(otherDate Date) bool {
 	return d.ToString() >= otherDate.ToString()
+}
+
+func (d *date) PlusDays(dayIncrement int) Date {
+	cd := civil.Date{
+		Year:  d.year,
+		Month: gotime.Month(d.month),
+		Day:   d.day,
+	}.AddDays(dayIncrement)
+	newDate, _ := cd2Date(cd)
+	return newDate
 }

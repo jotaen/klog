@@ -13,6 +13,13 @@ func TestRecognisesValidDate(t *testing.T) {
 	assert.Equal(t, 15, d.Day())
 }
 
+func TestReconWithDate(t *testing.T) {
+	d, _ := NewDate(2005, 12, 31)
+	assert.Equal(t, Ɀ_Date_(2006, 1, 1), d.PlusDays(1))
+	assert.Equal(t, Ɀ_Date_(2006, 2, 1), d.PlusDays(32))
+	assert.Equal(t, Ɀ_Date_(2005, 12, 30), d.PlusDays(-1))
+}
+
 func TestDetectsUnrepresentableDates(t *testing.T) {
 	invalidMonth, err := NewDate(2005, 13, 15)
 	assert.Nil(t, invalidMonth)

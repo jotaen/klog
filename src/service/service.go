@@ -1,30 +1,29 @@
 package service
 
 import (
-	"errors"
 	. "klog/record"
 	"sort"
 )
 
-func Total(r Record) Duration {
+func Total(rs ...Record) Duration {
 	total := NewDuration(0, 0)
-	for _, e := range r.Entries() {
-		switch v := e.Value().(type) {
-		case Duration:
-			total = total.Add(v)
-			break
-		case Range:
-			total = total.Add(v.Duration())
-			break
+	for _, r := range rs {
+		for _, e := range r.Entries() {
+			total = total.Plus(e.Duration())
 		}
 	}
 	return total
 }
 
-func ShouldTotalAll(rs []Record) Duration {
+func HypotheticalTotal(r Record, until Time) Duration {
+	_ = r.EndOpenRange(until)
+	return Total(r)
+}
+
+func ShouldTotal(rs ...Record) Duration {
 	total := NewDuration(0, 0)
 	for _, r := range rs {
-		total = total.Add(r.ShouldTotal())
+		total = total.Plus(r.ShouldTotal())
 	}
 	return total
 }
@@ -32,7 +31,7 @@ func ShouldTotalAll(rs []Record) Duration {
 func TotalEntries(es []Entry) Duration {
 	total := NewDuration(0, 0)
 	for _, e := range es {
-		total = total.Add(e.Duration())
+		total = total.Plus(e.Duration())
 	}
 	return total
 }
@@ -43,10 +42,12 @@ type Filter struct {
 	AfterEq  Date
 }
 
-func Sort(rs []Record) {
-	sort.Slice(rs, func(i, j int) bool {
-		return rs[j].Date().IsAfterOrEqual(rs[i].Date())
+func Sort(rs []Record, startWithOldest bool) []Record {
+	sorted := append([]Record(nil), rs...)
+	sort.Slice(sorted, func(i, j int) bool {
+		return !startWithOldest || rs[j].Date().IsAfterOrEqual(rs[i].Date())
 	})
+	return sorted
 }
 
 func FindFilter(rs []Record, f Filter) ([]Record, []Entry) {
@@ -87,36 +88,15 @@ func FindEntriesWithHashtags(tags TagSet, r Record) ([]Entry, bool) {
 	return matches, len(matches) > 0
 }
 
-func QuickStartAt(rs []Record, date Date, time Time) (Record, error) {
-	var recordToAlter *Record
+func FindRelevantOpenRangeAt(rs []Record, date Date) []Record {
+	var result []Record
 	for _, r := range rs {
-		if r.Date() == date {
-			recordToAlter = &r
+		if r.OpenRange() == nil {
+			continue
+		}
+		if r.Date() == date || r.Date().PlusDays(-1) == date {
+			result = append(result, r)
 		}
 	}
-	if recordToAlter == nil {
-		r := NewRecord(date)
-		recordToAlter = &r
-	}
-	(*recordToAlter).StartOpenRange(time, "")
-	return *recordToAlter, nil
-}
-
-func QuickStopAt(rs []Record, date Date, time Time) (Record, error) {
-	var recordToAlter *Record
-	for _, r := range rs {
-		if r.Date() == date && r.OpenRange() != nil {
-			recordToAlter = &r
-		}
-	}
-	if recordToAlter == nil {
-		return nil, errors.New("NO_OPEN_RANGE")
-	}
-	newRange, err := NewRange((*recordToAlter).OpenRange().Start(), time)
-	if err != nil {
-		return nil, err
-	}
-	(*recordToAlter).AddRange(newRange, "") // TODO take over summary
-	(*recordToAlter).StartOpenRange(time, "")
-	return *recordToAlter, nil
+	return result
 }

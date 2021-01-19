@@ -1,10 +1,13 @@
 package app
 
 import (
+	"io/ioutil"
 	"klog/parser"
 	"klog/record"
+	"os"
 	"os/exec"
 	"os/user"
+	"path/filepath"
 	"strings"
 )
 
@@ -15,21 +18,21 @@ type Context struct {
 	homeDir        string
 }
 
-func NewContext(config Config, history []string) (*Context, error) {
-	homeDir, err := user.Current()
-	if err != nil {
-		return nil, err
-	}
+func NewContext(config Config, history []string, homeDir string) (*Context, error) {
 	return &Context{
 		config:  config,
 		history: history,
-		homeDir: homeDir.HomeDir,
+		homeDir: homeDir,
 	}, nil
 }
 
 func NewContextFromEnv() (*Context, error) {
+	homeDir, err := user.Current()
+	if err != nil {
+		return nil, err
+	}
 	config, err := func() (Config, error) {
-		configToml, err := ReadFile("~/.klog.toml")
+		configToml, err := readFile(homeDir.HomeDir + "/.klog.toml")
 		if err != nil {
 			return NewDefaultConfig(), nil
 		}
@@ -40,7 +43,7 @@ func NewContextFromEnv() (*Context, error) {
 	}
 
 	history := func() []string {
-		h, _ := ReadFile("~/.klog/history")
+		h, _ := readFile("~/.klog/history")
 		hs := strings.Split(h, "\n")
 		var result []string
 		for _, x := range hs {
@@ -48,7 +51,7 @@ func NewContextFromEnv() (*Context, error) {
 		}
 		return result
 	}()
-	return NewContext(config, history)
+	return NewContext(config, history, homeDir.HomeDir)
 }
 
 func (c *Context) HomeDir() string {
@@ -58,7 +61,7 @@ func (c *Context) HomeDir() string {
 func (c *Context) RetrieveRecords(paths []string) ([]record.Record, error) {
 	var records []record.Record
 	for _, p := range paths {
-		content, err := ReadFile(p)
+		content, err := readFile(p)
 		if err != nil {
 			return nil, err
 		}
@@ -75,8 +78,38 @@ func (c *Context) Config() Config {
 	return Config{} // TODO
 }
 
-func (c *Context) BookmarkedFile() []record.Record {
-	return nil // TODO
+type File struct {
+	Name     string
+	Location string
+	Path     string
+}
+
+func (c *Context) Bookmark() ([]record.Record, File, error) {
+	bookmarkPath := c.HomeDir() + "/.klog/bookmark.klg"
+	dest, _ := os.Readlink(bookmarkPath)
+	file := File{
+		Name:     filepath.Base(dest),
+		Location: filepath.Dir(dest),
+		Path:     dest,
+	}
+	rs, err := c.RetrieveRecords([]string{bookmarkPath})
+	return rs, file, err
+}
+
+func (c *Context) SetBookmark(path string) error {
+	bookmark, err := filepath.Abs(path)
+	if err != nil {
+		return err
+	}
+	klogFolder := c.HomeDir() + "/.klog"
+	err = os.MkdirAll(klogFolder, 0700)
+	if err != nil {
+		return err
+	}
+
+	symlink := klogFolder + "/bookmark.klg"
+	_ = os.Remove(symlink)
+	return os.Symlink(bookmark, symlink)
 }
 
 func (c *Context) LatestFiles() []string {
@@ -86,4 +119,12 @@ func (c *Context) LatestFiles() []string {
 func (c *Context) OpenInFileBrowser(path string) error {
 	cmd := exec.Command("open", path)
 	return cmd.Run()
+}
+
+func readFile(path string) (string, error) {
+	contents, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	return string(contents), nil
 }

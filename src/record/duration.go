@@ -11,8 +11,8 @@ type duration int
 
 type Duration interface {
 	InMinutes() int
-	Add(Duration) Duration
-	Subtract(Duration) Duration
+	Plus(Duration) Duration
+	Minus(Duration) Duration
 	ToString() string
 }
 
@@ -31,11 +31,11 @@ func (d duration) InMinutes() int {
 	return int(d)
 }
 
-func (d duration) Add(additional Duration) Duration {
+func (d duration) Plus(additional Duration) Duration {
 	return NewDuration(0, d.InMinutes()+additional.InMinutes())
 }
 
-func (d duration) Subtract(deductible Duration) Duration {
+func (d duration) Minus(deductible Duration) Duration {
 	return NewDuration(0, d.InMinutes()-deductible.InMinutes())
 }
 

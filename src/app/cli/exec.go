@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"github.com/alecthomas/kong"
 	"klog/app"
@@ -20,6 +21,8 @@ var cli struct {
 func Execute() int {
 	ctx, err := app.NewContextFromEnv()
 	if err != nil {
+		fmt.Println("Failed to initialise application. Error:")
+		fmt.Println(err)
 		return -1
 	}
 	args := kong.Parse(
@@ -46,7 +49,9 @@ func dateDecoder() kong.MapperFunc {
 		if err := ctx.Scan.PopValueInto("date", &value); err != nil {
 			return err
 		}
-
+		if value == "" {
+			return errors.New("please provide a valid date")
+		}
 		if value == "today" || value == "yesterday" {
 			now := time.Now()
 			if value == "yesterday" {
@@ -57,7 +62,7 @@ func dateDecoder() kong.MapperFunc {
 
 		d, err := record.NewDateFromString(value)
 		if err != nil {
-			return err
+			return errors.New("`" + value + "` is not a valid date")
 		}
 		target.Set(reflect.ValueOf(d))
 		return nil

@@ -11,8 +11,14 @@ type Widget struct {
 }
 
 func (args *Widget) Run(ctx *app.Context) error {
+	if args.File != "" {
+		err := ctx.SetBookmark(args.File)
+		if err != nil {
+			return err
+		}
+	}
 	if args.Start {
-		systray.Launch()
+		systray.Run()
 	}
 	return nil
 }
