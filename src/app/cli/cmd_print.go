@@ -9,7 +9,7 @@ import (
 
 type Print struct {
 	FilterArgs
-	FileArgs
+	FilesArgs
 	Sort bool `short:"s" name:"sort" help:"Sort output by date (from oldest to latest)"`
 }
 

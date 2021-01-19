@@ -3,6 +3,7 @@ package app
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 func fileExists(path string) bool {
@@ -13,7 +14,7 @@ func fileExists(path string) bool {
 	return false
 }
 
-func readFile(path string) (string, error) {
+func ReadFile(path string) (string, error) {
 	contents, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", err
@@ -21,8 +22,11 @@ func readFile(path string) (string, error) {
 	return string(contents), nil
 }
 
-func writeFile(path string, contents string) error {
-	//os.MkdirAll(props.Dir, os.ModePerm)
-	ioutil.WriteFile(path, []byte(contents), 0644)
-	return nil
+func WriteFile(path string, contents string) error {
+	dir := filepath.Dir(path)
+	err := os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(path, []byte(contents), 0644)
 }

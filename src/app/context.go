@@ -4,25 +4,32 @@ import (
 	"klog/parser"
 	"klog/record"
 	"os/exec"
+	"os/user"
 	"strings"
 )
 
 type Context struct {
-	outputFilePath string
+	bookmarkedFile string
 	config         Config
 	history        []string
+	homeDir        string
 }
 
 func NewContext(config Config, history []string) (*Context, error) {
+	homeDir, err := user.Current()
+	if err != nil {
+		return nil, err
+	}
 	return &Context{
 		config:  config,
 		history: history,
+		homeDir: homeDir.HomeDir,
 	}, nil
 }
 
 func NewContextFromEnv() (*Context, error) {
 	config, err := func() (Config, error) {
-		configToml, err := readFile("~/.klog.toml")
+		configToml, err := ReadFile("~/.klog.toml")
 		if err != nil {
 			return NewDefaultConfig(), nil
 		}
@@ -33,7 +40,7 @@ func NewContextFromEnv() (*Context, error) {
 	}
 
 	history := func() []string {
-		h, _ := readFile("~/.klog/history")
+		h, _ := ReadFile("~/.klog/history")
 		hs := strings.Split(h, "\n")
 		var result []string
 		for _, x := range hs {
@@ -44,10 +51,14 @@ func NewContextFromEnv() (*Context, error) {
 	return NewContext(config, history)
 }
 
+func (c *Context) HomeDir() string {
+	return c.homeDir
+}
+
 func (c *Context) RetrieveRecords(paths []string) ([]record.Record, error) {
 	var records []record.Record
 	for _, p := range paths {
-		content, err := readFile(p)
+		content, err := ReadFile(p)
 		if err != nil {
 			return nil, err
 		}
@@ -68,18 +79,8 @@ func (c *Context) BookmarkedFile() []record.Record {
 	return nil // TODO
 }
 
-func (c *Context) OutputFilePath() string {
-	return c.outputFilePath
-}
-
 func (c *Context) LatestFiles() []string {
 	return c.history
-}
-
-func (c *Context) OpenInEditor() error {
-	// open -t ...
-	cmd := exec.Command("subl", c.outputFilePath)
-	return cmd.Run()
 }
 
 func (c *Context) OpenInFileBrowser(path string) error {

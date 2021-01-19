@@ -9,7 +9,7 @@ import (
 )
 
 type Start struct {
-	FileArgs
+	FilesArgs
 }
 
 func (args *Start) Run(ctx *app.Context) error {

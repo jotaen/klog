@@ -1,10 +1,12 @@
 package mac_widget
 
 import (
+	"fmt"
 	"klog/app"
 	"klog/lib/caseymrm/menuet"
 	"klog/record"
 	"klog/service"
+	"os"
 	"time"
 )
 
@@ -15,9 +17,12 @@ func Launch() {
 		Title: "⏱",
 	})
 	menuet.App().Name = "klog widget"
-	menuet.App().Label = "net.jotaen.klog.widget"
+	menuet.App().Label = ""
 	menuet.App().Children = func() []menuet.MenuItem {
-		ctx, _ := app.NewContextFromEnv() // TODO error handling
+		ctx, err := app.NewContextFromEnv()
+		if err != nil {
+			os.Exit(1)
+		}
 		return render(*ctx)
 	}
 
@@ -35,24 +40,39 @@ func updateTimer() {
 func render(ctx app.Context) []menuet.MenuItem {
 	var items []menuet.MenuItem
 
-	if ctx.BookmarkedFile() != nil {
-		items = append(items, renderRecords(ctx)...)
-		items = append(items, menuet.MenuItem{
-			Type: menuet.Separator,
-		})
-	}
+	//items = append(items, menuet.MenuItem{
+	//	Text: "Settings",
+	//	Children: func() []menuet.MenuItem {
+	//		var items []menuet.MenuItem
+	//		for _, b := range ctx.LatestFiles() {
+	//			items = append(items, menuet.MenuItem{
+	//				Text:  b,
+	//				State: ctx.OutputFilePath() == b,
+	//			})
+	//		}
+	//		return items
+	//	},
+	//})
+
+	//			items := []menuet.MenuItem{
+	//				{Text: "Open folder", Clicked: func() {
+	//					app.OpenInFileBrowser(project)
+	//				}},
+	//			}
 
 	items = append(items, menuet.MenuItem{
-		Text: "File History",
-		Children: func() []menuet.MenuItem {
-			var items []menuet.MenuItem
-			for _, b := range ctx.LatestFiles() {
-				items = append(items, menuet.MenuItem{
-					Text:  b,
-					State: ctx.OutputFilePath() == b,
-				})
+		Text:  "Start widget on login",
+		State: hasLaunchAgent(ctx.HomeDir()),
+		Clicked: func() {
+			var err error
+			if hasLaunchAgent(ctx.HomeDir()) {
+				err = removeLaunchAgent(ctx.HomeDir())
+			} else {
+				err = createLaunchAgent(ctx.HomeDir())
 			}
-			return items
+			if err != nil {
+				fmt.Println(err)
+			}
 		},
 	})
 
@@ -73,7 +93,7 @@ func renderRecords(ctx app.Context) []menuet.MenuItem {
 	}
 
 	items = append(items, menuet.MenuItem{
-		Text: ctx.OutputFilePath(),
+		Text: "My File",
 	})
 
 	totalTimeValue := func() string {

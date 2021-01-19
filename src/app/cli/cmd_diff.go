@@ -9,7 +9,7 @@ import (
 
 type Diff struct {
 	FilterArgs
-	FileArgs
+	FilesArgs
 }
 
 func (args *Diff) Run(ctx *app.Context) error {

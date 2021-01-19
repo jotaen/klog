@@ -8,7 +8,7 @@ import (
 
 type Total struct {
 	FilterArgs
-	FileArgs
+	FilesArgs
 }
 
 func (args *Total) Run(ctx *app.Context) error {

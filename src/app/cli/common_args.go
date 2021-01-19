@@ -5,7 +5,7 @@ import (
 	"klog/service"
 )
 
-type FileArgs struct {
+type FilesArgs struct {
 	File []string `arg type:"existingfile" name:"file" help:".klg source file(s)"`
 }
 
