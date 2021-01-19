@@ -1,8 +1,8 @@
 package mac_widget
 
 import (
-	"github.com/caseymrm/menuet"
 	"klog/app"
+	"klog/lib/caseymrm/menuet"
 	"klog/record"
 	"klog/service"
 	"time"
