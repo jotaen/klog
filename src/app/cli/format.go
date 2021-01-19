@@ -3,7 +3,7 @@ package cli
 import (
 	"errors"
 	"fmt"
-	. "klog/lib/tf"
+	. "klog/lib/jotaen/tf"
 	"klog/parser/engine"
 	"klog/record"
 	"strings"

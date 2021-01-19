@@ -8,7 +8,7 @@ import (
 type Widget struct {
 }
 
-func (args *Print) Widget(ctx *app.Context) error {
+func (args *Widget) Run(ctx *app.Context) error {
 	systray.Launch()
 	return nil
 }
