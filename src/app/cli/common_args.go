@@ -6,7 +6,7 @@ import (
 )
 
 type FileArgs struct {
-	File string `arg optional name:"file" help:"File to read from"`
+	File []string `arg type:"existingfile" name:"file" help:".klg source file(s)"`
 }
 
 type FilterArgs struct {

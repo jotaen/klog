@@ -1,7 +1,6 @@
 package app
 
 import (
-	"errors"
 	"klog/parser"
 	"klog/record"
 	"os/exec"
@@ -45,20 +44,24 @@ func NewContextFromEnv() (*Context, error) {
 	return NewContext(config, history)
 }
 
-func (c *Context) Config() Config {
-	return Config{} // TODO
+func (c *Context) RetrieveRecords(paths []string) ([]record.Record, error) {
+	var records []record.Record
+	for _, p := range paths {
+		content, err := readFile(p)
+		if err != nil {
+			return nil, err
+		}
+		rs, errs := parser.Parse(content)
+		if errs != nil {
+			return nil, errs
+		}
+		records = append(records, rs...)
+	}
+	return records, nil
 }
 
-func (c *Context) Read(path string) ([]record.Record, error) {
-	text, err := readFile(path)
-	if err != nil {
-		return nil, errors.New("NO_SUCH_FILE")
-	}
-	rs, err := parser.Parse(text)
-	if err != nil {
-		return nil, err
-	}
-	return rs, nil
+func (c *Context) Config() Config {
+	return Config{} // TODO
 }
 
 func (c *Context) BookmarkedFile() []record.Record {

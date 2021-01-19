@@ -3,23 +3,17 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"klog/app"
 	. "klog/lib/tf"
 	"klog/parser/engine"
 	"klog/record"
 	"strings"
 )
 
-func retrieveRecords(ctx *app.Context, file string) ([]record.Record, error) {
-	rs, err := ctx.Read(file)
-	if err == nil {
-		return rs, nil
-	}
-	pe, isParserErrors := err.(engine.Errors)
-	if isParserErrors {
+func prettifyError(err error) error {
+	if pErrs, isParserErrors := err.(engine.Errors); isParserErrors {
 		message := ""
 		INDENT := "    "
-		for _, e := range pe.Get() {
+		for _, e := range pErrs.Get() {
 			message += fmt.Sprintf(
 				Style{Background: "160", Color: "015"}.Format(" Error in line %d: "),
 				e.Context().LineNumber,
@@ -37,9 +31,10 @@ func retrieveRecords(ctx *app.Context, file string) ([]record.Record, error) {
 				strings.Join(breakLines(e.Message(), 60), "\n"+INDENT),
 			) + "\n\n"
 		}
-		return nil, errors.New(message)
+		return errors.New(message)
+	} else {
+		return err
 	}
-	return nil, err
 }
 
 func breakLines(text string, maxLength int) []string {
@@ -62,7 +57,7 @@ type stylerT struct{}
 var styler stylerT
 
 func (h stylerT) PrintDate(d record.Date) string {
-	return Style{Background: "090", Color: "015"}.Format(d.ToString())
+	return Style{Color: "098", IsUnderlined: true}.Format(d.ToString())
 }
 func (h stylerT) PrintShouldTotal(d record.Duration, symbol string) string {
 	return Style{Color: "213"}.Format(d.ToString()) + Style{Color: "201"}.Format(symbol)

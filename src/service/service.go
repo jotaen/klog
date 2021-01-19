@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	. "klog/record"
+	"sort"
 )
 
 func Total(r Record) Duration {
@@ -40,6 +41,12 @@ type Filter struct {
 	Tags     []string
 	BeforeEq Date
 	AfterEq  Date
+}
+
+func Sort(rs []Record) {
+	sort.Slice(rs, func(i, j int) bool {
+		return rs[j].Date().IsAfterOrEqual(rs[i].Date())
+	})
 }
 
 func FindFilter(rs []Record, f Filter) ([]Record, []Entry) {
