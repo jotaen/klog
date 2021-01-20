@@ -3,9 +3,9 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"klog"
 	. "klog/lib/jotaen/tf"
 	"klog/parser/engine"
-	"klog/record"
 	"strings"
 )
 
@@ -56,28 +56,28 @@ type stylerT struct{}
 
 var styler stylerT
 
-func (h stylerT) PrintDate(d record.Date) string {
+func (h stylerT) PrintDate(d src.Date) string {
 	return Style{Color: "098", IsUnderlined: true}.Format(d.ToString())
 }
-func (h stylerT) PrintShouldTotal(d record.Duration, symbol string) string {
+func (h stylerT) PrintShouldTotal(d src.Duration, symbol string) string {
 	return Style{Color: "213"}.Format(d.ToString()) + Style{Color: "201"}.Format(symbol)
 }
-func (h stylerT) PrintSummary(s record.Summary) string {
+func (h stylerT) PrintSummary(s src.Summary) string {
 	txt := s.ToString()
 	style := Style{Color: "249"}
 	hashStyle := style.ChangedBold(true).ChangedColor("251")
-	txt = record.HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
+	txt = src.HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
 		return hashStyle.FormatAndRestore(h, style)
 	})
 	return style.Format(txt)
 }
-func (h stylerT) PrintRange(r record.Range) string {
+func (h stylerT) PrintRange(r src.Range) string {
 	return Style{Color: "117"}.Format(r.ToString())
 }
-func (h stylerT) PrintOpenRange(or record.OpenRange) string {
+func (h stylerT) PrintOpenRange(or src.OpenRange) string {
 	return Style{Color: "027"}.Format(or.ToString())
 }
-func (h stylerT) PrintDuration(d record.Duration) string {
+func (h stylerT) PrintDuration(d src.Duration) string {
 	f := Style{Color: "120"}
 	if d.InMinutes() < 0 {
 		f.Color = "167"

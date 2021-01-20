@@ -1,11 +1,11 @@
 package parser
 
 import (
-	. "klog/record"
+	"klog"
 	"strings"
 )
 
-func SerialiseRecords(rs []Record, h FormattingHooks) string {
+func SerialiseRecords(rs []src.Record, h FormattingHooks) string {
 	var text []string
 	if h == nil {
 		h = defaultHooks{}
@@ -16,7 +16,7 @@ func SerialiseRecords(rs []Record, h FormattingHooks) string {
 	return strings.Join(text, "\n")
 }
 
-func SerialiseRecord(r Record, h FormattingHooks) string {
+func SerialiseRecord(r src.Record, h FormattingHooks) string {
 	if h == nil {
 		h = defaultHooks{}
 	}
@@ -40,13 +40,13 @@ func SerialiseRecord(r Record, h FormattingHooks) string {
 		text += "    " // indentation
 		length := 0
 		switch x := e.Value().(type) {
-		case Range:
+		case src.Range:
 			length = len(x.ToString())
 			text += h.PrintRange(x)
-		case Duration:
+		case src.Duration:
 			length = len(x.ToString())
 			text += h.PrintDuration(x)
-		case OpenRange:
+		case src.OpenRange:
 			length = len(x.ToString())
 			text += h.PrintOpenRange(x)
 		default:
@@ -62,21 +62,21 @@ func SerialiseRecord(r Record, h FormattingHooks) string {
 }
 
 type FormattingHooks interface {
-	PrintDate(Date) string
-	PrintShouldTotal(Duration, string) string
-	PrintSummary(Summary) string
-	PrintRange(Range) string
-	PrintOpenRange(OpenRange) string
-	PrintDuration(Duration) string
+	PrintDate(src.Date) string
+	PrintShouldTotal(src.Duration, string) string
+	PrintSummary(src.Summary) string
+	PrintRange(src.Range) string
+	PrintOpenRange(src.OpenRange) string
+	PrintDuration(src.Duration) string
 }
 
 type defaultHooks struct{}
 
-func (h defaultHooks) PrintDate(d Date) string { return d.ToString() }
-func (h defaultHooks) PrintShouldTotal(d Duration, symbol string) string {
+func (h defaultHooks) PrintDate(d src.Date) string { return d.ToString() }
+func (h defaultHooks) PrintShouldTotal(d src.Duration, symbol string) string {
 	return d.ToString() + symbol
 }
-func (h defaultHooks) PrintSummary(s Summary) string      { return string(s) }
-func (h defaultHooks) PrintRange(r Range) string          { return r.ToString() }
-func (h defaultHooks) PrintOpenRange(or OpenRange) string { return or.ToString() }
-func (h defaultHooks) PrintDuration(d Duration) string    { return d.ToString() }
+func (h defaultHooks) PrintSummary(s src.Summary) string      { return string(s) }
+func (h defaultHooks) PrintRange(r src.Range) string          { return r.ToString() }
+func (h defaultHooks) PrintOpenRange(or src.OpenRange) string { return or.ToString() }
+func (h defaultHooks) PrintDuration(d src.Duration) string    { return d.ToString() }

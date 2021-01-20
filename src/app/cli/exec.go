@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/alecthomas/kong"
+	"klog"
 	"klog/app"
-	"klog/record"
 	"reflect"
 	"time"
 )
@@ -31,7 +31,7 @@ func Execute() int {
 		kong.Description("klog time tracking: command line app for interacting with `.klg` files."),
 		kong.UsageOnError(),
 		func() kong.Option {
-			datePrototype, _ := record.NewDate(1, 1, 1)
+			datePrototype, _ := src.NewDate(1, 1, 1)
 			return kong.TypeMapper(reflect.TypeOf(&datePrototype).Elem(), dateDecoder())
 		}(),
 	)
@@ -60,7 +60,7 @@ func dateDecoder() kong.MapperFunc {
 			value = fmt.Sprintf("%04d-%02d-%02d", now.Year(), now.Month(), now.Day())
 		}
 
-		d, err := record.NewDateFromString(value)
+		d, err := src.NewDateFromString(value)
 		if err != nil {
 			return errors.New("`" + value + "` is not a valid date")
 		}

@@ -1,4 +1,4 @@
-package record
+package src
 
 import (
 	"cloud.google.com/go/civil"

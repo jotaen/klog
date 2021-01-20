@@ -9,10 +9,13 @@ func WithContext(fn func(Context)) {
 	_ = os.Remove(path)
 	file, err := os.Create(path)
 	if err != nil {
-		panic("Could not create context")
+		panic("Could not initialise test environment")
 	}
 	defer file.Close()
 	ctx := Context{}
 	fn(ctx)
 	_ = os.Remove(path)
+	if err != nil {
+		panic("Could clean up")
+	}
 }

@@ -2,8 +2,8 @@ package app
 
 import (
 	"io/ioutil"
+	"klog"
 	"klog/parser"
-	"klog/record"
 	"os"
 	"os/exec"
 	"os/user"
@@ -58,8 +58,8 @@ func (c *Context) HomeDir() string {
 	return c.homeDir
 }
 
-func (c *Context) RetrieveRecords(paths []string) ([]record.Record, error) {
-	var records []record.Record
+func (c *Context) RetrieveRecords(paths []string) ([]src.Record, error) {
+	var records []src.Record
 	for _, p := range paths {
 		content, err := readFile(p)
 		if err != nil {
@@ -84,7 +84,7 @@ type File struct {
 	Path     string
 }
 
-func (c *Context) Bookmark() ([]record.Record, File, error) {
+func (c *Context) Bookmark() ([]src.Record, File, error) {
 	bookmarkPath := c.HomeDir() + "/.klog/bookmark.klg"
 	dest, _ := os.Readlink(bookmarkPath)
 	file := File{

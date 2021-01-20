@@ -2,9 +2,9 @@ package mac_widget
 
 import (
 	"fmt"
+	"klog"
 	"klog/app"
 	"klog/lib/caseymrm/menuet"
-	"klog/record"
 	"klog/service"
 	"os/exec"
 	"time"
@@ -55,12 +55,12 @@ func render(ctx *app.Context, agent *launchAgent) []menuet.MenuItem {
 	return items
 }
 
-func renderRecords(records []record.Record, file app.File) []menuet.MenuItem {
+func renderRecords(records []src.Record, file app.File) []menuet.MenuItem {
 	var items []menuet.MenuItem
 	now := time.Now()
-	nowTime, _ := record.NewTime(now.Hour(), now.Minute())
-	nowDate := record.NewDateFromTime(now)
-	today := func() record.Record {
+	nowTime, _ := src.NewTime(now.Hour(), now.Minute())
+	nowDate := src.NewDateFromTime(now)
+	today := func() src.Record {
 		candidates, _ := service.FindFilter(records, service.Filter{
 			BeforeEq: nowDate, AfterEq: nowDate,
 		})
@@ -100,7 +100,7 @@ func renderRecords(records []record.Record, file app.File) []menuet.MenuItem {
 		Children: func() []menuet.MenuItem {
 			total := service.Total(records...)
 			should := service.ShouldTotal(records...)
-			diff := record.NewDuration(0, 0).Minus(should).Plus(total)
+			diff := src.NewDuration(0, 0).Minus(should).Plus(total)
 			plus := ""
 			if diff.InMinutes() > 0 {
 				plus = "+"

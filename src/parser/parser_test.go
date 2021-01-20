@@ -3,7 +3,7 @@ package parser
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	. "klog/record"
+	"klog"
 	"testing"
 )
 
@@ -28,7 +28,7 @@ func TestParseMinimalDocument(t *testing.T) {
 	rs, errs := Parse(text)
 	require.Nil(t, errs)
 	require.Len(t, rs, 1)
-	assert.Equal(t, Ɀ_Date_(2000, 1, 1), rs[0].Date())
+	assert.Equal(t, src.Ɀ_Date_(2000, 1, 1), rs[0].Date())
 }
 
 func TestParseMultipleRecords(t *testing.T) {
@@ -42,13 +42,13 @@ Empty
 	require.Nil(t, errs)
 	require.Len(t, rs, 2)
 
-	assert.Equal(t, Ɀ_Date_(1999, 5, 31), rs[0].Date())
-	assert.Equal(t, Summary(""), rs[0].Summary())
+	assert.Equal(t, src.Ɀ_Date_(1999, 5, 31), rs[0].Date())
+	assert.Equal(t, src.Summary(""), rs[0].Summary())
 	assert.Len(t, rs[0].Entries(), 0)
 
-	assert.Equal(t, Ɀ_Date_(1999, 6, 3), rs[1].Date())
-	assert.Equal(t, Summary("Empty"), rs[1].Summary())
-	assert.Equal(t, NewDuration(8, 15), rs[1].ShouldTotal())
+	assert.Equal(t, src.Ɀ_Date_(1999, 6, 3), rs[1].Date())
+	assert.Equal(t, src.Summary("Empty"), rs[1].Summary())
+	assert.Equal(t, src.NewDuration(8, 15), rs[1].ShouldTotal())
 	assert.Len(t, rs[1].Entries(), 0)
 }
 
@@ -74,27 +74,27 @@ func TestParseDocumentSucceedsWithCorrectEntries(t *testing.T) {
 		expectEntry   interface{}
 		expectSummary string
 	}{
-		{"1234-12-12\n\t5h Some remark", NewDuration(5, 0), "Some remark"},
-		{"1234-12-12\n\t2h30m", NewDuration(2, 30), ""},
-		{"1234-12-12\n\t2m", NewDuration(0, 2), ""},
-		{"1234-12-12\n\t+5h", NewDuration(5, 0), ""},
-		{"1234-12-12\n\t+2h30m", NewDuration(2, 30), ""},
-		{"1234-12-12\n\t+2m", NewDuration(0, 2), ""},
-		{"1234-12-12\n\t-5h", NewDuration(-5, -0), ""},
-		{"1234-12-12\n\t-2h30m", NewDuration(-2, -30), ""},
-		{"1234-12-12\n\t-2m", NewDuration(-0, -2), ""},
-		{"1234-12-12\n\t3:05 - 11:59 Did this and that", Ɀ_Range_(Ɀ_Time_(3, 5), Ɀ_Time_(11, 59)), "Did this and that"},
-		{"1234-12-12\n\t<23:30 - 0:10", Ɀ_Range_(Ɀ_TimeYesterday_(23, 30), Ɀ_Time_(0, 10)), ""},
-		{"1234-12-12\n\t22:17 - 1:00>", Ɀ_Range_(Ɀ_Time_(22, 17), Ɀ_TimeTomorrow_(1, 00)), ""},
-		{"1234-12-12\n\t18:45 - ? Just started something", NewOpenRange(Ɀ_Time_(18, 45)), "Just started something"},
-		{"1234-12-12\n\t<3:12-??????", NewOpenRange(Ɀ_TimeYesterday_(3, 12)), ""},
+		{"1234-12-12\n\t5h Some remark", src.NewDuration(5, 0), "Some remark"},
+		{"1234-12-12\n\t2h30m", src.NewDuration(2, 30), ""},
+		{"1234-12-12\n\t2m", src.NewDuration(0, 2), ""},
+		{"1234-12-12\n\t+5h", src.NewDuration(5, 0), ""},
+		{"1234-12-12\n\t+2h30m", src.NewDuration(2, 30), ""},
+		{"1234-12-12\n\t+2m", src.NewDuration(0, 2), ""},
+		{"1234-12-12\n\t-5h", src.NewDuration(-5, -0), ""},
+		{"1234-12-12\n\t-2h30m", src.NewDuration(-2, -30), ""},
+		{"1234-12-12\n\t-2m", src.NewDuration(-0, -2), ""},
+		{"1234-12-12\n\t3:05 - 11:59 Did this and that", src.Ɀ_Range_(src.Ɀ_Time_(3, 5), src.Ɀ_Time_(11, 59)), "Did this and that"},
+		{"1234-12-12\n\t<23:30 - 0:10", src.Ɀ_Range_(src.Ɀ_TimeYesterday_(23, 30), src.Ɀ_Time_(0, 10)), ""},
+		{"1234-12-12\n\t22:17 - 1:00>", src.Ɀ_Range_(src.Ɀ_Time_(22, 17), src.Ɀ_TimeTomorrow_(1, 00)), ""},
+		{"1234-12-12\n\t18:45 - ? Just started something", src.NewOpenRange(src.Ɀ_Time_(18, 45)), "Just started something"},
+		{"1234-12-12\n\t<3:12-??????", src.NewOpenRange(src.Ɀ_TimeYesterday_(3, 12)), ""},
 	} {
 		rs, errs := Parse(test.text)
 		require.Nil(t, errs, test.text)
 		require.Len(t, rs, 1, test.text)
 		require.Len(t, rs[0].Entries(), 1, test.text)
 		assert.Equal(t, test.expectEntry, rs[0].Entries()[0].Value(), test.text)
-		assert.Equal(t, Summary(test.expectSummary), rs[0].Entries()[0].Summary(), test.text)
+		assert.Equal(t, src.Summary(test.expectSummary), rs[0].Entries()[0].Summary(), test.text)
 	}
 }
 

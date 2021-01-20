@@ -1,12 +1,12 @@
 package service
 
 import (
-	. "klog/record"
+	"klog"
 	"sort"
 )
 
-func Total(rs ...Record) Duration {
-	total := NewDuration(0, 0)
+func Total(rs ...src.Record) src.Duration {
+	total := src.NewDuration(0, 0)
 	for _, r := range rs {
 		for _, e := range r.Entries() {
 			total = total.Plus(e.Duration())
@@ -15,21 +15,21 @@ func Total(rs ...Record) Duration {
 	return total
 }
 
-func HypotheticalTotal(r Record, until Time) Duration {
+func HypotheticalTotal(r src.Record, until src.Time) src.Duration {
 	_ = r.EndOpenRange(until)
 	return Total(r)
 }
 
-func ShouldTotal(rs ...Record) Duration {
-	total := NewDuration(0, 0)
+func ShouldTotal(rs ...src.Record) src.Duration {
+	total := src.NewDuration(0, 0)
 	for _, r := range rs {
 		total = total.Plus(r.ShouldTotal())
 	}
 	return total
 }
 
-func TotalEntries(es []Entry) Duration {
-	total := NewDuration(0, 0)
+func TotalEntries(es []src.Entry) src.Duration {
+	total := src.NewDuration(0, 0)
 	for _, e := range es {
 		total = total.Plus(e.Duration())
 	}
@@ -38,22 +38,22 @@ func TotalEntries(es []Entry) Duration {
 
 type Filter struct {
 	Tags     []string
-	BeforeEq Date
-	AfterEq  Date
+	BeforeEq src.Date
+	AfterEq  src.Date
 }
 
-func Sort(rs []Record, startWithOldest bool) []Record {
-	sorted := append([]Record(nil), rs...)
+func Sort(rs []src.Record, startWithOldest bool) []src.Record {
+	sorted := append([]src.Record(nil), rs...)
 	sort.Slice(sorted, func(i, j int) bool {
 		return !startWithOldest || rs[j].Date().IsAfterOrEqual(rs[i].Date())
 	})
 	return sorted
 }
 
-func FindFilter(rs []Record, f Filter) ([]Record, []Entry) {
-	tags := NewTagSet(f.Tags...)
-	var records []Record
-	var entries []Entry
+func FindFilter(rs []src.Record, f Filter) ([]src.Record, []src.Entry) {
+	tags := src.NewTagSet(f.Tags...)
+	var records []src.Record
+	var entries []src.Entry
 	for _, r := range rs {
 		if f.BeforeEq != nil && !f.BeforeEq.IsAfterOrEqual(r.Date()) {
 			continue
@@ -75,21 +75,21 @@ func FindFilter(rs []Record, f Filter) ([]Record, []Entry) {
 	return records, entries
 }
 
-func FindEntriesWithHashtags(tags TagSet, r Record) ([]Entry, bool) {
-	if ContainsOneOfTags(tags, r.Summary().ToString()) {
+func FindEntriesWithHashtags(tags src.TagSet, r src.Record) ([]src.Entry, bool) {
+	if src.ContainsOneOfTags(tags, r.Summary().ToString()) {
 		return r.Entries(), true
 	}
-	var matches []Entry
+	var matches []src.Entry
 	for _, e := range r.Entries() {
-		if ContainsOneOfTags(tags, e.Summary().ToString()) {
+		if src.ContainsOneOfTags(tags, e.Summary().ToString()) {
 			matches = append(matches, e)
 		}
 	}
 	return matches, len(matches) > 0
 }
 
-func FindRelevantOpenRangeAt(rs []Record, date Date) []Record {
-	var result []Record
+func FindRelevantOpenRangeAt(rs []src.Record, date src.Date) []src.Record {
+	var result []src.Record
 	for _, r := range rs {
 		if r.OpenRange() == nil {
 			continue
