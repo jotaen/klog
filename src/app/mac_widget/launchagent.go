@@ -5,25 +5,37 @@ import (
 	"os"
 )
 
-var launchAgentName = "net.jotaen.klog.plist"
+type launchAgent struct {
+	name           string
+	klogBinPath    string
+	launchAgentDir string
+	plistFilePath  string
+}
 
-func createLaunchAgent(homeDir string) error {
-	execPath, err := os.Executable()
-	if err != nil {
-		return err
+// os.Executable()
+func NewLaunchAgent(homeDir string, klogBinPath string) launchAgent {
+	name := "net.jotaen.klog.widget"
+	launchAgentDir := homeDir + "/Library/LaunchAgents/"
+	return launchAgent{
+		name:           name,
+		klogBinPath:    klogBinPath,
+		launchAgentDir: launchAgentDir,
+		plistFilePath:  launchAgentDir + name + ".plist",
 	}
+}
+
+func (l *launchAgent) activate() error {
 	contents := `<?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\" >
 <plist version='1.0'>
 	<dict>
 		<key>Label</key>
-		<string>` + launchAgentName + `</string>		
+		<string>` + l.name + `</string>		
 
 		<key>ProgramArguments</key>
 		<array>
-			<string>` + execPath + `</string>
+			<string>` + l.klogBinPath + `</string>
 			<string>widget</string>
-			<string>--start</string>
 		</array>
 
 		<key>RunAtLoad</key>
@@ -33,22 +45,19 @@ func createLaunchAgent(homeDir string) error {
 
 `
 	// chmod=0731 is how MacOS sets it
-	err = os.MkdirAll(launchAgentDir(homeDir), 0731)
+	err := os.MkdirAll(l.launchAgentDir, 0731)
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(launchAgentDir(homeDir)+launchAgentName, []byte(contents), 0644)
+	err = ioutil.WriteFile(l.plistFilePath, []byte(contents), 0644)
+	return err
 }
 
-func removeLaunchAgent(homeDir string) error {
-	return os.Remove(launchAgentDir(homeDir) + launchAgentName)
+func (l *launchAgent) deactivate() error {
+	return os.Remove(l.plistFilePath)
 }
 
-func hasLaunchAgent(homeDir string) bool {
-	fi, err := os.Stat(launchAgentDir(homeDir) + launchAgentName)
+func (l *launchAgent) isActive() bool {
+	fi, err := os.Stat(l.plistFilePath)
 	return err == nil && !fi.IsDir()
-}
-
-func launchAgentDir(homeDir string) string {
-	return homeDir + "/Library/LaunchAgents/"
 }

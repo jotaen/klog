@@ -12,7 +12,7 @@ import (
 
 var blinker = 1
 
-func render(ctx app.Context) []menuet.MenuItem {
+func render(ctx *app.Context, agent *launchAgent) []menuet.MenuItem {
 	var items []menuet.MenuItem
 
 	items = append(items, func() []menuet.MenuItem {
@@ -32,18 +32,23 @@ func render(ctx app.Context) []menuet.MenuItem {
 	items = append(items, menuet.MenuItem{
 		Type: menuet.Separator,
 	}, menuet.MenuItem{
-		Text:  "Start widget on login",
-		State: hasLaunchAgent(ctx.HomeDir()),
-		Clicked: func() {
-			var err error
-			if hasLaunchAgent(ctx.HomeDir()) {
-				err = removeLaunchAgent(ctx.HomeDir())
-			} else {
-				err = createLaunchAgent(ctx.HomeDir())
-			}
-			if err != nil {
-				fmt.Println(err)
-			}
+		Text: "Settings",
+		Children: func() []menuet.MenuItem {
+			return []menuet.MenuItem{{
+				Text:  "Launch widget on login",
+				State: agent.isActive(),
+				Clicked: func() {
+					var err error
+					if agent.isActive() {
+						err = agent.deactivate()
+					} else {
+						err = agent.activate()
+					}
+					if err != nil {
+						fmt.Println(err)
+					}
+				},
+			}}
 		},
 	})
 
@@ -129,8 +134,12 @@ func renderRecords(records []record.Record, file app.File) []menuet.MenuItem {
 	})
 
 	items = append(items, menuet.MenuItem{
-		Text:  "Track time",
-		State: isRunningCurrently,
+		Text: func() string {
+			if isRunningCurrently {
+				return "Stop"
+			}
+			return "Start tracking"
+		}(),
 		Clicked: func() {
 			if isRunningCurrently {
 				//ctx.QuickStopAt(nowDate, nowTime)
@@ -142,7 +151,8 @@ func renderRecords(records []record.Record, file app.File) []menuet.MenuItem {
 
 	if today != nil {
 		items = append(items, menuet.MenuItem{
-			Text: "Today: " + totalTimeValue,
+			State: isRunningCurrently,
+			Text:  "Today: " + totalTimeValue,
 		})
 	}
 

@@ -1,13 +1,14 @@
 package cli
 
 import (
+	"fmt"
 	"klog/app"
 	systray "klog/app/mac_widget"
 )
 
 type Widget struct {
-	Start bool   `name:"start" help:"Launch widget"`
-	File  string `short:"f" name:"file" help:"Specify file"`
+	File   string `short:"f" name:"file" help:"Which file to show in the widget"`
+	Detach bool   `name:"detach" help:"Detach the widget from the cli"`
 }
 
 func (args *Widget) Run(ctx *app.Context) error {
@@ -17,8 +18,10 @@ func (args *Widget) Run(ctx *app.Context) error {
 			return err
 		}
 	}
-	if args.Start {
-		systray.Run()
+	if !args.Detach {
+		fmt.Println("If you would like to run the widget on its own, start again with:")
+		fmt.Println("klog widget --detach")
 	}
+	systray.Run(args.Detach)
 	return nil
 }
