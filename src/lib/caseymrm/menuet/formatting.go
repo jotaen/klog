@@ -1,3 +1,5 @@
+// +build darwin
+
 package menuet
 
 // FontWeight represents the weight of the font
