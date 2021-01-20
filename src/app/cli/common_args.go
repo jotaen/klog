@@ -5,8 +5,12 @@ import (
 	"klog/service"
 )
 
-type FilesArgs struct {
-	File []string `arg type:"existingfile" name:"file" help:".klg source file(s)"`
+type MultipleFilesArgs struct {
+	File []string `arg required type:"existingfile" name:"file" help:".klg source file(s)"`
+}
+
+type SingleFileArgs struct {
+	File string `arg required type:"existingfile" name:"file" help:".klg source file"`
 }
 
 type FilterArgs struct {

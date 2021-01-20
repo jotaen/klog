@@ -9,11 +9,11 @@ import (
 
 type Diff struct {
 	FilterArgs
-	FilesArgs
+	MultipleFilesArgs
 }
 
 func (args *Diff) Run(ctx *app.Context) error {
-	rs, err := ctx.RetrieveRecords(args.File)
+	rs, err := ctx.RetrieveRecords(args.File...)
 	if err != nil {
 		return prettifyError(err)
 	}

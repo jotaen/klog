@@ -133,21 +133,21 @@ func renderRecords(records []src.Record, file app.File) []menuet.MenuItem {
 		},
 	})
 
-	items = append(items, menuet.MenuItem{
-		Text: func() string {
-			if isRunningCurrently {
-				return "Stop"
-			}
-			return "Start tracking"
-		}(),
-		Clicked: func() {
-			if isRunningCurrently {
-				//ctx.QuickStopAt(nowDate, nowTime)
-			} else {
-				//ctx.QuickStartAt(nowDate, nowTime)
-			}
-		},
-	})
+	//items = append(items, menuet.MenuItem{
+	//	Text: func() string {
+	//		if isRunningCurrently {
+	//			return "Stop"
+	//		}
+	//		return "Start tracking"
+	//	}(),
+	//	Clicked: func() {
+	//		if isRunningCurrently {
+	//			// stop!
+	//		} else {
+	//			// start!
+	//		}
+	//	},
+	//})
 
 	if today != nil {
 		items = append(items, menuet.MenuItem{

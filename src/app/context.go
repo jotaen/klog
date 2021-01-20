@@ -8,20 +8,17 @@ import (
 	"os/exec"
 	"os/user"
 	"path/filepath"
-	"strings"
 )
 
 type Context struct {
 	bookmarkedFile string
 	config         Config
-	history        []string
 	homeDir        string
 }
 
-func NewContext(config Config, history []string, homeDir string) (*Context, error) {
+func NewContext(config Config, homeDir string) (*Context, error) {
 	return &Context{
 		config:  config,
-		history: history,
 		homeDir: homeDir,
 	}, nil
 }
@@ -31,34 +28,21 @@ func NewContextFromEnv() (*Context, error) {
 	if err != nil {
 		return nil, err
 	}
-	config, err := func() (Config, error) {
-		configToml, err := readFile(homeDir.HomeDir + "/.klog.toml")
-		if err != nil {
-			return NewDefaultConfig(), nil
-		}
-		return NewConfigFromToml(configToml)
-	}()
-	if err != nil {
-		return nil, err
-	}
-
-	history := func() []string {
-		h, _ := readFile("~/.klog/history")
-		hs := strings.Split(h, "\n")
-		var result []string
-		for _, x := range hs {
-			result = append(result, strings.TrimSpace(x))
-		}
-		return result
-	}()
-	return NewContext(config, history, homeDir.HomeDir)
+	//config, err := func() (Config, error) {
+	//	configToml, err := readFile(homeDir.HomeDir + "/.klog.toml")
+	//	if err != nil {
+	//		return NewDefaultConfig(), nil
+	//	}
+	//	return NewConfigFromToml(configToml)
+	//}()
+	return NewContext(NewDefaultConfig(), homeDir.HomeDir)
 }
 
 func (c *Context) HomeDir() string {
 	return c.homeDir
 }
 
-func (c *Context) RetrieveRecords(paths []string) ([]src.Record, error) {
+func (c *Context) RetrieveRecords(paths ...string) ([]src.Record, error) {
 	var records []src.Record
 	for _, p := range paths {
 		content, err := readFile(p)
@@ -72,6 +56,11 @@ func (c *Context) RetrieveRecords(paths []string) ([]src.Record, error) {
 		records = append(records, rs...)
 	}
 	return records, nil
+}
+
+func (c *Context) WriteRecords(rs []src.Record, path string) error {
+	s := parser.SerialiseRecords(rs, nil)
+	return ioutil.WriteFile(path, []byte(s), 0644)
 }
 
 func (c *Context) Config() Config {
@@ -92,7 +81,7 @@ func (c *Context) Bookmark() ([]src.Record, File, error) {
 		Location: filepath.Dir(dest),
 		Path:     dest,
 	}
-	rs, err := c.RetrieveRecords([]string{bookmarkPath})
+	rs, err := c.RetrieveRecords(bookmarkPath)
 	return rs, file, err
 }
 
@@ -110,10 +99,6 @@ func (c *Context) SetBookmark(path string) error {
 	symlink := klogFolder + "/bookmark.klg"
 	_ = os.Remove(symlink)
 	return os.Symlink(bookmark, symlink)
-}
-
-func (c *Context) LatestFiles() []string {
-	return c.history
 }
 
 func (c *Context) OpenInFileBrowser(path string) error {

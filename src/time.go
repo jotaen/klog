@@ -84,8 +84,13 @@ func NewTimeFromString(hhmm string) (Time, error) {
 	return newTime(hour, minute, dayShift)
 }
 
-func CreateTimeFromTime(t gotime.Time) (Time, error) {
-	return NewTime(t.Hour(), t.Minute())
+func NewTimeFromTime(t gotime.Time) Time {
+	time, err := NewTime(t.Hour(), t.Minute())
+	if err != nil {
+		// This can/should never occur
+		panic("ILLEGAL_TIME")
+	}
+	return time
 }
 
 func (t *time) Hour() int {

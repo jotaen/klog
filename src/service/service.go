@@ -16,8 +16,15 @@ func Total(rs ...src.Record) src.Duration {
 }
 
 func HypotheticalTotal(r src.Record, until src.Time) src.Duration {
-	_ = r.EndOpenRange(until)
-	return Total(r)
+	total := Total(r)
+	or := r.OpenRange()
+	if or != nil {
+		tr, err := src.NewRange(or.Start(), until)
+		if err == nil {
+			total = total.Plus(tr.Duration())
+		}
+	}
+	return total
 }
 
 func ShouldTotal(rs ...src.Record) src.Duration {

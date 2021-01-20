@@ -14,7 +14,7 @@ var cli struct {
 	Print  Print  `cmd help:"Show records in a file"`
 	Total  Total  `cmd help:"Sum up the total time"`
 	Diff   Diff   `cmd help:"Show diff between total and should time"`
-	Start  Start  `cmd help:"Start to track"`
+	Follow Follow `cmd help:"Follow today’s record live"`
 	Widget Widget `cmd help:"Launch menu bar widget (MacOS only)"`
 }
 

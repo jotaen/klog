@@ -8,11 +8,11 @@ import (
 
 type Total struct {
 	FilterArgs
-	FilesArgs
+	MultipleFilesArgs
 }
 
 func (args *Total) Run(ctx *app.Context) error {
-	rs, err := ctx.RetrieveRecords(args.File)
+	rs, err := ctx.RetrieveRecords(args.File...)
 	if err != nil {
 		return prettifyError(err)
 	}
