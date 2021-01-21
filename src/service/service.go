@@ -47,6 +47,7 @@ type Filter struct {
 	Tags     []string
 	BeforeEq src.Date
 	AfterEq  src.Date
+	Dates    []src.Date
 }
 
 func Sort(rs []src.Record, startWithOldest bool) []src.Record {
@@ -59,9 +60,13 @@ func Sort(rs []src.Record, startWithOldest bool) []src.Record {
 
 func FindFilter(rs []src.Record, f Filter) ([]src.Record, []src.Entry) {
 	tags := src.NewTagSet(f.Tags...)
+	dates := newDateSet(f.Dates)
 	var records []src.Record
 	var entries []src.Entry
 	for _, r := range rs {
+		if len(dates) > 0 && !dates[r.Date().ToString()] {
+			continue
+		}
 		if f.BeforeEq != nil && !f.BeforeEq.IsAfterOrEqual(r.Date()) {
 			continue
 		}
@@ -80,6 +85,14 @@ func FindFilter(rs []src.Record, f Filter) ([]src.Record, []src.Entry) {
 		records = append(records, r)
 	}
 	return records, entries
+}
+
+func newDateSet(ds []src.Date) map[string]bool {
+	dict := make(map[string]bool, len(ds))
+	for _, d := range ds {
+		dict[d.ToString()] = true
+	}
+	return dict
 }
 
 func FindEntriesWithHashtags(tags src.TagSet, r src.Record) ([]src.Entry, bool) {

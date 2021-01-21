@@ -7,7 +7,6 @@ import (
 	"klog"
 	"klog/app"
 	"reflect"
-	"time"
 )
 
 var cli struct {
@@ -52,14 +51,6 @@ func dateDecoder() kong.MapperFunc {
 		if value == "" {
 			return errors.New("please provide a valid date")
 		}
-		if value == "today" || value == "yesterday" {
-			now := time.Now()
-			if value == "yesterday" {
-				now = time.Now().AddDate(0, 0, -1)
-			}
-			value = fmt.Sprintf("%04d-%02d-%02d", now.Year(), now.Month(), now.Day())
-		}
-
 		d, err := src.NewDateFromString(value)
 		if err != nil {
 			return errors.New("`" + value + "` is not a valid date")

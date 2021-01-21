@@ -32,7 +32,7 @@ func ContainsOneOfTags(tags TagSet, searchText string) bool {
 }
 
 func NewTagSet(tags ...string) TagSet {
-	result := map[Tag]bool{}
+	result := make(map[Tag]bool, len(tags))
 	for _, v := range tags {
 		if len(v) == 0 {
 			continue

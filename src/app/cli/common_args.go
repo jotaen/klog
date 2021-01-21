@@ -3,6 +3,7 @@ package cli
 import (
 	"klog"
 	"klog/service"
+	"time"
 )
 
 type MultipleFilesArgs struct {
@@ -14,10 +15,12 @@ type SingleFileArgs struct {
 }
 
 type FilterArgs struct {
-	Tags     []string `short:"t" name:"tag" help:"Only records that contain this tag"`
-	Date     src.Date `short:"d" name:"date" help:"Only records at this date"`
-	AfterEq  src.Date `short:"a" name:"after" help:"Only records at or after this date"`
-	BeforeEq src.Date `short:"b" name:"before" help:"Only records at or before this date"`
+	Tags      []string   `name:"tag" help:"Only records that contain this tag"`
+	Date      []src.Date `name:"date" help:"Only records at this date"`
+	Today     bool       `name:"today" help:"Shorthand for today’s date"`
+	Yesterday bool       `name:"yesterday" help:"Shorthand for yesterday’s date"`
+	AfterEq   src.Date   `name:"after" help:"Only records at or after this date"`
+	BeforeEq  src.Date   `name:"before" help:"Only records at or before this date"`
 }
 
 func (args *FilterArgs) toFilter() service.Filter {
@@ -25,10 +28,13 @@ func (args *FilterArgs) toFilter() service.Filter {
 		BeforeEq: args.BeforeEq,
 		AfterEq:  args.AfterEq,
 		Tags:     args.Tags,
+		Dates:    args.Date,
 	}
-	if args.Date != nil {
-		filter.BeforeEq = args.Date
-		filter.AfterEq = args.Date
+	if args.Today {
+		filter.Dates = append(filter.Dates, src.NewDateFromTime(time.Now()))
+	}
+	if args.Yesterday {
+		filter.Dates = append(filter.Dates, src.NewDateFromTime(time.Now().AddDate(0, 0, -1)))
 	}
 	return filter
 }
