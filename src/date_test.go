@@ -47,6 +47,27 @@ func TestParseDateWithDashes(t *testing.T) {
 	assert.Equal(t, d, should)
 }
 
+func TestEquality(t *testing.T) {
+	a := Ɀ_Date_(2005, 1, 1)
+	b := Ɀ_Date_(2005, 1, 1)
+	c := Ɀ_Date_(1982, 12, 31)
+	assert.True(t, a.IsEqualTo(b))
+	assert.False(t, a.IsEqualTo(c))
+	assert.False(t, b.IsEqualTo(c))
+}
+
+func TestComparison(t *testing.T) {
+	a := Ɀ_Date_(2005, 3, 15)
+	b := Ɀ_Date_(2005, 3, 15)
+	c := Ɀ_Date_(2005, 3, 16)
+	d := Ɀ_Date_(2004, 3, 16)
+	e := Ɀ_Date_(2005, 4, 1)
+	assert.True(t, b.IsAfterOrEqual(a))
+	assert.True(t, c.IsAfterOrEqual(a))
+	assert.True(t, a.IsAfterOrEqual(d))
+	assert.True(t, e.IsAfterOrEqual(c))
+}
+
 func TestParseDateWithSlashes(t *testing.T) {
 	original := "1856/10/22"
 	d, err := NewDateFromString(original)

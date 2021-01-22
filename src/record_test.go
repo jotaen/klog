@@ -10,16 +10,16 @@ func TestInitialiseRecord(t *testing.T) {
 	date := Ɀ_Date_(2020, 1, 1)
 	r := NewRecord(date)
 	assert.Equal(t, r.Date(), date)
-	assert.Equal(t, NewDuration(0, 0), r.ShouldTotal())
+	assert.Equal(t, NewDuration(0, 0).InMinutes(), r.ShouldTotal().InMinutes())
 	assert.Equal(t, Summary(""), r.Summary())
 	assert.Len(t, r.Entries(), 0)
 }
 
 func TestSavesShouldTotal(t *testing.T) {
 	r := NewRecord(Ɀ_Date_(2020, 1, 1))
-	assert.Equal(t, NewDuration(0, 0), r.ShouldTotal())
+	assert.Equal(t, NewDuration(0, 0).InMinutes(), r.ShouldTotal().InMinutes())
 	r.SetShouldTotal(NewDuration(5, 0))
-	assert.Equal(t, NewDuration(5, 0), r.ShouldTotal())
+	assert.Equal(t, NewDuration(5, 0).InMinutes(), r.ShouldTotal().InMinutes())
 }
 
 func TestAddRanges(t *testing.T) {

@@ -42,12 +42,12 @@ func HypotheticalTotal(until time.Time, rs ...klog.Record) (klog.Duration, bool)
 	return total, isCurrent
 }
 
-func ShouldTotal(rs ...klog.Record) klog.Duration {
+func ShouldTotal(rs ...klog.Record) klog.ShouldTotal {
 	total := klog.NewDuration(0, 0)
 	for _, r := range rs {
 		total = total.Plus(r.ShouldTotal())
 	}
-	return total
+	return klog.NewShouldTotal(0, total.InMinutes())
 }
 
 func TotalEntries(es []klog.Entry) klog.Duration {
@@ -68,7 +68,11 @@ type Filter struct {
 func Sort(rs []klog.Record, startWithOldest bool) []klog.Record {
 	sorted := append([]klog.Record(nil), rs...)
 	sort.Slice(sorted, func(i, j int) bool {
-		return !startWithOldest || rs[j].Date().IsAfterOrEqual(rs[i].Date())
+		isLess := sorted[j].Date().IsAfterOrEqual(sorted[i].Date())
+		if startWithOldest {
+			return !isLess
+		}
+		return isLess
 	})
 	return sorted
 }

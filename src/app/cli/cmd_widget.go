@@ -19,8 +19,8 @@ func (args *Widget) Run(ctx *app.Context) error {
 		}
 	}
 	if !args.Detach {
-		fmt.Println("If you would like to run the widget on its own, start again with:")
-		fmt.Println("klog widget --detach")
+		fmt.Println("If you would like to run the widget on its own")
+		fmt.Println("run again with --detach")
 	}
 	systray.Run(args.Detach)
 	return nil

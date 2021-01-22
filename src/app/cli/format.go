@@ -57,10 +57,10 @@ type stylerT struct{}
 var styler stylerT
 
 func (h stylerT) PrintDate(d klog.Date) string {
-	return Style{Color: "098", IsUnderlined: true}.Format(d.ToString())
+	return Style{Color: "015", IsUnderlined: true}.Format(d.ToString())
 }
-func (h stylerT) PrintShouldTotal(d klog.Duration, symbol string) string {
-	return Style{Color: "213"}.Format(d.ToString()) + Style{Color: "201"}.Format(symbol)
+func (h stylerT) PrintShouldTotal(d klog.Duration) string {
+	return Style{Color: "213"}.Format(d.ToString())
 }
 func (h stylerT) PrintSummary(s klog.Summary) string {
 	txt := s.ToString()
@@ -83,4 +83,11 @@ func (h stylerT) PrintDuration(d klog.Duration) string {
 		f.Color = "167"
 	}
 	return f.Format(d.ToString())
+}
+func (h stylerT) PrintDiff(d klog.Duration) string {
+	plus := ""
+	if d.InMinutes() > 0 {
+		plus = Style{Color: "120"}.Format("+")
+	}
+	return plus + h.PrintDuration(d)
 }

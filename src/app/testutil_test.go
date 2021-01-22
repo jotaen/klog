@@ -14,7 +14,7 @@ func WithContext(fn func(Context)) {
 	defer file.Close()
 	ctx := Context{}
 	fn(ctx)
-	_ = os.Remove(path)
+	err = os.Remove(path)
 	if err != nil {
 		panic("Could clean up")
 	}

@@ -7,6 +7,7 @@ import (
 	"klog/lib/caseymrm/menuet"
 	"klog/service"
 	"os/exec"
+	"time"
 )
 
 var blinker = blinkerT{1}
@@ -57,6 +58,19 @@ func render(ctx *app.Context, agent *launchAgent) []menuet.MenuItem {
 func renderRecords(records []klog.Record, file app.File) []menuet.MenuItem {
 	var items []menuet.MenuItem
 
+	now := time.Now()
+	today, _ := service.FindFilter(records, service.Filter{Dates: []klog.Date{klog.NewDateFromTime(now)}})
+	if today != nil {
+		total, isOngoing := service.HypotheticalTotal(now, today...)
+		indicator := ""
+		if isOngoing {
+			indicator = "  " + blinker.blink()
+		}
+		items = append(items, menuet.MenuItem{
+			Text: "Today: " + total.ToString() + indicator,
+		})
+	}
+
 	items = append(items, menuet.MenuItem{
 		Text: file.Name,
 		Children: func() []menuet.MenuItem {
@@ -77,11 +91,11 @@ func renderRecords(records []klog.Record, file app.File) []menuet.MenuItem {
 				},
 				{Type: menuet.Separator},
 				{Text: "Total: " + total.ToString()},
-				{Text: "Should: " + should.ToString() + "!"},
+				{Text: "Should: " + should.ToString()},
 				{Text: "Diff: " + plus + diff.ToString()},
 			}
 			showMax := 7
-			for i, r := range service.Sort(records, false) {
+			for i, r := range service.Sort(records, true) {
 				if i == 0 {
 					items = append(items, menuet.MenuItem{Type: menuet.Separator})
 				}
@@ -95,29 +109,6 @@ func renderRecords(records []klog.Record, file app.File) []menuet.MenuItem {
 		},
 	})
 
-	//items = append(items, menuet.MenuItem{
-	//	Text: func() string {
-	//		if isRunningCurrently {
-	//			return "Stop"
-	//		}
-	//		return "Start tracking"
-	//	}(),
-	//	Clicked: func() {
-	//		if isRunningCurrently {
-	//			// stop!
-	//		} else {
-	//			// start!
-	//		}
-	//	},
-	//})
-
-	//if today != nil {
-	//	items = append(items, menuet.MenuItem{
-	//		State: isRunningCurrently,
-	//		Text:  "Today: " + totalTimeValue,
-	//	})
-	//}
-
 	return items
 }
 
@@ -125,7 +116,7 @@ type blinkerT struct {
 	cycle int
 }
 
-func (b *blinkerT) get() string {
+func (b *blinkerT) blink() string {
 	b.cycle++
 	switch b.cycle {
 	case 1:
@@ -135,6 +126,6 @@ func (b *blinkerT) get() string {
 	case 3:
 		return "◵"
 	}
-	b.cycle = 1
+	b.cycle = 0
 	return "◴"
 }

@@ -23,7 +23,7 @@ func SerialiseRecord(r klog.Record, h FormattingHooks) string {
 	text := ""
 	text += h.PrintDate(r.Date())
 	if r.ShouldTotal().InMinutes() != 0 {
-		text += " (" + h.PrintShouldTotal(r.ShouldTotal(), "!") + ")"
+		text += " (" + h.PrintShouldTotal(r.ShouldTotal()) + ")"
 	}
 	text += "\n"
 	if r.Summary() != "" {
@@ -46,7 +46,7 @@ func SerialiseRecord(r klog.Record, h FormattingHooks) string {
 
 type FormattingHooks interface {
 	PrintDate(klog.Date) string
-	PrintShouldTotal(klog.Duration, string) string
+	PrintShouldTotal(klog.Duration) string
 	PrintSummary(klog.Summary) string
 	PrintRange(klog.Range) string
 	PrintOpenRange(klog.OpenRange) string
@@ -55,10 +55,8 @@ type FormattingHooks interface {
 
 type defaultHooks struct{}
 
-func (h defaultHooks) PrintDate(d klog.Date) string { return d.ToString() }
-func (h defaultHooks) PrintShouldTotal(d klog.Duration, symbol string) string {
-	return d.ToString() + symbol
-}
+func (h defaultHooks) PrintDate(d klog.Date) string            { return d.ToString() }
+func (h defaultHooks) PrintShouldTotal(d klog.Duration) string { return d.ToString() }
 func (h defaultHooks) PrintSummary(s klog.Summary) string      { return string(s) }
 func (h defaultHooks) PrintRange(r klog.Range) string          { return r.ToString() }
 func (h defaultHooks) PrintOpenRange(or klog.OpenRange) string { return or.ToString() }

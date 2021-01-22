@@ -2,7 +2,7 @@ package cli
 
 import (
 	"fmt"
-	src "klog"
+	"klog"
 	"klog/app"
 	"klog/service"
 	"time"
@@ -39,7 +39,7 @@ func (args *Evaluate) printEvaluation(ctx *app.Context) {
 		return
 	}
 	rs, _ = service.FindFilter(rs, args.toFilter())
-	total, _ := func() (src.Duration, bool) {
+	total, _ := func() (klog.Duration, bool) {
 		if args.Live {
 			return service.HypotheticalTotal(time.Now(), rs...)
 		}
@@ -48,9 +48,9 @@ func (args *Evaluate) printEvaluation(ctx *app.Context) {
 	fmt.Printf("Total: %s\n", total.ToString())
 	if args.Diff {
 		should := service.ShouldTotal(rs...)
-		diff := src.NewDuration(0, 0).Minus(should).Plus(total)
-		fmt.Printf("Should: %s\n", styler.PrintDuration(should))
-		fmt.Printf("Diff: %s\n", styler.PrintDuration(diff))
+		diff := klog.NewDuration(0, 0).Minus(should).Plus(total)
+		fmt.Printf("Should: %s\n", styler.PrintShouldTotal(should))
+		fmt.Printf("Diff: %s\n", styler.PrintDiff(diff))
 	}
 	fmt.Printf("(In %d records)\n", len(rs))
 }

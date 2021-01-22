@@ -5,10 +5,15 @@ import (
 	"regexp"
 )
 
+type ShouldTotal Duration
+type shouldTotal struct {
+	Duration
+}
+
 type Record interface {
 	Date() Date
 
-	ShouldTotal() Duration
+	ShouldTotal() ShouldTotal
 	SetShouldTotal(Duration)
 
 	Summary() Summary
@@ -28,9 +33,17 @@ func NewRecord(date Date) Record {
 	}
 }
 
+func NewShouldTotal(hours int, minutes int) ShouldTotal {
+	return shouldTotal{NewDuration(hours, minutes)}
+}
+
+func (s shouldTotal) ToString() string {
+	return s.Duration.ToString() + "!"
+}
+
 type record struct {
 	date        Date
-	shouldTotal Duration
+	shouldTotal ShouldTotal
 	summary     Summary
 	entries     []Entry
 }
@@ -39,7 +52,7 @@ func (r *record) Date() Date {
 	return r.date
 }
 
-func (r *record) ShouldTotal() Duration {
+func (r *record) ShouldTotal() ShouldTotal {
 	if r.shouldTotal == nil {
 		return NewDuration(0, 0)
 	}
@@ -47,7 +60,7 @@ func (r *record) ShouldTotal() Duration {
 }
 
 func (r *record) SetShouldTotal(t Duration) {
-	r.shouldTotal = t
+	r.shouldTotal = NewShouldTotal(0, t.InMinutes())
 }
 
 func (r *record) Summary() Summary {

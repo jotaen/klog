@@ -48,7 +48,7 @@ Empty
 
 	assert.Equal(t, klog.Ɀ_Date_(1999, 6, 3), rs[1].Date())
 	assert.Equal(t, klog.Summary("Empty"), rs[1].Summary())
-	assert.Equal(t, klog.NewDuration(8, 15), rs[1].ShouldTotal())
+	assert.Equal(t, klog.NewDuration(8, 15).InMinutes(), rs[1].ShouldTotal().InMinutes())
 	assert.Len(t, rs[1].Entries(), 0)
 }
 
