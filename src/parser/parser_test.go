@@ -52,6 +52,22 @@ Empty
 	assert.Len(t, rs[1].Entries(), 0)
 }
 
+func TestParseAlternativeFormatting(t *testing.T) {
+	text := `
+1999/05/31
+	8:00-13:00
+
+1999-05-31
+	8:00am-1:00pm
+`
+	rs, errs := Parse(text)
+	require.Nil(t, errs)
+	require.Len(t, rs, 2)
+
+	assert.True(t, rs[0].Date().IsEqualTo(rs[1].Date()))
+	assert.Equal(t, rs[0].Entries()[0].Duration(), rs[1].Entries()[0].Duration())
+}
+
 func TestAcceptTabOrSpacesAsIndentation(t *testing.T) {
 	for _, test := range []struct {
 		text   string
@@ -93,7 +109,12 @@ func TestParseDocumentSucceedsWithCorrectEntries(t *testing.T) {
 		require.Nil(t, errs, test.text)
 		require.Len(t, rs, 1, test.text)
 		require.Len(t, rs[0].Entries(), 1, test.text)
-		assert.Equal(t, test.expectEntry, rs[0].Entries()[0].Value(), test.text)
+		value := rs[0].Entries()[0].Unbox(
+			func(r src.Range) interface{} { return r },
+			func(d src.Duration) interface{} { return d },
+			func(o src.OpenRange) interface{} { return o },
+		)
+		assert.Equal(t, test.expectEntry, value, test.text)
 		assert.Equal(t, src.Summary(test.expectSummary), rs[0].Entries()[0].Summary(), test.text)
 	}
 }

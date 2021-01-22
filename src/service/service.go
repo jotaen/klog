@@ -3,28 +3,43 @@ package service
 import (
 	"klog"
 	"sort"
+	"time"
 )
 
 func Total(rs ...src.Record) src.Duration {
-	total := src.NewDuration(0, 0)
-	for _, r := range rs {
-		for _, e := range r.Entries() {
-			total = total.Plus(e.Duration())
-		}
-	}
+	total, _ := HypotheticalTotal(time.Time{}, rs...)
 	return total
 }
 
-func HypotheticalTotal(r src.Record, until src.Time) src.Duration {
-	total := Total(r)
-	or := r.OpenRange()
-	if or != nil {
-		tr, err := src.NewRange(or.Start(), until)
-		if err == nil {
-			total = total.Plus(tr.Duration())
+func HypotheticalTotal(until time.Time, rs ...src.Record) (src.Duration, bool) {
+	total := src.NewDuration(0, 0)
+	isCurrent := false
+	void := time.Time{}
+	thisDay := src.NewDateFromTime(until)
+	theDayBefore := thisDay.PlusDays(-1)
+	for _, r := range rs {
+		for _, e := range r.Entries() {
+			t := (e.Unbox(
+				func(r src.Range) interface{} { return r.Duration() },
+				func(d src.Duration) interface{} { return d },
+				func(o src.OpenRange) interface{} {
+					if until != void && (r.Date().IsEqualTo(thisDay) || r.Date().IsEqualTo(theDayBefore)) {
+						end := src.NewTimeFromTime(until)
+						if r.Date().IsEqualTo(theDayBefore) {
+							end, _ = src.NewTimeTomorrow(end.Hour(), end.Minute())
+						}
+						tr, err := src.NewRange(o.Start(), end)
+						if err == nil {
+							isCurrent = true
+							return tr.Duration()
+						}
+					}
+					return src.NewDuration(0, 0)
+				})).(src.Duration)
+			total = total.Plus(t)
 		}
 	}
-	return total
+	return total, isCurrent
 }
 
 func ShouldTotal(rs ...src.Record) src.Duration {
@@ -58,13 +73,17 @@ func Sort(rs []src.Record, startWithOldest bool) []src.Record {
 	return sorted
 }
 
+func dateHash(d src.Date) int {
+	return d.Year()*(12*31) + d.Month()*31 + d.Day()
+}
+
 func FindFilter(rs []src.Record, f Filter) ([]src.Record, []src.Entry) {
 	tags := src.NewTagSet(f.Tags...)
 	dates := newDateSet(f.Dates)
 	var records []src.Record
 	var entries []src.Entry
 	for _, r := range rs {
-		if len(dates) > 0 && !dates[r.Date().ToString()] {
+		if len(dates) > 0 && !dates[dateHash(r.Date())] {
 			continue
 		}
 		if f.BeforeEq != nil && !f.BeforeEq.IsAfterOrEqual(r.Date()) {
@@ -87,10 +106,10 @@ func FindFilter(rs []src.Record, f Filter) ([]src.Record, []src.Entry) {
 	return records, entries
 }
 
-func newDateSet(ds []src.Date) map[string]bool {
-	dict := make(map[string]bool, len(ds))
+func newDateSet(ds []src.Date) map[int]bool {
+	dict := make(map[int]bool, len(ds))
 	for _, d := range ds {
-		dict[d.ToString()] = true
+		dict[dateHash(d)] = true
 	}
 	return dict
 }
@@ -106,17 +125,4 @@ func FindEntriesWithHashtags(tags src.TagSet, r src.Record) ([]src.Entry, bool) 
 		}
 	}
 	return matches, len(matches) > 0
-}
-
-func FindRelevantOpenRangeAt(rs []src.Record, date src.Date) []src.Record {
-	var result []src.Record
-	for _, r := range rs {
-		if r.OpenRange() == nil {
-			continue
-		}
-		if r.Date() == date || r.Date().PlusDays(-1) == date {
-			result = append(result, r)
-		}
-	}
-	return result
 }

@@ -10,11 +10,9 @@ import (
 )
 
 var cli struct {
-	Print  Print  `cmd help:"Show records in a file"`
-	Total  Total  `cmd help:"Sum up the total time"`
-	Diff   Diff   `cmd help:"Show diff between total and should time"`
-	Follow Follow `cmd help:"Follow today’s record live"`
-	Widget Widget `cmd help:"Launch menu bar widget (MacOS only)"`
+	Print    Print    `cmd help:"Show records in a file"`
+	Evaluate Evaluate `cmd help:"Evaluate the times in records"`
+	Widget   Widget   `cmd help:"Launch menu bar widget (MacOS only)"`
 }
 
 func Execute() int {

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 	gotime "time"
 )
 
@@ -12,18 +13,20 @@ type Date interface {
 	Year() int
 	Month() int
 	Day() int
+	IsEqualTo(Date) bool
 	IsAfterOrEqual(Date) bool
 	ToString() string
 	PlusDays(int) Date
 }
 
 type date struct {
-	year  int
-	month int
-	day   int
+	year             int
+	month            int
+	day              int
+	formatWithDashes bool
 }
 
-var datePattern = regexp.MustCompile(`^\s*\d{4}-\d{2}-\d{2}\s*$`)
+var datePattern = regexp.MustCompile(`^(\d{4})[-/](\d{2})[-/](\d{2})$`)
 
 func NewDate(year int, month int, day int) (Date, error) {
 	cd := civil.Date{
@@ -31,18 +34,19 @@ func NewDate(year int, month int, day int) (Date, error) {
 		Month: gotime.Month(month),
 		Day:   day,
 	}
-	return cd2Date(cd)
+	return cd2Date(cd, true)
 }
 
 func NewDateFromString(yyyymmdd string) (Date, error) {
-	if !datePattern.MatchString(yyyymmdd) {
+	match := datePattern.FindStringSubmatch(yyyymmdd)
+	if len(match) != 4 || match[1] == "0" || match[2] == "0" || match[3] == "0" {
 		return nil, errors.New("MALFORMED_DATE")
 	}
-	cd, err := civil.ParseDate(yyyymmdd)
-	if err != nil {
+	cd, err := civil.ParseDate(match[1] + "-" + match[2] + "-" + match[3])
+	if err != nil || !cd.IsValid() {
 		return nil, errors.New("UNREPRESENTABLE_DATE")
 	}
-	return cd2Date(cd)
+	return cd2Date(cd, strings.Contains(yyyymmdd, "-"))
 }
 
 func NewDateFromTime(t gotime.Time) Date {
@@ -54,19 +58,24 @@ func NewDateFromTime(t gotime.Time) Date {
 	return d
 }
 
-func cd2Date(cd civil.Date) (Date, error) {
+func cd2Date(cd civil.Date, formatWithDashes bool) (Date, error) {
 	if !cd.IsValid() {
 		return nil, errors.New("UNREPRESENTABLE_DATE")
 	}
 	return &date{
-		year:  cd.Year,
-		month: int(cd.Month),
-		day:   cd.Day,
+		year:             cd.Year,
+		month:            int(cd.Month),
+		day:              cd.Day,
+		formatWithDashes: formatWithDashes,
 	}, nil
 }
 
 func (d *date) ToString() string {
-	return fmt.Sprintf("%04d-%02d-%02d", d.year, d.month, d.day)
+	separator := "-"
+	if !d.formatWithDashes {
+		separator = "/"
+	}
+	return fmt.Sprintf("%04d%s%02d%s%02d", d.year, separator, d.month, separator, d.day)
 }
 
 func (d *date) Year() int {
@@ -81,8 +90,18 @@ func (d *date) Day() int {
 	return d.day
 }
 
+func (d *date) IsEqualTo(otherDate Date) bool {
+	return d.Year() == otherDate.Year() && d.Month() == otherDate.Month() && d.Day() == otherDate.Day()
+}
+
 func (d *date) IsAfterOrEqual(otherDate Date) bool {
-	return d.ToString() >= otherDate.ToString()
+	if d.Year() != otherDate.Year() {
+		return d.Year() >= otherDate.Year()
+	}
+	if d.Month() != otherDate.Month() {
+		return d.Month() >= otherDate.Month()
+	}
+	return d.Day() >= otherDate.Day()
 }
 
 func (d *date) PlusDays(dayIncrement int) Date {
@@ -91,6 +110,9 @@ func (d *date) PlusDays(dayIncrement int) Date {
 		Month: gotime.Month(d.month),
 		Day:   d.day,
 	}.AddDays(dayIncrement)
-	newDate, _ := cd2Date(cd)
+	newDate, err := cd2Date(cd, true)
+	if err != nil {
+		panic(err)
+	}
 	return newDate
 }

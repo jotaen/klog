@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
-	"strings"
 	gotime "time"
 )
 
@@ -17,71 +16,71 @@ type Time interface {
 	IsYesterday() bool
 	IsTomorrow() bool
 	IsToday() bool
+	IsEqualTo(Time) bool
 	IsAfterOrEqual(Time) bool
 	ToString() string
 }
 
 type time struct {
-	hour     int
-	minute   int
-	dayShift int8
+	hour          int
+	minute        int
+	dayShift      int
+	is24HourClock bool
 }
 
-var timePattern = regexp.MustCompile(`^<?\d{1,2}:\d{2}>?$`)
-
-func (t *time) ToString() string {
-	prefix := ""
-	if t.IsYesterday() {
-		prefix = "<"
-	}
-	suffix := ""
-	if t.IsTomorrow() {
-		suffix = ">"
-	}
-	return fmt.Sprintf("%s%d:%02d%s", prefix, t.hour, t.minute, suffix)
-}
-
-func newTime(hour int, minute int, dayShift int8) (Time, error) {
+func newTime(hour int, minute int, dayShift int, is24HourClock bool) (Time, error) {
 	ct := civil.Time{Hour: hour, Minute: minute}
 	if !ct.IsValid() {
 		return nil, errors.New("INVALID_TIME")
 	}
 	return &time{
-		hour:     ct.Hour,
-		minute:   ct.Minute,
-		dayShift: dayShift,
+		hour:          ct.Hour,
+		minute:        ct.Minute,
+		dayShift:      dayShift,
+		is24HourClock: is24HourClock,
 	}, nil
 }
 
 func NewTime(hour int, minute int) (Time, error) {
-	return newTime(hour, minute, 0)
+	return newTime(hour, minute, 0, true)
 }
 
 func NewTimeYesterday(hour int, minute int) (Time, error) {
-	return newTime(hour, minute, -1)
+	return newTime(hour, minute, -1, true)
 }
 
 func NewTimeTomorrow(hour int, minute int) (Time, error) {
-	return newTime(hour, minute, +1)
+	return newTime(hour, minute, +1, true)
 }
 
+var timePattern = regexp.MustCompile(`^(<)?(\d{1,2}):(\d{2})(am|pm)?(>)?$`)
+
 func NewTimeFromString(hhmm string) (Time, error) {
-	if !timePattern.MatchString(hhmm) || (strings.HasPrefix(hhmm, "<") && strings.HasSuffix(hhmm, ">")) {
+	match := timePattern.FindStringSubmatch(hhmm)
+	if len(match) != 6 || (match[1] == "<" && match[5] == ">") {
 		return nil, errors.New("MALFORMED_TIME")
 	}
-	dayShift := int8(0)
-	if strings.HasPrefix(hhmm, "<") {
-		dayShift = -1
-		hhmm = strings.TrimPrefix(hhmm, "<")
-	} else if strings.HasSuffix(hhmm, ">") {
-		dayShift = +1
-		hhmm = strings.TrimSuffix(hhmm, ">")
+	hour, _ := strconv.Atoi(match[2])
+	minute, _ := strconv.Atoi(match[3])
+	is24HourClock := true
+	if match[4] == "am" || match[4] == "pm" {
+		if hour < 1 || hour > 12 {
+			return nil, errors.New("INVALID_TIME")
+		}
+		is24HourClock = false
+		if match[4] == "am" && hour == 12 {
+			hour = 0
+		} else if match[4] == "pm" && hour < 12 {
+			hour += 12
+		}
 	}
-	hhmm = strings.TrimSpace(hhmm)
-	parts := strings.Split(hhmm, ":")
-	hour, _ := strconv.Atoi(parts[0])
-	minute, _ := strconv.Atoi(parts[1])
-	return newTime(hour, minute, dayShift)
+	dayShift := 0
+	if match[1] == "<" {
+		dayShift = -1
+	} else if match[5] == ">" {
+		dayShift = +1
+	}
+	return newTime(hour, minute, dayShift, is24HourClock)
 }
 
 func NewTimeFromTime(t gotime.Time) Time {
@@ -122,8 +121,40 @@ func (t *time) IsTomorrow() bool {
 	return t.dayShift > 0
 }
 
+func (t *time) IsEqualTo(otherTime Time) bool {
+	return t.MidnightOffset().InMinutes() == otherTime.MidnightOffset().InMinutes()
+}
+
 func (t *time) IsAfterOrEqual(otherTime Time) bool {
 	first := t.MidnightOffset()
 	second := otherTime.MidnightOffset()
 	return first.InMinutes() >= second.InMinutes()
+}
+
+func (t *time) ToString() string {
+	yesterdayPrefix := ""
+	if t.IsYesterday() {
+		yesterdayPrefix = "<"
+	}
+	tomorrowSuffix := ""
+	if t.IsTomorrow() {
+		tomorrowSuffix = ">"
+	}
+	hour := t.hour
+	hour, am_pm := func() (int, string) {
+		if t.is24HourClock {
+			return t.hour, ""
+		}
+		if t.hour == 12 {
+			return 12, "pm"
+		}
+		if t.hour > 12 {
+			return t.hour - 12, "pm"
+		}
+		if t.hour == 0 {
+			return 12, "am"
+		}
+		return t.hour, "am"
+	}()
+	return fmt.Sprintf("%s%d:%02d%s%s", yesterdayPrefix, hour, t.minute, am_pm, tomorrowSuffix)
 }

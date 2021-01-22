@@ -66,30 +66,8 @@ func (r *record) Entries() []Entry {
 	return r.entries
 }
 
-func (r *record) Durations() []Duration {
-	var durations []Duration
-	for _, e := range r.entries {
-		d, isDuration := e.Value().(Duration)
-		if isDuration {
-			durations = append(durations, d)
-		}
-	}
-	return durations
-}
-
 func (r *record) AddDuration(d Duration, s Summary) {
 	r.entries = append(r.entries, Entry{value: d, summary: s})
-}
-
-func (r *record) Ranges() []Range {
-	var ranges []Range
-	for _, e := range r.entries {
-		tr, isRange := e.Value().(Range)
-		if isRange {
-			ranges = append(ranges, tr)
-		}
-	}
-	return ranges
 }
 
 func (r *record) AddRange(tr Range, s Summary) {
@@ -98,7 +76,7 @@ func (r *record) AddRange(tr Range, s Summary) {
 
 func (r *record) OpenRange() OpenRange {
 	for _, e := range r.entries {
-		t, isOpenRange := e.Value().(*openRange)
+		t, isOpenRange := e.value.(*openRange)
 		if isOpenRange {
 			return t
 		}
@@ -116,7 +94,7 @@ func (r *record) StartOpenRange(t Time, s Summary) error {
 
 func (r *record) EndOpenRange(end Time) error {
 	for i, e := range r.entries {
-		t, isOpenRange := e.Value().(*openRange)
+		t, isOpenRange := e.value.(*openRange)
 		if isOpenRange {
 			tr, err := NewRange(t.Start(), end)
 			if err != nil {

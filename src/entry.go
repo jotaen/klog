@@ -9,30 +9,22 @@ func (e *Entry) Summary() Summary {
 	return e.summary
 }
 
-func (e *Entry) Value() interface{} {
-	return e.value
-}
-
-func (e *Entry) ToString() string {
-	switch x := e.Value().(type) {
+func (e *Entry) Unbox(r func(Range) interface{}, d func(Duration) interface{}, or func(OpenRange) interface{}) interface{} {
+	switch x := e.value.(type) {
 	case Range:
-		return x.ToString()
+		return r(x)
 	case Duration:
-		return x.ToString()
+		return d(x)
 	case OpenRange:
-		return x.ToString()
+		return or(x)
 	}
 	panic("Incomplete switch statement")
 }
 
 func (e *Entry) Duration() Duration {
-	switch x := e.Value().(type) {
-	case Range:
-		return x.Duration()
-	case Duration:
-		return x
-	case OpenRange:
-		return NewDuration(0, 0)
-	}
-	panic("Incomplete switch statement")
+	return (e.Unbox(
+		func(r Range) interface{} { return r.Duration() },
+		func(d Duration) interface{} { return d },
+		func(o OpenRange) interface{} { return NewDuration(0, 0) },
+	)).(Duration)
 }

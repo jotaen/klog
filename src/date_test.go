@@ -40,11 +40,20 @@ func TestSerialiseDatePadsLeadingZeros(t *testing.T) {
 	assert.Equal(t, "2005-03-09", d.ToString())
 }
 
-func TestParseDate(t *testing.T) {
+func TestParseDateWithDashes(t *testing.T) {
 	d, err := NewDateFromString("1856-10-22")
 	assert.Nil(t, err)
 	should, _ := NewDate(1856, 10, 22)
 	assert.Equal(t, d, should)
+}
+
+func TestParseDateWithSlashes(t *testing.T) {
+	original := "1856/10/22"
+	d, err := NewDateFromString(original)
+	assert.Nil(t, err)
+	should, _ := NewDate(1856, 10, 22)
+	assert.True(t, should.IsEqualTo(d))
+	assert.Equal(t, original, d.ToString())
 }
 
 func TestParseDateFailsIfMalformed(t *testing.T) {

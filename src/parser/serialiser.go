@@ -29,31 +29,14 @@ func SerialiseRecord(r src.Record, h FormattingHooks) string {
 	if r.Summary() != "" {
 		text += h.PrintSummary(r.Summary()) + "\n"
 	}
-	maxLength := 0
-	for _, e := range r.Entries() {
-		length := len(e.ToString())
-		if length > maxLength {
-			maxLength = length
-		}
-	}
 	for _, e := range r.Entries() {
 		text += "    " // indentation
-		length := 0
-		switch x := e.Value().(type) {
-		case src.Range:
-			length = len(x.ToString())
-			text += h.PrintRange(x)
-		case src.Duration:
-			length = len(x.ToString())
-			text += h.PrintDuration(x)
-		case src.OpenRange:
-			length = len(x.ToString())
-			text += h.PrintOpenRange(x)
-		default:
-			panic("Incomplete switch statement")
-		}
+		text += (e.Unbox(
+			func(r src.Range) interface{} { return h.PrintRange(r) },
+			func(d src.Duration) interface{} { return h.PrintDuration(d) },
+			func(o src.OpenRange) interface{} { return h.PrintOpenRange(o) },
+		)).(string)
 		if e.Summary() != "" {
-			text += strings.Repeat(" ", maxLength-length)
 			text += " " + h.PrintSummary(e.Summary())
 		}
 		text += "\n"

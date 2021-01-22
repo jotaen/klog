@@ -50,11 +50,31 @@ func TestSerialiseTimeTomorrow(t *testing.T) {
 	assert.Equal(t, "0:02>", tm.ToString())
 }
 
-func TestParseTime(t *testing.T) {
+func TestParseTime24Hours(t *testing.T) {
 	tm, err := NewTimeFromString("9:42")
 	require.Nil(t, err)
 	should := Ɀ_Time_(9, 42)
 	assert.Equal(t, should, tm)
+}
+
+func TestParseTime12Hours(t *testing.T) {
+	for _, s := range []struct {
+		val string
+		exp Time
+	}{
+		{"12:37am", Ɀ_Time_(0, 37)},
+		{"1:00am", Ɀ_Time_(1, 0)},
+		{"1:00am", Ɀ_Time_(1, 0)},
+		{"12:22pm", Ɀ_Time_(12, 22)},
+		{"1:59pm", Ɀ_Time_(13, 59)},
+		{"7:33pm", Ɀ_Time_(19, 33)},
+	} {
+		tm, err := NewTimeFromString(s.val)
+		require.Nil(t, err)
+		require.NotNil(t, tm)
+		assert.True(t, s.exp.IsEqualTo(tm), s.val)
+		assert.Equal(t, s.val, tm.ToString())
+	}
 }
 
 func TestParseTimeYesterday(t *testing.T) {
@@ -77,18 +97,34 @@ func TestParseTimeTomorrow(t *testing.T) {
 	assert.Equal(t, true, tm.IsTomorrow())
 }
 
-func TestParseTimeFailsfMalformed(t *testing.T) {
+func TestParseMalformedTimesFail(t *testing.T) {
 	for _, s := range []string{
 		"009:42", // Hours cannot have infinite leading 0s
 		"09:042", // Minutes cannot have infinite leading 0s
 		"<2:15>", // Markers cannot appear on both sides
 		"asdf",
 		"12",
-		"13:3", // Minutes must have 2 digits
+		"13:3",   // Minutes must have 2 digits
+		"-14:12", // Cannot be negative
+		"14:-12", // Cannot be negative
 	} {
 		tm, err := NewTimeFromString(s)
-		require.Nil(t, tm)
-		assert.EqualError(t, err, "MALFORMED_TIME")
+		require.Nil(t, tm, s)
+		assert.EqualError(t, err, "MALFORMED_TIME", s)
+	}
+}
+
+func TestParseUnrepresentableTimesFail(t *testing.T) {
+	for _, s := range []string{
+		"25:12",
+		"3:87",
+		"00:00pm",
+		"13:00am",
+		"13:00pm",
+	} {
+		tm, err := NewTimeFromString(s)
+		require.Nil(t, tm, s)
+		assert.EqualError(t, err, "INVALID_TIME", s)
 	}
 }
 

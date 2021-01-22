@@ -7,10 +7,9 @@ import (
 	"klog/lib/caseymrm/menuet"
 	"klog/service"
 	"os/exec"
-	"time"
 )
 
-var blinker = 1
+var blinker = blinkerT{1}
 
 func render(ctx *app.Context, agent *launchAgent) []menuet.MenuItem {
 	var items []menuet.MenuItem
@@ -57,43 +56,6 @@ func render(ctx *app.Context, agent *launchAgent) []menuet.MenuItem {
 
 func renderRecords(records []src.Record, file app.File) []menuet.MenuItem {
 	var items []menuet.MenuItem
-	now := time.Now()
-	nowTime, _ := src.NewTime(now.Hour(), now.Minute())
-	nowDate := src.NewDateFromTime(now)
-	today := func() src.Record {
-		candidates, _ := service.FindFilter(records, service.Filter{
-			BeforeEq: nowDate, AfterEq: nowDate,
-		})
-		if len(candidates) == 1 {
-			return candidates[0]
-		}
-		return nil
-	}()
-
-	totalTimeValue, isRunningCurrently := func() (string, bool) {
-		if today == nil {
-			return "", false
-		}
-		if today.OpenRange() != nil {
-			result := service.HypotheticalTotal(today, nowTime).ToString()
-			result += "  "
-			switch blinker {
-			case 1:
-				result += "◷"
-			case 2:
-				result += "◶"
-			case 3:
-				result += "◵"
-			case 4:
-				result += "◴"
-				blinker = 0
-			}
-			blinker++
-			return result, true
-		} else {
-			return service.Total(today).ToString(), false
-		}
-	}()
 
 	items = append(items, menuet.MenuItem{
 		Text: file.Name,
@@ -149,12 +111,30 @@ func renderRecords(records []src.Record, file app.File) []menuet.MenuItem {
 	//	},
 	//})
 
-	if today != nil {
-		items = append(items, menuet.MenuItem{
-			State: isRunningCurrently,
-			Text:  "Today: " + totalTimeValue,
-		})
-	}
+	//if today != nil {
+	//	items = append(items, menuet.MenuItem{
+	//		State: isRunningCurrently,
+	//		Text:  "Today: " + totalTimeValue,
+	//	})
+	//}
 
 	return items
+}
+
+type blinkerT struct {
+	cycle int
+}
+
+func (b *blinkerT) get() string {
+	b.cycle++
+	switch b.cycle {
+	case 1:
+		return "◷"
+	case 2:
+		return "◶"
+	case 3:
+		return "◵"
+	}
+	b.cycle = 1
+	return "◴"
 }

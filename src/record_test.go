@@ -29,9 +29,9 @@ func TestAddRanges(t *testing.T) {
 	w.AddRange(range1, "Range 1")
 	w.AddRange(range2, "Range 2")
 	require.Len(t, w.Entries(), 2)
-	assert.Equal(t, range1, w.Entries()[0].Value())
+	assert.Equal(t, range1, w.Entries()[0].value)
 	assert.Equal(t, Summary("Range 1"), w.Entries()[0].Summary())
-	assert.Equal(t, range2, w.Entries()[1].Value())
+	assert.Equal(t, range2, w.Entries()[1].value)
 	assert.Equal(t, Summary("Range 2"), w.Entries()[1].Summary())
 }
 
@@ -41,7 +41,7 @@ func TestStartOpenRange(t *testing.T) {
 	assert.Equal(t, nil, w.OpenRange())
 	_ = w.StartOpenRange(time, "Open Range")
 	require.Len(t, w.Entries(), 1)
-	assert.Equal(t, NewOpenRange(time), w.Entries()[0].Value())
+	assert.Equal(t, NewOpenRange(time), w.Entries()[0].value)
 	assert.Equal(t, Summary("Open Range"), w.Entries()[0].Summary())
 }
 
@@ -63,7 +63,7 @@ func TestCloseOpenRange(t *testing.T) {
 	require.Nil(t, err)
 	assert.Nil(t, w.OpenRange())
 	require.Len(t, w.Entries(), 1)
-	assert.Equal(t, Ɀ_Range_(start, end), w.Entries()[0].Value())
+	assert.Equal(t, Ɀ_Range_(start, end), w.Entries()[0].value)
 	assert.Equal(t, Summary("Started"), w.Entries()[0].Summary())
 }
 
@@ -85,8 +85,8 @@ func TestAddDurations(t *testing.T) {
 	w.AddDuration(d1, "Duration 1")
 	w.AddDuration(d2, "Duration 2")
 	require.Len(t, w.Entries(), 2)
-	assert.Equal(t, d1, w.Entries()[0].Value())
+	assert.Equal(t, d1, w.Entries()[0].value)
 	assert.Equal(t, Summary("Duration 1"), w.Entries()[0].Summary())
-	assert.Equal(t, d2, w.Entries()[1].Value())
+	assert.Equal(t, d2, w.Entries()[1].value)
 	assert.Equal(t, Summary("Duration 2"), w.Entries()[1].Summary())
 }
