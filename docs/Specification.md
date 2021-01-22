@@ -1,4 +1,4 @@
-# klog – File Format Specification
+# klog – File Format Specification (DRAFT)
 
 klog is a file format for tracking times.
 It is free and open-source software distributed under the MIT-License.
