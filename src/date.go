@@ -1,4 +1,4 @@
-package src
+package klog
 
 import (
 	"cloud.google.com/go/civil"

@@ -1,4 +1,4 @@
-package src
+package klog
 
 import (
 	"github.com/stretchr/testify/assert"

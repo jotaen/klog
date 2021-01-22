@@ -28,7 +28,7 @@ func TestParseMinimalDocument(t *testing.T) {
 	rs, errs := Parse(text)
 	require.Nil(t, errs)
 	require.Len(t, rs, 1)
-	assert.Equal(t, src.Ɀ_Date_(2000, 1, 1), rs[0].Date())
+	assert.Equal(t, klog.Ɀ_Date_(2000, 1, 1), rs[0].Date())
 }
 
 func TestParseMultipleRecords(t *testing.T) {
@@ -42,13 +42,13 @@ Empty
 	require.Nil(t, errs)
 	require.Len(t, rs, 2)
 
-	assert.Equal(t, src.Ɀ_Date_(1999, 5, 31), rs[0].Date())
-	assert.Equal(t, src.Summary(""), rs[0].Summary())
+	assert.Equal(t, klog.Ɀ_Date_(1999, 5, 31), rs[0].Date())
+	assert.Equal(t, klog.Summary(""), rs[0].Summary())
 	assert.Len(t, rs[0].Entries(), 0)
 
-	assert.Equal(t, src.Ɀ_Date_(1999, 6, 3), rs[1].Date())
-	assert.Equal(t, src.Summary("Empty"), rs[1].Summary())
-	assert.Equal(t, src.NewDuration(8, 15), rs[1].ShouldTotal())
+	assert.Equal(t, klog.Ɀ_Date_(1999, 6, 3), rs[1].Date())
+	assert.Equal(t, klog.Summary("Empty"), rs[1].Summary())
+	assert.Equal(t, klog.NewDuration(8, 15), rs[1].ShouldTotal())
 	assert.Len(t, rs[1].Entries(), 0)
 }
 
@@ -90,32 +90,32 @@ func TestParseDocumentSucceedsWithCorrectEntries(t *testing.T) {
 		expectEntry   interface{}
 		expectSummary string
 	}{
-		{"1234-12-12\n\t5h Some remark", src.NewDuration(5, 0), "Some remark"},
-		{"1234-12-12\n\t2h30m", src.NewDuration(2, 30), ""},
-		{"1234-12-12\n\t2m", src.NewDuration(0, 2), ""},
-		{"1234-12-12\n\t+5h", src.NewDuration(5, 0), ""},
-		{"1234-12-12\n\t+2h30m", src.NewDuration(2, 30), ""},
-		{"1234-12-12\n\t+2m", src.NewDuration(0, 2), ""},
-		{"1234-12-12\n\t-5h", src.NewDuration(-5, -0), ""},
-		{"1234-12-12\n\t-2h30m", src.NewDuration(-2, -30), ""},
-		{"1234-12-12\n\t-2m", src.NewDuration(-0, -2), ""},
-		{"1234-12-12\n\t3:05 - 11:59 Did this and that", src.Ɀ_Range_(src.Ɀ_Time_(3, 5), src.Ɀ_Time_(11, 59)), "Did this and that"},
-		{"1234-12-12\n\t<23:30 - 0:10", src.Ɀ_Range_(src.Ɀ_TimeYesterday_(23, 30), src.Ɀ_Time_(0, 10)), ""},
-		{"1234-12-12\n\t22:17 - 1:00>", src.Ɀ_Range_(src.Ɀ_Time_(22, 17), src.Ɀ_TimeTomorrow_(1, 00)), ""},
-		{"1234-12-12\n\t18:45 - ? Just started something", src.NewOpenRange(src.Ɀ_Time_(18, 45)), "Just started something"},
-		{"1234-12-12\n\t<3:12-??????", src.NewOpenRange(src.Ɀ_TimeYesterday_(3, 12)), ""},
+		{"1234-12-12\n\t5h Some remark", klog.NewDuration(5, 0), "Some remark"},
+		{"1234-12-12\n\t2h30m", klog.NewDuration(2, 30), ""},
+		{"1234-12-12\n\t2m", klog.NewDuration(0, 2), ""},
+		{"1234-12-12\n\t+5h", klog.NewDuration(5, 0), ""},
+		{"1234-12-12\n\t+2h30m", klog.NewDuration(2, 30), ""},
+		{"1234-12-12\n\t+2m", klog.NewDuration(0, 2), ""},
+		{"1234-12-12\n\t-5h", klog.NewDuration(-5, -0), ""},
+		{"1234-12-12\n\t-2h30m", klog.NewDuration(-2, -30), ""},
+		{"1234-12-12\n\t-2m", klog.NewDuration(-0, -2), ""},
+		{"1234-12-12\n\t3:05 - 11:59 Did this and that", klog.Ɀ_Range_(klog.Ɀ_Time_(3, 5), klog.Ɀ_Time_(11, 59)), "Did this and that"},
+		{"1234-12-12\n\t<23:30 - 0:10", klog.Ɀ_Range_(klog.Ɀ_TimeYesterday_(23, 30), klog.Ɀ_Time_(0, 10)), ""},
+		{"1234-12-12\n\t22:17 - 1:00>", klog.Ɀ_Range_(klog.Ɀ_Time_(22, 17), klog.Ɀ_TimeTomorrow_(1, 00)), ""},
+		{"1234-12-12\n\t18:45 - ? Just started something", klog.NewOpenRange(klog.Ɀ_Time_(18, 45)), "Just started something"},
+		{"1234-12-12\n\t<3:12-??????", klog.NewOpenRange(klog.Ɀ_TimeYesterday_(3, 12)), ""},
 	} {
 		rs, errs := Parse(test.text)
 		require.Nil(t, errs, test.text)
 		require.Len(t, rs, 1, test.text)
 		require.Len(t, rs[0].Entries(), 1, test.text)
 		value := rs[0].Entries()[0].Unbox(
-			func(r src.Range) interface{} { return r },
-			func(d src.Duration) interface{} { return d },
-			func(o src.OpenRange) interface{} { return o },
+			func(r klog.Range) interface{} { return r },
+			func(d klog.Duration) interface{} { return d },
+			func(o klog.OpenRange) interface{} { return o },
 		)
 		assert.Equal(t, test.expectEntry, value, test.text)
-		assert.Equal(t, src.Summary(test.expectSummary), rs[0].Entries()[0].Summary(), test.text)
+		assert.Equal(t, klog.Summary(test.expectSummary), rs[0].Entries()[0].Summary(), test.text)
 	}
 }
 

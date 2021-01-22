@@ -28,7 +28,7 @@ func Execute() int {
 		kong.Description("klog time tracking: command line app for interacting with `.klg` files."),
 		kong.UsageOnError(),
 		func() kong.Option {
-			datePrototype, _ := src.NewDate(1, 1, 1)
+			datePrototype, _ := klog.NewDate(1, 1, 1)
 			return kong.TypeMapper(reflect.TypeOf(&datePrototype).Elem(), dateDecoder())
 		}(),
 	)
@@ -49,7 +49,7 @@ func dateDecoder() kong.MapperFunc {
 		if value == "" {
 			return errors.New("please provide a valid date")
 		}
-		d, err := src.NewDateFromString(value)
+		d, err := klog.NewDateFromString(value)
 		if err != nil {
 			return errors.New("`" + value + "` is not a valid date")
 		}

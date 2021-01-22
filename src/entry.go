@@ -1,4 +1,4 @@
-package src
+package klog
 
 type Entry struct {
 	value   interface{}

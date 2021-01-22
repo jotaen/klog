@@ -1,4 +1,4 @@
-package src
+package klog
 
 /**
 Only use these functions in test code.

@@ -54,7 +54,7 @@ func render(ctx *app.Context, agent *launchAgent) []menuet.MenuItem {
 	return items
 }
 
-func renderRecords(records []src.Record, file app.File) []menuet.MenuItem {
+func renderRecords(records []klog.Record, file app.File) []menuet.MenuItem {
 	var items []menuet.MenuItem
 
 	items = append(items, menuet.MenuItem{
@@ -62,7 +62,7 @@ func renderRecords(records []src.Record, file app.File) []menuet.MenuItem {
 		Children: func() []menuet.MenuItem {
 			total := service.Total(records...)
 			should := service.ShouldTotal(records...)
-			diff := src.NewDuration(0, 0).Minus(should).Plus(total)
+			diff := klog.NewDuration(0, 0).Minus(should).Plus(total)
 			plus := ""
 			if diff.InMinutes() > 0 {
 				plus = "+"

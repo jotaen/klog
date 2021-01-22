@@ -56,28 +56,28 @@ type stylerT struct{}
 
 var styler stylerT
 
-func (h stylerT) PrintDate(d src.Date) string {
+func (h stylerT) PrintDate(d klog.Date) string {
 	return Style{Color: "098", IsUnderlined: true}.Format(d.ToString())
 }
-func (h stylerT) PrintShouldTotal(d src.Duration, symbol string) string {
+func (h stylerT) PrintShouldTotal(d klog.Duration, symbol string) string {
 	return Style{Color: "213"}.Format(d.ToString()) + Style{Color: "201"}.Format(symbol)
 }
-func (h stylerT) PrintSummary(s src.Summary) string {
+func (h stylerT) PrintSummary(s klog.Summary) string {
 	txt := s.ToString()
 	style := Style{Color: "249"}
 	hashStyle := style.ChangedBold(true).ChangedColor("251")
-	txt = src.HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
+	txt = klog.HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
 		return hashStyle.FormatAndRestore(h, style)
 	})
 	return style.Format(txt)
 }
-func (h stylerT) PrintRange(r src.Range) string {
+func (h stylerT) PrintRange(r klog.Range) string {
 	return Style{Color: "117"}.Format(r.ToString())
 }
-func (h stylerT) PrintOpenRange(or src.OpenRange) string {
+func (h stylerT) PrintOpenRange(or klog.OpenRange) string {
 	return Style{Color: "027"}.Format(or.ToString())
 }
-func (h stylerT) PrintDuration(d src.Duration) string {
+func (h stylerT) PrintDuration(d klog.Duration) string {
 	f := Style{Color: "120"}
 	if d.InMinutes() < 0 {
 		f.Color = "167"
