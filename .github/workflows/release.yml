@@ -1,0 +1,64 @@
+name: Prepare Release
+on:
+  workflow_dispatch:
+    inputs:
+      release_id:
+        description: 'Release id (tag name)'
+        required: true
+        default: 'v-unstable-nightly'
+
+jobs:
+  create_release:
+    name: Create release draft
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1 # https://github.com/actions/create-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Automatically provided
+        with:
+          tag_name: ${{ github.event.inputs.release_id }}
+          body: Unstable **work-in-progress** version. Might contain bugs or unspecified behaviour.
+          release_name: Pre-release (${{ github.event.inputs.release_id }})
+          prerelease: true
+          draft: true
+  build:
+    name: Build
+    needs: create_release
+    strategy:
+      matrix:
+        include:
+          - name: linux
+            runner_os: ubuntu-latest
+            go_os: linux
+          - name: windows
+            runner_os: ubuntu-latest
+            go_os: windows
+          - name: mac
+            runner_os: macos-latest
+            go_os: darwin
+    runs-on: ${{ matrix.runner_os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.15.5'
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.go_os }}
+          GOARCH: amd64
+        run: |
+          ./run build
+          zip -j klog-${{ matrix.name }}.zip ./out/klog
+      - name: Upload binaries
+        uses: actions/upload-release-asset@v1 # https://github.com/actions/upload-release-asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Automatically provided
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./klog-${{ matrix.name }}.zip
+          asset_name: klog-${{ matrix.name }}.zip
+          asset_content_type: application/zip
