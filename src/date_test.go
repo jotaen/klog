@@ -80,6 +80,7 @@ func TestParseDateWithSlashes(t *testing.T) {
 func TestParseDateFailsIfMalformed(t *testing.T) {
 	for _, s := range []string{
 		"1856-1-2",
+		"1856/01-02",
 		"20-12-12",
 		"asdf",
 		"01.01.2000",

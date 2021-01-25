@@ -27,18 +27,15 @@ func parseRecord(c Chunk) (klog.Record, []Error) {
 
 	// ========== HEADLINE ==========
 	r := func(headline Text) klog.Record {
-		headline.SkipWhitespace()
-		if headline.PointerPosition != 0 {
-			errs = append(errs, ErrorIllegalWhitespace(NewError(headline, 0, headline.PointerPosition)))
+		if headline.IndentationLevel != 0 {
+			errs = append(errs, ErrorIllegalIndentation(NewError(headline, 0, headline.Length())))
+			return nil
 		}
 		dateText, _ := headline.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
 		date, err := klog.NewDateFromString(dateText.ToString())
 		if err != nil {
-			errs = append(errs, ErrorMalformedDate(NewError(headline, headline.PointerPosition, dateText.Length())))
-			// Generate dummy record to ensure that we have something to work with
-			// during parsing. That allows us to continue even if there are errors early on.
-			dummyDate, _ := klog.NewDate(0, 0, 0)
-			return klog.NewRecord(dummyDate)
+			errs = append(errs, ErrorInvalidDate(NewError(headline, headline.PointerPosition, dateText.Length())))
+			return nil
 		}
 		headline.Advance(dateText.Length())
 		headline.SkipWhitespace()
@@ -46,8 +43,13 @@ func parseRecord(c Chunk) (klog.Record, []Error) {
 		if headline.Peek() == '(' {
 			headline.Advance(1) // '('
 			headline.SkipWhitespace()
-			if _, hasClosingParenthesis := headline.PeekUntil(func(r rune) bool { return r == ')' }); !hasClosingParenthesis {
+			allPropsText, hasClosingParenthesis := headline.PeekUntil(func(r rune) bool { return r == ')' })
+			if !hasClosingParenthesis {
 				errs = append(errs, ErrorMalformedPropertiesSyntax(NewError(headline, headline.Length(), 1)))
+				return r
+			}
+			if allPropsText.Length() == 0 {
+				errs = append(errs, ErrorMalformedPropertiesSyntax(NewError(headline, headline.PointerPosition, 1)))
 				return r
 			}
 			shouldTotalText, hasExclamationMark := headline.PeekUntil(func(r rune) bool { return r == '!' })
@@ -74,10 +76,19 @@ func parseRecord(c Chunk) (klog.Record, []Error) {
 	}(c[0])
 	c = c.Pop()
 
+	// In case there was an error, generate dummy record to ensure that we have something to
+	// work with during parsing. That allows us to continue even if there are errors early on.
+	if r == nil {
+		dummyDate, _ := klog.NewDate(0, 0, 0)
+		r = klog.NewRecord(dummyDate)
+	}
+
 	// ========== SUMMARY LINES ==========
 	for i, sLine := range c {
 		if sLine.IndentationLevel > 0 {
 			break
+		} else if sLine.IndentationLevel < 0 {
+			errs = append(errs, ErrorIllegalIndentation(NewError(sLine, 0, sLine.Length())))
 		}
 		lineBreak := ""
 		if i > 0 {
@@ -94,7 +105,7 @@ func parseRecord(c Chunk) (klog.Record, []Error) {
 entries:
 	for _, eLine := range c {
 		if eLine.IndentationLevel != 1 {
-			errs = append(errs, ErrorIllegalIndentation(NewError(eLine, 0, eLine.Length()), "entry"))
+			errs = append(errs, ErrorIllegalIndentation(NewError(eLine, 0, eLine.Length())))
 			continue
 		}
 		durationCandidate, _ := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })

@@ -23,12 +23,9 @@ var blankTextPattern = regexp.MustCompile(
 	`^[  \t]*$`, // match space, non-breaking space, tab
 )
 
-var indentationPattern = regexp.MustCompile(`^(\t| {2,4})`)
-
 func SplitIntoChunksOfLines(text string) []Chunk {
 	var chunks []Chunk
 	var currentChunk Chunk
-	currentIndentation := 0
 	text = text + "\n"
 	for i, l := range strings.Split(text, "\n") {
 		if blankTextPattern.MatchString(l) {
@@ -38,17 +35,36 @@ func SplitIntoChunksOfLines(text string) []Chunk {
 			currentChunk = nil
 			continue
 		}
-		indent := indentationPattern.FindString(l)
-		if indent == "" {
+		l = replaceTabsWithSpaces(l)
+		l, spacesCount := trimLeftCount(l, ' ')
+		currentIndentation := -1
+		if spacesCount == 0 {
 			currentIndentation = 0
-		} else {
+		} else if spacesCount >= 2 && spacesCount <= 4 {
 			currentIndentation = 1
 		}
 		currentChunk = append(currentChunk, Text{
-			Value:            []rune(l)[len(indent):],
+			Value:            []rune(l),
 			IndentationLevel: currentIndentation,
 			LineNumber:       i + 1,
 		})
 	}
 	return chunks
+}
+
+func replaceTabsWithSpaces(text string) string {
+	text, tabsCount := trimLeftCount(text, '\t')
+	return strings.Repeat("    ", tabsCount) + text
+}
+
+func trimLeftCount(text string, char rune) (string, int) {
+	count := 0
+	text = strings.TrimLeftFunc(text, func(c rune) bool {
+		if c == char {
+			count++
+			return true
+		}
+		return false
+	})
+	return text, count
 }

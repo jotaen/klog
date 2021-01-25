@@ -42,6 +42,9 @@ func NewDateFromString(yyyymmdd string) (Date, error) {
 	if len(match) != 4 || match[1] == "0" || match[2] == "0" || match[3] == "0" {
 		return nil, errors.New("MALFORMED_DATE")
 	}
+	if c := strings.Count(yyyymmdd, "-"); c == 1 { // `-` and `/` mixed
+		return nil, errors.New("MALFORMED_DATE")
+	}
 	cd, err := civil.ParseDate(match[1] + "-" + match[2] + "-" + match[3])
 	if err != nil || !cd.IsValid() {
 		return nil, errors.New("UNREPRESENTABLE_DATE")

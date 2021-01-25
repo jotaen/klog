@@ -129,7 +129,7 @@ Why is there a summary at the end?
 	require.Nil(t, rs)
 	require.NotNil(t, errs)
 	require.Len(t, errs.Get(), 1)
-	assert.Equal(t, Err{ILLEGAL_INDENTATION, 4, 0, 34}, toErr(errs.Get()[0]))
+	assert.Equal(t, Err{id(ErrorIllegalIndentation), 4, 0, 34}, toErr(errs.Get()[0]))
 }
 
 func TestReportErrorsInHeadline(t *testing.T) {
@@ -137,13 +137,16 @@ func TestReportErrorsInHeadline(t *testing.T) {
 		text   string
 		expect Err
 	}{
-		{"Hello 123", Err{INVALID_VALUE, 1, 0, 5}},
-		{" 2020-01-01", Err{ILLEGAL_WHITESPACE, 1, 0, 1}},
-		{"2020-01-01 (asdf)", Err{UNRECOGNISED_TOKEN, 1, 12, 4}},
-		{"2020-01-01 5h30m!", Err{ILLEGAL_SYNTAX, 1, 11, 6}},
-		{"2020-01-01 (5h30m!", Err{ILLEGAL_SYNTAX, 1, 18, 1}},
-		{"2020-01-01 (", Err{ILLEGAL_SYNTAX, 1, 12, 1}},
-		{"2020-01-01 (5h!) foo", Err{ILLEGAL_SYNTAX, 1, 17, 3}},
+		{"Hello 123", Err{id(ErrorInvalidDate), 1, 0, 5}},
+		{" 2020-01-01", Err{id(ErrorIllegalIndentation), 1, 0, 10}},
+		{"   2020-01-01", Err{id(ErrorIllegalIndentation), 1, 0, 10}},
+		{"2020-01-01 ()", Err{id(ErrorMalformedPropertiesSyntax), 1, 12, 1}},
+		{"2020-01-01 (asdf)", Err{id(ErrorUnrecognisedProperty), 1, 12, 4}},
+		{"2020-01-01 (asdf!)", Err{id(ErrorMalformedShouldTotal), 1, 12, 4}},
+		{"2020-01-01 5h30m!", Err{id(ErrorUnrecognisedTextInHeadline), 1, 11, 6}},
+		{"2020-01-01 (5h30m!", Err{id(ErrorMalformedPropertiesSyntax), 1, 18, 1}},
+		{"2020-01-01 (", Err{id(ErrorMalformedPropertiesSyntax), 1, 12, 1}},
+		{"2020-01-01 (5h!) foo", Err{id(ErrorUnrecognisedTextInHeadline), 1, 17, 3}},
 	} {
 		rs, errs := Parse(test.text)
 		require.Nil(t, rs)
@@ -164,7 +167,7 @@ That is not allowed.
 	require.Nil(t, rs)
 	require.NotNil(t, errs)
 	require.Len(t, errs.Get(), 1)
-	assert.Equal(t, Err{INVALID_VALUE, 4, 0, 41}, toErr(errs.Get()[0]))
+	assert.Equal(t, Err{id(ErrorIllegalIndentation), 4, 0, 40}, toErr(errs.Get()[0]))
 }
 
 func TestReportErrorsInEntries(t *testing.T) {
@@ -172,16 +175,20 @@ func TestReportErrorsInEntries(t *testing.T) {
 		text   string
 		expect Err
 	}{
-		{"2020-01-01\n\t5h1", Err{INVALID_VALUE, 2, 0, 3}},
-		{"2020-01-01\n\tasdf Test 123", Err{INVALID_VALUE, 2, 0, 4}},
-		{"2020-01-01\n\t15:30", Err{INVALID_VALUE, 2, 5, 1}},
-		{"2020-01-01\n\t08:00-", Err{INVALID_VALUE, 2, 6, 1}},
-		{"2020-01-01\n\t08:00-asdf", Err{INVALID_VALUE, 2, 6, 4}},
-		{"2020-01-01\n\t08:00 - ?asdf", Err{INVALID_VALUE, 2, 9, 4}},
-		{"2020-01-01\n\t08:00- ?\n\t09:00 - ?", Err{DUPLICATE_OPEN_RANGE, 3, 0, 9}},
-		{"2020-01-01\n\t15:00 - 14:00", Err{ILLEGAL_RANGE, 2, 0, 13}},
-		{"2020-01-01\n\t-18:00", Err{INVALID_VALUE, 2, 0, 6}},
-		{"2020-01-01\n\t15:30 Foo Bar Baz", Err{INVALID_VALUE, 2, 6, 1}},
+		{"2020-01-01\n\t5h1", Err{id(ErrorMalformedEntry), 2, 0, 3}},
+		{"2020-01-01\n\tasdf Test 123", Err{id(ErrorMalformedEntry), 2, 0, 4}},
+		{"2020-01-01\n\t15:30", Err{id(ErrorMalformedEntry), 2, 5, 1}},
+		{"2020-01-01\n\t08:00-", Err{id(ErrorMalformedEntry), 2, 6, 1}},
+		{"2020-01-01\n\t08:00-asdf", Err{id(ErrorMalformedEntry), 2, 6, 4}},
+		{"2020-01-01\n\t08:00 - ?asdf", Err{id(ErrorMalformedEntry), 2, 9, 4}},
+		{"2020-01-01\n\t08:00- ?\n\t09:00 - ?", Err{id(ErrorDuplicateOpenRange), 3, 0, 9}},
+		{"2020-01-01\n\t15:00 - 14:00", Err{id(ErrorIllegalRange), 2, 0, 13}},
+		{"2020-01-01\n\t-18:00", Err{id(ErrorMalformedEntry), 2, 0, 6}},
+		{"2020-01-01\n\t15:30 Foo Bar Baz", Err{id(ErrorMalformedEntry), 2, 6, 1}},
+		{"2020-01-01\n 8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
+		{"2020-01-01\n\t 8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
+		{"2020-01-01\n\t\t8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
+		{"2020-01-01\n     8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
 	} {
 		rs, errs := Parse(test.text)
 		require.Nil(t, rs, test.text)
