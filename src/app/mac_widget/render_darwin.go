@@ -75,7 +75,7 @@ func renderRecords(records []klog.Record, file app.File) []menuet.MenuItem {
 		Text: file.Name,
 		Children: func() []menuet.MenuItem {
 			total := service.Total(records...)
-			should := service.ShouldTotal(records...)
+			should := service.ShouldTotalSum(records...)
 			diff := klog.NewDuration(0, 0).Minus(should).Plus(total)
 			plus := ""
 			if diff.InMinutes() > 0 {

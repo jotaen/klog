@@ -1,57 +1,57 @@
 package service
 
 import (
-	"klog"
+	. "klog"
 	"sort"
 	"time"
 )
 
-func Total(rs ...klog.Record) klog.Duration {
+func Total(rs ...Record) Duration {
 	total, _ := HypotheticalTotal(time.Time{}, rs...)
 	return total
 }
 
-func HypotheticalTotal(until time.Time, rs ...klog.Record) (klog.Duration, bool) {
-	total := klog.NewDuration(0, 0)
+func HypotheticalTotal(until time.Time, rs ...Record) (Duration, bool) {
+	total := NewDuration(0, 0)
 	isCurrent := false
 	void := time.Time{}
-	thisDay := klog.NewDateFromTime(until)
+	thisDay := NewDateFromTime(until)
 	theDayBefore := thisDay.PlusDays(-1)
 	for _, r := range rs {
 		for _, e := range r.Entries() {
 			t := (e.Unbox(
-				func(r klog.Range) interface{} { return r.Duration() },
-				func(d klog.Duration) interface{} { return d },
-				func(o klog.OpenRange) interface{} {
+				func(r Range) interface{} { return r.Duration() },
+				func(d Duration) interface{} { return d },
+				func(o OpenRange) interface{} {
 					if until != void && (r.Date().IsEqualTo(thisDay) || r.Date().IsEqualTo(theDayBefore)) {
-						end := klog.NewTimeFromTime(until)
+						end := NewTimeFromTime(until)
 						if r.Date().IsEqualTo(theDayBefore) {
-							end, _ = klog.NewTimeTomorrow(end.Hour(), end.Minute())
+							end, _ = NewTimeTomorrow(end.Hour(), end.Minute())
 						}
-						tr, err := klog.NewRange(o.Start(), end)
+						tr, err := NewRange(o.Start(), end)
 						if err == nil {
 							isCurrent = true
 							return tr.Duration()
 						}
 					}
-					return klog.NewDuration(0, 0)
-				})).(klog.Duration)
+					return NewDuration(0, 0)
+				})).(Duration)
 			total = total.Plus(t)
 		}
 	}
 	return total, isCurrent
 }
 
-func ShouldTotal(rs ...klog.Record) klog.ShouldTotal {
-	total := klog.NewDuration(0, 0)
+func ShouldTotalSum(rs ...Record) ShouldTotal {
+	total := NewDuration(0, 0)
 	for _, r := range rs {
 		total = total.Plus(r.ShouldTotal())
 	}
-	return klog.NewShouldTotal(0, total.InMinutes())
+	return NewShouldTotal(0, total.InMinutes())
 }
 
-func TotalEntries(es []klog.Entry) klog.Duration {
-	total := klog.NewDuration(0, 0)
+func TotalEntries(es []Entry) Duration {
+	total := NewDuration(0, 0)
 	for _, e := range es {
 		total = total.Plus(e.Duration())
 	}
@@ -60,13 +60,13 @@ func TotalEntries(es []klog.Entry) klog.Duration {
 
 type Filter struct {
 	Tags     []string
-	BeforeEq klog.Date
-	AfterEq  klog.Date
-	Dates    []klog.Date
+	BeforeEq Date
+	AfterEq  Date
+	Dates    []Date
 }
 
-func Sort(rs []klog.Record, startWithOldest bool) []klog.Record {
-	sorted := append([]klog.Record(nil), rs...)
+func Sort(rs []Record, startWithOldest bool) []Record {
+	sorted := append([]Record(nil), rs...)
 	sort.Slice(sorted, func(i, j int) bool {
 		isLess := sorted[j].Date().IsAfterOrEqual(sorted[i].Date())
 		if startWithOldest {
@@ -77,17 +77,13 @@ func Sort(rs []klog.Record, startWithOldest bool) []klog.Record {
 	return sorted
 }
 
-func dateHash(d klog.Date) int {
-	return d.Year()*(12*31) + d.Month()*31 + d.Day()
-}
-
-func FindFilter(rs []klog.Record, f Filter) ([]klog.Record, []klog.Entry) {
-	tags := klog.NewTagSet(f.Tags...)
+func FindFilter(rs []Record, f Filter) ([]Record, []Entry) {
+	tags := NewTagSet(f.Tags...)
 	dates := newDateSet(f.Dates)
-	var records []klog.Record
-	var entries []klog.Entry
+	var records []Record
+	var entries []Entry
 	for _, r := range rs {
-		if len(dates) > 0 && !dates[dateHash(r.Date())] {
+		if len(dates) > 0 && !dates[r.Date().Hash()] {
 			continue
 		}
 		if f.BeforeEq != nil && !f.BeforeEq.IsAfterOrEqual(r.Date()) {
@@ -110,21 +106,21 @@ func FindFilter(rs []klog.Record, f Filter) ([]klog.Record, []klog.Entry) {
 	return records, entries
 }
 
-func newDateSet(ds []klog.Date) map[int]bool {
-	dict := make(map[int]bool, len(ds))
+func newDateSet(ds []Date) map[DateHash]bool {
+	dict := make(map[DateHash]bool, len(ds))
 	for _, d := range ds {
-		dict[dateHash(d)] = true
+		dict[d.Hash()] = true
 	}
 	return dict
 }
 
-func FindEntriesWithHashtags(tags klog.TagSet, r klog.Record) ([]klog.Entry, bool) {
-	if klog.ContainsOneOfTags(tags, r.Summary().ToString()) {
+func FindEntriesWithHashtags(tags TagSet, r Record) ([]Entry, bool) {
+	if ContainsOneOfTags(tags, r.Summary().ToString()) {
 		return r.Entries(), true
 	}
-	var matches []klog.Entry
+	var matches []Entry
 	for _, e := range r.Entries() {
-		if klog.ContainsOneOfTags(tags, e.Summary().ToString()) {
+		if ContainsOneOfTags(tags, e.Summary().ToString()) {
 			matches = append(matches, e)
 		}
 	}

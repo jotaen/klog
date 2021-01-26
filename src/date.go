@@ -16,8 +16,11 @@ type Date interface {
 	IsEqualTo(Date) bool
 	IsAfterOrEqual(Date) bool
 	ToString() string
+	Hash() DateHash
 	PlusDays(int) Date
 }
+
+type DateHash uint32
 
 type date struct {
 	year             int
@@ -105,6 +108,14 @@ func (d *date) IsAfterOrEqual(otherDate Date) bool {
 		return d.Month() >= otherDate.Month()
 	}
 	return d.Day() >= otherDate.Day()
+}
+
+func (d *date) Hash() DateHash {
+	hash := DateHash(0)                  // bit layout: ...YYYYYYYYYMMMMDDDDD
+	hash = hash | DateHash(d.Day())<<0   // needs 5 bits max
+	hash = hash | DateHash(d.Month())<<5 // needs 4 bits max
+	hash = hash | DateHash(d.Year())<<9
+	return hash
 }
 
 func (d *date) PlusDays(dayIncrement int) Date {

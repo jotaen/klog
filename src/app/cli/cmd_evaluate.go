@@ -47,7 +47,7 @@ func (args *Evaluate) printEvaluation(ctx *app.Context) {
 	}()
 	fmt.Printf("Total: %s\n", total.ToString())
 	if args.Diff {
-		should := service.ShouldTotal(rs...)
+		should := service.ShouldTotalSum(rs...)
 		diff := klog.NewDuration(0, 0).Minus(should).Plus(total)
 		fmt.Printf("Should: %s\n", styler.PrintShouldTotal(should))
 		fmt.Printf("Diff: %s\n", styler.PrintDiff(diff))
