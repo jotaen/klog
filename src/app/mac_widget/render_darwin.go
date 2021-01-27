@@ -6,7 +6,6 @@ import (
 	"klog/app"
 	"klog/lib/caseymrm/menuet"
 	"klog/service"
-	"os/exec"
 	"time"
 )
 
@@ -17,7 +16,7 @@ func render(ctx *app.Context, agent *launchAgent) []menuet.MenuItem {
 
 	items = append(items, func() []menuet.MenuItem {
 		if rs, file, err := ctx.Bookmark(); err == nil {
-			return renderRecords(rs, file)
+			return renderRecords(ctx, rs, file)
 		}
 		return []menuet.MenuItem{{
 			Text:       "No input file specified",
@@ -55,7 +54,7 @@ func render(ctx *app.Context, agent *launchAgent) []menuet.MenuItem {
 	return items
 }
 
-func renderRecords(records []klog.Record, file app.File) []menuet.MenuItem {
+func renderRecords(ctx *app.Context, records []klog.Record, file app.File) []menuet.MenuItem {
 	var items []menuet.MenuItem
 
 	now := time.Now()
@@ -85,8 +84,7 @@ func renderRecords(records []klog.Record, file app.File) []menuet.MenuItem {
 				{
 					Text: "Show in Finder...",
 					Clicked: func() {
-						cmd := exec.Command("open", file.Location)
-						_ = cmd.Start()
+						_ = ctx.OpenInFileBrowser(file.Location)
 					},
 				},
 				{Type: menuet.Separator},

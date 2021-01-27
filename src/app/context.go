@@ -12,13 +12,11 @@ import (
 
 type Context struct {
 	bookmarkedFile string
-	config         Config
 	homeDir        string
 }
 
-func NewContext(config Config, homeDir string) (*Context, error) {
+func NewContext(homeDir string) (*Context, error) {
 	return &Context{
-		config:  config,
 		homeDir: homeDir,
 	}, nil
 }
@@ -28,14 +26,7 @@ func NewContextFromEnv() (*Context, error) {
 	if err != nil {
 		return nil, err
 	}
-	//config, err := func() (Config, error) {
-	//	configToml, err := readFile(homeDir.HomeDir + "/.klog.toml")
-	//	if err != nil {
-	//		return NewDefaultConfig(), nil
-	//	}
-	//	return NewConfigFromToml(configToml)
-	//}()
-	return NewContext(NewDefaultConfig(), homeDir.HomeDir)
+	return NewContext(homeDir.HomeDir)
 }
 
 func (c *Context) HomeDir() string {
@@ -56,15 +47,6 @@ func (c *Context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
 		records = append(records, rs...)
 	}
 	return records, nil
-}
-
-func (c *Context) WriteRecords(rs []klog.Record, path string) error {
-	s := parser.SerialiseRecords(rs, nil)
-	return ioutil.WriteFile(path, []byte(s), 0644)
-}
-
-func (c *Context) Config() Config {
-	return Config{} // TODO
 }
 
 type File struct {

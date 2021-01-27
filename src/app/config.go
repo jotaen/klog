@@ -2,6 +2,10 @@ package app
 
 import "github.com/pelletier/go-toml"
 
+/*
+	This module is not in use yet
+*/
+
 type Config struct {
 	DateWithDashes  bool
 	Time24HourClock bool
