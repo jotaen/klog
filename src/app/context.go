@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 )
 
+var KlogVersion = "(unknown)" // will be set during build
+
 type Context struct {
 	bookmarkedFile string
 	homeDir        string
@@ -31,6 +33,10 @@ func NewContextFromEnv() (*Context, error) {
 
 func (c *Context) HomeDir() string {
 	return c.homeDir
+}
+
+func (c *Context) Version() string {
+	return KlogVersion
 }
 
 func (c *Context) RetrieveRecords(paths ...string) ([]klog.Record, error) {

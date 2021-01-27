@@ -51,7 +51,7 @@ jobs:
           GOOS: ${{ matrix.go_os }}
           GOARCH: amd64
         run: |
-          ./run build
+          ./run build ${{ github.event.inputs.release_id }}
           zip -j klog-${{ matrix.name }}.zip ./out/klog
       - name: Upload binaries
         uses: actions/upload-release-asset@v1 # https://github.com/actions/upload-release-asset

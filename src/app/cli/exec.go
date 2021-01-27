@@ -9,10 +9,11 @@ import (
 	"reflect"
 )
 
-var cli struct {
+type cli struct {
 	Print    Print    `cmd help:"Show records in a file"`
 	Evaluate Evaluate `cmd help:"Evaluate the times in records"`
 	Widget   Widget   `cmd help:"Launch menu bar widget (MacOS only)"`
+	Version  kong.VersionFlag
 }
 
 func Execute() int {
@@ -23,7 +24,7 @@ func Execute() int {
 		return -1
 	}
 	args := kong.Parse(
-		&cli,
+		&cli{},
 		kong.Name("klog"),
 		kong.Description("klog time tracking: command line app for interacting with `.klg` files."),
 		kong.UsageOnError(),
@@ -31,6 +32,9 @@ func Execute() int {
 			datePrototype, _ := klog.NewDate(1, 1, 1)
 			return kong.TypeMapper(reflect.TypeOf(&datePrototype).Elem(), dateDecoder())
 		}(),
+		kong.Vars{
+			"version": ctx.Version(),
+		},
 	)
 	err = args.Run(ctx)
 	if err != nil {
