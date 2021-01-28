@@ -34,13 +34,13 @@ As you see, klog supports different notations to record times.
 You can capture short summaries about your activities along with your data
 (only if you want, of course), which can help you later on to make sense
 of what you did back in the day.
-And by adding tags you are able to run fine-granular evaluations.
+And by adding tags you are able to run more fine-granular evaluations.
 
 When stored in a file (e.g. `times.klg`) you can use the klog command
 line tool to interact with it. For instance, you could evaluate the
 resulting total time like this:
 
-```shell
+```
 $ klog eval --today times.klg
 Total: 7h45m
 (In 1 record)

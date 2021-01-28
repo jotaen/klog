@@ -21,14 +21,15 @@ func NewTag(value string) Tag {
 	return Tag(strings.ToLower(value))
 }
 
-func ContainsOneOfTags(tags TagSet, searchText string) bool {
-	for _, m := range HashTagPattern.FindAllStringSubmatch(searchText, -1) {
+func (s Summary) MatchTags(tags TagSet) TagSet {
+	matches := NewTagSet()
+	for _, m := range HashTagPattern.FindAllStringSubmatch(string(s), -1) {
 		tag := NewTag(m[1])
 		if tags[tag] == true {
-			return true
+			matches[tag] = true
 		}
 	}
-	return false
+	return matches
 }
 
 func NewTagSet(tags ...string) TagSet {

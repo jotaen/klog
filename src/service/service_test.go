@@ -47,64 +47,45 @@ func TestSumUpHypotheticalTotalAtGivenTime(t *testing.T) {
 	assert.Equal(t, NewDuration(2+(1+4)+18+3, 14+53+1), ht3)
 }
 
-func TestHashTagAllEntriesAreReturnedIfMatchIsInSummary(t *testing.T) {
-	r := NewRecord(Ɀ_Date_(2020, 1, 1))
-	_ = r.SetSummary("This and #that, and other stuff as well")
-	r.AddDuration(NewDuration(2, 0), "Foo")
-	r.AddRange(Ɀ_Range_(Ɀ_Time_(13, 49), Ɀ_Time_(17, 12)), "Bar")
-	es, hasMatched := FindEntriesWithHashtags(NewTagSet("that"), r)
-	require.Len(t, es, 2)
-	assert.True(t, hasMatched)
-	assert.Equal(t, Summary("Foo"), es[0].Summary())
-	assert.Equal(t, Summary("Bar"), es[1].Summary())
-}
-
-func TestHashTagReturnsEntriesThatMatch(t *testing.T) {
-	r := NewRecord(Ɀ_Date_(2020, 1, 1))
-	_ = r.SetSummary("This and #that, and other stuff as well")
-	r.AddDuration(NewDuration(2, 0), "Foo #fizzbuzz")
-	r.AddRange(Ɀ_Range_(Ɀ_Time_(13, 49), Ɀ_Time_(17, 12)), "Bar #barbaz")
-	es, hasMatched := FindEntriesWithHashtags(NewTagSet("fizzbuzz"), r)
-	require.Len(t, es, 1)
-	assert.True(t, hasMatched)
-	assert.Equal(t, Summary("Foo #fizzbuzz"), es[0].Summary())
-}
-
 func sampleRecords() []Record {
 	return []Record{
 		func() Record {
 			r := NewRecord(Ɀ_Date_(1999, 12, 30))
-			r.AddDuration(NewDuration(4, 0), "")
+			_ = r.SetSummary("#foo")
 			return r
 		}(), func() Record {
 			r := NewRecord(Ɀ_Date_(1999, 12, 31))
-			r.AddDuration(NewDuration(5, 0), "#newYearsEve")
+			_ = r.SetSummary("#bar")
+			r.AddDuration(NewDuration(5, 0), "#bar")
 			return r
 		}(), func() Record {
 			r := NewRecord(Ɀ_Date_(2000, 1, 1))
-			r.AddDuration(NewDuration(6, 0), "#millennium")
+			_ = r.SetSummary("#foo")
+			r.AddDuration(NewDuration(6, 0), "#asdf")
 			r.AddDuration(NewDuration(6, 30), "")
 			return r
 		}(), func() Record {
 			r := NewRecord(Ɀ_Date_(2000, 1, 2))
+			_ = r.SetSummary("#foo")
 			r.AddDuration(NewDuration(7, 0), "")
 			return r
 		}(), func() Record {
 			r := NewRecord(Ɀ_Date_(2000, 1, 3))
-			r.AddDuration(NewDuration(8, 0), "")
+			_ = r.SetSummary("#foo")
+			r.AddDuration(NewDuration(8, 0), "#bar")
 			return r
 		}(),
 	}
 }
 
 func TestFindFilterWithNoClauses(t *testing.T) {
-	rs, es := FindFilter(sampleRecords(), Filter{})
+	rs := FindFilter(sampleRecords(), Filter{})
 	require.Len(t, rs, 5)
-	assert.Equal(t, NewDuration(4+5+6+6+7+8, 30), TotalEntries(es))
+	assert.Equal(t, NewDuration(5+6+6+7+8, 30), Total(rs...))
 }
 
 func TestFindFilterWithAfter(t *testing.T) {
-	rs, _ := FindFilter(sampleRecords(), Filter{AfterEq: Ɀ_Date_(2000, 1, 1)})
+	rs := FindFilter(sampleRecords(), Filter{AfterEq: Ɀ_Date_(2000, 1, 1)})
 	require.Len(t, rs, 3)
 	assert.Equal(t, 1, rs[0].Date().Day())
 	assert.Equal(t, 2, rs[1].Date().Day())
@@ -112,18 +93,34 @@ func TestFindFilterWithAfter(t *testing.T) {
 }
 
 func TestFindFilterWithBefore(t *testing.T) {
-	rs, _ := FindFilter(sampleRecords(), Filter{BeforeEq: Ɀ_Date_(2000, 1, 1)})
+	rs := FindFilter(sampleRecords(), Filter{BeforeEq: Ɀ_Date_(2000, 1, 1)})
 	require.Len(t, rs, 3)
 	assert.Equal(t, 30, rs[0].Date().Day())
 	assert.Equal(t, 31, rs[1].Date().Day())
 	assert.Equal(t, 1, rs[2].Date().Day())
 }
 
-func TestFindFilterWithHash(t *testing.T) {
-	rs, es := FindFilter(sampleRecords(), Filter{Tags: []string{"newYearsEve", "millennium"}})
+func TestFindFilterWithTagOnEntries(t *testing.T) {
+	rs := FindFilter(sampleRecords(), Filter{Tags: []string{"bar"}})
 	require.Len(t, rs, 2)
-	require.Len(t, es, 2)
 	assert.Equal(t, 31, rs[0].Date().Day())
+	assert.Equal(t, 3, rs[1].Date().Day())
+	assert.Equal(t, NewDuration(5+8, 0), Total(rs...))
+}
+
+func TestFindFilterWithTagOnOverallSummary(t *testing.T) {
+	rs := FindFilter(sampleRecords(), Filter{Tags: []string{"foo"}})
+	require.Len(t, rs, 4)
+	assert.Equal(t, 30, rs[0].Date().Day())
 	assert.Equal(t, 1, rs[1].Date().Day())
-	assert.Equal(t, NewDuration(5+6, 0), TotalEntries(es))
+	assert.Equal(t, 2, rs[2].Date().Day())
+	assert.Equal(t, 3, rs[3].Date().Day())
+	assert.Equal(t, NewDuration(6+6+7+8, 30), Total(rs...))
+}
+
+func TestFindFilterWithTagOnEntriesAndInSummary(t *testing.T) {
+	rs := FindFilter(sampleRecords(), Filter{Tags: []string{"foo", "bar"}})
+	require.Len(t, rs, 1)
+	assert.Equal(t, 3, rs[0].Date().Day())
+	assert.Equal(t, NewDuration(8, 0), Total(rs...))
 }

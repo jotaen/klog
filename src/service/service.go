@@ -50,14 +50,6 @@ func ShouldTotalSum(rs ...Record) ShouldTotal {
 	return NewShouldTotal(0, total.InMinutes())
 }
 
-func TotalEntries(es []Entry) Duration {
-	total := NewDuration(0, 0)
-	for _, e := range es {
-		total = total.Plus(e.Duration())
-	}
-	return total
-}
-
 type Filter struct {
 	Tags     []string
 	BeforeEq Date
@@ -77,11 +69,10 @@ func Sort(rs []Record, startWithOldest bool) []Record {
 	return sorted
 }
 
-func FindFilter(rs []Record, f Filter) ([]Record, []Entry) {
+func FindFilter(rs []Record, f Filter) []Record {
 	tags := NewTagSet(f.Tags...)
 	dates := newDateSet(f.Dates)
 	var records []Record
-	var entries []Entry
 	for _, r := range rs {
 		if len(dates) > 0 && !dates[r.Date().Hash()] {
 			continue
@@ -92,18 +83,40 @@ func FindFilter(rs []Record, f Filter) ([]Record, []Entry) {
 		if f.AfterEq != nil && !r.Date().IsAfterOrEqual(f.AfterEq) {
 			continue
 		}
-		es := r.Entries()
 		if len(tags) > 0 {
-			matchingEs, hasMatched := FindEntriesWithHashtags(tags, r)
-			if !hasMatched {
+			if !hasTagMatchesAndReduce(tags, r) {
 				continue
 			}
-			es = matchingEs
 		}
-		entries = append(entries, es...)
 		records = append(records, r)
 	}
-	return records, entries
+	return records
+}
+
+func hasTagMatchesAndReduce(tags TagSet, r Record) bool {
+	remainder := func() TagSet {
+		rs := NewTagSet()
+		matches := r.Summary().MatchTags(tags)
+		for t := range tags {
+			if !matches[t] {
+				rs[t] = true
+			}
+		}
+		return rs
+	}()
+	if len(remainder) == 0 {
+		return true
+	}
+	hasMatch := false
+	for _, e := range r.Entries() {
+		matches := e.Summary().MatchTags(remainder)
+		if len(matches) == len(remainder) {
+			hasMatch = true
+		} else {
+			r.Remove(e)
+		}
+	}
+	return hasMatch
 }
 
 func newDateSet(ds []Date) map[DateHash]bool {
@@ -112,17 +125,4 @@ func newDateSet(ds []Date) map[DateHash]bool {
 		dict[d.Hash()] = true
 	}
 	return dict
-}
-
-func FindEntriesWithHashtags(tags TagSet, r Record) ([]Entry, bool) {
-	if ContainsOneOfTags(tags, r.Summary().ToString()) {
-		return r.Entries(), true
-	}
-	var matches []Entry
-	for _, e := range r.Entries() {
-		if ContainsOneOfTags(tags, e.Summary().ToString()) {
-			matches = append(matches, e)
-		}
-	}
-	return matches, len(matches) > 0
 }

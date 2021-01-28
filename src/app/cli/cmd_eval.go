@@ -38,7 +38,7 @@ func (args *Eval) printEvaluation(ctx *app.Context) {
 		fmt.Println(prettifyError(err))
 		return
 	}
-	rs, _ = service.FindFilter(rs, args.toFilter())
+	rs = service.FindFilter(rs, args.toFilter())
 	total, _ := func() (klog.Duration, bool) {
 		if args.Live {
 			return service.HypotheticalTotal(time.Now(), rs...)
@@ -52,5 +52,11 @@ func (args *Eval) printEvaluation(ctx *app.Context) {
 		fmt.Printf("Should: %s\n", styler.PrintShouldTotal(should))
 		fmt.Printf("Diff: %s\n", styler.PrintDiff(diff))
 	}
-	fmt.Printf("(In %d records)\n", len(rs))
+	fmt.Printf("(In %d record%s)\n", len(rs), func() string {
+		if len(rs) > 1 {
+			return "s"
+		} else {
+			return ""
+		}
+	}())
 }

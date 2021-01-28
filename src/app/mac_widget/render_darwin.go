@@ -58,7 +58,7 @@ func renderRecords(ctx *app.Context, records []klog.Record, file app.File) []men
 	var items []menuet.MenuItem
 
 	now := time.Now()
-	today, _ := service.FindFilter(records, service.Filter{Dates: []klog.Date{klog.NewDateFromTime(now)}})
+	today := service.FindFilter(records, service.Filter{Dates: []klog.Date{klog.NewDateFromTime(now)}})
 	if today != nil {
 		total, isOngoing := service.HypotheticalTotal(now, today...)
 		indicator := ""

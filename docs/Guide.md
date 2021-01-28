@@ -29,12 +29,12 @@ It can contain any number of sections (called *records* in klog)
 that each consists of a date, times and
 (optionally) a summary of how the time was spent.
 
-Records are divided by one blank line in between.
+Records are separated by one blank line between them.
 The first line of a record must be a date (formatted either
 `YYYY-MM-DD` or `YYYY/MM/DD`).
 
 ### Tracking time
-Entries for tracking time appear one per line and indented by one level.
+Entries for tracking time appear one per line and are indented by one level.
 
 ```klog
 2019-07-22
@@ -48,13 +48,17 @@ You can either record a duration (e.g. `1h`, `2h33m`, `48m`)
 or a time range (e.g. `12:32 - 17:20` or `8:45am - 1:30pm`).
 
 ### Summary
-A summary is free text that can appear underneath the date
-(in which case it is supposed to refer to the entire record)
-or behind entries on the same line (in which case it is only
-supposed to refer to that very entry). Summaries are always optional.
+A summary is free text that can appear…
+
+- underneath the date,
+  in which case it is supposed to refer to the entire record
+- behind entries on the same line,
+  in which case it is only supposed to refer to that very entry
+
+Summaries are optional.
 
 ### Tagging / categorising
-Summaries can contain `#hashtags` that allow for fine-granular
+Summaries can contain `#hashtags` that allow for more fine-granular
 filtering of the data.
 
 ```klog
@@ -65,9 +69,9 @@ it applies to all time entries.
     5h
 ```
 
-In the example above, when you filter for `#overall` it would
-count `9h`. If you filter for `#entry` it would count
-`4h`. (And if you filter for both, it’s still `9h`.)
+Here, the grand total for the tag `#overall` would be `9h`;
+for the tag `#entry` it would be `4h`.
+(And if you filter by both tags, it’s `9h`.)
 
 ### Day shifting
 Sometimes you start an activity in the evening and then stop
@@ -136,7 +140,6 @@ evaluation in order to diff the actual times against it.
   No, klog doesn’t care about that.
   (There are actually legitimate use-cases for this.)
 
-
 ## Command line tool
 The command line tool currently allows you to pretty print and
 evaluate files in your terminal. In order to learn about its usage
@@ -145,13 +148,13 @@ you should run `klog --help`.
 For example, if you want to evaluate all records in `sport.klg`
 from 2018 that are tagged with `#workout`, you would do:
 
-```shell
+```
 $ klog eval --after=2018-01-01 --before=2018-12-31 --tag=workout sport.klg
 ```
 
 Or if you want an ongoing counter of the current day to be displayed:
 
-```shell
+```
 $ klog eval --today --diff --live worktimes.klg
 ```
 
@@ -162,7 +165,7 @@ you can evaluate them all at once by doing `klog eval *.klg`.
 ## Menu bar widget (MacOS)
 On MacOS you can launch a menu bar widget by running
 
-```shell
+```
 $ klog widget --file=worktimes.klg
 ```
 

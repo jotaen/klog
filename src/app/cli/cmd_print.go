@@ -18,7 +18,7 @@ func (args *Print) Run(ctx *app.Context) error {
 	if err != nil {
 		return prettifyError(err)
 	}
-	rs, _ = service.FindFilter(rs, args.FilterArgs.toFilter())
+	rs = service.FindFilter(rs, args.FilterArgs.toFilter())
 	if args.Sort {
 		rs = service.Sort(rs, true)
 	}

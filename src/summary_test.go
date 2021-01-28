@@ -20,32 +20,26 @@ func TestSummaryCannotContainWhitespaceAtBeginningOfLine(t *testing.T) {
 	assert.Equal(t, Summary(""), r.Summary()) // Still empty
 }
 
-func TestHashTagMatches(t *testing.T) {
+func TestFindHashTagMatches(t *testing.T) {
 	// `#` is stripped
 	tags := NewTagSet("this", "#THAT", "numb3rs", "under_score")
-	for _, txt := range []string{
-		"#this at the beginning",
-		"#this, with punctuation afterwards",
-		"or at the end: #this",
-		"or #this in between",
-		"or both #this and #that",
-		"or #that as well (case-insensitive)",
-		"not case sensitive #THIS",
-		"can also contain #numb3rs!",
-		"or #under_score's",
+	for _, x := range []struct {
+		summary string
+		matches []string
+	}{
+		{"#this at the beginning", []string{"this"}},
+		{"#this, with punctuation afterwards", []string{"this"}},
+		{"or at the end: #this", []string{"this"}},
+		{"or #this in between", []string{"this"}},
+		{"or all: #this and #that and #numb3rs", []string{"this", "that", "numb3rs"}},
+		{"or #that as well (case-insensitive)", []string{"that"}},
+		{"not case sensitive #THIS", []string{"this"}},
+		{"can also contain #numb3rs!", []string{"numb3rs"}},
+		{"or #under_score's", []string{"under_score"}},
+		{"#some other tag", nil},
+		{"#thisAndThat is similar but not the same", nil},
 	} {
-		isMatch := ContainsOneOfTags(tags, txt)
-		assert.True(t, isMatch)
-	}
-}
-
-func TestHashTagDoesNotMatch(t *testing.T) {
-	tags := NewTagSet("this", "that")
-	for _, txt := range []string{
-		"#some other tag",
-		"#thisAndThat is not the same",
-	} {
-		isMatch := ContainsOneOfTags(tags, txt)
-		assert.False(t, isMatch)
+		matches := Summary(x.summary).MatchTags(tags)
+		assert.Equal(t, matches, NewTagSet(x.matches...))
 	}
 }

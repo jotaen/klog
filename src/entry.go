@@ -5,18 +5,22 @@ type Entry struct {
 	summary Summary
 }
 
+func NewEntry(value interface{}, summary Summary) Entry {
+	return Entry{value, summary}
+}
+
 func (e *Entry) Summary() Summary {
 	return e.summary
 }
 
-func (e *Entry) Unbox(r func(Range) interface{}, d func(Duration) interface{}, or func(OpenRange) interface{}) interface{} {
+func (e *Entry) Unbox(r func(Range) interface{}, d func(Duration) interface{}, o func(OpenRange) interface{}) interface{} {
 	switch x := e.value.(type) {
 	case Range:
 		return r(x)
 	case Duration:
 		return d(x)
 	case OpenRange:
-		return or(x)
+		return o(x)
 	}
 	panic("Incomplete switch statement")
 }
