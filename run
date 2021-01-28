@@ -8,7 +8,7 @@ install() {
 build() {
   cd src
 	go build \
-	  -ldflags "-X 'klog/app.KlogVersion=$1'" \
+	  -ldflags "-X 'klog/app.BinaryVersion=$1' -X 'klog/app.BinaryBuildHash=$2'" \
 	  -o ../out/klog \
 	  app/cli/main/main.go
 }

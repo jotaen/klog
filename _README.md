@@ -41,7 +41,7 @@ line tool to interact with it. For instance, you could evaluate the
 resulting total time like this:
 
 ```shell
-$ klog evaluate --today times.klg
+$ klog eval --today times.klg
 Total: 7h45m
 (In 1 record)
 ```
@@ -58,7 +58,7 @@ As of January 2021, the current state is the v1.0 release candidate (v1.0-rc).
 Unless there are any obvious bugs or mistakes popping up,
 the first stable version shall be timely released as is.
 
-The main goals throughout the first version are:
+The main goals from there on are…
 
 - to validate the basic idea behind the file format
   (as this is the central pillar of klog)
@@ -67,9 +67,10 @@ The main goals throughout the first version are:
   (e.g. adding new entries)
 - to find out how useful the MacOS widget is and whether it would
   be worth to provide such a graphical interface for other platforms
+- to fix compatibility issues with Windows
 
-If you have an idea or thought you’d like to bounce off,
-feel free to open an [issue on Github](https://github.com/jotaen/klog/issues) for further discussion.
+If you have ideas or thoughts you’d like to bounce off,
+feel invited to open an [issue on Github](https://github.com/jotaen/klog/issues).
 
 ## About
 

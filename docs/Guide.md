@@ -146,18 +146,18 @@ For example, if you want to evaluate all records in `sport.klg`
 from 2018 that are tagged with `#workout`, you would do:
 
 ```shell
-$ klog evaluate --after=2018-01-01 --before=2018-12-31 --tag=workout sport.klg
+$ klog eval --after=2018-01-01 --before=2018-12-31 --tag=workout sport.klg
 ```
 
 Or if you want an ongoing counter of the current day to be displayed:
 
 ```shell
-$ klog evaluate --today --diff --live worktimes.klg
+$ klog eval --today --diff --live worktimes.klg
 ```
 
 Pro-tip: most shells have native support for glob patterns, so in case
 you want to organise your records in multiple files (e.g. one file per month)
-you can evaluate them all at once by doing `klog evaluate *.klg`.
+you can evaluate them all at once by doing `klog eval *.klg`.
 
 ## Menu bar widget (MacOS)
 On MacOS you can launch a menu bar widget by running

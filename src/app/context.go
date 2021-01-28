@@ -8,9 +8,11 @@ import (
 	"os/exec"
 	"os/user"
 	"path/filepath"
+	"strings"
 )
 
-var KlogVersion = "(unknown)" // will be set during build
+var BinaryVersion string   // will be set during build
+var BinaryBuildHash string // will be set during build
 
 type Context struct {
 	bookmarkedFile string
@@ -35,8 +37,30 @@ func (c *Context) HomeDir() string {
 	return c.homeDir
 }
 
-func (c *Context) Version() string {
-	return KlogVersion
+func (c *Context) MetaInfo() struct {
+	Version   string
+	BuildHash string
+} {
+	return struct {
+		Version   string
+		BuildHash string
+	}{
+		Version: func() string {
+			if BinaryVersion == "" {
+				return "v?.?"
+			}
+			return BinaryVersion
+		}(),
+		BuildHash: func() string {
+			if BinaryBuildHash == "" {
+				return strings.Repeat("?", 7)
+			}
+			if len(BinaryBuildHash) > 7 {
+				return BinaryBuildHash[:7]
+			}
+			return BinaryBuildHash
+		}(),
+	}
 }
 
 func (c *Context) RetrieveRecords(paths ...string) ([]klog.Record, error) {

@@ -15,12 +15,12 @@ type SingleFileArgs struct {
 }
 
 type FilterArgs struct {
-	Tags      []string    `name:"tag" help:"Only records that contain this tag"`
+	Tags      []string    `name:"tag" help:"Only records that match this tag"`
 	Date      []klog.Date `name:"date" help:"Only records at this date"`
 	Today     bool        `name:"today" help:"Shorthand for today’s date"`
 	Yesterday bool        `name:"yesterday" help:"Shorthand for yesterday’s date"`
-	AfterEq   klog.Date   `name:"after" help:"Only records at or after this date"`
-	BeforeEq  klog.Date   `name:"before" help:"Only records at or before this date"`
+	AfterEq   klog.Date   `name:"after" help:"Only records after this date (inclusive)"`
+	BeforeEq  klog.Date   `name:"before" help:"Only records before this date (inclusive)"`
 }
 
 func (args *FilterArgs) toFilter() service.Filter {

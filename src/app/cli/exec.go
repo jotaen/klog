@@ -10,10 +10,10 @@ import (
 )
 
 type cli struct {
-	Print    Print    `cmd help:"Show records in a file"`
-	Evaluate Evaluate `cmd help:"Evaluate the times in records"`
-	Widget   Widget   `cmd help:"Launch menu bar widget (MacOS only)"`
-	Version  kong.VersionFlag
+	Print   Print  `cmd help:"Pretty-print records"`
+	Eval    Eval   `cmd help:"Evaluate records"`
+	Widget  Widget `cmd help:"Start menu bar widget (MacOS only)"`
+	Version kong.VersionFlag
 }
 
 func Execute() int {
@@ -33,7 +33,7 @@ func Execute() int {
 			return kong.TypeMapper(reflect.TypeOf(&datePrototype).Elem(), dateDecoder())
 		}(),
 		kong.Vars{
-			"version": ctx.Version(),
+			"version": ctx.MetaInfo().Version + "\n(" + ctx.MetaInfo().BuildHash + ")",
 		},
 	)
 	err = args.Run(ctx)

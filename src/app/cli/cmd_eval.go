@@ -8,14 +8,14 @@ import (
 	"time"
 )
 
-type Evaluate struct {
+type Eval struct {
 	FilterArgs
 	MultipleFilesArgs
 	Diff bool `name:"diff" help:"Show difference between actual and should total time"`
-	Live bool `name:"live" help:"Follow changes in files"`
+	Live bool `name:"live" help:"Keep shell open and follow changes live"`
 }
 
-func (args *Evaluate) Run(ctx *app.Context) error {
+func (args *Eval) Run(ctx *app.Context) error {
 	call := func(f func()) { f() }
 	if args.Live {
 		call = args.repeat
@@ -24,7 +24,7 @@ func (args *Evaluate) Run(ctx *app.Context) error {
 	return nil
 }
 
-func (args *Evaluate) repeat(cb func()) {
+func (args *Eval) repeat(cb func()) {
 	ticker := time.NewTicker(1 * time.Second)
 	for time.Now(); true; <-ticker.C {
 		fmt.Printf("\033[2J\033[H") // clear screen
@@ -32,7 +32,7 @@ func (args *Evaluate) repeat(cb func()) {
 	}
 }
 
-func (args *Evaluate) printEvaluation(ctx *app.Context) {
+func (args *Eval) printEvaluation(ctx *app.Context) {
 	rs, err := ctx.RetrieveRecords(args.File...)
 	if err != nil {
 		fmt.Println(prettifyError(err))
