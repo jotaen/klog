@@ -5,8 +5,6 @@ on:
       release_id:
         description: 'Release id (tag name)'
         required: true
-        default: 'v-unstable-nightly'
-
 jobs:
   create_release:
     name: Create release draft
@@ -21,8 +19,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Automatically provided
         with:
           tag_name: ${{ github.event.inputs.release_id }}
-          body: Unstable **work-in-progress** version. Might contain bugs or unspecified behaviour.
-          release_name: Pre-release (${{ github.event.inputs.release_id }})
+          body: |
+            ## Linux
+            1. [**Download**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-linux.zip) and unzip
+            2. Copy to path, e.g. `mv klog /usr/local/bin/` (might require `sudo`)
+
+            ## MacOS
+            1. [**Download**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac.zip) and unzip
+            2. Right-click on the binary and select “Open“ (due to [Gatekeeper](https://support.apple.com/en-us/HT202491))
+            3. Copy to path, e.g. `mv klog /usr/local/bin/` (might require `sudo`)
+          release_name: ${{ github.event.inputs.release_id }}
           prerelease: true
           draft: true
   build:
