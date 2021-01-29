@@ -15,6 +15,8 @@ data.
 
  ✦  [Specification](docs/Specification.md) – Understand the file format in-depth
 
+![Screen recording of the demo described below](docs/demo.gif)
+
 ## klog in a nutshell
 
 Let’s say you started a new job and want to use klog for tracking work times:
@@ -56,9 +58,9 @@ Learn more about klog and how to use it by reading the [guide](docs/Guide.md).
 
 As of January 2021, the current state is the v1.0 release candidate (v1.0-rc).
 Unless there are any obvious bugs or mistakes popping up,
-the first stable version shall be timely released as is.
+I want to release the first stable version as is.
 
-The main goals from there on are…
+My main goals from there on are…
 
 - to validate the basic idea behind the file format
   (as this is the central pillar of klog)
@@ -69,8 +71,9 @@ The main goals from there on are…
   be worth to provide such a graphical interface for other platforms
 - to fix compatibility issues with Windows
 
-If you have ideas or thoughts you’d like to bounce off,
-feel invited to open an [issue on Github](https://github.com/jotaen/klog/issues).
+If you find bugs, have ideas for improvements, or want to bounce off a thought,
+feel invited to open an [issue on Github](https://github.com/jotaen/klog/issues)
+so that we can discuss it.
 
 ## About
 

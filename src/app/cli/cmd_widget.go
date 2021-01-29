@@ -7,16 +7,15 @@ import (
 )
 
 type Widget struct {
-	File   string `short:"f" name:"file" help:"Which file to show in the widget"`
-	Detach bool   `name:"detach" help:"Detach the widget from the cli"`
+	File   string `short:"f" name:"file" help:"Set the file to read from"`
+	Detach bool   `name:"detach" help:"Detach the widget from the command line"`
 }
 
 func (args *Widget) Run(ctx *app.Context) error {
 	if args.File != "" {
+		fmt.Println("Set file " + args.File)
 		err := ctx.SetBookmark(args.File)
-		if err != nil {
-			return err
-		}
+		return err
 	}
 	if !args.Detach {
 		fmt.Println("If you would like to run the widget on its own")
