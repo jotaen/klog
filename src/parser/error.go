@@ -31,8 +31,8 @@ func ErrorUnrecognisedProperty(e Error) Error {
 	return e.Set(
 		"ErrorUnrecognisedProperty",
 		"Unrecognised property: the highlighted property is not recognised. "+
-			"Please ensure that the should-total value must be suffixed with an "+
-			"exclamation mark, e.g. (5h15m!)",
+			"The should-total property must be a time duration suffixed with an "+
+			"exclamation mark, e.g. 5h15m! or 8h!",
 	)
 }
 

@@ -55,14 +55,14 @@ func sampleRecords() []Record {
 			return r
 		}(), func() Record {
 			r := NewRecord(Ɀ_Date_(1999, 12, 31))
-			_ = r.SetSummary("#bar")
 			r.AddDuration(NewDuration(5, 0), "#bar")
 			return r
 		}(), func() Record {
 			r := NewRecord(Ɀ_Date_(2000, 1, 1))
 			_ = r.SetSummary("#foo")
-			r.AddDuration(NewDuration(6, 0), "#asdf")
-			r.AddDuration(NewDuration(6, 30), "")
+			r.AddDuration(NewDuration(0, 15), "")
+			r.AddDuration(NewDuration(6, 0), "#bar")
+			r.AddDuration(NewDuration(0, -30), "")
 			return r
 		}(), func() Record {
 			r := NewRecord(Ɀ_Date_(2000, 1, 2))
@@ -81,7 +81,7 @@ func sampleRecords() []Record {
 func TestFindFilterWithNoClauses(t *testing.T) {
 	rs := FindFilter(sampleRecords(), Filter{})
 	require.Len(t, rs, 5)
-	assert.Equal(t, NewDuration(5+6+6+7+8, 30), Total(rs...))
+	assert.Equal(t, NewDuration(5+6+7+8, -30+15), Total(rs...))
 }
 
 func TestFindFilterWithAfter(t *testing.T) {
@@ -102,10 +102,11 @@ func TestFindFilterWithBefore(t *testing.T) {
 
 func TestFindFilterWithTagOnEntries(t *testing.T) {
 	rs := FindFilter(sampleRecords(), Filter{Tags: []string{"bar"}})
-	require.Len(t, rs, 2)
+	require.Len(t, rs, 3)
 	assert.Equal(t, 31, rs[0].Date().Day())
-	assert.Equal(t, 3, rs[1].Date().Day())
-	assert.Equal(t, NewDuration(5+8, 0), Total(rs...))
+	assert.Equal(t, 1, rs[1].Date().Day())
+	assert.Equal(t, 3, rs[2].Date().Day())
+	assert.Equal(t, NewDuration(5+8+6, 0), Total(rs...))
 }
 
 func TestFindFilterWithTagOnOverallSummary(t *testing.T) {
@@ -115,12 +116,13 @@ func TestFindFilterWithTagOnOverallSummary(t *testing.T) {
 	assert.Equal(t, 1, rs[1].Date().Day())
 	assert.Equal(t, 2, rs[2].Date().Day())
 	assert.Equal(t, 3, rs[3].Date().Day())
-	assert.Equal(t, NewDuration(6+6+7+8, 30), Total(rs...))
+	assert.Equal(t, NewDuration(6+7+8, -30+15), Total(rs...))
 }
 
 func TestFindFilterWithTagOnEntriesAndInSummary(t *testing.T) {
 	rs := FindFilter(sampleRecords(), Filter{Tags: []string{"foo", "bar"}})
-	require.Len(t, rs, 1)
-	assert.Equal(t, 3, rs[0].Date().Day())
-	assert.Equal(t, NewDuration(8, 0), Total(rs...))
+	require.Len(t, rs, 2)
+	assert.Equal(t, 1, rs[0].Date().Day())
+	assert.Equal(t, 3, rs[1].Date().Day())
+	assert.Equal(t, NewDuration(8+6, 0), Total(rs...))
 }

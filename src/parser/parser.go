@@ -66,6 +66,10 @@ func parseRecord(c Chunk) (klog.Record, []Error) {
 			headline.Advance(shouldTotalText.Length())
 			headline.Advance(1) // '!'
 			headline.SkipWhitespace()
+			if headline.Peek() != ')' {
+				errs = append(errs, ErrorUnrecognisedProperty(NewError(headline, headline.PointerPosition, headline.RemainingLength()-1)))
+				return r
+			}
 			headline.Advance(1) // ')'
 		}
 		headline.SkipWhitespace()

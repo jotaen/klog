@@ -107,16 +107,15 @@ func hasTagMatchesAndReduce(tags TagSet, r Record) bool {
 	if len(remainder) == 0 {
 		return true
 	}
-	hasMatch := false
+	var matchingEntries []Entry
 	for _, e := range r.Entries() {
 		matches := e.Summary().MatchTags(remainder)
 		if len(matches) == len(remainder) {
-			hasMatch = true
-		} else {
-			r.Remove(e)
+			matchingEntries = append(matchingEntries, e)
 		}
 	}
-	return hasMatch
+	r.SetEntries(matchingEntries)
+	return len(matchingEntries) > 0
 }
 
 func newDateSet(ds []Date) map[DateHash]bool {

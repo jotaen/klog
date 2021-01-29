@@ -147,6 +147,8 @@ func TestReportErrorsInHeadline(t *testing.T) {
 		{"2020-01-01 (5h30m!", Err{id(ErrorMalformedPropertiesSyntax), 1, 18, 1}},
 		{"2020-01-01 (", Err{id(ErrorMalformedPropertiesSyntax), 1, 12, 1}},
 		{"2020-01-01 (5h!) foo", Err{id(ErrorUnrecognisedTextInHeadline), 1, 17, 3}},
+		{"2020-01-01 (5h! asdf)", Err{id(ErrorUnrecognisedProperty), 1, 16, 4}},
+		{"2020-01-01 (5h!!!)", Err{id(ErrorUnrecognisedProperty), 1, 15, 2}},
 	} {
 		rs, errs := Parse(test.text)
 		require.Nil(t, rs)

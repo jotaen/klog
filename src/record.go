@@ -20,7 +20,7 @@ type Record interface {
 	SetSummary(string) error
 
 	Entries() []Entry
-	Remove(Entry)
+	SetEntries([]Entry)
 	AddDuration(Duration, Summary)
 	AddRange(Range, Summary)
 	OpenRange() OpenRange
@@ -80,13 +80,8 @@ func (r *record) Entries() []Entry {
 	return r.entries
 }
 
-func (r *record) Remove(e Entry) {
-	for i, en := range r.entries {
-		if en == e {
-			r.entries = append(r.entries[:i], r.entries[i+1:]...)
-			return
-		}
-	}
+func (r *record) SetEntries(es []Entry) {
+	r.entries = es
 }
 
 func (r *record) AddDuration(d Duration, s Summary) {

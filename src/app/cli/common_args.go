@@ -15,7 +15,7 @@ type SingleFileArgs struct {
 }
 
 type FilterArgs struct {
-	Tags      []string    `name:"tag" help:"Only records that match this tag"`
+	Tags      []string    `name:"tag" help:"Only records (or particular entries) that match this tag"`
 	Date      []klog.Date `name:"date" help:"Only records at this date"`
 	Today     bool        `name:"today" help:"Shorthand for today’s date"`
 	Yesterday bool        `name:"yesterday" help:"Shorthand for yesterday’s date"`

@@ -15,9 +15,9 @@ data.
 
  ✦  [Specification](docs/Specification.md) – Understand the file format in-depth
 
-![Screen recording of the demo described below](docs/demo.gif)
-
 ## klog in a nutshell
+
+![Screen recording of the demo described below](docs/demo.gif)
 
 Let’s say you started a new job and want to use klog for tracking work times:
 

@@ -53,10 +53,9 @@ func (args *Eval) printEvaluation(ctx *app.Context) {
 		fmt.Printf("Diff: %s\n", styler.PrintDiff(diff))
 	}
 	fmt.Printf("(In %d record%s)\n", len(rs), func() string {
-		if len(rs) > 1 {
-			return "s"
-		} else {
+		if len(rs) == 1 {
 			return ""
 		}
+		return "s"
 	}())
 }
