@@ -33,17 +33,17 @@ in the morning and went home at 17:00 in the afternoon.
 Somewhere in between there was a 45-minute lunch break.
 
 As you see, klog supports different notations to record times.
-You can capture short summaries about your activities along with your data
-(only if you want, of course), which can help you later on to make sense
-of what you did back in the day.
+You can capture short summaries about your activities along with the
+time data (only if you want, of course), which can help you later
+on to make sense of what you did back in the day.
 And by adding tags you are able to run more fine-granular evaluations.
 
-When stored in a file (e.g. `times.klg`) you can use the klog command
+When stored in a file (e.g. `worktimes.klg`) you can use the klog command
 line tool to interact with it. For instance, you could evaluate the
 resulting total time like this:
 
 ```
-$ klog eval --today times.klg
+$ klog eval --today worktimes.klg
 Total: 7h45m
 (In 1 record)
 ```

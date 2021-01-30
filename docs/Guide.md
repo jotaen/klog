@@ -13,8 +13,8 @@
 
 ## File format
 A `.klg` file can contain any number of records
-that each consists of a date, some time entries,
-and optional summary texts.
+that each consists of a date, time entries,
+and (optionally) summary texts.
 
 ```klog
 2019-07-22
@@ -44,22 +44,31 @@ resulting in a total of 2 hours for this day.
     1h
 ```
 
-You can record a duration (e.g. `1h`, `-2h33m`, `48m`)
-which represent an “amount” of time spent on something.
-This can also be a negative value, in which case it will be
-deducted from the overall total.
-
-An entry can also be time range (e.g. `12:32 - 17:20` or `8:45am - 1:30pm`)
-representing a time span between two points in time throughout a day.
+Entries can be:
+- A duration, e.g. `1h`, `-2h33m`, `48m`,
+  which represents an “amount” of time spent on something.
+  This can also be a negative value, in which case it will be
+  deducted from the grand total. 
+- A time range, e.g. `12:32 - 17:20` or `8:45am - 1:30pm`,
+  representing a time span between two points in time throughout a day.
 
 ### Summary
-A summary is free text that can (optionally) appear:
+The purpose of summaries is to allow capturing arbitrary information
+alongside the data. Summaries can appear:
 
-- Underneath the date,
-  in which case it is supposed to refer to the entire record.
-  It can have multiple lines of text and is no indented.
-- Behind entries on the same line,
+- underneath the date,
+  in which case they are supposed to refer to the entire record.
+  They can have multiple lines of text.
+- behind entries on the same line,
   in which case it is only supposed to refer to that very entry.
+  They are just separated by whitespace from the preceding time value.
+
+```klog
+2020-02-18
+This is an overall summary for the entire record.
+It can have multiple lines of text.
+  1h This is a summary that only refers to this particular entry
+```
 
 ### Tagging / categorising
 Summaries can contain `#hashtags` that allow for more fine-granular
@@ -80,26 +89,27 @@ The grand total for the tag `#entry` would be `4h`, because
 it only refers to one individual entry.
 
 ### Day shifting
-Sometimes you start an activity in the evening and then stop
-it after midnight.
+Sometimes you start an activity in the evening and end it after
+midnight, just so that start and end time don’t belong to the
+same calendar date. For this case it is possible to “shift over”
+a time to the previous or to the next day by adding the
+`<` prefix, or the `>` suffix respectively.
 
 ```klog
 2019-07-26
-Last day of the week!
-    <23:30 - 8:00 Night shift
-    22:30 - 0:30> Watching movies
+Friday!
+    <23:30 - 8:00 Worked a night shift
+    22:30 - 1:45> Watched some movies
 ```
-
-In this case you can “shift over” a time to the previous or to the next day
-by adding the `<` prefix or the `>` suffix respectively.
 
 When filtering records, keep in mind that these entries are still
 associated with the date they are recorded under, so the grand total
-for the above date `2019-07-26` is `10h30m`.
+for the above date `2019-07-26` is `11h45m`. (If there are records
+for the adjacent days, their grand total won’t be affected.)
 
 ### Open-ended time ranges
 In case you just begin an activity (without knowing when it will end)
-you can already put it into your file as an open-ended time range.
+you can already log it in your file as an open-ended time range.
 
 ```klog
 2019-07-26
@@ -108,13 +118,16 @@ Just started my work day
 ```
 
 Open-ended time ranges are denoted by replacing the end time
-with a question mark.
-There can only be one open-ended range per record and it doesn’t
-count towards the grand total.
+with a question mark, otherwise they work the same as normal entries.
+Note that there can only be one open-ended range per record,
+and it doesn’t count towards the grand total as long as it’s open.
 
 ### Should-total
 There are use-cases where you have a certain overall time goal
 that you want to achieve.
+This so-called should-total property can appear after the record’s date,
+surrounded by parentheses.
+It is a duration value followed by an exclamation mark.
 For example, let’s say you are supposed to work 7½ hours per day:
 
 ```klog
@@ -123,9 +136,9 @@ For example, let’s say you are supposed to work 7½ hours per day:
     -45m lunch break
 ```
 
-This “should-total” is a mere meta-property. It can be used during
-evaluation in order to diff the actual times against it.
-The “should-total” always applies to the entire record with all its entries.
+Should-totals are a meta-property that can be useful for evaluation purposes,
+e.g. when you want to diff actual times against your designated goal.
+The should-total always applies to the entire record with all its entries.
 
 ### FAQ
 
@@ -140,18 +153,20 @@ The “should-total” always applies to the entire record with all its entries.
   In case you are affected by a timezone change or
   a switch to daylight saving time
   you need to account for that yourself.
-  (Realistically, this doesn’t happen all too often anyway.)
+  Realistically, this doesn’t happen all too often anyway,
+  so it’s simpler to omit the timezone information altogether.
 - **Can there be multiple records for the same date in one file?**
   Yes, as many as you want.
-- **Will it lead to problems if I track more than 24 hours per day,
-  or if the resulting total is a negative value?**
+- **Will it lead to problems if I track more than 24 hours per day?**
   No, klog doesn’t care about that.
   (There are actually legitimate use-cases for this.)
+- **Can I track negative durations only?**
+  Yes.
 
 ## Command line tool
-The command line tool currently allows you to pretty print and
-evaluate files in your terminal. In order to learn about its usage
-you should run `klog --help`.
+The command line tool allows you to find and filter records in files,
+and pretty print and evaluate them. In order to learn about its usage
+please run `klog --help`.
 
 For example, if you want to evaluate all records in `sport.klg`
 from 2018 that are tagged with `#workout`, you would do:
@@ -160,22 +175,28 @@ from 2018 that are tagged with `#workout`, you would do:
 $ klog eval --after=2018-01-01 --before=2018-12-31 --tag=workout sport.klg
 ```
 
-Or if you want an ongoing counter of the current day to be displayed:
+Or if you want an ongoing counter of the current day to be displayed
+in your terminal:
 
 ```
 $ klog eval --today --diff --live worktimes.klg
 ```
 
 Pro-tip: most shells have native support for glob patterns, so in case
-you want to organise your records in multiple files (e.g. one file per month)
-you can evaluate them all at once by doing `klog eval *.klg`.
+you want to organise your records throughout multiple files
+(e.g. one file per month)
+you can evaluate them all at once by passing the glob pattern `*.klg`.
 
 ## Menu bar widget (MacOS)
 On MacOS you can launch a menu bar widget by running
 
 ```
-$ klog widget --file=worktimes.klg
+# Set the file:
+$ klog widget --file=times.klg
+
+# Start the widget:
+$ klog widget
 ```
 
-It displays an ongoing counter of the current day and a summary
+It displays an ongoing counter of the current day and the statistics
 of the entire file in your menu bar / system tray.
