@@ -22,12 +22,12 @@ jobs:
           body: |
             ## Linux
             1. [**Download** (Linux)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-linux.zip) and unzip
-            2. Copy to path, e.g. `mv klog /usr/local/bin/` (might require `sudo`)
+            2. Copy to path, e.g. `mv klog /usr/local/bin/klog` (might require `sudo`)
 
             ## MacOS
             1. [**Download** (MacOS)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac.zip) and unzip
             2. Right-click on the binary and select “Open“ (due to [Gatekeeper](https://support.apple.com/en-us/HT202491))
-            3. Copy to path, e.g. `mv klog /usr/local/bin/` (might require `sudo`)
+            3. Copy to path, e.g. `mv klog /usr/local/bin/klog` (might require `sudo`)
           release_name: ${{ github.event.inputs.release_id }}
           prerelease: true
           draft: true

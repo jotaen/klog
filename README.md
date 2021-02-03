@@ -11,9 +11,9 @@ data.
 
  ✦  [**Download**](https://www.github.com/jotaen/klog/releases) – Get the latest version of the command line tool
 
- ✦  [Guide](docs/Guide.md) – Learn how to use klog
+ ✦  [Documentation](https://klog.jotaen.net) – Learn how to use klog
 
- ✦  [Specification](docs/Specification.md) – Understand the file format in-depth
+ ✦  [Specification](docs/Specification.md) – Read the file format specification 
 
 ## klog in a nutshell
 
@@ -52,7 +52,7 @@ For MacOS users there is a menu bar widget bundled into the command line tool
 that allows quick and convenient access to the most important functionalities.
 Just run `klog widget` to start it up and take it from there.
 
-Learn more about klog and how to use it by reading the [guide](docs/Guide.md).
+Learn more about klog and how to use it by reading the [documentation](https://klog.jotaen.net).
 
 ## Current state: v1.0-rc
 
