@@ -141,7 +141,7 @@ It MAY be `0m`.
 It MAY be greater than `59m`,
 e.g. `150m`;
 it is generally RECOMMENDED to break this up, though.
-If the hour part is missing, a value of `0m` is assumed.
+If the minute part is missing, a value of `0m` is assumed.
 
 While the hour and minute parts itself are unsigned,
 the *duration* as a whole is always a signed value:
