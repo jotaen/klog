@@ -10,8 +10,7 @@ import (
 	"time"
 )
 
-type Version struct {
-}
+type Version struct{}
 
 func (args *Version) Run(ctx *app.Context) error {
 	fmt.Printf("Version: %s\n(Build %s)\n\n", ctx.MetaInfo().Version, ctx.MetaInfo().BuildHash)

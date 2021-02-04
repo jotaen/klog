@@ -11,7 +11,8 @@ import (
 
 type cli struct {
 	Print   Print   `cmd help:"Pretty-print records"`
-	Eval    Eval    `cmd help:"Evaluate records"`
+	Total   Total   `cmd help:"Evaluate the total time"`
+	Eval    Eval    `cmd hidden`
 	Widget  Widget  `cmd help:"Start menu bar widget (MacOS only)"`
 	Version Version `cmd help:"Print version info and check for updates"`
 }
