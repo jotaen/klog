@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"klog"
 	. "klog/lib/jotaen/tf"
+	"klog/parser"
 	"klog/parser/engine"
 	"strings"
 )
@@ -52,42 +53,36 @@ func breakLines(text string, maxLength int) []string {
 	return lines
 }
 
-type stylerT struct{}
-
-var styler stylerT
-
-func (h stylerT) PrintDate(d klog.Date) string {
-	return Style{Color: "015", IsUnderlined: true}.Format(d.ToString())
-}
-func (h stylerT) PrintShouldTotal(d klog.Duration) string {
-	return Style{Color: "213"}.Format(d.ToString())
-}
-func (h stylerT) PrintSummary(s klog.Summary) string {
-	txt := s.ToString()
-	style := Style{Color: "249"}
-	hashStyle := style.ChangedBold(true).ChangedColor("251")
-	txt = klog.HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
-		return hashStyle.FormatAndRestore(h, style)
-	})
-	return style.Format(txt)
-}
-func (h stylerT) PrintRange(r klog.Range) string {
-	return Style{Color: "117"}.Format(r.ToString())
-}
-func (h stylerT) PrintOpenRange(or klog.OpenRange) string {
-	return Style{Color: "027"}.Format(or.ToString())
-}
-func (h stylerT) PrintDuration(d klog.Duration) string {
-	f := Style{Color: "120"}
-	if d.InMinutes() < 0 {
-		f.Color = "167"
-	}
-	return f.Format(d.ToString())
-}
-func (h stylerT) PrintDiff(d klog.Duration) string {
-	plus := ""
-	if d.InMinutes() > 0 {
-		plus = Style{Color: "120"}.Format("+")
-	}
-	return plus + h.PrintDuration(d)
+var styler = parser.Serialiser{
+	Date: func(d klog.Date) string {
+		return Style{Color: "015", IsUnderlined: true}.Format(d.ToString())
+	},
+	ShouldTotal: func(d klog.Duration) string {
+		return Style{Color: "213"}.Format(d.ToString())
+	},
+	Summary: func(s klog.Summary) string {
+		txt := s.ToString()
+		style := Style{Color: "249"}
+		hashStyle := style.ChangedBold(true).ChangedColor("251")
+		txt = klog.HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
+			return hashStyle.FormatAndRestore(h, style)
+		})
+		return style.Format(txt)
+	},
+	Range: func(r klog.Range) string {
+		return Style{Color: "117"}.Format(r.ToString())
+	},
+	OpenRange: func(or klog.OpenRange) string {
+		return Style{Color: "027"}.Format(or.ToString())
+	},
+	Duration: func(d klog.Duration, forceSign bool) string {
+		f := Style{Color: "120"}
+		if d.InMinutes() < 0 {
+			f.Color = "167"
+		}
+		if forceSign {
+			return f.Format(d.ToStringWithSign())
+		}
+		return f.Format(d.ToString())
+	},
 }

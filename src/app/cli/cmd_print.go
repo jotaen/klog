@@ -22,6 +22,6 @@ func (args *Print) Run(ctx app.Context) error {
 	if args.Sort {
 		rs = service.Sort(rs, true)
 	}
-	ctx.Print(fmt.Sprintf("\n" + parser.SerialiseRecords(rs, styler)))
+	ctx.Print(fmt.Sprintf("\n" + parser.SerialiseRecords(&styler, rs...)))
 	return nil
 }

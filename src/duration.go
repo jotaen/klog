@@ -14,6 +14,7 @@ type Duration interface {
 	Plus(Duration) Duration
 	Minus(Duration) Duration
 	ToString() string
+	ToStringWithSign() string
 }
 
 func abs(x int) int {
@@ -58,7 +59,15 @@ func (d duration) ToString() string {
 	return result
 }
 
-var durationPattern = regexp.MustCompile(`^(-|\+)?((\d+)h)? ?((\d+)m)?$`)
+func (d duration) ToStringWithSign() string {
+	s := d.ToString()
+	if d > 0 {
+		return "+" + s
+	}
+	return s
+}
+
+var durationPattern = regexp.MustCompile(`^(-|\+)?((\d+)h)?((\d+)m)?$`)
 
 func NewDurationFromString(hhmm string) (Duration, error) {
 	match := durationPattern.FindStringSubmatch(hhmm)

@@ -25,6 +25,15 @@ func TestSerialiseDurationOfNegativeValues(t *testing.T) {
 	assert.Equal(t, "-18m", NewDuration(0, -18).ToString())
 }
 
+func TestSerialiseDurationOfExplicitlyPositiveValues(t *testing.T) {
+	assert.Equal(t, "+3h18m", NewDuration(3, 18).ToStringWithSign())
+	assert.Equal(t, "+3h", NewDuration(3, 0).ToStringWithSign())
+	assert.Equal(t, "+18m", NewDuration(0, 18).ToStringWithSign())
+
+	// 0 is an exception, as it doesn’t make sense to sign it
+	assert.Equal(t, "0m", NewDuration(0, 0).ToStringWithSign())
+}
+
 func TestParsingDurationWithHoursAndMinutes(t *testing.T) {
 	duration, err := NewDurationFromString("2h6m")
 	assert.Nil(t, err)
@@ -35,7 +44,6 @@ func TestParsingDurationWithHoursOnly(t *testing.T) {
 	for _, d := range []string{
 		"13h",
 		"13h0m",
-		"13h 0m",
 	} {
 		duration, err := NewDurationFromString(d)
 		assert.Nil(t, err)
@@ -47,7 +55,6 @@ func TestParsingDurationWithMinutesOnly(t *testing.T) {
 	for _, d := range []string{
 		"48m",
 		"0h48m",
-		"0h 48m",
 	} {
 		duration, err := NewDurationFromString(d)
 		assert.Nil(t, err)
@@ -67,20 +74,22 @@ func TestParsingExplicitlyPositiveDuration(t *testing.T) {
 	assert.Equal(t, NewDuration(2, 5), duration)
 }
 
-func TestParsingIgnoresSpaceInBetween(t *testing.T) {
+func TestParsingWithLeadingZeros(t *testing.T) {
 	for _, d := range []string{
-		"1h11m",
-		"1h 11m",
+		"000009h00000000001m",
+		"9h001m",
+		"09h1m",
 	} {
 		duration, err := NewDurationFromString(d)
 		assert.Nil(t, err)
-		assert.Equal(t, NewDuration(0, 71), duration)
+		assert.Equal(t, NewDuration(9, 1), duration)
 	}
 }
 
 func TestParsingFailsWithInvalidValue(t *testing.T) {
 	for _, d := range []string{
 		"",
+		"1h 11m",
 		"asdf",
 		"6h asdf",
 		"qwer 30m",
@@ -92,7 +101,7 @@ func TestParsingFailsWithInvalidValue(t *testing.T) {
 }
 
 func TestParsingFailsWithMinutesGreaterThan60(t *testing.T) {
-	duration, err := NewDurationFromString("8h 1653m")
+	duration, err := NewDurationFromString("8h1653m")
 	assert.EqualError(t, err, "UNREPRESENTABLE_DURATION")
 	assert.Equal(t, nil, duration)
 }

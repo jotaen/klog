@@ -3,7 +3,7 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"klog"
+	. "klog"
 	"klog/app"
 	"klog/service"
 	"time"
@@ -21,7 +21,7 @@ func (args *Eval) Run(_ app.Context) error {
 type Total struct {
 	FilterArgs
 	MultipleFilesArgs
-	Diff bool `name:"diff" help:"Show difference between actual and should total time"`
+	DiffArg
 	Live bool `name:"live" help:"Keep shell open and follow changes live"`
 }
 
@@ -51,7 +51,7 @@ func (args *Total) printEvaluation(ctx app.Context) error {
 		return prettifyError(err)
 	}
 	rs = service.FindFilter(rs, args.toFilter())
-	total, _ := func() (klog.Duration, bool) {
+	total, _ := func() (Duration, bool) {
 		if args.Live {
 			return service.HypotheticalTotal(time.Now(), rs...)
 		}
@@ -60,9 +60,9 @@ func (args *Total) printEvaluation(ctx app.Context) error {
 	ctx.Print(fmt.Sprintf("Total: %s\n", total.ToString()))
 	if args.Diff {
 		should := service.ShouldTotalSum(rs...)
-		diff := klog.NewDuration(0, 0).Minus(should).Plus(total)
-		ctx.Print(fmt.Sprintf("Should: %s\n", styler.PrintShouldTotal(should)))
-		ctx.Print(fmt.Sprintf("Diff: %s\n", styler.PrintDiff(diff)))
+		diff := NewDuration(0, 0).Minus(should).Plus(total)
+		ctx.Print(fmt.Sprintf("Should: %s\n", styler.ShouldTotal(should)))
+		ctx.Print(fmt.Sprintf("Diff: %s\n", styler.Duration(diff, true)))
 	}
 	ctx.Print(fmt.Sprintf("(In %d record%s)\n", len(rs), func() string {
 		if len(rs) == 1 {

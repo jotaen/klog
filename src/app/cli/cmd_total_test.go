@@ -35,7 +35,7 @@ func TestTotalWithDiffing(t *testing.T) {
 
 2018-11-09 (7h45m!)
 	8:00 - 16:00
-`, (&Total{Diff: true}).Run)
+`, (&Total{DiffArg: DiffArg{Diff: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, "Total: 16h30m\nShould: 15h45m!\nDiff: +45m\n(In 2 records)\n", out)
 }

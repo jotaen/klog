@@ -14,6 +14,10 @@ type SingleFileArgs struct {
 	File string `arg required type:"existingfile" name:"file" help:".klg source file"`
 }
 
+type DiffArg struct {
+	Diff bool `name:"diff" help:"Show difference between actual and should total time"`
+}
+
 type FilterArgs struct {
 	Tags      []string    `name:"tag" help:"Only records (or particular entries) that match this tag"`
 	Date      []klog.Date `name:"date" help:"Only records at this date"`
