@@ -16,7 +16,7 @@ jobs:
           ./run install
       - name: Lint
         run: |
-          [[ $(./run format | wc -l) = 0 ]] && $(exit 0) || $(exit 1)
+          [[ $(./run format | wc -l | awk '{print $1}') = 0 ]] && $(exit 0) || $(exit 1)
       - name: Run tests
         run: |
           ./run test

@@ -40,9 +40,6 @@ jobs:
           - name: linux
             runner_os: ubuntu-latest
             go_os: linux
-#          - name: windows
-#            runner_os: ubuntu-latest
-#            go_os: windows
           - name: mac
             runner_os: macos-latest
             go_os: darwin
@@ -58,6 +55,11 @@ jobs:
           GOARCH: amd64
         run: |
           ./run build ${{ github.event.inputs.release_id }} ${{ github.sha }}
+      - name: Smoke test
+        run: |
+          [[ $(./out/klog version --no-check) == *"${{ github.event.inputs.release_id }}"* ]] && $(exit 0) || $(exit 1)
+      - name: Zip
+        run: |
           zip -j klog-${{ matrix.name }}.zip ./out/klog
       - name: Upload binaries
         uses: actions/upload-release-asset@v1 # https://github.com/actions/upload-release-asset

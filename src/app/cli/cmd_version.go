@@ -10,12 +10,17 @@ import (
 	"time"
 )
 
-type Version struct{}
+type Version struct {
+	NoCheck bool `name:"no-check" help:"Don’t check online for updates"` // used for the smoke test
+}
 
 func (args *Version) Run(ctx app.Context) error {
-	ctx.Print(fmt.Sprintf("Version: %s\n(Build %s)\n\n", ctx.MetaInfo().Version, ctx.MetaInfo().BuildHash))
+	ctx.Print(fmt.Sprintf("Version: %s\n(Build %s)\n", ctx.MetaInfo().Version, ctx.MetaInfo().BuildHash))
 
-	ctx.Print(fmt.Sprintf("Checking for newer version...\n"))
+	if args.NoCheck {
+		return nil
+	}
+	ctx.Print(fmt.Sprintf("\nChecking for newer version...\n"))
 	v := fetchVersionInfo("https://klog.jotaen.net/latest-stable-version.json")
 	if v == nil {
 		return errors.New("Failed to check for new version, please try again later")
