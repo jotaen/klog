@@ -14,7 +14,7 @@ type Eval struct {
 	Total
 }
 
-func (args *Eval) Run(ctx *app.Context) error {
+func (args *Eval) Run(_ app.Context) error {
 	return errors.New("Subcommand `eval` is now named `total`")
 }
 
@@ -25,28 +25,30 @@ type Total struct {
 	Live bool `name:"live" help:"Keep shell open and follow changes live"`
 }
 
-func (args *Total) Run(ctx *app.Context) error {
-	call := func(f func()) { f() }
+func (args *Total) Run(ctx app.Context) error {
+	call := func(f func(ctx app.Context) error) error { return f(ctx) }
 	if args.Live {
-		call = args.repeat
+		call = func(f func(ctx app.Context) error) error { return args.repeat(ctx, f) }
 	}
-	call(func() { args.printEvaluation(ctx) })
+	return call(args.printEvaluation)
+}
+
+func (args *Total) repeat(ctx app.Context, cb func(ctx app.Context) error) error {
+	ticker := time.NewTicker(1 * time.Second)
+	for time.Now(); true; <-ticker.C {
+		ctx.Print(fmt.Sprintf("\033[2J\033[H")) // clear screen
+		err := cb(ctx)
+		if err != nil {
+			ctx.Print(fmt.Sprintf(err.Error() + "\n"))
+		}
+	}
 	return nil
 }
 
-func (args *Total) repeat(cb func()) {
-	ticker := time.NewTicker(1 * time.Second)
-	for time.Now(); true; <-ticker.C {
-		fmt.Printf("\033[2J\033[H") // clear screen
-		cb()
-	}
-}
-
-func (args *Total) printEvaluation(ctx *app.Context) {
+func (args *Total) printEvaluation(ctx app.Context) error {
 	rs, err := ctx.RetrieveRecords(args.File...)
 	if err != nil {
-		fmt.Println(prettifyError(err))
-		return
+		return prettifyError(err)
 	}
 	rs = service.FindFilter(rs, args.toFilter())
 	total, _ := func() (klog.Duration, bool) {
@@ -55,17 +57,18 @@ func (args *Total) printEvaluation(ctx *app.Context) {
 		}
 		return service.Total(rs...), false
 	}()
-	fmt.Printf("Total: %s\n", total.ToString())
+	ctx.Print(fmt.Sprintf("Total: %s\n", total.ToString()))
 	if args.Diff {
 		should := service.ShouldTotalSum(rs...)
 		diff := klog.NewDuration(0, 0).Minus(should).Plus(total)
-		fmt.Printf("Should: %s\n", styler.PrintShouldTotal(should))
-		fmt.Printf("Diff: %s\n", styler.PrintDiff(diff))
+		ctx.Print(fmt.Sprintf("Should: %s\n", styler.PrintShouldTotal(should)))
+		ctx.Print(fmt.Sprintf("Diff: %s\n", styler.PrintDiff(diff)))
 	}
-	fmt.Printf("(In %d record%s)\n", len(rs), func() string {
+	ctx.Print(fmt.Sprintf("(In %d record%s)\n", len(rs), func() string {
 		if len(rs) == 1 {
 			return ""
 		}
 		return "s"
-	}())
+	}()))
+	return nil
 }

@@ -13,6 +13,7 @@ type cli struct {
 	Print   Print   `cmd help:"Pretty-print records"`
 	Total   Total   `cmd help:"Evaluate the total time"`
 	Eval    Eval    `cmd hidden`
+	Report  Report  `cmd help:"Print a report summarising all days"`
 	Widget  Widget  `cmd help:"Start menu bar widget (MacOS only)"`
 	Version Version `cmd help:"Print version info and check for updates"`
 }
@@ -24,7 +25,7 @@ func Execute() int {
 		fmt.Println(err)
 		return -1
 	}
-	args := kong.Parse(
+	cliApp := kong.Parse(
 		&cli{},
 		kong.Name("klog"),
 		kong.Description("klog time tracking: command line app for interacting with `.klg` files."),
@@ -34,7 +35,8 @@ func Execute() int {
 			return kong.TypeMapper(reflect.TypeOf(&datePrototype).Elem(), dateDecoder())
 		}(),
 	)
-	err = args.Run(ctx)
+	cliApp.BindTo(ctx, (*app.Context)(nil))
+	err = cliApp.Run(&ctx)
 	if err != nil {
 		fmt.Println(err)
 		return -1

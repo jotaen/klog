@@ -20,8 +20,8 @@ func (args *Report) Run(ctx app.Context) error {
 		return nil
 	}
 	rs = service.Sort(rs, false)
-	fmt.Printf("%s Total\n", strings.Repeat(" ", 22))
-	fmt.Printf("%s\n", strings.Repeat("-", 28))
+	ctx.Print(fmt.Sprintf("%s Total\n", strings.Repeat(" ", 22)))
+	ctx.Print(fmt.Sprintf("%s\n", strings.Repeat("-", 28)))
 	y := -1
 	m := -1
 	for _, r := range rs {
@@ -43,13 +43,13 @@ func (args *Report) Run(ctx app.Context) error {
 		day := func() string {
 			return fmt.Sprintf("%s %2v.", prettyDay(r.Date().Weekday()), r.Date().Day())
 		}()
-		fmt.Printf(
+		ctx.Print(fmt.Sprintf(
 			"%s %s    %s    %6v\n",
 			year, month, day, service.Total(r).ToString(),
-		)
+		))
 	}
-	fmt.Printf("%s\n", strings.Repeat("-", 28))
-	fmt.Printf("%28v\n", service.Total(rs...).ToString())
+	ctx.Print(fmt.Sprintf("%s\n", strings.Repeat("-", 28)))
+	ctx.Print(fmt.Sprintf("%28v\n", service.Total(rs...).ToString()))
 	return nil
 }
 

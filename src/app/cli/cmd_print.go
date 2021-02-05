@@ -13,7 +13,7 @@ type Print struct {
 	Sort bool `short:"s" name:"sort" help:"Sort output by date (from oldest to latest)"`
 }
 
-func (args *Print) Run(ctx *app.Context) error {
+func (args *Print) Run(ctx app.Context) error {
 	rs, err := ctx.RetrieveRecords(args.File...)
 	if err != nil {
 		return prettifyError(err)
@@ -22,6 +22,6 @@ func (args *Print) Run(ctx *app.Context) error {
 	if args.Sort {
 		rs = service.Sort(rs, true)
 	}
-	fmt.Println("\n" + parser.SerialiseRecords(rs, styler))
+	ctx.Print(fmt.Sprintf("\n" + parser.SerialiseRecords(rs, styler)))
 	return nil
 }

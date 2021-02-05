@@ -11,7 +11,7 @@ import (
 
 var blinker = blinkerT{1}
 
-func render(ctx *app.Context, agent *launchAgent) []menuet.MenuItem {
+func render(ctx app.Context, agent *launchAgent) []menuet.MenuItem {
 	var items []menuet.MenuItem
 
 	items = append(items, func() []menuet.MenuItem {
@@ -54,7 +54,7 @@ func render(ctx *app.Context, agent *launchAgent) []menuet.MenuItem {
 	return items
 }
 
-func renderRecords(ctx *app.Context, records []klog.Record, file app.File) []menuet.MenuItem {
+func renderRecords(ctx app.Context, records []klog.Record, file app.File) []menuet.MenuItem {
 	var items []menuet.MenuItem
 
 	now := time.Now()

@@ -101,15 +101,18 @@ func TestParseDateFailsIfMalformed(t *testing.T) {
 }
 
 func TestCalculateWeekday(t *testing.T) {
-	for _, d := range []struct{ d Date; w int }{
-		{ Ɀ_Date_(2021, 01, 15), 5 },
-		{ Ɀ_Date_(2021, 01, 16), 6 },
-		{ Ɀ_Date_(2021, 01, 17), 7 }, // Sunday
-		{ Ɀ_Date_(2021, 01, 18), 1 },
-		{ Ɀ_Date_(2021, 01, 19), 2 },
-		{ Ɀ_Date_(2021, 01, 20), 3 },
-		{ Ɀ_Date_(2021, 01, 21), 4 },
-		{ Ɀ_Date_(2021, 01, 22), 5 },
+	for _, d := range []struct {
+		d Date
+		w int
+	}{
+		{Ɀ_Date_(2021, 01, 15), 5},
+		{Ɀ_Date_(2021, 01, 16), 6},
+		{Ɀ_Date_(2021, 01, 17), 7}, // Sunday
+		{Ɀ_Date_(2021, 01, 18), 1},
+		{Ɀ_Date_(2021, 01, 19), 2},
+		{Ɀ_Date_(2021, 01, 20), 3},
+		{Ɀ_Date_(2021, 01, 21), 4},
+		{Ɀ_Date_(2021, 01, 22), 5},
 	} {
 		assert.Equal(t, d.w, d.d.Weekday())
 	}
