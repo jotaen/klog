@@ -13,6 +13,7 @@ type Date interface {
 	Year() int
 	Month() int
 	Day() int
+	Weekday() int
 	IsEqualTo(Date) bool
 	IsAfterOrEqual(Date) bool
 	ToString() string
@@ -94,6 +95,18 @@ func (d *date) Month() int {
 
 func (d *date) Day() int {
 	return d.day
+}
+
+func (d *date) Weekday() int {
+	x := int(civil.Date{
+		Year:  d.year,
+		Month: gotime.Month(d.month),
+		Day:   d.day,
+	}.In(gotime.UTC).Weekday())
+	if x == 0 {
+		return 7
+	}
+	return x
 }
 
 func (d *date) IsEqualTo(otherDate Date) bool {
