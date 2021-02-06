@@ -6,14 +6,21 @@ import (
 	"github.com/alecthomas/kong"
 	"klog"
 	"klog/app"
+	. "klog/lib/jotaen/tf"
+	"klog/parser/engine"
 	"reflect"
+	"strings"
 )
 
 type cli struct {
-	Print   Print   `cmd help:"Pretty-print records"`
-	Eval    Eval    `cmd help:"Evaluate records"`
-	Widget  Widget  `cmd help:"Start menu bar widget (MacOS only)"`
-	Version Version `cmd help:"Print version info and check for updates"`
+	Print    Print    `cmd help:"Pretty-print records"`
+	Total    Total    `cmd help:"Evaluate the total time"`
+	Eval     Eval     `cmd hidden`
+	Report   Report   `cmd help:"Print a calendar report summarising all days"`
+	Tags     Tags     `cmd help:"Print total times aggregated by tags"`
+	Bookmark Bookmark `cmd help:"Set a default file that klog reads from"`
+	Widget   Widget   `cmd help:"Start menu bar widget (MacOS only)"`
+	Version  Version  `cmd help:"Print version info and check for updates"`
 }
 
 func Execute() int {
@@ -23,7 +30,7 @@ func Execute() int {
 		fmt.Println(err)
 		return -1
 	}
-	args := kong.Parse(
+	cliApp := kong.Parse(
 		&cli{},
 		kong.Name("klog"),
 		kong.Description("klog time tracking: command line app for interacting with `.klg` files."),
@@ -33,9 +40,10 @@ func Execute() int {
 			return kong.TypeMapper(reflect.TypeOf(&datePrototype).Elem(), dateDecoder())
 		}(),
 	)
-	err = args.Run(ctx)
+	cliApp.BindTo(ctx, (*app.Context)(nil))
+	err = cliApp.Run(&ctx)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(prettifyError(err))
 		return -1
 	}
 	return 0
@@ -57,4 +65,47 @@ func dateDecoder() kong.MapperFunc {
 		target.Set(reflect.ValueOf(d))
 		return nil
 	}
+}
+
+func prettifyError(err error) error {
+	switch e := err.(type) {
+	case engine.Errors:
+		message := ""
+		INDENT := "    "
+		for _, e := range e.Get() {
+			message += fmt.Sprintf(
+				Style{Background: "160", Color: "015"}.Format(" Error in line %d: "),
+				e.Context().LineNumber,
+			) + "\n"
+			message += fmt.Sprintf(
+				Style{Color: "247"}.Format(INDENT+"%s"),
+				string(e.Context().Value),
+			) + "\n"
+			message += fmt.Sprintf(
+				Style{Color: "160"}.Format(INDENT+"%s%s"),
+				strings.Repeat(" ", e.Position()), strings.Repeat("^", e.Length()),
+			) + "\n"
+			message += fmt.Sprintf(
+				Style{Color: "227"}.Format(INDENT+"%s"),
+				strings.Join(breakLines(e.Message(), 60), "\n"+INDENT),
+			) + "\n\n"
+		}
+		return errors.New(message)
+	}
+	return err
+}
+
+func breakLines(text string, maxLength int) []string {
+	SPACE := " "
+	words := strings.Split(text, SPACE)
+	lines := []string{""}
+	for i, w := range words {
+		lastLine := lines[len(lines)-1]
+		isLastWord := i == len(words)-1
+		if !isLastWord && len(lastLine)+len(words[i+1]) > maxLength {
+			lines = append(lines, "")
+		}
+		lines[len(lines)-1] += w + SPACE
+	}
+	return lines
 }

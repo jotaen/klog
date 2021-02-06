@@ -11,21 +11,25 @@ import (
 )
 
 type Version struct {
+	NoCheck bool `name:"no-check" help:"Don’t check online for updates"` // used for the smoke test
 }
 
-func (args *Version) Run(ctx *app.Context) error {
-	fmt.Printf("Version: %s\n(Build %s)\n\n", ctx.MetaInfo().Version, ctx.MetaInfo().BuildHash)
+func (args *Version) Run(ctx app.Context) error {
+	ctx.Print(fmt.Sprintf("Version: %s\n(Build %s)\n", ctx.MetaInfo().Version, ctx.MetaInfo().BuildHash))
 
-	fmt.Printf("Checking for newer version...\n")
+	if args.NoCheck {
+		return nil
+	}
+	ctx.Print(fmt.Sprintf("\nChecking for newer version...\n"))
 	v := fetchVersionInfo("https://klog.jotaen.net/latest-stable-version.json")
 	if v == nil {
 		return errors.New("Failed to check for new version, please try again later")
 	}
 	if v.Latest.Version == ctx.MetaInfo().Version && v.Latest.BuildHash == ctx.MetaInfo().BuildHash {
-		fmt.Printf("You already have the latest version!\n")
+		ctx.Print(fmt.Sprintf("You already have the latest version!\n"))
 	} else {
-		fmt.Printf("New version available: %s (%s)\n", v.Latest.Version, v.Latest.BuildHash)
-		fmt.Printf("See: https://github.com/jotaen/klog\n")
+		ctx.Print(fmt.Sprintf("New version available: %s (%s)\n", v.Latest.Version, v.Latest.BuildHash))
+		ctx.Print(fmt.Sprintf("See: https://github.com/jotaen/klog\n"))
 	}
 	return nil
 }
@@ -33,7 +37,7 @@ func (args *Version) Run(ctx *app.Context) error {
 func fetchVersionInfo(url string) *versionInfo {
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	res, err := (&http.Client{
-		Timeout: time.Second * 5,
+		Timeout: time.Second * 7,
 	}).Do(req)
 	if err != nil {
 		return nil

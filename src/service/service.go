@@ -11,6 +11,14 @@ func Total(rs ...Record) Duration {
 	return total
 }
 
+func TotalEntries(es ...Entry) Duration {
+	total := NewDuration(0, 0)
+	for _, e := range es {
+		total = total.Plus(e.Duration())
+	}
+	return total
+}
+
 func HypotheticalTotal(until time.Time, rs ...Record) (Duration, bool) {
 	total := NewDuration(0, 0)
 	isCurrent := false
@@ -84,38 +92,70 @@ func FindFilter(rs []Record, f Filter) []Record {
 			continue
 		}
 		if len(tags) > 0 {
-			if !hasTagMatchesAndReduce(tags, r) {
+			reducedR, hasMatched := reduceRecordToMatchingTags(tags, r)
+			if !hasMatched {
 				continue
 			}
+			r = reducedR
 		}
 		records = append(records, r)
 	}
 	return records
 }
 
-func hasTagMatchesAndReduce(tags TagSet, r Record) bool {
-	remainder := func() TagSet {
-		rs := NewTagSet()
-		matches := r.Summary().MatchTags(tags)
-		for t := range tags {
-			if !matches[t] {
-				rs[t] = true
-			}
-		}
-		return rs
-	}()
-	if len(remainder) == 0 {
-		return true
+func reduceRecordToMatchingTags(tags TagSet, r Record) (Record, bool) {
+	if isSubsetOf(tags, r.Summary().Tags()) {
+		return r, true
 	}
+	_, tagsByEntry := EntryTagLookup(r)
 	var matchingEntries []Entry
 	for _, e := range r.Entries() {
-		matches := e.Summary().MatchTags(remainder)
-		if len(matches) == len(remainder) {
+		if isSubsetOf(tags, tagsByEntry[e]) {
 			matchingEntries = append(matchingEntries, e)
 		}
 	}
+	if len(matchingEntries) == 0 {
+		return nil, false
+	}
 	r.SetEntries(matchingEntries)
-	return len(matchingEntries) > 0
+	return r, true
+}
+
+func isSubsetOf(sub TagSet, super TagSet) bool {
+	for t := range sub {
+		if !super[t] {
+			return false
+		}
+	}
+	return true
+}
+
+func EntryTagLookup(rs ...Record) (map[Tag][]Entry, map[Entry]TagSet) {
+	entriesByTag := make(map[Tag][]Entry)
+	tagsByEntry := make(map[Entry]TagSet)
+	for _, r := range rs {
+		alreadyAdded := make(map[Tag]bool)
+		for t := range r.Summary().Tags() {
+			entriesByTag[t] = append(entriesByTag[t], r.Entries()...)
+			alreadyAdded[t] = true
+		}
+		for _, e := range r.Entries() {
+			tagsByEntry[e] = func() TagSet {
+				result := r.Summary().Tags()
+				for t := range e.Summary().Tags() {
+					result[t] = true
+				}
+				return result
+			}()
+			for t := range e.Summary().Tags() {
+				if alreadyAdded[t] {
+					continue
+				}
+				entriesByTag[t] = append(entriesByTag[t], e)
+			}
+		}
+	}
+	return entriesByTag, tagsByEntry
 }
 
 func newDateSet(ds []Date) map[DateHash]bool {

@@ -1,6 +1,8 @@
 package app
 
 import (
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"klog"
 	"klog/parser"
@@ -14,18 +16,30 @@ import (
 var BinaryVersion string   // will be set during build
 var BinaryBuildHash string // will be set during build
 
-type Context struct {
-	bookmarkedFile string
-	homeDir        string
+type Context interface {
+	Print(string)
+	HomeDir() string
+	MetaInfo() struct {
+		Version   string
+		BuildHash string
+	}
+	RetrieveRecords(...string) ([]klog.Record, error)
+	SetBookmark(string) error
+	Bookmark() (File, error)
+	OpenInFileBrowser(string) error
 }
 
-func NewContext(homeDir string) (*Context, error) {
-	return &Context{
+type context struct {
+	homeDir string
+}
+
+func NewContext(homeDir string) (Context, error) {
+	return &context{
 		homeDir: homeDir,
 	}, nil
 }
 
-func NewContextFromEnv() (*Context, error) {
+func NewContextFromEnv() (Context, error) {
 	homeDir, err := user.Current()
 	if err != nil {
 		return nil, err
@@ -33,11 +47,15 @@ func NewContextFromEnv() (*Context, error) {
 	return NewContext(homeDir.HomeDir)
 }
 
-func (c *Context) HomeDir() string {
+func (c *context) Print(text string) {
+	fmt.Print(text)
+}
+
+func (c *context) HomeDir() string {
 	return c.homeDir
 }
 
-func (c *Context) MetaInfo() struct {
+func (c *context) MetaInfo() struct {
 	Version   string
 	BuildHash string
 } {
@@ -63,7 +81,14 @@ func (c *Context) MetaInfo() struct {
 	}
 }
 
-func (c *Context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
+func (c *context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
+	if len(paths) == 0 {
+		if b, err := c.Bookmark(); err == nil {
+			paths = []string{b.Path}
+		} else {
+			return nil, errors.New("No input file(s) specified; couldn’t read from bookmarked file either.")
+		}
+	}
 	var records []klog.Record
 	for _, p := range paths {
 		content, err := readFile(p)
@@ -85,35 +110,38 @@ type File struct {
 	Path     string
 }
 
-func (c *Context) Bookmark() ([]klog.Record, File, error) {
+func (c *context) Bookmark() (File, error) {
 	bookmarkPath := c.HomeDir() + "/.klog/bookmark.klg"
-	dest, _ := os.Readlink(bookmarkPath)
-	file := File{
+	dest, err := os.Readlink(bookmarkPath)
+	if err != nil {
+		return File{}, err
+	}
+	return File{
 		Name:     filepath.Base(dest),
 		Location: filepath.Dir(dest),
 		Path:     dest,
-	}
-	rs, err := c.RetrieveRecords(bookmarkPath)
-	return rs, file, err
+	}, nil
 }
 
-func (c *Context) SetBookmark(path string) error {
+func (c *context) SetBookmark(path string) error {
 	bookmark, err := filepath.Abs(path)
 	if err != nil {
 		return err
+	}
+	if !strings.HasSuffix(bookmark, ".klg") {
+		return errors.New("File name must have .klg extension")
 	}
 	klogFolder := c.HomeDir() + "/.klog"
 	err = os.MkdirAll(klogFolder, 0700)
 	if err != nil {
 		return err
 	}
-
 	symlink := klogFolder + "/bookmark.klg"
 	_ = os.Remove(symlink)
 	return os.Symlink(bookmark, symlink)
 }
 
-func (c *Context) OpenInFileBrowser(path string) error {
+func (c *context) OpenInFileBrowser(path string) error {
 	cmd := exec.Command("open", path)
 	return cmd.Run()
 }

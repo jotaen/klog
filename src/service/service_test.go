@@ -72,7 +72,8 @@ func sampleRecords() []Record {
 		}(), func() Record {
 			r := NewRecord(Ɀ_Date_(2000, 1, 3))
 			_ = r.SetSummary("#foo")
-			r.AddDuration(NewDuration(8, 0), "#bar")
+			r.AddDuration(NewDuration(4, 0), "#bar")
+			r.AddDuration(NewDuration(4, 0), "#bar")
 			return r
 		}(),
 	}

@@ -7,18 +7,18 @@ import (
 )
 
 func TestSerialiseNoRecordsToEmptyString(t *testing.T) {
-	text := SerialiseRecords([]klog.Record{}, nil)
+	text := SerialiseRecords(nil, []klog.Record{}...)
 	assert.Equal(t, "", text)
 }
 
 func TestSerialiseEndsWithNewlineIfContainsContent(t *testing.T) {
-	text := SerialiseRecord(klog.NewRecord(klog.Ɀ_Date_(2020, 01, 15)), nil)
+	text := SerialiseRecords(nil, klog.NewRecord(klog.Ɀ_Date_(2020, 01, 15)))
 	lastChar := []rune(text)[len(text)-1]
 	assert.Equal(t, '\n', lastChar)
 }
 
 func TestSerialiseRecordWithMinimalRecord(t *testing.T) {
-	text := SerialiseRecord(klog.NewRecord(klog.Ɀ_Date_(2020, 01, 15)), nil)
+	text := SerialiseRecords(nil, klog.NewRecord(klog.Ɀ_Date_(2020, 01, 15)))
 	assert.Equal(t, `2020-01-15
 `, text)
 }
@@ -33,7 +33,7 @@ func TestSerialiseRecordWithCompleteRecord(t *testing.T) {
 	r.AddDuration(klog.NewDuration(-1, -51), "")
 	r.AddRange(klog.Ɀ_Range_(klog.Ɀ_TimeYesterday_(23, 23), klog.Ɀ_Time_(4, 3)), "")
 	r.AddRange(klog.Ɀ_Range_(klog.Ɀ_Time_(22, 0), klog.Ɀ_TimeTomorrow_(0, 1)), "")
-	text := SerialiseRecord(r, nil)
+	text := SerialiseRecords(nil, r)
 	assert.Equal(t, `2020-01-15 (7h30m!)
 This is a
 multiline summary
@@ -47,10 +47,10 @@ multiline summary
 }
 
 func TestSerialiseMultipleRecords(t *testing.T) {
-	text := SerialiseRecords([]klog.Record{
+	text := SerialiseRecords(nil, []klog.Record{
 		klog.NewRecord(klog.Ɀ_Date_(2020, 01, 15)),
 		klog.NewRecord(klog.Ɀ_Date_(2020, 01, 20)),
-	}, nil)
+	}...)
 	assert.Equal(t, `2020-01-15
 
 2020-01-20

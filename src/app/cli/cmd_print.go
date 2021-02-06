@@ -9,19 +9,19 @@ import (
 
 type Print struct {
 	FilterArgs
-	MultipleFilesArgs
+	InputFilesArgs
 	Sort bool `short:"s" name:"sort" help:"Sort output by date (from oldest to latest)"`
 }
 
-func (args *Print) Run(ctx *app.Context) error {
+func (args *Print) Run(ctx app.Context) error {
 	rs, err := ctx.RetrieveRecords(args.File...)
 	if err != nil {
-		return prettifyError(err)
+		return err
 	}
 	rs = service.FindFilter(rs, args.FilterArgs.toFilter())
 	if args.Sort {
 		rs = service.Sort(rs, true)
 	}
-	fmt.Println("\n" + parser.SerialiseRecords(rs, styler))
+	ctx.Print(fmt.Sprintf("\n" + parser.SerialiseRecords(&styler, rs...)))
 	return nil
 }

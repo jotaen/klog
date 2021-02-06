@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-type MultipleFilesArgs struct {
-	File []string `arg required type:"existingfile" name:"file" help:".klg source file(s)"`
+type InputFilesArgs struct {
+	File []string `arg optional type:"existingfile" name:"file" help:".klg source file(s) (falls back to bookmark if not specified)"`
 }
 
-type SingleFileArgs struct {
-	File string `arg required type:"existingfile" name:"file" help:".klg source file"`
+type DiffArg struct {
+	Diff bool `name:"diff" help:"Show difference between actual and should total time"`
 }
 
 type FilterArgs struct {

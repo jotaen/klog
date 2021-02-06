@@ -15,6 +15,10 @@ var HashTagPattern = regexp.MustCompile(`#([\p{L}\d_]+)`)
 
 type Tag string
 
+func (t Tag) ToString() string {
+	return "#" + string(t)
+}
+
 type TagSet map[Tag]bool
 
 func NewTag(value string) Tag {
@@ -23,13 +27,22 @@ func NewTag(value string) Tag {
 
 func (s Summary) MatchTags(tags TagSet) TagSet {
 	matches := NewTagSet()
-	for _, m := range HashTagPattern.FindAllStringSubmatch(string(s), -1) {
-		tag := NewTag(m[1])
-		if tags[tag] == true {
-			matches[tag] = true
+	allTags := s.Tags()
+	for t := range tags {
+		if allTags[t] {
+			matches[t] = true
 		}
 	}
 	return matches
+}
+
+func (s Summary) Tags() TagSet {
+	tags := NewTagSet()
+	for _, m := range HashTagPattern.FindAllStringSubmatch(string(s), -1) {
+		tag := NewTag(m[1])
+		tags[tag] = true
+	}
+	return tags
 }
 
 func NewTagSet(tags ...string) TagSet {
