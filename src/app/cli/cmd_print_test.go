@@ -19,5 +19,9 @@ Hello #world
 	1h
 `, (&Print{}).Run)
 	require.Nil(t, err)
-	assert.Equal(t, "\n2018-01-31\nHello #world\n    1h\n", out)
+	assert.Equal(t, `
+2018-01-31
+Hello #world
+    1h
+`, out)
 }

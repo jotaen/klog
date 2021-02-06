@@ -13,7 +13,8 @@ type cli struct {
 	Print   Print   `cmd help:"Pretty-print records"`
 	Total   Total   `cmd help:"Evaluate the total time"`
 	Eval    Eval    `cmd hidden`
-	Report  Report  `cmd help:"Print a report summarising all days"`
+	Report  Report  `cmd help:"Print a calendar report summarising all days"`
+	Tags    Tags    `cmd help:"Print total times aggregated by tags"`
 	Widget  Widget  `cmd help:"Start menu bar widget (MacOS only)"`
 	Version Version `cmd help:"Print version info and check for updates"`
 }

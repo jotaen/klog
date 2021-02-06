@@ -9,7 +9,7 @@ import (
 func TestTotalOfEmptyInput(t *testing.T) {
 	out, err := RunWithContext(``, (&Total{}).Run)
 	require.Nil(t, err)
-	assert.Equal(t, "Total: 0m\n(In 0 records)\n", out)
+	assert.Equal(t, "\nTotal: 0m\n(In 0 records)\n", out)
 }
 
 func TestTotalOfInput(t *testing.T) {
@@ -25,7 +25,7 @@ Open ranges are not considered
 	16:00 - ?
 `, (&Total{}).Run)
 	require.Nil(t, err)
-	assert.Equal(t, "Total: 2h\n(In 3 records)\n", out)
+	assert.Equal(t, "\nTotal: 2h\n(In 3 records)\n", out)
 }
 
 func TestTotalWithDiffing(t *testing.T) {
@@ -37,5 +37,5 @@ func TestTotalWithDiffing(t *testing.T) {
 	8:00 - 16:00
 `, (&Total{DiffArg: DiffArg{Diff: true}}).Run)
 	require.Nil(t, err)
-	assert.Equal(t, "Total: 16h30m\nShould: 15h45m!\nDiff: +45m\n(In 2 records)\n", out)
+	assert.Equal(t, "\nTotal: 16h30m\nShould: 15h45m!\nDiff: +45m\n(In 2 records)\n", out)
 }

@@ -57,7 +57,7 @@ func (args *Total) printEvaluation(ctx app.Context) error {
 		}
 		return service.Total(rs...), false
 	}()
-	ctx.Print(fmt.Sprintf("Total: %s\n", total.ToString()))
+	ctx.Print(fmt.Sprintf("Total: %s\n", styler.Duration(total, false)))
 	if args.Diff {
 		should := service.ShouldTotalSum(rs...)
 		diff := NewDuration(0, 0).Minus(should).Plus(total)

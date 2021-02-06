@@ -19,6 +19,9 @@ func RunWithContext(records string, cmd func(app.Context) error) (string, error)
 	}
 	cmdErr := cmd(ctx)
 	out := ansiSequencePattern.ReplaceAllString(ctx.printBuffer, "")
+	if len(out) > 0 && out[0] != '\n' {
+		out = "\n" + out
+	}
 	return out, cmdErr
 }
 

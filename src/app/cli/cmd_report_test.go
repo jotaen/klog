@@ -43,7 +43,8 @@ func TestReportOfRecords(t *testing.T) {
 	5m
 `, (&Report{}).Run)
 	require.Nil(t, err)
-	assert.Equal(t, `                      Total
+	assert.Equal(t, `
+                      Total
 2019 Dec    Su  1.       0m
 2020 Dec    We 30.    9h47m
 2021 Jan    Su 17.     333h
@@ -66,7 +67,8 @@ func TestReportConsecutive(t *testing.T) {
 2020-10-02
 `, (&Report{Fill: true}).Run)
 	require.Nil(t, err)
-	assert.Equal(t, `                      Total
+	assert.Equal(t, `
+                      Total
 2020 Sep    Tu 29.       1h
             We 30.  
      Oct    Th  1.  
@@ -92,7 +94,8 @@ func TestReportWithDiff(t *testing.T) {
 2018-07-09 (19m!)
 `, (&Report{DiffArg: DiffArg{Diff: true}}).Run)
 	require.Nil(t, err)
-	assert.Equal(t, `                      Total    Should     Diff
+	assert.Equal(t, `
+                      Total    Should     Diff
 2018 Jul    Sa  7.       8h       8h!       0m
             Su  8.       2h    5h30m!   -3h30m
             Mo  9.    5h20m    2h19m!    +3h1m
