@@ -1,7 +1,19 @@
-# klog – File Format Specification (DRAFT)
+# klog – File Format Specification
 
-klog is a file format for tracking times.
+klog is a file format for tracking time.
+
 It is free and open-source software distributed under the MIT-License.
+
+> **Current state**: version 1 RFC (request for comments)
+>
+> This is a draft for the first version of the klog file format.
+> While the basic structure will likely remain as it is,
+> there still might be minor additions or corrections necessary.
+> Time will tell when it’s good to go to be finalised as version 1.
+> 
+> In case you have comments or thoughts, please file an issue
+> in the [klog repository](https://github.com/jotaen/klog)
+> so that they can be discussed.
 
 ## Preface
 
@@ -14,7 +26,7 @@ Other technical terms are surrounded by “quotes”. These are defined at the e
 
 ## I. Records
 
-A *record* is a self-contained and atomic unit of data.
+A *record* is a self-contained data structure that contains time-tracking information.
 
 Each *record* MUST appear as one consecutive block in the file,
 without any “blank lines” appearing within.
@@ -22,7 +34,8 @@ without any “blank lines” appearing within.
 The first line of a *record* MUST start with a *date*.
 On the same line there MAY follow a list of *properties*.
 This list MUST be enclosed in “parentheses” and
-preceded by at least one “space”.
+separated by one “space” from the *date*
+(there MAY also be multiple “spaces”).
 If there are multiple *properties* they MUST be separated
 by a `,` followed by a “space”.
 The list of *properties* MUST NOT be empty.
@@ -35,7 +48,7 @@ A *date* is a day that is representable in the Gregorian calendar.
 
 Each *record* MUST contain a *date*.
 
-It MUST be either formatted according to one of the following patterns:
+It MUST be formatted according to one of the following patterns:
 - `YYYY-MM-DD` (RECOMMENDED),
 - `YYYY/MM/DD`
 
@@ -56,7 +69,7 @@ e.g. `8h!` or `5h30m!`.
 A *summary* is user-provided text for holding arbitrary information.
 There are two places where *summary* text MAY appear in *records*:
 
-- After the *date*:
+- Underneath the *date*:
   In this case the *summary* is considered to be associated with the entire *record*.
   The *summary* MAY span multiple lines.
   Each of its lines MUST NOT start with “whitespace”.
@@ -64,8 +77,8 @@ There are two places where *summary* text MAY appear in *records*:
   In this case the *summary* is only considered to be referring to the corresponding *entry*.
   The *summary* text follows the *entry* on the same line,
   and it ends at the end of that line.
-  It MUST be separated from the *entry* by at least one “space”.
-  It MUST start with a “letter” or a `#`.
+  It MUST be separated from the *entry* one “space”
+  (there MAY be multiple “spaces”).
 
 ### Tags
 The purpose of *tags* is to help categorise records and entries.
@@ -74,7 +87,6 @@ Any amount of *tags* MAY appear anywhere within *summaries*.
 A *tag* MUST be a sequence of “letters”, “digits” or the `_` character,
 preceded by a single `#` character,
 e.g. `#gym`, `#24hours` or `#home_office`.
-
 
 ### Entry
 *Entry* is an abstract term for time-related data.
@@ -114,17 +126,19 @@ It MAY be prefixed with a `<` to indicate that
 this *time* is referring to the day before the *record’s* date,
 e.g. `<23:00`.
 
-The end value MAY be a *time*;
-it MAY also be substituted by one or more `?` to denote that the end is not determined yet.
-This MUST NOT occur more than once per record.
-If the end value is a *time* it MAY be suffixed with a `>` to indicate
-that this *time* is referring to the day after the *record’s* date,
-e.g. `0:30>`.
+The end value MUST be either a *time* or a `?`.
+- If the end value is a *time* it MAY be suffixed with a `>` to indicate
+  that this *time* is referring to the day after the *record’s* date,
+  e.g. `0:30>`.
+- In case the end value is a `?` the *range* is considered to be open-ended,
+  which means that the end *time* is not determined yet.
+  This MUST NOT occur more than once per record.
+  The `?` MAY be written in repeatedly, e.g. `???`.
 
 ### Duration
 A *duration* is an *entry* that represents a period of time.
 It contains an amount of hours and/or an amount of minutes.
-(So it MUST contain either one of these two or both.)
+(So it MUST either contain one of these two or both.)
 The hour part MUST be written first.
 Examples are: `1h`, `5m`, `4h12m`, `-8h30m`.
 
@@ -140,7 +154,7 @@ which MUST be immediately followed by the character `m`.
 It MAY be `0m`.
 It MAY be greater than `59m`,
 e.g. `150m`;
-it is generally RECOMMENDED to break this up, though.
+it is RECOMMENDED to break this up, so that the minute part is less than `60m`.
 If the minute part is missing, a value of `0m` is assumed.
 
 While the hour and minute parts itself are unsigned,
