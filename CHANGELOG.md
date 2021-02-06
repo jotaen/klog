@@ -10,3 +10,7 @@
   therefore more intuitive.)
 - **[ ++ ]** Added subcommand `report` that generates a
   calendar overview
+- **[ ++ ]** Added subcommand `tags` that shows the total
+  times aggregated by tags
+- **[ ++ ]** Added subcommand `bookmark` (a file that
+  is used by default when no input files are specified)

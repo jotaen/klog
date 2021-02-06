@@ -56,8 +56,12 @@ func (m *TestContext) SetBookmark(_ string) error {
 	return nil
 }
 
-func (m *TestContext) Bookmark() ([]klog.Record, app.File, error) {
-	panic("implement me")
+func (m *TestContext) Bookmark() (app.File, error) {
+	return app.File{
+		Name:     "myfile.klg",
+		Location: "/",
+		Path:     "/myfile.klg",
+	}, nil
 }
 
 func (m *TestContext) OpenInFileBrowser(_ string) error {

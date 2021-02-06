@@ -15,16 +15,19 @@ func render(ctx app.Context, agent *launchAgent) []menuet.MenuItem {
 	var items []menuet.MenuItem
 
 	items = append(items, func() []menuet.MenuItem {
-		if rs, file, err := ctx.Bookmark(); err == nil {
-			return renderRecords(ctx, rs, file)
+		if file, err := ctx.Bookmark(); err == nil {
+			rs, err := ctx.RetrieveRecords()
+			if err == nil {
+				return renderRecords(ctx, rs, file)
+			}
 		}
 		return []menuet.MenuItem{{
-			Text:       "No input file specified",
+			Text:       "No bookmark specified",
 			FontWeight: menuet.WeightBold,
 		}, {
-			Text: "Specify one by running:",
+			Text: "Bookmark a file by running:",
 		}, {
-			Text: "klog widget --file yourfile.klg",
+			Text: "klog bookmark yourfile.klg",
 		}}
 	}()...)
 

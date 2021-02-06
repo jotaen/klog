@@ -20,7 +20,7 @@ func (args *Eval) Run(_ app.Context) error {
 
 type Total struct {
 	FilterArgs
-	MultipleFilesArgs
+	InputFilesArgs
 	DiffArg
 	Live bool `name:"live" help:"Keep shell open and follow changes live"`
 }
@@ -48,7 +48,7 @@ func (args *Total) repeat(ctx app.Context, cb func(ctx app.Context) error) error
 func (args *Total) printEvaluation(ctx app.Context) error {
 	rs, err := ctx.RetrieveRecords(args.File...)
 	if err != nil {
-		return prettifyError(err)
+		return err
 	}
 	rs = service.FindFilter(rs, args.toFilter())
 	total, _ := func() (Duration, bool) {

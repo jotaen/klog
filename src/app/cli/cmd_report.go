@@ -9,7 +9,7 @@ import (
 )
 
 type Report struct {
-	MultipleFilesArgs
+	InputFilesArgs
 	DiffArg
 	Fill bool `name:"fill" help:"Show all consecutive days, even if there is no record"`
 }
@@ -17,7 +17,7 @@ type Report struct {
 func (args *Report) Run(ctx app.Context) error {
 	records, err := ctx.RetrieveRecords(args.File...)
 	if err != nil {
-		return prettifyError(err)
+		return err
 	}
 	if len(records) == 0 {
 		return nil

@@ -9,13 +9,13 @@ import (
 )
 
 type Tags struct {
-	MultipleFilesArgs
+	InputFilesArgs
 }
 
 func (args *Tags) Run(ctx app.Context) error {
 	rs, err := ctx.RetrieveRecords(args.File...)
 	if err != nil {
-		return prettifyError(err)
+		return err
 	}
 	entriesByTag, _ := service.EntryTagLookup(rs...)
 	tagsOrdered, maxLength := sortTags(entriesByTag)
