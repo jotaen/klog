@@ -20,6 +20,8 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.release_id }}
           body: |
+            See the [changelog](https://github.com/jotaen/klog/blob/main/CHANGELOG.md) to learn about changes.
+
             ## Linux
             1. [**Download** (Linux)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-linux.zip) and unzip
             2. Copy to path, e.g. `mv klog /usr/local/bin/klog` (might require `sudo`)
@@ -28,6 +30,9 @@ jobs:
             1. [**Download** (MacOS)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac.zip) and unzip
             2. Right-click on the binary and select “Open“ (due to [Gatekeeper](https://support.apple.com/en-us/HT202491))
             3. Copy to path, e.g. `mv klog /usr/local/bin/klog` (might require `sudo`)
+
+            ## Windows
+            There is no native binary for Windows, but you can use the Linux binary on the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
           release_name: ${{ github.event.inputs.release_id }}
           prerelease: true
           draft: true

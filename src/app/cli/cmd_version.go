@@ -15,7 +15,9 @@ type Version struct {
 }
 
 func (args *Version) Run(ctx app.Context) error {
-	ctx.Print(fmt.Sprintf("Version: %s\n(Build %s)\n", ctx.MetaInfo().Version, ctx.MetaInfo().BuildHash))
+	ctx.Print("Command line tool: " + ctx.MetaInfo().Version)
+	ctx.Print("  [" + ctx.MetaInfo().BuildHash + "]\n")
+	ctx.Print("File format: version 1 (RFC)\n")
 
 	if args.NoCheck {
 		return nil
@@ -28,7 +30,7 @@ func (args *Version) Run(ctx app.Context) error {
 	if v.Latest.Version == ctx.MetaInfo().Version && v.Latest.BuildHash == ctx.MetaInfo().BuildHash {
 		ctx.Print(fmt.Sprintf("You already have the latest version!\n"))
 	} else {
-		ctx.Print(fmt.Sprintf("New version available: %s (%s)\n", v.Latest.Version, v.Latest.BuildHash))
+		ctx.Print(fmt.Sprintf("New version available: %s  [%s]\n", v.Latest.Version, v.Latest.BuildHash))
 		ctx.Print(fmt.Sprintf("See: https://github.com/jotaen/klog\n"))
 	}
 	return nil
