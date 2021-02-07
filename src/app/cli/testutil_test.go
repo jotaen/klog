@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"klog"
 	"klog/app"
 	"klog/parser"
@@ -34,8 +35,12 @@ func (m *TestContext) Print(s string) {
 	m.printBuffer += s
 }
 
-func (m *TestContext) HomeDir() string {
+func (m *TestContext) HomeFolder() string {
 	return "~"
+}
+
+func (m *TestContext) KlogFolder() string {
+	return m.HomeFolder() + "/.klog/"
 }
 
 func (m *TestContext) MetaInfo() struct {
@@ -66,4 +71,8 @@ func (m *TestContext) Bookmark() *app.File {
 
 func (m *TestContext) OpenInFileBrowser(_ string) error {
 	return nil
+}
+
+func (m *TestContext) AppendTemplateToFile(string, string) error {
+	return errors.New("No such template")
 }
