@@ -77,7 +77,7 @@ There are two places where *summary* text MAY appear in *records*:
   In this case the *summary* is only considered to be referring to the corresponding *entry*.
   The *summary* text follows the *entry* on the same line,
   and it ends at the end of that line.
-  It MUST be separated from the *entry* one “space”
+  It MUST be separated from the *entry* by one “space”
   (there MAY be multiple “spaces”).
 
 ### Tags
@@ -126,14 +126,15 @@ It MAY be prefixed with a `<` to indicate that
 this *time* is referring to the day before the *record’s* date,
 e.g. `<23:00`.
 
-The end value MUST be either a *time* or a `?`.
-- If the end value is a *time* it MAY be suffixed with a `>` to indicate
+The end value MUST be either a *time* or a placeholder for a *time*.
+- In case the end value is a *time* it MAY be suffixed with a `>` to indicate
   that this *time* is referring to the day after the *record’s* date,
   e.g. `0:30>`.
-- In case the end value is a `?` the *range* is considered to be open-ended,
+- In case the end value is a placeholder the *range* is considered to be *open-ended*,
   which means that the end *time* is not determined yet.
-  This MUST NOT occur more than once per record.
-  The `?` MAY be written in repeatedly, e.g. `???`.
+  The placeholder MUST be denoted by a `?`, e.g. `9:00 - ?`;
+  the `?` MAY be repeated, e.g. `9:00 - ???`.
+  An *open-ended range* MUST NOT occur more than once per record.
 
 ### Duration
 A *duration* is an *entry* that represents a period of time.

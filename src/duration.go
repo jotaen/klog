@@ -83,7 +83,7 @@ func NewDurationFromString(hhmm string) (Duration, error) {
 	}
 	hours, _ := strconv.Atoi(match[3])
 	minutes, _ := strconv.Atoi(match[5])
-	if minutes > 60 {
+	if minutes >= 60 {
 		return nil, errors.New("UNREPRESENTABLE_DURATION")
 	}
 	return NewDuration(sign*hours, sign*minutes), nil

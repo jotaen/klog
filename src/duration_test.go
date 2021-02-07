@@ -101,7 +101,12 @@ func TestParsingFailsWithInvalidValue(t *testing.T) {
 }
 
 func TestParsingFailsWithMinutesGreaterThan60(t *testing.T) {
-	duration, err := NewDurationFromString("8h1653m")
-	assert.EqualError(t, err, "UNREPRESENTABLE_DURATION")
-	assert.Equal(t, nil, duration)
+	for _, d := range []string{
+		"1h60m",
+		"8h1653m",
+	} {
+		duration, err := NewDurationFromString(d)
+		assert.EqualError(t, err, "UNREPRESENTABLE_DURATION")
+		assert.Equal(t, nil, duration)
+	}
 }
