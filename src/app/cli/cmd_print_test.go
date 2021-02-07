@@ -9,7 +9,7 @@ import (
 func TestPrintOutEmptyInput(t *testing.T) {
 	out, err := RunWithContext(``, (&Print{}).Run)
 	require.Nil(t, err)
-	assert.Equal(t, "\n", out)
+	assert.Equal(t, "", out)
 }
 
 func TestPrintOutRecord(t *testing.T) {
@@ -23,5 +23,6 @@ Hello #world
 2018-01-31
 Hello #world
     1h
+
 `, out)
 }
