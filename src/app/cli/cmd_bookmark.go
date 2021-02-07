@@ -10,9 +10,10 @@ type Bookmark struct {
 
 func (args *Bookmark) Run(ctx app.Context) error {
 	if args.File == "" {
-		file, err := ctx.Bookmark()
-		if err != nil {
-			return err
+		file := ctx.Bookmark()
+		if file == nil {
+			ctx.Print("Bookmark is empty\n")
+			return nil
 		}
 		ctx.Print("Current bookmark: " + file.Path + "\n")
 		return nil

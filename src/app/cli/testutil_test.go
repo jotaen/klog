@@ -56,12 +56,12 @@ func (m *TestContext) SetBookmark(_ string) error {
 	return nil
 }
 
-func (m *TestContext) Bookmark() (app.File, error) {
-	return app.File{
+func (m *TestContext) Bookmark() *app.File {
+	return &app.File{
 		Name:     "myfile.klg",
 		Location: "/",
 		Path:     "/myfile.klg",
-	}, nil
+	}
 }
 
 func (m *TestContext) OpenInFileBrowser(_ string) error {

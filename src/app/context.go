@@ -25,7 +25,7 @@ type Context interface {
 	}
 	RetrieveRecords(...string) ([]klog.Record, error)
 	SetBookmark(string) error
-	Bookmark() (File, error)
+	Bookmark() *File
 	OpenInFileBrowser(string) error
 }
 
@@ -83,7 +83,7 @@ func (c *context) MetaInfo() struct {
 
 func (c *context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
 	if len(paths) == 0 {
-		if b, err := c.Bookmark(); err == nil {
+		if b := c.Bookmark(); b != nil {
 			paths = []string{b.Path}
 		} else {
 			return nil, errors.New("No input file(s) specified; couldn’t read from bookmarked file either.")
@@ -110,17 +110,21 @@ type File struct {
 	Path     string
 }
 
-func (c *context) Bookmark() (File, error) {
+func (c *context) Bookmark() *File {
 	bookmarkPath := c.HomeDir() + "/.klog/bookmark.klg"
 	dest, err := os.Readlink(bookmarkPath)
 	if err != nil {
-		return File{}, err
+		return nil
 	}
-	return File{
+	_, err = os.Stat(dest)
+	if err != nil {
+		return nil
+	}
+	return &File{
 		Name:     filepath.Base(dest),
 		Location: filepath.Dir(dest),
 		Path:     dest,
-	}, nil
+	}
 }
 
 func (c *context) SetBookmark(path string) error {

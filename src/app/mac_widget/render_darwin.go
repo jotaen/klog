@@ -15,7 +15,7 @@ func render(ctx app.Context, agent *launchAgent) []menuet.MenuItem {
 	var items []menuet.MenuItem
 
 	items = append(items, func() []menuet.MenuItem {
-		if file, err := ctx.Bookmark(); err == nil {
+		if file := ctx.Bookmark(); file != nil {
 			rs, err := ctx.RetrieveRecords()
 			if err == nil {
 				return renderRecords(ctx, rs, file)
@@ -57,7 +57,7 @@ func render(ctx app.Context, agent *launchAgent) []menuet.MenuItem {
 	return items
 }
 
-func renderRecords(ctx app.Context, records []klog.Record, file app.File) []menuet.MenuItem {
+func renderRecords(ctx app.Context, records []klog.Record, file *app.File) []menuet.MenuItem {
 	var items []menuet.MenuItem
 
 	now := time.Now()
