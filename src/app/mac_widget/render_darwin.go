@@ -20,6 +20,12 @@ func render(ctx app.Context, agent *launchAgent) []menuet.MenuItem {
 			if err == nil {
 				return renderRecords(ctx, rs, file)
 			}
+			return []menuet.MenuItem{{
+				Text:       "Bookmarked file invalid",
+				FontWeight: menuet.WeightBold,
+			}, {
+				Text: "Please fix the syntax errors",
+			}}
 		}
 		return []menuet.MenuItem{{
 			Text:       "No bookmark specified",

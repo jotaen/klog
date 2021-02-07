@@ -18,6 +18,7 @@ type cli struct {
 	Eval     Eval     `cmd hidden`
 	Report   Report   `cmd help:"Print a calendar report summarising all days"`
 	Tags     Tags     `cmd help:"Print total times aggregated by tags"`
+	Append   Append   `cmd hidden help:"Appends a new record to a file (based on templates)"`
 	Bookmark Bookmark `cmd help:"Set a default file that klog reads from"`
 	Widget   Widget   `cmd help:"Start menu bar widget (MacOS only)"`
 	Version  Version  `cmd help:"Print version info and check for updates"`
