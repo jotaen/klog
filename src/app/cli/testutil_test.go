@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"errors"
 	"klog"
 	"klog/app"
 	"klog/parser"
@@ -57,22 +56,22 @@ func (m *TestContext) RetrieveRecords(_ ...string) ([]klog.Record, error) {
 	return m.records, nil
 }
 
-func (m *TestContext) SetBookmark(_ string) error {
+func (m *TestContext) SetBookmark(_ string) app.Error {
 	return nil
 }
 
-func (m *TestContext) Bookmark() *app.File {
+func (m *TestContext) Bookmark() (*app.File, app.Error) {
 	return &app.File{
 		Name:     "myfile.klg",
 		Location: "/",
 		Path:     "/myfile.klg",
-	}
+	}, nil
 }
 
-func (m *TestContext) OpenInFileBrowser(_ string) error {
+func (m *TestContext) OpenInFileBrowser(_ string) app.Error {
 	return nil
 }
 
-func (m *TestContext) AppendTemplateToFile(string, string) error {
-	return errors.New("No such template")
+func (m *TestContext) AppendTemplateToFile(string, string) app.Error {
+	return nil
 }

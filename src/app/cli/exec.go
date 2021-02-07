@@ -92,8 +92,10 @@ func prettifyError(err error) error {
 			) + "\n\n"
 		}
 		return errors.New(message)
+	case app.Error:
+		return errors.New("Error: " + e.Error() + "\n" + e.Help())
 	}
-	return err
+	return errors.New("Error: " + err.Error())
 }
 
 func breakLines(text string, maxLength int) []string {

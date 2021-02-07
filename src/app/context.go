@@ -1,7 +1,6 @@
 package app
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"klog"
@@ -27,10 +26,10 @@ type Context interface {
 		BuildHash string
 	}
 	RetrieveRecords(...string) ([]klog.Record, error)
-	SetBookmark(string) error
-	Bookmark() *File
-	OpenInFileBrowser(string) error
-	AppendTemplateToFile(string, string) error
+	SetBookmark(string) Error
+	Bookmark() (*File, Error)
+	OpenInFileBrowser(string) Error
+	AppendTemplateToFile(string, string) Error
 }
 
 type context struct {
@@ -91,11 +90,14 @@ func (c *context) MetaInfo() struct {
 
 func (c *context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
 	if len(paths) == 0 {
-		if b := c.Bookmark(); b != nil {
-			paths = []string{b.Path}
-		} else {
-			return nil, errors.New("No input file(s) specified; couldn’t read from bookmarked file either.")
+		b, err := c.Bookmark()
+		if err != nil {
+			return nil, appError{
+				"No input files specified",
+				"Either specify input files, or set a bookmark",
+			}
 		}
+		paths = []string{b.Path}
 	}
 	var records []klog.Record
 	for _, p := range paths {
@@ -118,84 +120,123 @@ type File struct {
 	Path     string
 }
 
-func (c *context) Bookmark() *File {
+func (c *context) Bookmark() (*File, Error) {
 	bookmarkPath := c.KlogFolder() + "bookmark.klg"
 	dest, err := os.Readlink(bookmarkPath)
 	if err != nil {
-		return nil
+		return nil, appError{
+			"No bookmark set",
+			"You can set a bookmark by running: klog bookmark somefile.klg",
+		}
 	}
 	_, err = os.Stat(dest)
 	if err != nil {
-		return nil
+		return nil, appError{
+			"Bookmark doesn’t point to valid file",
+			"Please check the current bookmark location or set a new one",
+		}
 	}
 	return &File{
 		Name:     filepath.Base(dest),
 		Location: filepath.Dir(dest),
 		Path:     dest,
-	}
+	}, nil
 }
 
-func (c *context) SetBookmark(path string) error {
+func (c *context) SetBookmark(path string) Error {
 	bookmark, err := filepath.Abs(path)
 	if err != nil {
-		return errors.New("Target file does not exist")
+		return appError{
+			"Invalid target file",
+			"Please check the file path",
+		}
 	}
 	if !strings.HasSuffix(bookmark, ".klg") {
-		return errors.New("File name must have .klg extension")
+		return appError{
+			"Invalid file extension",
+			"File name must have .klg extension",
+		}
 	}
 	klogFolder := c.KlogFolder()
 	err = os.MkdirAll(klogFolder, 0700)
 	if err != nil {
-		return errors.New("Unable to initialise ~/.klog folder")
+		return appError{
+			"Unable to initialise ~/.klog folder",
+			"Please create a ~/.klog folder manually",
+		}
 	}
 	symlink := klogFolder + "/bookmark.klg"
 	_ = os.Remove(symlink)
 	err = os.Symlink(bookmark, symlink)
 	if err != nil {
-		return errors.New("Failed to create bookmark")
+		return appError{
+			"Failed to create bookmark",
+			"",
+		}
 	}
 	return nil
 }
 
-func (c *context) OpenInFileBrowser(path string) error {
+func (c *context) OpenInFileBrowser(path string) Error {
 	cmd := exec.Command("open", path)
-	return cmd.Run()
+	err := cmd.Run()
+	if err != nil {
+		return appError{
+			"Failed to open file browser",
+			err.Error(),
+		}
+	}
+	return nil
 }
 
-func (c *context) AppendTemplateToFile(filePath string, templateName string) error {
+func (c *context) AppendTemplateToFile(filePath string, templateName string) Error {
 	location := c.KlogFolder() + templateName + ".template.klg"
 	template, err := readFile(location)
 	if err != nil {
-		return errors.New("No such template: " + location)
+		return appError{
+			"No such template",
+			"There is no template at location " + location,
+		}
 	}
-	instance, err := service.RenderTemplate(template, time.Now())
-	if err != nil {
-		return err
+	instance, tErr := service.RenderTemplate(template, time.Now())
+	if tErr != nil {
+		return appError{
+			"Invalid template",
+			tErr.Error(),
+		}
 	}
 	contents, err := readFile(filePath)
 	if err != nil {
 		return err
 	}
-	err = appendToFile(filePath, service.AppendableText(contents, instance))
-	return err
+	return appendToFile(filePath, service.AppendableText(contents, instance))
 }
 
-func readFile(path string) (string, error) {
+func readFile(path string) (string, Error) {
 	contents, err := ioutil.ReadFile(path)
 	if err != nil {
-		return "", errors.New("Cannot read file: " + path)
+		return "", appError{
+			"Cannot read file",
+			"Location: " + path,
+		}
 	}
 	return string(contents), nil
 }
 
-func appendToFile(path string, textToAppend string) error {
+func appendToFile(path string, textToAppend string) Error {
 	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		return errors.New("Cannot write to file: " + path)
+		return appError{
+			"Cannot write to file",
+			"Location: " + path,
+		}
 	}
 	defer file.Close()
 	if _, err := file.WriteString(textToAppend); err != nil {
-		return errors.New("Cannot write to file: " + path)
+		return appError{
+			"Cannot write to file",
+			"Location: " + path,
+		}
 	}
 	return nil
 }

@@ -1,5 +1,10 @@
 # Changelog (command line tool)
 
+## v1.2
+- **[ INFO ]** Provided more helpful error messages
+- **[ FIX ]** Fix unhandled error with experimental `template` subcommand
+  (introduced in v1.1)
+
 ## v1.1
 - **[ INFO ]** Introduced hidden and experimental `template` subcommand,
   see https://github.com/jotaen/klog/pull/12

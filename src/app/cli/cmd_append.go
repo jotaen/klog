@@ -12,7 +12,11 @@ type Append struct {
 func (args *Append) Run(ctx app.Context) error {
 	target := args.File
 	if target == "" {
-		target = ctx.Bookmark().Path
+		b, err := ctx.Bookmark()
+		if err != nil {
+			return err
+		}
+		target = b.Path
 	}
 	return ctx.AppendTemplateToFile(target, args.From)
 }

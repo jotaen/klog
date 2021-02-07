@@ -15,26 +15,26 @@ func render(ctx app.Context, agent *launchAgent) []menuet.MenuItem {
 	var items []menuet.MenuItem
 
 	items = append(items, func() []menuet.MenuItem {
-		if file := ctx.Bookmark(); file != nil {
-			rs, err := ctx.RetrieveRecords()
-			if err == nil {
-				return renderRecords(ctx, rs, file)
-			}
+		file, err := ctx.Bookmark()
+		if err != nil {
 			return []menuet.MenuItem{{
-				Text:       "Bookmarked file invalid",
+				Text:       "No bookmark specified",
 				FontWeight: menuet.WeightBold,
 			}, {
-				Text: "Please fix the syntax errors",
+				Text: "Bookmark a file by running:",
+			}, {
+				Text: "klog bookmark yourfile.klg",
 			}}
 		}
-		return []menuet.MenuItem{{
-			Text:       "No bookmark specified",
-			FontWeight: menuet.WeightBold,
-		}, {
-			Text: "Bookmark a file by running:",
-		}, {
-			Text: "klog bookmark yourfile.klg",
-		}}
+		rs, pErr := ctx.RetrieveRecords()
+		if pErr != nil {
+			return []menuet.MenuItem{{
+				Text: file.Name,
+			}, {
+				Text: "Error: file cannot be parsed",
+			}}
+		}
+		return renderRecords(ctx, rs, file)
 	}()...)
 
 	items = append(items, menuet.MenuItem{
