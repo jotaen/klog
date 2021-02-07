@@ -118,8 +118,9 @@ A *range* is an *entry* that represents the time span between two points in time
 It MUST consist of two values that denote the start and the end.
 Start and end MUST be written in chronological order.
 
-There MUST be a `-` between the two values,
-which MAY be surrounded by one “space” on each side.
+There MUST be a `-` between the two values.
+There MAY appear “spaces” on either side of the `-`;
+for this case it is RECOMMENDED to use exactly one “space” on both sides.
 
 The start value MUST be a *time*.
 It MAY be prefixed with a `<` to indicate that
@@ -143,14 +144,14 @@ It contains an amount of hours and/or an amount of minutes.
 The hour part MUST be written first.
 Examples are: `1h`, `5m`, `4h12m`, `-8h30m`.
 
-The hour part MUST be an unsigned number
+The hour part MUST be an “integer”
 which MUST be immediately followed by the character `h`.
 It MAY be `0h`.
 It MAY be greater than `24h`,
 e.g. `50h`.
 If the hour part is missing, a value of `0h` is assumed.
 
-The minute part MUST be an unsigned number
+The minute part MUST be an “integer”
 which MUST be immediately followed by the character `m`.
 It MAY be `0m`.
 It MAY be greater than `59m`,
@@ -158,8 +159,7 @@ e.g. `150m`;
 it is RECOMMENDED to break this up, so that the minute part is less than `60m`.
 If the minute part is missing, a value of `0m` is assumed.
 
-While the hour and minute parts itself are unsigned,
-the *duration* as a whole is always a signed value:
+The *duration* as a whole is a signed value:
 That means it is either positive (i.e. adding to the total time)
 or negative (i.e. deducting from the total time).
 As default a *duration* is positive,
@@ -173,8 +173,8 @@ A file MAY hold any amount of *records*.
 Apart from that it MUST NOT contain anything
 but what is allowed by this specification.
 
-Subsequent *records* MUST be separated by one “blank line”;
-there MAY be additional blank lines.
+There MUST appear one “blank line” between subsequent *records*;
+additional “blank lines” MAY appear.
 
 The *records* don’t have to appear in any order.
 There MAY exist multiple *records* for the same day.
@@ -200,4 +200,5 @@ There SHOULD be a “newline” at the end of the file.
 - “newline”: The LF linefeed character (U+0010), escape sequence `\n`
 - “blank line”: A line that only contains whitespace characters
 - “letter”: A character as defined by the Unicode letter category, regex `\p{L}`
-- “digit” Any of 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+- “digit”: Any of 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+- “integer”: An unsigned number without fractional component
