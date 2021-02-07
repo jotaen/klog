@@ -154,9 +154,12 @@ If the hour part is missing, a value of `0h` is assumed.
 The minute part MUST be an “integer”
 which MUST be immediately followed by the character `m`.
 It MAY be `0m`.
-It MAY be greater than `59m`,
-e.g. `150m`;
-it is RECOMMENDED to break this up, so that the minute part is less than `60m`.
+When the hour part is present,
+the minute part MUST NOT be greater than `59m`,
+e.g. `1h59m`;
+otherwise it MAY be greater than `59m`,
+e.g. `119m`
+(it is RECOMMENDED to break this up, though).
 If the minute part is missing, a value of `0m` is assumed.
 
 The *duration* as a whole is a signed value:
