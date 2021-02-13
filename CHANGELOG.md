@@ -1,5 +1,10 @@
 # Changelog (command line tool)
 
+## v1.3
+- **[ FEATURE ]** Allow to sort results in both directions
+  (`--sort ASC` or `--sort DESC`)
+- **[ FIX ]** Don’t demand `.klg` file extensions for bookmarks
+
 ## v1.2
 - **[ INFO ]** Provided more helpful error messages
 - **[ FIX ]** Fix unhandled error with experimental `template` subcommand

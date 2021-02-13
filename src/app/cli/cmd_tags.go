@@ -10,6 +10,7 @@ import (
 
 type Tags struct {
 	InputFilesArgs
+	FilterArgs
 }
 
 func (args *Tags) Run(ctx app.Context) error {
@@ -17,6 +18,8 @@ func (args *Tags) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
+	opts := args.FilterArgs.toFilter()
+	rs = service.Query(rs, opts)
 	entriesByTag, _ := service.EntryTagLookup(rs...)
 	tagsOrdered, maxLength := sortTags(entriesByTag)
 	for _, t := range tagsOrdered {
