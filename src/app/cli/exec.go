@@ -13,15 +13,17 @@ import (
 )
 
 type cli struct {
-	Print    Print    `cmd help:"Pretty-print records"`
-	Total    Total    `cmd help:"Evaluate the total time"`
-	Eval     Eval     `cmd hidden`
-	Report   Report   `cmd help:"Print a calendar report summarising all days"`
-	Tags     Tags     `cmd help:"Print total times aggregated by tags"`
-	Append   Append   `cmd hidden help:"Appends a new record to a file (based on templates)"`
-	Bookmark Bookmark `cmd help:"Set a default file that klog reads from"`
-	Widget   Widget   `cmd help:"Start menu bar widget (MacOS only)"`
-	Version  Version  `cmd help:"Print version info and check for updates"`
+	Print    Print    `cmd group:"Evaluate" help:"Pretty-print records"`
+	Total    Total    `cmd group:"Evaluate" help:"Evaluate the total time"`
+	Eval     Eval     `cmd group:"Evaluate" hidden`
+	Report   Report   `cmd group:"Evaluate" help:"Print a calendar report summarising all days"`
+	Tags     Tags     `cmd group:"Evaluate" help:"Print total times aggregated by tags"`
+
+	Append   Append   `cmd group:"Manipulate" hidden help:"Appends a new record to a file (based on templates)"`
+
+	Bookmark Bookmark `cmd group:"Misc" help:"Set a default file that klog reads from"`
+	Widget   Widget   `cmd group:"Misc" help:"Start menu bar widget (MacOS only)"`
+	Version  Version  `cmd group:"Misc" help:"Print version info and check for updates"`
 }
 
 func Execute() int {
@@ -34,12 +36,18 @@ func Execute() int {
 	cliApp := kong.Parse(
 		&cli{},
 		kong.Name("klog"),
-		kong.Description("klog time tracking: command line app for interacting with `.klg` files."),
+		kong.Description(
+			"klog time tracking: command line app for interacting with `.klg` files." +
+				"\n\nRead the documentation at https://klog.jotaen.net",
+			),
 		kong.UsageOnError(),
 		func() kong.Option {
 			datePrototype, _ := klog.NewDate(1, 1, 1)
 			return kong.TypeMapper(reflect.TypeOf(&datePrototype).Elem(), dateDecoder())
 		}(),
+		kong.ConfigureHelp(kong.HelpOptions{
+			Compact: true,
+		}),
 	)
 	cliApp.BindTo(ctx, (*app.Context)(nil))
 	err = cliApp.Run(&ctx)
