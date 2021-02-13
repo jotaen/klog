@@ -8,18 +8,19 @@ import (
 	"klog/app"
 	. "klog/lib/jotaen/tf"
 	"klog/parser/engine"
+	"klog/service"
 	"reflect"
 	"strings"
 )
 
 type cli struct {
-	Print    Print    `cmd group:"Evaluate" help:"Pretty-print records"`
-	Total    Total    `cmd group:"Evaluate" help:"Evaluate the total time"`
-	Eval     Eval     `cmd group:"Evaluate" hidden`
-	Report   Report   `cmd group:"Evaluate" help:"Print a calendar report summarising all days"`
-	Tags     Tags     `cmd group:"Evaluate" help:"Print total times aggregated by tags"`
+	Print  Print  `cmd group:"Evaluate" help:"Pretty-print records"`
+	Total  Total  `cmd group:"Evaluate" help:"Evaluate the total time"`
+	Eval   Eval   `cmd group:"Evaluate" hidden`
+	Report Report `cmd group:"Evaluate" help:"Print a calendar report summarising all days"`
+	Tags   Tags   `cmd group:"Evaluate" help:"Print total times aggregated by tags"`
 
-	Append   Append   `cmd group:"Manipulate" hidden help:"Appends a new record to a file (based on templates)"`
+	Append Append `cmd group:"Manipulate" hidden help:"Appends a new record to a file (based on templates)"`
 
 	Bookmark Bookmark `cmd group:"Misc" help:"Set a default file that klog reads from"`
 	Widget   Widget   `cmd group:"Misc" help:"Start menu bar widget (MacOS only)"`
@@ -37,9 +38,9 @@ func Execute() int {
 		&cli{},
 		kong.Name("klog"),
 		kong.Description(
-			"klog time tracking: command line app for interacting with `.klg` files." +
+			"klog time tracking: command line app for interacting with `.klg` files."+
 				"\n\nRead the documentation at https://klog.jotaen.net",
-			),
+		),
 		kong.UsageOnError(),
 		func() kong.Option {
 			datePrototype, _ := klog.NewDate(1, 1, 1)
@@ -83,7 +84,7 @@ func prettifyError(err error) error {
 		INDENT := "    "
 		for _, e := range e.Get() {
 			message += fmt.Sprintf(
-				Style{Background: "160", Color: "015"}.Format(" Error in line %d: "),
+				Style{Background: "160", Color: "015"}.Format(" ERROR in line %d: "),
 				e.Context().LineNumber,
 			) + "\n"
 			message += fmt.Sprintf(
@@ -104,6 +105,17 @@ func prettifyError(err error) error {
 		return errors.New("Error: " + e.Error() + "\n" + e.Help())
 	}
 	return errors.New("Error: " + err.Error())
+}
+
+func prettifyWarnings(ws []service.Warning) string {
+	result := ""
+	for _, w := range ws {
+		result += Style{Background: "227", Color: "000"}.Format(" WARNING ")
+		result += " "
+		result += Style{Color: "227"}.Format(w.Date.ToString() + ": " + w.Message)
+		result += "\n"
+	}
+	return result
 }
 
 func breakLines(text string, maxLength int) []string {

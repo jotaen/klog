@@ -9,20 +9,23 @@ import (
 type Print struct {
 	FilterArgs
 	SortArgs
+	WarnArgs
 	InputFilesArgs
 }
 
 func (args *Print) Run(ctx app.Context) error {
-	rs, err := ctx.RetrieveRecords(args.File...)
+	records, err := ctx.RetrieveRecords(args.File...)
 	if err != nil {
 		return err
 	}
-	if len(rs) == 0 {
+	if len(records) == 0 {
 		return nil
 	}
 	opts := args.FilterArgs.toFilter()
 	opts.Sort = args.Sort
-	rs = service.Query(rs, opts)
-	ctx.Print("\n" + parser.SerialiseRecords(&styler, rs...) + "\n")
+	records = service.Query(records, opts)
+	ctx.Print("\n" + parser.SerialiseRecords(&styler, records...) + "\n")
+
+	args.WarnArgs.printWarnings(ctx, records)
 	return nil
 }

@@ -11,6 +11,7 @@ import (
 type Report struct {
 	DiffArg
 	FilterArgs
+	WarnArgs
 	Fill bool `name:"fill" help:"Show all consecutive days, even if there is no record"`
 	InputFilesArgs
 }
@@ -90,6 +91,8 @@ func (args *Report) Run(ctx app.Context) error {
 		ctx.Print(pad(9-len(grandDiff.ToStringWithSign())) + styler.Duration(grandDiff, true))
 	}
 	ctx.Print("\n")
+
+	args.WarnArgs.printWarnings(ctx, records)
 	return nil
 }
 

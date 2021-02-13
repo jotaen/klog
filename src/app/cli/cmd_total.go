@@ -20,9 +20,10 @@ func (args *Eval) Run(_ app.Context) error {
 
 type Total struct {
 	FilterArgs
-	InputFilesArgs
 	DiffArg
+	WarnArgs
 	Live bool `name:"live" help:"Keep shell open and follow changes live"`
+	InputFilesArgs
 }
 
 func (args *Total) Run(ctx app.Context) error {
@@ -46,29 +47,31 @@ func (args *Total) repeat(ctx app.Context, cb func(ctx app.Context) error) error
 }
 
 func (args *Total) printEvaluation(ctx app.Context) error {
-	rs, err := ctx.RetrieveRecords(args.File...)
+	records, err := ctx.RetrieveRecords(args.File...)
 	if err != nil {
 		return err
 	}
-	rs = service.Query(rs, args.toFilter())
+	records = service.Query(records, args.toFilter())
 	total, _ := func() (Duration, bool) {
 		if args.Live {
-			return service.HypotheticalTotal(time.Now(), rs...)
+			return service.HypotheticalTotal(time.Now(), records...)
 		}
-		return service.Total(rs...), false
+		return service.Total(records...), false
 	}()
 	ctx.Print(fmt.Sprintf("Total: %s\n", styler.Duration(total, false)))
 	if args.Diff {
-		should := service.ShouldTotalSum(rs...)
+		should := service.ShouldTotalSum(records...)
 		diff := NewDuration(0, 0).Minus(should).Plus(total)
 		ctx.Print(fmt.Sprintf("Should: %s\n", styler.ShouldTotal(should)))
 		ctx.Print(fmt.Sprintf("Diff: %s\n", styler.Duration(diff, true)))
 	}
-	ctx.Print(fmt.Sprintf("(In %d record%s)\n", len(rs), func() string {
-		if len(rs) == 1 {
+	ctx.Print(fmt.Sprintf("(In %d record%s)\n", len(records), func() string {
+		if len(records) == 1 {
 			return ""
 		}
 		return "s"
 	}()))
+
+	args.WarnArgs.printWarnings(ctx, records)
 	return nil
 }

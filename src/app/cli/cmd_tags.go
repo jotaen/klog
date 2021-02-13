@@ -9,18 +9,19 @@ import (
 )
 
 type Tags struct {
-	InputFilesArgs
 	FilterArgs
+	WarnArgs
+	InputFilesArgs
 }
 
 func (args *Tags) Run(ctx app.Context) error {
-	rs, err := ctx.RetrieveRecords(args.File...)
+	records, err := ctx.RetrieveRecords(args.File...)
 	if err != nil {
 		return err
 	}
 	opts := args.FilterArgs.toFilter()
-	rs = service.Query(rs, opts)
-	entriesByTag, _ := service.EntryTagLookup(rs...)
+	records = service.Query(records, opts)
+	entriesByTag, _ := service.EntryTagLookup(records...)
 	tagsOrdered, maxLength := sortTags(entriesByTag)
 	for _, t := range tagsOrdered {
 		es := entriesByTag[t]
@@ -29,6 +30,8 @@ func (args *Tags) Run(ctx app.Context) error {
 		ctx.Print(styler.Duration(service.TotalEntries(es...), false))
 		ctx.Print("\n")
 	}
+
+	args.WarnArgs.printWarnings(ctx, records)
 	return nil
 }
 

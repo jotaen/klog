@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func sampleRecords() []Record {
+func sampleRecordsForQuerying() []Record {
 	return []Record{
 		func() Record {
 			r := NewRecord(Ɀ_Date_(1999, 12, 30))
@@ -40,13 +40,13 @@ func sampleRecords() []Record {
 }
 
 func TestQueryWithNoClauses(t *testing.T) {
-	rs := Query(sampleRecords(), Opts{})
+	rs := Query(sampleRecordsForQuerying(), Opts{})
 	require.Len(t, rs, 5)
 	assert.Equal(t, NewDuration(5+6+7+8, -30+15), Total(rs...))
 }
 
 func TestQueryWithAfter(t *testing.T) {
-	rs := Query(sampleRecords(), Opts{AfterEq: Ɀ_Date_(2000, 1, 1)})
+	rs := Query(sampleRecordsForQuerying(), Opts{AfterEq: Ɀ_Date_(2000, 1, 1)})
 	require.Len(t, rs, 3)
 	assert.Equal(t, 1, rs[0].Date().Day())
 	assert.Equal(t, 2, rs[1].Date().Day())
@@ -54,7 +54,7 @@ func TestQueryWithAfter(t *testing.T) {
 }
 
 func TestQueryWithBefore(t *testing.T) {
-	rs := Query(sampleRecords(), Opts{BeforeEq: Ɀ_Date_(2000, 1, 1)})
+	rs := Query(sampleRecordsForQuerying(), Opts{BeforeEq: Ɀ_Date_(2000, 1, 1)})
 	require.Len(t, rs, 3)
 	assert.Equal(t, 30, rs[0].Date().Day())
 	assert.Equal(t, 31, rs[1].Date().Day())
@@ -62,7 +62,7 @@ func TestQueryWithBefore(t *testing.T) {
 }
 
 func TestQueryWithTagOnEntries(t *testing.T) {
-	rs := Query(sampleRecords(), Opts{Tags: []string{"bar"}})
+	rs := Query(sampleRecordsForQuerying(), Opts{Tags: []string{"bar"}})
 	require.Len(t, rs, 3)
 	assert.Equal(t, 31, rs[0].Date().Day())
 	assert.Equal(t, 1, rs[1].Date().Day())
@@ -71,7 +71,7 @@ func TestQueryWithTagOnEntries(t *testing.T) {
 }
 
 func TestQueryWithTagOnOverallSummary(t *testing.T) {
-	rs := Query(sampleRecords(), Opts{Tags: []string{"foo"}})
+	rs := Query(sampleRecordsForQuerying(), Opts{Tags: []string{"foo"}})
 	require.Len(t, rs, 4)
 	assert.Equal(t, 30, rs[0].Date().Day())
 	assert.Equal(t, 1, rs[1].Date().Day())
@@ -81,7 +81,7 @@ func TestQueryWithTagOnOverallSummary(t *testing.T) {
 }
 
 func TestQueryWithTagOnEntriesAndInSummary(t *testing.T) {
-	rs := Query(sampleRecords(), Opts{Tags: []string{"foo", "bar"}})
+	rs := Query(sampleRecordsForQuerying(), Opts{Tags: []string{"foo", "bar"}})
 	require.Len(t, rs, 2)
 	assert.Equal(t, 1, rs[0].Date().Day())
 	assert.Equal(t, 3, rs[1].Date().Day())
@@ -89,7 +89,7 @@ func TestQueryWithTagOnEntriesAndInSummary(t *testing.T) {
 }
 
 func TestQueryWithSorting(t *testing.T) {
-	ss := sampleRecords()
+	ss := sampleRecordsForQuerying()
 	for _, x := range []struct{ rs []Record }{
 		{ss},
 		{[]Record{ss[3], ss[1], ss[2], ss[0], ss[4]}},

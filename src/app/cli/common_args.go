@@ -2,6 +2,7 @@ package cli
 
 import (
 	"klog"
+	"klog/app"
 	"klog/service"
 	"time"
 )
@@ -23,8 +24,20 @@ type FilterArgs struct {
 	BeforeEq  klog.Date   `name:"before" help:"Only records before this date (inclusive)"`
 }
 
+type WarnArgs struct {
+	NoWarn bool `name:"nowarn" help:"Suppress warnings about potential mistakes"`
+}
+
 type SortArgs struct {
 	Sort string `name:"sort" help:"Sort output by date (ASC or DESC)" enum:"ASC,DESC,"`
+}
+
+func (args *WarnArgs) printWarnings(ctx app.Context, records []klog.Record) {
+	if args.NoWarn {
+		return
+	}
+	ws := service.SanityCheck(time.Now(), records)
+	ctx.Print(prettifyWarnings(ws))
 }
 
 func (args *FilterArgs) toFilter() service.Opts {
