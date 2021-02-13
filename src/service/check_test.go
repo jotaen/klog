@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	. "klog"
 	"testing"
@@ -23,7 +22,6 @@ func TestWarnWhenUnclosedOpenRangeInThePast(t *testing.T) {
 	)
 	require.NotNil(t, ws)
 	require.Len(t, ws, 1)
-	assert.True(t, ws[0].Date.IsEqualTo(Ɀ_Date_(1999, 12, 30)))
 }
 
 func sampleRecordsForChecking(reference gotime.Time) []Record {

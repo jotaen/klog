@@ -26,7 +26,7 @@ func (args *Report) Run(ctx app.Context) error {
 	}
 	opts := args.FilterArgs.toFilter()
 	records = service.Query(records, opts)
-	indentation := strings.Repeat(" ", len("2020 Dec   We 30. "))
+	indentation := strings.Repeat(" ", len("2020 Dec   Wed 30. "))
 	records = service.Query(records, service.Opts{Sort: "ASC"})
 	ctx.Print(indentation + "    Total")
 	if args.Diff {
@@ -51,12 +51,12 @@ func (args *Report) Run(ctx app.Context) error {
 		month := func() string {
 			if date.Month() != m {
 				m = date.Month()
-				return prettyMonth(m)
+				return prettyMonth(m)[:3]
 			}
 			return "   "
 		}()
 		day := func() string {
-			return fmt.Sprintf("%s %2v.", prettyDay(date.Weekday()), date.Day())
+			return fmt.Sprintf("%s %2v.", prettyDay(date.Weekday())[:3], date.Day())
 		}()
 		ctx.Print(fmt.Sprintf("%s %s    %s  ", year, month, day))
 
@@ -132,29 +132,29 @@ func groupByDate(rs []Record) (map[DateHash][]Record, []Date) {
 func prettyMonth(m int) string {
 	switch m {
 	case 1:
-		return "Jan"
+		return "January"
 	case 2:
-		return "Feb"
+		return "February"
 	case 3:
-		return "Mar"
+		return "March"
 	case 4:
-		return "Apr"
+		return "April"
 	case 5:
 		return "May"
 	case 6:
-		return "Jun"
+		return "June"
 	case 7:
-		return "Jul"
+		return "July"
 	case 8:
-		return "Aug"
+		return "August"
 	case 9:
-		return "Sep"
+		return "September"
 	case 10:
-		return "Oct"
+		return "October"
 	case 11:
-		return "Nov"
+		return "November"
 	case 12:
-		return "Dec"
+		return "December"
 	}
 	panic("Illegal month") // this can/should never happen
 }
@@ -162,19 +162,19 @@ func prettyMonth(m int) string {
 func prettyDay(d int) string {
 	switch d {
 	case 1:
-		return "Mo"
+		return "Monday"
 	case 2:
-		return "Tu"
+		return "Tuesday"
 	case 3:
-		return "We"
+		return "Wednesday"
 	case 4:
-		return "Th"
+		return "Thursday"
 	case 5:
-		return "Fr"
+		return "Friday"
 	case 6:
-		return "Sa"
+		return "Saturday"
 	case 7:
-		return "Su"
+		return "Sunday"
 	}
 	panic("Illegal weekday") // this can/should never happen
 }

@@ -16,7 +16,6 @@ import (
 type cli struct {
 	Print  Print  `cmd group:"Evaluate" help:"Pretty-print records"`
 	Total  Total  `cmd group:"Evaluate" help:"Evaluate the total time"`
-	Eval   Eval   `cmd group:"Evaluate" hidden`
 	Report Report `cmd group:"Evaluate" help:"Print a calendar report summarising all days"`
 	Tags   Tags   `cmd group:"Evaluate" help:"Print total times aggregated by tags"`
 

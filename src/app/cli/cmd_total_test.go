@@ -20,7 +20,7 @@ func TestTotalOfInput(t *testing.T) {
 2018-11-09
 	16:00-17:00
 
-2018-11-10
+2150-11-10
 Open ranges are not considered
 	16:00 - ?
 `, (&Total{}).Run)
