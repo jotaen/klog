@@ -23,7 +23,7 @@ func render(ctx app.Context, agent *launchAgent) []menuet.MenuItem {
 			}, {
 				Text: "Bookmark a file by running:",
 			}, {
-				Text: "klog bookmark yourfile.klg",
+				Text: "klog bookmark set yourfile.klg",
 			}}
 		}
 		rs, pErr := ctx.RetrieveRecords()

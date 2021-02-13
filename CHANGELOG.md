@@ -1,11 +1,15 @@
 # Changelog (command line tool)
 
 ## v1.3
+- **[ BREAKING ]** Change structure of the bookmark subcommand
+  (This is to account for the increasing number of operations)
+- **[ FEATURE ]** Add subcommand `bookmark edit` for opening a bookmarked
+  file in your $EDITOR
 - **[ FEATURE ]** Allow to sort results in both directions
   (`--sort ASC` or `--sort DESC`)
 - **[ FEATURE ]** Print warning when unclosed open ranges are detected
-  in records before yesterday. (As this probably always a mistake.) You
-  can disable this check with the `--nowarn` flag.
+  in records before yesterday. (It’s probably always a mistake, if that occurs.)
+  You can disable this check with the `--nowarn` flag.
 - **[ FIX ]** Don’t demand `.klg` file extensions for bookmarks
 
 ## v1.2

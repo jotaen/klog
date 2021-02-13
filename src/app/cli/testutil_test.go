@@ -72,6 +72,10 @@ func (m *TestContext) OpenInFileBrowser(_ string) app.Error {
 	return nil
 }
 
+func (m *TestContext) OpenInEditor(_ string) app.Error {
+	return nil
+}
+
 func (m *TestContext) AppendTemplateToFile(string, string) app.Error {
 	return nil
 }

@@ -29,6 +29,7 @@ type Context interface {
 	SetBookmark(string) Error
 	Bookmark() (*File, Error)
 	OpenInFileBrowser(string) Error
+	OpenInEditor(string) Error
 	AppendTemplateToFile(string, string) Error
 }
 
@@ -126,7 +127,7 @@ func (c *context) Bookmark() (*File, Error) {
 	if err != nil {
 		return nil, appError{
 			"No bookmark set",
-			"You can set a bookmark by running: klog bookmark somefile.klg",
+			"You can set a bookmark by running: klog bookmark set somefile.klg",
 		}
 	}
 	_, err = os.Stat(dest)
@@ -178,6 +179,27 @@ func (c *context) OpenInFileBrowser(path string) Error {
 		return appError{
 			"Failed to open file browser",
 			err.Error(),
+		}
+	}
+	return nil
+}
+
+func (c *context) OpenInEditor(path string) Error {
+	editor := os.Getenv("EDITOR")
+	if editor == "" {
+		return appError{
+			"No default editor set",
+			"Please specify you editor via the $EDITOR environment variable",
+		}
+	}
+	cmd := exec.Command(editor, path)
+	cmd.Stdin = os.Stdin
+    cmd.Stdout = os.Stdout
+	err := cmd.Run()
+	if err != nil {
+		return appError{
+			"Cannot open editor",
+			"Tried to run: " + editor + " " + path,
 		}
 	}
 	return nil
