@@ -23,14 +23,14 @@ func (args *Version) Run(ctx app.Context) error {
 		return nil
 	}
 	ctx.Print(fmt.Sprintf("\nChecking for newer version...\n"))
-	v := fetchVersionInfo("https://klog.jotaen.net/latest-stable-version.json")
+	v := fetchVersionInfo("https://api.github.com/repos/jotaen/klog/releases/latest")
 	if v == nil {
 		return errors.New("Failed to check for new version, please try again later")
 	}
-	if v.Latest.Version == ctx.MetaInfo().Version && v.Latest.BuildHash == ctx.MetaInfo().BuildHash {
+	if v.Version() == ctx.MetaInfo().Version && ctx.MetaInfo().BuildHash == v.BuildHash() {
 		ctx.Print(fmt.Sprintf("You already have the latest version!\n"))
 	} else {
-		ctx.Print(fmt.Sprintf("New version available: %s  [%s]\n", v.Latest.Version, v.Latest.BuildHash))
+		ctx.Print(fmt.Sprintf("New version available: %s  [%s]\n", v.Version(), v.BuildHash()))
 		ctx.Print(fmt.Sprintf("See: https://github.com/jotaen/klog\n"))
 	}
 	return nil
@@ -57,8 +57,14 @@ func fetchVersionInfo(url string) *versionInfo {
 }
 
 type versionInfo struct {
-	Latest struct {
-		Version   string `json:"version"`
-		BuildHash string `json:"buildHash"`
-	} `json:"latest"`
+	Tag    string `json:"tag_name"`
+	Commit string `json:"target_commitish"`
+}
+
+func (v *versionInfo) Version() string { return v.Tag }
+func (v *versionInfo) BuildHash() string {
+	if len(v.Commit) < 7 {
+		return ""
+	}
+	return v.Commit[:7]
 }
