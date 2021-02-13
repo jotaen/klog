@@ -39,30 +39,30 @@ func sampleRecords() []Record {
 	}
 }
 
-func TestFindFilterWithNoClauses(t *testing.T) {
-	rs := FindFilter(sampleRecords(), Filter{})
+func TestQueryWithNoClauses(t *testing.T) {
+	rs := Query(sampleRecords(), Opts{})
 	require.Len(t, rs, 5)
 	assert.Equal(t, NewDuration(5+6+7+8, -30+15), Total(rs...))
 }
 
-func TestFindFilterWithAfter(t *testing.T) {
-	rs := FindFilter(sampleRecords(), Filter{AfterEq: Ɀ_Date_(2000, 1, 1)})
+func TestQueryWithAfter(t *testing.T) {
+	rs := Query(sampleRecords(), Opts{AfterEq: Ɀ_Date_(2000, 1, 1)})
 	require.Len(t, rs, 3)
 	assert.Equal(t, 1, rs[0].Date().Day())
 	assert.Equal(t, 2, rs[1].Date().Day())
 	assert.Equal(t, 3, rs[2].Date().Day())
 }
 
-func TestFindFilterWithBefore(t *testing.T) {
-	rs := FindFilter(sampleRecords(), Filter{BeforeEq: Ɀ_Date_(2000, 1, 1)})
+func TestQueryWithBefore(t *testing.T) {
+	rs := Query(sampleRecords(), Opts{BeforeEq: Ɀ_Date_(2000, 1, 1)})
 	require.Len(t, rs, 3)
 	assert.Equal(t, 30, rs[0].Date().Day())
 	assert.Equal(t, 31, rs[1].Date().Day())
 	assert.Equal(t, 1, rs[2].Date().Day())
 }
 
-func TestFindFilterWithTagOnEntries(t *testing.T) {
-	rs := FindFilter(sampleRecords(), Filter{Tags: []string{"bar"}})
+func TestQueryWithTagOnEntries(t *testing.T) {
+	rs := Query(sampleRecords(), Opts{Tags: []string{"bar"}})
 	require.Len(t, rs, 3)
 	assert.Equal(t, 31, rs[0].Date().Day())
 	assert.Equal(t, 1, rs[1].Date().Day())
@@ -70,8 +70,8 @@ func TestFindFilterWithTagOnEntries(t *testing.T) {
 	assert.Equal(t, NewDuration(5+8+6, 0), Total(rs...))
 }
 
-func TestFindFilterWithTagOnOverallSummary(t *testing.T) {
-	rs := FindFilter(sampleRecords(), Filter{Tags: []string{"foo"}})
+func TestQueryWithTagOnOverallSummary(t *testing.T) {
+	rs := Query(sampleRecords(), Opts{Tags: []string{"foo"}})
 	require.Len(t, rs, 4)
 	assert.Equal(t, 30, rs[0].Date().Day())
 	assert.Equal(t, 1, rs[1].Date().Day())
@@ -80,10 +80,25 @@ func TestFindFilterWithTagOnOverallSummary(t *testing.T) {
 	assert.Equal(t, NewDuration(6+7+8, -30+15), Total(rs...))
 }
 
-func TestFindFilterWithTagOnEntriesAndInSummary(t *testing.T) {
-	rs := FindFilter(sampleRecords(), Filter{Tags: []string{"foo", "bar"}})
+func TestQueryWithTagOnEntriesAndInSummary(t *testing.T) {
+	rs := Query(sampleRecords(), Opts{Tags: []string{"foo", "bar"}})
 	require.Len(t, rs, 2)
 	assert.Equal(t, 1, rs[0].Date().Day())
 	assert.Equal(t, 3, rs[1].Date().Day())
 	assert.Equal(t, NewDuration(8+6, 0), Total(rs...))
+}
+
+func TestQueryWithSorting(t *testing.T) {
+	ss := sampleRecords()
+	for _, x := range []struct{ rs []Record }{
+		{ss},
+		{[]Record{ss[3], ss[1], ss[2], ss[0], ss[4]}},
+		{[]Record{ss[1], ss[4], ss[0], ss[3], ss[2]}},
+	} {
+		ascending := Query(x.rs, Opts{Sort: "ASC"})
+		assert.Equal(t, []Record{ss[0], ss[1], ss[2], ss[3], ss[4]}, ascending)
+
+		descending := Query(x.rs, Opts{Sort: "DESC"})
+		assert.Equal(t, []Record{ss[4], ss[3], ss[2], ss[1], ss[0]}, descending)
+	}
 }

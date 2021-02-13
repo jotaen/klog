@@ -2,40 +2,29 @@ package service
 
 import (
 	. "klog"
-	"sort"
+	gosort "sort"
 )
 
-type Filter struct {
+type Opts struct {
 	Tags     []string
 	BeforeEq Date
 	AfterEq  Date
 	Dates    []Date
+	Sort     string // "ASC", "DESC" or "" (= don’t sort)
 }
 
-func Sort(rs []Record, startWithOldest bool) []Record {
-	sorted := append([]Record(nil), rs...)
-	sort.Slice(sorted, func(i, j int) bool {
-		isLess := sorted[j].Date().IsAfterOrEqual(sorted[i].Date())
-		if startWithOldest {
-			return !isLess
-		}
-		return isLess
-	})
-	return sorted
-}
-
-func FindFilter(rs []Record, f Filter) []Record {
-	tags := NewTagSet(f.Tags...)
-	dates := newDateSet(f.Dates)
+func Query(rs []Record, o Opts) []Record {
+	tags := NewTagSet(o.Tags...)
+	dates := newDateSet(o.Dates)
 	var records []Record
 	for _, r := range rs {
 		if len(dates) > 0 && !dates[r.Date().Hash()] {
 			continue
 		}
-		if f.BeforeEq != nil && !f.BeforeEq.IsAfterOrEqual(r.Date()) {
+		if o.BeforeEq != nil && !o.BeforeEq.IsAfterOrEqual(r.Date()) {
 			continue
 		}
-		if f.AfterEq != nil && !r.Date().IsAfterOrEqual(f.AfterEq) {
+		if o.AfterEq != nil && !r.Date().IsAfterOrEqual(o.AfterEq) {
 			continue
 		}
 		if len(tags) > 0 {
@@ -47,7 +36,26 @@ func FindFilter(rs []Record, f Filter) []Record {
 		}
 		records = append(records, r)
 	}
+	if o.Sort != "" {
+		startWithOldest := false
+		if o.Sort == "ASC" {
+			startWithOldest = true
+		}
+		records = sort(records, startWithOldest)
+	}
 	return records
+}
+
+func sort(rs []Record, startWithOldest bool) []Record {
+	sorted := append([]Record(nil), rs...)
+	gosort.Slice(sorted, func(i, j int) bool {
+		isLess := sorted[j].Date().IsAfterOrEqual(sorted[i].Date())
+		if !startWithOldest {
+			return !isLess
+		}
+		return isLess
+	})
+	return sorted
 }
 
 func reduceRecordToMatchingTags(tags TagSet, r Record) (Record, bool) {

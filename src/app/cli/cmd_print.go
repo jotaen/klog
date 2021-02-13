@@ -8,8 +8,8 @@ import (
 
 type Print struct {
 	FilterArgs
+	SortArgs
 	InputFilesArgs
-	Sort bool `short:"s" name:"sort" help:"Sort output by date (from oldest to latest)"`
 }
 
 func (args *Print) Run(ctx app.Context) error {
@@ -20,10 +20,9 @@ func (args *Print) Run(ctx app.Context) error {
 	if len(rs) == 0 {
 		return nil
 	}
-	rs = service.FindFilter(rs, args.FilterArgs.toFilter())
-	if args.Sort {
-		rs = service.Sort(rs, true)
-	}
+	opts := args.FilterArgs.toFilter()
+	opts.Sort = args.Sort
+	rs = service.Query(rs, opts)
 	ctx.Print("\n" + parser.SerialiseRecords(&styler, rs...) + "\n")
 	return nil
 }

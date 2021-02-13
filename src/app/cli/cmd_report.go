@@ -9,9 +9,9 @@ import (
 )
 
 type Report struct {
-	InputFilesArgs
 	DiffArg
 	Fill bool `name:"fill" help:"Show all consecutive days, even if there is no record"`
+	InputFilesArgs
 }
 
 func (args *Report) Run(ctx app.Context) error {
@@ -23,7 +23,7 @@ func (args *Report) Run(ctx app.Context) error {
 		return nil
 	}
 	indentation := strings.Repeat(" ", len("2020 Dec   We 30. "))
-	records = service.Sort(records, false)
+	records = service.Query(records, service.Opts{Sort: "ASC"})
 	ctx.Print(indentation + "    Total")
 	if args.Diff {
 		ctx.Print("    Should     Diff")

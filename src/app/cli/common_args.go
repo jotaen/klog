@@ -23,8 +23,12 @@ type FilterArgs struct {
 	BeforeEq  klog.Date   `name:"before" help:"Only records before this date (inclusive)"`
 }
 
-func (args *FilterArgs) toFilter() service.Filter {
-	filter := service.Filter{
+type SortArgs struct {
+	Sort string `name:"sort" help:"Sort output by date (ASC or DESC)" enum:"ASC,DESC,"`
+}
+
+func (args *FilterArgs) toFilter() service.Opts {
+	filter := service.Opts{
 		BeforeEq: args.BeforeEq,
 		AfterEq:  args.AfterEq,
 		Tags:     args.Tags,

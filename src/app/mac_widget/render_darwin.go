@@ -67,7 +67,7 @@ func renderRecords(ctx app.Context, records []klog.Record, file *app.File) []men
 	var items []menuet.MenuItem
 
 	now := time.Now()
-	today := service.FindFilter(records, service.Filter{Dates: []klog.Date{klog.NewDateFromTime(now)}})
+	today := service.Query(records, service.Opts{Dates: []klog.Date{klog.NewDateFromTime(now)}})
 	if today != nil {
 		total, isOngoing := service.HypotheticalTotal(now, today...)
 		indicator := ""
@@ -102,7 +102,7 @@ func renderRecords(ctx app.Context, records []klog.Record, file *app.File) []men
 				{Text: "Diff: " + plus + diff.ToString()},
 			}
 			showMax := 7
-			for i, r := range service.Sort(records, true) {
+			for i, r := range service.Query(records, service.Opts{Sort: "DESC"}) {
 				if i == 0 {
 					items = append(items, menuet.MenuItem{Type: menuet.Separator})
 				}

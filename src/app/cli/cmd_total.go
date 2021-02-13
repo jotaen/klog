@@ -50,7 +50,7 @@ func (args *Total) printEvaluation(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
-	rs = service.FindFilter(rs, args.toFilter())
+	rs = service.Query(rs, args.toFilter())
 	total, _ := func() (Duration, bool) {
 		if args.Live {
 			return service.HypotheticalTotal(time.Now(), rs...)
