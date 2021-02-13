@@ -13,8 +13,9 @@
   (`--sort ASC` or `--sort DESC`)
 - **[ FEATURE ]** Print warning when unclosed open ranges are detected
   in records before yesterday. (It’s probably always a mistake, if that occurs.)
-  You can disable this check with the `--nowarn` flag.
+  You can disable this check with the `--no-warn` flag.
 - **[ FEATURE ]** Support filtering for `tags` and `reports`
+- **[ FEATURE ]** Define shorthand flags, e.g. for `--now`, `--diff`
 - **[ FIX ]** Don’t demand `.klg` file extensions for bookmarks
 
 ## v1.2

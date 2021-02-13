@@ -14,7 +14,7 @@ import (
 
 type Now struct {
 	DiffArg
-	Follow bool `name:"follow" help:"Keep shell open and follow changes"`
+	Follow bool `name:"follow" short:"f" help:"Keep shell open and follow changes"`
 	WarnArgs
 	InputFilesArgs
 }

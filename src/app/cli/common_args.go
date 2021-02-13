@@ -12,11 +12,11 @@ type InputFilesArgs struct {
 }
 
 type DiffArg struct {
-	Diff bool `name:"diff" help:"Show difference between actual and should total time"`
+	Diff bool `name:"diff" short:"d" help:"Show difference between actual and should total time"`
 }
 
 type NowArgs struct {
-	Now bool `name:"now" help:"Assume open ranges to be closed at this moment"`
+	Now bool `name:"now" short:"n" help:"Assume open ranges to be closed at this moment"`
 }
 
 type FilterArgs struct {
@@ -29,7 +29,7 @@ type FilterArgs struct {
 }
 
 type WarnArgs struct {
-	NoWarn bool `name:"nowarn" help:"Suppress warnings about potential mistakes"`
+	NoWarn bool `name:"no-warn" help:"Suppress warnings about potential mistakes"`
 }
 
 type SortArgs struct {
