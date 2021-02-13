@@ -64,6 +64,7 @@ A *should-total* is a *property* to denote the targeted total time of a *record*
 
 A *should-total* MUST be a *duration* value followed by a `!`,
 e.g. `8h!` or `5h30m!`.
+(That implies that a negative value MAY be used.)
 
 ### Summary
 A *summary* is user-provided text for holding arbitrary information.
