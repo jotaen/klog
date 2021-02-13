@@ -6,11 +6,7 @@ import (
 	"github.com/alecthomas/kong"
 	"klog"
 	"klog/app"
-	. "klog/lib/jotaen/tf"
-	"klog/parser/engine"
-	"klog/service"
 	"reflect"
-	"strings"
 )
 
 type cli struct {
@@ -74,60 +70,4 @@ func dateDecoder() kong.MapperFunc {
 		target.Set(reflect.ValueOf(d))
 		return nil
 	}
-}
-
-func prettifyError(err error) error {
-	switch e := err.(type) {
-	case engine.Errors:
-		message := ""
-		INDENT := "    "
-		for _, e := range e.Get() {
-			message += fmt.Sprintf(
-				Style{Background: "160", Color: "015"}.Format(" ERROR in line %d: "),
-				e.Context().LineNumber,
-			) + "\n"
-			message += fmt.Sprintf(
-				Style{Color: "247"}.Format(INDENT+"%s"),
-				string(e.Context().Value),
-			) + "\n"
-			message += fmt.Sprintf(
-				Style{Color: "160"}.Format(INDENT+"%s%s"),
-				strings.Repeat(" ", e.Position()), strings.Repeat("^", e.Length()),
-			) + "\n"
-			message += fmt.Sprintf(
-				Style{Color: "227"}.Format(INDENT+"%s"),
-				strings.Join(breakLines(e.Message(), 60), "\n"+INDENT),
-			) + "\n\n"
-		}
-		return errors.New(message)
-	case app.Error:
-		return errors.New("Error: " + e.Error() + "\n" + e.Help())
-	}
-	return errors.New("Error: " + err.Error())
-}
-
-func prettifyWarnings(ws []service.Warning) string {
-	result := ""
-	for _, w := range ws {
-		result += Style{Background: "227", Color: "000"}.Format(" WARNING ")
-		result += " "
-		result += Style{Color: "227"}.Format(w.Date.ToString() + ": " + w.Message)
-		result += "\n"
-	}
-	return result
-}
-
-func breakLines(text string, maxLength int) []string {
-	SPACE := " "
-	words := strings.Split(text, SPACE)
-	lines := []string{""}
-	for i, w := range words {
-		lastLine := lines[len(lines)-1]
-		isLastWord := i == len(words)-1
-		if !isLastWord && len(lastLine)+len(words[i+1]) > maxLength {
-			lines = append(lines, "")
-		}
-		lines[len(lines)-1] += w + SPACE
-	}
-	return lines
 }

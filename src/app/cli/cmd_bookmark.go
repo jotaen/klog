@@ -34,7 +34,7 @@ func (args *BookmarkSet) Run(ctx app.Context) error {
 	return nil
 }
 
-type BookmarkEdit struct {}
+type BookmarkEdit struct{}
 
 func (args *BookmarkEdit) Run(ctx app.Context) error {
 	b, appErr := ctx.Bookmark()

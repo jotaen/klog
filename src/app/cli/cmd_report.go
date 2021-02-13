@@ -108,13 +108,6 @@ func allDatesRange(from Date, to Date) []Date {
 	return result
 }
 
-func pad(length int) string {
-	if length < 0 {
-		return ""
-	}
-	return strings.Repeat(" ", length)
-}
-
 func groupByDate(rs []Record) (map[DateHash][]Record, []Date) {
 	days := make(map[DateHash][]Record, len(rs))
 	var order []Date
@@ -127,54 +120,4 @@ func groupByDate(rs []Record) (map[DateHash][]Record, []Date) {
 		days[h] = append(days[h], r)
 	}
 	return days, order
-}
-
-func prettyMonth(m int) string {
-	switch m {
-	case 1:
-		return "January"
-	case 2:
-		return "February"
-	case 3:
-		return "March"
-	case 4:
-		return "April"
-	case 5:
-		return "May"
-	case 6:
-		return "June"
-	case 7:
-		return "July"
-	case 8:
-		return "August"
-	case 9:
-		return "September"
-	case 10:
-		return "October"
-	case 11:
-		return "November"
-	case 12:
-		return "December"
-	}
-	panic("Illegal month") // this can/should never happen
-}
-
-func prettyDay(d int) string {
-	switch d {
-	case 1:
-		return "Monday"
-	case 2:
-		return "Tuesday"
-	case 3:
-		return "Wednesday"
-	case 4:
-		return "Thursday"
-	case 5:
-		return "Friday"
-	case 6:
-		return "Saturday"
-	case 7:
-		return "Sunday"
-	}
-	panic("Illegal weekday") // this can/should never happen
 }

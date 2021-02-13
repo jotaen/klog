@@ -194,7 +194,7 @@ func (c *context) OpenInEditor(path string) Error {
 	}
 	cmd := exec.Command(editor, path)
 	cmd.Stdin = os.Stdin
-    cmd.Stdout = os.Stdout
+	cmd.Stdout = os.Stdout
 	err := cmd.Run()
 	if err != nil {
 		return appError{
