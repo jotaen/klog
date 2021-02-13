@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"klog"
+	. "klog"
 	"klog/app"
 	"klog/service"
 	"time"
@@ -15,13 +15,17 @@ type DiffArg struct {
 	Diff bool `name:"diff" help:"Show difference between actual and should total time"`
 }
 
+type NowArgs struct {
+	Now bool `name:"now" help:"Assume open ranges to be closed at this moment"`
+}
+
 type FilterArgs struct {
-	Tags      []string    `name:"tag" help:"Only records (or particular entries) that match this tag"`
-	Date      []klog.Date `name:"date" help:"Only records at this date"`
-	Today     bool        `name:"today" help:"Only records at today’s date"`
-	Yesterday bool        `name:"yesterday" help:"Only records at yesterday’s date"`
-	AfterEq   klog.Date   `name:"after" help:"Only records after this date (inclusive)"`
-	BeforeEq  klog.Date   `name:"before" help:"Only records before this date (inclusive)"`
+	Tags      []string `name:"tag" help:"Only records (or particular entries) that match this tag"`
+	Date      []Date   `name:"date" help:"Only records at this date"`
+	Today     bool     `name:"today" help:"Only records at today’s date"`
+	Yesterday bool     `name:"yesterday" help:"Only records at yesterday’s date"`
+	AfterEq   Date     `name:"after" help:"Only records after this date (inclusive)"`
+	BeforeEq  Date     `name:"before" help:"Only records before this date (inclusive)"`
 }
 
 type WarnArgs struct {
@@ -32,7 +36,15 @@ type SortArgs struct {
 	Sort string `name:"sort" help:"Sort output by date (ASC or DESC)" enum:"ASC,DESC,"`
 }
 
-func (args *WarnArgs) printWarnings(ctx app.Context, records []klog.Record) {
+func (args *NowArgs) total(reference time.Time, rs ...Record) Duration {
+	if args.Now {
+		d, _ := service.HypotheticalTotal(reference, rs...)
+		return d
+	}
+	return service.Total(rs...)
+}
+
+func (args *WarnArgs) printWarnings(ctx app.Context, records []Record) {
 	if args.NoWarn {
 		return
 	}
@@ -48,10 +60,10 @@ func (args *FilterArgs) toFilter() service.Opts {
 		Dates:    args.Date,
 	}
 	if args.Today {
-		filter.Dates = append(filter.Dates, klog.NewDateFromTime(time.Now()))
+		filter.Dates = append(filter.Dates, NewDateFromTime(time.Now()))
 	}
 	if args.Yesterday {
-		filter.Dates = append(filter.Dates, klog.NewDateFromTime(time.Now().AddDate(0, 0, -1)))
+		filter.Dates = append(filter.Dates, NewDateFromTime(time.Now().AddDate(0, 0, -1)))
 	}
 	return filter
 }

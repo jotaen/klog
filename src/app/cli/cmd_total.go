@@ -5,12 +5,14 @@ import (
 	. "klog"
 	"klog/app"
 	"klog/service"
+	gotime "time"
 )
 
 type Total struct {
 	FilterArgs
 	DiffArg
 	WarnArgs
+	NowArgs
 	InputFilesArgs
 }
 
@@ -19,8 +21,9 @@ func (args *Total) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
+	now := gotime.Now()
 	records = service.Query(records, args.toFilter())
-	total := service.Total(records...)
+	total := args.NowArgs.total(now, records...)
 	ctx.Print(fmt.Sprintf("Total: %s\n", styler.Duration(total, false)))
 	if args.Diff {
 		should := service.ShouldTotalSum(records...)

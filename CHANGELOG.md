@@ -2,9 +2,11 @@
 
 ## v1.3
 - **[ BREAKING ]** Change structure of the bookmark subcommand
-  (This is to account for the increasing number of operations)
+  (This is in order to account for the increasing number of operations)
 - **[ FEATURE ]** Add subcommand `now` for displaying an ongoing total
   that takes open ranges into account (based on the time of execution)
+- **[ FEATURE ]** Add `--now` flag to `total` and `report` to take
+  open ranges into account optionally
 - **[ FEATURE ]** Add subcommand `bookmark edit` for opening a bookmarked
   file in your $EDITOR
 - **[ FEATURE ]** Allow to sort results in both directions
@@ -12,6 +14,7 @@
 - **[ FEATURE ]** Print warning when unclosed open ranges are detected
   in records before yesterday. (It’s probably always a mistake, if that occurs.)
   You can disable this check with the `--nowarn` flag.
+- **[ FEATURE ]** Support filtering for `tags` and `reports`
 - **[ FIX ]** Don’t demand `.klg` file extensions for bookmarks
 
 ## v1.2

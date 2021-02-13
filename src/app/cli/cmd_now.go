@@ -6,6 +6,9 @@ import (
 	. "klog"
 	"klog/app"
 	"klog/service"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -91,6 +94,16 @@ func (args *Now) Run(ctx app.Context) error {
 }
 
 func withRepeat(ctx app.Context, fn func() error) error {
+	// Handle ^C gracefully, as it’s the only way to exit
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		os.Exit(0)
+		return
+	}()
+
+	// Call handler function repetitively
 	ctx.Print("\033[2J") // Initial screen clearing
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()

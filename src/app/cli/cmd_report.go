@@ -6,6 +6,7 @@ import (
 	"klog/app"
 	"klog/service"
 	"strings"
+	gotime "time"
 )
 
 type Report struct {
@@ -13,6 +14,7 @@ type Report struct {
 	FilterArgs
 	WarnArgs
 	Fill bool `name:"fill" help:"Show all consecutive days, even if there is no record"`
+	NowArgs
 	InputFilesArgs
 }
 
@@ -39,6 +41,7 @@ func (args *Report) Run(ctx app.Context) error {
 	if args.Fill {
 		dates = allDatesRange(records[0].Date(), records[len(records)-1].Date())
 	}
+	now := gotime.Now()
 	for _, date := range dates {
 		year := func() string {
 			if date.Year() != y {
@@ -65,7 +68,7 @@ func (args *Report) Run(ctx app.Context) error {
 			ctx.Print("\n")
 			continue
 		}
-		total := service.Total(rs...)
+		total := args.NowArgs.total(now, rs...)
 		ctx.Print(pad(7-len(total.ToString())) + styler.Duration(total, false))
 
 		if args.Diff {
@@ -82,7 +85,7 @@ func (args *Report) Run(ctx app.Context) error {
 		ctx.Print(strings.Repeat("=", 19))
 	}
 	ctx.Print("\n")
-	grandTotal := service.Total(records...)
+	grandTotal := args.NowArgs.total(now, records...)
 	ctx.Print(indentation + pad(9-len(grandTotal.ToStringWithSign())) + styler.Duration(grandTotal, true))
 	if args.Diff {
 		grandShould := service.ShouldTotalSum(records...)
