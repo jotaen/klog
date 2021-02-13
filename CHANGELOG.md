@@ -3,6 +3,8 @@
 ## v1.3
 - **[ BREAKING ]** Change structure of the bookmark subcommand
   (This is to account for the increasing number of operations)
+- **[ FEATURE ]** Add subcommand `now` for displaying an ongoing total
+  that takes open ranges into account (based on the time of execution)
 - **[ FEATURE ]** Add subcommand `bookmark edit` for opening a bookmarked
   file in your $EDITOR
 - **[ FEATURE ]** Allow to sort results in both directions

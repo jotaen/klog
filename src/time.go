@@ -135,7 +135,7 @@ func (t *time) IsAfterOrEqual(otherTime Time) bool {
 func (t *time) Add(d Duration) (Time, error) {
 	ONE_DAY := 24 * 60
 	mins := t.MidnightOffset().Plus(d).InMinutes()
-	if mins > 2*ONE_DAY || mins < ONE_DAY*-1 {
+	if mins >= 2*ONE_DAY || mins < ONE_DAY*-1 {
 		return nil, errors.New("IMPOSSIBLE_OPERATION")
 	}
 	dayShift := 0
