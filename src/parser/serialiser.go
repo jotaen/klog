@@ -48,6 +48,7 @@ type Serialiser struct {
 	Range       func(klog.Range) string
 	OpenRange   func(klog.OpenRange) string
 	Duration    func(klog.Duration, bool) string
+	Time        func(klog.Time) string
 }
 
 var defaultSerialiser = Serialiser{
@@ -57,4 +58,5 @@ var defaultSerialiser = Serialiser{
 	Range:       func(r klog.Range) string { return r.ToString() },
 	OpenRange:   func(or klog.OpenRange) string { return or.ToString() },
 	Duration:    func(d klog.Duration, _ bool) string { return d.ToString() },
+	Time:        func(t klog.Time) string { return t.ToString() },
 }

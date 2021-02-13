@@ -3,7 +3,7 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"klog"
+	. "klog"
 	"klog/app"
 	. "klog/lib/jotaen/tf"
 	"klog/parser"
@@ -13,28 +13,28 @@ import (
 )
 
 var styler = parser.Serialiser{
-	Date: func(d klog.Date) string {
+	Date: func(d Date) string {
 		return Style{Color: "015", IsUnderlined: true}.Format(d.ToString())
 	},
-	ShouldTotal: func(d klog.Duration) string {
+	ShouldTotal: func(d Duration) string {
 		return Style{Color: "213"}.Format(d.ToString())
 	},
-	Summary: func(s klog.Summary) string {
+	Summary: func(s Summary) string {
 		txt := s.ToString()
 		style := Style{Color: "249"}
 		hashStyle := style.ChangedBold(true).ChangedColor("251")
-		txt = klog.HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
+		txt = HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
 			return hashStyle.FormatAndRestore(h, style)
 		})
 		return style.Format(txt)
 	},
-	Range: func(r klog.Range) string {
+	Range: func(r Range) string {
 		return Style{Color: "117"}.Format(r.ToString())
 	},
-	OpenRange: func(or klog.OpenRange) string {
+	OpenRange: func(or OpenRange) string {
 		return Style{Color: "027"}.Format(or.ToString())
 	},
-	Duration: func(d klog.Duration, forceSign bool) string {
+	Duration: func(d Duration, forceSign bool) string {
 		f := Style{Color: "120"}
 		if d.InMinutes() < 0 {
 			f.Color = "167"
@@ -43,6 +43,9 @@ var styler = parser.Serialiser{
 			return f.Format(d.ToStringWithSign())
 		}
 		return f.Format(d.ToString())
+	},
+	Time: func(t Time) string {
+		return Style{Color: "027"}.Format(t.ToString())
 	},
 }
 

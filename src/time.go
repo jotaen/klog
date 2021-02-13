@@ -18,6 +18,7 @@ type Time interface {
 	IsToday() bool
 	IsEqualTo(Time) bool
 	IsAfterOrEqual(Time) bool
+	Add(Duration) (Time, error)
 	ToString() string
 }
 
@@ -129,6 +130,29 @@ func (t *time) IsAfterOrEqual(otherTime Time) bool {
 	first := t.MidnightOffset()
 	second := otherTime.MidnightOffset()
 	return first.InMinutes() >= second.InMinutes()
+}
+
+func (t *time) Add(d Duration) (Time, error) {
+	ONE_DAY := 24 * 60
+	mins := t.MidnightOffset().Plus(d).InMinutes()
+	if mins > 2*ONE_DAY || mins < ONE_DAY*-1 {
+		return nil, errors.New("IMPOSSIBLE_OPERATION")
+	}
+	dayShift := 0
+	if mins < 0 {
+		dayShift = -1
+		mins = ONE_DAY + mins
+	} else if mins > ONE_DAY {
+		dayShift = 1
+		mins = mins - ONE_DAY
+	}
+	result := &time{
+		hour:          mins / 60,
+		minute:        mins % 60,
+		dayShift:      dayShift,
+		is24HourClock: t.is24HourClock,
+	}
+	return result, nil
 }
 
 func (t *time) ToString() string {

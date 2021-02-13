@@ -14,6 +14,7 @@ type cli struct {
 	Total  Total  `cmd group:"Evaluate" help:"Evaluate the total time"`
 	Report Report `cmd group:"Evaluate" help:"Print a calendar report summarising all days"`
 	Tags   Tags   `cmd group:"Evaluate" help:"Print total times aggregated by tags"`
+	Now    Now    `cmd group:"Evaluate" help:"Evaluate today’s record (including potential open ranges)"`
 
 	Append Append `cmd group:"Manipulate" hidden help:"Appends a new record to a file (based on templates)"`
 

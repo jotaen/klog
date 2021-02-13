@@ -147,13 +147,51 @@ func TestCalculateMinutesSinceMidnight(t *testing.T) {
 }
 
 func TestTimeComparison(t *testing.T) {
-	today1, _ := NewTime(12, 30)
-	today2, _ := NewTime(12, 31)
-	yesterday, _ := NewTimeYesterday(22, 43)
-	tomorrow, _ := NewTimeTomorrow(9, 50)
+	today1 := Ɀ_Time_(12, 30)
+	today2 := Ɀ_Time_(12, 31)
+	yesterday := Ɀ_TimeYesterday_(22, 43)
+	tomorrow := Ɀ_TimeTomorrow_(9, 50)
 
 	assert.True(t, today1.IsAfterOrEqual(today1))
 	assert.True(t, today2.IsAfterOrEqual(today1))
 	assert.True(t, today1.IsAfterOrEqual(yesterday))
 	assert.True(t, tomorrow.IsAfterOrEqual(today1))
+}
+
+func TestAddDuration(t *testing.T) {
+	for _, x := range []struct {
+		initial   Time
+		increment Duration
+		expect    Time
+	}{
+		{Ɀ_Time_(11, 30), NewDuration(0, 30), Ɀ_Time_(12, 00)},
+		{Ɀ_Time_(18, 00), NewDuration(-6, 0), Ɀ_Time_(12, 00)},
+		{Ɀ_Time_(3, 59), NewDuration(8, 1), Ɀ_Time_(12, 00)},
+		{Ɀ_TimeYesterday_(23, 45), NewDuration(12, 15), Ɀ_Time_(12, 00)},
+		{Ɀ_TimeYesterday_(12, 12), NewDuration(1, 19), Ɀ_TimeYesterday_(13, 31)},
+		{Ɀ_TimeYesterday_(0, 1), NewDuration(0, -1), Ɀ_TimeYesterday_(0, 0)},
+		{Ɀ_TimeTomorrow_(4, 12), NewDuration(-16, -12), Ɀ_Time_(12, 00)},
+		{Ɀ_TimeTomorrow_(18, 38), NewDuration(-1, -1), Ɀ_TimeTomorrow_(17, 37)},
+		{Ɀ_TimeTomorrow_(23, 58), NewDuration(0, 1), Ɀ_TimeTomorrow_(23, 59)},
+	} {
+		result, err := x.initial.Add(x.increment)
+		require.Nil(t, err)
+		assert.Equal(t, x.expect, result, x.initial)
+	}
+}
+
+func TestAddDurationImpossible(t *testing.T) {
+	for _, x := range []struct {
+		initial   Time
+		increment Duration
+	}{
+		{Ɀ_Time_(11, 30), NewDuration(353, 0)},
+		{Ɀ_Time_(11, 30), NewDuration(-353, 0)},
+		{Ɀ_TimeYesterday_(0, 0), NewDuration(0, -1)},
+		{Ɀ_TimeTomorrow_(23, 59), NewDuration(0, 1)},
+	} {
+		result, err := x.initial.Add(x.increment)
+		require.Nil(t, result)
+		assert.Error(t, err)
+	}
 }
