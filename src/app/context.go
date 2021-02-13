@@ -151,12 +151,6 @@ func (c *context) SetBookmark(path string) Error {
 			"Please check the file path",
 		}
 	}
-	if !strings.HasSuffix(bookmark, ".klg") {
-		return appError{
-			"Invalid file extension",
-			"File name must have .klg extension",
-		}
-	}
 	klogFolder := c.KlogFolder()
 	err = os.MkdirAll(klogFolder, 0700)
 	if err != nil {
