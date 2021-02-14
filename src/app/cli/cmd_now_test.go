@@ -27,7 +27,10 @@ func TestPrintsTodaysEvalutaion(t *testing.T) {
 	12h5m
 
 1999-03-14
-	4h
+	1h
+
+1999-03-14
+	3h
 	13:15 - ?
 `)._Run((&Now{}).Run)
 	require.Nil(t, err)

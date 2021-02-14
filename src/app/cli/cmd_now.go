@@ -25,20 +25,20 @@ func (opt *Now) Run(ctx app.Context) error {
 		if err != nil {
 			return err
 		}
-		recent, err := getTodayOrYesterday(ctx.Now(), records)
+		recents, err := getTodayOrYesterday(ctx.Now(), records)
 		if err != nil {
 			ctx.Print(err.Error())
 			return nil
 		}
 		// Headline:
 		label := "     Today"
-		if !recent.Date().IsEqualTo(NewDateFromTime(ctx.Now())) {
+		if !recents[0].Date().IsEqualTo(NewDateFromTime(ctx.Now())) {
 			label = " Yesterday"
 		}
 		ctx.Print("       " + label + "    " + "Overall\n")
 		// Total:
 		ctx.Print("Total  ")
-		total, _ := service.HypotheticalTotal(ctx.Now(), recent)
+		total, _ := service.HypotheticalTotal(ctx.Now(), recents...)
 		grandTotal, _ := service.HypotheticalTotal(ctx.Now(), records...)
 		ctx.Print(pad(10-len(total.ToString())) + styler.Duration(total, false))
 		ctx.Print(pad(11-len(grandTotal.ToString())) + styler.Duration(grandTotal, false))
@@ -46,7 +46,7 @@ func (opt *Now) Run(ctx app.Context) error {
 		if opt.Diff {
 			// Should:
 			ctx.Print("Should  ")
-			shouldTotal := service.ShouldTotalSum(recent)
+			shouldTotal := service.ShouldTotalSum(recents...)
 			grandShouldTotal := service.ShouldTotalSum(records...)
 			ctx.Print(pad(9-len(shouldTotal.ToString())) + styler.ShouldTotal(shouldTotal))
 			ctx.Print(pad(11-len(grandShouldTotal.ToString())) + styler.ShouldTotal(grandShouldTotal))
@@ -83,15 +83,17 @@ func (opt *Now) Run(ctx app.Context) error {
 	return handle()
 }
 
-func getTodayOrYesterday(now gotime.Time, records []Record) (Record, error) {
-	rs := service.Filter(records, service.FilterQry{
-		Dates: []Date{NewDateFromTime(now), NewDateFromTime(now).PlusDays(-1)},
-	})
-	rs = service.Sort(rs, false)
-	if len(rs) == 0 {
-		return nil, errors.New("No record found for today\n")
+func getTodayOrYesterday(now gotime.Time, records []Record) ([]Record, error) {
+	rs := service.Sort(records, false)
+	for i := 0; i <= 1; i++ {
+		rs = service.Filter(records, service.FilterQry{
+			Dates: []Date{NewDateFromTime(now).PlusDays(-i)},
+		})
+		if len(rs) > 0 {
+			return rs, nil
+		}
 	}
-	return rs[0], nil
+	return nil, errors.New("No record found for today\n")
 }
 
 func withRepeat(ctx app.Context, fn func() error) error {

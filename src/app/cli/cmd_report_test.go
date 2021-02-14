@@ -41,7 +41,7 @@ func TestReportOfRecords(t *testing.T) {
 
 2021-01-19
 	5m
-`)._Run((&Report{}).Run)
+`)._SetNow(2021, 3, 4, 0, 0)._Run((&Report{}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
                        Total

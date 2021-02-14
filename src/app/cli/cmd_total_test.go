@@ -23,7 +23,7 @@ func TestTotalOfInput(t *testing.T) {
 2150-11-10
 Open ranges are not considered
 	16:00 - ?
-`)._Run((&Total{}).Run)
+`)._Run((&Total{WarnArgs: WarnArgs{NoWarn: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, "\nTotal: 2h\n(In 3 records)\n", out)
 }
