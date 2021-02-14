@@ -11,7 +11,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
-	"time"
+	gotime "time"
 )
 
 var BinaryVersion string   // will be set during build
@@ -26,6 +26,7 @@ type Context interface {
 		BuildHash string
 	}
 	RetrieveRecords(...string) ([]klog.Record, error)
+	Now() gotime.Time
 	SetBookmark(string) Error
 	Bookmark() (*File, Error)
 	OpenInFileBrowser(string) Error
@@ -35,11 +36,13 @@ type Context interface {
 
 type context struct {
 	homeDir string
+	now     gotime.Time
 }
 
 func NewContext(homeDir string) (Context, error) {
 	return &context{
 		homeDir: homeDir,
+		now:     gotime.Now(),
 	}, nil
 }
 
@@ -113,6 +116,10 @@ func (c *context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
 		records = append(records, rs...)
 	}
 	return records, nil
+}
+
+func (c *context) Now() gotime.Time {
+	return c.now
 }
 
 type File struct {
@@ -214,7 +221,7 @@ func (c *context) AppendTemplateToFile(filePath string, templateName string) Err
 			"There is no template at location " + location,
 		}
 	}
-	instance, tErr := service.RenderTemplate(template, time.Now())
+	instance, tErr := service.RenderTemplate(template, c.now)
 	if tErr != nil {
 		return appError{
 			"Invalid template",

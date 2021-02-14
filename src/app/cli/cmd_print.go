@@ -20,10 +20,10 @@ func (opt *Print) Run(ctx app.Context) error {
 	if len(records) == 0 {
 		return nil
 	}
-	records = opt.filter(records)
+	records = opt.filter(ctx.Now(), records)
 	records = opt.sort(records)
 	ctx.Print("\n" + parser.SerialiseRecords(&styler, records...) + "\n")
 
-	ctx.Print(opt.WarnArgs.ToString(records))
+	ctx.Print(opt.WarnArgs.ToString(ctx.Now(), records))
 	return nil
 }

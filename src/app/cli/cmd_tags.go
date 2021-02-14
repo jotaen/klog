@@ -19,7 +19,7 @@ func (opt *Tags) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
-	records = opt.filter(records)
+	records = opt.filter(ctx.Now(), records)
 	entriesByTag, _ := service.EntryTagLookup(records...)
 	tagsOrdered, maxLength := sortTags(entriesByTag)
 	for _, t := range tagsOrdered {
@@ -30,7 +30,7 @@ func (opt *Tags) Run(ctx app.Context) error {
 		ctx.Print("\n")
 	}
 
-	ctx.Print(opt.WarnArgs.ToString(records))
+	ctx.Print(opt.WarnArgs.ToString(ctx.Now(), records))
 	return nil
 }
 

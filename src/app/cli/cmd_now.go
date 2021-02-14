@@ -9,7 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
+	gotime "time"
 )
 
 type Now struct {
@@ -25,31 +25,21 @@ func (opt *Now) Run(ctx app.Context) error {
 		if err != nil {
 			return err
 		}
-		now := time.Now()
-		recent, err := func() (Record, error) {
-			rs := service.Filter(records, service.FilterQry{
-				Dates: []Date{NewDateFromTime(now), NewDateFromTime(now).PlusDays(-1)},
-			})
-			rs = service.Sort(rs, false)
-			if len(rs) == 0 {
-				return nil, errors.New("No record found for today\n")
-			}
-			return rs[0], nil
-		}()
+		recent, err := getTodayOrYesterday(ctx.Now(), records)
 		if err != nil {
-			ctx.Print("Error: " + err.Error())
+			ctx.Print(err.Error())
 			return nil
 		}
 		// Headline:
 		label := "     Today"
-		if !recent.Date().IsEqualTo(NewDateFromTime(now)) {
+		if !recent.Date().IsEqualTo(NewDateFromTime(ctx.Now())) {
 			label = " Yesterday"
 		}
 		ctx.Print("       " + label + "    " + "Overall\n")
 		// Total:
 		ctx.Print("Total  ")
-		total, _ := service.HypotheticalTotal(now, recent)
-		grandTotal, _ := service.HypotheticalTotal(now, records...)
+		total, _ := service.HypotheticalTotal(ctx.Now(), recent)
+		grandTotal, _ := service.HypotheticalTotal(ctx.Now(), records...)
 		ctx.Print(pad(10-len(total.ToString())) + styler.Duration(total, false))
 		ctx.Print(pad(11-len(grandTotal.ToString())) + styler.Duration(grandTotal, false))
 		ctx.Print("\n")
@@ -70,13 +60,13 @@ func (opt *Now) Run(ctx app.Context) error {
 			ctx.Print("\n")
 			// ETA:
 			ctx.Print("E.T.A.  ")
-			eta, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(diff))
+			eta, _ := NewTimeFromTime(ctx.Now()).Add(NewDuration(0, 0).Minus(diff))
 			if eta != nil {
 				ctx.Print(pad(9-len(eta.ToString())) + styler.Time(eta))
 			} else {
 				ctx.Print(pad(9-3) + "???")
 			}
-			grandEta, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(grandDiff))
+			grandEta, _ := NewTimeFromTime(ctx.Now()).Add(NewDuration(0, 0).Minus(grandDiff))
 			if grandEta != nil {
 				ctx.Print(pad(11-len(grandEta.ToString())) + styler.Time(grandEta))
 			} else {
@@ -84,13 +74,24 @@ func (opt *Now) Run(ctx app.Context) error {
 			}
 			ctx.Print("\n")
 		}
-		ctx.Print(opt.WarnArgs.ToString(records))
+		ctx.Print(opt.WarnArgs.ToString(ctx.Now(), records))
 		return nil
 	}
 	if opt.Follow {
 		return withRepeat(ctx, handle)
 	}
 	return handle()
+}
+
+func getTodayOrYesterday(now gotime.Time, records []Record) (Record, error) {
+	rs := service.Filter(records, service.FilterQry{
+		Dates: []Date{NewDateFromTime(now), NewDateFromTime(now).PlusDays(-1)},
+	})
+	rs = service.Sort(rs, false)
+	if len(rs) == 0 {
+		return nil, errors.New("No record found for today\n")
+	}
+	return rs[0], nil
 }
 
 func withRepeat(ctx app.Context, fn func() error) error {
@@ -105,7 +106,7 @@ func withRepeat(ctx app.Context, fn func() error) error {
 
 	// Call handler function repetitively
 	ctx.Print("\033[2J") // Initial screen clearing
-	ticker := time.NewTicker(1 * time.Second)
+	ticker := gotime.NewTicker(1 * gotime.Second)
 	defer ticker.Stop()
 	for ; true; <-ticker.C {
 		ctx.Print(fmt.Sprintf("\033[H\033[J")) // Cursor reset

@@ -6,7 +6,6 @@ import (
 	"klog/app"
 	"klog/lib/caseymrm/menuet"
 	"klog/service"
-	"time"
 )
 
 var blinker = blinkerT{1}
@@ -66,10 +65,9 @@ func render(ctx app.Context, agent *launchAgent) []menuet.MenuItem {
 func renderRecords(ctx app.Context, records []klog.Record, file *app.File) []menuet.MenuItem {
 	var items []menuet.MenuItem
 
-	now := time.Now()
-	today := service.Filter(records, service.FilterQry{Dates: []klog.Date{klog.NewDateFromTime(now)}})
+	today := service.Filter(records, service.FilterQry{Dates: []klog.Date{klog.NewDateFromTime(ctx.Now())}})
 	if today != nil {
-		total, isOngoing := service.HypotheticalTotal(now, today...)
+		total, isOngoing := service.HypotheticalTotal(ctx.Now(), today...)
 		indicator := ""
 		if isOngoing {
 			indicator = "  " + blinker.blink()

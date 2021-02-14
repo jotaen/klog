@@ -3,14 +3,14 @@ package cli
 import (
 	. "klog"
 	"klog/service"
-	"time"
+	gotime "time"
 )
 
 type InputFilesArgs struct {
 	File []string `arg optional type:"existingfile" name:"file" help:".klg source file(s) (if empty the bookmark is used)"`
 }
 
-func (args *FilterArgs) filter(rs []Record) []Record {
+func (args *FilterArgs) filter(now gotime.Time, rs []Record) []Record {
 	qry := service.FilterQry{
 		BeforeEq: args.BeforeEq,
 		AfterEq:  args.AfterEq,
@@ -18,10 +18,10 @@ func (args *FilterArgs) filter(rs []Record) []Record {
 		Dates:    args.Date,
 	}
 	if args.Today {
-		qry.Dates = append(qry.Dates, NewDateFromTime(time.Now()))
+		qry.Dates = append(qry.Dates, NewDateFromTime(now))
 	}
 	if args.Yesterday {
-		qry.Dates = append(qry.Dates, NewDateFromTime(time.Now().AddDate(0, 0, -1)))
+		qry.Dates = append(qry.Dates, NewDateFromTime(now.AddDate(0, 0, -1)))
 	}
 	return service.Filter(rs, qry)
 }
@@ -34,7 +34,7 @@ type NowArgs struct {
 	Now bool `name:"now" short:"n" help:"Assume open ranges to be closed at this moment"`
 }
 
-func (args *NowArgs) total(reference time.Time, rs ...Record) Duration {
+func (args *NowArgs) total(reference gotime.Time, rs ...Record) Duration {
 	if args.Now {
 		d, _ := service.HypotheticalTotal(reference, rs...)
 		return d
@@ -55,11 +55,11 @@ type WarnArgs struct {
 	NoWarn bool `name:"no-warn" help:"Suppress warnings about potential mistakes"`
 }
 
-func (args *WarnArgs) ToString(records []Record) string {
+func (args *WarnArgs) ToString(now gotime.Time, records []Record) string {
 	if args.NoWarn {
 		return ""
 	}
-	ws := service.SanityCheck(time.Now(), records)
+	ws := service.SanityCheck(now, records)
 	return prettifyWarnings(ws)
 }
 

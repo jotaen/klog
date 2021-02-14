@@ -6,14 +6,13 @@ import (
 	"klog/app"
 	"klog/service"
 	"strings"
-	gotime "time"
 )
 
 type Report struct {
 	DiffArg
 	FilterArgs
 	WarnArgs
-	Fill bool `name:"fill" help:"Show all consecutive days, even if there is no record"`
+	Fill bool `name:"fill" short:"f" help:"Show all consecutive days, even if there is no record"`
 	NowArgs
 	InputFilesArgs
 }
@@ -26,7 +25,7 @@ func (opt *Report) Run(ctx app.Context) error {
 	if len(records) == 0 {
 		return nil
 	}
-	records = opt.filter(records)
+	records = opt.filter(ctx.Now(), records)
 	indentation := strings.Repeat(" ", len("2020 Dec   Wed 30. "))
 	records = service.Sort(records, true)
 	ctx.Print(indentation + "    Total")
@@ -40,7 +39,6 @@ func (opt *Report) Run(ctx app.Context) error {
 	if opt.Fill {
 		dates = allDatesRange(records[0].Date(), records[len(records)-1].Date())
 	}
-	now := gotime.Now()
 	for _, date := range dates {
 		year := func() string {
 			if date.Year() != y {
@@ -67,7 +65,7 @@ func (opt *Report) Run(ctx app.Context) error {
 			ctx.Print("\n")
 			continue
 		}
-		total := opt.NowArgs.total(now, rs...)
+		total := opt.NowArgs.total(ctx.Now(), rs...)
 		ctx.Print(pad(7-len(total.ToString())) + styler.Duration(total, false))
 
 		if opt.Diff {
@@ -84,7 +82,7 @@ func (opt *Report) Run(ctx app.Context) error {
 		ctx.Print(strings.Repeat("=", 19))
 	}
 	ctx.Print("\n")
-	grandTotal := opt.NowArgs.total(now, records...)
+	grandTotal := opt.NowArgs.total(ctx.Now(), records...)
 	ctx.Print(indentation + pad(9-len(grandTotal.ToStringWithSign())) + styler.Duration(grandTotal, true))
 	if opt.Diff {
 		grandShould := service.ShouldTotalSum(records...)
@@ -94,7 +92,7 @@ func (opt *Report) Run(ctx app.Context) error {
 	}
 	ctx.Print("\n")
 
-	ctx.Print(opt.WarnArgs.ToString(records))
+	ctx.Print(opt.WarnArgs.ToString(ctx.Now(), records))
 	return nil
 }
 

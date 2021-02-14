@@ -7,7 +7,7 @@ import (
 )
 
 func TestReportOfEmptyInput(t *testing.T) {
-	out, err := RunWithContext(``, (&Report{}).Run)
+	out, err := NewTestingContext()._SetRecords(``)._Run((&Report{}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, "", out)
 }
@@ -20,7 +20,7 @@ func TestReportOfRecords(t *testing.T) {
 		- Not repeating year or month label
 		- Weekdays
 	*/
-	out, err := RunWithContext(`
+	out, err := NewTestingContext()._SetRecords(`
 2021-01-17
 	332h
 
@@ -41,7 +41,7 @@ func TestReportOfRecords(t *testing.T) {
 
 2021-01-19
 	5m
-`, (&Report{}).Run)
+`)._Run((&Report{}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
                        Total
@@ -57,7 +57,7 @@ func TestReportOfRecords(t *testing.T) {
 }
 
 func TestReportConsecutive(t *testing.T) {
-	out, err := RunWithContext(`
+	out, err := NewTestingContext()._SetRecords(`
 2020-09-29
 	1h
 
@@ -65,7 +65,7 @@ func TestReportConsecutive(t *testing.T) {
 	3h
 
 2020-10-02
-`, (&Report{Fill: true}).Run)
+`)._Run((&Report{Fill: true}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
                        Total
@@ -81,7 +81,7 @@ func TestReportConsecutive(t *testing.T) {
 }
 
 func TestReportWithDiff(t *testing.T) {
-	out, err := RunWithContext(`
+	out, err := NewTestingContext()._SetRecords(`
 2018-07-07 (8h!)
 	8h
 
@@ -92,7 +92,7 @@ func TestReportWithDiff(t *testing.T) {
 	5h20m
 
 2018-07-09 (19m!)
-`, (&Report{DiffArg: DiffArg{Diff: true}}).Run)
+`)._Run((&Report{DiffArg: DiffArg{Diff: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
                        Total    Should     Diff

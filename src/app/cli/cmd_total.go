@@ -5,7 +5,6 @@ import (
 	. "klog"
 	"klog/app"
 	"klog/service"
-	gotime "time"
 )
 
 type Total struct {
@@ -21,9 +20,8 @@ func (opt *Total) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
-	now := gotime.Now()
-	records = opt.filter(records)
-	total := opt.NowArgs.total(now, records...)
+	records = opt.filter(ctx.Now(), records)
+	total := opt.NowArgs.total(ctx.Now(), records...)
 	ctx.Print(fmt.Sprintf("Total: %s\n", styler.Duration(total, false)))
 	if opt.Diff {
 		should := service.ShouldTotalSum(records...)
@@ -38,6 +36,6 @@ func (opt *Total) Run(ctx app.Context) error {
 		return "s"
 	}()))
 
-	ctx.Print(opt.WarnArgs.ToString(records))
+	ctx.Print(opt.WarnArgs.ToString(ctx.Now(), records))
 	return nil
 }
