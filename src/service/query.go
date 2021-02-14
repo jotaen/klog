@@ -5,15 +5,14 @@ import (
 	gosort "sort"
 )
 
-type Opts struct {
+type FilterQry struct {
 	Tags     []string
 	BeforeEq Date
 	AfterEq  Date
 	Dates    []Date
-	Sort     string // "ASC", "DESC" or "" (= don’t sort)
 }
 
-func Query(rs []Record, o Opts) []Record {
+func Filter(rs []Record, o FilterQry) []Record {
 	tags := NewTagSet(o.Tags...)
 	dates := newDateSet(o.Dates)
 	var records []Record
@@ -36,17 +35,10 @@ func Query(rs []Record, o Opts) []Record {
 		}
 		records = append(records, r)
 	}
-	if o.Sort != "" {
-		startWithOldest := false
-		if o.Sort == "ASC" {
-			startWithOldest = true
-		}
-		records = sort(records, startWithOldest)
-	}
 	return records
 }
 
-func sort(rs []Record, startWithOldest bool) []Record {
+func Sort(rs []Record, startWithOldest bool) []Record {
 	sorted := append([]Record(nil), rs...)
 	gosort.Slice(sorted, func(i, j int) bool {
 		isLess := sorted[j].Date().IsAfterOrEqual(sorted[i].Date())

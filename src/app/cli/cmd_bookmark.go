@@ -12,7 +12,7 @@ type Bookmark struct {
 
 type BookmarkGet struct{}
 
-func (args *BookmarkGet) Run(ctx app.Context) error {
+func (opt *BookmarkGet) Run(ctx app.Context) error {
 	b, err := ctx.Bookmark()
 	if err != nil {
 		return err

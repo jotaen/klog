@@ -19,18 +19,18 @@ type Now struct {
 	InputFilesArgs
 }
 
-func (args *Now) Run(ctx app.Context) error {
+func (opt *Now) Run(ctx app.Context) error {
 	handle := func() error {
-		records, err := ctx.RetrieveRecords(args.File...)
+		records, err := ctx.RetrieveRecords(opt.File...)
 		if err != nil {
 			return err
 		}
 		now := time.Now()
 		recent, err := func() (Record, error) {
-			rs := service.Query(records, service.Opts{
+			rs := service.Filter(records, service.FilterQry{
 				Dates: []Date{NewDateFromTime(now), NewDateFromTime(now).PlusDays(-1)},
-				Sort:  "DESC",
 			})
+			rs = service.Sort(rs, false)
 			if len(rs) == 0 {
 				return nil, errors.New("No record found for today\n")
 			}
@@ -53,7 +53,7 @@ func (args *Now) Run(ctx app.Context) error {
 		ctx.Print(pad(10-len(total.ToString())) + styler.Duration(total, false))
 		ctx.Print(pad(11-len(grandTotal.ToString())) + styler.Duration(grandTotal, false))
 		ctx.Print("\n")
-		if args.Diff {
+		if opt.Diff {
 			// Should:
 			ctx.Print("Should  ")
 			shouldTotal := service.ShouldTotalSum(recent)
@@ -84,10 +84,10 @@ func (args *Now) Run(ctx app.Context) error {
 			}
 			ctx.Print("\n")
 		}
-		args.printWarnings(ctx, records)
+		ctx.Print(opt.WarnArgs.ToString(records))
 		return nil
 	}
-	if args.Follow {
+	if opt.Follow {
 		return withRepeat(ctx, handle)
 	}
 	return handle()

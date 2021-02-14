@@ -9,8 +9,8 @@ type Append struct {
 	From string `required name:"from" help:"The name of the template to instantiate"`
 }
 
-func (args *Append) Run(ctx app.Context) error {
-	target := args.File
+func (opt *Append) Run(ctx app.Context) error {
+	target := opt.File
 	if target == "" {
 		b, err := ctx.Bookmark()
 		if err != nil {
@@ -18,5 +18,5 @@ func (args *Append) Run(ctx app.Context) error {
 		}
 		target = b.Path
 	}
-	return ctx.AppendTemplateToFile(target, args.From)
+	return ctx.AppendTemplateToFile(target, opt.From)
 }

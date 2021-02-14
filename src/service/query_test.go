@@ -40,13 +40,13 @@ func sampleRecordsForQuerying() []Record {
 }
 
 func TestQueryWithNoClauses(t *testing.T) {
-	rs := Query(sampleRecordsForQuerying(), Opts{})
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{})
 	require.Len(t, rs, 5)
 	assert.Equal(t, NewDuration(5+6+7+8, -30+15), Total(rs...))
 }
 
 func TestQueryWithAfter(t *testing.T) {
-	rs := Query(sampleRecordsForQuerying(), Opts{AfterEq: Ɀ_Date_(2000, 1, 1)})
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{AfterEq: Ɀ_Date_(2000, 1, 1)})
 	require.Len(t, rs, 3)
 	assert.Equal(t, 1, rs[0].Date().Day())
 	assert.Equal(t, 2, rs[1].Date().Day())
@@ -54,7 +54,7 @@ func TestQueryWithAfter(t *testing.T) {
 }
 
 func TestQueryWithBefore(t *testing.T) {
-	rs := Query(sampleRecordsForQuerying(), Opts{BeforeEq: Ɀ_Date_(2000, 1, 1)})
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{BeforeEq: Ɀ_Date_(2000, 1, 1)})
 	require.Len(t, rs, 3)
 	assert.Equal(t, 30, rs[0].Date().Day())
 	assert.Equal(t, 31, rs[1].Date().Day())
@@ -62,7 +62,7 @@ func TestQueryWithBefore(t *testing.T) {
 }
 
 func TestQueryWithTagOnEntries(t *testing.T) {
-	rs := Query(sampleRecordsForQuerying(), Opts{Tags: []string{"bar"}})
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []string{"bar"}})
 	require.Len(t, rs, 3)
 	assert.Equal(t, 31, rs[0].Date().Day())
 	assert.Equal(t, 1, rs[1].Date().Day())
@@ -71,7 +71,7 @@ func TestQueryWithTagOnEntries(t *testing.T) {
 }
 
 func TestQueryWithTagOnOverallSummary(t *testing.T) {
-	rs := Query(sampleRecordsForQuerying(), Opts{Tags: []string{"foo"}})
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []string{"foo"}})
 	require.Len(t, rs, 4)
 	assert.Equal(t, 30, rs[0].Date().Day())
 	assert.Equal(t, 1, rs[1].Date().Day())
@@ -81,7 +81,7 @@ func TestQueryWithTagOnOverallSummary(t *testing.T) {
 }
 
 func TestQueryWithTagOnEntriesAndInSummary(t *testing.T) {
-	rs := Query(sampleRecordsForQuerying(), Opts{Tags: []string{"foo", "bar"}})
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []string{"foo", "bar"}})
 	require.Len(t, rs, 2)
 	assert.Equal(t, 1, rs[0].Date().Day())
 	assert.Equal(t, 3, rs[1].Date().Day())
@@ -95,10 +95,10 @@ func TestQueryWithSorting(t *testing.T) {
 		{[]Record{ss[3], ss[1], ss[2], ss[0], ss[4]}},
 		{[]Record{ss[1], ss[4], ss[0], ss[3], ss[2]}},
 	} {
-		ascending := Query(x.rs, Opts{Sort: "ASC"})
+		ascending := Sort(x.rs, true)
 		assert.Equal(t, []Record{ss[0], ss[1], ss[2], ss[3], ss[4]}, ascending)
 
-		descending := Query(x.rs, Opts{Sort: "DESC"})
+		descending := Sort(x.rs, false)
 		assert.Equal(t, []Record{ss[4], ss[3], ss[2], ss[1], ss[0]}, descending)
 	}
 }

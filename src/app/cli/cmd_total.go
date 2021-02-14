@@ -16,16 +16,16 @@ type Total struct {
 	InputFilesArgs
 }
 
-func (args *Total) Run(ctx app.Context) error {
-	records, err := ctx.RetrieveRecords(args.File...)
+func (opt *Total) Run(ctx app.Context) error {
+	records, err := ctx.RetrieveRecords(opt.File...)
 	if err != nil {
 		return err
 	}
 	now := gotime.Now()
-	records = service.Query(records, args.toFilter())
-	total := args.NowArgs.total(now, records...)
+	records = opt.filter(records)
+	total := opt.NowArgs.total(now, records...)
 	ctx.Print(fmt.Sprintf("Total: %s\n", styler.Duration(total, false)))
-	if args.Diff {
+	if opt.Diff {
 		should := service.ShouldTotalSum(records...)
 		diff := NewDuration(0, 0).Minus(should).Plus(total)
 		ctx.Print(fmt.Sprintf("Should: %s\n", styler.ShouldTotal(should)))
@@ -38,6 +38,6 @@ func (args *Total) Run(ctx app.Context) error {
 		return "s"
 	}()))
 
-	args.WarnArgs.printWarnings(ctx, records)
+	ctx.Print(opt.WarnArgs.ToString(records))
 	return nil
 }

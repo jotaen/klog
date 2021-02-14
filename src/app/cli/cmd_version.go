@@ -14,12 +14,12 @@ type Version struct {
 	NoCheck bool `name:"no-check" help:"Don’t check online for updates"` // used for the smoke test
 }
 
-func (args *Version) Run(ctx app.Context) error {
+func (opt *Version) Run(ctx app.Context) error {
 	ctx.Print("Command line tool: " + ctx.MetaInfo().Version)
 	ctx.Print("  [" + ctx.MetaInfo().BuildHash + "]\n")
 	ctx.Print("File format: version 1 (RFC)\n")
 
-	if args.NoCheck {
+	if opt.NoCheck {
 		return nil
 	}
 	ctx.Print(fmt.Sprintf("\nChecking for newer version...\n"))

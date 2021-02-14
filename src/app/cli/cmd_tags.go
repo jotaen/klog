@@ -14,13 +14,12 @@ type Tags struct {
 	InputFilesArgs
 }
 
-func (args *Tags) Run(ctx app.Context) error {
-	records, err := ctx.RetrieveRecords(args.File...)
+func (opt *Tags) Run(ctx app.Context) error {
+	records, err := ctx.RetrieveRecords(opt.File...)
 	if err != nil {
 		return err
 	}
-	opts := args.FilterArgs.toFilter()
-	records = service.Query(records, opts)
+	records = opt.filter(records)
 	entriesByTag, _ := service.EntryTagLookup(records...)
 	tagsOrdered, maxLength := sortTags(entriesByTag)
 	for _, t := range tagsOrdered {
@@ -31,7 +30,7 @@ func (args *Tags) Run(ctx app.Context) error {
 		ctx.Print("\n")
 	}
 
-	args.WarnArgs.printWarnings(ctx, records)
+	ctx.Print(opt.WarnArgs.ToString(records))
 	return nil
 }
 

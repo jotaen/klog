@@ -18,27 +18,26 @@ type Report struct {
 	InputFilesArgs
 }
 
-func (args *Report) Run(ctx app.Context) error {
-	records, err := ctx.RetrieveRecords(args.File...)
+func (opt *Report) Run(ctx app.Context) error {
+	records, err := ctx.RetrieveRecords(opt.File...)
 	if err != nil {
 		return err
 	}
 	if len(records) == 0 {
 		return nil
 	}
-	opts := args.FilterArgs.toFilter()
-	records = service.Query(records, opts)
+	records = opt.filter(records)
 	indentation := strings.Repeat(" ", len("2020 Dec   Wed 30. "))
-	records = service.Query(records, service.Opts{Sort: "ASC"})
+	records = service.Sort(records, true)
 	ctx.Print(indentation + "    Total")
-	if args.Diff {
+	if opt.Diff {
 		ctx.Print("    Should     Diff")
 	}
 	ctx.Print("\n")
 	y := -1
 	m := -1
 	recordGroups, dates := groupByDate(records)
-	if args.Fill {
+	if opt.Fill {
 		dates = allDatesRange(records[0].Date(), records[len(records)-1].Date())
 	}
 	now := gotime.Now()
@@ -68,10 +67,10 @@ func (args *Report) Run(ctx app.Context) error {
 			ctx.Print("\n")
 			continue
 		}
-		total := args.NowArgs.total(now, rs...)
+		total := opt.NowArgs.total(now, rs...)
 		ctx.Print(pad(7-len(total.ToString())) + styler.Duration(total, false))
 
-		if args.Diff {
+		if opt.Diff {
 			should := service.ShouldTotalSum(rs...)
 			ctx.Print(pad(10-len(should.ToString())) + styler.ShouldTotal(should))
 			diff := total.Minus(should)
@@ -81,13 +80,13 @@ func (args *Report) Run(ctx app.Context) error {
 		ctx.Print("\n")
 	}
 	ctx.Print(indentation + " " + strings.Repeat("=", 8))
-	if args.Diff {
+	if opt.Diff {
 		ctx.Print(strings.Repeat("=", 19))
 	}
 	ctx.Print("\n")
-	grandTotal := args.NowArgs.total(now, records...)
+	grandTotal := opt.NowArgs.total(now, records...)
 	ctx.Print(indentation + pad(9-len(grandTotal.ToStringWithSign())) + styler.Duration(grandTotal, true))
-	if args.Diff {
+	if opt.Diff {
 		grandShould := service.ShouldTotalSum(records...)
 		ctx.Print(pad(10-len(grandShould.ToString())) + styler.ShouldTotal(grandShould))
 		grandDiff := grandTotal.Minus(grandShould)
@@ -95,7 +94,7 @@ func (args *Report) Run(ctx app.Context) error {
 	}
 	ctx.Print("\n")
 
-	args.WarnArgs.printWarnings(ctx, records)
+	ctx.Print(opt.WarnArgs.ToString(records))
 	return nil
 }
 
