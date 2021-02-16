@@ -1,5 +1,8 @@
 # Changelog (command line tool)
 
+## v1.4
+-**[ FIX ]** Fix the ongoing time counter in the MacOS widget
+
 ## v1.3
 - **[ BREAKING ]** Change structure of the bookmark subcommand
   (This is in order to account for the increasing number of operations)
