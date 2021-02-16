@@ -36,13 +36,11 @@ type Context interface {
 
 type context struct {
 	homeDir string
-	now     gotime.Time
 }
 
 func NewContext(homeDir string) (Context, error) {
 	return &context{
 		homeDir: homeDir,
-		now:     gotime.Now(),
 	}, nil
 }
 
@@ -119,7 +117,7 @@ func (c *context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
 }
 
 func (c *context) Now() gotime.Time {
-	return c.now
+	return gotime.Now()
 }
 
 type File struct {
@@ -221,7 +219,7 @@ func (c *context) AppendTemplateToFile(filePath string, templateName string) Err
 			"There is no template at location " + location,
 		}
 	}
-	instance, tErr := service.RenderTemplate(template, c.now)
+	instance, tErr := service.RenderTemplate(template, c.Now())
 	if tErr != nil {
 		return appError{
 			"Invalid template",

@@ -20,26 +20,27 @@ type Now struct {
 }
 
 func (opt *Now) Run(ctx app.Context) error {
+	now := ctx.Now()
 	handle := func() error {
 		records, err := ctx.RetrieveRecords(opt.File...)
 		if err != nil {
 			return err
 		}
-		recents, err := getTodayOrYesterday(ctx.Now(), records)
+		recents, err := getTodayOrYesterday(now, records)
 		if err != nil {
 			ctx.Print(err.Error())
 			return nil
 		}
 		// Headline:
 		label := "     Today"
-		if !recents[0].Date().IsEqualTo(NewDateFromTime(ctx.Now())) {
+		if !recents[0].Date().IsEqualTo(NewDateFromTime(now)) {
 			label = " Yesterday"
 		}
 		ctx.Print("       " + label + "    " + "Overall\n")
 		// Total:
 		ctx.Print("Total  ")
-		total, _ := service.HypotheticalTotal(ctx.Now(), recents...)
-		grandTotal, _ := service.HypotheticalTotal(ctx.Now(), records...)
+		total, _ := service.HypotheticalTotal(now, recents...)
+		grandTotal, _ := service.HypotheticalTotal(now, records...)
 		ctx.Print(pad(10-len(total.ToString())) + styler.Duration(total, false))
 		ctx.Print(pad(11-len(grandTotal.ToString())) + styler.Duration(grandTotal, false))
 		ctx.Print("\n")
@@ -60,13 +61,13 @@ func (opt *Now) Run(ctx app.Context) error {
 			ctx.Print("\n")
 			// ETA:
 			ctx.Print("E.T.A.  ")
-			eta, _ := NewTimeFromTime(ctx.Now()).Add(NewDuration(0, 0).Minus(diff))
+			eta, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(diff))
 			if eta != nil {
 				ctx.Print(pad(9-len(eta.ToString())) + styler.Time(eta))
 			} else {
 				ctx.Print(pad(9-3) + "???")
 			}
-			grandEta, _ := NewTimeFromTime(ctx.Now()).Add(NewDuration(0, 0).Minus(grandDiff))
+			grandEta, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(grandDiff))
 			if grandEta != nil {
 				ctx.Print(pad(11-len(grandEta.ToString())) + styler.Time(grandEta))
 			} else {
@@ -74,7 +75,7 @@ func (opt *Now) Run(ctx app.Context) error {
 			}
 			ctx.Print("\n")
 		}
-		ctx.Print(opt.WarnArgs.ToString(ctx.Now(), records))
+		ctx.Print(opt.WarnArgs.ToString(now, records))
 		return nil
 	}
 	if opt.Follow {

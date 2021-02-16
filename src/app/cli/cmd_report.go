@@ -25,7 +25,8 @@ func (opt *Report) Run(ctx app.Context) error {
 	if len(records) == 0 {
 		return nil
 	}
-	records = opt.filter(ctx.Now(), records)
+	now := ctx.Now()
+	records = opt.filter(now, records)
 	indentation := strings.Repeat(" ", len("2020 Dec   Wed 30. "))
 	records = service.Sort(records, true)
 	ctx.Print(indentation + "    Total")
@@ -65,7 +66,7 @@ func (opt *Report) Run(ctx app.Context) error {
 			ctx.Print("\n")
 			continue
 		}
-		total := opt.NowArgs.total(ctx.Now(), rs...)
+		total := opt.NowArgs.total(now, rs...)
 		ctx.Print(pad(7-len(total.ToString())) + styler.Duration(total, false))
 
 		if opt.Diff {
@@ -82,7 +83,7 @@ func (opt *Report) Run(ctx app.Context) error {
 		ctx.Print(strings.Repeat("=", 19))
 	}
 	ctx.Print("\n")
-	grandTotal := opt.NowArgs.total(ctx.Now(), records...)
+	grandTotal := opt.NowArgs.total(now, records...)
 	ctx.Print(indentation + pad(9-len(grandTotal.ToStringWithSign())) + styler.Duration(grandTotal, true))
 	if opt.Diff {
 		grandShould := service.ShouldTotalSum(records...)
@@ -92,7 +93,7 @@ func (opt *Report) Run(ctx app.Context) error {
 	}
 	ctx.Print("\n")
 
-	ctx.Print(opt.WarnArgs.ToString(ctx.Now(), records))
+	ctx.Print(opt.WarnArgs.ToString(now, records))
 	return nil
 }
 

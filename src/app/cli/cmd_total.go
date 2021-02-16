@@ -20,8 +20,9 @@ func (opt *Total) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
-	records = opt.filter(ctx.Now(), records)
-	total := opt.NowArgs.total(ctx.Now(), records...)
+	now := ctx.Now()
+	records = opt.filter(now, records)
+	total := opt.NowArgs.total(now, records...)
 	ctx.Print(fmt.Sprintf("Total: %s\n", styler.Duration(total, false)))
 	if opt.Diff {
 		should := service.ShouldTotalSum(records...)
@@ -36,6 +37,6 @@ func (opt *Total) Run(ctx app.Context) error {
 		return "s"
 	}()))
 
-	ctx.Print(opt.WarnArgs.ToString(ctx.Now(), records))
+	ctx.Print(opt.WarnArgs.ToString(now, records))
 	return nil
 }
