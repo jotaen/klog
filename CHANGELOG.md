@@ -1,7 +1,10 @@
 # Changelog (command line tool)
 
+## v1.5
+- **[ FIX ]** Fix the ongoing time counter in `klog now --follow`
+
 ## v1.4
--**[ FIX ]** Fix the ongoing time counter in the MacOS widget
+- **[ FIX ]** Fix the ongoing time counter in the MacOS widget
 
 ## v1.3
 - **[ BREAKING ]** Change structure of the bookmark subcommand
