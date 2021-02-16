@@ -113,10 +113,15 @@ func withRepeat(ctx app.Context, fn func() error) error {
 	ctx.Print("\033[2J") // Initial screen clearing
 	ticker := gotime.NewTicker(1 * gotime.Second)
 	defer ticker.Stop()
+	i := 5 // seconds to display help text (how to exit)
 	for ; true; <-ticker.C {
 		ctx.Print(fmt.Sprintf("\033[H\033[J")) // Cursor reset
 		err := fn()
 		ctx.Print("\n")
+		if i > 0 {
+			ctx.Print("Press ^C to exit")
+			i--
+		}
 		if err != nil {
 			return err
 		}
