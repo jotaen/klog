@@ -12,6 +12,8 @@ type FilterQry struct {
 	Dates    []Date
 }
 
+// Filter returns all records the matches the query.
+// A matching record must satisfy *all* query clauses.
 func Filter(rs []Record, o FilterQry) []Record {
 	tags := NewTagSet(o.Tags...)
 	dates := newDateSet(o.Dates)
@@ -38,6 +40,7 @@ func Filter(rs []Record, o FilterQry) []Record {
 	return records
 }
 
+// Sort orders the records by date.
 func Sort(rs []Record, startWithOldest bool) []Record {
 	sorted := append([]Record(nil), rs...)
 	gosort.Slice(sorted, func(i, j int) bool {

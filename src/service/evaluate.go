@@ -5,11 +5,15 @@ import (
 	"time"
 )
 
+// Total calculates the overall time spent in records.
+// It disregards open ranges.
 func Total(rs ...Record) Duration {
 	total, _ := HypotheticalTotal(time.Time{}, rs...)
 	return total
 }
 
+// TotalEntries calculates the overall of entries.
+// It disregards open ranges.
 func TotalEntries(es ...Entry) Duration {
 	total := NewDuration(0, 0)
 	for _, e := range es {
@@ -18,6 +22,8 @@ func TotalEntries(es ...Entry) Duration {
 	return total
 }
 
+// HypotheticalTotal calculates the overall total time of records,
+// assuming all open ranges would be closed at the `until` time.
 func HypotheticalTotal(until time.Time, rs ...Record) (Duration, bool) {
 	total := NewDuration(0, 0)
 	isCurrent := false
@@ -49,6 +55,7 @@ func HypotheticalTotal(until time.Time, rs ...Record) (Duration, bool) {
 	return total, isCurrent
 }
 
+// ShouldTotalSum calculates the overall should total time of records.
 func ShouldTotalSum(rs ...Record) ShouldTotal {
 	total := NewDuration(0, 0)
 	for _, r := range rs {

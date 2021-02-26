@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Summary is arbitrary text that can be associated with a Record or an Entry.
 type Summary string
 
 func (s Summary) ToString() string {

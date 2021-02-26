@@ -5,11 +5,8 @@ import (
 	"regexp"
 )
 
-type ShouldTotal Duration
-type shouldTotal struct {
-	Duration
-}
-
+// Record is a standalone piece of data that holds the time tracking
+// information associated with a certain date.
 type Record interface {
 	Date() Date
 
@@ -32,6 +29,12 @@ func NewRecord(date Date) Record {
 	return &record{
 		date: date,
 	}
+}
+
+// ShouldTotal is the targeted total time of a Record.
+type ShouldTotal Duration
+type shouldTotal struct {
+	Duration
 }
 
 func NewShouldTotal(hours int, minutes int) ShouldTotal {

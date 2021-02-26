@@ -23,6 +23,8 @@ var blankTextPattern = regexp.MustCompile(
 	`^[  \t]*$`, // match space, non-breaking space, tab
 )
 
+// SplitIntoChunksOfLines splits up a text into paragraphs (at blank lines)
+// and the paragraphs into its individual lines.
 func SplitIntoChunksOfLines(text string) []Chunk {
 	var chunks []Chunk
 	var currentChunk Chunk

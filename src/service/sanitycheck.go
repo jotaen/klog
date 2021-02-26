@@ -14,6 +14,7 @@ type checker interface {
 	Warn(Record) *Warning
 }
 
+// SanityCheck checks records for potential user errors.
 func SanityCheck(reference gotime.Time, rs []Record) []Warning {
 	today := NewDateFromTime(reference)
 	sortedRs := Sort(rs, false)

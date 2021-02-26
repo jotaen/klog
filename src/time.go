@@ -9,6 +9,7 @@ import (
 	gotime "time"
 )
 
+// Time represents a wall clock time. It can be shifted to the adjacent dates.
 type Time interface {
 	Hour() int
 	Minute() int

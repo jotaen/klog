@@ -9,6 +9,7 @@ import (
 	gotime "time"
 )
 
+// Date represents a day in the gregorian calendar.
 type Date interface {
 	Year() int
 	Month() int

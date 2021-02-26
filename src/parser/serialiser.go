@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// SerialiseRecords serialises records into the canonical string representation.
 func SerialiseRecords(h *Serialiser, rs ...klog.Record) string {
 	var text []string
 	if h == nil {

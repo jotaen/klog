@@ -4,6 +4,7 @@ import (
 	"errors"
 )
 
+// Range is the period of time between two times.
 type Range interface {
 	Start() Time
 	End() Time

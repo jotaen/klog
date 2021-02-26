@@ -5,6 +5,7 @@ import (
 	. "klog/parser/engine"
 )
 
+// Parse parses a text with records into Record data structures.
 func Parse(recordsAsText string) ([]klog.Record, Errors) {
 	var records []klog.Record
 	var allErrs []Error

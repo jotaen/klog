@@ -1,5 +1,7 @@
 package klog
 
+// Entry is a time value and a summary.
+// A time value can be a Range, a Duration, or an OpenRange.
 type Entry struct {
 	value   interface{}
 	summary Summary

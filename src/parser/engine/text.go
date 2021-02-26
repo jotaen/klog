@@ -1,5 +1,6 @@
 package engine
 
+// Text is a single line of characters.
 type Text struct {
 	Value            []rune
 	PointerPosition  int
@@ -7,6 +8,7 @@ type Text struct {
 	IndentationLevel int
 }
 
+// Chunk is a paragraph of Text (i.e. a block of subsequent lines).
 type Chunk []Text
 
 var END_OF_TEXT int32 = -1

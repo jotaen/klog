@@ -9,6 +9,7 @@ import (
 
 type duration int
 
+// Duration represents a time span.
 type Duration interface {
 	InMinutes() int
 	Plus(Duration) Duration
