@@ -1,17 +1,18 @@
 package parser
 
 import (
-	"klog"
+	. "klog"
 	. "klog/parser/engine"
 )
 
 // Parse parses a text with records into Record data structures.
-func Parse(recordsAsText string) ([]klog.Record, Errors) {
-	var records []klog.Record
+func Parse(recordsAsText string) ([]Record, Errors) {
+	var records []Record
 	var allErrs []Error
-	cs := SplitIntoChunksOfLines(recordsAsText)
-	for _, c := range cs {
-		r, errs := parseRecord(c)
+	lines := Split(recordsAsText)
+	blocks := GroupIntoBlocks(lines)
+	for _, block := range blocks {
+		r, errs := parseRecord(block)
 		if len(errs) > 0 {
 			allErrs = append(allErrs, errs...)
 		}
@@ -23,24 +24,24 @@ func Parse(recordsAsText string) ([]klog.Record, Errors) {
 	return records, nil
 }
 
-func parseRecord(c Chunk) (klog.Record, []Error) {
+func parseRecord(block []Line) (Record, []Error) {
 	var errs []Error
 
 	// ========== HEADLINE ==========
-	r := func(headline Text) klog.Record {
+	record := func(headline Line) Record {
 		if headline.IndentationLevel != 0 {
 			errs = append(errs, ErrorIllegalIndentation(NewError(headline, 0, headline.Length())))
 			return nil
 		}
 		dateText, _ := headline.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
-		date, err := klog.NewDateFromString(dateText.ToString())
+		date, err := NewDateFromString(dateText.ToString())
 		if err != nil {
 			errs = append(errs, ErrorInvalidDate(NewError(headline, headline.PointerPosition, dateText.Length())))
 			return nil
 		}
 		headline.Advance(dateText.Length())
 		headline.SkipWhitespace()
-		r := klog.NewRecord(date)
+		r := NewRecord(date)
 		if headline.Peek() == '(' {
 			headline.Advance(1) // '('
 			headline.SkipWhitespace()
@@ -58,7 +59,7 @@ func parseRecord(c Chunk) (klog.Record, []Error) {
 				errs = append(errs, ErrorUnrecognisedProperty(NewError(headline, headline.PointerPosition, shouldTotalText.Length()-1)))
 				return r
 			}
-			shouldTotal, err := klog.NewDurationFromString(shouldTotalText.ToString())
+			shouldTotal, err := NewDurationFromString(shouldTotalText.ToString())
 			if err != nil {
 				errs = append(errs, ErrorMalformedShouldTotal(NewError(headline, headline.PointerPosition, shouldTotalText.Length())))
 				return r
@@ -78,18 +79,18 @@ func parseRecord(c Chunk) (klog.Record, []Error) {
 			errs = append(errs, ErrorUnrecognisedTextInHeadline(NewError(headline, headline.PointerPosition, headline.RemainingLength())))
 		}
 		return r
-	}(c[0])
-	c = c.Pop()
+	}(block[0])
+	block = block[1:]
 
 	// In case there was an error, generate dummy record to ensure that we have something to
 	// work with during parsing. That allows us to continue even if there are errors early on.
-	if r == nil {
-		dummyDate, _ := klog.NewDate(0, 0, 0)
-		r = klog.NewRecord(dummyDate)
+	if record == nil {
+		dummyDate, _ := NewDate(0, 0, 0)
+		record = NewRecord(dummyDate)
 	}
 
 	// ========== SUMMARY LINES ==========
-	for i, sLine := range c {
+	for i, sLine := range block {
 		if sLine.IndentationLevel > 0 {
 			break
 		} else if sLine.IndentationLevel < 0 {
@@ -99,8 +100,8 @@ func parseRecord(c Chunk) (klog.Record, []Error) {
 		if i > 0 {
 			lineBreak = "\n"
 		}
-		err := r.SetSummary(r.Summary().ToString() + lineBreak + sLine.ToString())
-		c = c.Pop()
+		err := record.SetSummary(record.Summary().ToString() + lineBreak + sLine.ToString())
+		block = block[1:]
 		if err != nil {
 			errs = append(errs, ErrorMalformedSummary(NewError(sLine, 0, sLine.Length())))
 		}
@@ -108,18 +109,18 @@ func parseRecord(c Chunk) (klog.Record, []Error) {
 
 	// ========== ENTRIES ==========
 entries:
-	for _, eLine := range c {
+	for _, eLine := range block {
 		if eLine.IndentationLevel != 1 {
 			errs = append(errs, ErrorIllegalIndentation(NewError(eLine, 0, eLine.Length())))
 			continue
 		}
 		durationCandidate, _ := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
-		duration, err := klog.NewDurationFromString(durationCandidate.ToString())
+		duration, err := NewDurationFromString(durationCandidate.ToString())
 		if err == nil {
 			eLine.Advance(durationCandidate.Length())
 			eLine.SkipWhitespace()
 			summaryText, _ := eLine.PeekUntil(func(r rune) bool { return false })
-			r.AddDuration(duration, klog.Summary(summaryText.ToString()))
+			record.AddDuration(duration, Summary(summaryText.ToString()))
 			continue
 		}
 		startCandidate, _ := eLine.PeekUntil(func(r rune) bool { return r == '-' || IsWhitespace(r) })
@@ -129,7 +130,7 @@ entries:
 			errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, firstToken.Length())))
 			continue
 		}
-		start, err := klog.NewTimeFromString(startCandidate.ToString())
+		start, err := NewTimeFromString(startCandidate.ToString())
 		if err != nil {
 			errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, startCandidate.Length())))
 			continue
@@ -154,9 +155,10 @@ entries:
 			eLine.Advance(placeholder.Length())
 			eLine.SkipWhitespace()
 			summaryText, _ := eLine.PeekUntil(func(r rune) bool { return false })
-			err := r.StartOpenRange(start, klog.Summary(summaryText.ToString()))
+			err := record.StartOpenRange(start, Summary(summaryText.ToString()))
 			if err != nil {
 				errs = append(errs, ErrorDuplicateOpenRange(NewError(eLine, 0, eLine.PointerPosition)))
+				continue
 			}
 		} else {
 			endCandidate, _ := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
@@ -164,24 +166,25 @@ entries:
 				errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, 1)))
 				continue
 			}
-			end, err := klog.NewTimeFromString(endCandidate.ToString())
+			end, err := NewTimeFromString(endCandidate.ToString())
 			if err != nil {
 				errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, endCandidate.Length())))
 				continue
 			}
 			eLine.Advance(endCandidate.Length())
-			timeRange, err := klog.NewRange(start, end)
+			timeRange, err := NewRange(start, end)
 			if err != nil {
 				errs = append(errs, ErrorIllegalRange(NewError(eLine, 0, eLine.PointerPosition)))
+				continue
 			}
 			eLine.SkipWhitespace()
 			summaryText, _ := eLine.PeekUntil(func(r rune) bool { return false })
-			r.AddRange(timeRange, klog.Summary(summaryText.ToString()))
+			record.AddRange(timeRange, Summary(summaryText.ToString()))
 		}
 	}
 
 	if len(errs) > 0 {
 		return nil, errs
 	}
-	return r, nil
+	return record, nil
 }

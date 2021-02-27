@@ -1,9 +1,6 @@
 package engine
 
-import (
-	"regexp"
-	"strings"
-)
+import "strings"
 
 func SubRune(text []rune, start int, length int) []rune {
 	if start >= len(text) {
@@ -19,54 +16,50 @@ func IsWhitespace(r rune) bool {
 	return r == ' ' || r == '\t'
 }
 
-var blankTextPattern = regexp.MustCompile(
-	`^[  \t]*$`, // match space, non-breaking space, tab
-)
-
-// SplitIntoChunksOfLines splits up a text into paragraphs (at blank lines)
-// and the paragraphs into its individual lines.
-func SplitIntoChunksOfLines(text string) []Chunk {
-	var chunks []Chunk
-	var currentChunk Chunk
-	text = text + "\n"
-	for i, l := range strings.Split(text, "\n") {
-		if blankTextPattern.MatchString(l) {
-			if currentChunk != nil {
-				chunks = append(chunks, currentChunk)
+func GroupIntoBlocks(lines []Line) [][]Line {
+	var blocks [][]Line
+	var currentBlock []Line
+	for _, l := range lines {
+		if IsBlank(l) {
+			if currentBlock != nil {
+				blocks = append(blocks, currentBlock)
+				currentBlock = nil
 			}
-			currentChunk = nil
 			continue
 		}
-		l = replaceTabsWithSpaces(l)
-		l, spacesCount := trimLeftCount(l, ' ')
-		currentIndentation := -1
-		if spacesCount == 0 {
-			currentIndentation = 0
-		} else if spacesCount >= 2 && spacesCount <= 4 {
-			currentIndentation = 1
-		}
-		currentChunk = append(currentChunk, Text{
-			Value:            []rune(l),
-			IndentationLevel: currentIndentation,
-			LineNumber:       i + 1,
-		})
+		currentBlock = append(currentBlock, l)
 	}
-	return chunks
+	if currentBlock != nil {
+		blocks = append(blocks, currentBlock)
+	}
+	return blocks
 }
 
-func replaceTabsWithSpaces(text string) string {
-	text, tabsCount := trimLeftCount(text, '\t')
-	return strings.Repeat("    ", tabsCount) + text
-}
-
-func trimLeftCount(text string, char rune) (string, int) {
-	count := 0
-	text = strings.TrimLeftFunc(text, func(c rune) bool {
-		if c == char {
-			count++
-			return true
+func IsBlank(l Line) bool {
+	if len(l.Value) == 0 {
+		return true
+	}
+	for _, c := range l.Value {
+		if c != ' ' && c != '\t' {
+			return false
 		}
-		return false
+	}
+	return true
+}
+
+func trimLineEnding(line string) string {
+	return strings.TrimFunc(line, func(r rune) bool {
+		return r == '\n' || r == '\r'
 	})
-	return text, count
+}
+
+var indentationPatterns = []string{"    ", "   ", "  ", "\t"}
+
+func trimIndentation(line string, initialIndentation int) (string, int) {
+	for _, indent := range indentationPatterns {
+		if strings.HasPrefix(line, indent) {
+			return trimIndentation(line[len(indent):], initialIndentation+1)
+		}
+	}
+	return line, initialIndentation
 }
