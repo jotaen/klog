@@ -5,23 +5,46 @@ import (
 	. "klog/parser/engine"
 )
 
+type ParseResult struct {
+	Records  []Record
+	lines    []Line
+	fileInfo fileInfo
+}
+
 // Parse parses a text with records into Record data structures.
-func Parse(recordsAsText string) ([]Record, Errors) {
-	var records []Record
+func Parse(recordsAsText string) (*ParseResult, Errors) {
+	parseResult := ParseResult{
+		Records: nil,
+		lines:   Split(recordsAsText),
+		fileInfo: fileInfo{
+			recordLastLine: nil,    // TODO
+			indentation:    "    ", // TODO
+			lineEnding:     "\n",   // TODO
+		},
+	}
 	var allErrs []Error
-	lines := Split(recordsAsText)
-	blocks := GroupIntoBlocks(lines)
+	blocks := GroupIntoBlocks(parseResult.lines)
 	for _, block := range blocks {
 		r, errs := parseRecord(block)
 		if len(errs) > 0 {
 			allErrs = append(allErrs, errs...)
 		}
-		records = append(records, r)
+		parseResult.Records = append(parseResult.Records, r)
+		parseResult.fileInfo.recordLastLine = append(
+			parseResult.fileInfo.recordLastLine,
+			block[len(block)-1].LineNumber,
+		)
 	}
 	if len(allErrs) > 0 {
 		return nil, NewErrors(allErrs)
 	}
-	return records, nil
+	return &parseResult, nil
+}
+
+type fileInfo struct {
+	recordLastLine []int
+	indentation    string
+	lineEnding     string
 }
 
 func parseRecord(block []Line) (Record, []Error) {

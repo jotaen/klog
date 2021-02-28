@@ -107,11 +107,11 @@ func (c *context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
 		if err != nil {
 			return nil, err
 		}
-		rs, parserErrors := parser.Parse(content)
+		pr, parserErrors := parser.Parse(content)
 		if parserErrors != nil {
 			return nil, parserErrors
 		}
-		records = append(records, rs...)
+		records = append(records, pr.Records...)
 	}
 	return records, nil
 }
