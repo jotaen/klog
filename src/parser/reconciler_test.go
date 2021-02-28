@@ -22,9 +22,7 @@ Hello World
 `
 	pr, _ := Parse(original)
 	reconciled, err := pr.AddEntry(func(rs []Record) (int, string) {
-		i := 1
-		rs[i].AddDuration(NewDuration(2, 30), "")
-		return i, "2h30m"
+		return 1, "2h30m"
 	})
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -39,6 +37,22 @@ Hello World
 
 2018-01-03
     5h
+`, reconciled)
+}
+
+func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
+	original := `
+2018-01-01
+    1h`
+	pr, _ := Parse(original)
+	reconciled, err := pr.AddEntry(func(rs []Record) (int, string) {
+		return 0, "16:00-17:00"
+	})
+	require.Nil(t, err)
+	assert.Equal(t, `
+2018-01-01
+    1h
+    16:00-17:00
 `, reconciled)
 }
 

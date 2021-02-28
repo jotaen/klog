@@ -1,4 +1,4 @@
-package engine
+package parsing
 
 import (
 	"github.com/stretchr/testify/assert"

@@ -7,7 +7,7 @@ import (
 	"klog/app"
 	. "klog/lib/jotaen/tf"
 	"klog/parser"
-	"klog/parser/engine"
+	"klog/parser/parsing"
 	"klog/service"
 	"strings"
 )
@@ -123,7 +123,7 @@ func breakLines(text string, maxLength int) []string {
 
 func prettifyError(err error) error {
 	switch e := err.(type) {
-	case engine.Errors:
+	case parsing.Errors:
 		message := ""
 		INDENT := "    "
 		for _, e := range e.Get() {

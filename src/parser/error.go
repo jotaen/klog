@@ -1,7 +1,7 @@
 package parser
 
 import (
-	. "klog/parser/engine"
+	. "klog/parser/parsing"
 )
 
 func ErrorInvalidDate(e Error) Error {

@@ -1,4 +1,4 @@
-package engine
+package parsing
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -60,4 +60,33 @@ func TestRejectsInvalidIndentation(t *testing.T) {
 func TestSplitAndJoinResultsInOriginalText(t *testing.T) {
 	text := "x\n1293871jh23981y293j\n asdfkj     askdlfjh\n\nalkdjhf\r\n\tasdkljfh\n"
 	assert.Equal(t, text, Join(Split(text)))
+}
+
+func TestInsertInBetween(t *testing.T) {
+	before := Split("first\nthird\nfourth")
+	after := Insert(before, 1, "second\n")
+	require.Len(t, after, 4)
+	assert.Equal(t, before[0].Original, after[0].Original)
+	assert.Equal(t, after[0].LineNumber, 1)
+
+	assert.Equal(t, "second\n", after[1].Original)
+	assert.Equal(t, after[1].LineNumber, 2)
+
+	assert.Equal(t, before[1].Original, after[2].Original)
+	assert.Equal(t, after[2].LineNumber, 3)
+
+	assert.Equal(t, before[2].Original, after[3].Original)
+	assert.Equal(t, after[3].LineNumber, 4)
+}
+
+func TestInsertAtBeginning(t *testing.T) {
+	before := Split("bar")
+	after := Insert(before, 0, "foo\n")
+	assert.Equal(t, "foo\nbar", Join(after))
+}
+
+func TestInsertAtEnd(t *testing.T) {
+	before := Split("foo")
+	after := Insert(before, 1, "bar")
+	assert.Equal(t, "foo\nbar", Join(after))
 }
