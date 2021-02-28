@@ -56,3 +56,8 @@ func TestRejectsInvalidIndentation(t *testing.T) {
 	assert.Equal(t, ls[1].Value, []rune("y"))
 	assert.Less(t, ls[1].IndentationLevel, 0)
 }
+
+func TestSplitAndJoinResultsInOriginalText(t *testing.T) {
+	text := "x\n1293871jh23981y293j\n asdfkj     askdlfjh\n\nalkdjhf\r\n\tasdkljfh\n"
+	assert.Equal(t, text, Join(Split(text)))
+}

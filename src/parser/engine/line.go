@@ -40,6 +40,14 @@ func Split(text string) []Line {
 	return result
 }
 
+func Join(ls []Line) string {
+	result := ""
+	for _, l := range ls {
+		result += l.Original
+	}
+	return result
+}
+
 var END_OF_TEXT int32 = -1
 
 func (l *Line) Peek() rune {
