@@ -57,7 +57,7 @@ func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 }
 
 func TestReconcilerRejectsInvalidIndex(t *testing.T) {
-	original := "2018-01-01"
+	original := "2018-01-01\n"
 	pr, _ := Parse(original)
 	reconciled, err := pr.AddEntry(func(rs []Record) (int, string) {
 		return 1872, ""
@@ -67,7 +67,7 @@ func TestReconcilerRejectsInvalidIndex(t *testing.T) {
 }
 
 func TestReconcilerRejectsInvalidEntry(t *testing.T) {
-	original := "2018-01-01"
+	original := "2018-01-01\n"
 	pr, _ := Parse(original)
 	reconciled, err := pr.AddEntry(func(rs []Record) (int, string) {
 		return 0, "this is not valid entry text"

@@ -133,7 +133,7 @@ func prettifyError(err error) error {
 			) + "\n"
 			message += fmt.Sprintf(
 				Style{Color: "247"}.Format(INDENT+"%s"),
-				string(e.Context().Value),
+				e.Context().Text,
 			) + "\n"
 			message += fmt.Sprintf(
 				Style{Color: "160"}.Format(INDENT+"%s%s"),

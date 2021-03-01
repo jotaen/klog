@@ -6,31 +6,41 @@ import (
 )
 
 type Line struct {
-	Value            []rune
-	Original         string
-	LineNumber       int
-	IndentationLevel int
+	Text        string
+	LineNumber  int
+	lineEnding  string
+	indentation string
 }
 
 var lineDelimiterPattern = regexp.MustCompile(`^.*\n?`)
 
-func NewLineFromString(lineText string, initialIndentation int, lineNumber int) Line {
-	value, indentation := trimIndentation(lineText, initialIndentation)
-	if strings.HasPrefix(value, " ") {
-		// A single “dangling” space is not allowed
-		value = value[1:]
-		indentation = -99999
-	}
+func NewLineFromString(lineText string, lineNumber int) Line {
+	text, indentation := splitOffPrecedingWhitespace(lineText)
+	text, lineEnding := splitOffLineEnding(text)
 	return Line{
-		Value:            []rune(trimLineEnding(value)),
-		Original:         lineText,
-		LineNumber:       lineNumber,
-		IndentationLevel: indentation,
+		Text:        text,
+		LineNumber:  lineNumber,
+		lineEnding:  lineEnding,
+		indentation: indentation,
 	}
 }
 
-func IsNewLineTerminated(l Line) bool {
-	return strings.LastIndexFunc(l.Original, IsNewline) != -1
+func (l *Line) ToString() string {
+	return l.indentation + l.Text + l.lineEnding
+}
+
+func (l *Line) IndentationLevel() int {
+	normalised := strings.ReplaceAll(l.indentation, "\t", "    ")
+	if normalised == "" {
+		return 0
+	}
+	if len(normalised) == 1 {
+		return -1
+	}
+	if len(normalised) > 4 {
+		return 2
+	}
+	return 1
 }
 
 func Split(text string) []Line {
@@ -40,40 +50,49 @@ func Split(text string) []Line {
 	for len(remainder) > 0 {
 		lineNumber += 1
 		original := lineDelimiterPattern.FindString(remainder)
-		result = append(result, NewLineFromString(original, 0, lineNumber))
+		result = append(result, NewLineFromString(original, lineNumber))
 		remainder = remainder[len(original):]
 	}
 	return result
 }
 
-func trimLineEnding(line string) string {
-	return strings.TrimFunc(line, IsNewline)
-}
+var lineEndingPatterns = []string{"\r\n", "\n"}
 
-var indentationPatterns = []string{"    ", "   ", "  ", "\t"}
-
-func trimIndentation(line string, initialIndentation int) (string, int) {
-	for _, indent := range indentationPatterns {
-		if strings.HasPrefix(line, indent) {
-			return trimIndentation(line[len(indent):], initialIndentation+1)
+func splitOffLineEnding(text string) (string, string) {
+	for _, e := range lineEndingPatterns {
+		if strings.HasSuffix(text, e) {
+			return text[:len(text)-len(e)], e
 		}
 	}
-	return line, initialIndentation
+	return text, ""
+}
+
+func splitOffPrecedingWhitespace(line string) (string, string) {
+	text := strings.TrimLeftFunc(line, func(r rune) bool {
+		return r == '\t' || r == ' '
+	})
+	return text, line[:len(line)-len(text)]
 }
 
 func Join(ls []Line) string {
 	result := ""
+	preferredLineEnding := "\n"
 	for _, l := range ls {
-		result += l.Original
+		result += l.ToString()
+		if l.lineEnding == "" {
+			result += preferredLineEnding
+		} else {
+			preferredLineEnding = l.lineEnding
+		}
 	}
 	return result
 }
 
 func IsBlank(l Line) bool {
-	if len(l.Value) == 0 {
+	if len(l.Text) == 0 {
 		return true
 	}
-	for _, c := range l.Value {
+	for _, c := range l.Text {
 		if c != ' ' && c != '\t' {
 			return false
 		}
@@ -89,11 +108,8 @@ func Insert(ls []Line, position int, lineText string) []Line {
 	offset := 0
 	for i := range result {
 		if i == position {
-			result[i] = NewLineFromString(lineText, 0, i+1)
+			result[i] = NewLineFromString(lineText, i+1)
 			offset = 1
-			if i > 0 && !IsNewLineTerminated(result[i-1]) {
-				result[i].Original = "\n" + result[i].Original
-			}
 		} else {
 			result[i] = ls[i-offset]
 		}

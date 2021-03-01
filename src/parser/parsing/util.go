@@ -14,10 +14,6 @@ func IsWhitespace(r rune) bool {
 	return r == ' ' || r == '\t'
 }
 
-func IsNewline(r rune) bool {
-	return r == '\n' || r == '\r'
-}
-
 func GroupIntoBlocks(lines []Line) [][]Line {
 	var blocks [][]Line
 	var currentBlock []Line

@@ -52,7 +52,7 @@ func parseRecord(block []Line) (Record, []Error) {
 
 	// ========== HEADLINE ==========
 	record := func(headline Parseable) Record {
-		if headline.IndentationLevel != 0 {
+		if headline.IndentationLevel() != 0 {
 			errs = append(errs, ErrorIllegalIndentation(NewError(headline.Line, 0, headline.Length())))
 			return nil
 		}
@@ -115,9 +115,9 @@ func parseRecord(block []Line) (Record, []Error) {
 	// ========== SUMMARY LINES ==========
 	for i, s := range block {
 		summary := NewParseable(s)
-		if summary.IndentationLevel > 0 {
+		if summary.IndentationLevel() > 0 {
 			break
-		} else if summary.IndentationLevel < 0 {
+		} else if summary.IndentationLevel() < 0 {
 			errs = append(errs, ErrorIllegalIndentation(NewError(summary.Line, 0, summary.Length())))
 		}
 		lineBreak := ""
@@ -135,7 +135,7 @@ func parseRecord(block []Line) (Record, []Error) {
 entries:
 	for _, e := range block {
 		entry := NewParseable(e)
-		if entry.IndentationLevel != 1 {
+		if entry.IndentationLevel() != 1 {
 			errs = append(errs, ErrorIllegalIndentation(NewError(entry.Line, 0, entry.Length())))
 			continue
 		}
@@ -171,7 +171,7 @@ entries:
 		if entry.Peek() == '?' {
 			entry.Advance(1)
 			placeholder, _ := entry.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
-			for _, p := range placeholder.Value {
+			for _, p := range placeholder.Chars {
 				if p != '?' {
 					errs = append(errs, ErrorMalformedEntry(NewError(entry.Line, entry.PointerPosition, placeholder.Length())))
 					continue entries

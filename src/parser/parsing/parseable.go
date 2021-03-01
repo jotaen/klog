@@ -2,6 +2,7 @@ package parsing
 
 type Parseable struct {
 	Line
+	Chars           []rune
 	PointerPosition int
 }
 
@@ -10,12 +11,13 @@ var END_OF_TEXT int32 = -1
 func NewParseable(l Line) Parseable {
 	return Parseable{
 		PointerPosition: 0,
+		Chars:           []rune(l.Text),
 		Line:            l,
 	}
 }
 
 func (p *Parseable) Peek() rune {
-	char := SubRune(p.Value, p.PointerPosition, 1)
+	char := SubRune(p.Chars, p.PointerPosition, 1)
 	if char == nil {
 		return END_OF_TEXT
 	}
@@ -27,12 +29,12 @@ func (p *Parseable) PeekUntil(isMatch func(rune) bool) (Parseable, bool) {
 		PointerPosition: p.PointerPosition,
 		Line:            Line{},
 	}
-	for i := p.PointerPosition; i < len(p.Value); i++ {
-		next := SubRune(p.Value, i, 1)
+	for i := p.PointerPosition; i < len(p.Chars); i++ {
+		next := SubRune(p.Chars, i, 1)
 		if isMatch(next[0]) {
 			return result, true
 		}
-		result.Value = append(result.Value, next[0])
+		result.Chars = append(result.Chars, next[0])
 	}
 	return result, false
 }
@@ -49,7 +51,7 @@ func (p *Parseable) SkipWhitespace() {
 }
 
 func (p *Parseable) Length() int {
-	return len(p.Value)
+	return len(p.Chars)
 }
 
 func (p *Parseable) RemainingLength() int {
@@ -57,5 +59,5 @@ func (p *Parseable) RemainingLength() int {
 }
 
 func (p *Parseable) ToString() string {
-	return string(p.Value)
+	return string(p.Chars)
 }
