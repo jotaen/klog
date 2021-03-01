@@ -11,8 +11,8 @@ func (pr *ParseResult) AddEntry(createEntry func([]Record) (int, string)) (strin
 	if recordIndex > len(pr.Records)-1 {
 		return parsing.Join(pr.lines), errors.New("")
 	}
-	lineIndex := pr.fileInfo.recordLastLine[recordIndex]
-	result := parsing.Insert(pr.lines, lineIndex, pr.fileInfo.indentation+newEntry+pr.fileInfo.lineEnding)
+	lineIndex := pr.lastLineOfRecord[recordIndex]
+	result := parsing.Insert(pr.lines, lineIndex, newEntry, true, pr.preferences)
 	newFileText := parsing.Join(result)
 	_, err := Parse(newFileText)
 	if err != nil {

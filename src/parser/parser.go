@@ -6,21 +6,19 @@ import (
 )
 
 type ParseResult struct {
-	Records  []Record
-	lines    []Line
-	fileInfo fileInfo
+	Records          []Record
+	lines            []Line
+	lastLineOfRecord []int
+	preferences      Preferences
 }
 
 // Parse parses a text with records into Record data structures.
 func Parse(recordsAsText string) (*ParseResult, Errors) {
 	parseResult := ParseResult{
-		Records: nil,
-		lines:   Split(recordsAsText),
-		fileInfo: fileInfo{
-			recordLastLine: nil,    // TODO
-			indentation:    "    ", // TODO
-			lineEnding:     "\n",   // TODO
-		},
+		Records:          nil,
+		lines:            Split(recordsAsText),
+		lastLineOfRecord: nil,
+		preferences:      DefaultPreferences(),
 	}
 	var allErrs []Error
 	blocks := GroupIntoBlocks(parseResult.lines)
@@ -30,21 +28,18 @@ func Parse(recordsAsText string) (*ParseResult, Errors) {
 			allErrs = append(allErrs, errs...)
 		}
 		parseResult.Records = append(parseResult.Records, r)
-		parseResult.fileInfo.recordLastLine = append(
-			parseResult.fileInfo.recordLastLine,
+		parseResult.lastLineOfRecord = append(
+			parseResult.lastLineOfRecord,
 			block[len(block)-1].LineNumber,
 		)
+		for _, l := range block {
+			parseResult.preferences.Adapt(&l)
+		}
 	}
 	if len(allErrs) > 0 {
 		return nil, NewErrors(allErrs)
 	}
 	return &parseResult, nil
-}
-
-type fileInfo struct {
-	recordLastLine []int
-	indentation    string
-	lineEnding     string
 }
 
 func parseRecord(block []Line) (Record, []Error) {

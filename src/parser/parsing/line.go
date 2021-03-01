@@ -6,39 +6,36 @@ import (
 )
 
 type Line struct {
-	Text        string
-	LineNumber  int
-	lineEnding  string
-	indentation string
+	Text                string
+	LineNumber          int
+	originalLineEnding  string
+	originalIndentation string
 }
 
 var lineDelimiterPattern = regexp.MustCompile(`^.*\n?`)
 
-func NewLineFromString(lineText string, lineNumber int) Line {
-	text, indentation := splitOffPrecedingWhitespace(lineText)
+func NewLineFromString(rawLineText string, lineNumber int) Line {
+	text, indentation := splitOffPrecedingWhitespace(rawLineText)
 	text, lineEnding := splitOffLineEnding(text)
 	return Line{
-		Text:        text,
-		LineNumber:  lineNumber,
-		lineEnding:  lineEnding,
-		indentation: indentation,
+		Text:                text,
+		LineNumber:          lineNumber,
+		originalLineEnding:  lineEnding,
+		originalIndentation: indentation,
 	}
 }
 
-func (l *Line) ToString() string {
-	return l.indentation + l.Text + l.lineEnding
+func (l *Line) Original() string {
+	return l.originalIndentation + l.Text + l.originalLineEnding
 }
 
 func (l *Line) IndentationLevel() int {
-	normalised := strings.ReplaceAll(l.indentation, "\t", "    ")
+	normalised := strings.ReplaceAll(l.originalIndentation, "\t", "    ")
 	if normalised == "" {
 		return 0
 	}
-	if len(normalised) == 1 {
+	if len(normalised) == 1 || len(normalised) > 4 {
 		return -1
-	}
-	if len(normalised) > 4 {
-		return 2
 	}
 	return 1
 }
@@ -76,14 +73,8 @@ func splitOffPrecedingWhitespace(line string) (string, string) {
 
 func Join(ls []Line) string {
 	result := ""
-	preferredLineEnding := "\n"
 	for _, l := range ls {
-		result += l.ToString()
-		if l.lineEnding == "" {
-			result += preferredLineEnding
-		} else {
-			preferredLineEnding = l.lineEnding
-		}
+		result += l.Original()
 	}
 	return result
 }
@@ -100,7 +91,7 @@ func IsBlank(l Line) bool {
 	return true
 }
 
-func Insert(ls []Line, position int, lineText string) []Line {
+func Insert(ls []Line, position int, text string, isIndented bool, prefs Preferences) []Line {
 	if position > len(ls)+1 {
 		panic("Out of bounds")
 	}
@@ -108,12 +99,41 @@ func Insert(ls []Line, position int, lineText string) []Line {
 	offset := 0
 	for i := range result {
 		if i == position {
-			result[i] = NewLineFromString(lineText, i+1)
+			line := ""
+			if isIndented {
+				line += prefs.Indentation
+			}
+			line += text + prefs.LineEnding
+			result[i] = NewLineFromString(line, i+1)
 			offset = 1
 		} else {
 			result[i] = ls[i-offset]
 		}
 		result[i].LineNumber = i + 1
 	}
+	if position > 0 && result[position-1].originalLineEnding == "" {
+		result[position-1].originalLineEnding = prefs.LineEnding
+	}
 	return result
+}
+
+type Preferences struct {
+	LineEnding  string
+	Indentation string
+}
+
+func DefaultPreferences() Preferences {
+	return Preferences{
+		LineEnding:  "\n",
+		Indentation: "    ",
+	}
+}
+
+func (p *Preferences) Adapt(l *Line) {
+	if l.IndentationLevel() == 1 {
+		p.Indentation = l.originalIndentation
+	}
+	if l.originalLineEnding != "" {
+		p.LineEnding = l.originalLineEnding
+	}
 }
