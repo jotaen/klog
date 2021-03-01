@@ -1,4 +1,4 @@
-package engine
+package parsing
 
 import "fmt"
 
@@ -25,7 +25,7 @@ func (pe errors) Get() []Error {
 
 type Error interface {
 	Error() string
-	Context() Text
+	Context() Line
 	Position() int
 	Length() int
 	Code() string
@@ -34,7 +34,7 @@ type Error interface {
 }
 
 type err struct {
-	context  Text
+	context  Line
 	position int
 	length   int
 	code     string
@@ -42,7 +42,7 @@ type err struct {
 }
 
 func (e *err) Error() string   { return e.message }
-func (e *err) Context() Text   { return e.context }
+func (e *err) Context() Line   { return e.context }
 func (e *err) Position() int   { return e.position }
 func (e *err) Length() int     { return e.length }
 func (e *err) Code() string    { return e.code }
@@ -53,7 +53,7 @@ func (e *err) Set(code string, message string) Error {
 	return e
 }
 
-func NewError(t Text, start int, length int) Error {
+func NewError(t Line, start int, length int) Error {
 	return &err{
 		context:  t,
 		position: start,

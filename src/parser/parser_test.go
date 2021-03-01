@@ -9,26 +9,26 @@ import (
 
 func TestParseEmptyDocument(t *testing.T) {
 	text := ``
-	rs, errs := Parse(text)
+	pr, errs := Parse(text)
 	require.Nil(t, errs)
-	require.Nil(t, rs)
+	require.Len(t, pr.Records, 0)
 }
 
 func TestParseBlankDocument(t *testing.T) {
 	text := `
  
 `
-	rs, errs := Parse(text)
+	pr, errs := Parse(text)
 	require.Nil(t, errs)
-	require.Nil(t, rs)
+	require.Len(t, pr.Records, 0)
 }
 
 func TestParseMinimalDocument(t *testing.T) {
 	text := `2000-01-01`
-	rs, errs := Parse(text)
+	pr, errs := Parse(text)
 	require.Nil(t, errs)
-	require.Len(t, rs, 1)
-	assert.Equal(t, klog.Ɀ_Date_(2000, 1, 1), rs[0].Date())
+	require.Len(t, pr.Records, 1)
+	assert.Equal(t, klog.Ɀ_Date_(2000, 1, 1), pr.Records[0].Date())
 }
 
 func TestParseMultipleRecords(t *testing.T) {
@@ -38,18 +38,18 @@ func TestParseMultipleRecords(t *testing.T) {
 1999-06-03 (8h15m!)
 Empty
 `
-	rs, errs := Parse(text)
+	pr, errs := Parse(text)
 	require.Nil(t, errs)
-	require.Len(t, rs, 2)
+	require.Len(t, pr.Records, 2)
 
-	assert.Equal(t, klog.Ɀ_Date_(1999, 5, 31), rs[0].Date())
-	assert.Equal(t, klog.Summary(""), rs[0].Summary())
-	assert.Len(t, rs[0].Entries(), 0)
+	assert.Equal(t, klog.Ɀ_Date_(1999, 5, 31), pr.Records[0].Date())
+	assert.Equal(t, klog.Summary(""), pr.Records[0].Summary())
+	assert.Len(t, pr.Records[0].Entries(), 0)
 
-	assert.Equal(t, klog.Ɀ_Date_(1999, 6, 3), rs[1].Date())
-	assert.Equal(t, klog.Summary("Empty"), rs[1].Summary())
-	assert.Equal(t, klog.NewDuration(8, 15).InMinutes(), rs[1].ShouldTotal().InMinutes())
-	assert.Len(t, rs[1].Entries(), 0)
+	assert.Equal(t, klog.Ɀ_Date_(1999, 6, 3), pr.Records[1].Date())
+	assert.Equal(t, klog.Summary("Empty"), pr.Records[1].Summary())
+	assert.Equal(t, klog.NewDuration(8, 15).InMinutes(), pr.Records[1].ShouldTotal().InMinutes())
+	assert.Len(t, pr.Records[1].Entries(), 0)
 }
 
 func TestParseAlternativeFormatting(t *testing.T) {
@@ -60,12 +60,12 @@ func TestParseAlternativeFormatting(t *testing.T) {
 1999-05-31
 	8:00am-1:00pm
 `
-	rs, errs := Parse(text)
+	pr, errs := Parse(text)
 	require.Nil(t, errs)
-	require.Len(t, rs, 2)
+	require.Len(t, pr.Records, 2)
 
-	assert.True(t, rs[0].Date().IsEqualTo(rs[1].Date()))
-	assert.Equal(t, rs[0].Entries()[0].Duration(), rs[1].Entries()[0].Duration())
+	assert.True(t, pr.Records[0].Date().IsEqualTo(pr.Records[1].Date()))
+	assert.Equal(t, pr.Records[0].Entries()[0].Duration(), pr.Records[1].Entries()[0].Duration())
 }
 
 func TestAcceptTabOrSpacesAsIndentation(t *testing.T) {
@@ -78,9 +78,9 @@ func TestAcceptTabOrSpacesAsIndentation(t *testing.T) {
 		{"2000-05-31\n   6h", nil},
 		{"2000-05-31\n    6h", nil},
 	} {
-		rs, errs := Parse(test.text)
+		pr, errs := Parse(test.text)
 		require.Nil(t, errs)
-		require.Len(t, rs, 1)
+		require.Len(t, pr.Records, 1)
 	}
 }
 
@@ -105,17 +105,17 @@ func TestParseDocumentSucceedsWithCorrectEntries(t *testing.T) {
 		{"1234-12-12\n\t18:45 - ? Just started something", klog.NewOpenRange(klog.Ɀ_Time_(18, 45)), "Just started something"},
 		{"1234-12-12\n\t<3:12-??????", klog.NewOpenRange(klog.Ɀ_TimeYesterday_(3, 12)), ""},
 	} {
-		rs, errs := Parse(test.text)
+		pr, errs := Parse(test.text)
 		require.Nil(t, errs, test.text)
-		require.Len(t, rs, 1, test.text)
-		require.Len(t, rs[0].Entries(), 1, test.text)
-		value := rs[0].Entries()[0].Unbox(
+		require.Len(t, pr.Records, 1, test.text)
+		require.Len(t, pr.Records[0].Entries(), 1, test.text)
+		value := pr.Records[0].Entries()[0].Unbox(
 			func(r klog.Range) interface{} { return r },
 			func(d klog.Duration) interface{} { return d },
 			func(o klog.OpenRange) interface{} { return o },
 		)
 		assert.Equal(t, test.expectEntry, value, test.text)
-		assert.Equal(t, klog.Summary(test.expectSummary), rs[0].Entries()[0].Summary(), test.text)
+		assert.Equal(t, klog.Summary(test.expectSummary), pr.Records[0].Entries()[0].Summary(), test.text)
 	}
 }
 
@@ -125,8 +125,8 @@ func TestMalformedRecord(t *testing.T) {
 	5h30m This and that
 Why is there a summary at the end?
 `
-	rs, errs := Parse(text)
-	require.Nil(t, rs)
+	pr, errs := Parse(text)
+	require.Nil(t, pr)
 	require.NotNil(t, errs)
 	require.Len(t, errs.Get(), 1)
 	assert.Equal(t, Err{id(ErrorIllegalIndentation), 4, 0, 34}, toErr(errs.Get()[0]))
@@ -150,8 +150,8 @@ func TestReportErrorsInHeadline(t *testing.T) {
 		{"2020-01-01 (5h! asdf)", Err{id(ErrorUnrecognisedProperty), 1, 16, 4}},
 		{"2020-01-01 (5h!!!)", Err{id(ErrorUnrecognisedProperty), 1, 15, 2}},
 	} {
-		rs, errs := Parse(test.text)
-		require.Nil(t, rs)
+		pr, errs := Parse(test.text)
+		require.Nil(t, pr)
 		require.NotNil(t, errs)
 		require.Len(t, errs.Get(), 1)
 		assert.Equal(t, test.expect, toErr(errs.Get()[0]), test.text)
@@ -165,8 +165,8 @@ This is a summary that contains
  whitespace at the beginning of the line.
 That is not allowed.
 `
-	rs, errs := Parse(text)
-	require.Nil(t, rs)
+	pr, errs := Parse(text)
+	require.Nil(t, pr)
 	require.NotNil(t, errs)
 	require.Len(t, errs.Get(), 1)
 	assert.Equal(t, Err{id(ErrorIllegalIndentation), 4, 0, 40}, toErr(errs.Get()[0]))
@@ -192,8 +192,8 @@ func TestReportErrorsInEntries(t *testing.T) {
 		{"2020-01-01\n\t\t8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
 		{"2020-01-01\n     8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
 	} {
-		rs, errs := Parse(test.text)
-		require.Nil(t, rs, test.text)
+		pr, errs := Parse(test.text)
+		require.Nil(t, pr, test.text)
 		require.NotNil(t, errs, test.text)
 		require.Len(t, errs.Get(), 1, test.text)
 		assert.Equal(t, test.expect, toErr(errs.Get()[0]), test.text)

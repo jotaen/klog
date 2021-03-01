@@ -19,11 +19,11 @@ func NewTestingContext() TestingContext {
 }
 
 func (ctx TestingContext) _SetRecords(records string) TestingContext {
-	rs, err := parser.Parse(records)
+	pr, err := parser.Parse(records)
 	if err != nil {
 		panic("Invalid records")
 	}
-	ctx.records = rs
+	ctx.records = pr.Records
 	return ctx
 }
 

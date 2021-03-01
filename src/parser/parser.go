@@ -1,66 +1,85 @@
 package parser
 
 import (
-	"klog"
-	. "klog/parser/engine"
+	. "klog"
+	. "klog/parser/parsing"
 )
 
+type ParseResult struct {
+	Records          []Record
+	lines            []Line
+	lastLineOfRecord []int
+	preferences      Preferences
+}
+
 // Parse parses a text with records into Record data structures.
-func Parse(recordsAsText string) ([]klog.Record, Errors) {
-	var records []klog.Record
+func Parse(recordsAsText string) (*ParseResult, Errors) {
+	parseResult := ParseResult{
+		Records:          nil,
+		lines:            Split(recordsAsText),
+		lastLineOfRecord: nil,
+		preferences:      DefaultPreferences(),
+	}
 	var allErrs []Error
-	cs := SplitIntoChunksOfLines(recordsAsText)
-	for _, c := range cs {
-		r, errs := parseRecord(c)
+	blocks := GroupIntoBlocks(parseResult.lines)
+	for _, block := range blocks {
+		r, errs := parseRecord(block)
 		if len(errs) > 0 {
 			allErrs = append(allErrs, errs...)
 		}
-		records = append(records, r)
+		parseResult.Records = append(parseResult.Records, r)
+		parseResult.lastLineOfRecord = append(
+			parseResult.lastLineOfRecord,
+			block[len(block)-1].LineNumber,
+		)
+		for _, l := range block {
+			parseResult.preferences.Adapt(&l)
+		}
 	}
 	if len(allErrs) > 0 {
 		return nil, NewErrors(allErrs)
 	}
-	return records, nil
+	return &parseResult, nil
 }
 
-func parseRecord(c Chunk) (klog.Record, []Error) {
+func parseRecord(block []Line) (Record, []Error) {
 	var errs []Error
 
 	// ========== HEADLINE ==========
-	r := func(headline Text) klog.Record {
-		if headline.IndentationLevel != 0 {
-			errs = append(errs, ErrorIllegalIndentation(NewError(headline, 0, headline.Length())))
+	record := func(headline Parseable) Record {
+		if headline.IndentationLevel() != 0 {
+			errs = append(errs, ErrorIllegalIndentation(NewError(headline.Line, 0, headline.Length())))
 			return nil
 		}
 		dateText, _ := headline.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
-		date, err := klog.NewDateFromString(dateText.ToString())
+		date, err := NewDateFromString(dateText.ToString())
 		if err != nil {
-			errs = append(errs, ErrorInvalidDate(NewError(headline, headline.PointerPosition, dateText.Length())))
+			errs = append(errs, ErrorInvalidDate(NewError(headline.Line, headline.PointerPosition, dateText.Length())))
 			return nil
 		}
 		headline.Advance(dateText.Length())
 		headline.SkipWhitespace()
-		r := klog.NewRecord(date)
+		r := NewRecord(date)
 		if headline.Peek() == '(' {
 			headline.Advance(1) // '('
 			headline.SkipWhitespace()
 			allPropsText, hasClosingParenthesis := headline.PeekUntil(func(r rune) bool { return r == ')' })
 			if !hasClosingParenthesis {
-				errs = append(errs, ErrorMalformedPropertiesSyntax(NewError(headline, headline.Length(), 1)))
+				errs = append(errs, ErrorMalformedPropertiesSyntax(NewError(headline.Line, headline.Length(), 1)))
 				return r
 			}
 			if allPropsText.Length() == 0 {
-				errs = append(errs, ErrorMalformedPropertiesSyntax(NewError(headline, headline.PointerPosition, 1)))
+				errs = append(errs, ErrorMalformedPropertiesSyntax(NewError(headline.Line, headline.PointerPosition, 1)))
 				return r
 			}
 			shouldTotalText, hasExclamationMark := headline.PeekUntil(func(r rune) bool { return r == '!' })
 			if !hasExclamationMark {
-				errs = append(errs, ErrorUnrecognisedProperty(NewError(headline, headline.PointerPosition, shouldTotalText.Length()-1)))
+				errs = append(errs, ErrorUnrecognisedProperty(NewError(headline.Line, headline.PointerPosition, shouldTotalText.Length()-1)))
 				return r
 			}
-			shouldTotal, err := klog.NewDurationFromString(shouldTotalText.ToString())
+			shouldTotal, err := NewDurationFromString(shouldTotalText.ToString())
 			if err != nil {
-				errs = append(errs, ErrorMalformedShouldTotal(NewError(headline, headline.PointerPosition, shouldTotalText.Length())))
+				errs = append(errs, ErrorMalformedShouldTotal(NewError(headline.Line, headline.PointerPosition, shouldTotalText.Length())))
 				return r
 			}
 			r.SetShouldTotal(shouldTotal)
@@ -68,120 +87,124 @@ func parseRecord(c Chunk) (klog.Record, []Error) {
 			headline.Advance(1) // '!'
 			headline.SkipWhitespace()
 			if headline.Peek() != ')' {
-				errs = append(errs, ErrorUnrecognisedProperty(NewError(headline, headline.PointerPosition, headline.RemainingLength()-1)))
+				errs = append(errs, ErrorUnrecognisedProperty(NewError(headline.Line, headline.PointerPosition, headline.RemainingLength()-1)))
 				return r
 			}
 			headline.Advance(1) // ')'
 		}
 		headline.SkipWhitespace()
 		if headline.RemainingLength() > 0 {
-			errs = append(errs, ErrorUnrecognisedTextInHeadline(NewError(headline, headline.PointerPosition, headline.RemainingLength())))
+			errs = append(errs, ErrorUnrecognisedTextInHeadline(NewError(headline.Line, headline.PointerPosition, headline.RemainingLength())))
 		}
 		return r
-	}(c[0])
-	c = c.Pop()
+	}(NewParseable(block[0]))
+	block = block[1:]
 
 	// In case there was an error, generate dummy record to ensure that we have something to
 	// work with during parsing. That allows us to continue even if there are errors early on.
-	if r == nil {
-		dummyDate, _ := klog.NewDate(0, 0, 0)
-		r = klog.NewRecord(dummyDate)
+	if record == nil {
+		dummyDate, _ := NewDate(0, 0, 0)
+		record = NewRecord(dummyDate)
 	}
 
 	// ========== SUMMARY LINES ==========
-	for i, sLine := range c {
-		if sLine.IndentationLevel > 0 {
+	for i, s := range block {
+		summary := NewParseable(s)
+		if summary.IndentationLevel() > 0 {
 			break
-		} else if sLine.IndentationLevel < 0 {
-			errs = append(errs, ErrorIllegalIndentation(NewError(sLine, 0, sLine.Length())))
+		} else if summary.IndentationLevel() < 0 {
+			errs = append(errs, ErrorIllegalIndentation(NewError(summary.Line, 0, summary.Length())))
 		}
 		lineBreak := ""
 		if i > 0 {
 			lineBreak = "\n"
 		}
-		err := r.SetSummary(r.Summary().ToString() + lineBreak + sLine.ToString())
-		c = c.Pop()
+		err := record.SetSummary(record.Summary().ToString() + lineBreak + summary.ToString())
+		block = block[1:]
 		if err != nil {
-			errs = append(errs, ErrorMalformedSummary(NewError(sLine, 0, sLine.Length())))
+			errs = append(errs, ErrorMalformedSummary(NewError(summary.Line, 0, summary.Length())))
 		}
 	}
 
 	// ========== ENTRIES ==========
 entries:
-	for _, eLine := range c {
-		if eLine.IndentationLevel != 1 {
-			errs = append(errs, ErrorIllegalIndentation(NewError(eLine, 0, eLine.Length())))
+	for _, e := range block {
+		entry := NewParseable(e)
+		if entry.IndentationLevel() != 1 {
+			errs = append(errs, ErrorIllegalIndentation(NewError(entry.Line, 0, entry.Length())))
 			continue
 		}
-		durationCandidate, _ := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
-		duration, err := klog.NewDurationFromString(durationCandidate.ToString())
+		durationCandidate, _ := entry.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
+		duration, err := NewDurationFromString(durationCandidate.ToString())
 		if err == nil {
-			eLine.Advance(durationCandidate.Length())
-			eLine.SkipWhitespace()
-			summaryText, _ := eLine.PeekUntil(func(r rune) bool { return false })
-			r.AddDuration(duration, klog.Summary(summaryText.ToString()))
+			entry.Advance(durationCandidate.Length())
+			entry.SkipWhitespace()
+			summaryText, _ := entry.PeekUntil(func(r rune) bool { return false })
+			record.AddDuration(duration, Summary(summaryText.ToString()))
 			continue
 		}
-		startCandidate, _ := eLine.PeekUntil(func(r rune) bool { return r == '-' || IsWhitespace(r) })
+		startCandidate, _ := entry.PeekUntil(func(r rune) bool { return r == '-' || IsWhitespace(r) })
 		if startCandidate.Length() == 0 {
 			// Handle case where `-` appears right at the beginning of the line
-			firstToken, _ := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
-			errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, firstToken.Length())))
+			firstToken, _ := entry.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
+			errs = append(errs, ErrorMalformedEntry(NewError(entry.Line, entry.PointerPosition, firstToken.Length())))
 			continue
 		}
-		start, err := klog.NewTimeFromString(startCandidate.ToString())
+		start, err := NewTimeFromString(startCandidate.ToString())
 		if err != nil {
-			errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, startCandidate.Length())))
+			errs = append(errs, ErrorMalformedEntry(NewError(entry.Line, entry.PointerPosition, startCandidate.Length())))
 			continue
 		}
-		eLine.Advance(startCandidate.Length())
-		eLine.SkipWhitespace()
-		if eLine.Peek() != '-' {
-			errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, 1)))
+		entry.Advance(startCandidate.Length())
+		entry.SkipWhitespace()
+		if entry.Peek() != '-' {
+			errs = append(errs, ErrorMalformedEntry(NewError(entry.Line, entry.PointerPosition, 1)))
 			continue
 		}
-		eLine.Advance(1) // '-'
-		eLine.SkipWhitespace()
-		if eLine.Peek() == '?' {
-			eLine.Advance(1)
-			placeholder, _ := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
-			for _, p := range placeholder.Value {
+		entry.Advance(1) // '-'
+		entry.SkipWhitespace()
+		if entry.Peek() == '?' {
+			entry.Advance(1)
+			placeholder, _ := entry.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
+			for _, p := range placeholder.Chars {
 				if p != '?' {
-					errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, placeholder.Length())))
+					errs = append(errs, ErrorMalformedEntry(NewError(entry.Line, entry.PointerPosition, placeholder.Length())))
 					continue entries
 				}
 			}
-			eLine.Advance(placeholder.Length())
-			eLine.SkipWhitespace()
-			summaryText, _ := eLine.PeekUntil(func(r rune) bool { return false })
-			err := r.StartOpenRange(start, klog.Summary(summaryText.ToString()))
+			entry.Advance(placeholder.Length())
+			entry.SkipWhitespace()
+			summaryText, _ := entry.PeekUntil(func(r rune) bool { return false })
+			err := record.StartOpenRange(start, Summary(summaryText.ToString()))
 			if err != nil {
-				errs = append(errs, ErrorDuplicateOpenRange(NewError(eLine, 0, eLine.PointerPosition)))
+				errs = append(errs, ErrorDuplicateOpenRange(NewError(entry.Line, 0, entry.PointerPosition)))
+				continue
 			}
 		} else {
-			endCandidate, _ := eLine.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
+			endCandidate, _ := entry.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
 			if endCandidate.Length() == 0 {
-				errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, 1)))
+				errs = append(errs, ErrorMalformedEntry(NewError(entry.Line, entry.PointerPosition, 1)))
 				continue
 			}
-			end, err := klog.NewTimeFromString(endCandidate.ToString())
+			end, err := NewTimeFromString(endCandidate.ToString())
 			if err != nil {
-				errs = append(errs, ErrorMalformedEntry(NewError(eLine, eLine.PointerPosition, endCandidate.Length())))
+				errs = append(errs, ErrorMalformedEntry(NewError(entry.Line, entry.PointerPosition, endCandidate.Length())))
 				continue
 			}
-			eLine.Advance(endCandidate.Length())
-			timeRange, err := klog.NewRange(start, end)
+			entry.Advance(endCandidate.Length())
+			timeRange, err := NewRange(start, end)
 			if err != nil {
-				errs = append(errs, ErrorIllegalRange(NewError(eLine, 0, eLine.PointerPosition)))
+				errs = append(errs, ErrorIllegalRange(NewError(entry.Line, 0, entry.PointerPosition)))
+				continue
 			}
-			eLine.SkipWhitespace()
-			summaryText, _ := eLine.PeekUntil(func(r rune) bool { return false })
-			r.AddRange(timeRange, klog.Summary(summaryText.ToString()))
+			entry.SkipWhitespace()
+			summaryText, _ := entry.PeekUntil(func(r rune) bool { return false })
+			record.AddRange(timeRange, Summary(summaryText.ToString()))
 		}
 	}
 
 	if len(errs) > 0 {
 		return nil, errs
 	}
-	return r, nil
+	return record, nil
 }
