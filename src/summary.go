@@ -2,6 +2,7 @@ package klog
 
 import (
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -18,6 +19,17 @@ type Tag string
 
 func (t Tag) ToString() string {
 	return "#" + string(t)
+}
+
+func (ts TagSet) ToStrings() []string {
+	var tags []string
+	for t := range ts {
+		tags = append(tags, t.ToString())
+	}
+	sort.Slice(tags, func(i, j int) bool {
+		return i < j
+	})
+	return tags
 }
 
 type TagSet map[Tag]bool
