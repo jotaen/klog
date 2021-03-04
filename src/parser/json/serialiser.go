@@ -48,7 +48,7 @@ func toRecordViews(rs []Record) []RecordView {
 			ShouldTotalMins: should.InMinutes(),
 			Diff:            diff.ToStringWithSign(),
 			DiffMins:        diff.InMinutes(),
-			Tags:            r.Summary().Tags().ToStrings(),
+			Tags:            toTagViews(r.Summary().Tags()),
 			Entries:         toEntryViews(r.Entries()),
 		}
 		result = append(result, v)
@@ -56,17 +56,22 @@ func toRecordViews(rs []Record) []RecordView {
 	return result
 }
 
+func toTagViews(ts TagSet) []string {
+	result := ts.ToStrings()
+	if result == nil {
+		return []string{}
+	}
+	return result
+}
+
 func toEntryViews(es []Entry) []interface{} {
-	var views []interface{}
+	views := []interface{}{}
 	for _, e := range es {
 		base := EntryView{
 			Summary:   e.Summary().ToString(),
-			Tags:      e.Summary().Tags().ToStrings(),
+			Tags:      toTagViews(e.Summary().Tags()),
 			Total:     e.Duration().ToString(),
 			TotalMins: e.Duration().InMinutes(),
-		}
-		if base.Tags == nil {
-			base.Tags = []string{}
 		}
 		view := e.Unbox(func(r Range) interface{} {
 			base.Type = "range"
@@ -100,9 +105,10 @@ func toErrorViews(errs parsing.Errors) []ErrorView {
 	for _, e := range errs.Get() {
 		result = append(result, ErrorView{
 			Line:    e.Context().LineNumber,
-			Column:  e.Position(),
+			Column:  e.Column(),
 			Length:  e.Length(),
-			Message: e.Message(),
+			Title:   e.Title(),
+			Details: e.Details(),
 		})
 	}
 	return result

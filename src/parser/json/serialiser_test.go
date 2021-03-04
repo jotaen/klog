@@ -18,6 +18,25 @@ func TestSerialiseEmptyArrayIfNoErrors(t *testing.T) {
 	assert.Equal(t, `{"records":[],"errors":null}`, json)
 }
 
+func TestSerialiseMinimalRecord(t *testing.T) {
+	json := ToJson(func() []Record {
+		r := NewRecord(Ɀ_Date_(2000, 12, 31))
+		return []Record{r}
+	}(), nil)
+	assert.Equal(t, `{"records":[{`+
+		`"date":"2000-12-31",`+
+		`"summary":"",`+
+		`"total":"0m",`+
+		`"total_mins":0,`+
+		`"should_total":"0m",`+
+		`"should_total_mins":0,`+
+		`"diff":"0m",`+
+		`"diff_mins":0,`+
+		`"tags":[],`+
+		`"entries":[]`+
+		`}],"errors":null}`, json)
+}
+
 func TestSerialiseFullBlownRecord(t *testing.T) {
 	json := ToJson(func() []Record {
 		r := NewRecord(Ɀ_Date_(2000, 12, 31))
@@ -75,8 +94,9 @@ func TestSerialiseParserErrors(t *testing.T) {
 	}))
 	assert.Equal(t, `{"records":null,"errors":[{`+
 		`"line":7,`+
-		`"column":0,`+
+		`"column":1,`+
 		`"length":10,`+
-		`"message":"Invalid date: please make sure that the date format is either YYYY-MM-DD or YYYY/MM/DD, and that its value represents a valid day in the calendar."`+
+		`"title":"Invalid date",`+
+		`"details":"Please make sure that the date format is either YYYY-MM-DD or YYYY/MM/DD, and that its value represents a valid day in the calendar."`+
 		`}]}`, json)
 }

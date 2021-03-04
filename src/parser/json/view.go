@@ -42,5 +42,6 @@ type ErrorView struct {
 	Line    int    `json:"line"`
 	Column  int    `json:"column"`
 	Length  int    `json:"length"`
-	Message string `json:"message"`
+	Title   string `json:"title"`
+	Details string `json:"details"`
 }

@@ -1,5 +1,10 @@
 # Changelog (command line tool)
 
+## v1.6
+- **[ FEATURE ]** Add `json` subcommand that allows users to build
+  programmatic extensions
+- **[ FEATURE ]** Support Windows line endings (`\r\n`)
+
 ## v1.5
 - **[ FIX ]** Fix the ongoing time counter in `klog now --follow`
 
