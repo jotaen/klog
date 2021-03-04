@@ -3,6 +3,8 @@ package json
 import (
 	"github.com/stretchr/testify/assert"
 	. "klog"
+	"klog/parser"
+	"klog/parser/parsing"
 	"testing"
 )
 
@@ -60,4 +62,19 @@ func TestSerialiseFullBlownRecord(t *testing.T) {
 		`"start_mins":1468`+
 		`}]`+
 		`}],"errors":null}`, json)
+}
+
+func TestSerialiseParserErrors(t *testing.T) {
+	json := ToJson(nil, parsing.NewErrors([]parsing.Error{
+		parser.ErrorInvalidDate(parsing.NewError(parsing.Line{
+			Text:       "2018-99-99",
+			LineNumber: 7,
+		}, 0, 10)),
+	}))
+	assert.Equal(t, `{"records":null,"errors":[{`+
+		`"line":7,`+
+		`"column":0,`+
+		`"length":10,`+
+		`"message":"Invalid date: please make sure that the date format is either YYYY-MM-DD or YYYY/MM/DD, and that its value represents a valid day in the calendar."`+
+		`}]}`, json)
 }

@@ -9,47 +9,20 @@ import (
 	"strings"
 )
 
-type Envelop struct {
-	Records interface{} `json:"records"`
-	Errors  interface{} `json:"errors"`
-}
-
-type EntryView struct {
-	Type      string   `json:"type"`
-	Summary   string   `json:"summary"`
-	Tags      []string `json:"tags"`
-	Total     string   `json:"total"`
-	TotalMins int      `json:"total_mins"`
-}
-
-type OpenRangeView struct {
-	EntryView
-	Start     string `json:"start"`
-	StartMins int    `json:"start_mins"`
-}
-
-type RangeView struct {
-	OpenRangeView
-	End     string `json:"end"`
-	EndMins int    `json:"end_mins"`
-}
-
-type RecordView struct {
-	Date            string        `json:"date"`
-	Summary         string        `json:"summary"`
-	Total           string        `json:"total"`
-	TotalMins       int           `json:"total_mins"`
-	ShouldTotal     string        `json:"should_total"`
-	ShouldTotalMins int           `json:"should_total_mins"`
-	Tags            []string      `json:"tags"`
-	Entries         []interface{} `json:"entries"`
-}
-
 func ToJson(rs []Record, errs parsing.Errors) string {
-	envelop := Envelop{
-		Records: toView(rs),
-		Errors:  errs,
-	}
+	envelop := func() Envelop {
+		if errs == nil {
+			return Envelop{
+				Records: toRecordViews(rs),
+				Errors:  nil,
+			}
+		} else {
+			return Envelop{
+				Records: nil,
+				Errors:  toErrorViews(errs),
+			}
+		}
+	}()
 	buffer := new(bytes.Buffer)
 	enc := json.NewEncoder(buffer)
 	enc.SetEscapeHTML(false)
@@ -60,7 +33,7 @@ func ToJson(rs []Record, errs parsing.Errors) string {
 	return strings.TrimRight(buffer.String(), "\n")
 }
 
-func toView(rs []Record) []RecordView {
+func toRecordViews(rs []Record) []RecordView {
 	result := []RecordView{}
 	for _, r := range rs {
 		total := service.Total(r)
@@ -116,4 +89,17 @@ func toEntryViews(es []Entry) []interface{} {
 		views = append(views, view)
 	}
 	return views
+}
+
+func toErrorViews(errs parsing.Errors) []ErrorView {
+	var result []ErrorView
+	for _, e := range errs.Get() {
+		result = append(result, ErrorView{
+			Line:    e.Context().LineNumber,
+			Column:  e.Position(),
+			Length:  e.Length(),
+			Message: e.Message(),
+		})
+	}
+	return result
 }
