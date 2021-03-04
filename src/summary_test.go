@@ -20,6 +20,14 @@ func TestSummaryCannotContainWhitespaceAtBeginningOfLine(t *testing.T) {
 	assert.Equal(t, Summary(""), r.Summary()) // Still empty
 }
 
+func TestRecognisesAllTags(t *testing.T) {
+	s := Summary("Hello #world, I feel #GREAT today #123_test")
+	assert.True(t, s.Tags()["world"])
+	assert.True(t, s.Tags()["great"])
+	assert.True(t, s.Tags()["123_test"])
+	assert.Equal(t, s.Tags().ToStrings(), []string{"#123_test", "#great", "#world"})
+}
+
 func TestFindHashTagMatches(t *testing.T) {
 	// `#` is stripped
 	tags := NewTagSet("this", "#THAT", "numb3rs", "under_score")

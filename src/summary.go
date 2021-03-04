@@ -27,7 +27,7 @@ func (ts TagSet) ToStrings() []string {
 		tags = append(tags, t.ToString())
 	}
 	sort.Slice(tags, func(i, j int) bool {
-		return i < j
+		return tags[i] < tags[j]
 	})
 	return tags
 }

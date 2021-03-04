@@ -27,6 +27,7 @@ func TestSerialiseFullBlownRecord(t *testing.T) {
 	assert.Equal(t, `{"records":[{`+
 		`"date":"2000-12-31",`+
 		`"summary":"Hello #World",`+
+		`"total":"1h30m",`+
 		`"total_mins":90,`+
 		`"should_total":"7h30m!",`+
 		`"should_total_mins":450,`+
@@ -35,6 +36,7 @@ func TestSerialiseFullBlownRecord(t *testing.T) {
 		`"type":"duration",`+
 		`"summary":"#some #thing",`+
 		`"tags":["#some","#thing"],`+
+		`"total":"1h30m",`+
 		`"total_mins":90`+
 		`}]`+
 		`}],"errors":null}`, json)

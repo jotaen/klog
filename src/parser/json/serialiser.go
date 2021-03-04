@@ -16,12 +16,14 @@ type EntryView struct {
 	Type      string   `json:"type"`
 	Summary   string   `json:"summary"`
 	Tags      []string `json:"tags"`
+	Total     string   `json:"total"`
 	TotalMins int      `json:"total_mins"`
 }
 
 type RecordView struct {
 	Date            string      `json:"date"`
 	Summary         string      `json:"summary"`
+	Total           string      `json:"total"`
 	TotalMins       int         `json:"total_mins"`
 	ShouldTotal     string      `json:"should_total"`
 	ShouldTotalMins int         `json:"should_total_mins"`
@@ -58,16 +60,19 @@ func toView(rs []Record) []RecordView {
 					Type:      entryType,
 					Summary:   e.Summary().ToString(),
 					Tags:      e.Summary().Tags().ToStrings(),
+					Total:     e.Duration().ToString(),
 					TotalMins: e.Duration().InMinutes(),
 				})
 				return evs
 			}
 			return evs
 		}()
+		total := service.Total(r)
 		v := RecordView{
 			Date:            r.Date().ToString(),
 			Summary:         r.Summary().ToString(),
-			TotalMins:       service.Total(r).InMinutes(),
+			Total:           total.ToString(),
+			TotalMins:       total.InMinutes(),
 			ShouldTotal:     r.ShouldTotal().ToString(),
 			ShouldTotalMins: r.ShouldTotal().InMinutes(),
 			Tags:            r.Summary().Tags().ToStrings(),
