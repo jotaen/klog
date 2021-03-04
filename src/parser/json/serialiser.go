@@ -38,7 +38,7 @@ func toRecordViews(rs []Record) []RecordView {
 	for _, r := range rs {
 		total := service.Total(r)
 		should := r.ShouldTotal()
-		diff := total.Minus(should)
+		diff := service.Diff(should, total)
 		v := RecordView{
 			Date:            r.Date().ToString(),
 			Summary:         r.Summary().ToString(),

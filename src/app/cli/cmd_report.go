@@ -72,7 +72,7 @@ func (opt *Report) Run(ctx app.Context) error {
 		if opt.Diff {
 			should := service.ShouldTotalSum(rs...)
 			ctx.Print(pad(10-len(should.ToString())) + styler.ShouldTotal(should))
-			diff := total.Minus(should)
+			diff := service.Diff(should, total)
 			ctx.Print(pad(9-len(diff.ToStringWithSign())) + styler.Duration(diff, true))
 		}
 
@@ -88,7 +88,7 @@ func (opt *Report) Run(ctx app.Context) error {
 	if opt.Diff {
 		grandShould := service.ShouldTotalSum(records...)
 		ctx.Print(pad(10-len(grandShould.ToString())) + styler.ShouldTotal(grandShould))
-		grandDiff := grandTotal.Minus(grandShould)
+		grandDiff := service.Diff(grandShould, grandTotal)
 		ctx.Print(pad(9-len(grandDiff.ToStringWithSign())) + styler.Duration(grandDiff, true))
 	}
 	ctx.Print("\n")
