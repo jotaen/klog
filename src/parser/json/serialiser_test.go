@@ -18,6 +18,25 @@ func TestSerialiseEmptyArrayIfNoErrors(t *testing.T) {
 	assert.Equal(t, `{"records":[],"errors":null}`, json)
 }
 
+func TestSerialiseMinimalRecord(t *testing.T) {
+	json := ToJson(func() []Record {
+		r := NewRecord(Ɀ_Date_(2000, 12, 31))
+		return []Record{r}
+	}(), nil)
+	assert.Equal(t, `{"records":[{`+
+		`"date":"2000-12-31",`+
+		`"summary":"",`+
+		`"total":"0m",`+
+		`"total_mins":0,`+
+		`"should_total":"0m",`+
+		`"should_total_mins":0,`+
+		`"diff":"0m",`+
+		`"diff_mins":0,`+
+		`"tags":[],`+
+		`"entries":[]`+
+		`}],"errors":null}`, json)
+}
+
 func TestSerialiseFullBlownRecord(t *testing.T) {
 	json := ToJson(func() []Record {
 		r := NewRecord(Ɀ_Date_(2000, 12, 31))
