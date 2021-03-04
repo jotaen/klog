@@ -7,11 +7,13 @@ import (
 )
 
 type Json struct {
+	FilterArgs
+	SortArgs
 	InputFilesArgs
 }
 
 func (opt *Json) Run(ctx app.Context) error {
-	rs, err := ctx.RetrieveRecords()
+	records, err := ctx.RetrieveRecords()
 	if err != nil {
 		parserErrs, isParserErr := err.(parsing.Errors)
 		if isParserErr {
@@ -20,6 +22,8 @@ func (opt *Json) Run(ctx app.Context) error {
 		}
 		return err
 	}
-	ctx.Print(json.ToJson(rs, nil) + "\n")
+	records = opt.filter(ctx.Now(), records)
+	records = opt.sort(records)
+	ctx.Print(json.ToJson(records, nil) + "\n")
 	return nil
 }
