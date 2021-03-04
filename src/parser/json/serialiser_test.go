@@ -23,7 +23,7 @@ func TestSerialiseFullBlownRecord(t *testing.T) {
 		r := NewRecord(Ɀ_Date_(2000, 12, 31))
 		r.SetSummary("Hello #World")
 		r.SetShouldTotal(NewDuration(7, 30))
-		r.AddDuration(NewDuration(1, 30), "#some #thing")
+		r.AddDuration(NewDuration(2, 3), "#some #thing")
 		r.AddRange(Ɀ_Range_(Ɀ_TimeYesterday_(23, 44), Ɀ_Time_(5, 23)), "")
 		r.StartOpenRange(Ɀ_TimeTomorrow_(0, 28), "Started #todo")
 		return []Record{r}
@@ -31,17 +31,19 @@ func TestSerialiseFullBlownRecord(t *testing.T) {
 	assert.Equal(t, `{"records":[{`+
 		`"date":"2000-12-31",`+
 		`"summary":"Hello #World",`+
-		`"total":"7h9m",`+
-		`"total_mins":429,`+
+		`"total":"7h42m",`+
+		`"total_mins":462,`+
 		`"should_total":"7h30m!",`+
 		`"should_total_mins":450,`+
+		`"diff":"+12m",`+
+		`"diff_mins":12,`+
 		`"tags":["#world"],`+
 		`"entries":[{`+
 		`"type":"duration",`+
 		`"summary":"#some #thing",`+
 		`"tags":["#some","#thing"],`+
-		`"total":"1h30m",`+
-		`"total_mins":90`+
+		`"total":"2h3m",`+
+		`"total_mins":123`+
 		`},{`+
 		`"type":"range",`+
 		`"summary":"",`+

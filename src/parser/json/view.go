@@ -12,6 +12,8 @@ type RecordView struct {
 	TotalMins       int           `json:"total_mins"`
 	ShouldTotal     string        `json:"should_total"`
 	ShouldTotalMins int           `json:"should_total_mins"`
+	Diff            string        `json:"diff"`
+	DiffMins        int           `json:"diff_mins"`
 	Tags            []string      `json:"tags"`
 	Entries         []interface{} `json:"entries"`
 }
