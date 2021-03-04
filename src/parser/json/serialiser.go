@@ -105,9 +105,9 @@ func toErrorViews(errs parsing.Errors) []ErrorView {
 	for _, e := range errs.Get() {
 		result = append(result, ErrorView{
 			Line:    e.Context().LineNumber,
-			Column:  e.Position(),
+			Column:  e.Column(),
 			Length:  e.Length(),
-			Title: e.Title(),
+			Title:   e.Title(),
 			Details: e.Details(),
 		})
 	}

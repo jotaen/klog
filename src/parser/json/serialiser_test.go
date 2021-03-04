@@ -94,7 +94,7 @@ func TestSerialiseParserErrors(t *testing.T) {
 	}))
 	assert.Equal(t, `{"records":null,"errors":[{`+
 		`"line":7,`+
-		`"column":0,`+
+		`"column":1,`+
 		`"length":10,`+
 		`"title":"Invalid date",`+
 		`"details":"Please make sure that the date format is either YYYY-MM-DD or YYYY/MM/DD, and that its value represents a valid day in the calendar."`+
