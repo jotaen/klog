@@ -61,8 +61,8 @@ func handle(opt *Now, ctx app.Context) error {
 		ctx.Print("\n")
 		// Diff:
 		ctx.Print("Diff    ")
-		diff := total.Minus(shouldTotal)
-		grandDiff := grandTotal.Minus(grandShouldTotal)
+		diff := service.Diff(shouldTotal, total)
+		grandDiff := service.Diff(grandShouldTotal, grandTotal)
 		ctx.Print(pad(9-len(diff.ToStringWithSign())) + styler.Duration(diff, true))
 		ctx.Print(pad(11-len(grandDiff.ToStringWithSign())) + styler.Duration(grandDiff, true))
 		ctx.Print("\n")

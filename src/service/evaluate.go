@@ -63,3 +63,8 @@ func ShouldTotalSum(rs ...Record) ShouldTotal {
 	}
 	return NewShouldTotal(0, total.InMinutes())
 }
+
+// Diff calculates the difference between should total and actual total
+func Diff(should ShouldTotal, actual Duration) Duration {
+	return actual.Minus(should)
+}

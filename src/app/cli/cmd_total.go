@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	. "klog"
 	"klog/app"
 	"klog/service"
 )
@@ -26,7 +25,7 @@ func (opt *Total) Run(ctx app.Context) error {
 	ctx.Print(fmt.Sprintf("Total: %s\n", styler.Duration(total, false)))
 	if opt.Diff {
 		should := service.ShouldTotalSum(records...)
-		diff := NewDuration(0, 0).Minus(should).Plus(total)
+		diff := service.Diff(should, total)
 		ctx.Print(fmt.Sprintf("Should: %s\n", styler.ShouldTotal(should)))
 		ctx.Print(fmt.Sprintf("Diff: %s\n", styler.Duration(diff, true)))
 	}

@@ -7,22 +7,6 @@ import (
 	"testing"
 )
 
-func TestParseEmptyDocument(t *testing.T) {
-	text := ``
-	pr, errs := Parse(text)
-	require.Nil(t, errs)
-	require.Len(t, pr.Records, 0)
-}
-
-func TestParseBlankDocument(t *testing.T) {
-	text := `
- 
-`
-	pr, errs := Parse(text)
-	require.Nil(t, errs)
-	require.Len(t, pr.Records, 0)
-}
-
 func TestParseMinimalDocument(t *testing.T) {
 	text := `2000-01-01`
 	pr, errs := Parse(text)
@@ -50,6 +34,33 @@ Empty
 	assert.Equal(t, klog.Summary("Empty"), pr.Records[1].Summary())
 	assert.Equal(t, klog.NewDuration(8, 15).InMinutes(), pr.Records[1].ShouldTotal().InMinutes())
 	assert.Len(t, pr.Records[1].Entries(), 0)
+}
+
+func TestParseEmptyOrBlankDocument(t *testing.T) {
+	for _, text := range []string{
+		"",
+		"    ",
+		"\n\n\n\n\n",
+		"\n\t     \n \n         ",
+	} {
+		pr, errs := Parse(text)
+		require.Nil(t, errs)
+		require.Len(t, pr.Records, 0)
+	}
+}
+
+func TestParseWindowsAndUnixLineEndings(t *testing.T) {
+	text := "2000-01-01\r\n\r\n2000-01-02\n\n2000-01-03"
+	pr, errs := Parse(text)
+	require.Nil(t, errs)
+	require.Len(t, pr.Records, 3)
+}
+
+func TestParseMultipleRecordsWhenBlankLineContainsWhitespace(t *testing.T) {
+	text := "2018-01-01\n    1h\n" + "    \n" + "2019-01-01\n"
+	pr, errs := Parse(text)
+	require.Nil(t, errs)
+	require.Len(t, pr.Records, 2)
 }
 
 func TestParseAlternativeFormatting(t *testing.T) {
