@@ -29,8 +29,10 @@ type Error interface {
 	Position() int
 	Length() int
 	Code() string
+	Title() string
+	Details() string
 	Message() string
-	Set(string, string) Error
+	Set(string, string, string) Error
 }
 
 type err struct {
@@ -38,18 +40,22 @@ type err struct {
 	position int
 	length   int
 	code     string
-	message  string
+	title    string
+	details  string
 }
 
-func (e *err) Error() string   { return e.message }
+func (e *err) Error() string   { return e.Message() }
 func (e *err) Context() Line   { return e.context }
 func (e *err) Position() int   { return e.position }
 func (e *err) Length() int     { return e.length }
 func (e *err) Code() string    { return e.code }
-func (e *err) Message() string { return e.message }
-func (e *err) Set(code string, message string) Error {
+func (e *err) Title() string    { return e.title }
+func (e *err) Details() string    { return e.details }
+func (e *err) Message() string { return e.title + ": " + e.details }
+func (e *err) Set(code string, title string, details string) Error {
 	e.code = code
-	e.message = message
+	e.title = title
+	e.details = details
 	return e
 }
 

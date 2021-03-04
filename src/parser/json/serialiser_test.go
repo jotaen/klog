@@ -96,6 +96,7 @@ func TestSerialiseParserErrors(t *testing.T) {
 		`"line":7,`+
 		`"column":0,`+
 		`"length":10,`+
-		`"message":"Invalid date: please make sure that the date format is either YYYY-MM-DD or YYYY/MM/DD, and that its value represents a valid day in the calendar."`+
+		`"title":"Invalid date",`+
+		`"details":"Please make sure that the date format is either YYYY-MM-DD or YYYY/MM/DD, and that its value represents a valid day in the calendar."`+
 		`}]}`, json)
 }

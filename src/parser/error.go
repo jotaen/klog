@@ -7,7 +7,8 @@ import (
 func ErrorInvalidDate(e Error) Error {
 	return e.Set(
 		"ErrorInvalidDate",
-		"Invalid date: please make sure that the date format is either YYYY-MM-DD or YYYY/MM/DD, "+
+		"Invalid date",
+		"Please make sure that the date format is either YYYY-MM-DD or YYYY/MM/DD, "+
 			"and that its value represents a valid day in the calendar.",
 	)
 }
@@ -15,14 +16,16 @@ func ErrorInvalidDate(e Error) Error {
 func ErrorIllegalIndentation(e Error) Error {
 	return e.Set(
 		"ErrorIllegalIndentation",
-		"Unexpected indentation: please correct the indentation of this line.",
+		"Unexpected indentation",
+		"Please correct the indentation of this line.",
 	)
 }
 
 func ErrorMalformedShouldTotal(e Error) Error {
 	return e.Set(
 		"ErrorMalformedShouldTotal",
-		"Malformed property: please review the syntax of the should-total property. "+
+		"Malformed property",
+		"Please review the syntax of the should-total property. "+
 			"Valid examples for it would be: (8h!) or (4h30m!) or (45m!)",
 	)
 }
@@ -30,7 +33,8 @@ func ErrorMalformedShouldTotal(e Error) Error {
 func ErrorUnrecognisedProperty(e Error) Error {
 	return e.Set(
 		"ErrorUnrecognisedProperty",
-		"Unrecognised property: the highlighted property is not recognised. "+
+		"Unrecognised property",
+		"The highlighted property is not recognised. "+
 			"The should-total property must be a time duration suffixed with an "+
 			"exclamation mark, e.g. 5h15m! or 8h!",
 	)
@@ -39,7 +43,8 @@ func ErrorUnrecognisedProperty(e Error) Error {
 func ErrorMalformedPropertiesSyntax(e Error) Error {
 	return e.Set(
 		"ErrorMalformedPropertiesSyntax",
-		"Malformed properties list: properties cannot be empty and must be "+
+		"Malformed properties list",
+		"Properties cannot be empty and must be "+
 			"surrounded by parenthesis on both sides",
 	)
 }
@@ -47,7 +52,8 @@ func ErrorMalformedPropertiesSyntax(e Error) Error {
 func ErrorUnrecognisedTextInHeadline(e Error) Error {
 	return e.Set(
 		"ErrorUnrecognisedTextInHeadline",
-		"Malformed headline: the highlighted text in the headline is not recognised. "+
+		"Malformed headline",
+		"The highlighted text in the headline is not recognised. "+
 			"Please make sure to surround properties with parentheses, e.g.: (5h!) "+
 			"You generally cannot put arbitrary text into the headline.",
 	)
@@ -58,13 +64,15 @@ func ErrorMalformedSummary(e Error) Error {
 	return e.Set(
 		"ErrorMalformedSummary",
 		"Invalid summary",
+		"The summary text is not valid",
 	)
 }
 
 func ErrorMalformedEntry(e Error) Error {
 	return e.Set(
 		"ErrorMalformedEntry",
-		"Malformed entry: please review the syntax of the entry. "+
+		"Malformed entry",
+		"Please review the syntax of the entry. "+
 			"It must start with a duration or a time range. "+
 			"Valid examples would be: 3h20m or 8:00-10:00 or 8:00-? "+
 			"or <23:00-6:00 or 18:00-0:30>",
@@ -74,7 +82,8 @@ func ErrorMalformedEntry(e Error) Error {
 func ErrorDuplicateOpenRange(e Error) Error {
 	return e.Set(
 		"ErrorDuplicateOpenRange",
-		"Invalid duplicate entry: please make sure that there is only "+
+		"Duplicate entry",
+		"Please make sure that there is only "+
 			"one open (unclosed) time range in this record.",
 	)
 }
@@ -82,7 +91,8 @@ func ErrorDuplicateOpenRange(e Error) Error {
 func ErrorIllegalRange(e Error) Error {
 	return e.Set(
 		"ErrorIllegalRange",
-		"Invalid date range: please make sure that both time values appear in chronological order. "+
+		"Invalid date range",
+		"Please make sure that both time values appear in chronological order. "+
 			"If you want a time to be associated with an adjacent day you can use angle brackets "+
 			"to shift the time by one day: <23:00-6:00 or 18:00-0:30>",
 	)

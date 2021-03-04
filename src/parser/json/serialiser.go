@@ -107,7 +107,8 @@ func toErrorViews(errs parsing.Errors) []ErrorView {
 			Line:    e.Context().LineNumber,
 			Column:  e.Position(),
 			Length:  e.Length(),
-			Message: e.Message(),
+			Title: e.Title(),
+			Details: e.Details(),
 		})
 	}
 	return result
