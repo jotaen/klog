@@ -19,7 +19,7 @@ type cli struct {
 	Append Append `cmd group:"Manipulate" hidden help:"Appends a new record to a file (based on templates)"`
 
 	Bookmark Bookmark `cmd group:"Misc" help:"Default file that klog reads from"`
-	Json     Json     `cmd group:"Misc" hidden help:"Convert records to JSON"`
+	Json     Json     `cmd group:"Misc" help:"Convert records to JSON"`
 	Widget   Widget   `cmd group:"Misc" help:"Start menu bar widget (MacOS only)"`
 	Version  Version  `cmd group:"Misc" help:"Print version info and check for updates"`
 }
