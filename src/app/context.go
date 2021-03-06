@@ -90,7 +90,11 @@ func (c *context) MetaInfo() struct {
 	}
 }
 
-func retrieveInputs(filePaths []string, readStdin func() (string, Error), bookmarkOrNil *File) ([]string, Error) {
+func retrieveInputs(
+	filePaths []string,
+	readStdin func() (string, Error),
+	bookmarkOrNil func() (*File, Error),
+) ([]string, Error) {
 	if len(filePaths) > 0 {
 		var result []string
 		for _, p := range filePaths {
@@ -109,8 +113,11 @@ func retrieveInputs(filePaths []string, readStdin func() (string, Error), bookma
 	if stdin != "" {
 		return []string{stdin}, nil
 	}
-	if bookmarkOrNil != nil {
-		content, err := readFile(bookmarkOrNil.Path)
+	b, err := bookmarkOrNil()
+	if err != nil {
+		return nil, err
+	} else if b != nil {
+		content, err := readFile(b.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -118,17 +125,15 @@ func retrieveInputs(filePaths []string, readStdin func() (string, Error), bookma
 	}
 	return nil, appError{
 		"No input given",
-		"You can a) pass a file to read, b) pipe file contents via stdin, or" +
-			"c) specify a bookmark to read from.",
+		"Please do one of the following:\n" +
+			"    a) pass one or multiple file names as argument\n" +
+			"    b) pipe file contents via stdin\n" +
+			"    c) specify a bookmark to read from by default",
 	}
 }
 
 func (c *context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
-	b, err := c.bookmarkOrNil()
-	if err != nil {
-		return nil, err
-	}
-	inputs, err := retrieveInputs(paths, readStdin, b)
+	inputs, err := retrieveInputs(paths, readStdin, c.bookmarkOrNil)
 	if err != nil {
 		return nil, err
 	}
