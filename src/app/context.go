@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"io/ioutil"
 	"klog"
 	"klog/parser"
 	"klog/service"
@@ -27,8 +26,9 @@ type Context interface {
 	}
 	RetrieveRecords(...string) ([]klog.Record, error)
 	Now() gotime.Time
-	SetBookmark(string) Error
 	Bookmark() (*File, Error)
+	SetBookmark(string) Error
+	UnsetBookmark() Error
 	OpenInFileBrowser(string) Error
 	OpenInEditor(string) Error
 	AppendTemplateToFile(string, string) Error
@@ -90,24 +90,56 @@ func (c *context) MetaInfo() struct {
 	}
 }
 
-func (c *context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
-	if len(paths) == 0 {
-		b, err := c.Bookmark()
-		if err != nil {
-			return nil, appError{
-				"No input files specified",
-				"Either specify input files, or set a bookmark",
+func retrieveInputs(
+	filePaths []string,
+	readStdin func() (string, Error),
+	bookmarkOrNil func() (*File, Error),
+) ([]string, Error) {
+	if len(filePaths) > 0 {
+		var result []string
+		for _, p := range filePaths {
+			content, err := readFile(p)
+			if err != nil {
+				return nil, err
 			}
+			result = append(result, content)
 		}
-		paths = []string{b.Path}
+		return result, nil
 	}
-	var records []klog.Record
-	for _, p := range paths {
-		content, err := readFile(p)
+	stdin, err := readStdin()
+	if err != nil {
+		return nil, err
+	}
+	if stdin != "" {
+		return []string{stdin}, nil
+	}
+	b, err := bookmarkOrNil()
+	if err != nil {
+		return nil, err
+	} else if b != nil {
+		content, err := readFile(b.Path)
 		if err != nil {
 			return nil, err
 		}
-		pr, parserErrors := parser.Parse(content)
+		return []string{content}, nil
+	}
+	return nil, appError{
+		"No input given",
+		"Please do one of the following:\n" +
+			"    a) pass one or multiple file names as argument\n" +
+			"    b) pipe file contents via stdin\n" +
+			"    c) specify a bookmark to read from by default",
+	}
+}
+
+func (c *context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
+	inputs, err := retrieveInputs(paths, readStdin, c.bookmarkOrNil)
+	if err != nil {
+		return nil, err
+	}
+	var records []klog.Record
+	for _, in := range inputs {
+		pr, parserErrors := parser.Parse(in)
 		if parserErrors != nil {
 			return nil, parserErrors
 		}
@@ -126,14 +158,11 @@ type File struct {
 	Path     string
 }
 
-func (c *context) Bookmark() (*File, Error) {
-	bookmarkPath := c.KlogFolder() + "bookmark.klg"
+func (c *context) bookmarkOrNil() (*File, Error) {
+	bookmarkPath := c.bookmarkOrigin()
 	dest, err := os.Readlink(bookmarkPath)
 	if err != nil {
-		return nil, appError{
-			"No bookmark set",
-			"You can set a bookmark by running: klog bookmark set somefile.klg",
-		}
+		return nil, nil
 	}
 	_, err = os.Stat(dest)
 	if err != nil {
@@ -147,6 +176,24 @@ func (c *context) Bookmark() (*File, Error) {
 		Location: filepath.Dir(dest),
 		Path:     dest,
 	}, nil
+}
+
+func (c *context) bookmarkOrigin() string {
+	return c.KlogFolder() + "bookmark.klg"
+}
+
+func (c *context) Bookmark() (*File, Error) {
+	b, err := c.bookmarkOrNil()
+	if err != nil {
+		return nil, err
+	}
+	if b == nil {
+		return nil, appError{
+			"No bookmark set",
+			"You can set a bookmark by running: klog bookmark set somefile.klg",
+		}
+	}
+	return b, nil
 }
 
 func (c *context) SetBookmark(path string) Error {
@@ -165,7 +212,7 @@ func (c *context) SetBookmark(path string) Error {
 			"Please create a ~/.klog folder manually",
 		}
 	}
-	symlink := klogFolder + "/bookmark.klg"
+	symlink := c.bookmarkOrigin()
 	_ = os.Remove(symlink)
 	err = os.Symlink(bookmark, symlink)
 	if err != nil {
@@ -175,6 +222,10 @@ func (c *context) SetBookmark(path string) Error {
 		}
 	}
 	return nil
+}
+
+func (c *context) UnsetBookmark() Error {
+	return removeFile(c.bookmarkOrigin())
 }
 
 func (c *context) OpenInFileBrowser(path string) Error {
@@ -231,33 +282,4 @@ func (c *context) AppendTemplateToFile(filePath string, templateName string) Err
 		return err
 	}
 	return appendToFile(filePath, service.AppendableText(contents, instance))
-}
-
-func readFile(path string) (string, Error) {
-	contents, err := ioutil.ReadFile(path)
-	if err != nil {
-		return "", appError{
-			"Cannot read file",
-			"Location: " + path,
-		}
-	}
-	return string(contents), nil
-}
-
-func appendToFile(path string, textToAppend string) Error {
-	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
-	if err != nil {
-		return appError{
-			"Cannot write to file",
-			"Location: " + path,
-		}
-	}
-	defer file.Close()
-	if _, err := file.WriteString(textToAppend); err != nil {
-		return appError{
-			"Cannot write to file",
-			"Location: " + path,
-		}
-	}
-	return nil
 }

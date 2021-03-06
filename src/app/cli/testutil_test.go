@@ -89,6 +89,10 @@ func (ctx *TestingContext) Bookmark() (*app.File, app.Error) {
 	}, nil
 }
 
+func (ctx *TestingContext) UnsetBookmark() app.Error {
+	return nil
+}
+
 func (ctx *TestingContext) OpenInFileBrowser(_ string) app.Error {
 	return nil
 }

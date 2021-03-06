@@ -10,20 +10,21 @@ type Json struct {
 	FilterArgs
 	SortArgs
 	InputFilesArgs
+	Pretty bool `name:"pretty" help:"Pretty-print output"`
 }
 
 func (opt *Json) Run(ctx app.Context) error {
-	records, err := ctx.RetrieveRecords()
+	records, err := ctx.RetrieveRecords(opt.File...)
 	if err != nil {
 		parserErrs, isParserErr := err.(parsing.Errors)
 		if isParserErr {
-			ctx.Print(json.ToJson(nil, parserErrs) + "\n")
+			ctx.Print(json.ToJson(nil, parserErrs, opt.Pretty) + "\n")
 			return nil
 		}
 		return err
 	}
 	records = opt.filter(ctx.Now(), records)
 	records = opt.sort(records)
-	ctx.Print(json.ToJson(records, nil) + "\n")
+	ctx.Print(json.ToJson(records, nil, opt.Pretty) + "\n")
 	return nil
 }
