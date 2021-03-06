@@ -27,8 +27,9 @@ type Context interface {
 	}
 	RetrieveRecords(...string) ([]klog.Record, error)
 	Now() gotime.Time
-	SetBookmark(string) Error
 	Bookmark() (*File, Error)
+	SetBookmark(string) Error
+	UnsetBookmark() Error
 	OpenInFileBrowser(string) Error
 	OpenInEditor(string) Error
 	AppendTemplateToFile(string, string) Error
@@ -126,14 +127,11 @@ type File struct {
 	Path     string
 }
 
-func (c *context) Bookmark() (*File, Error) {
-	bookmarkPath := c.KlogFolder() + "bookmark.klg"
+func (c *context) bookmarkOrNil() (*File, Error) {
+	bookmarkPath := c.bookmarkOrigin()
 	dest, err := os.Readlink(bookmarkPath)
 	if err != nil {
-		return nil, appError{
-			"No bookmark set",
-			"You can set a bookmark by running: klog bookmark set somefile.klg",
-		}
+		return nil, nil
 	}
 	_, err = os.Stat(dest)
 	if err != nil {
@@ -147,6 +145,24 @@ func (c *context) Bookmark() (*File, Error) {
 		Location: filepath.Dir(dest),
 		Path:     dest,
 	}, nil
+}
+
+func (c *context) bookmarkOrigin() string {
+	return c.KlogFolder() + "bookmark.klg"
+}
+
+func (c *context) Bookmark() (*File, Error) {
+	b, err := c.bookmarkOrNil()
+	if err != nil {
+		return nil, err
+	}
+	if b == nil {
+		return nil, appError{
+			"No bookmark set",
+			"You can set a bookmark by running: klog bookmark set somefile.klg",
+		}
+	}
+	return b, nil
 }
 
 func (c *context) SetBookmark(path string) Error {
@@ -165,7 +181,7 @@ func (c *context) SetBookmark(path string) Error {
 			"Please create a ~/.klog folder manually",
 		}
 	}
-	symlink := klogFolder + "/bookmark.klg"
+	symlink := c.bookmarkOrigin()
 	_ = os.Remove(symlink)
 	err = os.Symlink(bookmark, symlink)
 	if err != nil {
@@ -175,6 +191,10 @@ func (c *context) SetBookmark(path string) Error {
 		}
 	}
 	return nil
+}
+
+func (c *context) UnsetBookmark() Error {
+	return removeFile(c.bookmarkOrigin())
 }
 
 func (c *context) OpenInFileBrowser(path string) Error {
@@ -231,33 +251,4 @@ func (c *context) AppendTemplateToFile(filePath string, templateName string) Err
 		return err
 	}
 	return appendToFile(filePath, service.AppendableText(contents, instance))
-}
-
-func readFile(path string) (string, Error) {
-	contents, err := ioutil.ReadFile(path)
-	if err != nil {
-		return "", appError{
-			"Cannot read file",
-			"Location: " + path,
-		}
-	}
-	return string(contents), nil
-}
-
-func appendToFile(path string, textToAppend string) Error {
-	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
-	if err != nil {
-		return appError{
-			"Cannot write to file",
-			"Location: " + path,
-		}
-	}
-	defer file.Close()
-	if _, err := file.WriteString(textToAppend); err != nil {
-		return appError{
-			"Cannot write to file",
-			"Location: " + path,
-		}
-	}
-	return nil
 }

@@ -5,9 +5,10 @@ import (
 )
 
 type Bookmark struct {
-	Get  BookmarkGet  `cmd name:"get" group:"Bookmark" help:"Show current bookmark"`
-	Set  BookmarkSet  `cmd name:"set" group:"Bookmark" help:"Set bookmark to a file"`
-	Edit BookmarkEdit `cmd name:"edit" group:"Bookmark" help:"Open bookmark in your editor"`
+	Get   BookmarkGet   `cmd name:"get" group:"Bookmark" help:"Show current bookmark"`
+	Set   BookmarkSet   `cmd name:"set" group:"Bookmark" help:"Set bookmark to a file"`
+	Edit  BookmarkEdit  `cmd name:"edit" group:"Bookmark" help:"Open bookmark in your editor"`
+	Unset BookmarkUnset `cmd name:"unset" group:"Bookmark" help:"Clear current bookmark"`
 }
 
 type BookmarkGet struct{}
@@ -42,4 +43,15 @@ func (args *BookmarkEdit) Run(ctx app.Context) error {
 		return appErr
 	}
 	return ctx.OpenInEditor(b.Path)
+}
+
+type BookmarkUnset struct{}
+
+func (args *BookmarkUnset) Run(ctx app.Context) error {
+	err := ctx.UnsetBookmark()
+	if err != nil {
+		return err
+	}
+	ctx.Print("Removed bookmark\n")
+	return nil
 }

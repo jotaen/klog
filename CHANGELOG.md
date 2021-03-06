@@ -4,6 +4,7 @@
 - **[ FEATURE ]** Add `json` subcommand that allows users to build
   programmatic extensions
 - **[ FEATURE ]** Support Windows line endings (`\r\n`)
+- **[ FEATURE ]** Add `bookmark unset` command for clearing current selection
 
 ## v1.5
 - **[ FIX ]** Fix the ongoing time counter in `klog now --follow`
