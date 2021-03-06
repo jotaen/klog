@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 install() {
   cd src
@@ -29,4 +29,7 @@ cli() {
 	go run app/cli/main/main.go $@
 }
 
-$1 ${@:2}
+# MAIN
+task=$1
+shift 1
+$task $@
