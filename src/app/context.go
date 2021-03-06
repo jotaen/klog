@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"io/ioutil"
 	"klog"
 	"klog/parser"
 	"klog/service"
@@ -91,24 +90,51 @@ func (c *context) MetaInfo() struct {
 	}
 }
 
-func (c *context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
-	if len(paths) == 0 {
-		b, err := c.Bookmark()
-		if err != nil {
-			return nil, appError{
-				"No input files specified",
-				"Either specify input files, or set a bookmark",
+func retrieveInputs(filePaths []string, readStdin func() (string, Error), bookmarkOrNil *File) ([]string, Error) {
+	if len(filePaths) > 0 {
+		var result []string
+		for _, p := range filePaths {
+			content, err := readFile(p)
+			if err != nil {
+				return nil, err
 			}
+			result = append(result, content)
 		}
-		paths = []string{b.Path}
+		return result, nil
 	}
-	var records []klog.Record
-	for _, p := range paths {
-		content, err := readFile(p)
+	stdin, err := readStdin()
+	if err != nil {
+		return nil, err
+	}
+	if stdin != "" {
+		return []string{stdin}, nil
+	}
+	if bookmarkOrNil != nil {
+		content, err := readFile(bookmarkOrNil.Path)
 		if err != nil {
 			return nil, err
 		}
-		pr, parserErrors := parser.Parse(content)
+		return []string{content}, nil
+	}
+	return nil, appError{
+		"No input given",
+		"You can a) pass a file to read, b) pipe file contents via stdin, or" +
+			"c) specify a bookmark to read from.",
+	}
+}
+
+func (c *context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
+	b, err := c.bookmarkOrNil()
+	if err != nil {
+		return nil, err
+	}
+	inputs, err := retrieveInputs(paths, readStdin, b)
+	if err != nil {
+		return nil, err
+	}
+	var records []klog.Record
+	for _, in := range inputs {
+		pr, parserErrors := parser.Parse(in)
 		if parserErrors != nil {
 			return nil, parserErrors
 		}

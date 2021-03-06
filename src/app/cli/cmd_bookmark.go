@@ -52,6 +52,6 @@ func (args *BookmarkUnset) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
-	ctx.Print("Removed bookmark\n")
+	ctx.Print("Cleared bookmark\n")
 	return nil
 }

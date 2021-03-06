@@ -5,6 +5,7 @@
   programmatic extensions
 - **[ FEATURE ]** Support Windows line endings (`\r\n`)
 - **[ FEATURE ]** Add `bookmark unset` command for clearing current selection
+- **[ FEATURE ]** Check stdin for input (to allow shell piping)
 
 ## v1.5
 - **[ FIX ]** Fix the ongoing time counter in `klog now --follow`
