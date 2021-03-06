@@ -9,20 +9,28 @@ import (
 )
 
 func TestSerialiseEmptyRecords(t *testing.T) {
-	json := ToJson([]Record{}, nil)
+	json := ToJson([]Record{}, nil, false)
 	assert.Equal(t, `{"records":[],"errors":null}`, json)
 }
 
 func TestSerialiseEmptyArrayIfNoErrors(t *testing.T) {
-	json := ToJson(nil, nil)
+	json := ToJson(nil, nil, false)
 	assert.Equal(t, `{"records":[],"errors":null}`, json)
+}
+
+func TestSerialisePrettyPrinted(t *testing.T) {
+	json := ToJson(nil, nil, true)
+	assert.Equal(t, `{
+  "records": [],
+  "errors": null
+}`, json)
 }
 
 func TestSerialiseMinimalRecord(t *testing.T) {
 	json := ToJson(func() []Record {
 		r := NewRecord(Ɀ_Date_(2000, 12, 31))
 		return []Record{r}
-	}(), nil)
+	}(), nil, false)
 	assert.Equal(t, `{"records":[{`+
 		`"date":"2000-12-31",`+
 		`"summary":"",`+
@@ -46,7 +54,7 @@ func TestSerialiseFullBlownRecord(t *testing.T) {
 		r.AddRange(Ɀ_Range_(Ɀ_TimeYesterday_(23, 44), Ɀ_Time_(5, 23)), "")
 		r.StartOpenRange(Ɀ_TimeTomorrow_(0, 28), "Started #todo")
 		return []Record{r}
-	}(), nil)
+	}(), nil, false)
 	assert.Equal(t, `{"records":[{`+
 		`"date":"2000-12-31",`+
 		`"summary":"Hello #World",`+
@@ -91,7 +99,7 @@ func TestSerialiseParserErrors(t *testing.T) {
 			Text:       "2018-99-99",
 			LineNumber: 7,
 		}, 0, 10)),
-	}))
+	}), false)
 	assert.Equal(t, `{"records":null,"errors":[{`+
 		`"line":7,`+
 		`"column":1,`+

@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func ToJson(rs []Record, errs parsing.Errors) string {
+func ToJson(rs []Record, errs parsing.Errors, prettyPrint bool) string {
 	envelop := func() Envelop {
 		if errs == nil {
 			return Envelop{
@@ -25,6 +25,9 @@ func ToJson(rs []Record, errs parsing.Errors) string {
 	}()
 	buffer := new(bytes.Buffer)
 	enc := json.NewEncoder(buffer)
+	if prettyPrint {
+		enc.SetIndent("", "  ")
+	}
 	enc.SetEscapeHTML(false)
 	err := enc.Encode(&envelop)
 	if err != nil {
