@@ -1,3 +1,5 @@
+![klog logp](https://klog.jotaen.net/logo/klog-black-small.svg)
+
 # klog
 
 klog is a plain-text file format and a command line tool for time tracking.
