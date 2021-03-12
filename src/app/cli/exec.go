@@ -38,7 +38,6 @@ func Execute() int {
 			"klog time tracking: command line app for interacting with `.klg` files."+
 				"\n\nRead the documentation at https://klog.jotaen.net",
 		),
-		kong.UsageOnError(),
 		func() kong.Option {
 			datePrototype, _ := klog.NewDate(1, 1, 1)
 			return kong.TypeMapper(reflect.TypeOf(&datePrototype).Elem(), dateDecoder())
