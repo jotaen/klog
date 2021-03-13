@@ -86,7 +86,7 @@ func periodDecoder() kong.MapperFunc {
 		}
 		p, err := lib.NewPeriodFromString(value)
 		if err != nil {
-			return errors.New("Please provide a valid period")
+			return err
 		}
 		target.Set(reflect.ValueOf(p))
 		return nil
