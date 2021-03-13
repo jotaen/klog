@@ -47,6 +47,17 @@ func appendToFile(path string, textToAppend string) Error {
 	return nil
 }
 
+func writeToFile(path string, contents string) Error {
+	err := os.WriteFile(path, []byte(contents), 0644)
+	if err != nil {
+		return appError{
+			message: "Cannot write to file",
+			help:    "Location: " + path,
+		}
+	}
+	return nil
+}
+
 func readStdin() (string, Error) {
 	info, err := os.Stdin.Stat()
 	if err != nil {

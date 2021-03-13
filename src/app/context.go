@@ -25,6 +25,8 @@ type Context interface {
 		BuildHash string
 	}
 	ReadInputs(...string) ([]klog.Record, error)
+	ReadFileInput(string) (*parser.ParseResult, error)
+	WriteFile(string, string) Error
 	Now() gotime.Time
 	Bookmark() (*File, Error)
 	SetBookmark(string) Error
@@ -146,6 +148,22 @@ func (ctx *context) ReadInputs(paths ...string) ([]klog.Record, error) {
 		records = append(records, pr.Records...)
 	}
 	return records, nil
+}
+
+func (ctx *context) ReadFileInput(path string) (*parser.ParseResult, error) {
+	content, err := readFile(path)
+	if err != nil {
+		return nil, err
+	}
+	pr, parserErrors := parser.Parse(content)
+	if parserErrors != nil {
+		return nil, parserErrors
+	}
+	return pr, nil
+}
+
+func (ctx *context) WriteFile(path string, contents string) Error {
+	return writeToFile(path, contents)
 }
 
 func (ctx *context) Now() gotime.Time {

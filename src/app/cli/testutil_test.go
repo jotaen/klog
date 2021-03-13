@@ -73,6 +73,14 @@ func (ctx *TestingContext) ReadInputs(_ ...string) ([]klog.Record, error) {
 	return ctx.records, nil
 }
 
+func (ctx *TestingContext) ReadFileInput(string) (*parser.ParseResult, error) {
+	return nil, nil
+}
+
+func (ctx *TestingContext) WriteFile(path string, contents string) app.Error {
+	return nil
+}
+
 func (ctx *TestingContext) Now() gotime.Time {
 	return ctx.now
 }

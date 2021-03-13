@@ -2,12 +2,28 @@ package lib
 
 import (
 	. "klog"
+	"klog/app"
 	"klog/service"
 	gotime "time"
 )
 
 type InputFilesArgs struct {
 	File []string `arg optional type:"existingfile" name:"file" help:".klg source file(s) (if empty the bookmark is used)"`
+}
+
+type OutputFileArgs struct {
+	File string `arg optional type:"existingfile" name:"file" help:".klg source file (if empty the bookmark is used)"`
+}
+
+func (args *OutputFileArgs) OutputFile(ctx app.Context) (string, error) {
+	if args.File != "" {
+		return args.File, nil
+	}
+	b, err := ctx.Bookmark()
+	if err != nil {
+		return "", nil
+	}
+	return b.Path, nil
 }
 
 type DiffArg struct {
