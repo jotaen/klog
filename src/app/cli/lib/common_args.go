@@ -1,8 +1,7 @@
-package cli
+package lib
 
 import (
 	. "klog"
-	"klog/app/cli/lib"
 	"klog/service"
 	gotime "time"
 )
@@ -19,7 +18,7 @@ type NowArgs struct {
 	Now bool `name:"now" short:"n" help:"Assume open ranges to be closed at this moment"`
 }
 
-func (args *NowArgs) total(reference gotime.Time, rs ...Record) Duration {
+func (args *NowArgs) Total(reference gotime.Time, rs ...Record) Duration {
 	if args.Now {
 		d, _ := service.HypotheticalTotal(reference, rs...)
 		return d
@@ -28,18 +27,18 @@ func (args *NowArgs) total(reference gotime.Time, rs ...Record) Duration {
 }
 
 type FilterArgs struct {
-	Tags      []string   `name:"tag" group:"Filter" help:"Only records (or particular entries) that match this tag"`
-	Date      []Date     `name:"date" group:"Filter" help:"Only records at this date"`
-	Today     bool       `name:"today" group:"Filter" help:"Only records at today’s date"`
-	Yesterday bool       `name:"yesterday" group:"Filter" help:"Only records at yesterday’s date"`
-	Since     Date       `name:"since" group:"Filter" help:"Only records since this date (inclusive)"`
-	Until     Date       `name:"until" group:"Filter" help:"Only records until this date (inclusive)"`
-	After     Date       `name:"after" group:"Filter" help:"Only records after this date (exclusive)"`
-	Before    Date       `name:"before" group:"Filter" help:"Only records before this date (exclusive)"`
-	Period    lib.Period `name:"period" group:"Filter" help:"Only records in this period (YYYY-MM or YYYY)"`
+	Tags      []string `name:"tag" group:"Filter" help:"Only records (or particular entries) that match this tag"`
+	Date      []Date   `name:"date" group:"Filter" help:"Only records at this date"`
+	Today     bool     `name:"today" group:"Filter" help:"Only records at today’s date"`
+	Yesterday bool     `name:"yesterday" group:"Filter" help:"Only records at yesterday’s date"`
+	Since     Date     `name:"since" group:"Filter" help:"Only records since this date (inclusive)"`
+	Until     Date     `name:"until" group:"Filter" help:"Only records until this date (inclusive)"`
+	After     Date     `name:"after" group:"Filter" help:"Only records after this date (exclusive)"`
+	Before    Date     `name:"before" group:"Filter" help:"Only records before this date (exclusive)"`
+	Period    Period   `name:"period" group:"Filter" help:"Only records in this period (YYYY-MM or YYYY)"`
 }
 
-func (args *FilterArgs) filter(now gotime.Time, rs []Record) []Record {
+func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
 	qry := service.FilterQry{
 		BeforeOrEqual: args.Until,
 		AfterOrEqual:  args.Since,
@@ -74,14 +73,14 @@ func (args *WarnArgs) ToString(now gotime.Time, records []Record) string {
 		return ""
 	}
 	ws := service.SanityCheck(now, records)
-	return prettifyWarnings(ws)
+	return PrettifyWarnings(ws)
 }
 
 type SortArgs struct {
 	Sort string `name:"sort" help:"Sort output by date (ASC or DESC)" enum:"ASC,DESC,"`
 }
 
-func (args *SortArgs) sort(rs []Record) []Record {
+func (args *SortArgs) ApplySort(rs []Record) []Record {
 	if args.Sort == "" {
 		return rs
 	}

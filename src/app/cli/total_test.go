@@ -3,6 +3,7 @@ package cli
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"klog/app/cli/lib"
 	"testing"
 )
 
@@ -23,7 +24,7 @@ func TestTotalOfInput(t *testing.T) {
 2150-11-10
 Open ranges are not considered
 	16:00 - ?
-`)._Run((&Total{WarnArgs: WarnArgs{NoWarn: true}}).Run)
+`)._Run((&Total{WarnArgs: lib.WarnArgs{NoWarn: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, "\nTotal: 2h\n(In 3 records)\n", out)
 }
@@ -35,7 +36,7 @@ func TestTotalWithDiffing(t *testing.T) {
 
 2018-11-09 (7h45m!)
 	8:00 - 16:00
-`)._Run((&Total{DiffArg: DiffArg{Diff: true}}).Run)
+`)._Run((&Total{DiffArg: lib.DiffArg{Diff: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, "\nTotal: 16h30m\nShould: 15h45m!\nDiff: +45m\n(In 2 records)\n", out)
 }

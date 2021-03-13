@@ -1,4 +1,4 @@
-package cli
+package lib
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-var styler = parser.Serialiser{
+var Styler = parser.Serialiser{
 	Date: func(d Date) string {
 		return Style{Color: "015", IsUnderlined: true}.Format(d.ToString())
 	},
@@ -49,14 +49,14 @@ var styler = parser.Serialiser{
 	},
 }
 
-func pad(length int) string {
+func Pad(length int) string {
 	if length < 0 {
 		return ""
 	}
 	return strings.Repeat(" ", length)
 }
 
-func prettyMonth(m int) string {
+func PrettyMonth(m int) string {
 	switch m {
 	case 1:
 		return "January"
@@ -86,7 +86,7 @@ func prettyMonth(m int) string {
 	panic("Illegal month") // this can/should never happen
 }
 
-func prettyDay(d int) string {
+func PrettyDay(d int) string {
 	switch d {
 	case 1:
 		return "Monday"
@@ -121,7 +121,7 @@ func breakLines(text string, maxLength int) []string {
 	return lines
 }
 
-func prettifyError(err error) error {
+func PrettifyError(err error) error {
 	switch e := err.(type) {
 	case parsing.Errors:
 		message := ""
@@ -151,7 +151,7 @@ func prettifyError(err error) error {
 	return errors.New("Error: " + err.Error())
 }
 
-func prettifyWarnings(ws []service.Warning) string {
+func PrettifyWarnings(ws []service.Warning) string {
 	result := ""
 	for _, w := range ws {
 		result += Style{Background: "227", Color: "000"}.Format(" WARNING ")

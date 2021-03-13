@@ -3,15 +3,16 @@ package cli
 import (
 	. "klog"
 	"klog/app"
+	"klog/app/cli/lib"
 	"klog/service"
 	"sort"
 	"strings"
 )
 
 type Tags struct {
-	FilterArgs
-	WarnArgs
-	InputFilesArgs
+	lib.FilterArgs
+	lib.WarnArgs
+	lib.InputFilesArgs
 }
 
 func (opt *Tags) Run(ctx app.Context) error {
@@ -20,14 +21,14 @@ func (opt *Tags) Run(ctx app.Context) error {
 		return err
 	}
 	now := ctx.Now()
-	records = opt.filter(now, records)
+	records = opt.ApplyFilter(now, records)
 	entriesByTag, _ := service.EntryTagLookup(records...)
 	tagsOrdered, maxLength := sortTags(entriesByTag)
 	for _, t := range tagsOrdered {
 		es := entriesByTag[t]
 		ctx.Print(t.ToString())
 		ctx.Print(strings.Repeat(" ", maxLength-len(t)) + " ")
-		ctx.Print(styler.Duration(service.TotalEntries(es...), false))
+		ctx.Print(lib.Styler.Duration(service.TotalEntries(es...), false))
 		ctx.Print("\n")
 	}
 
