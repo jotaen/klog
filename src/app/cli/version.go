@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"klog/app"
 	"net/http"
 	"time"
@@ -44,7 +44,7 @@ func fetchVersionInfo(url string) *versionInfo {
 	if err != nil {
 		return nil
 	}
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil
 	}

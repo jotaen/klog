@@ -3,12 +3,11 @@ package app
 import (
 	"bufio"
 	"io"
-	"io/ioutil"
 	"os"
 )
 
-func readFile(path string) (string, Error) {
-	contents, err := ioutil.ReadFile(path)
+func ReadFile(path string) (string, Error) {
+	contents, err := os.ReadFile(path)
 	if err != nil {
 		return "", appError{
 			"Cannot read file",
@@ -18,7 +17,7 @@ func readFile(path string) (string, Error) {
 	return string(contents), nil
 }
 
-func removeFile(path string) Error {
+func RemoveFile(path string) Error {
 	err := os.Remove(path)
 	if err != nil {
 		return appError{
@@ -29,6 +28,7 @@ func removeFile(path string) Error {
 	return nil
 }
 
+// Deprecated
 func appendToFile(path string, textToAppend string) Error {
 	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
@@ -47,7 +47,7 @@ func appendToFile(path string, textToAppend string) Error {
 	return nil
 }
 
-func writeToFile(path string, contents string) Error {
+func WriteToFile(path string, contents string) Error {
 	err := os.WriteFile(path, []byte(contents), 0644)
 	if err != nil {
 		return appError{
@@ -58,7 +58,7 @@ func writeToFile(path string, contents string) Error {
 	return nil
 }
 
-func readStdin() (string, Error) {
+func ReadStdin() (string, Error) {
 	info, err := os.Stdin.Stat()
 	if err != nil {
 		return "", appError{

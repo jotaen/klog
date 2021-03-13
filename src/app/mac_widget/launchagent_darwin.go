@@ -1,7 +1,7 @@
 package mac_widget
 
 import (
-	"io/ioutil"
+	"klog/app"
 	"os"
 )
 
@@ -12,8 +12,7 @@ type launchAgent struct {
 	plistFilePath  string
 }
 
-// os.Executable()
-func NewLaunchAgent(homeDir string, klogBinPath string) launchAgent {
+func newLaunchAgent(homeDir string, klogBinPath string) launchAgent {
 	name := "net.jotaen.klog.widget"
 	launchAgentDir := homeDir + "/Library/LaunchAgents/"
 	return launchAgent{
@@ -49,7 +48,7 @@ func (l *launchAgent) activate() error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(l.plistFilePath, []byte(contents), 0644)
+	err = app.WriteToFile(l.plistFilePath, contents)
 	return err
 }
 

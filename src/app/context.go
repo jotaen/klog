@@ -100,7 +100,7 @@ func retrieveInputs(
 	if len(filePaths) > 0 {
 		var result []string
 		for _, p := range filePaths {
-			content, err := readFile(p)
+			content, err := ReadFile(p)
 			if err != nil {
 				return nil, err
 			}
@@ -119,7 +119,7 @@ func retrieveInputs(
 	if err != nil {
 		return nil, err
 	} else if b != nil {
-		content, err := readFile(b.Path)
+		content, err := ReadFile(b.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -135,7 +135,7 @@ func retrieveInputs(
 }
 
 func (ctx *context) ReadInputs(paths ...string) ([]klog.Record, error) {
-	inputs, err := retrieveInputs(paths, readStdin, ctx.bookmarkOrNil)
+	inputs, err := retrieveInputs(paths, ReadStdin, ctx.bookmarkOrNil)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +151,7 @@ func (ctx *context) ReadInputs(paths ...string) ([]klog.Record, error) {
 }
 
 func (ctx *context) ReadFileInput(path string) (*parser.ParseResult, error) {
-	content, err := readFile(path)
+	content, err := ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +163,7 @@ func (ctx *context) ReadFileInput(path string) (*parser.ParseResult, error) {
 }
 
 func (ctx *context) WriteFile(path string, contents string) Error {
-	return writeToFile(path, contents)
+	return WriteToFile(path, contents)
 }
 
 func (ctx *context) Now() gotime.Time {
@@ -243,7 +243,7 @@ func (ctx *context) SetBookmark(path string) Error {
 }
 
 func (ctx *context) UnsetBookmark() Error {
-	return removeFile(ctx.bookmarkOrigin())
+	return RemoveFile(ctx.bookmarkOrigin())
 }
 
 func (ctx *context) OpenInFileBrowser(path string) Error {
@@ -281,7 +281,7 @@ func (ctx *context) OpenInEditor(path string) Error {
 
 func (ctx *context) AppendTemplateToFile(filePath string, templateName string) Error {
 	location := ctx.KlogFolder() + templateName + ".template.klg"
-	template, err := readFile(location)
+	template, err := ReadFile(location)
 	if err != nil {
 		return appError{
 			"No such template",
@@ -295,7 +295,7 @@ func (ctx *context) AppendTemplateToFile(filePath string, templateName string) E
 			tErr.Error(),
 		}
 	}
-	contents, err := readFile(filePath)
+	contents, err := ReadFile(filePath)
 	if err != nil {
 		return err
 	}
