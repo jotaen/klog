@@ -35,6 +35,7 @@ type FilterArgs struct {
 	Until     Date     `name:"until" group:"Filter" help:"Only records until this date (inclusive)"`
 	After     Date     `name:"after" group:"Filter" help:"Only records after this date (exclusive)"`
 	Before    Date     `name:"before" group:"Filter" help:"Only records before this date (exclusive)"`
+	Period    Period   `name:"period" group:"Filter" help:"Only records in this period (YYYY-MM or YYYY)"`
 }
 
 func (args *FilterArgs) filter(now gotime.Time, rs []Record) []Record {
@@ -43,6 +44,10 @@ func (args *FilterArgs) filter(now gotime.Time, rs []Record) []Record {
 		AfterEq:  args.Since,
 		Tags:     args.Tags,
 		Dates:    args.Date,
+	}
+	if args.Period.since != nil {
+		qry.BeforeEq = args.Period.until
+		qry.AfterEq = args.Period.since
 	}
 	if args.After != nil {
 		qry.AfterEq = args.After.PlusDays(1)
