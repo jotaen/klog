@@ -10,7 +10,7 @@ build() {
 	go build \
 	  -ldflags "-X 'klog/app.BinaryVersion=$1' -X 'klog/app.BinaryBuildHash=$2'" \
 	  -o ../out/klog \
-	  app/cli/main/main.go
+	  app/cli/main/*.go
 }
 
 test() {
@@ -26,7 +26,7 @@ format() {
 cli() {
   # When passing in a file, remember to prepend `../`
   cd src
-	go run app/cli/main/main.go $@
+	go run app/cli/main/*.go $@
 }
 
 # MAIN
