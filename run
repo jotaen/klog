@@ -26,10 +26,10 @@ format() {
 cli() {
   # When passing in a file, remember to prepend `../`
   cd src
-	go run app/cli/main/*.go $@
+	go run app/cli/main/*.go "$@"
 }
 
 # MAIN
 task=$1
 shift 1
-$task $@
+$task "$@"
