@@ -2,28 +2,13 @@ package cli
 
 import (
 	. "klog"
+	"klog/app/cli/lib"
 	"klog/service"
 	gotime "time"
 )
 
 type InputFilesArgs struct {
 	File []string `arg optional type:"existingfile" name:"file" help:".klg source file(s) (if empty the bookmark is used)"`
-}
-
-func (args *FilterArgs) filter(now gotime.Time, rs []Record) []Record {
-	qry := service.FilterQry{
-		BeforeEq: args.BeforeEq,
-		AfterEq:  args.AfterEq,
-		Tags:     args.Tags,
-		Dates:    args.Date,
-	}
-	if args.Today {
-		qry.Dates = append(qry.Dates, NewDateFromTime(now))
-	}
-	if args.Yesterday {
-		qry.Dates = append(qry.Dates, NewDateFromTime(now.AddDate(0, 0, -1)))
-	}
-	return service.Filter(rs, qry)
 }
 
 type DiffArg struct {
@@ -43,12 +28,41 @@ func (args *NowArgs) total(reference gotime.Time, rs ...Record) Duration {
 }
 
 type FilterArgs struct {
-	Tags      []string `name:"tag" help:"Only records (or particular entries) that match this tag"`
-	Date      []Date   `name:"date" help:"Only records at this date"`
-	Today     bool     `name:"today" help:"Only records at today’s date"`
-	Yesterday bool     `name:"yesterday" help:"Only records at yesterday’s date"`
-	AfterEq   Date     `name:"after" help:"Only records after this date (inclusive)"`
-	BeforeEq  Date     `name:"before" help:"Only records before this date (inclusive)"`
+	Tags      []string   `name:"tag" group:"Filter" help:"Only records (or particular entries) that match this tag"`
+	Date      []Date     `name:"date" group:"Filter" help:"Only records at this date"`
+	Today     bool       `name:"today" group:"Filter" help:"Only records at today’s date"`
+	Yesterday bool       `name:"yesterday" group:"Filter" help:"Only records at yesterday’s date"`
+	Since     Date       `name:"since" group:"Filter" help:"Only records since this date (inclusive)"`
+	Until     Date       `name:"until" group:"Filter" help:"Only records until this date (inclusive)"`
+	After     Date       `name:"after" group:"Filter" help:"Only records after this date (exclusive)"`
+	Before    Date       `name:"before" group:"Filter" help:"Only records before this date (exclusive)"`
+	Period    lib.Period `name:"period" group:"Filter" help:"Only records in this period (YYYY-MM or YYYY)"`
+}
+
+func (args *FilterArgs) filter(now gotime.Time, rs []Record) []Record {
+	qry := service.FilterQry{
+		BeforeOrEqual: args.Until,
+		AfterOrEqual:  args.Since,
+		Tags:          args.Tags,
+		Dates:         args.Date,
+	}
+	if args.Period.Since != nil {
+		qry.BeforeOrEqual = args.Period.Until
+		qry.AfterOrEqual = args.Period.Since
+	}
+	if args.After != nil {
+		qry.AfterOrEqual = args.After.PlusDays(1)
+	}
+	if args.Before != nil {
+		qry.BeforeOrEqual = args.Before.PlusDays(-1)
+	}
+	if args.Today {
+		qry.Dates = append(qry.Dates, NewDateFromTime(now))
+	}
+	if args.Yesterday {
+		qry.Dates = append(qry.Dates, NewDateFromTime(now.AddDate(0, 0, -1)))
+	}
+	return service.Filter(rs, qry)
 }
 
 type WarnArgs struct {

@@ -6,10 +6,10 @@ import (
 )
 
 type FilterQry struct {
-	Tags     []string
-	BeforeEq Date
-	AfterEq  Date
-	Dates    []Date
+	Tags          []string
+	BeforeOrEqual Date
+	AfterOrEqual  Date
+	Dates         []Date
 }
 
 // Filter returns all records the matches the query.
@@ -22,10 +22,10 @@ func Filter(rs []Record, o FilterQry) []Record {
 		if len(dates) > 0 && !dates[r.Date().Hash()] {
 			continue
 		}
-		if o.BeforeEq != nil && !o.BeforeEq.IsAfterOrEqual(r.Date()) {
+		if o.BeforeOrEqual != nil && !o.BeforeOrEqual.IsAfterOrEqual(r.Date()) {
 			continue
 		}
-		if o.AfterEq != nil && !r.Date().IsAfterOrEqual(o.AfterEq) {
+		if o.AfterOrEqual != nil && !r.Date().IsAfterOrEqual(o.AfterOrEqual) {
 			continue
 		}
 		if len(tags) > 0 {

@@ -6,6 +6,7 @@ import (
 	"github.com/alecthomas/kong"
 	"klog"
 	"klog/app"
+	"klog/app/cli/lib"
 	"reflect"
 )
 
@@ -38,10 +39,13 @@ func Execute() int {
 			"klog time tracking: command line app for interacting with `.klg` files."+
 				"\n\nRead the documentation at https://klog.jotaen.net",
 		),
-		kong.UsageOnError(),
 		func() kong.Option {
 			datePrototype, _ := klog.NewDate(1, 1, 1)
 			return kong.TypeMapper(reflect.TypeOf(&datePrototype).Elem(), dateDecoder())
+		}(),
+		func() kong.Option {
+			period := lib.Period{}
+			return kong.TypeMapper(reflect.TypeOf(&period).Elem(), periodDecoder())
 		}(),
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact: true,
@@ -63,13 +67,28 @@ func dateDecoder() kong.MapperFunc {
 			return err
 		}
 		if value == "" {
-			return errors.New("please provide a valid date")
+			return errors.New("Please provide a valid date")
 		}
 		d, err := klog.NewDateFromString(value)
 		if err != nil {
 			return errors.New("`" + value + "` is not a valid date")
 		}
 		target.Set(reflect.ValueOf(d))
+		return nil
+	}
+}
+
+func periodDecoder() kong.MapperFunc {
+	return func(ctx *kong.DecodeContext, target reflect.Value) error {
+		var value string
+		if err := ctx.Scan.PopValueInto("period", &value); err != nil {
+			return err
+		}
+		p, err := lib.NewPeriodFromString(value)
+		if err != nil {
+			return err
+		}
+		target.Set(reflect.ValueOf(p))
 		return nil
 	}
 }

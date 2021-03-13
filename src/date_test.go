@@ -20,6 +20,11 @@ func TestReconWithDate(t *testing.T) {
 	assert.Equal(t, Ɀ_Date_(2005, 12, 30), d.PlusDays(-1))
 }
 
+func TestPlusDaysAccountsForLeapYear(t *testing.T) {
+	d, _ := NewDate(2020, 2, 28)
+	assert.Equal(t, Ɀ_Date_(2020, 2, 29), d.PlusDays(1))
+}
+
 func TestHashYieldsDistinctValues(t *testing.T) {
 	hashes := make(map[DateHash]bool)
 	for i, d := 0, Ɀ_Date_(1000, 1, 1); i < 1000; i++ {
