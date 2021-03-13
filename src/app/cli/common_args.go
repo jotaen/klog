@@ -2,6 +2,7 @@ package cli
 
 import (
 	. "klog"
+	"klog/app/cli/lib"
 	"klog/service"
 	gotime "time"
 )
@@ -27,15 +28,15 @@ func (args *NowArgs) total(reference gotime.Time, rs ...Record) Duration {
 }
 
 type FilterArgs struct {
-	Tags      []string `name:"tag" group:"Filter" help:"Only records (or particular entries) that match this tag"`
-	Date      []Date   `name:"date" group:"Filter" help:"Only records at this date"`
-	Today     bool     `name:"today" group:"Filter" help:"Only records at today’s date"`
-	Yesterday bool     `name:"yesterday" group:"Filter" help:"Only records at yesterday’s date"`
-	Since     Date     `name:"since" group:"Filter" help:"Only records since this date (inclusive)"`
-	Until     Date     `name:"until" group:"Filter" help:"Only records until this date (inclusive)"`
-	After     Date     `name:"after" group:"Filter" help:"Only records after this date (exclusive)"`
-	Before    Date     `name:"before" group:"Filter" help:"Only records before this date (exclusive)"`
-	Period    Period   `name:"period" group:"Filter" help:"Only records in this period (YYYY-MM or YYYY)"`
+	Tags      []string   `name:"tag" group:"Filter" help:"Only records (or particular entries) that match this tag"`
+	Date      []Date     `name:"date" group:"Filter" help:"Only records at this date"`
+	Today     bool       `name:"today" group:"Filter" help:"Only records at today’s date"`
+	Yesterday bool       `name:"yesterday" group:"Filter" help:"Only records at yesterday’s date"`
+	Since     Date       `name:"since" group:"Filter" help:"Only records since this date (inclusive)"`
+	Until     Date       `name:"until" group:"Filter" help:"Only records until this date (inclusive)"`
+	After     Date       `name:"after" group:"Filter" help:"Only records after this date (exclusive)"`
+	Before    Date       `name:"before" group:"Filter" help:"Only records before this date (exclusive)"`
+	Period    lib.Period `name:"period" group:"Filter" help:"Only records in this period (YYYY-MM or YYYY)"`
 }
 
 func (args *FilterArgs) filter(now gotime.Time, rs []Record) []Record {
@@ -45,9 +46,9 @@ func (args *FilterArgs) filter(now gotime.Time, rs []Record) []Record {
 		Tags:     args.Tags,
 		Dates:    args.Date,
 	}
-	if args.Period.since != nil {
-		qry.BeforeEq = args.Period.until
-		qry.AfterEq = args.Period.since
+	if args.Period.Since != nil {
+		qry.BeforeEq = args.Period.Until
+		qry.AfterEq = args.Period.Since
 	}
 	if args.After != nil {
 		qry.AfterEq = args.After.PlusDays(1)

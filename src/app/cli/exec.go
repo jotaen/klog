@@ -6,10 +6,8 @@ import (
 	"github.com/alecthomas/kong"
 	"klog"
 	"klog/app"
+	"klog/app/cli/lib"
 	"reflect"
-	"regexp"
-	"strconv"
-	"strings"
 )
 
 type cli struct {
@@ -46,7 +44,7 @@ func Execute() int {
 			return kong.TypeMapper(reflect.TypeOf(&datePrototype).Elem(), dateDecoder())
 		}(),
 		func() kong.Option {
-			period := Period{}
+			period := lib.Period{}
 			return kong.TypeMapper(reflect.TypeOf(&period).Elem(), periodDecoder())
 		}(),
 		kong.ConfigureHelp(kong.HelpOptions{
@@ -80,43 +78,17 @@ func dateDecoder() kong.MapperFunc {
 	}
 }
 
-var periodPattern = regexp.MustCompile(`^\d{4}(-\d{2})?$`)
-
 func periodDecoder() kong.MapperFunc {
 	return func(ctx *kong.DecodeContext, target reflect.Value) error {
 		var value string
 		if err := ctx.Scan.PopValueInto("period", &value); err != nil {
 			return err
 		}
-		if value == "" || !periodPattern.MatchString(value) {
+		p, err := lib.NewPeriodFromString(value)
+		if err != nil {
 			return errors.New("Please provide a valid period")
 		}
-		parts := strings.Split(value, "-")
-		year, _ := strconv.Atoi(parts[0])
-		monthStart := 1
-		monthEnd := 12
-		if len(parts) == 2 {
-			monthStart, _ = strconv.Atoi(parts[1])
-			monthEnd = monthStart
-		}
-		start, _ := klog.NewDate(year, monthStart, 1)
-		end, _ := klog.NewDate(year, monthEnd, 28)
-		for true {
-			next := end.PlusDays(1)
-			if next.Month() != end.Month() {
-				break
-			}
-			end = next
-		}
-		target.Set(reflect.ValueOf(Period{
-			since: start,
-			until: end,
-		}))
+		target.Set(reflect.ValueOf(p))
 		return nil
 	}
-}
-
-type Period struct {
-	since klog.Date
-	until klog.Date
 }
