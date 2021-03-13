@@ -66,6 +66,16 @@ func TestReconcilerRejectsInvalidIndex(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestReconcilerRejectsNegativeIndex(t *testing.T) {
+	original := "2018-01-01\n"
+	pr, _ := Parse(original)
+	reconciled, err := pr.AddEntry(func(rs []Record) (int, string) {
+		return -1, ""
+	})
+	assert.Equal(t, original, reconciled)
+	assert.Error(t, err)
+}
+
 func TestReconcilerRejectsInvalidEntry(t *testing.T) {
 	original := "2018-01-01\n"
 	pr, _ := Parse(original)
