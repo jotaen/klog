@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"klog/app"
+	"klog/app/cli/lib"
 	"klog/service"
 )
 
@@ -22,12 +23,12 @@ func (opt *Total) Run(ctx app.Context) error {
 	now := ctx.Now()
 	records = opt.filter(now, records)
 	total := opt.NowArgs.total(now, records...)
-	ctx.Print(fmt.Sprintf("Total: %s\n", styler.Duration(total, false)))
+	ctx.Print(fmt.Sprintf("Total: %s\n", lib.Styler.Duration(total, false)))
 	if opt.Diff {
 		should := service.ShouldTotalSum(records...)
 		diff := service.Diff(should, total)
-		ctx.Print(fmt.Sprintf("Should: %s\n", styler.ShouldTotal(should)))
-		ctx.Print(fmt.Sprintf("Diff: %s\n", styler.Duration(diff, true)))
+		ctx.Print(fmt.Sprintf("Should: %s\n", lib.Styler.ShouldTotal(should)))
+		ctx.Print(fmt.Sprintf("Diff: %s\n", lib.Styler.Duration(diff, true)))
 	}
 	ctx.Print(fmt.Sprintf("(In %d record%s)\n", len(records), func() string {
 		if len(records) == 1 {

@@ -54,7 +54,7 @@ func Execute() int {
 	cliApp.BindTo(ctx, (*app.Context)(nil))
 	err = cliApp.Run(&ctx)
 	if err != nil {
-		fmt.Println(prettifyError(err))
+		fmt.Println(lib.PrettifyError(err))
 		return -1
 	}
 	return 0

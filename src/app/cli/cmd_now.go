@@ -5,6 +5,7 @@ import (
 	"fmt"
 	. "klog"
 	"klog/app"
+	"klog/app/cli/lib"
 	"klog/service"
 	"os"
 	"os/signal"
@@ -48,37 +49,37 @@ func handle(opt *Now, ctx app.Context) error {
 	ctx.Print("Total  ")
 	total, _ := service.HypotheticalTotal(now, recents...)
 	grandTotal, _ := service.HypotheticalTotal(now, records...)
-	ctx.Print(pad(10-len(total.ToString())) + styler.Duration(total, false))
-	ctx.Print(pad(11-len(grandTotal.ToString())) + styler.Duration(grandTotal, false))
+	ctx.Print(lib.Pad(10-len(total.ToString())) + lib.Styler.Duration(total, false))
+	ctx.Print(lib.Pad(11-len(grandTotal.ToString())) + lib.Styler.Duration(grandTotal, false))
 	ctx.Print("\n")
 	if opt.Diff {
 		// Should:
 		ctx.Print("Should  ")
 		shouldTotal := service.ShouldTotalSum(recents...)
 		grandShouldTotal := service.ShouldTotalSum(records...)
-		ctx.Print(pad(9-len(shouldTotal.ToString())) + styler.ShouldTotal(shouldTotal))
-		ctx.Print(pad(11-len(grandShouldTotal.ToString())) + styler.ShouldTotal(grandShouldTotal))
+		ctx.Print(lib.Pad(9-len(shouldTotal.ToString())) + lib.Styler.ShouldTotal(shouldTotal))
+		ctx.Print(lib.Pad(11-len(grandShouldTotal.ToString())) + lib.Styler.ShouldTotal(grandShouldTotal))
 		ctx.Print("\n")
 		// Diff:
 		ctx.Print("Diff    ")
 		diff := service.Diff(shouldTotal, total)
 		grandDiff := service.Diff(grandShouldTotal, grandTotal)
-		ctx.Print(pad(9-len(diff.ToStringWithSign())) + styler.Duration(diff, true))
-		ctx.Print(pad(11-len(grandDiff.ToStringWithSign())) + styler.Duration(grandDiff, true))
+		ctx.Print(lib.Pad(9-len(diff.ToStringWithSign())) + lib.Styler.Duration(diff, true))
+		ctx.Print(lib.Pad(11-len(grandDiff.ToStringWithSign())) + lib.Styler.Duration(grandDiff, true))
 		ctx.Print("\n")
 		// ETA:
 		ctx.Print("E.T.A.  ")
 		eta, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(diff))
 		if eta != nil {
-			ctx.Print(pad(9-len(eta.ToString())) + styler.Time(eta))
+			ctx.Print(lib.Pad(9-len(eta.ToString())) + lib.Styler.Time(eta))
 		} else {
-			ctx.Print(pad(9-3) + "???")
+			ctx.Print(lib.Pad(9-3) + "???")
 		}
 		grandEta, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(grandDiff))
 		if grandEta != nil {
-			ctx.Print(pad(11-len(grandEta.ToString())) + styler.Time(grandEta))
+			ctx.Print(lib.Pad(11-len(grandEta.ToString())) + lib.Styler.Time(grandEta))
 		} else {
-			ctx.Print(pad(11-3) + "???")
+			ctx.Print(lib.Pad(11-3) + "???")
 		}
 		ctx.Print("\n")
 	}

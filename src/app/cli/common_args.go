@@ -74,7 +74,7 @@ func (args *WarnArgs) ToString(now gotime.Time, records []Record) string {
 		return ""
 	}
 	ws := service.SanityCheck(now, records)
-	return prettifyWarnings(ws)
+	return lib.PrettifyWarnings(ws)
 }
 
 type SortArgs struct {

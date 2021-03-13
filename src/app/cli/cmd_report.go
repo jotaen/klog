@@ -4,6 +4,7 @@ import (
 	"fmt"
 	. "klog"
 	"klog/app"
+	"klog/app/cli/lib"
 	"klog/service"
 	"strings"
 )
@@ -52,12 +53,12 @@ func (opt *Report) Run(ctx app.Context) error {
 		month := func() string {
 			if date.Month() != m {
 				m = date.Month()
-				return prettyMonth(m)[:3]
+				return lib.PrettyMonth(m)[:3]
 			}
 			return "   "
 		}()
 		day := func() string {
-			return fmt.Sprintf("%s %2v.", prettyDay(date.Weekday())[:3], date.Day())
+			return fmt.Sprintf("%s %2v.", lib.PrettyDay(date.Weekday())[:3], date.Day())
 		}()
 		ctx.Print(fmt.Sprintf("%s %s    %s  ", year, month, day))
 
@@ -67,13 +68,13 @@ func (opt *Report) Run(ctx app.Context) error {
 			continue
 		}
 		total := opt.NowArgs.total(now, rs...)
-		ctx.Print(pad(7-len(total.ToString())) + styler.Duration(total, false))
+		ctx.Print(lib.Pad(7-len(total.ToString())) + lib.Styler.Duration(total, false))
 
 		if opt.Diff {
 			should := service.ShouldTotalSum(rs...)
-			ctx.Print(pad(10-len(should.ToString())) + styler.ShouldTotal(should))
+			ctx.Print(lib.Pad(10-len(should.ToString())) + lib.Styler.ShouldTotal(should))
 			diff := service.Diff(should, total)
-			ctx.Print(pad(9-len(diff.ToStringWithSign())) + styler.Duration(diff, true))
+			ctx.Print(lib.Pad(9-len(diff.ToStringWithSign())) + lib.Styler.Duration(diff, true))
 		}
 
 		ctx.Print("\n")
@@ -84,12 +85,12 @@ func (opt *Report) Run(ctx app.Context) error {
 	}
 	ctx.Print("\n")
 	grandTotal := opt.NowArgs.total(now, records...)
-	ctx.Print(indentation + pad(9-len(grandTotal.ToStringWithSign())) + styler.Duration(grandTotal, true))
+	ctx.Print(indentation + lib.Pad(9-len(grandTotal.ToStringWithSign())) + lib.Styler.Duration(grandTotal, true))
 	if opt.Diff {
 		grandShould := service.ShouldTotalSum(records...)
-		ctx.Print(pad(10-len(grandShould.ToString())) + styler.ShouldTotal(grandShould))
+		ctx.Print(lib.Pad(10-len(grandShould.ToString())) + lib.Styler.ShouldTotal(grandShould))
 		grandDiff := service.Diff(grandShould, grandTotal)
-		ctx.Print(pad(9-len(grandDiff.ToStringWithSign())) + styler.Duration(grandDiff, true))
+		ctx.Print(lib.Pad(9-len(grandDiff.ToStringWithSign())) + lib.Styler.Duration(grandDiff, true))
 	}
 	ctx.Print("\n")
 

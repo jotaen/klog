@@ -2,6 +2,7 @@ package cli
 
 import (
 	"klog/app"
+	"klog/app/cli/lib"
 	"klog/parser"
 )
 
@@ -23,7 +24,7 @@ func (opt *Print) Run(ctx app.Context) error {
 	now := ctx.Now()
 	records = opt.filter(now, records)
 	records = opt.sort(records)
-	ctx.Print("\n" + parser.SerialiseRecords(&styler, records...) + "\n")
+	ctx.Print("\n" + parser.SerialiseRecords(&lib.Styler, records...) + "\n")
 
 	ctx.Print(opt.WarnArgs.ToString(now, records))
 	return nil
