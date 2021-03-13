@@ -69,7 +69,7 @@ func (ctx *TestingContext) MetaInfo() struct {
 	}{"v0.0", "abcdef1"}
 }
 
-func (ctx *TestingContext) RetrieveRecords(_ ...string) ([]klog.Record, error) {
+func (ctx *TestingContext) ReadInputs(_ ...string) ([]klog.Record, error) {
 	return ctx.records, nil
 }
 

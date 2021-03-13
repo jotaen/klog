@@ -15,7 +15,7 @@ type Json struct {
 }
 
 func (opt *Json) Run(ctx app.Context) error {
-	records, err := ctx.RetrieveRecords(opt.File...)
+	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		parserErrs, isParserErr := err.(parsing.Errors)
 		if isParserErr {

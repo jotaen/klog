@@ -19,7 +19,7 @@ type Report struct {
 }
 
 func (opt *Report) Run(ctx app.Context) error {
-	records, err := ctx.RetrieveRecords(opt.File...)
+	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err
 	}

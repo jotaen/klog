@@ -14,7 +14,7 @@ type Print struct {
 }
 
 func (opt *Print) Run(ctx app.Context) error {
-	records, err := ctx.RetrieveRecords(opt.File...)
+	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err
 	}

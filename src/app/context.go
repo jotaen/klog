@@ -24,14 +24,14 @@ type Context interface {
 		Version   string
 		BuildHash string
 	}
-	RetrieveRecords(...string) ([]klog.Record, error)
+	ReadInputs(...string) ([]klog.Record, error)
 	Now() gotime.Time
 	Bookmark() (*File, Error)
 	SetBookmark(string) Error
 	UnsetBookmark() Error
 	OpenInFileBrowser(string) Error
 	OpenInEditor(string) Error
-	AppendTemplateToFile(string, string) Error
+	AppendTemplateToFile(string, string) Error // Deprecated
 }
 
 type context struct {
@@ -52,19 +52,19 @@ func NewContextFromEnv() (Context, error) {
 	return NewContext(homeDir.HomeDir)
 }
 
-func (c *context) Print(text string) {
+func (ctx *context) Print(text string) {
 	fmt.Print(text)
 }
 
-func (c *context) HomeFolder() string {
-	return c.homeDir
+func (ctx *context) HomeFolder() string {
+	return ctx.homeDir
 }
 
-func (c *context) KlogFolder() string {
-	return c.homeDir + "/.klog/"
+func (ctx *context) KlogFolder() string {
+	return ctx.homeDir + "/.klog/"
 }
 
-func (c *context) MetaInfo() struct {
+func (ctx *context) MetaInfo() struct {
 	Version   string
 	BuildHash string
 } {
@@ -132,8 +132,8 @@ func retrieveInputs(
 	}
 }
 
-func (c *context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
-	inputs, err := retrieveInputs(paths, readStdin, c.bookmarkOrNil)
+func (ctx *context) ReadInputs(paths ...string) ([]klog.Record, error) {
+	inputs, err := retrieveInputs(paths, readStdin, ctx.bookmarkOrNil)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +148,7 @@ func (c *context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
 	return records, nil
 }
 
-func (c *context) Now() gotime.Time {
+func (ctx *context) Now() gotime.Time {
 	return gotime.Now()
 }
 
@@ -158,8 +158,8 @@ type File struct {
 	Path     string
 }
 
-func (c *context) bookmarkOrNil() (*File, Error) {
-	bookmarkPath := c.bookmarkOrigin()
+func (ctx *context) bookmarkOrNil() (*File, Error) {
+	bookmarkPath := ctx.bookmarkOrigin()
 	dest, err := os.Readlink(bookmarkPath)
 	if err != nil {
 		return nil, nil
@@ -178,12 +178,12 @@ func (c *context) bookmarkOrNil() (*File, Error) {
 	}, nil
 }
 
-func (c *context) bookmarkOrigin() string {
-	return c.KlogFolder() + "bookmark.klg"
+func (ctx *context) bookmarkOrigin() string {
+	return ctx.KlogFolder() + "bookmark.klg"
 }
 
-func (c *context) Bookmark() (*File, Error) {
-	b, err := c.bookmarkOrNil()
+func (ctx *context) Bookmark() (*File, Error) {
+	b, err := ctx.bookmarkOrNil()
 	if err != nil {
 		return nil, err
 	}
@@ -196,7 +196,7 @@ func (c *context) Bookmark() (*File, Error) {
 	return b, nil
 }
 
-func (c *context) SetBookmark(path string) Error {
+func (ctx *context) SetBookmark(path string) Error {
 	bookmark, err := filepath.Abs(path)
 	if err != nil {
 		return appError{
@@ -204,7 +204,7 @@ func (c *context) SetBookmark(path string) Error {
 			"Please check the file path",
 		}
 	}
-	klogFolder := c.KlogFolder()
+	klogFolder := ctx.KlogFolder()
 	err = os.MkdirAll(klogFolder, 0700)
 	if err != nil {
 		return appError{
@@ -212,7 +212,7 @@ func (c *context) SetBookmark(path string) Error {
 			"Please create a ~/.klog folder manually",
 		}
 	}
-	symlink := c.bookmarkOrigin()
+	symlink := ctx.bookmarkOrigin()
 	_ = os.Remove(symlink)
 	err = os.Symlink(bookmark, symlink)
 	if err != nil {
@@ -224,11 +224,11 @@ func (c *context) SetBookmark(path string) Error {
 	return nil
 }
 
-func (c *context) UnsetBookmark() Error {
-	return removeFile(c.bookmarkOrigin())
+func (ctx *context) UnsetBookmark() Error {
+	return removeFile(ctx.bookmarkOrigin())
 }
 
-func (c *context) OpenInFileBrowser(path string) Error {
+func (ctx *context) OpenInFileBrowser(path string) Error {
 	cmd := exec.Command("open", path)
 	err := cmd.Run()
 	if err != nil {
@@ -240,7 +240,7 @@ func (c *context) OpenInFileBrowser(path string) Error {
 	return nil
 }
 
-func (c *context) OpenInEditor(path string) Error {
+func (ctx *context) OpenInEditor(path string) Error {
 	editor := os.Getenv("EDITOR")
 	if editor == "" {
 		return appError{
@@ -261,8 +261,8 @@ func (c *context) OpenInEditor(path string) Error {
 	return nil
 }
 
-func (c *context) AppendTemplateToFile(filePath string, templateName string) Error {
-	location := c.KlogFolder() + templateName + ".template.klg"
+func (ctx *context) AppendTemplateToFile(filePath string, templateName string) Error {
+	location := ctx.KlogFolder() + templateName + ".template.klg"
 	template, err := readFile(location)
 	if err != nil {
 		return appError{
@@ -270,7 +270,7 @@ func (c *context) AppendTemplateToFile(filePath string, templateName string) Err
 			"There is no template at location " + location,
 		}
 	}
-	instance, tErr := service.RenderTemplate(template, c.Now())
+	instance, tErr := service.RenderTemplate(template, ctx.Now())
 	if tErr != nil {
 		return appError{
 			"Invalid template",
