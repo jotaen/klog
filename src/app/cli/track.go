@@ -9,7 +9,7 @@ import (
 
 type Track struct {
 	Date  Date   `name:"date" group:"Filter" help:"The date at which to add the entry (defaults to today)"`
-	Entry string `arg required help:".klg source file (if empty the bookmark is used)"`
+	Entry string `arg required help:"A time entry, optionally with summary (might require quoting)"`
 	lib.OutputFileArgs
 }
 
