@@ -1,5 +1,11 @@
 # Changelog (command line tool)
 
+## Pending
+- **[ BREAKING ]** Make `--after` and `--before` filters exclusive
+- **[ FEATURE ]** Add `--since` and `--until` filters (inclusive)
+- **[ FEATURE ]** Add `--period` filter (e.g. `--period=2015` for 
+  all in 2015, or `--period=2015-04` for all in April 2015).
+
 ## v1.6
 - **[ FEATURE ]** Add `json` subcommand that allows users to build
   programmatic extensions
