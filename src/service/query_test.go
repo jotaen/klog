@@ -46,7 +46,7 @@ func TestQueryWithNoClauses(t *testing.T) {
 }
 
 func TestQueryWithAfter(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{AfterEq: Ɀ_Date_(2000, 1, 1)})
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{AfterOrEqual: Ɀ_Date_(2000, 1, 1)})
 	require.Len(t, rs, 3)
 	assert.Equal(t, 1, rs[0].Date().Day())
 	assert.Equal(t, 2, rs[1].Date().Day())
@@ -54,7 +54,7 @@ func TestQueryWithAfter(t *testing.T) {
 }
 
 func TestQueryWithBefore(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{BeforeEq: Ɀ_Date_(2000, 1, 1)})
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{BeforeOrEqual: Ɀ_Date_(2000, 1, 1)})
 	require.Len(t, rs, 3)
 	assert.Equal(t, 30, rs[0].Date().Day())
 	assert.Equal(t, 31, rs[1].Date().Day())

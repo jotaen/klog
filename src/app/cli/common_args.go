@@ -41,20 +41,20 @@ type FilterArgs struct {
 
 func (args *FilterArgs) filter(now gotime.Time, rs []Record) []Record {
 	qry := service.FilterQry{
-		BeforeEq: args.Until,
-		AfterEq:  args.Since,
-		Tags:     args.Tags,
-		Dates:    args.Date,
+		BeforeOrEqual: args.Until,
+		AfterOrEqual:  args.Since,
+		Tags:          args.Tags,
+		Dates:         args.Date,
 	}
 	if args.Period.Since != nil {
-		qry.BeforeEq = args.Period.Until
-		qry.AfterEq = args.Period.Since
+		qry.BeforeOrEqual = args.Period.Until
+		qry.AfterOrEqual = args.Period.Since
 	}
 	if args.After != nil {
-		qry.AfterEq = args.After.PlusDays(1)
+		qry.AfterOrEqual = args.After.PlusDays(1)
 	}
 	if args.Before != nil {
-		qry.BeforeEq = args.Before.PlusDays(-1)
+		qry.BeforeOrEqual = args.Before.PlusDays(-1)
 	}
 	if args.Today {
 		qry.Dates = append(qry.Dates, NewDateFromTime(now))
