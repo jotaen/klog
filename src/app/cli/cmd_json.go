@@ -2,14 +2,15 @@ package cli
 
 import (
 	"klog/app"
+	"klog/app/cli/lib"
 	"klog/parser/json"
 	"klog/parser/parsing"
 )
 
 type Json struct {
-	FilterArgs
-	SortArgs
-	InputFilesArgs
+	lib.FilterArgs
+	lib.SortArgs
+	lib.InputFilesArgs
 	Pretty bool `name:"pretty" help:"Pretty-print output"`
 }
 
@@ -23,8 +24,8 @@ func (opt *Json) Run(ctx app.Context) error {
 		}
 		return err
 	}
-	records = opt.filter(ctx.Now(), records)
-	records = opt.sort(records)
+	records = opt.ApplyFilter(ctx.Now(), records)
+	records = opt.ApplySort(records)
 	ctx.Print(json.ToJson(records, nil, opt.Pretty) + "\n")
 	return nil
 }

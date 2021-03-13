@@ -10,12 +10,12 @@ import (
 )
 
 type Report struct {
-	DiffArg
-	FilterArgs
-	WarnArgs
+	lib.DiffArg
+	lib.FilterArgs
+	lib.WarnArgs
 	Fill bool `name:"fill" short:"f" help:"Show all consecutive days, even if there is no record"`
-	NowArgs
-	InputFilesArgs
+	lib.NowArgs
+	lib.InputFilesArgs
 }
 
 func (opt *Report) Run(ctx app.Context) error {
@@ -27,7 +27,7 @@ func (opt *Report) Run(ctx app.Context) error {
 		return nil
 	}
 	now := ctx.Now()
-	records = opt.filter(now, records)
+	records = opt.ApplyFilter(now, records)
 	indentation := strings.Repeat(" ", len("2020 Dec   Wed 30. "))
 	records = service.Sort(records, true)
 	ctx.Print(indentation + "    Total")
@@ -67,7 +67,7 @@ func (opt *Report) Run(ctx app.Context) error {
 			ctx.Print("\n")
 			continue
 		}
-		total := opt.NowArgs.total(now, rs...)
+		total := opt.NowArgs.Total(now, rs...)
 		ctx.Print(lib.Pad(7-len(total.ToString())) + lib.Styler.Duration(total, false))
 
 		if opt.Diff {
@@ -84,7 +84,7 @@ func (opt *Report) Run(ctx app.Context) error {
 		ctx.Print(strings.Repeat("=", 19))
 	}
 	ctx.Print("\n")
-	grandTotal := opt.NowArgs.total(now, records...)
+	grandTotal := opt.NowArgs.Total(now, records...)
 	ctx.Print(indentation + lib.Pad(9-len(grandTotal.ToStringWithSign())) + lib.Styler.Duration(grandTotal, true))
 	if opt.Diff {
 		grandShould := service.ShouldTotalSum(records...)

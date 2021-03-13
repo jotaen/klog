@@ -8,11 +8,11 @@ import (
 )
 
 type Total struct {
-	FilterArgs
-	DiffArg
-	WarnArgs
-	NowArgs
-	InputFilesArgs
+	lib.FilterArgs
+	lib.DiffArg
+	lib.WarnArgs
+	lib.NowArgs
+	lib.InputFilesArgs
 }
 
 func (opt *Total) Run(ctx app.Context) error {
@@ -21,8 +21,8 @@ func (opt *Total) Run(ctx app.Context) error {
 		return err
 	}
 	now := ctx.Now()
-	records = opt.filter(now, records)
-	total := opt.NowArgs.total(now, records...)
+	records = opt.ApplyFilter(now, records)
+	total := opt.NowArgs.Total(now, records...)
 	ctx.Print(fmt.Sprintf("Total: %s\n", lib.Styler.Duration(total, false)))
 	if opt.Diff {
 		should := service.ShouldTotalSum(records...)

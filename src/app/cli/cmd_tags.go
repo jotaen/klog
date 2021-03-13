@@ -10,9 +10,9 @@ import (
 )
 
 type Tags struct {
-	FilterArgs
-	WarnArgs
-	InputFilesArgs
+	lib.FilterArgs
+	lib.WarnArgs
+	lib.InputFilesArgs
 }
 
 func (opt *Tags) Run(ctx app.Context) error {
@@ -21,7 +21,7 @@ func (opt *Tags) Run(ctx app.Context) error {
 		return err
 	}
 	now := ctx.Now()
-	records = opt.filter(now, records)
+	records = opt.ApplyFilter(now, records)
 	entriesByTag, _ := service.EntryTagLookup(records...)
 	tagsOrdered, maxLength := sortTags(entriesByTag)
 	for _, t := range tagsOrdered {

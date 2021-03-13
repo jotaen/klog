@@ -14,10 +14,10 @@ import (
 )
 
 type Now struct {
-	DiffArg
+	lib.DiffArg
 	Follow bool `name:"follow" short:"f" help:"Keep shell open and follow changes"`
-	WarnArgs
-	InputFilesArgs
+	lib.WarnArgs
+	lib.InputFilesArgs
 }
 
 func (opt *Now) Run(ctx app.Context) error {

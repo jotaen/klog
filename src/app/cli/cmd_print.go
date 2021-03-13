@@ -7,10 +7,10 @@ import (
 )
 
 type Print struct {
-	FilterArgs
-	SortArgs
-	WarnArgs
-	InputFilesArgs
+	lib.FilterArgs
+	lib.SortArgs
+	lib.WarnArgs
+	lib.InputFilesArgs
 }
 
 func (opt *Print) Run(ctx app.Context) error {
@@ -22,8 +22,8 @@ func (opt *Print) Run(ctx app.Context) error {
 		return nil
 	}
 	now := ctx.Now()
-	records = opt.filter(now, records)
-	records = opt.sort(records)
+	records = opt.ApplyFilter(now, records)
+	records = opt.ApplySort(records)
 	ctx.Print("\n" + parser.SerialiseRecords(&lib.Styler, records...) + "\n")
 
 	ctx.Print(opt.WarnArgs.ToString(now, records))
