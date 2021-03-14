@@ -4,6 +4,7 @@ import (
 	. "klog"
 	"klog/app"
 	"klog/app/cli/lib"
+	"klog/parser"
 	gotime "time"
 )
 
@@ -30,13 +31,17 @@ func (opt *Track) Run(ctx app.Context) error {
 		return err
 	}
 	today := opt.atDate()
-	contents, err := pr.AddEntry(func(r Record) bool {
-		return r.Date().IsEqualTo(today)
-	}, func(r Record) string {
-		return opt.Entry
-	})
+	record, contents, err := pr.AddEntry(
+		"No record at date "+today.ToString(),
+		func(r Record) bool { return r.Date().IsEqualTo(today) },
+		func(r Record) string { return opt.Entry })
 	if err != nil {
 		return err
 	}
-	return ctx.WriteFile(targetFile, contents)
+	err = ctx.WriteFile(targetFile, contents)
+	if err != nil {
+		return err
+	}
+	ctx.Print(parser.SerialiseRecords(&lib.Styler, record))
+	return nil
 }
