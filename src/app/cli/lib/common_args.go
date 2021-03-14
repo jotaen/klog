@@ -32,11 +32,11 @@ type AtDateArgs struct {
 	Date      Date `name:"date" help:"The date of the record"`
 }
 
-func (args *AtDateArgs) AtDate() Date {
+func (args *AtDateArgs) AtDate(now gotime.Time) Date {
 	if args.Date != nil {
 		return args.Date
 	}
-	today := NewDateFromTime(gotime.Now())
+	today := NewDateFromTime(now)
 	if args.Yesterday {
 		return today.PlusDays(-1)
 	}

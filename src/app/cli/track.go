@@ -14,7 +14,26 @@ type Track struct {
 }
 
 func (opt *Track) Run(ctx app.Context) error {
-	targetFile, err := opt.OutputFile(ctx)
+	return handleAddEntry(
+		opt.OutputFileArgs,
+		ctx,
+		func(pr *parser.ParseResult) (Record, string, error) {
+			date := opt.AtDate(ctx.Now())
+			return pr.AddEntry(
+				"No record at date "+date.ToString(),
+				func(r Record) bool { return r.Date().IsEqualTo(date) },
+				func(r Record) string { return opt.Entry },
+			)
+		},
+	)
+}
+
+func handleAddEntry(
+	fileArgs lib.OutputFileArgs,
+	ctx app.Context,
+	handler func(*parser.ParseResult) (Record, string, error),
+) error {
+	targetFile, err := fileArgs.OutputFile(ctx)
 	if err != nil {
 		return err
 	}
@@ -22,11 +41,7 @@ func (opt *Track) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
-	date := opt.AtDate()
-	record, contents, err := pr.AddEntry(
-		"No record at date "+date.ToString(),
-		func(r Record) bool { return r.Date().IsEqualTo(date) },
-		func(r Record) string { return opt.Entry })
+	record, contents, err := handler(pr)
 	if err != nil {
 		return err
 	}
@@ -34,6 +49,6 @@ func (opt *Track) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
-	ctx.Print(parser.SerialiseRecords(&lib.Styler, record))
+	ctx.Print("\n" + parser.SerialiseRecords(&lib.Styler, record) + "\n")
 	return nil
 }

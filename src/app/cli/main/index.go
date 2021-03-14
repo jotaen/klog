@@ -11,6 +11,7 @@ type cli struct {
 
 	Append Append `cmd group:"Manipulate" hidden help:"Appends a new record to a file (based on templates)"`
 	Track  Track  `cmd group:"Manipulate" hidden help:"Add a new entry to a record"`
+	Start  Start  `cmd group:"Manipulate" hidden aliases:"in" help:"Start open time range"`
 
 	Bookmark Bookmark `cmd group:"Misc" help:"Default file that klog reads from"`
 	Json     Json     `cmd group:"Misc" help:"Convert records to JSON"`
