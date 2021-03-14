@@ -29,7 +29,7 @@ func (args *OutputFileArgs) OutputFile(ctx app.Context) (string, error) {
 type AtDateArgs struct {
 	Today     bool `name:"today" help:"Use today’s date (default)"`
 	Yesterday bool `name:"yesterday" help:"Use yesterday’s date"`
-	Date      Date `name:"date" help:"The date of the record"`
+	Date      Date `name:"date" short:"d" help:"The date of the record"`
 }
 
 func (args *AtDateArgs) AtDate(now gotime.Time) Date {
@@ -41,6 +41,17 @@ func (args *AtDateArgs) AtDate(now gotime.Time) Date {
 		return today.PlusDays(-1)
 	}
 	return today
+}
+
+type AtTimeArgs struct {
+	Time Time `name:"time" short:"t" help:"Specify the time (defaults to now)"`
+}
+
+func (args *AtTimeArgs) AtTime(now gotime.Time) Time {
+	if args.Time != nil {
+		return args.Time
+	}
+	return NewTimeFromTime(now)
 }
 
 type DiffArgs struct {

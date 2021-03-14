@@ -9,20 +9,23 @@ import (
 )
 
 type Stop struct {
+	lib.AtTimeArgs
 	lib.AtDateArgs
 	lib.OutputFileArgs
 }
 
 func (opt *Stop) Run(ctx app.Context) error {
 	date := opt.AtDate(ctx.Now())
-	time := NewTimeFromTime(ctx.Now())
+	time := opt.AtTime(ctx.Now())
 	return reconcile(
 		opt.OutputFileArgs,
 		ctx,
 		errors.New("No eligible record at date "+date.ToString()),
-		func(r Record) bool { return r.Date().IsEqualTo(date) &&
-			r.OpenRange() != nil &&
-			time.IsAfterOrEqual(r.OpenRange().Start()) },
+		func(r Record) bool {
+			return r.Date().IsEqualTo(date) &&
+				r.OpenRange() != nil &&
+				time.IsAfterOrEqual(r.OpenRange().Start())
+		},
 		func(r *parser.Reconciler) (Record, string, error) {
 			return r.CloseOpenRange(
 				func(r Record) Time { return time },
