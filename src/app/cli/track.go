@@ -30,13 +30,10 @@ func (opt *Track) Run(ctx app.Context) error {
 		return err
 	}
 	today := opt.atDate()
-	contents, err := pr.AddEntry(func(rs []Record) (int, string) {
-		for i, r := range rs {
-			if r.Date().IsEqualTo(today) {
-				return i, opt.Entry
-			}
-		}
-		return -1, ""
+	contents, err := pr.AddEntry(func(r Record) bool {
+		return r.Date().IsEqualTo(today)
+	}, func(r Record) string {
+		return opt.Entry
 	})
 	if err != nil {
 		return err

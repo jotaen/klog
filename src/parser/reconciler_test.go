@@ -21,8 +21,10 @@ Hello World
     5h
 `
 	pr, _ := Parse(original)
-	reconciled, err := pr.AddEntry(func(rs []Record) (int, string) {
-		return 1, "2h30m"
+	reconciled, err := pr.AddEntry(func(r Record) bool {
+		return r.Date().ToString() == "2018-01-02"
+	}, func(r Record) string {
+		return "2h30m"
 	})
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -45,8 +47,10 @@ func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 2018-01-01
     1h`
 	pr, _ := Parse(original)
-	reconciled, err := pr.AddEntry(func(rs []Record) (int, string) {
-		return 0, "16:00-17:00"
+	reconciled, err := pr.AddEntry(func(r Record) bool {
+		return r.Date().ToString() == "2018-01-01"
+	}, func(r Record) string {
+		return "16:00-17:00"
 	})
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -56,21 +60,13 @@ func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 `, reconciled)
 }
 
-func TestReconcilerRejectsInvalidIndex(t *testing.T) {
+func TestReconcilerSkipsIfNoRecordMatches(t *testing.T) {
 	original := "2018-01-01\n"
 	pr, _ := Parse(original)
-	reconciled, err := pr.AddEntry(func(rs []Record) (int, string) {
-		return 1872, ""
-	})
-	assert.Equal(t, original, reconciled)
-	assert.Error(t, err)
-}
-
-func TestReconcilerRejectsNegativeIndex(t *testing.T) {
-	original := "2018-01-01\n"
-	pr, _ := Parse(original)
-	reconciled, err := pr.AddEntry(func(rs []Record) (int, string) {
-		return -1, ""
+	reconciled, err := pr.AddEntry(func(r Record) bool {
+		return false
+	}, func(r Record) string {
+		return "1h"
 	})
 	assert.Equal(t, original, reconciled)
 	assert.Error(t, err)
@@ -79,8 +75,10 @@ func TestReconcilerRejectsNegativeIndex(t *testing.T) {
 func TestReconcilerRejectsInvalidEntry(t *testing.T) {
 	original := "2018-01-01\n"
 	pr, _ := Parse(original)
-	reconciled, err := pr.AddEntry(func(rs []Record) (int, string) {
-		return 0, "this is not valid entry text"
+	reconciled, err := pr.AddEntry(func(r Record) bool {
+		return true
+	}, func(r Record) string {
+		return "this is not valid entry text"
 	})
 	assert.Equal(t, original, reconciled)
 	assert.Error(t, err)

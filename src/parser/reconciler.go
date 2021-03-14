@@ -6,12 +6,19 @@ import (
 	"klog/parser/parsing"
 )
 
-func (pr *ParseResult) AddEntry(createEntry func([]Record) (int, string)) (string, error) {
-	recordIndex, newEntry := createEntry(pr.Records)
-	if recordIndex > len(pr.Records)-1 || recordIndex < 0 {
+func (pr *ParseResult) AddEntry(matchRecord func(Record) bool, createEntry func(Record) string) (string, error) {
+	index := -1
+	for i, r := range pr.Records {
+		if matchRecord(r) {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
 		return parsing.Join(pr.lines), errors.New("No such record")
 	}
-	lineIndex := pr.lastLineOfRecord[recordIndex]
+	newEntry := createEntry(pr.Records[index])
+	lineIndex := pr.lastLineOfRecord[index]
 	result := parsing.Insert(pr.lines, lineIndex, newEntry, true, pr.preferences)
 	newFileText := parsing.Join(result)
 	_, pErr := Parse(newFileText)
