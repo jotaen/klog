@@ -19,11 +19,12 @@ func (opt *Start) Run(ctx app.Context) error {
 	return reconcile(
 		opt.OutputFileArgs,
 		ctx,
-		errors.New("No record (without open time range) at date "+date.ToString()),
-		func(r Record) bool { return r.Date().IsEqualTo(date) && r.OpenRange() == nil },
+		errors.New("No eligible record at date "+date.ToString()),
+		func(r Record) bool { return r.Date().IsEqualTo(date) &&
+			r.OpenRange() == nil },
 		func(r *parser.Reconciler) (Record, string, error) {
 			return r.AppendEntry(
-				func(r Record) string { return time.ToString() + "-?" },
+				func(r Record) string { return time.ToString() + " - ?" },
 			)
 		},
 	)
