@@ -20,11 +20,14 @@ func (opt *Stop) Run(ctx app.Context) error {
 	return reconcile(
 		opt.OutputFileArgs,
 		ctx,
-		errors.New("No eligible record at date "+date.ToString()),
-		func(r Record) bool {
-			return r.Date().IsEqualTo(date) &&
-				r.OpenRange() != nil &&
-				time.IsAfterOrEqual(r.OpenRange().Start())
+		func(pr *parser.ParseResult) (*parser.Reconciler, error) {
+			return parser.NewRecordReconciler(pr,
+				errors.New("No eligible record at date "+date.ToString()),
+				func(r Record) bool {
+					return r.Date().IsEqualTo(date) &&
+						r.OpenRange() != nil &&
+						time.IsAfterOrEqual(r.OpenRange().Start())
+				})
 		},
 		func(r *parser.Reconciler) (Record, string, error) {
 			return r.CloseOpenRange(

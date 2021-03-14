@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"errors"
 	. "klog"
 	"klog/app"
 	"klog/app/cli/lib"
@@ -36,8 +35,11 @@ func (opt *Create) Run(ctx app.Context) error {
 	return reconcile(
 		opt.OutputFileArgs,
 		ctx,
-		errors.New("No eligible record at date "+date.ToString()),
-		func(r Record) bool { return date.IsAfterOrEqual(r.Date()) },
+		func(pr *parser.ParseResult) (*parser.Reconciler, error) {
+			return parser.NewBlockReconciler(pr, func(r1 Record, r2 Record) bool {
+				return date.IsAfterOrEqual(r1.Date()) && r2.Date().IsAfterOrEqual(date)
+			})
+		},
 		func(r *parser.Reconciler) (Record, string, error) {
 			return r.AddBlock(lines)
 		},

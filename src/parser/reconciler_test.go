@@ -23,7 +23,7 @@ Hello World
     5h
 `
 	pr, _ := Parse(original)
-	reconciler, err := NewReconciler(
+	reconciler, err := NewRecordReconciler(
 		pr,
 		nil,
 		func(r Record) bool { return r.Date().ToString() == "2018-01-02" },
@@ -52,7 +52,7 @@ func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 2018-01-01
     1h`
 	pr, _ := Parse(original)
-	reconciler, err := NewReconciler(
+	reconciler, err := NewRecordReconciler(
 		pr,
 		nil,
 		func(r Record) bool { return r.Date().ToString() == "2018-01-01" },
@@ -70,7 +70,7 @@ func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 func TestReconcilerSkipsIfNoRecordMatches(t *testing.T) {
 	original := "2018-01-01\n"
 	pr, _ := Parse(original)
-	reconciler, err := NewReconciler(
+	reconciler, err := NewRecordReconciler(
 		pr,
 		errors.New("No such record"),
 		func(r Record) bool { return false },
@@ -82,7 +82,7 @@ func TestReconcilerSkipsIfNoRecordMatches(t *testing.T) {
 func TestReconcilerRejectsInvalidEntry(t *testing.T) {
 	original := "2018-01-01\n"
 	pr, _ := Parse(original)
-	reconciler, err := NewReconciler(
+	reconciler, err := NewRecordReconciler(
 		pr,
 		errors.New("No such record"),
 		func(r Record) bool { return true },
@@ -102,7 +102,7 @@ func TestReconcilerClosesOpenRange(t *testing.T) {
 	2m
 `
 	pr, _ := Parse(original)
-	reconciler, err := NewReconciler(
+	reconciler, err := NewRecordReconciler(
 		pr,
 		nil,
 		func(r Record) bool { return r.Date().ToString() == "2018-01-01" },
@@ -123,12 +123,10 @@ func TestReconcileAddBlockToEnd(t *testing.T) {
 2018-01-01
     1h`
 	pr, _ := Parse(original)
-	reconciler, err := NewReconciler(
+	reconciler, _ := NewBlockReconciler(
 		pr,
-		nil,
-		func(r Record) bool { return r.Date().ToString() == "2018-01-01" },
+		func(Record, Record) bool { return false },
 	)
-	require.Nil(t, err)
 	_, reconciled, err := reconciler.AddBlock([]parsing.Text{
 		{"2018-01-02", 0},
 	})
@@ -149,12 +147,10 @@ func TestReconcileAddBlockInBetween(t *testing.T) {
 2018-01-03
     3h`
 	pr, _ := Parse(original)
-	reconciler, err := NewReconciler(
-		pr,
-		nil,
-		func(r Record) bool { return r.Date().ToString() == "2018-01-01" },
-	)
-	require.Nil(t, err)
+	date := Ɀ_Date_(2018, 1, 2)
+	reconciler, _ := NewBlockReconciler(pr, func(r1 Record, r2 Record) bool {
+		return date.IsAfterOrEqual(r1.Date()) && r2.Date().IsAfterOrEqual(date)
+	})
 	_, reconciled, err := reconciler.AddBlock([]parsing.Text{
 		{"2018-01-02", 0},
 		{"This and that", 0},

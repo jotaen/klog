@@ -19,8 +19,11 @@ func (opt *Track) Run(ctx app.Context) error {
 	return reconcile(
 		opt.OutputFileArgs,
 		ctx,
-		errors.New("No record at date "+date.ToString()),
-		func(r Record) bool { return r.Date().IsEqualTo(date) },
+		func(pr *parser.ParseResult) (*parser.Reconciler, error) {
+			return parser.NewRecordReconciler(pr,
+				errors.New("No record at date "+date.ToString()),
+				func(r Record) bool { return r.Date().IsEqualTo(date) })
+		},
 		func(r *parser.Reconciler) (Record, string, error) {
 			return r.AppendEntry(
 				func(r Record) string { return opt.Entry },
@@ -32,8 +35,7 @@ func (opt *Track) Run(ctx app.Context) error {
 func reconcile(
 	fileArgs lib.OutputFileArgs,
 	ctx app.Context,
-	notFoundError error,
-	matchRecord func(Record) bool,
+	reconcilerSupplier func(pr *parser.ParseResult) (*parser.Reconciler, error),
 	handle func(reconciler *parser.Reconciler) (Record, string, error),
 ) error {
 	targetFile, err := fileArgs.OutputFile(ctx)
@@ -44,7 +46,7 @@ func reconcile(
 	if err != nil {
 		return err
 	}
-	reconciler, err := parser.NewReconciler(pr, notFoundError, matchRecord)
+	reconciler, err := reconcilerSupplier(pr)
 	if reconciler == nil {
 		return err
 	}

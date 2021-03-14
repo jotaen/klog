@@ -12,7 +12,7 @@ type Reconciler struct {
 	index int
 }
 
-func NewReconciler(
+func NewRecordReconciler(
 	pr *ParseResult,
 	notFoundError error,
 	matchRecord func(Record) bool,
@@ -26,6 +26,26 @@ func NewReconciler(
 	}
 	if index == -1 {
 		return nil, notFoundError
+	}
+	return &Reconciler{
+		pr:    pr,
+		index: index,
+	}, nil
+}
+
+func NewBlockReconciler(
+	pr *ParseResult,
+	findPosition func(Record, Record) bool,
+) (*Reconciler, error) {
+	index := len(pr.Records) - 1
+	for i, r := range pr.Records {
+		if i == index {
+			break
+		}
+		if findPosition(r, pr.Records[i+1]) {
+			index = i
+			break
+		}
 	}
 	return &Reconciler{
 		pr:    pr,

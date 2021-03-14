@@ -14,7 +14,7 @@ var ansiSequencePattern = regexp.MustCompile(`\x1b\[[\d;]+m`)
 func NewTestingContext() TestingContext {
 	return TestingContext{
 		State: State{
-			printBuffer: "",
+			printBuffer:         "",
 			writtenFileContents: "",
 		},
 		now:         gotime.Now(),
@@ -48,7 +48,7 @@ func (ctx TestingContext) _Run(cmd func(app.Context) error) (State, error) {
 }
 
 type State struct {
-	printBuffer string
+	printBuffer         string
 	writtenFileContents string
 }
 
