@@ -43,7 +43,7 @@ func (args *AtDateArgs) AtDate() Date {
 	return today
 }
 
-type DiffArg struct {
+type DiffArgs struct {
 	Diff bool `name:"diff" short:"d" help:"Show difference between actual and should total time"`
 }
 

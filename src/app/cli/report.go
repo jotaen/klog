@@ -10,7 +10,7 @@ import (
 )
 
 type Report struct {
-	lib.DiffArg
+	lib.DiffArgs
 	lib.FilterArgs
 	lib.WarnArgs
 	Fill bool `name:"fill" short:"f" help:"Show all consecutive days, even if there is no record"`

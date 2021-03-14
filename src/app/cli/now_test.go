@@ -48,7 +48,7 @@ func TestPrintsEvalutaionWithDiff(t *testing.T) {
 
 1999-03-13 (6h!)
 	23:38 - ?
-`)._Run((&Now{DiffArg: lib.DiffArg{Diff: true}}).Run)
+`)._Run((&Now{DiffArgs: lib.DiffArgs{Diff: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
         Yesterday    Overall

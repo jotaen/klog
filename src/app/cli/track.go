@@ -22,10 +22,10 @@ func (opt *Track) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
-	today := opt.AtDate()
+	date := opt.AtDate()
 	record, contents, err := pr.AddEntry(
-		"No record at date "+today.ToString(),
-		func(r Record) bool { return r.Date().IsEqualTo(today) },
+		"No record at date "+date.ToString(),
+		func(r Record) bool { return r.Date().IsEqualTo(date) },
 		func(r Record) string { return opt.Entry })
 	if err != nil {
 		return err

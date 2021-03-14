@@ -93,7 +93,7 @@ func TestReportWithDiff(t *testing.T) {
 	5h20m
 
 2018-07-09 (19m!)
-`)._Run((&Report{DiffArg: lib.DiffArg{Diff: true}}).Run)
+`)._Run((&Report{DiffArgs: lib.DiffArgs{Diff: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
                        Total    Should     Diff
