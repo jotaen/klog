@@ -19,7 +19,7 @@ func (opt *Start) Run(ctx app.Context) error {
 		func(pr *parser.ParseResult) (Record, string, error) {
 			date := opt.AtDate(ctx.Now())
 			time := NewTimeFromTime(ctx.Now())
-			return pr.AddEntry(
+			return pr.AppendEntry(
 				"No record at date "+date.ToString(),
 				func(r Record) bool { return r.Date().IsEqualTo(date) },
 				func(r Record) string { return time.ToString() + "-?" },

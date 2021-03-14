@@ -6,7 +6,7 @@ import (
 	"klog/parser/parsing"
 )
 
-func (pr *ParseResult) AddEntry(
+func (pr *ParseResult) AppendEntry(
 	errorMessage string,
 	matchRecord func(Record) bool,
 	createEntry func(Record) string,

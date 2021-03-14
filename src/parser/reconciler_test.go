@@ -21,7 +21,7 @@ Hello World
     5h
 `
 	pr, _ := Parse(original)
-	newRecord, reconciled, err := pr.AddEntry(
+	newRecord, reconciled, err := pr.AppendEntry(
 		"",
 		func(r Record) bool { return r.Date().ToString() == "2018-01-02" },
 		func(r Record) string { return "2h30m" },
@@ -48,7 +48,7 @@ func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 2018-01-01
     1h`
 	pr, _ := Parse(original)
-	_, reconciled, err := pr.AddEntry(
+	_, reconciled, err := pr.AppendEntry(
 		"",
 		func(r Record) bool { return r.Date().ToString() == "2018-01-01" },
 		func(r Record) string { return "16:00-17:00" },
@@ -64,7 +64,7 @@ func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 func TestReconcilerSkipsIfNoRecordMatches(t *testing.T) {
 	original := "2018-01-01\n"
 	pr, _ := Parse(original)
-	newRecord, reconciled, err := pr.AddEntry(
+	newRecord, reconciled, err := pr.AppendEntry(
 		"No such record",
 		func(r Record) bool { return false },
 		func(r Record) string { return "1h" },
@@ -77,7 +77,7 @@ func TestReconcilerSkipsIfNoRecordMatches(t *testing.T) {
 func TestReconcilerRejectsInvalidEntry(t *testing.T) {
 	original := "2018-01-01\n"
 	pr, _ := Parse(original)
-	newRecord, reconciled, err := pr.AddEntry(
+	newRecord, reconciled, err := pr.AppendEntry(
 		"",
 		func(r Record) bool { return true },
 		func(r Record) string { return "this is not valid entry text" },
