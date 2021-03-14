@@ -10,7 +10,7 @@ import (
 )
 
 type Create struct {
-	Template string `required name:"template" short:"t" help:"The name of the template to instantiate"`
+	Template string `name:"template" hidden help:"The name of the template to instantiate"`
 	lib.AtDateArgs
 	lib.OutputFileArgs
 }
