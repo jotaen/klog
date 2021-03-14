@@ -25,7 +25,7 @@ func render(ctx app.Context, agent *launchAgent) []menuet.MenuItem {
 				Text: "klog bookmark set yourfile.klg",
 			}}
 		}
-		rs, pErr := ctx.RetrieveRecords()
+		rs, pErr := ctx.ReadInputs()
 		if pErr != nil {
 			return []menuet.MenuItem{{
 				Text: file.Name,

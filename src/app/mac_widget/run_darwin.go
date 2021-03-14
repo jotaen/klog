@@ -16,7 +16,7 @@ func Run(forceRunThroughLaunchAgent bool) {
 		os.Exit(1)
 	}
 	binPath, _ := os.Executable()
-	launchAgent := NewLaunchAgent(ctx.HomeFolder(), binPath)
+	launchAgent := newLaunchAgent(ctx.HomeFolder(), binPath)
 
 	if forceRunThroughLaunchAgent {
 		if !launchAgent.isActive() {

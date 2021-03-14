@@ -29,6 +29,14 @@ func main() {
 			return kong.TypeMapper(reflect.TypeOf(&datePrototype).Elem(), dateDecoder())
 		}(),
 		func() kong.Option {
+			timePrototype, _ := klog.NewTime(0, 0)
+			return kong.TypeMapper(reflect.TypeOf(&timePrototype).Elem(), timeDecoder())
+		}(),
+		func() kong.Option {
+			durationPrototype := klog.NewDuration(0, 0)
+			return kong.TypeMapper(reflect.TypeOf(&durationPrototype).Elem(), durationDecoder())
+		}(),
+		func() kong.Option {
 			period := lib.Period{}
 			return kong.TypeMapper(reflect.TypeOf(&period).Elem(), periodDecoder())
 		}(),

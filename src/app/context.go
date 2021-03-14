@@ -2,9 +2,9 @@ package app
 
 import (
 	"fmt"
-	"klog"
+	. "klog"
 	"klog/parser"
-	"klog/service"
+	"klog/parser/parsing"
 	"os"
 	"os/exec"
 	"os/user"
@@ -24,14 +24,16 @@ type Context interface {
 		Version   string
 		BuildHash string
 	}
-	RetrieveRecords(...string) ([]klog.Record, error)
+	ReadInputs(...string) ([]Record, error)
+	ReadFileInput(string) (*parser.ParseResult, error)
+	WriteFile(string, string) Error
 	Now() gotime.Time
 	Bookmark() (*File, Error)
 	SetBookmark(string) Error
 	UnsetBookmark() Error
 	OpenInFileBrowser(string) Error
 	OpenInEditor(string) Error
-	AppendTemplateToFile(string, string) Error
+	InstantiateTemplate(string) ([]parsing.Text, Error)
 }
 
 type context struct {
@@ -52,19 +54,19 @@ func NewContextFromEnv() (Context, error) {
 	return NewContext(homeDir.HomeDir)
 }
 
-func (c *context) Print(text string) {
+func (ctx *context) Print(text string) {
 	fmt.Print(text)
 }
 
-func (c *context) HomeFolder() string {
-	return c.homeDir
+func (ctx *context) HomeFolder() string {
+	return ctx.homeDir
 }
 
-func (c *context) KlogFolder() string {
-	return c.homeDir + "/.klog/"
+func (ctx *context) KlogFolder() string {
+	return ctx.homeDir + "/.klog/"
 }
 
-func (c *context) MetaInfo() struct {
+func (ctx *context) MetaInfo() struct {
 	Version   string
 	BuildHash string
 } {
@@ -98,7 +100,7 @@ func retrieveInputs(
 	if len(filePaths) > 0 {
 		var result []string
 		for _, p := range filePaths {
-			content, err := readFile(p)
+			content, err := ReadFile(p)
 			if err != nil {
 				return nil, err
 			}
@@ -117,7 +119,7 @@ func retrieveInputs(
 	if err != nil {
 		return nil, err
 	} else if b != nil {
-		content, err := readFile(b.Path)
+		content, err := ReadFile(b.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -132,12 +134,12 @@ func retrieveInputs(
 	}
 }
 
-func (c *context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
-	inputs, err := retrieveInputs(paths, readStdin, c.bookmarkOrNil)
+func (ctx *context) ReadInputs(paths ...string) ([]Record, error) {
+	inputs, err := retrieveInputs(paths, ReadStdin, ctx.bookmarkOrNil)
 	if err != nil {
 		return nil, err
 	}
-	var records []klog.Record
+	var records []Record
 	for _, in := range inputs {
 		pr, parserErrors := parser.Parse(in)
 		if parserErrors != nil {
@@ -148,7 +150,23 @@ func (c *context) RetrieveRecords(paths ...string) ([]klog.Record, error) {
 	return records, nil
 }
 
-func (c *context) Now() gotime.Time {
+func (ctx *context) ReadFileInput(path string) (*parser.ParseResult, error) {
+	content, err := ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	pr, parserErrors := parser.Parse(content)
+	if parserErrors != nil {
+		return nil, parserErrors
+	}
+	return pr, nil
+}
+
+func (ctx *context) WriteFile(path string, contents string) Error {
+	return WriteToFile(path, contents)
+}
+
+func (ctx *context) Now() gotime.Time {
 	return gotime.Now()
 }
 
@@ -158,8 +176,8 @@ type File struct {
 	Path     string
 }
 
-func (c *context) bookmarkOrNil() (*File, Error) {
-	bookmarkPath := c.bookmarkOrigin()
+func (ctx *context) bookmarkOrNil() (*File, Error) {
+	bookmarkPath := ctx.bookmarkOrigin()
 	dest, err := os.Readlink(bookmarkPath)
 	if err != nil {
 		return nil, nil
@@ -178,12 +196,12 @@ func (c *context) bookmarkOrNil() (*File, Error) {
 	}, nil
 }
 
-func (c *context) bookmarkOrigin() string {
-	return c.KlogFolder() + "bookmark.klg"
+func (ctx *context) bookmarkOrigin() string {
+	return ctx.KlogFolder() + "bookmark.klg"
 }
 
-func (c *context) Bookmark() (*File, Error) {
-	b, err := c.bookmarkOrNil()
+func (ctx *context) Bookmark() (*File, Error) {
+	b, err := ctx.bookmarkOrNil()
 	if err != nil {
 		return nil, err
 	}
@@ -196,7 +214,7 @@ func (c *context) Bookmark() (*File, Error) {
 	return b, nil
 }
 
-func (c *context) SetBookmark(path string) Error {
+func (ctx *context) SetBookmark(path string) Error {
 	bookmark, err := filepath.Abs(path)
 	if err != nil {
 		return appError{
@@ -204,7 +222,7 @@ func (c *context) SetBookmark(path string) Error {
 			"Please check the file path",
 		}
 	}
-	klogFolder := c.KlogFolder()
+	klogFolder := ctx.KlogFolder()
 	err = os.MkdirAll(klogFolder, 0700)
 	if err != nil {
 		return appError{
@@ -212,7 +230,7 @@ func (c *context) SetBookmark(path string) Error {
 			"Please create a ~/.klog folder manually",
 		}
 	}
-	symlink := c.bookmarkOrigin()
+	symlink := ctx.bookmarkOrigin()
 	_ = os.Remove(symlink)
 	err = os.Symlink(bookmark, symlink)
 	if err != nil {
@@ -224,11 +242,11 @@ func (c *context) SetBookmark(path string) Error {
 	return nil
 }
 
-func (c *context) UnsetBookmark() Error {
-	return removeFile(c.bookmarkOrigin())
+func (ctx *context) UnsetBookmark() Error {
+	return RemoveFile(ctx.bookmarkOrigin())
 }
 
-func (c *context) OpenInFileBrowser(path string) Error {
+func (ctx *context) OpenInFileBrowser(path string) Error {
 	cmd := exec.Command("open", path)
 	err := cmd.Run()
 	if err != nil {
@@ -240,7 +258,7 @@ func (c *context) OpenInFileBrowser(path string) Error {
 	return nil
 }
 
-func (c *context) OpenInEditor(path string) Error {
+func (ctx *context) OpenInEditor(path string) Error {
 	editor := os.Getenv("EDITOR")
 	if editor == "" {
 		return appError{
@@ -261,25 +279,21 @@ func (c *context) OpenInEditor(path string) Error {
 	return nil
 }
 
-func (c *context) AppendTemplateToFile(filePath string, templateName string) Error {
-	location := c.KlogFolder() + templateName + ".template.klg"
-	template, err := readFile(location)
+func (ctx *context) InstantiateTemplate(templateName string) ([]parsing.Text, Error) {
+	location := ctx.KlogFolder() + templateName + ".template.klg"
+	template, err := ReadFile(location)
 	if err != nil {
-		return appError{
+		return nil, appError{
 			"No such template",
 			"There is no template at location " + location,
 		}
 	}
-	instance, tErr := service.RenderTemplate(template, c.Now())
+	instance, tErr := parser.RenderTemplate(template, ctx.Now())
 	if tErr != nil {
-		return appError{
+		return nil, appError{
 			"Invalid template",
 			tErr.Error(),
 		}
 	}
-	contents, err := readFile(filePath)
-	if err != nil {
-		return err
-	}
-	return appendToFile(filePath, service.AppendableText(contents, instance))
+	return instance, nil
 }

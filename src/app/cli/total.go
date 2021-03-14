@@ -9,14 +9,14 @@ import (
 
 type Total struct {
 	lib.FilterArgs
-	lib.DiffArg
+	lib.DiffArgs
 	lib.WarnArgs
 	lib.NowArgs
 	lib.InputFilesArgs
 }
 
 func (opt *Total) Run(ctx app.Context) error {
-	records, err := ctx.RetrieveRecords(opt.File...)
+	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err
 	}

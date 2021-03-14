@@ -7,9 +7,9 @@ import (
 )
 
 func TestTagsOfEmptyInput(t *testing.T) {
-	out, err := NewTestingContext()._SetRecords(``)._Run((&Tags{}).Run)
+	state, err := NewTestingContext()._SetRecords(``)._Run((&Tags{}).Run)
 	require.Nil(t, err)
-	assert.Equal(t, "", out)
+	assert.Equal(t, "", state.printBuffer)
 }
 
 func TestPrintTagsOverview(t *testing.T) {
@@ -19,7 +19,7 @@ func TestPrintTagsOverview(t *testing.T) {
 		- Sort output alphabetically
 		- Print in tabular manner
 	*/
-	out, err := NewTestingContext()._SetRecords(`
+	state, err := NewTestingContext()._SetRecords(`
 1995-03-17
 #sports
 	3h #badminton
@@ -45,5 +45,5 @@ Was #sick, need to compensate later
 #running   4h30m
 #sick      -30m
 #sports    8h
-`, out)
+`, state.printBuffer)
 }

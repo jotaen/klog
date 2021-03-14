@@ -14,7 +14,7 @@ import (
 )
 
 type Now struct {
-	lib.DiffArg
+	lib.DiffArgs
 	Follow bool `name:"follow" short:"f" help:"Keep shell open and follow changes"`
 	lib.WarnArgs
 	lib.InputFilesArgs
@@ -30,7 +30,7 @@ func (opt *Now) Run(ctx app.Context) error {
 
 func handle(opt *Now, ctx app.Context) error {
 	now := ctx.Now()
-	records, err := ctx.RetrieveRecords(opt.File...)
+	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err
 	}

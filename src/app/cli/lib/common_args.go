@@ -2,6 +2,7 @@ package lib
 
 import (
 	. "klog"
+	"klog/app"
 	"klog/service"
 	gotime "time"
 )
@@ -10,7 +11,50 @@ type InputFilesArgs struct {
 	File []string `arg optional type:"existingfile" name:"file" help:".klg source file(s) (if empty the bookmark is used)"`
 }
 
-type DiffArg struct {
+type OutputFileArgs struct {
+	File string `arg optional type:"existingfile" name:"file" help:".klg source file (if empty the bookmark is used)"`
+}
+
+func (args *OutputFileArgs) OutputFile(ctx app.Context) (string, error) {
+	if args.File != "" {
+		return args.File, nil
+	}
+	b, err := ctx.Bookmark()
+	if err != nil {
+		return "", nil
+	}
+	return b.Path, nil
+}
+
+type AtDateArgs struct {
+	Today     bool `name:"today" help:"Use today’s date (default)"`
+	Yesterday bool `name:"yesterday" help:"Use yesterday’s date"`
+	Date      Date `name:"date" short:"d" help:"The date of the record"`
+}
+
+func (args *AtDateArgs) AtDate(now gotime.Time) Date {
+	if args.Date != nil {
+		return args.Date
+	}
+	today := NewDateFromTime(now)
+	if args.Yesterday {
+		return today.PlusDays(-1)
+	}
+	return today
+}
+
+type AtTimeArgs struct {
+	Time Time `name:"time" short:"t" help:"Specify the time (defaults to now)"`
+}
+
+func (args *AtTimeArgs) AtTime(now gotime.Time) Time {
+	if args.Time != nil {
+		return args.Time
+	}
+	return NewTimeFromTime(now)
+}
+
+type DiffArgs struct {
 	Diff bool `name:"diff" short:"d" help:"Show difference between actual and should total time"`
 }
 

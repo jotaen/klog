@@ -84,26 +84,47 @@ func TestSplitAndJoinResultsInOriginalText(t *testing.T) {
 
 func TestInsertInBetween(t *testing.T) {
 	before := Split("first\nthird\nfourth")
-	after := Insert(before, 1, "second", false, DefaultPreferences())
+	after := Insert(before, 1, []Text{
+		{"second", 0},
+	}, DefaultPreferences())
 	require.Len(t, after, 4)
 	assert.Equal(t, before[0].Original(), after[0].Original())
-	assert.Equal(t, after[0].LineNumber, 1)
+	assert.Equal(t, 1, after[0].LineNumber)
 
 	assert.Equal(t, "second\n", after[1].Original())
-	assert.Equal(t, after[1].LineNumber, 2)
+	assert.Equal(t, 2, after[1].LineNumber)
 
 	assert.Equal(t, before[1].Original(), after[2].Original())
-	assert.Equal(t, after[2].LineNumber, 3)
+	assert.Equal(t, 3, after[2].LineNumber)
 
 	assert.Equal(t, before[2].Original(), after[3].Original())
-	assert.Equal(t, after[3].LineNumber, 4)
+	assert.Equal(t, 4, after[3].LineNumber)
+}
+
+func TestInsertMultipleTexts(t *testing.T) {
+	before := Split("first\nfourth\nfifth\n")
+	after := Insert(before, 1, []Text{
+		{"second", 0},
+		{"third", 1},
+	}, DefaultPreferences())
+	require.Len(t, after, 5)
+	assert.Equal(t, "first\n", after[0].Original())
+	assert.Equal(t, 1, after[0].LineNumber)
+	assert.Equal(t, "second\n", after[1].Original())
+	assert.Equal(t, 2, after[1].LineNumber)
+	assert.Equal(t, "    third\n", after[2].Original())
+	assert.Equal(t, 3, after[2].LineNumber)
+	assert.Equal(t, "fourth\n", after[3].Original())
+	assert.Equal(t, 4, after[3].LineNumber)
+	assert.Equal(t, "fifth\n", after[4].Original())
+	assert.Equal(t, 5, after[4].LineNumber)
 }
 
 func TestInsertWithLineEndingsAndIndentation(t *testing.T) {
 	before := Split("bar")
-	after := Insert(before, 0, "foo", false, DefaultPreferences())
-	after = Insert(after, 2, "baz", true, Preferences{"\r\n", "\t"})
-	after = Insert(after, 0, "hello", true, DefaultPreferences())
+	after := Insert(before, 0, []Text{{"foo", 0}}, DefaultPreferences())
+	after = Insert(after, 2, []Text{{"baz", 1}}, Preferences{"\r\n", "\t"})
+	after = Insert(after, 0, []Text{{"hello", 1}}, DefaultPreferences())
 	require.Len(t, after, 4)
 	assert.Equal(t, "    hello\n", after[0].Original())
 	assert.Equal(t, "foo\n", after[1].Original())

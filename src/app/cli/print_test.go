@@ -7,13 +7,13 @@ import (
 )
 
 func TestPrintOutEmptyInput(t *testing.T) {
-	out, err := NewTestingContext()._SetRecords(``)._Run((&Print{}).Run)
+	state, err := NewTestingContext()._SetRecords(``)._Run((&Print{}).Run)
 	require.Nil(t, err)
-	assert.Equal(t, "", out)
+	assert.Equal(t, "", state.printBuffer)
 }
 
 func TestPrintOutRecord(t *testing.T) {
-	out, err := NewTestingContext()._SetRecords(`
+	state, err := NewTestingContext()._SetRecords(`
 2018-01-31
 Hello #world
 	1h
@@ -24,5 +24,5 @@ Hello #world
 Hello #world
     1h
 
-`, out)
+`, state.printBuffer)
 }
