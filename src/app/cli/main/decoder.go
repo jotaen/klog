@@ -6,6 +6,7 @@ import (
 	"klog"
 	"klog/app/cli/lib"
 	"reflect"
+	"strings"
 )
 
 func dateDecoder() kong.MapperFunc {
@@ -40,6 +41,25 @@ func timeDecoder() kong.MapperFunc {
 			return errors.New("`" + value + "` is not a valid time")
 		}
 		target.Set(reflect.ValueOf(t))
+		return nil
+	}
+}
+
+func durationDecoder() kong.MapperFunc {
+	return func(ctx *kong.DecodeContext, target reflect.Value) error {
+		var value string
+		if err := ctx.Scan.PopValueInto("duration", &value); err != nil {
+			return err
+		}
+		if value == "" {
+			return errors.New("Please provide a valid duration")
+		}
+		value = strings.TrimSuffix(value, "!")
+		d, err := klog.NewDurationFromString(value)
+		if err != nil {
+			return errors.New("`" + value + "` is not a valid duration")
+		}
+		target.Set(reflect.ValueOf(d))
 		return nil
 	}
 }

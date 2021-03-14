@@ -10,7 +10,8 @@ import (
 )
 
 type Create struct {
-	Template string `name:"template" hidden help:"The name of the template to instantiate"`
+	Template    string   `name:"template" hidden help:"The name of the template to instantiate"`
+	ShouldTotal Duration `name:"should" help:"A should total property"`
 	lib.AtDateArgs
 	lib.OutputFileArgs
 }
@@ -21,8 +22,12 @@ func (opt *Create) Run(ctx app.Context) error {
 		if opt.Template != "" {
 			return ctx.InstantiateTemplate(opt.Template)
 		}
+		headline := opt.AtDate(ctx.Now()).ToString()
+		if opt.ShouldTotal != nil {
+			headline += " (" + opt.ShouldTotal.ToString() + "!)"
+		}
 		return []parsing.Text{
-			{opt.AtDate(ctx.Now()).ToString(), 0},
+			{headline, 0},
 		}, nil
 	}()
 	if err != nil {
