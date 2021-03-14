@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	. "klog"
 	"klog/app"
 	"klog/app/cli/lib"
@@ -14,24 +15,26 @@ type Track struct {
 }
 
 func (opt *Track) Run(ctx app.Context) error {
-	return handleAddEntry(
+	date := opt.AtDate(ctx.Now())
+	return reconcile(
 		opt.OutputFileArgs,
 		ctx,
-		func(pr *parser.ParseResult) (Record, string, error) {
-			date := opt.AtDate(ctx.Now())
-			return pr.AppendEntry(
-				"No record at date "+date.ToString(),
-				func(r Record) bool { return r.Date().IsEqualTo(date) },
+		errors.New("No record at date "+date.ToString()),
+		func(r Record) bool { return r.Date().IsEqualTo(date) },
+		func(r *parser.Reconciler) (Record, string, error) {
+			return r.AppendEntry(
 				func(r Record) string { return opt.Entry },
 			)
 		},
 	)
 }
 
-func handleAddEntry(
+func reconcile(
 	fileArgs lib.OutputFileArgs,
 	ctx app.Context,
-	handler func(*parser.ParseResult) (Record, string, error),
+	notFoundError error,
+	matchRecord func(Record) bool,
+	handle func(reconciler *parser.Reconciler) (Record, string, error),
 ) error {
 	targetFile, err := fileArgs.OutputFile(ctx)
 	if err != nil {
@@ -41,7 +44,11 @@ func handleAddEntry(
 	if err != nil {
 		return err
 	}
-	record, contents, err := handler(pr)
+	reconciler, err := parser.NewReconciler(pr, notFoundError, matchRecord)
+	if reconciler == nil {
+		return err
+	}
+	record, contents, err := handle(reconciler)
 	if err != nil {
 		return err
 	}

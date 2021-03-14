@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	. "klog"
 	"klog/app"
 	"klog/app/cli/lib"
@@ -13,15 +14,15 @@ type Start struct {
 }
 
 func (opt *Start) Run(ctx app.Context) error {
-	return handleAddEntry(
+	date := opt.AtDate(ctx.Now())
+	time := NewTimeFromTime(ctx.Now())
+	return reconcile(
 		opt.OutputFileArgs,
 		ctx,
-		func(pr *parser.ParseResult) (Record, string, error) {
-			date := opt.AtDate(ctx.Now())
-			time := NewTimeFromTime(ctx.Now())
-			return pr.AppendEntry(
-				"No record at date "+date.ToString(),
-				func(r Record) bool { return r.Date().IsEqualTo(date) },
+		errors.New("No record at date "+date.ToString()),
+		func(r Record) bool { return r.Date().IsEqualTo(date) },
+		func(r *parser.Reconciler) (Record, string, error) {
+			return r.AppendEntry(
 				func(r Record) string { return time.ToString() + "-?" },
 			)
 		},
