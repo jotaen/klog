@@ -4,6 +4,7 @@ import (
 	"errors"
 	. "klog"
 	"klog/parser/parsing"
+	"regexp"
 )
 
 type Reconciler struct {
@@ -36,11 +37,39 @@ func (r *Reconciler) AppendEntry(handler func(Record) string) (Record, string, e
 	newEntry := handler(r.pr.Records[r.index])
 	lineIndex := r.pr.lastLineOfRecord[r.index]
 	result := parsing.Insert(r.pr.lines, lineIndex, newEntry, true, r.pr.preferences)
-	newFileText := parsing.Join(result)
-	newRecords, pErr := Parse(newFileText)
+	return makeResult(result, r.index)
+}
+
+func (r *Reconciler) CloseOpenRange(handler func(Record) Time) (Record, string, error) {
+	record := r.pr.Records[r.index]
+	if record.OpenRange() == nil {
+		return nil, "", errors.New("NO_OPEN_RANGE")
+	}
+	entryIndex := 0
+	for i, e := range record.Entries() {
+		e.Unbox(
+			func(Range) interface{} { return nil },
+			func(Duration) interface{} { return nil },
+			func(OpenRange) interface{} {
+				entryIndex = i
+				return nil
+			},
+		)
+	}
+	time := handler(record)
+	openRangeLineIndex := r.pr.lastLineOfRecord[r.index] - len(record.Entries()) + entryIndex
+	originalText := r.pr.lines[openRangeLineIndex].Text
+	r.pr.lines[openRangeLineIndex].Text = regexp.MustCompile(`^(.*?)\?+(.*)$`).
+		ReplaceAllString(originalText, "${1}"+time.ToString()+"${2}")
+	return makeResult(r.pr.lines, r.index)
+}
+
+func makeResult(ls []parsing.Line, recordIndex int) (Record, string, error) {
+	newText := parsing.Join(ls)
+	newRecords, pErr := Parse(newText)
 	if pErr != nil {
 		err := pErr.Get()[0]
-		return nil, parsing.Join(r.pr.lines), errors.New(err.Message())
+		return nil, "", errors.New(err.Message())
 	}
-	return newRecords.Records[r.index], parsing.Join(result), nil
+	return newRecords.Records[recordIndex], newText, nil
 }

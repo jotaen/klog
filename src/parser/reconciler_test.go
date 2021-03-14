@@ -88,7 +88,31 @@ func TestReconcilerRejectsInvalidEntry(t *testing.T) {
 	)
 	require.Nil(t, err)
 	newRecord, reconciled, err := reconciler.AppendEntry(func(r Record) string { return "this is not valid entry text" })
-	assert.Equal(t, original, reconciled)
+	assert.Equal(t, "", reconciled)
 	assert.Nil(t, newRecord)
 	assert.Error(t, err)
+}
+
+func TestReconcilerClosesOpenRange(t *testing.T) {
+	original := `
+2018-01-01
+    1h
+    15:00-??? Will this close? I hope so!?!?
+	2m
+`
+	pr, _ := Parse(original)
+	reconciler, err := NewReconciler(
+		pr,
+		nil,
+		func(r Record) bool { return r.Date().ToString() == "2018-01-01" },
+	)
+	require.Nil(t, err)
+	_, reconciled, err := reconciler.CloseOpenRange(func(r Record) Time { return Ɀ_Time_(16, 42) })
+	require.Nil(t, err)
+	assert.Equal(t, `
+2018-01-01
+    1h
+    15:00-16:42 Will this close? I hope so!?!?
+	2m
+`, reconciled)
 }
