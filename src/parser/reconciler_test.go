@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	. "klog"
+	"klog/parser/parsing"
 	"testing"
 )
 
@@ -115,4 +116,59 @@ func TestReconcilerClosesOpenRange(t *testing.T) {
     15:00-16:42 Will this close? I hope so!?!?
 	2m
 `, reconciled)
+}
+
+func TestReconcileAddBlockToEnd(t *testing.T) {
+	original := `
+2018-01-01
+    1h`
+	pr, _ := Parse(original)
+	reconciler, err := NewReconciler(
+		pr,
+		nil,
+		func(r Record) bool { return r.Date().ToString() == "2018-01-01" },
+	)
+	require.Nil(t, err)
+	_, reconciled, err := reconciler.AddBlock([]parsing.Text{
+		{"2018-01-02", 0},
+	})
+	require.Nil(t, err)
+	assert.Equal(t, `
+2018-01-01
+    1h
+
+2018-01-02
+`, reconciled)
+}
+
+func TestReconcileAddBlockInBetween(t *testing.T) {
+	original := `
+2018-01-01
+    1h
+
+2018-01-03
+    3h`
+	pr, _ := Parse(original)
+	reconciler, err := NewReconciler(
+		pr,
+		nil,
+		func(r Record) bool { return r.Date().ToString() == "2018-01-01" },
+	)
+	require.Nil(t, err)
+	_, reconciled, err := reconciler.AddBlock([]parsing.Text{
+		{"2018-01-02", 0},
+		{"This and that", 0},
+		{"30m worked", 1},
+	})
+	require.Nil(t, err)
+	assert.Equal(t, `
+2018-01-01
+    1h
+
+2018-01-02
+This and that
+    30m worked
+
+2018-01-03
+    3h`, reconciled)
 }

@@ -11,10 +11,10 @@ type cli struct {
 	Now    Now    `cmd group:"Evaluate" help:"Evaluate today’s record (including potential open ranges)"`
 
 	// Manipulate
-	Append Append `cmd group:"Manipulate" hidden help:"Appends a new record to a file (based on templates)"`
 	Track  Track  `cmd group:"Manipulate" hidden help:"Add a new entry to a record"`
 	Start  Start  `cmd group:"Manipulate" hidden aliases:"in" help:"Start open time range"`
 	Stop   Stop   `cmd group:"Manipulate" hidden aliases:"out" help:"Close open time range"`
+	Create Create `cmd group:"Manipulate" hidden help:"Creates a new record"`
 
 	// Misc
 	Bookmark Bookmark `cmd group:"Misc" help:"Default file that klog reads from"`

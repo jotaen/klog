@@ -1,9 +1,10 @@
 package cli
 
 import (
-	"klog"
+	. "klog"
 	"klog/app"
 	"klog/parser"
+	"klog/parser/parsing"
 	"regexp"
 	gotime "time"
 )
@@ -43,7 +44,7 @@ func (ctx TestingContext) _Run(cmd func(app.Context) error) (string, error) {
 
 type TestingContext struct {
 	printBuffer string
-	records     []klog.Record
+	records     []Record
 	now         gotime.Time
 }
 
@@ -69,7 +70,7 @@ func (ctx *TestingContext) MetaInfo() struct {
 	}{"v0.0", "abcdef1"}
 }
 
-func (ctx *TestingContext) ReadInputs(_ ...string) ([]klog.Record, error) {
+func (ctx *TestingContext) ReadInputs(_ ...string) ([]Record, error) {
 	return ctx.records, nil
 }
 
@@ -109,6 +110,6 @@ func (ctx *TestingContext) OpenInEditor(_ string) app.Error {
 	return nil
 }
 
-func (ctx *TestingContext) AppendTemplateToFile(string, string) app.Error {
-	return nil
+func (ctx *TestingContext) InstantiateTemplate(_ string) ([]parsing.Text, app.Error) {
+	return nil, nil
 }

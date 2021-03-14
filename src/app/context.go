@@ -2,9 +2,9 @@ package app
 
 import (
 	"fmt"
-	"klog"
+	. "klog"
 	"klog/parser"
-	"klog/service"
+	"klog/parser/parsing"
 	"os"
 	"os/exec"
 	"os/user"
@@ -24,7 +24,7 @@ type Context interface {
 		Version   string
 		BuildHash string
 	}
-	ReadInputs(...string) ([]klog.Record, error)
+	ReadInputs(...string) ([]Record, error)
 	ReadFileInput(string) (*parser.ParseResult, error)
 	WriteFile(string, string) Error
 	Now() gotime.Time
@@ -33,7 +33,7 @@ type Context interface {
 	UnsetBookmark() Error
 	OpenInFileBrowser(string) Error
 	OpenInEditor(string) Error
-	AppendTemplateToFile(string, string) Error // Deprecated
+	InstantiateTemplate(string) ([]parsing.Text, Error)
 }
 
 type context struct {
@@ -134,12 +134,12 @@ func retrieveInputs(
 	}
 }
 
-func (ctx *context) ReadInputs(paths ...string) ([]klog.Record, error) {
+func (ctx *context) ReadInputs(paths ...string) ([]Record, error) {
 	inputs, err := retrieveInputs(paths, ReadStdin, ctx.bookmarkOrNil)
 	if err != nil {
 		return nil, err
 	}
-	var records []klog.Record
+	var records []Record
 	for _, in := range inputs {
 		pr, parserErrors := parser.Parse(in)
 		if parserErrors != nil {
@@ -279,25 +279,21 @@ func (ctx *context) OpenInEditor(path string) Error {
 	return nil
 }
 
-func (ctx *context) AppendTemplateToFile(filePath string, templateName string) Error {
+func (ctx *context) InstantiateTemplate(templateName string) ([]parsing.Text, Error) {
 	location := ctx.KlogFolder() + templateName + ".template.klg"
 	template, err := ReadFile(location)
 	if err != nil {
-		return appError{
+		return nil, appError{
 			"No such template",
 			"There is no template at location " + location,
 		}
 	}
-	instance, tErr := service.RenderTemplate(template, ctx.Now())
+	instance, tErr := parser.RenderTemplate(template, ctx.Now())
 	if tErr != nil {
-		return appError{
+		return nil, appError{
 			"Invalid template",
 			tErr.Error(),
 		}
 	}
-	contents, err := ReadFile(filePath)
-	if err != nil {
-		return err
-	}
-	return appendToFile(filePath, service.AppendableText(contents, instance))
+	return instance, nil
 }

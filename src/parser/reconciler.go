@@ -36,7 +36,7 @@ func NewReconciler(
 func (r *Reconciler) AppendEntry(handler func(Record) string) (Record, string, error) {
 	newEntry := handler(r.pr.Records[r.index])
 	lineIndex := r.pr.lastLineOfRecord[r.index]
-	result := parsing.Insert(r.pr.lines, lineIndex, newEntry, true, r.pr.preferences)
+	result := parsing.Insert(r.pr.lines, lineIndex, []parsing.Text{{newEntry, 1}}, r.pr.preferences)
 	return makeResult(result, r.index)
 }
 
@@ -62,6 +62,16 @@ func (r *Reconciler) CloseOpenRange(handler func(Record) Time) (Record, string, 
 	r.pr.lines[openRangeLineIndex].Text = regexp.MustCompile(`^(.*?)\?+(.*)$`).
 		ReplaceAllString(originalText, "${1}"+time.ToString()+"${2}")
 	return makeResult(r.pr.lines, r.index)
+}
+
+func (r *Reconciler) AddBlock(texts []parsing.Text) (Record, string, error) {
+	lines := parsing.Insert(
+		r.pr.lines,
+		r.pr.lastLineOfRecord[r.index],
+		append([]parsing.Text{{"", 0}}, texts...),
+		r.pr.preferences,
+	)
+	return makeResult(lines, r.index+1)
 }
 
 func makeResult(ls []parsing.Line, recordIndex int) (Record, string, error) {

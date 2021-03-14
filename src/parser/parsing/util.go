@@ -53,21 +53,26 @@ func IsBlank(l Line) bool {
 	return true
 }
 
-func Insert(ls []Line, position int, text string, isIndented bool, prefs Preferences) []Line {
+type Text struct {
+	Text        string
+	Indentation int
+}
+
+func Insert(ls []Line, position int, texts []Text, prefs Preferences) []Line {
 	if position > len(ls)+1 {
 		panic("Out of bounds")
 	}
-	result := make([]Line, len(ls)+1)
+	result := make([]Line, len(ls)+len(texts))
 	offset := 0
 	for i := range result {
-		if i == position {
+		if i >= position && offset < len(texts) {
 			line := ""
-			if isIndented {
+			if texts[offset].Indentation > 0 {
 				line += prefs.Indentation
 			}
-			line += text + prefs.LineEnding
-			result[i] = NewLineFromString(line, i+1)
-			offset = 1
+			line += texts[offset].Text + prefs.LineEnding
+			result[i] = NewLineFromString(line, -999)
+			offset++
 		} else {
 			result[i] = ls[i-offset]
 		}
