@@ -8,9 +8,9 @@ import (
 )
 
 func TestReportOfEmptyInput(t *testing.T) {
-	out, err := NewTestingContext()._SetRecords(``)._Run((&Report{}).Run)
+	state, err := NewTestingContext()._SetRecords(``)._Run((&Report{}).Run)
 	require.Nil(t, err)
-	assert.Equal(t, "", out)
+	assert.Equal(t, "", state.printBuffer)
 }
 
 func TestReportOfRecords(t *testing.T) {
@@ -21,7 +21,7 @@ func TestReportOfRecords(t *testing.T) {
 		- Not repeating year or month label
 		- Weekdays
 	*/
-	out, err := NewTestingContext()._SetRecords(`
+	state, err := NewTestingContext()._SetRecords(`
 2021-01-17
 	332h
 
@@ -54,11 +54,11 @@ func TestReportOfRecords(t *testing.T) {
             Wed  3.       1h
                     ========
                     +335h50m
-`, out)
+`, state.printBuffer)
 }
 
 func TestReportConsecutive(t *testing.T) {
-	out, err := NewTestingContext()._SetRecords(`
+	state, err := NewTestingContext()._SetRecords(`
 2020-09-29
 	1h
 
@@ -78,11 +78,11 @@ func TestReportConsecutive(t *testing.T) {
             Sun  4.       3h
                     ========
                          +4h
-`, out)
+`, state.printBuffer)
 }
 
 func TestReportWithDiff(t *testing.T) {
-	out, err := NewTestingContext()._SetRecords(`
+	state, err := NewTestingContext()._SetRecords(`
 2018-07-07 (8h!)
 	8h
 
@@ -102,5 +102,5 @@ func TestReportWithDiff(t *testing.T) {
             Mon  9.    5h20m    2h19m!    +3h1m
                     ===========================
                      +15h20m   15h49m!     -29m
-`, out)
+`, state.printBuffer)
 }

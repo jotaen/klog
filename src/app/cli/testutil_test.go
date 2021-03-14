@@ -13,9 +13,13 @@ var ansiSequencePattern = regexp.MustCompile(`\x1b\[[\d;]+m`)
 
 func NewTestingContext() TestingContext {
 	return TestingContext{
-		printBuffer: "",
+		State: State{
+			printBuffer: "",
+			writtenFileContents: "",
+		},
 		now:         gotime.Now(),
 		records:     nil,
+		parseResult: nil,
 	}
 }
 
@@ -24,6 +28,7 @@ func (ctx TestingContext) _SetRecords(records string) TestingContext {
 	if err != nil {
 		panic("Invalid records")
 	}
+	ctx.parseResult = pr
 	ctx.records = pr.Records
 	return ctx
 }
@@ -33,19 +38,25 @@ func (ctx TestingContext) _SetNow(Y int, M int, D int, h int, m int) TestingCont
 	return ctx
 }
 
-func (ctx TestingContext) _Run(cmd func(app.Context) error) (string, error) {
+func (ctx TestingContext) _Run(cmd func(app.Context) error) (State, error) {
 	cmdErr := cmd(&ctx)
 	out := ansiSequencePattern.ReplaceAllString(ctx.printBuffer, "")
 	if len(out) > 0 && out[0] != '\n' {
 		out = "\n" + out
 	}
-	return out, cmdErr
+	return State{out, ctx.writtenFileContents}, cmdErr
+}
+
+type State struct {
+	printBuffer string
+	writtenFileContents string
 }
 
 type TestingContext struct {
-	printBuffer string
-	records     []Record
+	State
 	now         gotime.Time
+	records     []Record
+	parseResult *parser.ParseResult
 }
 
 func (ctx *TestingContext) Print(s string) {
@@ -75,10 +86,11 @@ func (ctx *TestingContext) ReadInputs(_ ...string) ([]Record, error) {
 }
 
 func (ctx *TestingContext) ReadFileInput(string) (*parser.ParseResult, error) {
-	return nil, nil
+	return ctx.parseResult, nil
 }
 
-func (ctx *TestingContext) WriteFile(path string, contents string) app.Error {
+func (ctx *TestingContext) WriteFile(_ string, contents string) app.Error {
+	ctx.writtenFileContents = contents
 	return nil
 }
 
