@@ -5,20 +5,12 @@ import (
 	"klog/app"
 	"klog/app/cli/lib"
 	"klog/parser"
-	gotime "time"
 )
 
 type Track struct {
-	Date  Date   `name:"date" group:"Filter" help:"The date at which to add the entry (defaults to today)"`
+	lib.AtDateArgs
 	Entry string `arg required help:"A time entry, optionally with summary (might require quoting)"`
 	lib.OutputFileArgs
-}
-
-func (opt *Track) atDate() Date {
-	if opt.Date != nil {
-		return opt.Date
-	}
-	return NewDateFromTime(gotime.Now())
 }
 
 func (opt *Track) Run(ctx app.Context) error {
@@ -30,7 +22,7 @@ func (opt *Track) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
-	today := opt.atDate()
+	today := opt.AtDate()
 	record, contents, err := pr.AddEntry(
 		"No record at date "+today.ToString(),
 		func(r Record) bool { return r.Date().IsEqualTo(today) },

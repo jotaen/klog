@@ -26,6 +26,23 @@ func (args *OutputFileArgs) OutputFile(ctx app.Context) (string, error) {
 	return b.Path, nil
 }
 
+type AtDateArgs struct {
+	Today     bool `name:"today" help:"Use today’s date (default)"`
+	Yesterday bool `name:"yesterday" help:"Use yesterday’s date"`
+	Date      Date `name:"date" help:"The date of the record"`
+}
+
+func (args *AtDateArgs) AtDate() Date {
+	if args.Date != nil {
+		return args.Date
+	}
+	today := NewDateFromTime(gotime.Now())
+	if args.Yesterday {
+		return today.PlusDays(-1)
+	}
+	return today
+}
+
 type DiffArg struct {
 	Diff bool `name:"diff" short:"d" help:"Show difference between actual and should total time"`
 }
