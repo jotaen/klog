@@ -6,6 +6,7 @@ import (
 	"klog/app"
 	"klog/app/cli/lib"
 	"klog/parser"
+	"strings"
 )
 
 type Track struct {
@@ -16,6 +17,7 @@ type Track struct {
 
 func (opt *Track) Run(ctx app.Context) error {
 	date := opt.AtDate(ctx.Now())
+	value := sanitiseQuotedLeadingDash(opt.Entry)
 	return applyReconciler(
 		opt.OutputFileArgs,
 		ctx,
@@ -26,9 +28,16 @@ func (opt *Track) Run(ctx app.Context) error {
 			if reconciler == nil {
 				return nil, errors.New("No record at date " + date.ToString())
 			}
-			return reconciler.AppendEntry(func(r Record) string { return opt.Entry })
+			return reconciler.AppendEntry(func(r Record) string { return value })
 		},
 	)
+}
+
+func sanitiseQuotedLeadingDash(text string) string {
+	// When passing entries like `-45m` the leading dash must be escaped
+	// otherwise it’s treated like a flag. Therefore we have to remove
+	// the potential escaping backslash.
+	return strings.TrimPrefix(text, "\\")
 }
 
 func applyReconciler(

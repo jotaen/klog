@@ -11,7 +11,7 @@ func ReadFile(path string) (string, Error) {
 	if err != nil {
 		return "", NewError(
 			"Cannot read file",
-			"Location: " + path,
+			"Location: "+path,
 		)
 	}
 	return string(contents), nil
@@ -22,7 +22,7 @@ func RemoveFile(path string) Error {
 	if err != nil {
 		return NewError(
 			"Cannot remove file",
-			"Location: " + path,
+			"Location: "+path,
 		)
 	}
 	return nil
@@ -34,14 +34,14 @@ func appendToFile(path string, textToAppend string) Error {
 	if err != nil {
 		return NewError(
 			"Cannot write to file",
-			"Location: " + path,
+			"Location: "+path,
 		)
 	}
 	defer file.Close()
 	if _, err := file.WriteString(textToAppend); err != nil {
 		return NewError(
 			"Cannot write to file",
-			"Location: " + path,
+			"Location: "+path,
 		)
 	}
 	return nil
@@ -52,7 +52,7 @@ func WriteToFile(path string, contents string) Error {
 	if err != nil {
 		return NewError(
 			"Cannot write to file",
-			"Location: " + path,
+			"Location: "+path,
 		)
 	}
 	return nil
