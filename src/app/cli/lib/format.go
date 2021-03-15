@@ -146,7 +146,7 @@ func PrettifyError(err error) error {
 		}
 		return errors.New(message)
 	case app.Error:
-		return errors.New("Error: " + e.Error() + "\n" + e.Help())
+		return errors.New("Error: " + e.Error() + "\n" + e.Details())
 	}
 	return errors.New("Error: " + err.Error())
 }

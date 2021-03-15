@@ -2,18 +2,22 @@ package app
 
 type Error interface {
 	Error() string
-	Help() string
+	Details() string
 }
 
-type appError struct {
+type AppError struct {
 	message string
-	help    string
+	details string
 }
 
-func (e appError) Error() string {
+func NewError(message string, details string) Error {
+	return AppError{message, details}
+}
+
+func (e AppError) Error() string {
 	return e.message
 }
 
-func (e appError) Help() string {
-	return e.help
+func (e AppError) Details() string {
+	return e.details
 }

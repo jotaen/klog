@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"errors"
 	. "klog"
 	"klog/app"
 	"klog/app/cli/lib"
@@ -25,7 +24,10 @@ func (opt *Start) Run(ctx app.Context) error {
 				return r.Date().IsEqualTo(date) && r.OpenRange() == nil
 			})
 			if reconciler == nil {
-				return nil, errors.New("No eligible record at date " + date.ToString())
+				return nil, app.NewError(
+					"No eligible record at date "+date.ToString(),
+					"Please make sure the record exists and it doesn’t contain an open-ended time range yet.",
+				)
 			}
 			return reconciler.AppendEntry(
 				func(r Record) string { return time.ToString() + " - ?" },

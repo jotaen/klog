@@ -125,13 +125,13 @@ func retrieveInputs(
 		}
 		return []string{content}, nil
 	}
-	return nil, appError{
+	return nil, NewError(
 		"No input given",
-		"Please do one of the following:\n" +
-			"    a) pass one or multiple file names as argument\n" +
-			"    b) pipe file contents via stdin\n" +
+		"Please do one of the following:\n"+
+			"    a) pass one or multiple file names as argument\n"+
+			"    b) pipe file contents via stdin\n"+
 			"    c) specify a bookmark to read from by default",
-	}
+	)
 }
 
 func (ctx *context) ReadInputs(paths ...string) ([]Record, error) {
@@ -198,10 +198,10 @@ func (ctx *context) bookmarkOrNil() (*File, Error) {
 	}
 	_, err = os.Stat(dest)
 	if err != nil {
-		return nil, appError{
+		return nil, NewError(
 			"Bookmark doesn’t point to valid file",
 			"Please check the current bookmark location or set a new one",
-		}
+		)
 	}
 	return &File{
 		Name:     filepath.Base(dest),
@@ -220,10 +220,10 @@ func (ctx *context) Bookmark() (*File, Error) {
 		return nil, err
 	}
 	if b == nil {
-		return nil, appError{
+		return nil, NewError(
 			"No bookmark set",
 			"You can set a bookmark by running: klog bookmark set somefile.klg",
-		}
+		)
 	}
 	return b, nil
 }
@@ -231,27 +231,27 @@ func (ctx *context) Bookmark() (*File, Error) {
 func (ctx *context) SetBookmark(path string) Error {
 	bookmark, err := filepath.Abs(path)
 	if err != nil {
-		return appError{
+		return NewError(
 			"Invalid target file",
 			"Please check the file path",
-		}
+		)
 	}
 	klogFolder := ctx.KlogFolder()
 	err = os.MkdirAll(klogFolder, 0700)
 	if err != nil {
-		return appError{
+		return NewError(
 			"Unable to initialise ~/.klog folder",
 			"Please create a ~/.klog folder manually",
-		}
+		)
 	}
 	symlink := ctx.bookmarkOrigin()
 	_ = os.Remove(symlink)
 	err = os.Symlink(bookmark, symlink)
 	if err != nil {
-		return appError{
+		return NewError(
 			"Failed to create bookmark",
 			"",
-		}
+		)
 	}
 	return nil
 }
@@ -264,10 +264,10 @@ func (ctx *context) OpenInFileBrowser(path string) Error {
 	cmd := exec.Command("open", path)
 	err := cmd.Run()
 	if err != nil {
-		return appError{
+		return NewError(
 			"Failed to open file browser",
 			err.Error(),
-		}
+		)
 	}
 	return nil
 }
@@ -275,20 +275,20 @@ func (ctx *context) OpenInFileBrowser(path string) Error {
 func (ctx *context) OpenInEditor(path string) Error {
 	editor := os.Getenv("EDITOR")
 	if editor == "" {
-		return appError{
+		return NewError(
 			"No default editor set",
 			"Please specify you editor via the $EDITOR environment variable",
-		}
+		)
 	}
 	cmd := exec.Command(editor, path)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	err := cmd.Run()
 	if err != nil {
-		return appError{
+		return NewError(
 			"Cannot open editor",
-			"Tried to run: " + editor + " " + path,
-		}
+			"Tried to run: "+editor+" "+path,
+		)
 	}
 	return nil
 }
@@ -297,17 +297,17 @@ func (ctx *context) InstantiateTemplate(templateName string) ([]parsing.Text, Er
 	location := ctx.KlogFolder() + templateName + ".template.klg"
 	template, err := ReadFile(location)
 	if err != nil {
-		return nil, appError{
+		return nil, NewError(
 			"No such template",
-			"There is no template at location " + location,
-		}
+			"There is no template at location "+location,
+		)
 	}
 	instance, tErr := parser.RenderTemplate(template, ctx.Now())
 	if tErr != nil {
-		return nil, appError{
+		return nil, NewError(
 			"Invalid template",
 			tErr.Error(),
-		}
+		)
 	}
 	return instance, nil
 }
