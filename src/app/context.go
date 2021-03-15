@@ -151,6 +151,13 @@ func (ctx *context) ReadInputs(paths ...string) ([]Record, error) {
 }
 
 func (ctx *context) ReadFileInput(path string) (*parser.ParseResult, error) {
+	if path == "" {
+		b, err := ctx.Bookmark()
+		if err != nil {
+			return nil, err
+		}
+		path = b.Path
+	}
 	content, err := ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -163,6 +170,13 @@ func (ctx *context) ReadFileInput(path string) (*parser.ParseResult, error) {
 }
 
 func (ctx *context) WriteFile(path string, contents string) Error {
+	if path == "" {
+		b, err := ctx.Bookmark()
+		if err != nil {
+			return err
+		}
+		path = b.Path
+	}
 	return WriteToFile(path, contents)
 }
 

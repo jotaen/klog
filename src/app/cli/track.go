@@ -36,11 +36,7 @@ func applyReconciler(
 	ctx app.Context,
 	reconcile func(*parser.ParseResult) (*parser.ReconcileResult, error),
 ) error {
-	targetFile, err := fileArgs.OutputFile(ctx)
-	if err != nil {
-		return err
-	}
-	pr, err := ctx.ReadFileInput(targetFile)
+	pr, err := ctx.ReadFileInput(fileArgs.File)
 	if err != nil {
 		return err
 	}
@@ -48,7 +44,7 @@ func applyReconciler(
 	if err != nil {
 		return err
 	}
-	err = ctx.WriteFile(targetFile, result.NewText)
+	err = ctx.WriteFile(fileArgs.File, result.NewText)
 	if err != nil {
 		return err
 	}
