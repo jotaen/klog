@@ -10,7 +10,7 @@ import (
 
 type Track struct {
 	lib.AtDateArgs
-	Entry string `arg required help:"The new entry to add (requires quoting if contains multiple words)"`
+	Entry string `arg required help:"The new entry to add, which may optionally contain summary text. Remember to 'quote' to avoid shell processing."`
 	lib.OutputFileArgs
 }
 
