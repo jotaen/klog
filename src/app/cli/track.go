@@ -16,27 +16,25 @@ type Track struct {
 
 func (opt *Track) Run(ctx app.Context) error {
 	date := opt.AtDate(ctx.Now())
-	return reconcile(
+	return applyReconciler(
 		opt.OutputFileArgs,
 		ctx,
-		func(pr *parser.ParseResult) (*parser.Reconciler, error) {
-			return parser.NewRecordReconciler(pr,
-				errors.New("No record at date "+date.ToString()),
-				func(r Record) bool { return r.Date().IsEqualTo(date) })
-		},
-		func(r *parser.Reconciler) (Record, string, error) {
-			return r.AppendEntry(
-				func(r Record) string { return opt.Entry },
-			)
+		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
+			reconciler := parser.NewRecordReconciler(pr, func(r Record) bool {
+				return r.Date().IsEqualTo(date)
+			})
+			if reconciler == nil {
+				return nil, errors.New("No record at date " + date.ToString())
+			}
+			return reconciler.AppendEntry(func(r Record) string { return opt.Entry })
 		},
 	)
 }
 
-func reconcile(
+func applyReconciler(
 	fileArgs lib.OutputFileArgs,
 	ctx app.Context,
-	reconcilerSupplier func(pr *parser.ParseResult) (*parser.Reconciler, error),
-	handle func(reconciler *parser.Reconciler) (Record, string, error),
+	reconcile func(*parser.ParseResult) (*parser.ReconcileResult, error),
 ) error {
 	targetFile, err := fileArgs.OutputFile(ctx)
 	if err != nil {
@@ -46,18 +44,14 @@ func reconcile(
 	if err != nil {
 		return err
 	}
-	reconciler, err := reconcilerSupplier(pr)
-	if reconciler == nil {
-		return err
-	}
-	record, contents, err := handle(reconciler)
+	result, err := reconcile(pr)
 	if err != nil {
 		return err
 	}
-	err = ctx.WriteFile(targetFile, contents)
+	err = ctx.WriteFile(targetFile, result.NewText)
 	if err != nil {
 		return err
 	}
-	ctx.Print("\n" + parser.SerialiseRecords(&lib.Styler, record) + "\n")
+	ctx.Print("\n" + parser.SerialiseRecords(&lib.Styler, result.NewRecord) + "\n")
 	return nil
 }

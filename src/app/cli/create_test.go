@@ -28,6 +28,14 @@ func TestCreate(t *testing.T) {
 `, state.writtenFileContents)
 }
 
+func TestCreateFromEmpty(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(``).
+		_SetNow(1999, 10, 4, 0, 1).
+		_Run((&Create{}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, "1999-10-04\n", state.writtenFileContents)
+}
+
 func TestCreateWithValues(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 1975-12-31
