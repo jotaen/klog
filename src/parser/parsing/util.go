@@ -33,14 +33,6 @@ func GroupIntoBlocks(lines []Line) [][]Line {
 	return blocks
 }
 
-func Join(ls []Line) string {
-	result := ""
-	for _, l := range ls {
-		result += l.Original()
-	}
-	return result
-}
-
 func IsBlank(l Line) bool {
 	if len(l.Text) == 0 {
 		return true

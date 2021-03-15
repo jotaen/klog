@@ -9,10 +9,10 @@ import (
 func ReadFile(path string) (string, Error) {
 	contents, err := os.ReadFile(path)
 	if err != nil {
-		return "", appError{
+		return "", NewError(
 			"Cannot read file",
-			"Location: " + path,
-		}
+			"Location: "+path,
+		)
 	}
 	return string(contents), nil
 }
@@ -20,10 +20,10 @@ func ReadFile(path string) (string, Error) {
 func RemoveFile(path string) Error {
 	err := os.Remove(path)
 	if err != nil {
-		return appError{
+		return NewError(
 			"Cannot remove file",
-			"Location: " + path,
-		}
+			"Location: "+path,
+		)
 	}
 	return nil
 }
@@ -32,17 +32,17 @@ func RemoveFile(path string) Error {
 func appendToFile(path string, textToAppend string) Error {
 	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		return appError{
+		return NewError(
 			"Cannot write to file",
-			"Location: " + path,
-		}
+			"Location: "+path,
+		)
 	}
 	defer file.Close()
 	if _, err := file.WriteString(textToAppend); err != nil {
-		return appError{
+		return NewError(
 			"Cannot write to file",
-			"Location: " + path,
-		}
+			"Location: "+path,
+		)
 	}
 	return nil
 }
@@ -50,10 +50,10 @@ func appendToFile(path string, textToAppend string) Error {
 func WriteToFile(path string, contents string) Error {
 	err := os.WriteFile(path, []byte(contents), 0644)
 	if err != nil {
-		return appError{
-			message: "Cannot write to file",
-			help:    "Location: " + path,
-		}
+		return NewError(
+			"Cannot write to file",
+			"Location: "+path,
+		)
 	}
 	return nil
 }
@@ -61,10 +61,10 @@ func WriteToFile(path string, contents string) Error {
 func ReadStdin() (string, Error) {
 	info, err := os.Stdin.Stat()
 	if err != nil {
-		return "", appError{
+		return "", NewError(
 			"Cannot read from Stdin",
 			"Cannot open Stdin stream to check for input",
-		}
+		)
 	}
 	if info.Mode()&os.ModeCharDevice != 0 || info.Size() <= 0 {
 		return "", nil
@@ -77,10 +77,10 @@ func ReadStdin() (string, Error) {
 			break
 		}
 		if err != nil {
-			return "", appError{
+			return "", NewError(
 				"Error while reading from Stdin",
 				"An error occurred while processing the input stream",
-			}
+			)
 		}
 		output = append(output, input)
 	}

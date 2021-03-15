@@ -6,58 +6,57 @@ import (
 	"klog/app"
 	"klog/app/cli/lib"
 	"klog/parser"
+	"strings"
 )
 
 type Track struct {
 	lib.AtDateArgs
-	Entry string `arg required help:"The new entry to add (requires quoting if contains multiple words)"`
+	Entry string `arg required help:"The new entry to add, which may optionally contain summary text. Remember to 'quote' to avoid shell processing."`
 	lib.OutputFileArgs
 }
 
 func (opt *Track) Run(ctx app.Context) error {
 	date := opt.AtDate(ctx.Now())
-	return reconcile(
+	value := sanitiseQuotedLeadingDash(opt.Entry)
+	return applyReconciler(
 		opt.OutputFileArgs,
 		ctx,
-		func(pr *parser.ParseResult) (*parser.Reconciler, error) {
-			return parser.NewRecordReconciler(pr,
-				errors.New("No record at date "+date.ToString()),
-				func(r Record) bool { return r.Date().IsEqualTo(date) })
-		},
-		func(r *parser.Reconciler) (Record, string, error) {
-			return r.AppendEntry(
-				func(r Record) string { return opt.Entry },
-			)
+		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
+			reconciler := parser.NewRecordReconciler(pr, func(r Record) bool {
+				return r.Date().IsEqualTo(date)
+			})
+			if reconciler == nil {
+				return nil, errors.New("No record at date " + date.ToString())
+			}
+			return reconciler.AppendEntry(func(r Record) string { return value })
 		},
 	)
 }
 
-func reconcile(
+func sanitiseQuotedLeadingDash(text string) string {
+	// When passing entries like `-45m` the leading dash must be escaped
+	// otherwise it’s treated like a flag. Therefore we have to remove
+	// the potential escaping backslash.
+	return strings.TrimPrefix(text, "\\")
+}
+
+func applyReconciler(
 	fileArgs lib.OutputFileArgs,
 	ctx app.Context,
-	reconcilerSupplier func(pr *parser.ParseResult) (*parser.Reconciler, error),
-	handle func(reconciler *parser.Reconciler) (Record, string, error),
+	reconcile func(*parser.ParseResult) (*parser.ReconcileResult, error),
 ) error {
-	targetFile, err := fileArgs.OutputFile(ctx)
+	pr, err := ctx.ReadFileInput(fileArgs.File)
 	if err != nil {
 		return err
 	}
-	pr, err := ctx.ReadFileInput(targetFile)
+	result, err := reconcile(pr)
 	if err != nil {
 		return err
 	}
-	reconciler, err := reconcilerSupplier(pr)
-	if reconciler == nil {
-		return err
-	}
-	record, contents, err := handle(reconciler)
+	err = ctx.WriteFile(fileArgs.File, result.NewText)
 	if err != nil {
 		return err
 	}
-	err = ctx.WriteFile(targetFile, contents)
-	if err != nil {
-		return err
-	}
-	ctx.Print("\n" + parser.SerialiseRecords(&lib.Styler, record) + "\n")
+	ctx.Print("\n" + parser.SerialiseRecords(&lib.Styler, result.NewRecord) + "\n")
 	return nil
 }

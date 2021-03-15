@@ -28,11 +28,28 @@ func TestCreate(t *testing.T) {
 `, state.writtenFileContents)
 }
 
+func TestCreateFromEmpty(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords("").
+		_SetNow(1999, 10, 4, 0, 1).
+		_Run((&Create{}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, "1999-10-04\n", state.writtenFileContents)
+}
+
+func TestCreateFromBlank(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords("\n\n\n\n").
+		_SetNow(1999, 10, 4, 0, 1).
+		_Run((&Create{}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, "1999-10-04\n\n\n\n\n", state.writtenFileContents)
+}
+
 func TestCreateWithValues(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 1975-12-31
 	1h
 	2h
+
 
 1976-01-01
 	1h
@@ -45,6 +62,7 @@ func TestCreateWithValues(t *testing.T) {
 1975-12-31
 	1h
 	2h
+
 
 1976-01-01
 	1h

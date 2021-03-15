@@ -1,7 +1,12 @@
 # Changelog (command line tool)
 
-## Pending
+## v2.0
 - **[ BREAKING ]** Make `--after` and `--before` filters exclusive
+- **[ FEATURE ]** Add commands for manipulating files:
+  - `create` for creating a new record
+  - `track` for adding an entry to a record
+  - `start` to track an open-ended time range
+  - `stop` to close an open-ended time range
 - **[ FEATURE ]** Add `--since` and `--until` filters (inclusive)
 - **[ FEATURE ]** Add `--period` filter (e.g. `--period=2015` for 
   all in 2015, or `--period=2015-04` for all in April 2015).

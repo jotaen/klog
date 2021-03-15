@@ -7,16 +7,22 @@ import (
 	"regexp"
 )
 
-type Reconciler struct {
-	pr    *ParseResult
-	index int
+type ReconcileResult struct {
+	NewRecord Record
+	NewText   string
 }
 
-func NewRecordReconciler(
-	pr *ParseResult,
-	notFoundError error,
-	matchRecord func(Record) bool,
-) (*Reconciler, error) {
+type RecordReconciler struct {
+	pr            *ParseResult
+	recordPointer uint // `-1` indicates to prepend
+}
+
+type BlockReconciler struct {
+	pr                 *ParseResult
+	maybeRecordPointer int
+}
+
+func NewRecordReconciler(pr *ParseResult, matchRecord func(Record) bool) *RecordReconciler {
 	index := -1
 	for i, r := range pr.Records {
 		if matchRecord(r) {
@@ -25,45 +31,29 @@ func NewRecordReconciler(
 		}
 	}
 	if index == -1 {
-		return nil, notFoundError
+		return nil
 	}
-	return &Reconciler{
-		pr:    pr,
-		index: index,
-	}, nil
-}
-
-func NewBlockReconciler(
-	pr *ParseResult,
-	findPosition func(Record, Record) bool,
-) (*Reconciler, error) {
-	index := len(pr.Records) - 1
-	for i, r := range pr.Records {
-		if i == index {
-			break
-		}
-		if findPosition(r, pr.Records[i+1]) {
-			index = i
-			break
-		}
+	return &RecordReconciler{
+		pr:            pr,
+		recordPointer: uint(index),
 	}
-	return &Reconciler{
-		pr:    pr,
-		index: index,
-	}, nil
 }
 
-func (r *Reconciler) AppendEntry(handler func(Record) string) (Record, string, error) {
-	newEntry := handler(r.pr.Records[r.index])
-	lineIndex := r.pr.lastLineOfRecord[r.index]
-	result := parsing.Insert(r.pr.lines, lineIndex, []parsing.Text{{newEntry, 1}}, r.pr.preferences)
-	return makeResult(result, r.index)
+func (r *RecordReconciler) AppendEntry(handler func(Record) string) (*ReconcileResult, error) {
+	newEntry := handler(r.pr.Records[r.recordPointer])
+	result := parsing.Insert(
+		r.pr.lines,
+		r.pr.lastLineOfRecord[r.recordPointer],
+		[]parsing.Text{{newEntry, 1}},
+		r.pr.preferences,
+	)
+	return makeResult(result, r.recordPointer)
 }
 
-func (r *Reconciler) CloseOpenRange(handler func(Record) Time) (Record, string, error) {
-	record := r.pr.Records[r.index]
+func (r *RecordReconciler) CloseOpenRange(handler func(Record) Time) (*ReconcileResult, error) {
+	record := r.pr.Records[r.recordPointer]
 	if record.OpenRange() == nil {
-		return nil, "", errors.New("NO_OPEN_RANGE")
+		return nil, errors.New("NO_OPEN_RANGE")
 	}
 	entryIndex := 0
 	for i, e := range record.Entries() {
@@ -77,29 +67,66 @@ func (r *Reconciler) CloseOpenRange(handler func(Record) Time) (Record, string, 
 		)
 	}
 	time := handler(record)
-	openRangeLineIndex := r.pr.lastLineOfRecord[r.index] - len(record.Entries()) + entryIndex
+	openRangeLineIndex := r.pr.lastLineOfRecord[r.recordPointer] - len(record.Entries()) + entryIndex
 	originalText := r.pr.lines[openRangeLineIndex].Text
 	r.pr.lines[openRangeLineIndex].Text = regexp.MustCompile(`^(.*?)\?+(.*)$`).
 		ReplaceAllString(originalText, "${1}"+time.ToString()+"${2}")
-	return makeResult(r.pr.lines, r.index)
+	return makeResult(r.pr.lines, r.recordPointer)
 }
 
-func (r *Reconciler) AddBlock(texts []parsing.Text) (Record, string, error) {
+func NewBlockReconciler(pr *ParseResult, newDate Date) *BlockReconciler {
+	index := -1
+	for i, r := range pr.Records {
+		if i == 0 && !newDate.IsAfterOrEqual(r.Date()) {
+			break
+		}
+		if i == len(pr.Records)-1 {
+			index = len(pr.Records) - 1
+			break
+		}
+		if newDate.IsAfterOrEqual(r.Date()) && !newDate.IsAfterOrEqual(pr.Records[i+1].Date()) {
+			index = i
+			break
+		}
+	}
+	return &BlockReconciler{
+		pr:                 pr,
+		maybeRecordPointer: index,
+	}
+}
+
+var blankLine = parsing.Text{"", 0}
+
+func (r *BlockReconciler) InsertBlock(texts []parsing.Text) (*ReconcileResult, error) {
+	lineIndex, newRecordIndex, insertable := func() (int, uint, []parsing.Text) {
+		if r.maybeRecordPointer == -1 {
+			if len(r.pr.Records) == 0 {
+				return 0, 0, texts
+			}
+			return 0, 0, append(texts, blankLine)
+		}
+		return r.pr.lastLineOfRecord[r.maybeRecordPointer],
+			uint(r.maybeRecordPointer + 1),
+			append([]parsing.Text{blankLine}, texts...)
+	}()
 	lines := parsing.Insert(
 		r.pr.lines,
-		r.pr.lastLineOfRecord[r.index],
-		append([]parsing.Text{{"", 0}}, texts...),
+		lineIndex,
+		insertable,
 		r.pr.preferences,
 	)
-	return makeResult(lines, r.index+1)
+	return makeResult(lines, newRecordIndex)
 }
 
-func makeResult(ls []parsing.Line, recordIndex int) (Record, string, error) {
+func makeResult(ls []parsing.Line, recordIndex uint) (*ReconcileResult, error) {
 	newText := parsing.Join(ls)
 	newRecords, pErr := Parse(newText)
 	if pErr != nil {
 		err := pErr.Get()[0]
-		return nil, "", errors.New(err.Message())
+		return nil, errors.New(err.Message())
 	}
-	return newRecords.Records[recordIndex], newText, nil
+	return &ReconcileResult{
+		newRecords.Records[recordIndex],
+		newText,
+	}, nil
 }

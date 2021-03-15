@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"errors"
 	. "klog"
 	"klog/app"
 	"klog/app/cli/lib"
@@ -17,20 +16,23 @@ type Stop struct {
 func (opt *Stop) Run(ctx app.Context) error {
 	date := opt.AtDate(ctx.Now())
 	time := opt.AtTime(ctx.Now())
-	return reconcile(
+	return applyReconciler(
 		opt.OutputFileArgs,
 		ctx,
-		func(pr *parser.ParseResult) (*parser.Reconciler, error) {
-			return parser.NewRecordReconciler(pr,
-				errors.New("No eligible record at date "+date.ToString()),
-				func(r Record) bool {
-					return r.Date().IsEqualTo(date) &&
-						r.OpenRange() != nil &&
-						time.IsAfterOrEqual(r.OpenRange().Start())
-				})
-		},
-		func(r *parser.Reconciler) (Record, string, error) {
-			return r.CloseOpenRange(
+		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
+			reconciler := parser.NewRecordReconciler(pr, func(r Record) bool {
+				return r.Date().IsEqualTo(date) &&
+					r.OpenRange() != nil &&
+					time.IsAfterOrEqual(r.OpenRange().Start())
+			})
+			if reconciler == nil {
+				return nil, app.NewError(
+					"No eligible record at date "+date.ToString(),
+					"Please make sure the record exists and it contains an open-ended time range "+
+						"which start time is prior to your desired end time.",
+				)
+			}
+			return reconciler.CloseOpenRange(
 				func(r Record) Time { return time },
 			)
 		},

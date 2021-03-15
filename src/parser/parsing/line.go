@@ -53,6 +53,14 @@ func Split(text string) []Line {
 	return result
 }
 
+func Join(ls []Line) string {
+	result := ""
+	for _, l := range ls {
+		result += l.Original()
+	}
+	return result
+}
+
 var lineEndingPatterns = []string{"\r\n", "\n"}
 
 func splitOffLineEnding(text string) (string, string) {
