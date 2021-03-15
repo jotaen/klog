@@ -36,10 +36,8 @@ func (opt *Create) Run(ctx app.Context) error {
 		opt.OutputFileArgs,
 		ctx,
 		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
-			reconciler := parser.NewBlockReconciler(pr, func(r1 Record, r2 Record) bool {
-				return date.IsAfterOrEqual(r1.Date()) && r2.Date().IsAfterOrEqual(date)
-			})
-			return reconciler.AddNewRecord(lines)
+			reconciler := parser.NewBlockReconciler(pr, date)
+			return reconciler.InsertBlock(lines)
 		},
 	)
 }

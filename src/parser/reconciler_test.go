@@ -104,10 +104,8 @@ func TestReconcilerClosesOpenRange(t *testing.T) {
 
 func TestReconcileAddBlockIfOriginalIsEmpty(t *testing.T) {
 	pr, _ := Parse("")
-	reconciler := NewBlockReconciler(pr, func(Record, Record) bool {
-		return false
-	})
-	result, err := reconciler.AddNewRecord([]parsing.Text{
+	reconciler := NewBlockReconciler(pr, Ɀ_Date_(3333, 1, 1))
+	result, err := reconciler.InsertBlock([]parsing.Text{
 		{"2000-05-05", 0},
 	})
 	require.Nil(t, err)
@@ -119,11 +117,8 @@ func TestReconcileAddBlockToEnd(t *testing.T) {
 2018-01-01
     1h`
 	pr, _ := Parse(original)
-	reconciler := NewBlockReconciler(
-		pr,
-		func(Record, Record) bool { return false },
-	)
-	result, err := reconciler.AddNewRecord([]parsing.Text{
+	reconciler := NewBlockReconciler(pr, Ɀ_Date_(2018, 1, 2))
+	result, err := reconciler.InsertBlock([]parsing.Text{
 		{"2018-01-02", 0},
 	})
 	require.Nil(t, err)
@@ -135,6 +130,55 @@ func TestReconcileAddBlockToEnd(t *testing.T) {
 `, result.NewText)
 }
 
+func TestReconcileAddBlockToEndWithTrailingNewlines(t *testing.T) {
+	original := `
+2018-01-01
+    1h
+
+`
+	pr, _ := Parse(original)
+	reconciler := NewBlockReconciler(pr, Ɀ_Date_(2018, 1, 2))
+	result, err := reconciler.InsertBlock([]parsing.Text{
+		{"2018-01-02", 0},
+	})
+	require.Nil(t, err)
+	assert.Equal(t, `
+2018-01-01
+    1h
+
+2018-01-02
+
+`, result.NewText)
+}
+
+func TestReconcileAddBlockToBeginning(t *testing.T) {
+	original := "2018-01-02"
+	pr, _ := Parse(original)
+	reconciler := NewBlockReconciler(pr, Ɀ_Date_(2018, 1, 1))
+	result, err := reconciler.InsertBlock([]parsing.Text{
+		{"2018-01-01", 0},
+	})
+	require.Nil(t, err)
+	assert.Equal(t, `2018-01-01
+
+2018-01-02`, result.NewText)
+}
+
+func TestReconcileAddBlockToBeginningWithLeadingNewlines(t *testing.T) {
+	original := "\n\n2018-01-02"
+	pr, _ := Parse(original)
+	reconciler := NewBlockReconciler(pr, Ɀ_Date_(2018, 1, 1))
+	result, err := reconciler.InsertBlock([]parsing.Text{
+		{"2018-01-01", 0},
+	})
+	require.Nil(t, err)
+	assert.Equal(t, `2018-01-01
+
+
+
+2018-01-02`, result.NewText)
+}
+
 func TestReconcileAddBlockInBetween(t *testing.T) {
 	original := `
 2018-01-01
@@ -143,11 +187,8 @@ func TestReconcileAddBlockInBetween(t *testing.T) {
 2018-01-03
     3h`
 	pr, _ := Parse(original)
-	date := Ɀ_Date_(2018, 1, 2)
-	reconciler := NewBlockReconciler(pr, func(r1 Record, r2 Record) bool {
-		return date.IsAfterOrEqual(r1.Date()) && r2.Date().IsAfterOrEqual(date)
-	})
-	result, err := reconciler.AddNewRecord([]parsing.Text{
+	reconciler := NewBlockReconciler(pr, Ɀ_Date_(2018, 1, 2))
+	result, err := reconciler.InsertBlock([]parsing.Text{
 		{"2018-01-02", 0},
 		{"This and that", 0},
 		{"30m worked", 1},

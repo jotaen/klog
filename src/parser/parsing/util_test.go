@@ -48,6 +48,21 @@ func TestInsertInBetween(t *testing.T) {
 	assert.Equal(t, 4, after[3].LineNumber)
 }
 
+func TestInsertAtBeginningAndEnd(t *testing.T) {
+	before := Split("beginning\nend")
+	after := Insert(before, 0, []Text{
+		{"first", 0},
+	}, DefaultPreferences())
+	after = Insert(after, 3, []Text{
+		{"last", 0},
+	}, DefaultPreferences())
+	require.Len(t, after, 4)
+	assert.Equal(t, "first\n", after[0].Original())
+	assert.Equal(t, "beginning\n", after[1].Original())
+	assert.Equal(t, "end\n", after[2].Original())
+	assert.Equal(t, "last\n", after[3].Original())
+}
+
 func TestInsertMultipleTexts(t *testing.T) {
 	before := Split("first\nfourth\nfifth\n")
 	after := Insert(before, 1, []Text{

@@ -14,7 +14,7 @@ type ReconcileResult struct {
 
 type RecordReconciler struct {
 	pr            *ParseResult
-	recordPointer uint // can be `-1` for nothing found
+	recordPointer uint // `-1` indicates to prepend
 }
 
 type BlockReconciler struct {
@@ -74,13 +74,17 @@ func (r *RecordReconciler) CloseOpenRange(handler func(Record) Time) (*Reconcile
 	return makeResult(r.pr.lines, r.recordPointer)
 }
 
-func NewBlockReconciler(pr *ParseResult, findPosition func(Record, Record) bool) *BlockReconciler {
-	index := len(pr.Records) - 1
+func NewBlockReconciler(pr *ParseResult, newDate Date) *BlockReconciler {
+	index := -1
 	for i, r := range pr.Records {
-		if i == index {
+		if i == 0 && !newDate.IsAfterOrEqual(r.Date()) {
 			break
 		}
-		if findPosition(r, pr.Records[i+1]) {
+		if i == len(pr.Records)-1 {
+			index = len(pr.Records) - 1
+			break
+		}
+		if newDate.IsAfterOrEqual(r.Date()) && !newDate.IsAfterOrEqual(pr.Records[i+1].Date()) {
 			index = i
 			break
 		}
@@ -91,19 +95,24 @@ func NewBlockReconciler(pr *ParseResult, findPosition func(Record, Record) bool)
 	}
 }
 
-func (r *BlockReconciler) AddNewRecord(texts []parsing.Text) (*ReconcileResult, error) {
-	lineIndex, newRecordIndex, appendable := func() (int, uint, []parsing.Text) {
+var blankLine = parsing.Text{"", 0}
+
+func (r *BlockReconciler) InsertBlock(texts []parsing.Text) (*ReconcileResult, error) {
+	lineIndex, newRecordIndex, insertable := func() (int, uint, []parsing.Text) {
 		if r.maybeRecordPointer == -1 {
-			return 0, 0, texts
+			if len(r.pr.Records) == 0 {
+				return 0, 0, texts
+			}
+			return 0, 0, append(texts, blankLine)
 		}
 		return r.pr.lastLineOfRecord[r.maybeRecordPointer],
 			uint(r.maybeRecordPointer + 1),
-			append([]parsing.Text{{"", 0}}, texts...)
+			append([]parsing.Text{blankLine}, texts...)
 	}()
 	lines := parsing.Insert(
 		r.pr.lines,
 		lineIndex,
-		appendable,
+		insertable,
 		r.pr.preferences,
 	)
 	return makeResult(lines, newRecordIndex)
