@@ -8,8 +8,8 @@ import (
 )
 
 type Reconciler struct {
-	pr    *ParseResult
-	index int
+	pr            *ParseResult
+	recordPointer int
 }
 
 func NewRecordReconciler(
@@ -28,8 +28,8 @@ func NewRecordReconciler(
 		return nil, notFoundError
 	}
 	return &Reconciler{
-		pr:    pr,
-		index: index,
+		pr:            pr,
+		recordPointer: index,
 	}, nil
 }
 
@@ -48,20 +48,24 @@ func NewBlockReconciler(
 		}
 	}
 	return &Reconciler{
-		pr:    pr,
-		index: index,
+		pr:            pr,
+		recordPointer: index,
 	}, nil
 }
 
 func (r *Reconciler) AppendEntry(handler func(Record) string) (Record, string, error) {
-	newEntry := handler(r.pr.Records[r.index])
-	lineIndex := r.pr.lastLineOfRecord[r.index]
-	result := parsing.Insert(r.pr.lines, lineIndex, []parsing.Text{{newEntry, 1}}, r.pr.preferences)
-	return makeResult(result, r.index)
+	newEntry := handler(r.pr.Records[r.recordPointer])
+	result := parsing.Insert(
+		r.pr.lines,
+		r.pr.lastLineOfRecord[r.recordPointer],
+		[]parsing.Text{{newEntry, 1}},
+		r.pr.preferences,
+	)
+	return makeResult(result, r.recordPointer)
 }
 
 func (r *Reconciler) CloseOpenRange(handler func(Record) Time) (Record, string, error) {
-	record := r.pr.Records[r.index]
+	record := r.pr.Records[r.recordPointer]
 	if record.OpenRange() == nil {
 		return nil, "", errors.New("NO_OPEN_RANGE")
 	}
@@ -77,21 +81,27 @@ func (r *Reconciler) CloseOpenRange(handler func(Record) Time) (Record, string, 
 		)
 	}
 	time := handler(record)
-	openRangeLineIndex := r.pr.lastLineOfRecord[r.index] - len(record.Entries()) + entryIndex
+	openRangeLineIndex := r.pr.lastLineOfRecord[r.recordPointer] - len(record.Entries()) + entryIndex
 	originalText := r.pr.lines[openRangeLineIndex].Text
 	r.pr.lines[openRangeLineIndex].Text = regexp.MustCompile(`^(.*?)\?+(.*)$`).
 		ReplaceAllString(originalText, "${1}"+time.ToString()+"${2}")
-	return makeResult(r.pr.lines, r.index)
+	return makeResult(r.pr.lines, r.recordPointer)
 }
 
 func (r *Reconciler) AddBlock(texts []parsing.Text) (Record, string, error) {
+	lineIndex, appendable := func() (int, []parsing.Text) {
+		if r.recordPointer == -1 {
+			return 0, texts
+		}
+		return r.pr.lastLineOfRecord[r.recordPointer], append([]parsing.Text{{"", 0}}, texts...)
+	}()
 	lines := parsing.Insert(
 		r.pr.lines,
-		r.pr.lastLineOfRecord[r.index],
-		append([]parsing.Text{{"", 0}}, texts...),
+		lineIndex,
+		appendable,
 		r.pr.preferences,
 	)
-	return makeResult(lines, r.index+1)
+	return makeResult(lines, r.recordPointer+1)
 }
 
 func makeResult(ls []parsing.Line, recordIndex int) (Record, string, error) {

@@ -118,6 +118,18 @@ func TestReconcilerClosesOpenRange(t *testing.T) {
 `, reconciled)
 }
 
+func TestReconcileAddBlockIfOriginalIsEmpty(t *testing.T) {
+	pr, _ := Parse("")
+	reconciler, _ := NewBlockReconciler(pr, func(Record, Record) bool {
+		return false
+	})
+	_, reconciled, err := reconciler.AddBlock([]parsing.Text{
+		{"2000-05-05", 0},
+	})
+	require.Nil(t, err)
+	assert.Equal(t, "2000-05-05\n", reconciled)
+}
+
 func TestReconcileAddBlockToEnd(t *testing.T) {
 	original := `
 2018-01-01
