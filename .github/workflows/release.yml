@@ -68,7 +68,9 @@ jobs:
           [[ $(./out/klog version --no-check) == *"${{ github.event.inputs.release_id }}"* ]] && $(exit 0) || $(exit 1)
       - name: Bundle
         run: |
-          mv ./out/klog ./out/${{ matrix.binary_name }}
+          if [[ "${{ matrix.binary_name }}" != "klog" ]]; then
+            mv ./out/klog ./out/${{ matrix.binary_name }}
+          fi
           zip -j klog-${{ matrix.name }}.zip ./out/${{ matrix.binary_name }}
       - name: Upload binaries
         uses: actions/upload-release-asset@v1 # https://github.com/actions/upload-release-asset
