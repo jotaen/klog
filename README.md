@@ -12,6 +12,8 @@ klog is a plain-text file format and a command line tool for time tracking.
 
 ## Get klog
 
+In order to not miss any updates you can either subscribe to the release notifications on Github (at the top right: “Watch”→“Custom”→“Releases”), or you occasionally run `klog version`.
+
 ### MacOS
 1. [**Download**](https://www.github.com/jotaen/klog/releases) and unzip
 2. Right-click on the binary and select “Open“ (due to [Gatekeeper](https://support.apple.com/en-us/HT202491))
@@ -22,7 +24,13 @@ klog is a plain-text file format and a command line tool for time tracking.
 2. Copy to path, e.g. `mv klog /usr/local/bin/klog` (might require `sudo`)
 
 ### Windows
-There is no native binary for Windows, but you can use the Linux binary on the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+1. [**Download**](https://www.github.com/jotaen/klog/releases) and unzip
+2. Copy to path, e.g. to `C:\Windows\System32` (might require admin privileges)
+
+klog works well with [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701),
+support for other terminals might be limited.
+
+By the way, as an alternative you can also use the Linux binary on the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 ## Contribute
 

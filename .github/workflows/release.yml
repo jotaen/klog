@@ -28,7 +28,7 @@ jobs:
             You find the install instructions in the [README](https://github.com/jotaen/klog).
             Consult the [Changelog](https://github.com/jotaen/klog/blob/main/CHANGELOG.md) to learn what’s new.
 
-            In order to not miss updates you can either subscribe to the release notifications on Github (at the top right: “Watch”→“Custom“→“Releases”), or you occasionally run `klog version`.
+            In order to not miss any updates you can either subscribe to the release notifications on Github (at the top right: “Watch”→“Custom”→“Releases”), or you occasionally run `klog version`.
           release_name: ${{ github.event.inputs.release_id }}
           prerelease: true
           draft: true
