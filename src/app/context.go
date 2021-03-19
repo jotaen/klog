@@ -238,6 +238,7 @@ func (ctx *context) SetBookmark(path string) Error {
 	}
 	klogFolder := ctx.KlogFolder()
 	err = os.MkdirAll(klogFolder, 0700)
+	flagAsHidden(klogFolder)
 	if err != nil {
 		return NewError(
 			"Unable to initialise ~/.klog folder",

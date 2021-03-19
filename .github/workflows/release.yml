@@ -27,6 +27,8 @@ jobs:
 
             You find the install instructions in the [README](https://github.com/jotaen/klog).
             Consult the [Changelog](https://github.com/jotaen/klog/blob/main/CHANGELOG.md) to learn what’s new.
+
+            In order to not miss any updates you can either subscribe to the release notifications on Github (at the top right: “Watch”→“Custom”→“Releases”), or you occasionally run `klog version`.
           release_name: ${{ github.event.inputs.release_id }}
           prerelease: true
           draft: true
@@ -39,9 +41,15 @@ jobs:
           - name: linux
             runner_os: ubuntu-latest
             go_os: linux
+            binary_name: klog
           - name: mac
             runner_os: macos-latest
             go_os: darwin
+            binary_name: klog
+          - name: windows
+            runner_os: ubuntu-latest # Run on Linux for portability of workflow
+            go_os: windows
+            binary_name: klog.exe
     runs-on: ${{ matrix.runner_os }}
     steps:
       - uses: actions/checkout@v2
@@ -55,11 +63,15 @@ jobs:
         run: |
           ./run build ${{ github.event.inputs.release_id }} ${{ github.sha }}
       - name: Smoke test
+        if: ${{ matrix.name != 'windows' }} # This test is not executable on Windows
         run: |
           [[ $(./out/klog version --no-check) == *"${{ github.event.inputs.release_id }}"* ]] && $(exit 0) || $(exit 1)
-      - name: Zip
+      - name: Bundle
         run: |
-          zip -j klog-${{ matrix.name }}.zip ./out/klog
+          if [[ "${{ matrix.binary_name }}" != "klog" ]]; then
+            mv ./out/klog ./out/${{ matrix.binary_name }}
+          fi
+          zip -j klog-${{ matrix.name }}.zip ./out/${{ matrix.binary_name }}
       - name: Upload binaries
         uses: actions/upload-release-asset@v1 # https://github.com/actions/upload-release-asset
         env:
