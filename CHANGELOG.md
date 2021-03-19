@@ -1,5 +1,8 @@
 # Changelog (command line tool)
 
+## v2.1
+- **[ FEATURE ]** Provide native Windows binary
+
 ## v2.0
 - **[ BREAKING ]** Make `--after` and `--before` filters exclusive
 - **[ FEATURE ]** Add commands for manipulating files:
