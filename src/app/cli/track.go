@@ -12,10 +12,12 @@ import (
 type Track struct {
 	lib.AtDateArgs
 	Entry string `arg required help:"The new entry to add, which may optionally contain summary text. Remember to 'quote' to avoid shell processing."`
+	lib.NoStyleArgs
 	lib.OutputFileArgs
 }
 
 func (opt *Track) Run(ctx app.Context) error {
+	opt.NoStyleArgs.SetGlobalState()
 	date := opt.AtDate(ctx.Now())
 	value := sanitiseQuotedLeadingDash(opt.Entry)
 	return applyReconciler(

@@ -12,10 +12,12 @@ type Total struct {
 	lib.DiffArgs
 	lib.WarnArgs
 	lib.NowArgs
+	lib.NoStyleArgs
 	lib.InputFilesArgs
 }
 
 func (opt *Total) Run(ctx app.Context) error {
+	opt.NoStyleArgs.SetGlobalState()
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err

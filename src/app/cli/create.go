@@ -12,10 +12,12 @@ type Create struct {
 	Template    string   `name:"template" hidden help:"The name of the template to instantiate"`
 	ShouldTotal Duration `name:"should" help:"A should total property"`
 	lib.AtDateArgs
+	lib.NoStyleArgs
 	lib.OutputFileArgs
 }
 
 func (opt *Create) Run(ctx app.Context) error {
+	opt.NoStyleArgs.SetGlobalState()
 	date := opt.AtDate(ctx.Now())
 	lines, err := func() ([]parsing.Text, error) {
 		if opt.Template != "" {

@@ -12,10 +12,12 @@ import (
 type Tags struct {
 	lib.FilterArgs
 	lib.WarnArgs
+	lib.NoStyleArgs
 	lib.InputFilesArgs
 }
 
 func (opt *Tags) Run(ctx app.Context) error {
+	opt.NoStyleArgs.SetGlobalState()
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err

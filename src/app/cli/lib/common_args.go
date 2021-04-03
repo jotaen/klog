@@ -2,7 +2,9 @@ package lib
 
 import (
 	. "klog"
+	"klog/parser"
 	"klog/service"
+	"os"
 	gotime "time"
 )
 
@@ -106,6 +108,16 @@ func (args *WarnArgs) ToString(now gotime.Time, records []Record) string {
 	}
 	ws := service.SanityCheck(now, records)
 	return PrettifyWarnings(ws)
+}
+
+type NoStyleArgs struct {
+	NoStyle bool `name:"no-style" help:"Do not style or color the values"`
+}
+
+func (args *NoStyleArgs) SetGlobalState() {
+	if args.NoStyle || os.Getenv("NO_COLOR") != "" {
+		Styler = parser.DefaultSerialiser
+	}
 }
 
 type SortArgs struct {
