@@ -2,8 +2,8 @@
 package tf
 
 import (
-	"syscall"
 	"os"
+	"syscall"
 	"unsafe"
 )
 
