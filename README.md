@@ -27,9 +27,6 @@ In order to not miss any updates you can either subscribe to the release notific
 1. [**Download**](https://www.github.com/jotaen/klog/releases) and unzip
 2. Copy to path, e.g. to `C:\Windows\System32` (might require admin privileges)
 
-klog works well with [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701),
-support for other terminals might be limited.
-
 By the way, as an alternative you can also use the Linux binary on the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 ## Contribute
