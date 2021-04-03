@@ -1,5 +1,11 @@
 # Changelog (command line tool)
 
+## v2.2
+- **[ FEATURE ]** Provide `--no-style` option to disable output
+  formatting (i.e. no colours, underlined, bold, etc.)
+- **[ FIX ]** Make sure that output formatting works on Windows
+  across all Terminals.
+
 ## v2.1
 - **[ FEATURE ]** Provide native Windows binary
 
