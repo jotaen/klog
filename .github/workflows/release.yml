@@ -24,6 +24,7 @@ jobs:
 
             - [**MacOS**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac.zip)
             - [**Linux**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-linux.zip)
+            - [**Windows**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-windows.zip)
 
             You find the install instructions in the [README](https://github.com/jotaen/klog).
             Consult the [Changelog](https://github.com/jotaen/klog/blob/main/CHANGELOG.md) to learn what’s new.

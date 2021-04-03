@@ -10,10 +10,12 @@ type Print struct {
 	lib.FilterArgs
 	lib.SortArgs
 	lib.WarnArgs
+	lib.NoStyleArgs
 	lib.InputFilesArgs
 }
 
 func (opt *Print) Run(ctx app.Context) error {
+	opt.NoStyleArgs.SetGlobalState()
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err

@@ -10,10 +10,12 @@ import (
 type Stop struct {
 	lib.AtTimeArgs
 	lib.AtDateArgs
+	lib.NoStyleArgs
 	lib.OutputFileArgs
 }
 
 func (opt *Stop) Run(ctx app.Context) error {
+	opt.NoStyleArgs.SetGlobalState()
 	date := opt.AtDate(ctx.Now())
 	time := opt.AtTime(ctx.Now())
 	return applyReconciler(

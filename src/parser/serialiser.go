@@ -9,7 +9,7 @@ import (
 func SerialiseRecords(h *Serialiser, rs ...klog.Record) string {
 	var text []string
 	if h == nil {
-		h = &defaultSerialiser
+		h = &DefaultSerialiser
 	}
 	for _, r := range rs {
 		text = append(text, serialiseRecord(h, r))
@@ -52,7 +52,7 @@ type Serialiser struct {
 	Time        func(klog.Time) string
 }
 
-var defaultSerialiser = Serialiser{
+var DefaultSerialiser = Serialiser{
 	Date:        func(d klog.Date) string { return d.ToString() },
 	ShouldTotal: func(d klog.Duration) string { return d.ToString() },
 	Summary:     func(s klog.Summary) string { return string(s) },

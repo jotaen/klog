@@ -17,10 +17,12 @@ type Now struct {
 	lib.DiffArgs
 	Follow bool `name:"follow" short:"f" help:"Keep shell open and follow changes"`
 	lib.WarnArgs
+	lib.NoStyleArgs
 	lib.InputFilesArgs
 }
 
 func (opt *Now) Run(ctx app.Context) error {
+	opt.NoStyleArgs.SetGlobalState()
 	h := func() error { return handle(opt, ctx) }
 	if opt.Follow {
 		return withRepeat(ctx, h)
