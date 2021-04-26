@@ -12,7 +12,8 @@ klog is a plain-text file format and a command line tool for time tracking.
 
 ## Get klog
 
-In order to not miss any updates you can either subscribe to the release notifications on Github (at the top right: “Watch”→“Custom”→“Releases”), or you occasionally run `klog version`.
+In order to not miss any updates you can either subscribe to the release notifications on Github
+(at the top right: “Watch”→“Custom”→“Releases”), or you occasionally run `klog version`.
 
 ### MacOS
 1. [**Download**](https://www.github.com/jotaen/klog/releases) and unzip
@@ -27,20 +28,19 @@ In order to not miss any updates you can either subscribe to the release notific
 1. [**Download**](https://www.github.com/jotaen/klog/releases) and unzip
 2. Copy to path, e.g. to `C:\Windows\System32` (might require admin privileges)
 
-By the way, as an alternative you can also use the Linux binary on the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+By the way, as an alternative you can also use the Linux binary on
+the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 ## Contribute
 
-This repository contains the specification of the klog file format
-as well as the sources of the command line tool.
+If you have questions, feature ideas, or just want to bounce off some feedback
+feel invited to [start a discussion](https://github.com/jotaen/klog/discussions).
+In case you run into a bug please [file an issue](https://github.com/jotaen/klog/issues).
+(When in doubt just go for an issue.)
 
-- **Command line tool**: if you have ideas, run into a problem,
-  or just want to bounce off some feedback, feel invited to open an
-  [issue on Github](https://github.com/jotaen/klog/issues) so that we can discuss it.
-- **File format**: current state is RFC (request for comments) for version 1.
-  Please see the [Specification](Specification.md) for further details.
-
-The version numbers of the file format and the CLI tool are independent of each other. 
+This repository contains the sources of the command line tool as well as
+the [specification](Specification.md) of the klog file format. Note that the
+version numbers of both are independent of each other.
 
 ## About
 
