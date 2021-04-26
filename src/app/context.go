@@ -131,6 +131,7 @@ func retrieveInputs(
 			"    a) pass one or multiple file names as argument\n"+
 			"    b) pipe file contents via stdin\n"+
 			"    c) specify a bookmark to read from by default",
+		err,
 	)
 }
 
@@ -201,6 +202,7 @@ func (ctx *context) bookmarkOrNil() (*File, Error) {
 		return nil, NewError(
 			"Bookmark doesn’t point to valid file",
 			"Please check the current bookmark location or set a new one",
+			err,
 		)
 	}
 	return &File{
@@ -223,6 +225,7 @@ func (ctx *context) Bookmark() (*File, Error) {
 		return nil, NewError(
 			"No bookmark set",
 			"You can set a bookmark by running: klog bookmark set somefile.klg",
+			err,
 		)
 	}
 	return b, nil
@@ -234,6 +237,7 @@ func (ctx *context) SetBookmark(path string) Error {
 		return NewError(
 			"Invalid target file",
 			"Please check the file path",
+			err,
 		)
 	}
 	klogFolder := ctx.KlogFolder()
@@ -243,6 +247,7 @@ func (ctx *context) SetBookmark(path string) Error {
 		return NewError(
 			"Unable to initialise ~/.klog folder",
 			"Please create a ~/.klog folder manually",
+			err,
 		)
 	}
 	symlink := ctx.bookmarkOrigin()
@@ -252,6 +257,7 @@ func (ctx *context) SetBookmark(path string) Error {
 		return NewError(
 			"Failed to create bookmark",
 			"",
+			err,
 		)
 	}
 	return nil
@@ -268,6 +274,7 @@ func (ctx *context) OpenInFileBrowser(path string) Error {
 		return NewError(
 			"Failed to open file browser",
 			err.Error(),
+			err,
 		)
 	}
 	return nil
@@ -279,6 +286,7 @@ func (ctx *context) OpenInEditor(path string) Error {
 		return NewError(
 			"No default editor set",
 			"Please specify you editor via the $EDITOR environment variable",
+			nil,
 		)
 	}
 	cmd := exec.Command(editor, path)
@@ -289,6 +297,7 @@ func (ctx *context) OpenInEditor(path string) Error {
 		return NewError(
 			"Cannot open editor",
 			"Tried to run: "+editor+" "+path,
+			err,
 		)
 	}
 	return nil
@@ -301,6 +310,7 @@ func (ctx *context) InstantiateTemplate(templateName string) ([]parsing.Text, Er
 		return nil, NewError(
 			"No such template",
 			"There is no template at location "+location,
+			err,
 		)
 	}
 	instance, tErr := parser.RenderTemplate(template, ctx.Now())
@@ -308,6 +318,7 @@ func (ctx *context) InstantiateTemplate(templateName string) ([]parsing.Text, Er
 		return nil, NewError(
 			"Invalid template",
 			tErr.Error(),
+			tErr,
 		)
 	}
 	return instance, nil

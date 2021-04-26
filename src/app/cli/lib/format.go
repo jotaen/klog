@@ -121,7 +121,7 @@ func breakLines(text string, maxLength int) []string {
 	return lines
 }
 
-func PrettifyError(err error) error {
+func PrettifyError(err error, isDebug bool) error {
 	switch e := err.(type) {
 	case parsing.Errors:
 		message := ""
@@ -146,7 +146,11 @@ func PrettifyError(err error) error {
 		}
 		return errors.New(message)
 	case app.Error:
-		return errors.New("Error: " + e.Error() + "\n" + e.Details())
+		message := "Error: " + e.Error() + "\n" + e.Details()
+		if isDebug && e.Original() != nil {
+			message += "\n\nOriginal Error:\n" + e.Original().Error()
+		}
+		return errors.New(message)
 	}
 	return errors.New("Error: " + err.Error())
 }

@@ -29,6 +29,7 @@ func (opt *Start) Run(ctx app.Context) error {
 				return nil, app.NewError(
 					"No eligible record at date "+date.ToString(),
 					"Please make sure the record exists and it doesn’t contain an open-ended time range yet.",
+					nil,
 				)
 			}
 			return reconciler.AppendEntry(

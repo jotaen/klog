@@ -32,6 +32,7 @@ func (opt *Stop) Run(ctx app.Context) error {
 					"No eligible record at date "+date.ToString(),
 					"Please make sure the record exists and it contains an open-ended time range "+
 						"which start time is prior to your desired end time.",
+					nil,
 				)
 			}
 			return reconciler.CloseOpenRange(

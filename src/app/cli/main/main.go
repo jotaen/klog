@@ -47,7 +47,11 @@ func main() {
 	cliApp.BindTo(ctx, (*app.Context)(nil))
 	err = cliApp.Run(&ctx)
 	if err != nil {
-		fmt.Println(lib.PrettifyError(err))
+		isDebug := false
+		if os.Getenv("KLOG_DEBUG") != "" {
+			isDebug = true
+		}
+		fmt.Println(lib.PrettifyError(err, isDebug))
 		os.Exit(-1)
 	}
 	os.Exit(0)

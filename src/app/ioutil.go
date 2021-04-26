@@ -12,6 +12,7 @@ func ReadFile(path string) (string, Error) {
 		return "", NewError(
 			"Cannot read file",
 			"Location: "+path,
+			err,
 		)
 	}
 	return string(contents), nil
@@ -23,6 +24,7 @@ func RemoveFile(path string) Error {
 		return NewError(
 			"Cannot remove file",
 			"Location: "+path,
+			err,
 		)
 	}
 	return nil
@@ -34,6 +36,7 @@ func WriteToFile(path string, contents string) Error {
 		return NewError(
 			"Cannot write to file",
 			"Location: "+path,
+			err,
 		)
 	}
 	return nil
@@ -45,6 +48,7 @@ func ReadStdin() (string, Error) {
 		return "", NewError(
 			"Cannot read from Stdin",
 			"Cannot open Stdin stream to check for input",
+			err,
 		)
 	}
 	if info.Mode()&os.ModeCharDevice != 0 || info.Size() <= 0 {
@@ -61,6 +65,7 @@ func ReadStdin() (string, Error) {
 			return "", NewError(
 				"Error while reading from Stdin",
 				"An error occurred while processing the input stream",
+				err,
 			)
 		}
 		output = append(output, input)
