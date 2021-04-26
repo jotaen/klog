@@ -28,25 +28,6 @@ func RemoveFile(path string) Error {
 	return nil
 }
 
-// Deprecated
-func appendToFile(path string, textToAppend string) Error {
-	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
-	if err != nil {
-		return NewError(
-			"Cannot write to file",
-			"Location: "+path,
-		)
-	}
-	defer file.Close()
-	if _, err := file.WriteString(textToAppend); err != nil {
-		return NewError(
-			"Cannot write to file",
-			"Location: "+path,
-		)
-	}
-	return nil
-}
-
 func WriteToFile(path string, contents string) Error {
 	err := os.WriteFile(path, []byte(contents), 0644)
 	if err != nil {
