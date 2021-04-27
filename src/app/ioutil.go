@@ -17,18 +17,6 @@ func ReadFile(path string) (string, Error) {
 	return string(contents), nil
 }
 
-func RemoveFile(path string) Error {
-	err := os.Remove(path)
-	if err != nil {
-		return NewError(
-			"Cannot remove file",
-			"Location: "+path,
-			err,
-		)
-	}
-	return nil
-}
-
 func WriteToFile(path string, contents string) Error {
 	err := os.WriteFile(path, []byte(contents), 0644)
 	if err != nil {

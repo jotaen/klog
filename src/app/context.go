@@ -250,13 +250,15 @@ func (ctx *context) SetBookmark(path string) Error {
 			err,
 		)
 	}
-	symlink := ctx.bookmarkOrigin()
-	_ = os.Remove(symlink)
-	err = os.Symlink(bookmark, symlink)
+	appErr := ctx.UnsetBookmark()
+	if appErr != nil {
+		return appErr
+	}
+	err = os.Symlink(bookmark, ctx.bookmarkOrigin())
 	if err != nil {
 		return NewError(
 			"Failed to create bookmark",
-			"",
+			"Unable to create the new bookmark",
 			err,
 		)
 	}
@@ -264,7 +266,15 @@ func (ctx *context) SetBookmark(path string) Error {
 }
 
 func (ctx *context) UnsetBookmark() Error {
-	return RemoveFile(ctx.bookmarkOrigin())
+	err := os.Remove(ctx.bookmarkOrigin())
+	if err != nil && !os.IsNotExist(err) {
+		return NewError(
+			"Failed to unset bookmark",
+			"The current bookmark could not be cleared",
+			err,
+		)
+	}
+	return nil
 }
 
 func (ctx *context) OpenInFileBrowser(path string) Error {
