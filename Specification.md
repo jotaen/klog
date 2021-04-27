@@ -34,7 +34,7 @@ without any “blank lines” appearing within.
 The first line of a *record* MUST start with a *date*.
 On the same line there MAY follow a *should-total*,
 which MUST be separated by one “space” from the *date*
-(there MAY appear additional “spaces”).
+(additional “spaces” MAY appear).
 
 A *summary* MAY appear on the subsequent lines.
 Any amount of *entries* MAY appear afterwards.
@@ -56,8 +56,7 @@ A *should-total* denotes the targeted total time of a *record*.
 A *should-total* MUST be a *duration* value
 followed by a `!`
 and wrapped in parentheses,
-e.g. `(8h!)` or `(5h30m!)`.
-(A negative value MAY be used, e.g. `(-8h!)`.)
+e.g. `(8h!)` or `(-5h30m!)`.
 
 ### Summary
 A *summary* is user-provided text for holding arbitrary information.
