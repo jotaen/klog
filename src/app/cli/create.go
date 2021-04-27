@@ -10,7 +10,7 @@ import (
 
 type Create struct {
 	Template    string   `name:"template" hidden help:"The name of the template to instantiate"`
-	ShouldTotal Duration `name:"should" help:"A should total property"`
+	ShouldTotal Duration `name:"should" help:"The should-total of the record"`
 	lib.AtDateArgs
 	lib.NoStyleArgs
 	lib.OutputFileArgs

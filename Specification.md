@@ -32,13 +32,9 @@ Each *record* MUST appear as one consecutive block in the file,
 without any “blank lines” appearing within.
 
 The first line of a *record* MUST start with a *date*.
-On the same line there MAY follow a list of *properties*.
-This list MUST be enclosed in “parentheses” and
-separated by one “space” from the *date*
-(there MAY also be multiple “spaces”).
-If there are multiple *properties* they MUST be separated
-by a `,` followed by a “space”.
-The list of *properties* MUST NOT be empty.
+On the same line there MAY follow a *should-total*,
+which MUST be separated by one “space” from the *date*
+(additional “spaces” MAY appear).
 
 A *summary* MAY appear on the subsequent lines.
 Any amount of *entries* MAY appear afterwards.
@@ -54,17 +50,13 @@ It MUST be formatted according to one of the following patterns:
 
 (Where `Y` is a digit to denote the year, `M` the month, `D` the day.)
 
-### Properties
-*Property* is an abstract term that denotes additional information
-or configuration of a *record*.
-A *should-total* is an instance of a *property*.
-
 ### Should-Total
-A *should-total* is a *property* to denote the targeted total time of a *record*.
+A *should-total* denotes the targeted total time of a *record*.
 
-A *should-total* MUST be a *duration* value followed by a `!`,
-e.g. `8h!` or `5h30m!`.
-(That implies that a negative value MAY be used.)
+A *should-total* MUST be a *duration* value
+followed by a `!`
+and wrapped in parentheses,
+e.g. `(8h!)` or `(-5h30m!)`.
 
 ### Summary
 A *summary* is user-provided text for holding arbitrary information.

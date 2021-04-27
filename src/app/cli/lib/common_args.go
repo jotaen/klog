@@ -45,7 +45,7 @@ func (args *AtTimeArgs) AtTime(now gotime.Time) Time {
 }
 
 type DiffArgs struct {
-	Diff bool `name:"diff" short:"d" help:"Show difference between actual and should total time"`
+	Diff bool `name:"diff" short:"d" help:"Show difference between actual and should-total time"`
 }
 
 type NowArgs struct {
