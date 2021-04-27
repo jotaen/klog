@@ -50,7 +50,7 @@ func (r *RecordReconciler) AppendEntry(handler func(Record) string) (*ReconcileR
 	return makeResult(result, r.recordPointer)
 }
 
-func (r *RecordReconciler) CloseOpenRange(handler func(Record) Time) (*ReconcileResult, error) {
+func (r *RecordReconciler) CloseOpenRange(handler func(Record) (Time, Summary)) (*ReconcileResult, error) {
 	record := r.pr.Records[r.recordPointer]
 	if record.OpenRange() == nil {
 		return nil, errors.New("NO_OPEN_RANGE")
@@ -66,11 +66,11 @@ func (r *RecordReconciler) CloseOpenRange(handler func(Record) Time) (*Reconcile
 			},
 		)
 	}
-	time := handler(record)
+	time, summary := handler(record)
 	openRangeLineIndex := r.pr.lastLineOfRecord[r.recordPointer] - len(record.Entries()) + entryIndex
 	originalText := r.pr.lines[openRangeLineIndex].Text
 	r.pr.lines[openRangeLineIndex].Text = regexp.MustCompile(`^(.*?)\?+(.*)$`).
-		ReplaceAllString(originalText, "${1}"+time.ToString()+"${2}")
+		ReplaceAllString(originalText, "${1}"+time.ToString()+"${2}"+summary.ToString())
 	return makeResult(r.pr.lines, r.recordPointer)
 }
 

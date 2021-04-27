@@ -23,6 +23,22 @@ func TestStart(t *testing.T) {
 `, state.writtenFileContents)
 }
 
+func TestStartWithSummary(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+1920-02-02
+	9:00-12:00
+`)._SetNow(1920, 2, 2, 15, 24)._Run((&Start{
+		AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
+		Summary:    "Started something",
+	}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+1920-02-02
+	9:00-12:00
+	15:24 - ? Started something
+`, state.writtenFileContents)
+}
+
 func TestStartFailsIfOpenRangeAlreadyPresent(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 1623-12-13

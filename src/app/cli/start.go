@@ -10,6 +10,7 @@ import (
 type Start struct {
 	lib.AtTimeArgs
 	lib.AtDateArgs
+	Summary string `name:"summary" short:"s" help:"Summary text for this entry"`
 	lib.NoStyleArgs
 	lib.OutputFileArgs
 }
@@ -33,7 +34,13 @@ func (opt *Start) Run(ctx app.Context) error {
 				)
 			}
 			return reconciler.AppendEntry(
-				func(r Record) string { return time.ToString() + " - ?" },
+				func(r Record) string {
+					summary := ""
+					if opt.Summary != "" {
+						summary += " " + opt.Summary
+					}
+					return time.ToString() + " - ?" + summary
+				},
 			)
 		},
 	)
