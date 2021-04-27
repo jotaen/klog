@@ -24,8 +24,8 @@ func ErrorIllegalIndentation(e Error) Error {
 func ErrorMalformedShouldTotal(e Error) Error {
 	return e.Set(
 		"ErrorMalformedShouldTotal",
-		"Malformed property",
-		"Please review the syntax of the should-total property. "+
+		"Malformed should-total time",
+		"Please review the syntax of the should-total time. "+
 			"Valid examples for it would be: (8h!) or (4h30m!) or (45m!)",
 	)
 }
@@ -33,9 +33,9 @@ func ErrorMalformedShouldTotal(e Error) Error {
 func ErrorUnrecognisedProperty(e Error) Error {
 	return e.Set(
 		"ErrorUnrecognisedProperty",
-		"Unrecognised property",
-		"The highlighted property is not recognised. "+
-			"The should-total property must be a time duration suffixed with an "+
+		"Unrecognised should-total value",
+		"The highlighted value is not recognised. "+
+			"The should-total must be a time duration suffixed with an "+
 			"exclamation mark, e.g. 5h15m! or 8h!",
 	)
 }
@@ -43,8 +43,8 @@ func ErrorUnrecognisedProperty(e Error) Error {
 func ErrorMalformedPropertiesSyntax(e Error) Error {
 	return e.Set(
 		"ErrorMalformedPropertiesSyntax",
-		"Malformed properties list",
-		"Properties cannot be empty and must be "+
+		"Malformed should-total time",
+		"The should-total cannot be empty and it must be "+
 			"surrounded by parenthesis on both sides",
 	)
 }
@@ -54,7 +54,7 @@ func ErrorUnrecognisedTextInHeadline(e Error) Error {
 		"ErrorUnrecognisedTextInHeadline",
 		"Malformed headline",
 		"The highlighted text in the headline is not recognised. "+
-			"Please make sure to surround properties with parentheses, e.g.: (5h!) "+
+			"Please make sure to surround the should-total with parentheses, e.g.: (5h!) "+
 			"You generally cannot put arbitrary text into the headline.",
 	)
 }

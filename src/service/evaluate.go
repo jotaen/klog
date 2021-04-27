@@ -55,7 +55,7 @@ func HypotheticalTotal(until time.Time, rs ...Record) (Duration, bool) {
 	return total, isCurrent
 }
 
-// ShouldTotalSum calculates the overall should total time of records.
+// ShouldTotalSum calculates the overall should-total time of records.
 func ShouldTotalSum(rs ...Record) ShouldTotal {
 	total := NewDuration(0, 0)
 	for _, r := range rs {
@@ -64,7 +64,7 @@ func ShouldTotalSum(rs ...Record) ShouldTotal {
 	return NewShouldTotal(0, total.InMinutes())
 }
 
-// Diff calculates the difference between should total and actual total
+// Diff calculates the difference between should-total and actual total
 func Diff(should ShouldTotal, actual Duration) Duration {
 	return actual.Minus(should)
 }
