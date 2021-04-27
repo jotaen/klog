@@ -92,12 +92,14 @@ func TestReconcilerClosesOpenRange(t *testing.T) {
 		return r.Date().ToString() == "2018-01-01"
 	})
 	require.NotNil(t, reconciler)
-	result, err := reconciler.CloseOpenRange(func(r Record) Time { return Ɀ_Time_(16, 42) })
+	result, err := reconciler.CloseOpenRange(func(r Record) (Time, Summary) {
+		return Ɀ_Time_(16, 42), " Yes!"
+	})
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01
     1h
-    15:00-16:42 Will this close? I hope so!?!?
+    15:00-16:42 Will this close? I hope so!?!? Yes!
 	2m
 `, result.NewText)
 }

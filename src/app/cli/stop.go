@@ -10,6 +10,7 @@ import (
 type Stop struct {
 	lib.AtTimeArgs
 	lib.AtDateArgs
+	Summary string `name:"summary" short:"s" help:"Text to append to the entry summary"`
 	lib.NoStyleArgs
 	lib.OutputFileArgs
 }
@@ -36,7 +37,7 @@ func (opt *Stop) Run(ctx app.Context) error {
 				)
 			}
 			return reconciler.CloseOpenRange(
-				func(r Record) Time { return time },
+				func(r Record) (Time, Summary) { return time, Summary(opt.Summary) },
 			)
 		},
 	)
