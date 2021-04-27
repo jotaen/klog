@@ -31,7 +31,7 @@ Was #sick, need to compensate later
 	-30m #running
 
 1995-04-02
-	99h something untagged
+	9h something untagged
 	45m #badminton
 
 1995-04-19
