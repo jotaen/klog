@@ -1,7 +1,6 @@
 package app
 
 import (
-	"bufio"
 	"io"
 	"os"
 )
@@ -43,7 +42,7 @@ func WriteToFile(path string, contents string) Error {
 }
 
 func ReadStdin() (string, Error) {
-	info, err := os.Stdin.Stat()
+	stat, err := os.Stdin.Stat()
 	if err != nil {
 		return "", NewError(
 			"Cannot read from Stdin",
@@ -51,24 +50,16 @@ func ReadStdin() (string, Error) {
 			err,
 		)
 	}
-	if info.Mode()&os.ModeCharDevice != 0 || info.Size() <= 0 {
+	if (stat.Mode() & os.ModeCharDevice) != 0 {
 		return "", nil
 	}
-	reader := bufio.NewReader(os.Stdin)
-	var output []rune
-	for {
-		input, _, err := reader.ReadRune()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return "", NewError(
-				"Error while reading from Stdin",
-				"An error occurred while processing the input stream",
-				err,
-			)
-		}
-		output = append(output, input)
+	bytes, err := io.ReadAll(os.Stdin)
+	if err != nil {
+		return "", NewError(
+			"Error while reading from Stdin",
+			"An error occurred while processing the input stream",
+			err,
+		)
 	}
-	return string(output), nil
+	return string(bytes), nil
 }
