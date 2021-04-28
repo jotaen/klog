@@ -1,5 +1,14 @@
 # Changelog (command line tool)
 
+## v2.3
+- **[ FEATURE ]** Add `--summary`/`-s` flag for `start` and
+  `stop` subcommands
+- **[ FEATURE ]** If `KLOG_DEBUG` environment variable is set,
+  print more verbose error output
+- **[ FIX ]** Ensure that reading from stdin works on Windows
+- **[ FIX ]** Display a more helpful error message on Windows
+  to explain the quirks with `bookmark set`
+
 ## v2.2
 - **[ FEATURE ]** Provide `--no-style` option to disable output
   formatting (i.e. no colours, underlined, bold, etc.)
