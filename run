@@ -10,7 +10,7 @@ build() {
 	go build \
 	  -ldflags "-X 'klog/app.BinaryVersion=$1' -X 'klog/app.BinaryBuildHash=$2'" \
 	  -o ../out/klog \
-	  app/cli/main/*.go
+	  app/cli/main/klog.go
 }
 
 test() {

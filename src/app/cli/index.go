@@ -1,8 +1,6 @@
-package main
+package cli
 
-import . "klog/app/cli"
-
-type cli struct {
+type Cli struct {
 	// Evaluate
 	Print  Print  `cmd group:"Evaluate" help:"Pretty-print records"`
 	Total  Total  `cmd group:"Evaluate" help:"Evaluate the total time"`
