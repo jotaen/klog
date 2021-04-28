@@ -254,13 +254,9 @@ func (ctx *context) SetBookmark(path string) Error {
 	if appErr != nil {
 		return appErr
 	}
-	err = os.Symlink(bookmark, ctx.bookmarkOrigin())
-	if err != nil {
-		return NewError(
-			"Failed to create bookmark",
-			"Unable to create the new bookmark",
-			err,
-		)
+	appErr = createSymlinkForBookmark(bookmark, ctx.bookmarkOrigin())
+	if appErr != nil {
+		return appErr
 	}
 	return nil
 }

@@ -106,19 +106,29 @@ func PrettyDay(d int) string {
 	panic("Illegal weekday") // this can/should never happen
 }
 
-func breakLines(text string, maxLength int) []string {
+type lineBreakerT struct {
+	maxLength int
+	newLine   string
+}
+
+var lineBreaker = lineBreakerT{
+	maxLength: 60,
+	newLine:   "\n",
+}
+
+func (b lineBreakerT) split(text string) string {
 	SPACE := " "
 	words := strings.Split(text, SPACE)
 	lines := []string{""}
 	for i, w := range words {
 		lastLine := lines[len(lines)-1]
 		isLastWord := i == len(words)-1
-		if !isLastWord && len(lastLine)+len(words[i+1]) > maxLength {
+		if !isLastWord && len(lastLine)+len(words[i+1]) > b.maxLength {
 			lines = append(lines, "")
 		}
 		lines[len(lines)-1] += w + SPACE
 	}
-	return lines
+	return strings.Join(lines, b.newLine)
 }
 
 func PrettifyError(err error, isDebug bool) error {
@@ -141,12 +151,13 @@ func PrettifyError(err error, isDebug bool) error {
 			) + "\n"
 			message += fmt.Sprintf(
 				Style{Color: "227"}.Format(INDENT+"%s"),
-				strings.Join(breakLines(e.Message(), 60), "\n"+INDENT),
+				lineBreaker.split(e.Message()), "\n"+INDENT,
 			) + "\n\n"
 		}
 		return errors.New(message)
 	case app.Error:
-		message := "Error: " + e.Error() + "\n" + e.Details()
+		message := "Error: " + e.Error() + "\n"
+		message += lineBreaker.split(e.Details())
 		if isDebug && e.Original() != nil {
 			message += "\n\nOriginal Error:\n" + e.Original().Error()
 		}
