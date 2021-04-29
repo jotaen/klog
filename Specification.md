@@ -83,7 +83,8 @@ e.g. `#gym`, `#24hours` or `#home_office`.
 
 ### Entry
 *Entry* is an abstract term for time-related data.
-A *range* and a *duration* are instances of *entries*.
+*Durations*, *ranges* and *open ranges* are instances of *entries*.
+A *summary* MAY be associated with an *entry* (see above).
 
 Each *entry* MUST appear on its own line and
 MUST be indented in one of the following ways:
@@ -110,25 +111,34 @@ A *range* is an *entry* that represents the time span between two points in time
 
 It MUST consist of two values that denote the start and the end.
 Start and end MUST be written in chronological order.
+They MAY be equal.
 
 There MUST be a `-` between the two values.
 There MAY appear “spaces” on either side of the `-`;
 for this case it is RECOMMENDED to use exactly one “space” on both sides.
 
-The start value MUST be a *time*.
-It MAY be prefixed with a `<` to indicate that
-this *time* is referring to the day before the *record’s* date,
-e.g. `<23:00`.
+*Time* values MAY be *shifted* to the next or to the previous day:
+- To associate the *time* with the day before the *record’s* date,
+  a `<` prefix MUST be used,
+  e.g. `<23:00`.
+- To associate the *time* with the day after the *record’s* date,
+  a `>` suffix MUST be used,
+  e.g. `1:30>`.
 
-The end value MUST be either a *time* or a placeholder for a *time*.
-- In case the end value is a *time* it MAY be suffixed with a `>` to indicate
-  that this *time* is referring to the day after the *record’s* date,
-  e.g. `0:30>`.
-- In case the end value is a placeholder the *range* is considered to be *open-ended*,
-  which means that the end *time* is not determined yet.
-  The placeholder MUST be denoted by a `?`, e.g. `9:00 - ?`;
-  the `?` MAY be repeated, e.g. `9:00 - ???`.
-  An *open-ended range* MUST NOT occur more than once per record.
+Examples of *ranges* with *shifted times*:
+`<23:00 - 5:00`, `19:00 - 0:30>`, `<22:25 - <23:59`, `<15:00 - 12:00>`.
+
+### Open range
+An *open range* can be used to track the start *time* of an activity,
+i.e. the end *time* is not determined yet.
+
+*Open ranges* are formatted in the same way as *ranges*, except that
+the end *time* MUST be replaced by a `?` placeholder,
+e.g. `9:00 - ?`;
+the `?` MAY be repeated, e.g. `9:00 - ???`.
+The placeholder MUST NOT be *shifted*.
+
+*Open ranges* MUST NOT appear more than once per record.
 
 ### Duration
 A *duration* is an *entry* that represents a period of time.
@@ -156,8 +166,8 @@ e.g. `119m`
 If the minute part is missing, a value of `0m` is assumed.
 
 The *duration* as a whole is a signed value:
-That means it is either positive (i.e. adding to the total time)
-or negative (i.e. deducting from the total time).
+That means it is either positive (i.e. adding to the *total time*)
+or negative (i.e. deducting from the *total time*).
 As default a *duration* is positive,
 which MAY be indicated by a leading `+` character,
 e.g. `+4h12m`.
@@ -172,18 +182,40 @@ but what is allowed by this specification.
 There MUST appear one “blank line” between subsequent *records*;
 additional “blank lines” MAY appear.
 
-The *records* don’t have to appear in any order.
-There MAY exist multiple *records* for the same day.
-These are treated as distinct.
+*Records* MAY appear in any order in the file.
 
-### Technical remarks
+There MAY exist multiple *records* with the same date.
+These MUST be treated as distinct.
 
-The file extension MUST be `.klg`, e.g. `times.klg`.
-
+The file extension SHOULD be `.klg`, e.g. `times.klg`.
 The file encoding MUST be UTF-8.
 
-Newlines MUST be encoded with the LF linefeed character (escape sequence `\n`).
-There SHOULD be a “newline” at the end of the file.
+Newlines MUST be encoded with either the
+linefeed character (LF, escape sequence `\n`),
+or carriage return and linefeed character (CRLF, escape sequences `\r\n`).
+These two styles SHOULD NOT be mixed within the same file.
+
+There SHOULD be a newline at the end of the file.
+
+## III. Evaluating data
+
+### Total time
+The resulting *total time* of a record MUST be computed by summing up its *entries*:
+positive values add to the *total time*,
+negative values deduct from it.
+The resulting *total time* MAY be 0;
+it MAY be negative;
+it MAY be greater than 24 hours.
+
+Overlapping *ranges* MUST be counted individually.
+(They MUST NOT be merged together.)
+
+*Ranges* with *shifted times* MUST be fully counted towards
+the *date* at which they appear in the *record*.
+They MUST NOT be implicitly split across the two adjacent *dates*.
+
+*Open ranges* MUST NOT be counted by default;
+they MAY be factored in upon explicit request, though.
 
 ## III. Appendix
 
@@ -193,7 +225,6 @@ There SHOULD be a “newline” at the end of the file.
 - “tab”: The tab character (U+0009), escape sequence `\t`
 - “whitespace”: A “space”, a “tab”, or another character that appears blank
 - “parenthesis”: The opening and closing parentheses `(` and `)` (U+0028 and U+0029)
-- “newline”: The LF linefeed character (U+0010), escape sequence `\n`
 - “blank line”: A line that only contains whitespace characters
 - “letter”: A character as defined by the Unicode letter category, regex `\p{L}`
 - “digit”: Any of 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
