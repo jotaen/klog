@@ -53,7 +53,7 @@ func (r *RecordReconciler) AppendEntry(handler func(Record) string) (*ReconcileR
 func (r *RecordReconciler) CloseOpenRange(handler func(Record) (Time, Summary)) (*ReconcileResult, error) {
 	record := r.pr.Records[r.recordPointer]
 	if record.OpenRange() == nil {
-		return nil, errors.New("NO_OPEN_RANGE")
+		return nil, errors.New("No open time range found")
 	}
 	entryIndex := 0
 	for i, e := range record.Entries() {

@@ -24,7 +24,7 @@ func TestTrackEntry(t *testing.T) {
 `, state.writtenFileContents)
 }
 
-func TestTrackEntryAtUnknownDateFails(t *testing.T) {
+func TestTrackEntryAtUnknownDateCreatesNewRecord(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 1855-04-25
 	1h
@@ -32,6 +32,12 @@ func TestTrackEntryAtUnknownDateFails(t *testing.T) {
 		Entry:      "2h",
 		AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(2000, 1, 1)},
 	}).Run)
-	require.Error(t, err)
-	assert.Equal(t, state.writtenFileContents, "")
+	require.Nil(t, err)
+	assert.Equal(t, `
+1855-04-25
+	1h
+
+2000-01-01
+	2h
+`, state.writtenFileContents)
 }

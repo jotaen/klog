@@ -34,10 +34,10 @@ func (opt *Create) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
-	return ReconcilerApplicator{
-		file: opt.OutputFileArgs.File,
-		ctx:  ctx,
-	}.apply(
+	return lib.ReconcilerChain{
+		File: opt.OutputFileArgs.File,
+		Ctx:  ctx,
+	}.Apply(
 		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
 			reconciler := parser.NewBlockReconciler(pr, date)
 			return reconciler.InsertBlock(lines)
