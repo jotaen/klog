@@ -21,33 +21,17 @@ func TestSummaryCannotContainWhitespaceAtBeginningOfLine(t *testing.T) {
 }
 
 func TestRecognisesAllTags(t *testing.T) {
-	s := Summary("Hello #world, I feel #GREAT today #123_test")
-	assert.True(t, s.Tags()["world"])
-	assert.True(t, s.Tags()["great"])
-	assert.True(t, s.Tags()["123_test"])
+	s := Summary("Hello #world, I feel #GREAT-ish today #123_test!")
 	assert.Equal(t, s.Tags().ToStrings(), []string{"#123_test", "#great", "#world"})
+	assert.True(t, s.Tags().Contains("#123_test"))
+	assert.True(t, s.Tags().Contains("great"))
+	assert.True(t, s.Tags().Contains("world"))
 }
 
-func TestFindHashTagMatches(t *testing.T) {
-	// `#` is stripped
-	tags := NewTagSet("this", "#THAT", "numb3rs", "under_score")
-	for _, x := range []struct {
-		summary string
-		matches []string
-	}{
-		{"#this at the beginning", []string{"this"}},
-		{"#this, with punctuation afterwards", []string{"this"}},
-		{"or at the end: #this", []string{"this"}},
-		{"or #this in between", []string{"this"}},
-		{"or all: #this and #that and #numb3rs", []string{"this", "that", "numb3rs"}},
-		{"or #that as well (case-insensitive)", []string{"that"}},
-		{"not case sensitive #THIS", []string{"this"}},
-		{"can also contain #numb3rs!", []string{"numb3rs"}},
-		{"or #under_score's", []string{"under_score"}},
-		{"#some other tag", nil},
-		{"#thisAndThat is similar but not the same", nil},
-	} {
-		matches := Summary(x.summary).MatchTags(tags)
-		assert.Equal(t, matches, NewTagSet(x.matches...))
-	}
+func TestPerformsFuzzyMatching(t *testing.T) {
+	s := Summary("Hello #world, I feel #GREAT-ish today #123_test!")
+	assert.True(t, s.Tags().Contains("#123_..."))
+	assert.True(t, s.Tags().Contains("GR..."))
+	assert.True(t, s.Tags().Contains("WoRl..."))
+	assert.False(t, s.Tags().Contains("worl"))
 }

@@ -32,21 +32,26 @@ func (ts TagSet) ToStrings() []string {
 	return tags
 }
 
+func (ts TagSet) Contains(queryTag string) bool {
+	if !strings.HasSuffix(queryTag, "...") {
+		return ts[NewTag(queryTag)]
+	}
+	queryBaseTag := NewTag(strings.TrimSuffix(queryTag, "..."))
+	for t := range ts {
+		if strings.HasPrefix(t.ToString(), queryBaseTag.ToString()) {
+			return true
+		}
+	}
+	return false
+}
+
 type TagSet map[Tag]bool
 
 func NewTag(value string) Tag {
-	return Tag(strings.ToLower(value))
-}
-
-func (s Summary) MatchTags(tags TagSet) TagSet {
-	matches := NewTagSet()
-	allTags := s.Tags()
-	for t := range tags {
-		if allTags[t] {
-			matches[t] = true
-		}
+	if value[0] == '#' {
+		value = value[1:]
 	}
-	return matches
+	return Tag(strings.ToLower(value))
 }
 
 func (s Summary) Tags() TagSet {
@@ -63,9 +68,6 @@ func NewTagSet(tags ...string) TagSet {
 	for _, v := range tags {
 		if len(v) == 0 {
 			continue
-		}
-		if v[0] == '#' {
-			v = v[1:]
 		}
 		tag := NewTag(v)
 		result[tag] = true
