@@ -5,6 +5,7 @@ import (
 	"klog/app"
 	"klog/app/cli/lib"
 	"klog/parser"
+	"klog/parser/parsing"
 )
 
 type Start struct {
@@ -19,29 +20,36 @@ func (opt *Start) Run(ctx app.Context) error {
 	opt.NoStyleArgs.SetGlobalState()
 	date := opt.AtDate(ctx.Now())
 	time := opt.AtTime(ctx.Now())
-	return applyReconciler(
-		opt.OutputFileArgs,
-		ctx,
+	entry := func() string {
+		summary := ""
+		if opt.Summary != "" {
+			summary += " " + opt.Summary
+		}
+		return time.ToString() + " - ?" + summary
+	}()
+	return lib.ReconcilerChain{
+		File: opt.OutputFileArgs.File,
+		Ctx:  ctx,
+	}.Apply(
 		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
 			reconciler := parser.NewRecordReconciler(pr, func(r Record) bool {
-				return r.Date().IsEqualTo(date) && r.OpenRange() == nil
+				return r.Date().IsEqualTo(date)
 			})
 			if reconciler == nil {
-				return nil, app.NewError(
-					"No eligible record at date "+date.ToString(),
-					"Please make sure the record exists and it doesn’t contain an open-ended time range yet.",
-					nil,
-				)
+				return nil, lib.NotEligibleError{}
 			}
-			return reconciler.AppendEntry(
-				func(r Record) string {
-					summary := ""
-					if opt.Summary != "" {
-						summary += " " + opt.Summary
-					}
-					return time.ToString() + " - ?" + summary
-				},
-			)
+			return reconciler.AppendEntry(func(r Record) string {
+				return entry
+			})
+		},
+		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
+			reconciler := parser.NewBlockReconciler(pr, date)
+			headline := opt.AtDate(ctx.Now()).ToString()
+			lines := []parsing.Text{
+				{headline, 0},
+				{entry, 1},
+			}
+			return reconciler.InsertBlock(lines)
 		},
 	)
 }

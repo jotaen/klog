@@ -22,6 +22,18 @@ func TestStop(t *testing.T) {
 `, state.writtenFileContents)
 }
 
+func TestStopFallsBackToYesterday(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+1920-02-02
+	22:22-?
+`)._SetNow(1920, 2, 3, 4, 16)._Run((&Stop{}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+1920-02-02
+	22:22-4:16>
+`, state.writtenFileContents)
+}
+
 func TestStopWithSummary(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 1920-02-02
@@ -39,6 +51,8 @@ func TestStopWithSummary(t *testing.T) {
 
 func TestStopFailsIfNoOpenRange(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
+1623-12-12
+
 1623-12-13
 	12:23-13:01
 `)._Run((&Stop{
