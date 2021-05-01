@@ -19,9 +19,10 @@ func (opt *Stop) Run(ctx app.Context) error {
 	opt.NoStyleArgs.SetGlobalState()
 	date := opt.AtDate(ctx.Now())
 	time := opt.AtTime(ctx.Now())
-	return applyReconciler(
-		opt.OutputFileArgs,
-		ctx,
+	return ReconcilerApplicator{
+		file: opt.OutputFileArgs.File,
+		ctx:  ctx,
+	}.apply(
 		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
 			reconciler := parser.NewRecordReconciler(pr, func(r Record) bool {
 				return r.Date().IsEqualTo(date) &&

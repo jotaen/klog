@@ -20,9 +20,10 @@ func (opt *Track) Run(ctx app.Context) error {
 	opt.NoStyleArgs.SetGlobalState()
 	date := opt.AtDate(ctx.Now())
 	value := sanitiseQuotedLeadingDash(opt.Entry)
-	return applyReconciler(
-		opt.OutputFileArgs,
-		ctx,
+	return ReconcilerApplicator{
+		file: opt.OutputFileArgs.File,
+		ctx:  ctx,
+	}.apply(
 		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
 			reconciler := parser.NewRecordReconciler(pr, func(r Record) bool {
 				return r.Date().IsEqualTo(date)
@@ -42,12 +43,15 @@ func sanitiseQuotedLeadingDash(text string) string {
 	return strings.TrimPrefix(text, "\\")
 }
 
-func applyReconciler(
-	fileArgs lib.OutputFileArgs,
-	ctx app.Context,
+type ReconcilerApplicator struct {
+	file string
+	ctx  app.Context
+}
+
+func (a ReconcilerApplicator) apply(
 	reconcile func(*parser.ParseResult) (*parser.ReconcileResult, error),
 ) error {
-	pr, err := ctx.ReadFileInput(fileArgs.File)
+	pr, err := a.ctx.ReadFileInput(a.file)
 	if err != nil {
 		return err
 	}
@@ -55,10 +59,10 @@ func applyReconciler(
 	if err != nil {
 		return err
 	}
-	err = ctx.WriteFile(fileArgs.File, result.NewText)
+	err = a.ctx.WriteFile(a.file, result.NewText)
 	if err != nil {
 		return err
 	}
-	ctx.Print("\n" + parser.SerialiseRecords(&lib.Styler, result.NewRecord) + "\n")
+	a.ctx.Print("\n" + parser.SerialiseRecords(&lib.Styler, result.NewRecord) + "\n")
 	return nil
 }
