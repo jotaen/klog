@@ -88,6 +88,15 @@ func TestQueryWithTagOnEntriesAndInSummary(t *testing.T) {
 	assert.Equal(t, NewDuration(8+6, 0), Total(rs...))
 }
 
+func TestQueryWithFuzzyTags(t *testing.T) {
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []string{"fo..."}})
+	require.Len(t, rs, 4)
+	assert.Equal(t, 30, rs[0].Date().Day())
+	assert.Equal(t, 1, rs[1].Date().Day())
+	assert.Equal(t, 2, rs[2].Date().Day())
+	assert.Equal(t, 3, rs[3].Date().Day())
+}
+
 func TestQueryWithSorting(t *testing.T) {
 	ss := sampleRecordsForQuerying()
 	for _, x := range []struct{ rs []Record }{

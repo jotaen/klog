@@ -15,7 +15,6 @@ type FilterQry struct {
 // Filter returns all records the matches the query.
 // A matching record must satisfy *all* query clauses.
 func Filter(rs []Record, o FilterQry) []Record {
-	tags := NewTagSet(o.Tags...)
 	dates := newDateSet(o.Dates)
 	var records []Record
 	for _, r := range rs {
@@ -28,8 +27,8 @@ func Filter(rs []Record, o FilterQry) []Record {
 		if o.AfterOrEqual != nil && !r.Date().IsAfterOrEqual(o.AfterOrEqual) {
 			continue
 		}
-		if len(tags) > 0 {
-			reducedR, hasMatched := reduceRecordToMatchingTags(tags, r)
+		if len(o.Tags) > 0 {
+			reducedR, hasMatched := reduceRecordToMatchingTags(o.Tags, r)
 			if !hasMatched {
 				continue
 			}
@@ -53,14 +52,14 @@ func Sort(rs []Record, startWithOldest bool) []Record {
 	return sorted
 }
 
-func reduceRecordToMatchingTags(tags TagSet, r Record) (Record, bool) {
-	if isSubsetOf(tags, r.Summary().Tags()) {
+func reduceRecordToMatchingTags(queriedTags []string, r Record) (Record, bool) {
+	if isSubsetOf(queriedTags, r.Summary().Tags()) {
 		return r, true
 	}
 	_, tagsByEntry := EntryTagLookup(r)
 	var matchingEntries []Entry
 	for _, e := range r.Entries() {
-		if isSubsetOf(tags, tagsByEntry[e]) {
+		if isSubsetOf(queriedTags, tagsByEntry[e]) {
 			matchingEntries = append(matchingEntries, e)
 		}
 	}
@@ -71,9 +70,9 @@ func reduceRecordToMatchingTags(tags TagSet, r Record) (Record, bool) {
 	return r, true
 }
 
-func isSubsetOf(sub TagSet, super TagSet) bool {
-	for t := range sub {
-		if !super[t] {
+func isSubsetOf(queriedTags []string, allTags TagSet) bool {
+	for _, t := range queriedTags {
+		if !allTags.Contains(t) {
 			return false
 		}
 	}
