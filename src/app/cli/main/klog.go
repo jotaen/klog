@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	ctx, err := app.NewContextFromEnv()
+	ctx, err := app.NewContextFromEnv(&lib.Styler)
 	if err != nil {
 		fmt.Println("Failed to initialise application. Error:")
 		fmt.Println(err)

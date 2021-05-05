@@ -3,6 +3,7 @@ package mac_widget
 import (
 	"klog/app"
 	"klog/lib/caseymrm/menuet"
+	"klog/parser"
 	"os"
 	"os/exec"
 	"time"
@@ -11,7 +12,7 @@ import (
 var ticker = time.NewTicker(500 * time.Millisecond)
 
 func Run(forceRunThroughLaunchAgent bool) {
-	ctx, err := app.NewContextFromEnv()
+	ctx, err := app.NewContextFromEnv(&parser.PlainSerialiser)
 	if err != nil {
 		os.Exit(1)
 	}

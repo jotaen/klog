@@ -34,24 +34,28 @@ type Context interface {
 	OpenInFileBrowser(string) Error
 	OpenInEditor(string) Error
 	InstantiateTemplate(string) ([]parsing.Text, Error)
+	Serialiser() *parser.Serialiser
+	SetSerialiser(*parser.Serialiser)
 }
 
 type context struct {
-	homeDir string
+	homeDir    string
+	serialiser *parser.Serialiser
 }
 
-func NewContext(homeDir string) (Context, error) {
+func NewContext(homeDir string, serialiser *parser.Serialiser) (Context, error) {
 	return &context{
-		homeDir: homeDir,
+		homeDir:    homeDir,
+		serialiser: serialiser,
 	}, nil
 }
 
-func NewContextFromEnv() (Context, error) {
+func NewContextFromEnv(serialiser *parser.Serialiser) (Context, error) {
 	homeDir, err := user.Current()
 	if err != nil {
 		return nil, err
 	}
-	return NewContext(homeDir.HomeDir)
+	return NewContext(homeDir.HomeDir, serialiser)
 }
 
 func (ctx *context) Print(text string) {
@@ -328,4 +332,15 @@ func (ctx *context) InstantiateTemplate(templateName string) ([]parsing.Text, Er
 		)
 	}
 	return instance, nil
+}
+
+func (ctx *context) Serialiser() *parser.Serialiser {
+	return ctx.serialiser
+}
+
+func (ctx *context) SetSerialiser(serialiser *parser.Serialiser) {
+	if serialiser == nil {
+		panic("Serialiser cannot be nil")
+	}
+	ctx.serialiser = serialiser
 }

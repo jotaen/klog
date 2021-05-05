@@ -55,6 +55,7 @@ type TestingContext struct {
 	now         gotime.Time
 	records     []Record
 	parseResult *parser.ParseResult
+	serialiser  *parser.Serialiser
 }
 
 func (ctx *TestingContext) Print(s string) {
@@ -122,4 +123,15 @@ func (ctx *TestingContext) OpenInEditor(_ string) app.Error {
 
 func (ctx *TestingContext) InstantiateTemplate(_ string) ([]parsing.Text, app.Error) {
 	return nil, nil
+}
+
+func (ctx *TestingContext) Serialiser() *parser.Serialiser {
+	return ctx.serialiser
+}
+
+func (ctx *TestingContext) SetSerialiser(serialiser *parser.Serialiser) {
+	if serialiser == nil {
+		panic("Serialiser cannot be nil")
+	}
+	ctx.serialiser = serialiser
 }
