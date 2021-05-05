@@ -13,7 +13,7 @@ type ReconcilerChain struct {
 
 type NotEligibleError struct{}
 
-func (e NotEligibleError) Error() string { return "" }
+func (e NotEligibleError) Error() string { return "No record found at that date" }
 
 func (c ReconcilerChain) Apply(
 	applicators ...func(pr *parser.ParseResult) (*parser.ReconcileResult, error),

@@ -69,8 +69,14 @@ func (r *RecordReconciler) CloseOpenRange(handler func(Record) (Time, Summary)) 
 	time, summary := handler(record)
 	openRangeLineIndex := r.pr.lastLineOfRecord[r.recordPointer] - len(record.Entries()) + entryIndex
 	originalText := r.pr.lines[openRangeLineIndex].Text
+	summaryText := func() string {
+		if summary.ToString() == "" {
+			return summary.ToString()
+		}
+		return " " + summary.ToString()
+	}()
 	r.pr.lines[openRangeLineIndex].Text = regexp.MustCompile(`^(.*?)\?+(.*)$`).
-		ReplaceAllString(originalText, "${1}"+time.ToString()+"${2}"+summary.ToString())
+		ReplaceAllString(originalText, "${1}"+time.ToString()+"${2}"+summaryText)
 	return makeResult(r.pr.lines, r.recordPointer)
 }
 
