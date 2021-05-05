@@ -1,5 +1,15 @@
 # Changelog (command line tool)
 
+## v2.4
+- **[ FEATURE ]** Automatically create a new record when doing
+  `klog start` or `klog track` if there is no record yet
+- **[ FEATURE ]** Allow wildcard searching in tags by appending `...`,
+  e.g. `--tag=foo...` would match the tag `#foobar`
+- **[ FIX ]** `klog stop` now also looks for open ranges of the
+  previous day and closes them with a shifted end time
+- **[ FIX ]** `klog stop --summary=""` doesn’t fail if the existing
+  entry summary was empty
+
 ## v2.3
 - **[ FEATURE ]** Add `--summary`/`-s` flag for `start` and
   `stop` subcommands
