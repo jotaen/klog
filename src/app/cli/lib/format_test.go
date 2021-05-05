@@ -65,3 +65,8 @@ A more detailed explanation
 Original Error:
 ORIG_ERR`, textWithErr)
 }
+
+func TestFormatRegularError(t *testing.T) {
+	textWithNilErr := PrettifyError(errors.New("Some plain error"), true).Error()
+	assert.Equal(t, `Error: Some plain error`, textWithNilErr)
+}
