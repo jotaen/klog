@@ -12,123 +12,52 @@ import (
 	"strings"
 )
 
-var Styler = parser.Serialiser{
-	Date: func(d Date) string {
-		return Style{Color: "015", IsUnderlined: true}.Format(d.ToString())
-	},
-	ShouldTotal: func(d Duration) string {
-		return Style{Color: "213"}.Format(d.ToString())
-	},
-	Summary: func(s Summary) string {
-		txt := s.ToString()
-		style := Style{Color: "249"}
-		hashStyle := style.ChangedBold(true).ChangedColor("251")
-		txt = HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
-			return hashStyle.FormatAndRestore(h, style)
-		})
-		return style.Format(txt)
-	},
-	Range: func(r Range) string {
-		return Style{Color: "117"}.Format(r.ToString())
-	},
-	OpenRange: func(or OpenRange) string {
-		return Style{Color: "027"}.Format(or.ToString())
-	},
-	Duration: func(d Duration, forceSign bool) string {
-		f := Style{Color: "120"}
-		if d.InMinutes() < 0 {
-			f.Color = "167"
-		}
-		if forceSign {
+func NewCliSerialiser() *parser.Serialiser {
+	return &parser.Serialiser{
+		Date: func(d Date) string {
+			return Style{Color: "015", IsUnderlined: true}.Format(d.ToString())
+		},
+		ShouldTotal: func(d Duration) string {
+			return Style{Color: "213"}.Format(d.ToString())
+		},
+		Summary: func(s Summary) string {
+			txt := s.ToString()
+			style := Style{Color: "249"}
+			hashStyle := style.ChangedBold(true).ChangedColor("251")
+			txt = HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
+				return hashStyle.FormatAndRestore(h, style)
+			})
+			return style.Format(txt)
+		},
+		Range: func(r Range) string {
+			return Style{Color: "117"}.Format(r.ToString())
+		},
+		OpenRange: func(or OpenRange) string {
+			return Style{Color: "027"}.Format(or.ToString())
+		},
+		Duration: func(d Duration) string {
+			f := Style{Color: "120"}
+			if d.InMinutes() < 0 {
+				f.Color = "167"
+			}
+			return f.Format(d.ToString())
+		},
+		SignedDuration: func(d Duration) string {
+			f := Style{Color: "120"}
+			if d.InMinutes() < 0 {
+				f.Color = "167"
+			}
 			return f.Format(d.ToStringWithSign())
-		}
-		return f.Format(d.ToString())
-	},
-	Time: func(t Time) string {
-		return Style{Color: "027"}.Format(t.ToString())
-	},
-}
-
-func Pad(length int) string {
-	if length < 0 {
-		return ""
+		},
+		Time: func(t Time) string {
+			return Style{Color: "027"}.Format(t.ToString())
+		},
 	}
-	return strings.Repeat(" ", length)
 }
 
-func PrettyMonth(m int) string {
-	switch m {
-	case 1:
-		return "January"
-	case 2:
-		return "February"
-	case 3:
-		return "March"
-	case 4:
-		return "April"
-	case 5:
-		return "May"
-	case 6:
-		return "June"
-	case 7:
-		return "July"
-	case 8:
-		return "August"
-	case 9:
-		return "September"
-	case 10:
-		return "October"
-	case 11:
-		return "November"
-	case 12:
-		return "December"
-	}
-	panic("Illegal month") // this can/should never happen
-}
-
-func PrettyDay(d int) string {
-	switch d {
-	case 1:
-		return "Monday"
-	case 2:
-		return "Tuesday"
-	case 3:
-		return "Wednesday"
-	case 4:
-		return "Thursday"
-	case 5:
-		return "Friday"
-	case 6:
-		return "Saturday"
-	case 7:
-		return "Sunday"
-	}
-	panic("Illegal weekday") // this can/should never happen
-}
-
-type lineBreakerT struct {
-	maxLength int
-	newLine   string
-}
-
-var lineBreaker = lineBreakerT{
+var lineBreaker = LineBreaker{
 	maxLength: 60,
 	newLine:   "\n",
-}
-
-func (b lineBreakerT) split(text string) string {
-	SPACE := " "
-	words := strings.Split(text, SPACE)
-	lines := []string{""}
-	for i, w := range words {
-		lastLine := lines[len(lines)-1]
-		isLastWord := i == len(words)-1
-		if !isLastWord && len(lastLine)+len(words[i+1]) > b.maxLength {
-			lines = append(lines, "")
-		}
-		lines[len(lines)-1] += w + SPACE
-	}
-	return strings.Join(lines, b.newLine)
 }
 
 func PrettifyError(err error, isDebug bool) error {
@@ -150,14 +79,14 @@ func PrettifyError(err error, isDebug bool) error {
 				strings.Repeat(" ", e.Position()), strings.Repeat("^", e.Length()),
 			) + "\n"
 			message += fmt.Sprintf(
-				Style{Color: "227"}.Format(INDENT+"%s"),
-				lineBreaker.split(e.Message()), "\n"+INDENT,
+				Style{Color: "227"}.Format("%s"),
+				lineBreaker.apply(e.Message(), INDENT),
 			) + "\n\n"
 		}
 		return errors.New(message)
 	case app.Error:
 		message := "Error: " + e.Error() + "\n"
-		message += lineBreaker.split(e.Details())
+		message += lineBreaker.apply(e.Details(), "")
 		if isDebug && e.Original() != nil {
 			message += "\n\nOriginal Error:\n" + e.Original().Error()
 		}

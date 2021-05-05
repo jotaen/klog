@@ -3,13 +3,11 @@ package cli
 import (
 	. "klog"
 	"klog/app"
+	"klog/app/cli/lib"
 	"klog/parser"
 	"klog/parser/parsing"
-	"regexp"
 	gotime "time"
 )
-
-var ansiSequencePattern = regexp.MustCompile(`\x1b\[[\d;]+m`)
 
 func NewTestingContext() TestingContext {
 	return TestingContext{
@@ -20,6 +18,7 @@ func NewTestingContext() TestingContext {
 		now:         gotime.Now(),
 		records:     nil,
 		parseResult: nil,
+		serialiser:  lib.NewCliSerialiser(),
 	}
 }
 
@@ -40,7 +39,7 @@ func (ctx TestingContext) _SetNow(Y int, M int, D int, h int, m int) TestingCont
 
 func (ctx TestingContext) _Run(cmd func(app.Context) error) (State, error) {
 	cmdErr := cmd(&ctx)
-	out := ansiSequencePattern.ReplaceAllString(ctx.printBuffer, "")
+	out := lib.StripAllAnsiSequences(ctx.printBuffer)
 	if len(out) > 0 && out[0] != '\n' {
 		out = "\n" + out
 	}
@@ -57,6 +56,7 @@ type TestingContext struct {
 	now         gotime.Time
 	records     []Record
 	parseResult *parser.ParseResult
+	serialiser  *parser.Serialiser
 }
 
 func (ctx *TestingContext) Print(s string) {
@@ -124,4 +124,15 @@ func (ctx *TestingContext) OpenInEditor(_ string) app.Error {
 
 func (ctx *TestingContext) InstantiateTemplate(_ string) ([]parsing.Text, app.Error) {
 	return nil, nil
+}
+
+func (ctx *TestingContext) Serialiser() *parser.Serialiser {
+	return ctx.serialiser
+}
+
+func (ctx *TestingContext) SetSerialiser(serialiser *parser.Serialiser) {
+	if serialiser == nil {
+		panic("Serialiser cannot be nil")
+	}
+	ctx.serialiser = serialiser
 }

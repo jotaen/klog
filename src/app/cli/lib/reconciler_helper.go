@@ -44,6 +44,6 @@ func (c ReconcilerChain) Apply(
 	if err != nil {
 		return err
 	}
-	c.Ctx.Print("\n" + parser.SerialiseRecords(&Styler, result.NewRecord) + "\n")
+	c.Ctx.Print("\n" + c.Ctx.Serialiser().SerialiseRecords(result.NewRecord) + "\n")
 	return nil
 }

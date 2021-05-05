@@ -17,7 +17,7 @@ type Start struct {
 }
 
 func (opt *Start) Run(ctx app.Context) error {
-	opt.NoStyleArgs.SetGlobalState()
+	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())
 	time := opt.AtTime(ctx.Now())
 	entry := func() string {

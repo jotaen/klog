@@ -22,7 +22,7 @@ type Now struct {
 }
 
 func (opt *Now) Run(ctx app.Context) error {
-	opt.NoStyleArgs.SetGlobalState()
+	opt.NoStyleArgs.Apply(&ctx)
 	h := func() error { return handle(opt, ctx) }
 	if opt.Follow {
 		return withRepeat(ctx, h)
@@ -51,35 +51,35 @@ func handle(opt *Now, ctx app.Context) error {
 	ctx.Print("Total  ")
 	total, _ := service.HypotheticalTotal(now, recents...)
 	grandTotal, _ := service.HypotheticalTotal(now, records...)
-	ctx.Print(lib.Pad(10-len(total.ToString())) + lib.Styler.Duration(total, false))
-	ctx.Print(lib.Pad(11-len(grandTotal.ToString())) + lib.Styler.Duration(grandTotal, false))
+	ctx.Print(lib.Pad(10-len(total.ToString())) + ctx.Serialiser().Duration(total))
+	ctx.Print(lib.Pad(11-len(grandTotal.ToString())) + ctx.Serialiser().Duration(grandTotal))
 	ctx.Print("\n")
 	if opt.Diff {
 		// Should:
 		ctx.Print("Should  ")
 		shouldTotal := service.ShouldTotalSum(recents...)
 		grandShouldTotal := service.ShouldTotalSum(records...)
-		ctx.Print(lib.Pad(9-len(shouldTotal.ToString())) + lib.Styler.ShouldTotal(shouldTotal))
-		ctx.Print(lib.Pad(11-len(grandShouldTotal.ToString())) + lib.Styler.ShouldTotal(grandShouldTotal))
+		ctx.Print(lib.Pad(9-len(shouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(shouldTotal))
+		ctx.Print(lib.Pad(11-len(grandShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(grandShouldTotal))
 		ctx.Print("\n")
 		// Diff:
 		ctx.Print("Diff    ")
 		diff := service.Diff(shouldTotal, total)
 		grandDiff := service.Diff(grandShouldTotal, grandTotal)
-		ctx.Print(lib.Pad(9-len(diff.ToStringWithSign())) + lib.Styler.Duration(diff, true))
-		ctx.Print(lib.Pad(11-len(grandDiff.ToStringWithSign())) + lib.Styler.Duration(grandDiff, true))
+		ctx.Print(lib.Pad(9-len(diff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(diff))
+		ctx.Print(lib.Pad(11-len(grandDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(grandDiff))
 		ctx.Print("\n")
 		// ETA:
 		ctx.Print("E.T.A.  ")
 		eta, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(diff))
 		if eta != nil {
-			ctx.Print(lib.Pad(9-len(eta.ToString())) + lib.Styler.Time(eta))
+			ctx.Print(lib.Pad(9-len(eta.ToString())) + ctx.Serialiser().Time(eta))
 		} else {
 			ctx.Print(lib.Pad(9-3) + "???")
 		}
 		grandEta, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(grandDiff))
 		if grandEta != nil {
-			ctx.Print(lib.Pad(11-len(grandEta.ToString())) + lib.Styler.Time(grandEta))
+			ctx.Print(lib.Pad(11-len(grandEta.ToString())) + ctx.Serialiser().Time(grandEta))
 		} else {
 			ctx.Print(lib.Pad(11-3) + "???")
 		}

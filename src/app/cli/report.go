@@ -20,7 +20,7 @@ type Report struct {
 }
 
 func (opt *Report) Run(ctx app.Context) error {
-	opt.NoStyleArgs.SetGlobalState()
+	opt.NoStyleArgs.Apply(&ctx)
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err
@@ -70,13 +70,13 @@ func (opt *Report) Run(ctx app.Context) error {
 			continue
 		}
 		total := opt.NowArgs.Total(now, rs...)
-		ctx.Print(lib.Pad(7-len(total.ToString())) + lib.Styler.Duration(total, false))
+		ctx.Print(lib.Pad(7-len(total.ToString())) + ctx.Serialiser().Duration(total))
 
 		if opt.Diff {
 			should := service.ShouldTotalSum(rs...)
-			ctx.Print(lib.Pad(10-len(should.ToString())) + lib.Styler.ShouldTotal(should))
+			ctx.Print(lib.Pad(10-len(should.ToString())) + ctx.Serialiser().ShouldTotal(should))
 			diff := service.Diff(should, total)
-			ctx.Print(lib.Pad(9-len(diff.ToStringWithSign())) + lib.Styler.Duration(diff, true))
+			ctx.Print(lib.Pad(9-len(diff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(diff))
 		}
 
 		ctx.Print("\n")
@@ -87,12 +87,12 @@ func (opt *Report) Run(ctx app.Context) error {
 	}
 	ctx.Print("\n")
 	grandTotal := opt.NowArgs.Total(now, records...)
-	ctx.Print(indentation + lib.Pad(9-len(grandTotal.ToStringWithSign())) + lib.Styler.Duration(grandTotal, true))
+	ctx.Print(indentation + lib.Pad(9-len(grandTotal.ToStringWithSign())) + ctx.Serialiser().SignedDuration(grandTotal))
 	if opt.Diff {
 		grandShould := service.ShouldTotalSum(records...)
-		ctx.Print(lib.Pad(10-len(grandShould.ToString())) + lib.Styler.ShouldTotal(grandShould))
+		ctx.Print(lib.Pad(10-len(grandShould.ToString())) + ctx.Serialiser().ShouldTotal(grandShould))
 		grandDiff := service.Diff(grandShould, grandTotal)
-		ctx.Print(lib.Pad(9-len(grandDiff.ToStringWithSign())) + lib.Styler.Duration(grandDiff, true))
+		ctx.Print(lib.Pad(9-len(grandDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(grandDiff))
 	}
 	ctx.Print("\n")
 
