@@ -14,7 +14,7 @@ type Print struct {
 }
 
 func (opt *Print) Run(ctx app.Context) error {
-	opt.NoStyleArgs.SetGlobalState()
+	opt.NoStyleArgs.Apply(&ctx)
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err
@@ -25,7 +25,7 @@ func (opt *Print) Run(ctx app.Context) error {
 	now := ctx.Now()
 	records = opt.ApplyFilter(now, records)
 	records = opt.ApplySort(records)
-	ctx.Print("\n" + lib.Styler.SerialiseRecords(records...) + "\n")
+	ctx.Print("\n" + ctx.Serialiser().SerialiseRecords(records...) + "\n")
 
 	ctx.Print(opt.WarnArgs.ToString(now, records))
 	return nil

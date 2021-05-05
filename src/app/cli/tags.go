@@ -17,7 +17,7 @@ type Tags struct {
 }
 
 func (opt *Tags) Run(ctx app.Context) error {
-	opt.NoStyleArgs.SetGlobalState()
+	opt.NoStyleArgs.Apply(&ctx)
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func (opt *Tags) Run(ctx app.Context) error {
 		es := entriesByTag[t]
 		ctx.Print(t.ToString())
 		ctx.Print(strings.Repeat(" ", maxLength-len(t)) + " ")
-		ctx.Print(lib.Styler.Duration(service.TotalEntries(es...)))
+		ctx.Print(ctx.Serialiser().Duration(service.TotalEntries(es...)))
 		ctx.Print("\n")
 	}
 

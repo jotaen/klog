@@ -12,45 +12,47 @@ import (
 	"strings"
 )
 
-var Styler = parser.Serialiser{
-	Date: func(d Date) string {
-		return Style{Color: "015", IsUnderlined: true}.Format(d.ToString())
-	},
-	ShouldTotal: func(d Duration) string {
-		return Style{Color: "213"}.Format(d.ToString())
-	},
-	Summary: func(s Summary) string {
-		txt := s.ToString()
-		style := Style{Color: "249"}
-		hashStyle := style.ChangedBold(true).ChangedColor("251")
-		txt = HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
-			return hashStyle.FormatAndRestore(h, style)
-		})
-		return style.Format(txt)
-	},
-	Range: func(r Range) string {
-		return Style{Color: "117"}.Format(r.ToString())
-	},
-	OpenRange: func(or OpenRange) string {
-		return Style{Color: "027"}.Format(or.ToString())
-	},
-	Duration: func(d Duration) string {
-		f := Style{Color: "120"}
-		if d.InMinutes() < 0 {
-			f.Color = "167"
-		}
-		return f.Format(d.ToString())
-	},
-	SignedDuration: func(d Duration) string {
-		f := Style{Color: "120"}
-		if d.InMinutes() < 0 {
-			f.Color = "167"
-		}
-		return f.Format(d.ToStringWithSign())
-	},
-	Time: func(t Time) string {
-		return Style{Color: "027"}.Format(t.ToString())
-	},
+func NewCliSerialiser() *parser.Serialiser {
+	return &parser.Serialiser{
+		Date: func(d Date) string {
+			return Style{Color: "015", IsUnderlined: true}.Format(d.ToString())
+		},
+		ShouldTotal: func(d Duration) string {
+			return Style{Color: "213"}.Format(d.ToString())
+		},
+		Summary: func(s Summary) string {
+			txt := s.ToString()
+			style := Style{Color: "249"}
+			hashStyle := style.ChangedBold(true).ChangedColor("251")
+			txt = HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
+				return hashStyle.FormatAndRestore(h, style)
+			})
+			return style.Format(txt)
+		},
+		Range: func(r Range) string {
+			return Style{Color: "117"}.Format(r.ToString())
+		},
+		OpenRange: func(or OpenRange) string {
+			return Style{Color: "027"}.Format(or.ToString())
+		},
+		Duration: func(d Duration) string {
+			f := Style{Color: "120"}
+			if d.InMinutes() < 0 {
+				f.Color = "167"
+			}
+			return f.Format(d.ToString())
+		},
+		SignedDuration: func(d Duration) string {
+			f := Style{Color: "120"}
+			if d.InMinutes() < 0 {
+				f.Color = "167"
+			}
+			return f.Format(d.ToStringWithSign())
+		},
+		Time: func(t Time) string {
+			return Style{Color: "027"}.Format(t.ToString())
+		},
+	}
 }
 
 var lineBreaker = lineBreakerT{

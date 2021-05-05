@@ -2,6 +2,7 @@ package lib
 
 import (
 	. "klog"
+	"klog/app"
 	"klog/parser"
 	"klog/service"
 	"os"
@@ -114,9 +115,9 @@ type NoStyleArgs struct {
 	NoStyle bool `name:"no-style" help:"Do not style or color the values"`
 }
 
-func (args *NoStyleArgs) SetGlobalState() {
+func (args *NoStyleArgs) Apply(ctx *app.Context) {
 	if args.NoStyle || os.Getenv("NO_COLOR") != "" {
-		Styler = parser.PlainSerialiser
+		(*ctx).SetSerialiser(&parser.PlainSerialiser)
 	}
 }
 

@@ -18,6 +18,7 @@ func NewTestingContext() TestingContext {
 		now:         gotime.Now(),
 		records:     nil,
 		parseResult: nil,
+		serialiser:  lib.NewCliSerialiser(),
 	}
 }
 

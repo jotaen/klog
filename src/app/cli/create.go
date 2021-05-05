@@ -17,7 +17,7 @@ type Create struct {
 }
 
 func (opt *Create) Run(ctx app.Context) error {
-	opt.NoStyleArgs.SetGlobalState()
+	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())
 	lines, err := func() ([]parsing.Text, error) {
 		if opt.Template != "" {

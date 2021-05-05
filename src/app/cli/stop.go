@@ -16,7 +16,7 @@ type Stop struct {
 }
 
 func (opt *Stop) Run(ctx app.Context) error {
-	opt.NoStyleArgs.SetGlobalState()
+	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())
 	time := opt.AtTime(ctx.Now())
 	return lib.ReconcilerChain{

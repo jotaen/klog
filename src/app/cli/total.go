@@ -17,7 +17,7 @@ type Total struct {
 }
 
 func (opt *Total) Run(ctx app.Context) error {
-	opt.NoStyleArgs.SetGlobalState()
+	opt.NoStyleArgs.Apply(&ctx)
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err
@@ -25,12 +25,12 @@ func (opt *Total) Run(ctx app.Context) error {
 	now := ctx.Now()
 	records = opt.ApplyFilter(now, records)
 	total := opt.NowArgs.Total(now, records...)
-	ctx.Print(fmt.Sprintf("Total: %s\n", lib.Styler.Duration(total)))
+	ctx.Print(fmt.Sprintf("Total: %s\n", ctx.Serialiser().Duration(total)))
 	if opt.Diff {
 		should := service.ShouldTotalSum(records...)
 		diff := service.Diff(should, total)
-		ctx.Print(fmt.Sprintf("Should: %s\n", lib.Styler.ShouldTotal(should)))
-		ctx.Print(fmt.Sprintf("Diff: %s\n", lib.Styler.SignedDuration(diff)))
+		ctx.Print(fmt.Sprintf("Should: %s\n", ctx.Serialiser().ShouldTotal(should)))
+		ctx.Print(fmt.Sprintf("Diff: %s\n", ctx.Serialiser().SignedDuration(diff)))
 	}
 	ctx.Print(fmt.Sprintf("(In %d record%s)\n", len(records), func() string {
 		if len(records) == 1 {

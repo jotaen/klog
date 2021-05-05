@@ -17,7 +17,7 @@ type Track struct {
 }
 
 func (opt *Track) Run(ctx app.Context) error {
-	opt.NoStyleArgs.SetGlobalState()
+	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())
 	value := sanitiseQuotedLeadingDash(opt.Entry)
 	return lib.ReconcilerChain{
