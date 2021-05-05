@@ -25,12 +25,12 @@ func (opt *Total) Run(ctx app.Context) error {
 	now := ctx.Now()
 	records = opt.ApplyFilter(now, records)
 	total := opt.NowArgs.Total(now, records...)
-	ctx.Print(fmt.Sprintf("Total: %s\n", lib.Styler.Duration(total, false)))
+	ctx.Print(fmt.Sprintf("Total: %s\n", lib.Styler.Duration(total)))
 	if opt.Diff {
 		should := service.ShouldTotalSum(records...)
 		diff := service.Diff(should, total)
 		ctx.Print(fmt.Sprintf("Should: %s\n", lib.Styler.ShouldTotal(should)))
-		ctx.Print(fmt.Sprintf("Diff: %s\n", lib.Styler.Duration(diff, true)))
+		ctx.Print(fmt.Sprintf("Diff: %s\n", lib.Styler.SignedDuration(diff)))
 	}
 	ctx.Print(fmt.Sprintf("(In %d record%s)\n", len(records), func() string {
 		if len(records) == 1 {

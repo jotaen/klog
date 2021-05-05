@@ -51,8 +51,8 @@ func handle(opt *Now, ctx app.Context) error {
 	ctx.Print("Total  ")
 	total, _ := service.HypotheticalTotal(now, recents...)
 	grandTotal, _ := service.HypotheticalTotal(now, records...)
-	ctx.Print(lib.Pad(10-len(total.ToString())) + lib.Styler.Duration(total, false))
-	ctx.Print(lib.Pad(11-len(grandTotal.ToString())) + lib.Styler.Duration(grandTotal, false))
+	ctx.Print(lib.Pad(10-len(total.ToString())) + lib.Styler.Duration(total))
+	ctx.Print(lib.Pad(11-len(grandTotal.ToString())) + lib.Styler.Duration(grandTotal))
 	ctx.Print("\n")
 	if opt.Diff {
 		// Should:
@@ -66,8 +66,8 @@ func handle(opt *Now, ctx app.Context) error {
 		ctx.Print("Diff    ")
 		diff := service.Diff(shouldTotal, total)
 		grandDiff := service.Diff(grandShouldTotal, grandTotal)
-		ctx.Print(lib.Pad(9-len(diff.ToStringWithSign())) + lib.Styler.Duration(diff, true))
-		ctx.Print(lib.Pad(11-len(grandDiff.ToStringWithSign())) + lib.Styler.Duration(grandDiff, true))
+		ctx.Print(lib.Pad(9-len(diff.ToStringWithSign())) + lib.Styler.SignedDuration(diff))
+		ctx.Print(lib.Pad(11-len(grandDiff.ToStringWithSign())) + lib.Styler.SignedDuration(grandDiff))
 		ctx.Print("\n")
 		// ETA:
 		ctx.Print("E.T.A.  ")

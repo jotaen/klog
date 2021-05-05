@@ -30,7 +30,7 @@ func (opt *Tags) Run(ctx app.Context) error {
 		es := entriesByTag[t]
 		ctx.Print(t.ToString())
 		ctx.Print(strings.Repeat(" ", maxLength-len(t)) + " ")
-		ctx.Print(lib.Styler.Duration(service.TotalEntries(es...), false))
+		ctx.Print(lib.Styler.Duration(service.TotalEntries(es...)))
 		ctx.Print("\n")
 	}
 

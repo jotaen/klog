@@ -116,7 +116,7 @@ type NoStyleArgs struct {
 
 func (args *NoStyleArgs) SetGlobalState() {
 	if args.NoStyle || os.Getenv("NO_COLOR") != "" {
-		Styler = parser.DefaultSerialiser
+		Styler = parser.PlainSerialiser
 	}
 }
 

@@ -34,15 +34,19 @@ var Styler = parser.Serialiser{
 	OpenRange: func(or OpenRange) string {
 		return Style{Color: "027"}.Format(or.ToString())
 	},
-	Duration: func(d Duration, forceSign bool) string {
+	Duration: func(d Duration) string {
 		f := Style{Color: "120"}
 		if d.InMinutes() < 0 {
 			f.Color = "167"
 		}
-		if forceSign {
-			return f.Format(d.ToStringWithSign())
-		}
 		return f.Format(d.ToString())
+	},
+	SignedDuration: func(d Duration) string {
+		f := Style{Color: "120"}
+		if d.InMinutes() < 0 {
+			f.Color = "167"
+		}
+		return f.Format(d.ToStringWithSign())
 	},
 	Time: func(t Time) string {
 		return Style{Color: "027"}.Format(t.ToString())

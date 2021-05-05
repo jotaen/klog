@@ -1,12 +1,12 @@
 package parser
 
 import (
-	"klog"
+	. "klog"
 	"strings"
 )
 
 // SerialiseRecords serialises records into the canonical string representation.
-func (h *Serialiser) SerialiseRecords(rs ...klog.Record) string {
+func (h *Serialiser) SerialiseRecords(rs ...Record) string {
 	var text []string
 	for _, r := range rs {
 		text = append(text, h.serialiseRecord(r))
@@ -14,7 +14,7 @@ func (h *Serialiser) SerialiseRecords(rs ...klog.Record) string {
 	return strings.Join(text, "\n")
 }
 
-func (h *Serialiser) serialiseRecord(r klog.Record) string {
+func (h *Serialiser) serialiseRecord(r Record) string {
 	text := ""
 	text += h.Date(r.Date())
 	if r.ShouldTotal().InMinutes() != 0 {
@@ -27,9 +27,9 @@ func (h *Serialiser) serialiseRecord(r klog.Record) string {
 	for _, e := range r.Entries() {
 		text += "    " // indentation
 		text += (e.Unbox(
-			func(r klog.Range) interface{} { return h.Range(r) },
-			func(d klog.Duration) interface{} { return h.Duration(d, false) },
-			func(o klog.OpenRange) interface{} { return h.OpenRange(o) },
+			func(r Range) interface{} { return h.Range(r) },
+			func(d Duration) interface{} { return h.Duration(d) },
+			func(o OpenRange) interface{} { return h.OpenRange(o) },
 		)).(string)
 		if e.Summary() != "" {
 			text += " " + h.Summary(e.Summary())
@@ -40,21 +40,23 @@ func (h *Serialiser) serialiseRecord(r klog.Record) string {
 }
 
 type Serialiser struct {
-	Date        func(klog.Date) string
-	ShouldTotal func(klog.Duration) string
-	Summary     func(klog.Summary) string
-	Range       func(klog.Range) string
-	OpenRange   func(klog.OpenRange) string
-	Duration    func(klog.Duration, bool) string
-	Time        func(klog.Time) string
+	Date           func(Date) string
+	ShouldTotal    func(Duration) string
+	Summary        func(Summary) string
+	Range          func(Range) string
+	OpenRange      func(OpenRange) string
+	Duration       func(Duration) string
+	SignedDuration func(Duration) string
+	Time           func(Time) string
 }
 
-var DefaultSerialiser = Serialiser{
-	Date:        func(d klog.Date) string { return d.ToString() },
-	ShouldTotal: func(d klog.Duration) string { return d.ToString() },
-	Summary:     func(s klog.Summary) string { return string(s) },
-	Range:       func(r klog.Range) string { return r.ToString() },
-	OpenRange:   func(or klog.OpenRange) string { return or.ToString() },
-	Duration:    func(d klog.Duration, _ bool) string { return d.ToString() },
-	Time:        func(t klog.Time) string { return t.ToString() },
+var PlainSerialiser = Serialiser{
+	Date:           Date.ToString,
+	ShouldTotal:    Duration.ToString,
+	Summary:        Summary.ToString,
+	Range:          Range.ToString,
+	OpenRange:      OpenRange.ToString,
+	Duration:       Duration.ToString,
+	SignedDuration: Duration.ToStringWithSign,
+	Time:           Time.ToString,
 }

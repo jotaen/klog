@@ -18,6 +18,6 @@ lines and contains a #tag as well.
     7:00 - ?
 `
 	pr, _ := Parse(text)
-	s := DefaultSerialiser.SerialiseRecords(pr.Records...)
+	s := PlainSerialiser.SerialiseRecords(pr.Records...)
 	assert.Equal(t, text, s)
 }
