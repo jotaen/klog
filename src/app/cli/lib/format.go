@@ -116,17 +116,23 @@ var lineBreaker = lineBreakerT{
 	newLine:   "\n",
 }
 
-func (b lineBreakerT) split(text string) string {
+func (b lineBreakerT) split(text string, linePrefix string) string {
 	SPACE := " "
 	words := strings.Split(text, SPACE)
 	lines := []string{""}
-	for i, w := range words {
-		lastLine := lines[len(lines)-1]
-		isLastWord := i == len(words)-1
-		if !isLastWord && len(lastLine)+len(words[i+1]) > b.maxLength {
+	for i, word := range words {
+		nr := len(lines) - 1
+		isLastWordOfText := i == len(words)-1
+		if !isLastWordOfText && len(lines[nr])+len(words[i+1]) > b.maxLength {
 			lines = append(lines, "")
+			nr = len(lines) - 1
 		}
-		lines[len(lines)-1] += w + SPACE
+		if lines[nr] == "" {
+			lines[nr] += linePrefix
+		} else {
+			lines[nr] += SPACE
+		}
+		lines[nr] += word
 	}
 	return strings.Join(lines, b.newLine)
 }
@@ -150,14 +156,14 @@ func PrettifyError(err error, isDebug bool) error {
 				strings.Repeat(" ", e.Position()), strings.Repeat("^", e.Length()),
 			) + "\n"
 			message += fmt.Sprintf(
-				Style{Color: "227"}.Format(INDENT+"%s"),
-				lineBreaker.split(e.Message()), "\n"+INDENT,
+				Style{Color: "227"}.Format("%s"),
+				lineBreaker.split(e.Message(), INDENT),
 			) + "\n\n"
 		}
 		return errors.New(message)
 	case app.Error:
 		message := "Error: " + e.Error() + "\n"
-		message += lineBreaker.split(e.Details())
+		message += lineBreaker.split(e.Details(), "")
 		if isDebug && e.Original() != nil {
 			message += "\n\nOriginal Error:\n" + e.Original().Error()
 		}
