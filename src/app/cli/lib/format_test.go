@@ -5,15 +5,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"klog/app"
 	"klog/parser/parsing"
-	"regexp"
 	"testing"
 )
-
-var ansiSequencePattern = regexp.MustCompile(`\x1b\[.+?m`)
-
-func stripAllAnsiSequences(text string) string {
-	return ansiSequencePattern.ReplaceAllString(text, "")
-}
 
 func TestFormatParserError(t *testing.T) {
 	err := parsing.NewErrors([]parsing.Error{
@@ -39,7 +32,7 @@ func TestFormatParserError(t *testing.T) {
     ^^^^
     Error: Short explanation.
 
-`, stripAllAnsiSequences(text))
+`, StripAllAnsiSequences(text))
 }
 
 func TestFormatAppError(t *testing.T) {

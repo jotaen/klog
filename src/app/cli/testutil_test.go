@@ -3,13 +3,11 @@ package cli
 import (
 	. "klog"
 	"klog/app"
+	"klog/app/cli/lib"
 	"klog/parser"
 	"klog/parser/parsing"
-	"regexp"
 	gotime "time"
 )
-
-var ansiSequencePattern = regexp.MustCompile(`\x1b\[[\d;]+m`)
 
 func NewTestingContext() TestingContext {
 	return TestingContext{
@@ -40,7 +38,7 @@ func (ctx TestingContext) _SetNow(Y int, M int, D int, h int, m int) TestingCont
 
 func (ctx TestingContext) _Run(cmd func(app.Context) error) (State, error) {
 	cmdErr := cmd(&ctx)
-	out := ansiSequencePattern.ReplaceAllString(ctx.printBuffer, "")
+	out := lib.StripAllAnsiSequences(ctx.printBuffer)
 	if len(out) > 0 && out[0] != '\n' {
 		out = "\n" + out
 	}

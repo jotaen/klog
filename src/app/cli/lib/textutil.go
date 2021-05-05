@@ -1,6 +1,15 @@
 package lib
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+)
+
+var ansiSequencePattern = regexp.MustCompile(`\x1b\[[\d;]+m`)
+
+func StripAllAnsiSequences(text string) string {
+	return ansiSequencePattern.ReplaceAllString(text, "")
+}
 
 func Pad(length int) string {
 	if length < 0 {
