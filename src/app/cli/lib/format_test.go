@@ -1,7 +1,9 @@
 package lib
 
 import (
+	"errors"
 	"github.com/stretchr/testify/assert"
+	"klog/app"
 	"klog/parser/parsing"
 	"regexp"
 	"testing"
@@ -38,4 +40,28 @@ func TestFormatParserError(t *testing.T) {
     Error: Short explanation.
 
 `, stripAllAnsiSequences(text))
+}
+
+func TestFormatAppError(t *testing.T) {
+	err := app.NewError("Some message", "A more detailed explanation", nil)
+	text := PrettifyError(err, false).Error()
+	assert.Equal(t, `Error: Some message
+A more detailed explanation`, text)
+}
+
+func TestFormatAppErrorWithDebugFlag(t *testing.T) {
+	textWithNilErr := PrettifyError(
+		app.NewError("Some message", "A more detailed explanation", nil),
+		true).Error()
+	assert.Equal(t, `Error: Some message
+A more detailed explanation`, textWithNilErr)
+
+	textWithErr := PrettifyError(
+		app.NewError("Some message", "A more detailed explanation", errors.New("ORIG_ERR")),
+		true).Error()
+	assert.Equal(t, `Error: Some message
+A more detailed explanation
+
+Original Error:
+ORIG_ERR`, textWithErr)
 }
