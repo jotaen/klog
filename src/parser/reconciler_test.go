@@ -80,7 +80,27 @@ func TestReconcilerRejectsInvalidEntry(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestReconcilerClosesOpenRange(t *testing.T) {
+func TestReconcilerClosesOpenRangeWithNewSummary(t *testing.T) {
+	original := `
+2018-01-01
+    15:00 - ?
+`
+	pr, _ := Parse(original)
+	reconciler := NewRecordReconciler(pr, func(r Record) bool {
+		return r.Date().ToString() == "2018-01-01"
+	})
+	require.NotNil(t, reconciler)
+	result, err := reconciler.CloseOpenRange(func(r Record) (Time, Summary) {
+		return Ɀ_Time_(15, 22), "Finished."
+	})
+	require.Nil(t, err)
+	assert.Equal(t, `
+2018-01-01
+    15:00 - 15:22 Finished.
+`, result.NewText)
+}
+
+func TestReconcilerClosesOpenRangeWithExtendingSummary(t *testing.T) {
 	original := `
 2018-01-01
     1h
@@ -93,7 +113,7 @@ func TestReconcilerClosesOpenRange(t *testing.T) {
 	})
 	require.NotNil(t, reconciler)
 	result, err := reconciler.CloseOpenRange(func(r Record) (Time, Summary) {
-		return Ɀ_Time_(16, 42), " Yes!"
+		return Ɀ_Time_(16, 42), "Yes!"
 	})
 	require.Nil(t, err)
 	assert.Equal(t, `
