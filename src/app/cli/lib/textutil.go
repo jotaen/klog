@@ -68,12 +68,12 @@ func PrettyDay(d int) string {
 	panic("Illegal weekday") // this can/should never happen
 }
 
-type lineBreakerT struct {
+type LineBreaker struct {
 	maxLength int
 	newLine   string
 }
 
-func (b lineBreakerT) split(text string, linePrefix string) string {
+func (b LineBreaker) apply(text string, linePrefix string) string {
 	SPACE := " "
 	words := strings.Split(text, SPACE)
 	lines := []string{""}

@@ -55,7 +55,7 @@ func NewCliSerialiser() *parser.Serialiser {
 	}
 }
 
-var lineBreaker = lineBreakerT{
+var lineBreaker = LineBreaker{
 	maxLength: 60,
 	newLine:   "\n",
 }
@@ -80,13 +80,13 @@ func PrettifyError(err error, isDebug bool) error {
 			) + "\n"
 			message += fmt.Sprintf(
 				Style{Color: "227"}.Format("%s"),
-				lineBreaker.split(e.Message(), INDENT),
+				lineBreaker.apply(e.Message(), INDENT),
 			) + "\n\n"
 		}
 		return errors.New(message)
 	case app.Error:
 		message := "Error: " + e.Error() + "\n"
-		message += lineBreaker.split(e.Details(), "")
+		message += lineBreaker.apply(e.Details(), "")
 		if isDebug && e.Original() != nil {
 			message += "\n\nOriginal Error:\n" + e.Original().Error()
 		}
