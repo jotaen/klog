@@ -3,7 +3,6 @@ package cli
 import (
 	"klog/app"
 	"klog/app/cli/lib"
-	"klog/parser"
 )
 
 type Print struct {
@@ -26,7 +25,7 @@ func (opt *Print) Run(ctx app.Context) error {
 	now := ctx.Now()
 	records = opt.ApplyFilter(now, records)
 	records = opt.ApplySort(records)
-	ctx.Print("\n" + parser.SerialiseRecords(&lib.Styler, records...) + "\n")
+	ctx.Print("\n" + lib.Styler.SerialiseRecords(records...) + "\n")
 
 	ctx.Print(opt.WarnArgs.ToString(now, records))
 	return nil

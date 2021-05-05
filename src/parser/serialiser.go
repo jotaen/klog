@@ -6,18 +6,15 @@ import (
 )
 
 // SerialiseRecords serialises records into the canonical string representation.
-func SerialiseRecords(h *Serialiser, rs ...klog.Record) string {
+func (h *Serialiser) SerialiseRecords(rs ...klog.Record) string {
 	var text []string
-	if h == nil {
-		h = &DefaultSerialiser
-	}
 	for _, r := range rs {
-		text = append(text, serialiseRecord(h, r))
+		text = append(text, h.serialiseRecord(r))
 	}
 	return strings.Join(text, "\n")
 }
 
-func serialiseRecord(h *Serialiser, r klog.Record) string {
+func (h *Serialiser) serialiseRecord(r klog.Record) string {
 	text := ""
 	text += h.Date(r.Date())
 	if r.ShouldTotal().InMinutes() != 0 {
