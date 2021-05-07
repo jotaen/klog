@@ -6,30 +6,11 @@ klog is a plain-text file format and a command line tool for time tracking.
 
  ✦  [**Documentation**](https://klog.jotaen.net) – **Learn how to use klog**
 
- ✦  [Changelog](https://github.com/jotaen/klog/blob/main/CHANGELOG.md) – See the latest changes
+ ✦  [Download](INSTALL.md) – Get the latest version
+
+ ✦  [Changelog](https://github.com/jotaen/klog/blob/main/CHANGELOG.md) – See what’s new
 
  ✦  [Specification](Specification.md) – Understand the file format in-depth
-
-## Get klog
-
-In order to not miss any updates you can either subscribe to the release notifications on Github
-(at the top right: “Watch”→“Custom”→“Releases”), or you occasionally run `klog version`.
-
-### MacOS
-1. [**Download**](https://www.github.com/jotaen/klog/releases) and unzip
-2. Right-click on the binary and select “Open“ (due to [Gatekeeper](https://support.apple.com/en-us/HT202491))
-3. Copy to path, e.g. `mv klog /usr/local/bin/klog` (might require `sudo`)
-
-### Linux
-1. [**Download**](https://www.github.com/jotaen/klog/releases) and unzip
-2. Copy to path, e.g. `mv klog /usr/local/bin/klog` (might require `sudo`)
-
-### Windows
-1. [**Download**](https://www.github.com/jotaen/klog/releases) and unzip
-2. Copy to path, e.g. to `C:\Windows\System32` (might require admin privileges)
-
-By the way, as an alternative you can also use the Linux binary on
-the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 ## Contribute
 
