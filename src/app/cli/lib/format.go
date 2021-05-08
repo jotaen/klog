@@ -80,13 +80,13 @@ func PrettifyError(err error, isDebug bool) error {
 			) + "\n"
 			message += fmt.Sprintf(
 				Style{Color: "227"}.Format("%s"),
-				lineBreaker.apply(e.Message(), INDENT),
+				lineBreaker.reflow(e.Message(), INDENT),
 			) + "\n\n"
 		}
 		return errors.New(message)
 	case app.Error:
 		message := "Error: " + e.Error() + "\n"
-		message += lineBreaker.apply(e.Details(), "")
+		message += lineBreaker.reflow(e.Details(), "")
 		if isDebug && e.Original() != nil {
 			message += "\n\nOriginal Error:\n" + e.Original().Error()
 		}

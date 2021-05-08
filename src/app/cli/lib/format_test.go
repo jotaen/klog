@@ -12,7 +12,7 @@ func TestFormatParserError(t *testing.T) {
 	err := parsing.NewErrors([]parsing.Error{
 		func() parsing.Error {
 			err := parsing.NewError(parsing.NewLineFromString("Foo bar", 2), 4, 3)
-			return err.Set("CODE", "Some Title", "A verbose description with details, potentially spanning multiple lines with a comprehensive text and tremendously helpful information.")
+			return err.Set("CODE", "Some Title", "A verbose description with details, potentially spanning multiple lines with a comprehensive text and tremendously helpful information.\nBut it respects newlines.")
 		}(),
 		func() parsing.Error {
 			err := parsing.NewError(parsing.NewLineFromString("Some malformed text", 39), 0, 4)
@@ -26,6 +26,7 @@ func TestFormatParserError(t *testing.T) {
     Some Title: A verbose description with details, potentially
     spanning multiple lines with a comprehensive text
     and tremendously helpful information.
+    But it respects newlines.
 
  ERROR in line 39: 
     Some malformed text

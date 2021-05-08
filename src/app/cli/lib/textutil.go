@@ -73,23 +73,28 @@ type LineBreaker struct {
 	newLine   string
 }
 
-func (b LineBreaker) apply(text string, linePrefix string) string {
+func (b LineBreaker) reflow(text string, linePrefix string) string {
 	SPACE := " "
-	words := strings.Split(text, SPACE)
-	lines := []string{""}
-	for i, word := range words {
-		nr := len(lines) - 1
-		isLastWordOfText := i == len(words)-1
-		if !isLastWordOfText && len(lines[nr])+len(words[i+1]) > b.maxLength {
-			lines = append(lines, "")
-			nr = len(lines) - 1
+	var resultParagraphs []string
+
+	for _, paragraph := range strings.Split(text, b.newLine) {
+		words := strings.Split(paragraph, SPACE)
+		lines := []string{""}
+		for i, word := range words {
+			nr := len(lines) - 1
+			isLastWordOfText := i == len(words)-1
+			if !isLastWordOfText && len(lines[nr])+len(words[i+1]) > b.maxLength {
+				lines = append(lines, "")
+				nr = len(lines) - 1
+			}
+			if lines[nr] == "" {
+				lines[nr] += linePrefix
+			} else {
+				lines[nr] += SPACE
+			}
+			lines[nr] += word
 		}
-		if lines[nr] == "" {
-			lines[nr] += linePrefix
-		} else {
-			lines[nr] += SPACE
-		}
-		lines[nr] += word
+		resultParagraphs = append(resultParagraphs, strings.Join(lines, b.newLine))
 	}
-	return strings.Join(lines, b.newLine)
+	return strings.Join(resultParagraphs, b.newLine)
 }
