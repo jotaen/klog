@@ -16,6 +16,11 @@ type Start struct {
 	lib.OutputFileArgs
 }
 
+func (opt *Start) Help() string {
+	return `A new open-ended entry is appended to the record, e.g. 14:00-?.
+The start time is the current time (or whatever is specified by --time).`
+}
+
 func (opt *Start) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())

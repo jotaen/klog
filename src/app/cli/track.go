@@ -11,9 +11,18 @@ import (
 
 type Track struct {
 	lib.AtDateArgs
-	Entry string `arg required help:"The new entry to add, which may optionally contain summary text. Remember to 'quote' to avoid shell processing."`
+	Entry string `arg required help:"The new entry to add"`
 	lib.NoStyleArgs
 	lib.OutputFileArgs
+}
+
+func (opt *Track) Help() string {
+	return `The text of the new entry is taken over as is and appended to the record.
+
+Example: klog track '1h work' file.klg
+
+Remember to use 'quotes' if the entry consists of multiple words,
+and to avoid the text being processed by your shell.`
 }
 
 func (opt *Track) Run(ctx app.Context) error {

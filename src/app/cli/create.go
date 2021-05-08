@@ -16,6 +16,11 @@ type Create struct {
 	lib.OutputFileArgs
 }
 
+func (opt *Create) Help() string {
+	return `The new record is inserted into the file at the chronologically correct position.
+(Assuming that the records are sorted from oldest to latest.)`
+}
+
 func (opt *Create) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())

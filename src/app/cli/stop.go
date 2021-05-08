@@ -15,6 +15,11 @@ type Stop struct {
 	lib.OutputFileArgs
 }
 
+func (opt *Stop) Help() string {
+	return `If the record contains an open-ended time range (e.g. 18:00-?) then this command
+will replace the end placeholder with the current time (or the one specified via --time).`
+}
+
 func (opt *Stop) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())

@@ -14,6 +14,10 @@ type Json struct {
 	Pretty bool `name:"pretty" help:"Pretty-print output"`
 }
 
+func (opt *Json) Help() string {
+	return `Run with the --pretty flag to explore how the output structure looks.`
+}
+
 func (opt *Json) Run(ctx app.Context) error {
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {

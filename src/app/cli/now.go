@@ -21,6 +21,17 @@ type Now struct {
 	lib.InputFilesArgs
 }
 
+func (opt *Now) Help() string {
+	return `Shows a dashboard-like overview of the data where the current day is displayed
+and evaluated separately from all other records. The current day is either today’s date,
+or otherwise yesterday’s date.
+
+All open-ended time ranges are assumed to be closed right now.
+
+With the --should option it calculates the forecasted time at which the time goal will be reached.
+(I.e. when the difference between should and actual time is 0.)`
+}
+
 func (opt *Now) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	h := func() error { return handle(opt, ctx) }

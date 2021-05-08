@@ -13,7 +13,7 @@ type Report struct {
 	lib.DiffArgs
 	lib.FilterArgs
 	lib.WarnArgs
-	Fill bool `name:"fill" short:"f" help:"Show all consecutive days, even if there is no record"`
+	Fill bool `name:"fill" short:"f" help:"Fill the gaps and show consecutive stream of days"`
 	lib.NowArgs
 	lib.NoStyleArgs
 	lib.InputFilesArgs

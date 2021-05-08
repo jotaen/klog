@@ -11,6 +11,14 @@ type Bookmark struct {
 	Unset BookmarkUnset `cmd name:"unset" group:"Bookmark" help:"Clear current bookmark"`
 }
 
+func (opt *Bookmark) Help() string {
+	return `With bookmarks you can make klog always read from a default file, in case you don’t specify one explicitly.
+
+This is handy in case you always use the same file.
+You can then interact with it regardless of your current working directory.`
+}
+
+
 type BookmarkGet struct{}
 
 func (opt *BookmarkGet) Run(ctx app.Context) error {

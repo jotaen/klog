@@ -13,6 +13,10 @@ type Print struct {
 	lib.InputFilesArgs
 }
 
+func (opt *Print) Help() string {
+	return `The output is syntax-highlighted and the formatting is slightly sanitised.`
+}
+
 func (opt *Print) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	records, err := ctx.ReadInputs(opt.File...)
