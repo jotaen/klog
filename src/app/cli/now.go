@@ -36,70 +36,107 @@ func handle(opt *Now, ctx app.Context) error {
 	if err != nil {
 		return err
 	}
-	recents, err := getTodayOrYesterday(now, records)
+	currentRecords, previousRecords, isToday, err := splitIntoCurrentAndPrevious(now, records)
 	if err != nil {
-		ctx.Print(err.Error())
-		return nil
+		return err
 	}
+
+	INDENT := "          "
+
+	currentTotal, _ := service.HypotheticalTotal(now, currentRecords...)
+	currentShouldTotal := service.ShouldTotalSum(currentRecords...)
+	currentDiff := service.Diff(currentShouldTotal, currentTotal)
+	currentEndTime, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(currentDiff))
+
+	previousTotal, _ := service.HypotheticalTotal(now, previousRecords...)
+	previousShouldTotal := service.ShouldTotalSum(previousRecords...)
+	previousDiff := service.Diff(previousShouldTotal, previousTotal)
+
+	grandTotal := currentTotal.Plus(previousTotal)
+	grandShouldTotal := NewShouldTotal(0, currentShouldTotal.Plus(previousShouldTotal).InMinutes())
+	grandDiff := service.Diff(grandShouldTotal, grandTotal)
+	grandEndTime, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(grandDiff))
+
 	// Headline:
-	label := "     Today"
-	if !recents[0].Date().IsEqualTo(NewDateFromTime(now)) {
-		label = " Yesterday"
-	}
-	ctx.Print("       " + label + "    " + "Overall\n")
-	// Total:
-	ctx.Print("Total  ")
-	total, _ := service.HypotheticalTotal(now, recents...)
-	grandTotal, _ := service.HypotheticalTotal(now, records...)
-	ctx.Print(lib.Pad(10-len(total.ToString())) + ctx.Serialiser().Duration(total))
-	ctx.Print(lib.Pad(11-len(grandTotal.ToString())) + ctx.Serialiser().Duration(grandTotal))
-	ctx.Print("\n")
+	ctx.Print(INDENT + "   Total")
 	if opt.Diff {
-		// Should:
-		ctx.Print("Should  ")
-		shouldTotal := service.ShouldTotalSum(recents...)
-		grandShouldTotal := service.ShouldTotalSum(records...)
-		ctx.Print(lib.Pad(9-len(shouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(shouldTotal))
-		ctx.Print(lib.Pad(11-len(grandShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(grandShouldTotal))
-		ctx.Print("\n")
-		// Diff:
-		ctx.Print("Diff    ")
-		diff := service.Diff(shouldTotal, total)
-		grandDiff := service.Diff(grandShouldTotal, grandTotal)
-		ctx.Print(lib.Pad(9-len(diff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(diff))
-		ctx.Print(lib.Pad(11-len(grandDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(grandDiff))
-		ctx.Print("\n")
-		// ETA:
-		ctx.Print("E.T.A.  ")
-		eta, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(diff))
-		if eta != nil {
-			ctx.Print(lib.Pad(9-len(eta.ToString())) + ctx.Serialiser().Time(eta))
-		} else {
-			ctx.Print(lib.Pad(9-3) + "???")
-		}
-		grandEta, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(grandDiff))
-		if grandEta != nil {
-			ctx.Print(lib.Pad(11-len(grandEta.ToString())) + ctx.Serialiser().Time(grandEta))
+		ctx.Print("    Should     Diff   End-Time")
+	}
+	ctx.Print("\n")
+
+	// Current:
+	if isToday {
+		ctx.Print("Today    ")
+	} else {
+		ctx.Print("Yesterday")
+	}
+	ctx.Print(lib.Pad(9-len(currentTotal.ToString())) + ctx.Serialiser().Duration(currentTotal))
+	if opt.Diff {
+		ctx.Print(lib.Pad(10-len(currentShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(currentShouldTotal))
+		ctx.Print(lib.Pad(9-len(currentDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(currentDiff))
+		if currentEndTime != nil {
+			ctx.Print(lib.Pad(11-len(currentEndTime.ToString())) + ctx.Serialiser().Time(currentEndTime))
 		} else {
 			ctx.Print(lib.Pad(11-3) + "???")
 		}
-		ctx.Print("\n")
 	}
+	ctx.Print("\n")
+
+	// Previous:
+	ctx.Print("Previous")
+	ctx.Print(lib.Pad(10-len(previousTotal.ToString())) + ctx.Serialiser().Duration(previousTotal))
+	if opt.Diff {
+		ctx.Print(lib.Pad(10-len(previousShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(previousShouldTotal))
+		ctx.Print(lib.Pad(9-len(previousDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(previousDiff))
+	}
+	ctx.Print("\n")
+
+	// Line:
+	ctx.Print(INDENT + "========")
+	if opt.Diff {
+		ctx.Print("===================")
+	}
+	ctx.Print("\n")
+
+	// GrandTotal:
+	ctx.Print(INDENT + lib.Pad(7-len(grandTotal.ToString())) + ctx.Serialiser().SignedDuration(grandTotal))
+	if opt.Diff {
+		ctx.Print(lib.Pad(10-len(grandShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(grandShouldTotal))
+		ctx.Print(lib.Pad(9-len(grandDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(grandDiff))
+		if grandEndTime != nil {
+			ctx.Print(lib.Pad(11-len(grandEndTime.ToString())) + ctx.Serialiser().Time(grandEndTime))
+		} else {
+			ctx.Print(lib.Pad(11-3) + "???")
+		}
+	}
+	ctx.Print("\n")
+
 	ctx.Print(opt.WarnArgs.ToString(now, records))
 	return nil
 }
 
-func getTodayOrYesterday(now gotime.Time, records []Record) ([]Record, error) {
-	rs := service.Sort(records, false)
-	for i := 0; i <= 1; i++ {
-		rs = service.Filter(records, service.FilterQry{
-			Dates: []Date{NewDateFromTime(now).PlusDays(-i)},
-		})
-		if len(rs) > 0 {
-			return rs, nil
+func splitIntoCurrentAndPrevious(now gotime.Time, records []Record) ([]Record, []Record, bool, error) {
+	var todaysRecords []Record
+	var yesterdaysRecords []Record
+	var previousRecords []Record
+	today := NewDateFromTime(now)
+	yesterday := today.PlusDays(-1)
+	for _, r := range records {
+		if r.Date().IsEqualTo(today) {
+			todaysRecords = append(todaysRecords, r)
+		} else if r.Date().IsEqualTo(yesterday) {
+			yesterdaysRecords = append(yesterdaysRecords, r)
+		} else {
+			previousRecords = append(previousRecords, r)
 		}
 	}
-	return nil, errors.New("No record found for today\n")
+	if len(todaysRecords) > 0 {
+		return todaysRecords, append(previousRecords, yesterdaysRecords...), true, nil
+	}
+	if len(yesterdaysRecords) > 0 {
+		return yesterdaysRecords, previousRecords, false, nil
+	}
+	return nil, nil, false, errors.New("No current record (dated either today or yesterday)")
 }
 
 func withRepeat(ctx app.Context, fn func() error) error {

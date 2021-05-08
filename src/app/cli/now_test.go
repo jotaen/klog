@@ -9,8 +9,8 @@ import (
 
 func TestSkipsWhenThereAreNoRecords(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(``)._Run((&Now{}).Run)
-	require.Nil(t, err)
-	assert.Equal(t, "\nNo record found for today\n", state.printBuffer)
+	require.EqualError(t, err, "No current record (dated either today or yesterday)")
+	assert.Equal(t, "", state.printBuffer)
 }
 
 func TestSkipsWhenThereAreNoRecentRecords(t *testing.T) {
@@ -18,14 +18,17 @@ func TestSkipsWhenThereAreNoRecentRecords(t *testing.T) {
 1999-03-12
 	4h
 `)._Run((&Now{}).Run)
-	require.Nil(t, err)
-	assert.Equal(t, "\nNo record found for today\n", state.printBuffer)
+	require.EqualError(t, err, "No current record (dated either today or yesterday)")
+	assert.Equal(t, "", state.printBuffer)
 }
 
 func TestPrintsTodaysEvalutaion(t *testing.T) {
 	state, err := NewTestingContext()._SetNow(1999, 3, 14, 15, 0)._SetRecords(`
+1999-03-12
+	5m
+
 1999-03-13
-	12h5m
+	12h
 
 1999-03-14
 	1h
@@ -36,25 +39,46 @@ func TestPrintsTodaysEvalutaion(t *testing.T) {
 `)._Run((&Now{}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
-            Today    Overall
-Total       5h45m     17h50m
+             Total
+Today        5h45m
+Previous     12h5m
+          ========
+           +17h50m
 `, state.printBuffer)
 }
 
-func TestPrintsEvalutaionWithDiff(t *testing.T) {
-	state, err := NewTestingContext()._SetNow(1999, 3, 14, 3, 13)._SetRecords(`
-1999-03-12 (3h10m!)
-	2h50m
+func TestFallsBackToYesterday(t *testing.T) {
+	state, err := NewTestingContext()._SetNow(1999, 3, 14, 15, 0)._SetRecords(`
+1999-03-12
+	5m
 
-1999-03-13 (6h!)
-	23:38 - ?
+1999-03-13
+	12h
+`)._Run((&Now{}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+             Total
+Yesterday      12h
+Previous        5m
+          ========
+            +12h5m
+`, state.printBuffer)
+}
+
+func TestPrintsEvaluationWithDiff(t *testing.T) {
+	state, err := NewTestingContext()._SetNow(1999, 3, 14, 18, 13)._SetRecords(`
+1999-03-12 (3h10m!)
+	6h50m
+
+1999-03-14 (6h!)
+	14:38 - ?
 `)._Run((&Now{DiffArgs: lib.DiffArgs{Diff: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
-        Yesterday    Overall
-Total       3h35m      6h25m
-Should        6h!     9h10m!
-Diff       -2h25m     -2h45m
-E.T.A.       5:38       5:58
+             Total    Should     Diff   End-Time
+Today        3h35m       6h!   -2h25m      20:38
+Previous     6h50m    3h10m!   +3h40m
+          ===========================
+           +10h25m    9h10m!   +1h15m      16:58
 `, state.printBuffer)
 }
