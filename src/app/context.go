@@ -25,8 +25,8 @@ type Context interface {
 		BuildHash string
 	}
 	ReadInputs(...string) ([]Record, error)
-	ReadFileInput(string) (*parser.ParseResult, error)
-	WriteFile(string, string) Error
+	ReadFileInput(string) (*parser.ParseResult, *File, error)
+	WriteFile(*File, string) Error
 	Now() gotime.Time
 	Bookmark() (*File, Error)
 	SetBookmark(string) Error
@@ -129,7 +129,8 @@ func retrieveInputs(
 		}
 		return []string{content}, nil
 	}
-	return nil, NewError(
+	return nil, NewErrorWithCode(
+		NO_INPUT_ERROR,
 		"No input given",
 		"Please do one of the following:\n"+
 			"    a) pass one or multiple file names as argument\n"+
@@ -155,34 +156,37 @@ func (ctx *context) ReadInputs(paths ...string) ([]Record, error) {
 	return records, nil
 }
 
-func (ctx *context) ReadFileInput(path string) (*parser.ParseResult, error) {
+func (ctx *context) ReadFileInput(path string) (*parser.ParseResult, *File, error) {
 	if path == "" {
-		b, err := ctx.Bookmark()
+		b, err := ctx.bookmarkOrNil()
 		if err != nil {
-			return nil, err
+			return nil, nil, err
+		} else if b == nil {
+			return nil, nil, NewErrorWithCode(
+				NO_TARGET_FILE,
+				"No file specified",
+				"You can either specify a file path, or you set a bookmark",
+				nil,
+			)
 		}
 		path = b.Path
 	}
 	content, err := ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	pr, parserErrors := parser.Parse(content)
 	if parserErrors != nil {
-		return nil, parserErrors
+		return nil, nil, parserErrors
 	}
-	return pr, nil
+	return pr, newFile(path), nil
 }
 
-func (ctx *context) WriteFile(path string, contents string) Error {
-	if path == "" {
-		b, err := ctx.Bookmark()
-		if err != nil {
-			return err
-		}
-		path = b.Path
+func (ctx *context) WriteFile(target *File, contents string) Error {
+	if target == nil {
+		panic("No path specified")
 	}
-	return WriteToFile(path, contents)
+	return WriteToFile(target.Path, contents)
 }
 
 func (ctx *context) Now() gotime.Time {
@@ -195,6 +199,14 @@ type File struct {
 	Path     string
 }
 
+func newFile(path string) *File {
+	return &File{
+		Name:     filepath.Base(path),
+		Location: filepath.Dir(path),
+		Path:     path,
+	}
+}
+
 func (ctx *context) bookmarkOrNil() (*File, Error) {
 	bookmarkPath := ctx.bookmarkOrigin()
 	dest, err := os.Readlink(bookmarkPath)
@@ -203,17 +215,14 @@ func (ctx *context) bookmarkOrNil() (*File, Error) {
 	}
 	_, err = os.Stat(dest)
 	if err != nil {
-		return nil, NewError(
+		return nil, NewErrorWithCode(
+			BOOKMARK_ERROR,
 			"Bookmark doesn’t point to valid file",
 			"Please check the current bookmark location or set a new one",
 			err,
 		)
 	}
-	return &File{
-		Name:     filepath.Base(dest),
-		Location: filepath.Dir(dest),
-		Path:     dest,
-	}, nil
+	return newFile(dest), nil
 }
 
 func (ctx *context) bookmarkOrigin() string {
@@ -226,7 +235,8 @@ func (ctx *context) Bookmark() (*File, Error) {
 		return nil, err
 	}
 	if b == nil {
-		return nil, NewError(
+		return nil, NewErrorWithCode(
+			BOOKMARK_ERROR,
 			"No bookmark set",
 			"You can set a bookmark by running: klog bookmark set somefile.klg",
 			err,
@@ -238,7 +248,8 @@ func (ctx *context) Bookmark() (*File, Error) {
 func (ctx *context) SetBookmark(path string) Error {
 	bookmark, err := filepath.Abs(path)
 	if err != nil {
-		return NewError(
+		return NewErrorWithCode(
+			BOOKMARK_ERROR,
 			"Invalid target file",
 			"Please check the file path",
 			err,
@@ -268,7 +279,8 @@ func (ctx *context) SetBookmark(path string) Error {
 func (ctx *context) UnsetBookmark() Error {
 	err := os.Remove(ctx.bookmarkOrigin())
 	if err != nil && !os.IsNotExist(err) {
-		return NewError(
+		return NewErrorWithCode(
+			BOOKMARK_ERROR,
 			"Failed to unset bookmark",
 			"The current bookmark could not be cleared",
 			err,

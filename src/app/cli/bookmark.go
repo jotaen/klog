@@ -18,7 +18,6 @@ This is handy in case you always use the same file.
 You can then interact with it regardless of your current working directory.`
 }
 
-
 type BookmarkGet struct{}
 
 func (opt *BookmarkGet) Run(ctx app.Context) error {

@@ -25,7 +25,7 @@ func main() {
 		kong.Name("klog"),
 		kong.Description(
 			"klog time tracking: command line app for interacting with `.klg` files.\n\n"+
-				"Run the --help flag on subcommands to learn how they work.\n" +
+				"Run the --help flag on subcommands to learn how they work.\n"+
 				"Find a comprehensive documentation at https://klog.jotaen.net",
 		),
 		func() kong.Option {
@@ -56,7 +56,11 @@ func main() {
 			isDebug = true
 		}
 		fmt.Println(lib.PrettifyError(err, isDebug))
-		os.Exit(-1)
+		exitCode := app.GENERAL_ERROR
+		if appErr, isAppError := err.(app.Error); isAppError {
+			exitCode = appErr.Code()
+		}
+		os.Exit(exitCode)
 	}
 	os.Exit(0)
 }

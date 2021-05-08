@@ -18,7 +18,7 @@ func (e NotEligibleError) Error() string { return "No record found at that date"
 func (c ReconcilerChain) Apply(
 	applicators ...func(pr *parser.ParseResult) (*parser.ReconcileResult, error),
 ) error {
-	pr, err := c.Ctx.ReadFileInput(c.File)
+	pr, targetFilePath, err := c.Ctx.ReadFileInput(c.File)
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func (c ReconcilerChain) Apply(
 	if err != nil {
 		return err
 	}
-	err = c.Ctx.WriteFile(c.File, result.NewText)
+	err = c.Ctx.WriteFile(targetFilePath, result.NewText)
 	if err != nil {
 		return err
 	}
