@@ -2,6 +2,7 @@ package cli
 
 import (
 	"klog/app"
+	"klog/app/cli/lib"
 )
 
 type Bookmark struct {
@@ -18,19 +19,25 @@ This is handy in case you always use the same file.
 You can then interact with it regardless of your current working directory.`
 }
 
-type BookmarkGet struct{}
+type BookmarkGet struct {
+	lib.QuietArgs
+}
 
 func (opt *BookmarkGet) Run(ctx app.Context) error {
 	b, err := ctx.Bookmark()
 	if err != nil {
 		return err
 	}
-	ctx.Print("Current bookmark: " + b.Path + "\n")
+	if !opt.Quiet {
+		ctx.Print("Current bookmark: ")
+	}
+	ctx.Print(b.Path + "\n")
 	return nil
 }
 
 type BookmarkSet struct {
 	File string `arg type:"existingfile" help:".klg source file"`
+	lib.QuietArgs
 }
 
 func (args *BookmarkSet) Run(ctx app.Context) error {
@@ -38,7 +45,10 @@ func (args *BookmarkSet) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
-	ctx.Print("Bookmarked file " + args.File + "\n")
+	if !args.Quiet {
+		ctx.Print("Bookmarked file ")
+	}
+	ctx.Print(args.File + "\n")
 	return nil
 }
 

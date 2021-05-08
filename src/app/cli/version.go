@@ -6,15 +6,21 @@ import (
 	"fmt"
 	"io"
 	"klog/app"
+	"klog/app/cli/lib"
 	"net/http"
 	"time"
 )
 
 type Version struct {
 	NoCheck bool `name:"no-check" help:"Don’t check online for updates"` // used for the smoke test
+	lib.QuietArgs
 }
 
 func (opt *Version) Run(ctx app.Context) error {
+	if opt.Quiet {
+		ctx.Print(ctx.MetaInfo().Version + "\n")
+		return nil
+	}
 	ctx.Print("Command line tool: " + ctx.MetaInfo().Version)
 	ctx.Print("  [" + ctx.MetaInfo().BuildHash + "]\n")
 	ctx.Print("File format: version 1 (RFC)\n")

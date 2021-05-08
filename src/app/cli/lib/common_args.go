@@ -121,6 +121,10 @@ func (args *NoStyleArgs) Apply(ctx *app.Context) {
 	}
 }
 
+type QuietArgs struct {
+	Quiet bool `name:"quiet" help:"Output raw data without any labels"`
+}
+
 type SortArgs struct {
 	Sort string `name:"sort" help:"Sort output by date (ASC or DESC)" enum:"ASC,DESC,"`
 }

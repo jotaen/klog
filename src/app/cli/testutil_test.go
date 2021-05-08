@@ -85,11 +85,11 @@ func (ctx *TestingContext) ReadInputs(_ ...string) ([]Record, error) {
 	return ctx.records, nil
 }
 
-func (ctx *TestingContext) ReadFileInput(string) (*parser.ParseResult, error) {
-	return ctx.parseResult, nil
+func (ctx *TestingContext) ReadFileInput(string) (*parser.ParseResult, *app.File, error) {
+	return ctx.parseResult, nil, nil
 }
 
-func (ctx *TestingContext) WriteFile(_ string, contents string) app.Error {
+func (ctx *TestingContext) WriteFile(_ *app.File, contents string) app.Error {
 	ctx.writtenFileContents = contents
 	return nil
 }
