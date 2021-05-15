@@ -60,7 +60,7 @@ func main() {
 		if appErr, isAppError := err.(app.Error); isAppError {
 			exitCode = appErr.Code()
 		}
-		os.Exit(exitCode)
+		os.Exit(exitCode.ToInt())
 	}
 	os.Exit(0)
 }
