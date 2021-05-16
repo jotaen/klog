@@ -1,5 +1,13 @@
 # Changelog (command line tool)
 
+## v2.5
+- **[ FEATURE ]** Restructure output of `klog now`, especially when
+  using the `--diff` flag
+- **[ FEATURE ]** Use distinct exit codes for different error cases
+- **[ FEATURE ]** Introduce `--quiet` flag to retrieve raw output
+- **[ FEATURE ]** Extend help texts, improve error messages 
+- **[ FIX ]** Fix formatting issues of error output
+
 ## v2.4
 - **[ FEATURE ]** Automatically create a new record when doing
   `klog start` or `klog track` if there is no record yet
