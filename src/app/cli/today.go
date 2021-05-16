@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"errors"
 	"fmt"
 	. "klog"
 	"klog/app"
@@ -15,6 +14,7 @@ import (
 
 type Today struct {
 	lib.DiffArgs
+	lib.NowArgs
 	Follow bool `name:"follow" short:"f" help:"Keep shell open and follow changes"`
 	lib.WarnArgs
 	lib.NoStyleArgs
@@ -22,15 +22,10 @@ type Today struct {
 }
 
 func (opt *Today) Help() string {
-	return `Shows a dashboard-like overview of the data where the current day is displayed
-and evaluated separately from all other records. The current day is either today’s date,
-or otherwise yesterday’s date.
+	return `Evaluates the total time, where today’s record and the rest is evaluated separately.
 
-All open-ended time ranges are assumed to be closed right now.
-
-With the --diff option it calculates the forecasted end-time at which the time goal will be reached.
-(I.e. when the difference between should and actual time will be 0.)
-When no open range is present, the end time will appear wrapped in parenthesis.`
+With both --now and --diff it also calculates the forecasted end-time at which the time goal will be reached.
+(I.e. when the difference between should and actual time will be 0.)`
 }
 
 func (opt *Today) Run(ctx app.Context) error {
@@ -48,63 +43,86 @@ func handle(opt *Today, ctx app.Context) error {
 	if err != nil {
 		return err
 	}
-	currentRecords, previousRecords, isToday, err := splitIntoCurrentAndPrevious(now, records)
-	if err != nil {
-		return err
-	}
+	currentRecords, otherRecords, isYesterday := splitIntoCurrentAndOther(now, records)
+	hasCurrentRecords := len(currentRecords) > 0
 
 	INDENT := "          "
+	N_A := "n/a"
+	QQQ := "???"
 
-	currentTotal, _ := service.HypotheticalTotal(now, currentRecords...)
+	currentTotal, _ := func() (Duration, bool) {
+		if opt.Now {
+			return service.HypotheticalTotal(now, currentRecords...)
+		}
+		return service.Total(currentRecords...), false
+	}()
 	currentShouldTotal := service.ShouldTotalSum(currentRecords...)
 	currentDiff := service.Diff(currentShouldTotal, currentTotal)
 	currentEndTime, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(currentDiff))
 
-	previousTotal, _ := service.HypotheticalTotal(now, previousRecords...)
-	previousShouldTotal := service.ShouldTotalSum(previousRecords...)
-	previousDiff := service.Diff(previousShouldTotal, previousTotal)
+	otherTotal, _ := func() (Duration, bool) {
+		if opt.Now {
+			return service.HypotheticalTotal(now, otherRecords...)
+		}
+		return service.Total(otherRecords...), false
+	}()
+	otherShouldTotal := service.ShouldTotalSum(otherRecords...)
+	otherDiff := service.Diff(otherShouldTotal, otherTotal)
 
-	grandTotal := currentTotal.Plus(previousTotal)
-	grandShouldTotal := NewShouldTotal(0, currentShouldTotal.Plus(previousShouldTotal).InMinutes())
+	grandTotal := currentTotal.Plus(otherTotal)
+	grandShouldTotal := NewShouldTotal(0, currentShouldTotal.Plus(otherShouldTotal).InMinutes())
 	grandDiff := service.Diff(grandShouldTotal, grandTotal)
 	grandEndTime, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(grandDiff))
-
-	wrapEndTime, endTimeWrapperLength := func(text string) string { return text }, 0
-	if !hasOpenRange(currentRecords) {
-		wrapEndTime, endTimeWrapperLength = func(text string) string { return "(" + text + ")" }, 2
-	}
 
 	// Headline:
 	ctx.Print(INDENT + "   Total")
 	if opt.Diff {
-		ctx.Print("    Should     Diff   End-Time")
+		ctx.Print("    Should     Diff")
+		if opt.Now {
+			ctx.Print("   End-Time")
+		}
 	}
 	ctx.Print("\n")
 
 	// Current:
-	if isToday {
-		ctx.Print("Today    ")
-	} else {
+	if isYesterday {
 		ctx.Print("Yesterday")
+	} else {
+		ctx.Print("Today    ")
 	}
-	ctx.Print(lib.Pad(9-len(currentTotal.ToString())) + ctx.Serialiser().Duration(currentTotal))
+	if hasCurrentRecords {
+		ctx.Print(lib.Pad(9-len(currentTotal.ToString())) + ctx.Serialiser().Duration(currentTotal))
+	} else {
+		ctx.Print(lib.Pad(9-len(N_A)) + N_A)
+	}
 	if opt.Diff {
-		ctx.Print(lib.Pad(10-len(currentShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(currentShouldTotal))
-		ctx.Print(lib.Pad(9-len(currentDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(currentDiff))
-		if currentEndTime != nil {
-			ctx.Print(lib.Pad(11-len(currentEndTime.ToString())-endTimeWrapperLength) + wrapEndTime(ctx.Serialiser().Time(currentEndTime)))
+		if hasCurrentRecords {
+			ctx.Print(lib.Pad(10-len(currentShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(currentShouldTotal))
+			ctx.Print(lib.Pad(9-len(currentDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(currentDiff))
 		} else {
-			ctx.Print(lib.Pad(11-3) + "???")
+			ctx.Print(lib.Pad(10-len(N_A)) + N_A)
+			ctx.Print(lib.Pad(9-len(N_A)) + N_A)
+		}
+		if opt.Now {
+			if hasCurrentRecords {
+				if currentEndTime != nil {
+					ctx.Print(lib.Pad(11-len(currentEndTime.ToString())) + ctx.Serialiser().Time(currentEndTime))
+				} else {
+					ctx.Print(lib.Pad(11-len(QQQ)) + QQQ)
+				}
+			} else {
+				ctx.Print(lib.Pad(11-len(N_A)) + N_A)
+			}
 		}
 	}
 	ctx.Print("\n")
 
 	// Other:
 	ctx.Print("Other   ")
-	ctx.Print(lib.Pad(10-len(previousTotal.ToString())) + ctx.Serialiser().Duration(previousTotal))
+	ctx.Print(lib.Pad(10-len(otherTotal.ToString())) + ctx.Serialiser().Duration(otherTotal))
 	if opt.Diff {
-		ctx.Print(lib.Pad(10-len(previousShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(previousShouldTotal))
-		ctx.Print(lib.Pad(9-len(previousDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(previousDiff))
+		ctx.Print(lib.Pad(10-len(otherShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(otherShouldTotal))
+		ctx.Print(lib.Pad(9-len(otherDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(otherDiff))
 	}
 	ctx.Print("\n")
 
@@ -117,14 +135,20 @@ func handle(opt *Today, ctx app.Context) error {
 
 	// GrandTotal:
 	ctx.Print("All       ")
-	ctx.Print(lib.Pad(7-len(grandTotal.ToString())) + ctx.Serialiser().SignedDuration(grandTotal))
+	ctx.Print(lib.Pad(8-len(grandTotal.ToStringWithSign())) + ctx.Serialiser().SignedDuration(grandTotal))
 	if opt.Diff {
 		ctx.Print(lib.Pad(10-len(grandShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(grandShouldTotal))
 		ctx.Print(lib.Pad(9-len(grandDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(grandDiff))
-		if grandEndTime != nil {
-			ctx.Print(lib.Pad(11-len(grandEndTime.ToString())-endTimeWrapperLength) + wrapEndTime(ctx.Serialiser().Time(grandEndTime)))
-		} else {
-			ctx.Print(lib.Pad(11-3) + "???")
+		if opt.Now {
+			if hasCurrentRecords {
+				if grandEndTime != nil {
+					ctx.Print(lib.Pad(11-len(grandEndTime.ToString())) + ctx.Serialiser().Time(grandEndTime))
+				} else {
+					ctx.Print(lib.Pad(11-len(QQQ)) + QQQ)
+				}
+			} else {
+				ctx.Print(lib.Pad(11-len(N_A)) + N_A)
+			}
 		}
 	}
 	ctx.Print("\n")
@@ -133,10 +157,10 @@ func handle(opt *Today, ctx app.Context) error {
 	return nil
 }
 
-func splitIntoCurrentAndPrevious(now gotime.Time, records []Record) ([]Record, []Record, bool, error) {
+func splitIntoCurrentAndOther(now gotime.Time, records []Record) ([]Record, []Record, bool) {
 	var todaysRecords []Record
 	var yesterdaysRecords []Record
-	var previousRecords []Record
+	var otherRecords []Record
 	today := NewDateFromTime(now)
 	yesterday := today.PlusDays(-1)
 	for _, r := range records {
@@ -145,25 +169,16 @@ func splitIntoCurrentAndPrevious(now gotime.Time, records []Record) ([]Record, [
 		} else if r.Date().IsEqualTo(yesterday) {
 			yesterdaysRecords = append(yesterdaysRecords, r)
 		} else {
-			previousRecords = append(previousRecords, r)
+			otherRecords = append(otherRecords, r)
 		}
 	}
 	if len(todaysRecords) > 0 {
-		return todaysRecords, append(previousRecords, yesterdaysRecords...), true, nil
+		return todaysRecords, append(otherRecords, yesterdaysRecords...), false
 	}
 	if len(yesterdaysRecords) > 0 {
-		return yesterdaysRecords, previousRecords, false, nil
+		return yesterdaysRecords, otherRecords, true
 	}
-	return nil, nil, false, errors.New("No current record (dated either today or yesterday)")
-}
-
-func hasOpenRange(rs []Record) bool {
-	for _, r := range rs {
-		if r.OpenRange() != nil {
-			return true
-		}
-	}
-	return false
+	return nil, otherRecords, false
 }
 
 func withRepeat(ctx app.Context, fn func() error) error {
