@@ -8,7 +8,7 @@ import (
 )
 
 func TestSkipsWhenThereAreNoRecords(t *testing.T) {
-	state, err := NewTestingContext()._SetRecords(``)._Run((&Now{}).Run)
+	state, err := NewTestingContext()._SetRecords(``)._Run((&Today{}).Run)
 	require.EqualError(t, err, "No current record (dated either today or yesterday)")
 	assert.Equal(t, "", state.printBuffer)
 }
@@ -17,7 +17,7 @@ func TestSkipsWhenThereAreNoRecentRecords(t *testing.T) {
 	state, err := NewTestingContext()._SetNow(1999, 3, 14, 0, 0)._SetRecords(`
 1999-03-12
 	4h
-`)._Run((&Now{}).Run)
+`)._Run((&Today{}).Run)
 	require.EqualError(t, err, "No current record (dated either today or yesterday)")
 	assert.Equal(t, "", state.printBuffer)
 }
@@ -36,7 +36,7 @@ func TestPrintsTodaysEvalutaion(t *testing.T) {
 1999-03-14
 	3h
 	13:15 - ?
-`)._Run((&Now{}).Run)
+`)._Run((&Today{}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
              Total
@@ -54,7 +54,7 @@ func TestFallsBackToYesterday(t *testing.T) {
 
 1999-03-13
 	12h
-`)._Run((&Now{}).Run)
+`)._Run((&Today{}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
              Total
@@ -72,7 +72,7 @@ func TestPrintsEvaluationWithDiff(t *testing.T) {
 
 1999-03-14 (6h!)
 	14:38 - ?
-`)._Run((&Now{DiffArgs: lib.DiffArgs{Diff: true}}).Run)
+`)._Run((&Today{DiffArgs: lib.DiffArgs{Diff: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
              Total    Should     Diff   End-Time

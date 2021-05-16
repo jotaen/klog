@@ -13,7 +13,7 @@ import (
 	gotime "time"
 )
 
-type Now struct {
+type Today struct {
 	lib.DiffArgs
 	Follow bool `name:"follow" short:"f" help:"Keep shell open and follow changes"`
 	lib.WarnArgs
@@ -21,7 +21,7 @@ type Now struct {
 	lib.InputFilesArgs
 }
 
-func (opt *Now) Help() string {
+func (opt *Today) Help() string {
 	return `Shows a dashboard-like overview of the data where the current day is displayed
 and evaluated separately from all other records. The current day is either today’s date,
 or otherwise yesterday’s date.
@@ -33,7 +33,7 @@ With the --diff option it calculates the forecasted end-time at which the time g
 When no open range is present, the end time will appear wrapped in parenthesis.`
 }
 
-func (opt *Now) Run(ctx app.Context) error {
+func (opt *Today) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	h := func() error { return handle(opt, ctx) }
 	if opt.Follow {
@@ -42,7 +42,7 @@ func (opt *Now) Run(ctx app.Context) error {
 	return h()
 }
 
-func handle(opt *Now, ctx app.Context) error {
+func handle(opt *Today, ctx app.Context) error {
 	now := ctx.Now()
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
