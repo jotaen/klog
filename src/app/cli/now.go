@@ -28,8 +28,9 @@ or otherwise yesterday’s date.
 
 All open-ended time ranges are assumed to be closed right now.
 
-With the --should option it calculates the forecasted time at which the time goal will be reached.
-(I.e. when the difference between should and actual time is 0.)`
+With the --diff option it calculates the forecasted end-time at which the time goal will be reached.
+(I.e. when the difference between should and actual time will be 0.)
+When no open range is present, the end time will appear wrapped in parenthesis.`
 }
 
 func (opt *Now) Run(ctx app.Context) error {
@@ -68,6 +69,11 @@ func handle(opt *Now, ctx app.Context) error {
 	grandDiff := service.Diff(grandShouldTotal, grandTotal)
 	grandEndTime, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(grandDiff))
 
+	wrapEndTime, endTimeWrapperLength := func(text string) string { return text }, 0
+	if !hasOpenRange(currentRecords) {
+		wrapEndTime, endTimeWrapperLength = func(text string) string { return "(" + text + ")" }, 2
+	}
+
 	// Headline:
 	ctx.Print(INDENT + "   Total")
 	if opt.Diff {
@@ -86,15 +92,15 @@ func handle(opt *Now, ctx app.Context) error {
 		ctx.Print(lib.Pad(10-len(currentShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(currentShouldTotal))
 		ctx.Print(lib.Pad(9-len(currentDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(currentDiff))
 		if currentEndTime != nil {
-			ctx.Print(lib.Pad(11-len(currentEndTime.ToString())) + ctx.Serialiser().Time(currentEndTime))
+			ctx.Print(lib.Pad(11-len(currentEndTime.ToString())-endTimeWrapperLength) + wrapEndTime(ctx.Serialiser().Time(currentEndTime)))
 		} else {
 			ctx.Print(lib.Pad(11-3) + "???")
 		}
 	}
 	ctx.Print("\n")
 
-	// Previous:
-	ctx.Print("Previous")
+	// Other:
+	ctx.Print("Other   ")
 	ctx.Print(lib.Pad(10-len(previousTotal.ToString())) + ctx.Serialiser().Duration(previousTotal))
 	if opt.Diff {
 		ctx.Print(lib.Pad(10-len(previousShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(previousShouldTotal))
@@ -110,12 +116,13 @@ func handle(opt *Now, ctx app.Context) error {
 	ctx.Print("\n")
 
 	// GrandTotal:
-	ctx.Print(INDENT + lib.Pad(7-len(grandTotal.ToString())) + ctx.Serialiser().SignedDuration(grandTotal))
+	ctx.Print("All       ")
+	ctx.Print(lib.Pad(7-len(grandTotal.ToString())) + ctx.Serialiser().SignedDuration(grandTotal))
 	if opt.Diff {
 		ctx.Print(lib.Pad(10-len(grandShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(grandShouldTotal))
 		ctx.Print(lib.Pad(9-len(grandDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(grandDiff))
 		if grandEndTime != nil {
-			ctx.Print(lib.Pad(11-len(grandEndTime.ToString())) + ctx.Serialiser().Time(grandEndTime))
+			ctx.Print(lib.Pad(11-len(grandEndTime.ToString())-endTimeWrapperLength) + wrapEndTime(ctx.Serialiser().Time(grandEndTime)))
 		} else {
 			ctx.Print(lib.Pad(11-3) + "???")
 		}
@@ -148,6 +155,15 @@ func splitIntoCurrentAndPrevious(now gotime.Time, records []Record) ([]Record, [
 		return yesterdaysRecords, previousRecords, false, nil
 	}
 	return nil, nil, false, errors.New("No current record (dated either today or yesterday)")
+}
+
+func hasOpenRange(rs []Record) bool {
+	for _, r := range rs {
+		if r.OpenRange() != nil {
+			return true
+		}
+	}
+	return false
 }
 
 func withRepeat(ctx app.Context, fn func() error) error {

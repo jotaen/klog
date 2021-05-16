@@ -41,9 +41,9 @@ func TestPrintsTodaysEvalutaion(t *testing.T) {
 	assert.Equal(t, `
              Total
 Today        5h45m
-Previous     12h5m
+Other        12h5m
           ========
-           +17h50m
+All        +17h50m
 `, state.printBuffer)
 }
 
@@ -59,9 +59,9 @@ func TestFallsBackToYesterday(t *testing.T) {
 	assert.Equal(t, `
              Total
 Yesterday      12h
-Previous        5m
+Other           5m
           ========
-            +12h5m
+All         +12h5m
 `, state.printBuffer)
 }
 
@@ -77,8 +77,8 @@ func TestPrintsEvaluationWithDiff(t *testing.T) {
 	assert.Equal(t, `
              Total    Should     Diff   End-Time
 Today        3h35m       6h!   -2h25m      20:38
-Previous     6h50m    3h10m!   +3h40m
+Other        6h50m    3h10m!   +3h40m
           ===========================
-           +10h25m    9h10m!   +1h15m      16:58
+All        +10h25m    9h10m!   +1h15m      16:58
 `, state.printBuffer)
 }
