@@ -22,10 +22,12 @@ type Today struct {
 }
 
 func (opt *Today) Help() string {
-	return `Evaluates the total time, where today’s record and the rest is evaluated separately.
+	return `Evaluates the total time, separately for today’s records and all other records.
 
-With both --now and --diff it also calculates the forecasted end-time at which the time goal will be reached.
-(I.e. when the difference between should and actual time will be 0.)`
+When both --now and --diff are set, it also calculates the forecasted end-time at which the time goal will be reached.
+(I.e. when the difference between should and actual time will be 0.)
+
+If there are no records today, it falls back to yesterday.`
 }
 
 func (opt *Today) Run(ctx app.Context) error {
@@ -135,7 +137,7 @@ func handle(opt *Today, ctx app.Context) error {
 
 	// GrandTotal:
 	ctx.Print("All       ")
-	ctx.Print(lib.Pad(8-len(grandTotal.ToStringWithSign())) + ctx.Serialiser().SignedDuration(grandTotal))
+	ctx.Print(lib.Pad(8-len(grandTotal.ToString())) + ctx.Serialiser().Duration(grandTotal))
 	if opt.Diff {
 		ctx.Print(lib.Pad(10-len(grandShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(grandShouldTotal))
 		ctx.Print(lib.Pad(9-len(grandDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(grandDiff))

@@ -11,7 +11,7 @@ type Cli struct {
 	Total  Total  `cmd group:"Evaluate" help:"Evaluates the total time"`
 	Report Report `cmd group:"Evaluate" help:"Prints a calendar report summarising all days"`
 	Tags   Tags   `cmd group:"Evaluate" help:"Prints total times aggregated by tags"`
-	Today  Today  `cmd group:"Evaluate" help:"Show overview of the current day"`
+	Today  Today  `cmd group:"Evaluate" help:"Evaluate current day"`
 	Now    Now    `cmd group:"Evaluate" hidden help:"Show overview of the current day"`
 
 	// Manipulate

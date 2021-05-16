@@ -28,7 +28,7 @@ func TestPrintsTodaysEvalutaion(t *testing.T) {
 Today        5h45m
 Other        12h5m
           ========
-All        +17h50m
+All         17h50m
 `, state.printBuffer)
 }
 
@@ -46,7 +46,7 @@ func TestFallsBackToYesterday(t *testing.T) {
 Yesterday      12h
 Other           5m
           ========
-All         +12h5m
+All          12h5m
 `, state.printBuffer)
 }
 
@@ -64,7 +64,7 @@ func TestPrintsEvaluationWithDiff(t *testing.T) {
 Today        3h35m       6h!   -2h25m
 Other        6h50m    3h10m!   +3h40m
           ===========================
-All        +10h25m    9h10m!   +1h15m
+All         10h25m    9h10m!   +1h15m
 `, state.printBuffer)
 }
 
@@ -82,7 +82,7 @@ func TestPrintsEvaluationWithNow(t *testing.T) {
 Today        3h35m
 Other        6h50m
           ========
-All        +10h25m
+All         10h25m
 `, state.printBuffer)
 }
 
@@ -100,7 +100,7 @@ func TestPrintsEvaluationWithDiffAndNow(t *testing.T) {
 Today        3h35m       6h!   -2h25m      20:38
 Other        6h50m    3h10m!   +3h40m
           ===========================
-All        +10h25m    9h10m!   +1h15m      16:58
+All         10h25m    9h10m!   +1h15m      16:58
 `, state.printBuffer)
 }
 
@@ -115,6 +115,6 @@ func TestPrintsNAWhenNoCurrentRecord(t *testing.T) {
 Today          n/a       n/a      n/a        n/a
 Other        6h50m    3h10m!   +3h40m
           ===========================
-All         +6h50m    3h10m!   +3h40m        n/a
+All          6h50m    3h10m!   +3h40m        n/a
 `, state.printBuffer)
 }
