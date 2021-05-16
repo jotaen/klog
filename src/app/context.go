@@ -216,7 +216,7 @@ func (ctx *context) bookmarkOrNil() (*File, Error) {
 	_, err = os.Stat(dest)
 	if err != nil {
 		return nil, NewErrorWithCode(
-			BOOKMARK_ERROR,
+			BOOKMARK_ACCESS_ERROR,
 			"Bookmark doesn’t point to valid file",
 			"Please check the current bookmark location or set a new one",
 			err,
@@ -236,7 +236,7 @@ func (ctx *context) Bookmark() (*File, Error) {
 	}
 	if b == nil {
 		return nil, NewErrorWithCode(
-			BOOKMARK_ERROR,
+			NO_BOOKMARK_SET_ERROR,
 			"No bookmark set",
 			"You can set a bookmark by running: klog bookmark set somefile.klg",
 			err,
@@ -249,7 +249,7 @@ func (ctx *context) SetBookmark(path string) Error {
 	bookmark, err := filepath.Abs(path)
 	if err != nil {
 		return NewErrorWithCode(
-			BOOKMARK_ERROR,
+			BOOKMARK_ACCESS_ERROR,
 			"Invalid target file",
 			"Please check the file path",
 			err,
@@ -280,7 +280,7 @@ func (ctx *context) UnsetBookmark() Error {
 	err := os.Remove(ctx.bookmarkOrigin())
 	if err != nil && !os.IsNotExist(err) {
 		return NewErrorWithCode(
-			BOOKMARK_ERROR,
+			BOOKMARK_ACCESS_ERROR,
 			"Failed to unset bookmark",
 			"The current bookmark could not be cleared",
 			err,
