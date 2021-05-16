@@ -15,7 +15,14 @@ type Json struct {
 }
 
 func (opt *Json) Help() string {
-	return `Run with the --pretty flag to explore how the output structure looks.`
+	return `The output structure contains two properties at the top level: "records" and "errors".
+
+If the file is valid, "records" is an array containing a JSON object for each record; "errors" is null.
+
+If the file has syntax errors, "records" is null and "errors" contains an array of error objects.
+
+The structure of the objects is always uniform, so you can explore it by running the command with the --pretty flag.
+`
 }
 
 func (opt *Json) Run(ctx app.Context) error {
