@@ -53,7 +53,7 @@ func TestReportOfRecords(t *testing.T) {
      Mar    Tue  2.    -8h2m
             Wed  3.       1h
                     ========
-                    +335h50m
+                     335h50m
 `, state.printBuffer)
 }
 
@@ -77,7 +77,7 @@ func TestReportConsecutive(t *testing.T) {
             Sat  3.  
             Sun  4.       3h
                     ========
-                         +4h
+                          4h
 `, state.printBuffer)
 }
 
@@ -101,6 +101,6 @@ func TestReportWithDiff(t *testing.T) {
             Sun  8.       2h    5h30m!   -3h30m
             Mon  9.    5h20m    2h19m!    +3h1m
                     ===========================
-                     +15h20m   15h49m!     -29m
+                      15h20m   15h49m!     -29m
 `, state.printBuffer)
 }

@@ -87,7 +87,7 @@ func (opt *Report) Run(ctx app.Context) error {
 	}
 	ctx.Print("\n")
 	grandTotal := opt.NowArgs.Total(now, records...)
-	ctx.Print(indentation + lib.Pad(9-len(grandTotal.ToStringWithSign())) + ctx.Serialiser().SignedDuration(grandTotal))
+	ctx.Print(indentation + lib.Pad(9-len(grandTotal.ToString())) + ctx.Serialiser().Duration(grandTotal))
 	if opt.Diff {
 		grandShould := service.ShouldTotalSum(records...)
 		ctx.Print(lib.Pad(10-len(grandShould.ToString())) + ctx.Serialiser().ShouldTotal(grandShould))
