@@ -39,37 +39,30 @@ func (opt *Today) Run(ctx app.Context) error {
 	return h()
 }
 
+var (
+	INDENT = "          "
+	N_A    = "n/a"
+	QQQ    = "???"
+	COL_1  = 8
+	COL_2  = 10
+	COL_3  = 9
+	COL_4  = 11
+)
+
 func handle(opt *Today, ctx app.Context) error {
 	now := ctx.Now()
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err
 	}
+
 	currentRecords, otherRecords, isYesterday := splitIntoCurrentAndOther(now, records)
 	hasCurrentRecords := len(currentRecords) > 0
 
-	INDENT := "          "
-	N_A := "n/a"
-	QQQ := "???"
-
-	currentTotal, _ := func() (Duration, bool) {
-		if opt.Now {
-			return service.HypotheticalTotal(now, currentRecords...)
-		}
-		return service.Total(currentRecords...), false
-	}()
-	currentShouldTotal := service.ShouldTotalSum(currentRecords...)
-	currentDiff := service.Diff(currentShouldTotal, currentTotal)
+	currentTotal, currentShouldTotal, currentDiff := opt.evaluate(now, currentRecords)
 	currentEndTime, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(currentDiff))
 
-	otherTotal, _ := func() (Duration, bool) {
-		if opt.Now {
-			return service.HypotheticalTotal(now, otherRecords...)
-		}
-		return service.Total(otherRecords...), false
-	}()
-	otherShouldTotal := service.ShouldTotalSum(otherRecords...)
-	otherDiff := service.Diff(otherShouldTotal, otherTotal)
+	otherTotal, otherShouldTotal, otherDiff := opt.evaluate(now, otherRecords)
 
 	grandTotal := currentTotal.Plus(otherTotal)
 	grandShouldTotal := NewShouldTotal(0, currentShouldTotal.Plus(otherShouldTotal).InMinutes())
@@ -88,43 +81,43 @@ func handle(opt *Today, ctx app.Context) error {
 
 	// Current:
 	if isYesterday {
-		ctx.Print("Yesterday")
+		ctx.Print("Yesterday ")
 	} else {
-		ctx.Print("Today    ")
+		ctx.Print("Today     ")
 	}
 	if hasCurrentRecords {
-		ctx.Print(lib.Pad(9-len(currentTotal.ToString())) + ctx.Serialiser().Duration(currentTotal))
+		ctx.Print(lib.Pad(COL_1-len(currentTotal.ToString())) + ctx.Serialiser().Duration(currentTotal))
 	} else {
-		ctx.Print(lib.Pad(9-len(N_A)) + N_A)
+		ctx.Print(lib.Pad(COL_1-len(N_A)) + N_A)
 	}
 	if opt.Diff {
 		if hasCurrentRecords {
-			ctx.Print(lib.Pad(10-len(currentShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(currentShouldTotal))
-			ctx.Print(lib.Pad(9-len(currentDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(currentDiff))
+			ctx.Print(lib.Pad(COL_2-len(currentShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(currentShouldTotal))
+			ctx.Print(lib.Pad(COL_3-len(currentDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(currentDiff))
 		} else {
-			ctx.Print(lib.Pad(10-len(N_A)) + N_A)
-			ctx.Print(lib.Pad(9-len(N_A)) + N_A)
+			ctx.Print(lib.Pad(COL_2-len(N_A)) + N_A)
+			ctx.Print(lib.Pad(COL_3-len(N_A)) + N_A)
 		}
 		if opt.Now {
 			if hasCurrentRecords {
 				if currentEndTime != nil {
-					ctx.Print(lib.Pad(11-len(currentEndTime.ToString())) + ctx.Serialiser().Time(currentEndTime))
+					ctx.Print(lib.Pad(COL_4-len(currentEndTime.ToString())) + ctx.Serialiser().Time(currentEndTime))
 				} else {
-					ctx.Print(lib.Pad(11-len(QQQ)) + QQQ)
+					ctx.Print(lib.Pad(COL_4-len(QQQ)) + QQQ)
 				}
 			} else {
-				ctx.Print(lib.Pad(11-len(N_A)) + N_A)
+				ctx.Print(lib.Pad(COL_4-len(N_A)) + N_A)
 			}
 		}
 	}
 	ctx.Print("\n")
 
 	// Other:
-	ctx.Print("Other   ")
-	ctx.Print(lib.Pad(10-len(otherTotal.ToString())) + ctx.Serialiser().Duration(otherTotal))
+	ctx.Print("Other     ")
+	ctx.Print(lib.Pad(COL_1-len(otherTotal.ToString())) + ctx.Serialiser().Duration(otherTotal))
 	if opt.Diff {
-		ctx.Print(lib.Pad(10-len(otherShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(otherShouldTotal))
-		ctx.Print(lib.Pad(9-len(otherDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(otherDiff))
+		ctx.Print(lib.Pad(COL_2-len(otherShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(otherShouldTotal))
+		ctx.Print(lib.Pad(COL_3-len(otherDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(otherDiff))
 	}
 	ctx.Print("\n")
 
@@ -137,19 +130,19 @@ func handle(opt *Today, ctx app.Context) error {
 
 	// GrandTotal:
 	ctx.Print("All       ")
-	ctx.Print(lib.Pad(8-len(grandTotal.ToString())) + ctx.Serialiser().Duration(grandTotal))
+	ctx.Print(lib.Pad(COL_1-len(grandTotal.ToString())) + ctx.Serialiser().Duration(grandTotal))
 	if opt.Diff {
-		ctx.Print(lib.Pad(10-len(grandShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(grandShouldTotal))
-		ctx.Print(lib.Pad(9-len(grandDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(grandDiff))
+		ctx.Print(lib.Pad(COL_2-len(grandShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(grandShouldTotal))
+		ctx.Print(lib.Pad(COL_3-len(grandDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(grandDiff))
 		if opt.Now {
 			if hasCurrentRecords {
 				if grandEndTime != nil {
-					ctx.Print(lib.Pad(11-len(grandEndTime.ToString())) + ctx.Serialiser().Time(grandEndTime))
+					ctx.Print(lib.Pad(COL_4-len(grandEndTime.ToString())) + ctx.Serialiser().Time(grandEndTime))
 				} else {
-					ctx.Print(lib.Pad(11-len(QQQ)) + QQQ)
+					ctx.Print(lib.Pad(COL_4-len(QQQ)) + QQQ)
 				}
 			} else {
-				ctx.Print(lib.Pad(11-len(N_A)) + N_A)
+				ctx.Print(lib.Pad(COL_4-len(N_A)) + N_A)
 			}
 		}
 	}
@@ -157,6 +150,18 @@ func handle(opt *Today, ctx app.Context) error {
 
 	ctx.Print(opt.WarnArgs.ToString(now, records))
 	return nil
+}
+
+func (opt *Today) evaluate(now gotime.Time, records []Record) (Duration, Duration, Duration) {
+	total, _ := func() (Duration, bool) {
+		if opt.Now {
+			return service.HypotheticalTotal(now, records...)
+		}
+		return service.Total(records...), false
+	}()
+	shouldTotal := service.ShouldTotalSum(records...)
+	diff := service.Diff(shouldTotal, total)
+	return total, shouldTotal, diff
 }
 
 func splitIntoCurrentAndOther(now gotime.Time, records []Record) ([]Record, []Record, bool) {
