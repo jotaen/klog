@@ -1,8 +1,8 @@
 # Changelog (command line tool)
 
 ## v2.5
-- **[ FEATURE ]** Restructure output of `klog now`, especially when
-  using the `--diff` flag
+- **[ BREAKING ]** Rename `klog now` to `klog today`; restructure the
+  output, especially when using the `--diff`/`--now` flag
 - **[ FEATURE ]** Use distinct exit codes for different error cases
 - **[ FEATURE ]** Introduce `--quiet` flag to retrieve raw output
 - **[ FEATURE ]** Extend help texts, improve error messages 
