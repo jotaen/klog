@@ -5,7 +5,7 @@ import (
 	"fmt"
 	. "klog"
 	"klog/app"
-	. "klog/lib/jotaen/tf"
+	. "klog/lib/jotaen/terminalformat"
 	"klog/parser"
 	"klog/parser/parsing"
 	"klog/service"
@@ -55,10 +55,7 @@ func NewCliSerialiser() *parser.Serialiser {
 	}
 }
 
-var lineBreaker = LineBreaker{
-	maxLength: 60,
-	newLine:   "\n",
-}
+var reflower = NewReflower(60, "\n")
 
 func PrettifyError(err error, isDebug bool) error {
 	switch e := err.(type) {
@@ -80,13 +77,13 @@ func PrettifyError(err error, isDebug bool) error {
 			) + "\n"
 			message += fmt.Sprintf(
 				Style{Color: "227"}.Format("%s"),
-				lineBreaker.reflow(e.Message(), INDENT),
+				reflower.Reflow(e.Message(), INDENT),
 			) + "\n\n"
 		}
 		return errors.New(message)
 	case app.Error:
 		message := "Error: " + e.Error() + "\n"
-		message += lineBreaker.reflow(e.Details(), "")
+		message += reflower.Reflow(e.Details(), "")
 		if isDebug && e.Original() != nil {
 			message += "\n\nOriginal Error:\n" + e.Original().Error()
 		}
@@ -104,4 +101,54 @@ func PrettifyWarnings(ws []service.Warning) string {
 		result += "\n"
 	}
 	return result
+}
+
+func PrettyMonth(m int) string {
+	switch m {
+	case 1:
+		return "January"
+	case 2:
+		return "February"
+	case 3:
+		return "March"
+	case 4:
+		return "April"
+	case 5:
+		return "May"
+	case 6:
+		return "June"
+	case 7:
+		return "July"
+	case 8:
+		return "August"
+	case 9:
+		return "September"
+	case 10:
+		return "October"
+	case 11:
+		return "November"
+	case 12:
+		return "December"
+	}
+	panic("Illegal month") // this can/should never happen
+}
+
+func PrettyDay(d int) string {
+	switch d {
+	case 1:
+		return "Monday"
+	case 2:
+		return "Tuesday"
+	case 3:
+		return "Wednesday"
+	case 4:
+		return "Thursday"
+	case 5:
+		return "Friday"
+	case 6:
+		return "Saturday"
+	case 7:
+		return "Sunday"
+	}
+	panic("Illegal weekday") // this can/should never happen
 }

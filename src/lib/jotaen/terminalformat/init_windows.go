@@ -1,6 +1,6 @@
 // +build windows
 
-package tf
+package terminalformat
 
 import (
 	"os"

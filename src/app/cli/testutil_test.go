@@ -4,6 +4,7 @@ import (
 	. "klog"
 	"klog/app"
 	"klog/app/cli/lib"
+	"klog/lib/jotaen/terminalformat"
 	"klog/parser"
 	"klog/parser/parsing"
 	gotime "time"
@@ -39,7 +40,7 @@ func (ctx TestingContext) _SetNow(Y int, M int, D int, h int, m int) TestingCont
 
 func (ctx TestingContext) _Run(cmd func(app.Context) error) (State, error) {
 	cmdErr := cmd(&ctx)
-	out := lib.StripAllAnsiSequences(ctx.printBuffer)
+	out := terminalformat.StripAllAnsiSequences(ctx.printBuffer)
 	if len(out) > 0 && out[0] != '\n' {
 		out = "\n" + out
 	}
