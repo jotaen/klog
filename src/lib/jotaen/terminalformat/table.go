@@ -2,9 +2,19 @@ package terminalformat
 
 import "strings"
 
+type Options struct {
+	fill  bool
+	align Alignment
+}
+
+type cell struct {
+	Options
+	value string
+	len   int
+}
+
 type Table struct {
-	cells           []string
-	alignments      []Alignment
+	cells           []cell
 	numberOfColumns int
 	longestCell     []int
 	currentColumn   int
@@ -23,7 +33,7 @@ func NewTable(numberOfColumns int, columnSeparator string) *Table {
 		panic("Column count must be greater than 1")
 	}
 	return &Table{
-		cells:           []string{},
+		cells:           []cell{},
 		numberOfColumns: numberOfColumns,
 		longestCell:     make([]int, numberOfColumns),
 		currentColumn:   0,
@@ -31,21 +41,46 @@ func NewTable(numberOfColumns int, columnSeparator string) *Table {
 	}
 }
 
-func (t *Table) cell(text string, alignment Alignment) {
-	t.cells = append(t.cells, text)
-	t.alignments = append(t.alignments, alignment)
-	if len(text) > t.longestCell[t.currentColumn] {
-		t.longestCell[t.currentColumn] = len(text)
+func (t *Table) Cell(text string, opts Options) *Table {
+	c := cell{
+		Options: opts,
+		value:   text,
+		len:     len(StripAllAnsiSequences(text)),
+	}
+	t.cells = append(t.cells, c)
+	if c.len > t.longestCell[t.currentColumn] {
+		t.longestCell[t.currentColumn] = c.len
 	}
 	t.currentColumn++
 	if t.currentColumn >= t.numberOfColumns {
 		t.currentColumn = 0
 	}
+	return t
+}
+
+func (t *Table) CellL(text string) *Table {
+	return t.Cell(text, Options{align: ALIGN_LEFT})
+}
+
+func (t *Table) CellR(text string) *Table {
+	return t.Cell(text, Options{align: ALIGN_RIGHT})
+}
+
+func (t *Table) Skip(numberOfCells int) *Table {
+	for i := 0; i < numberOfCells; i++ {
+		t.Cell("", Options{})
+	}
+	return t
+}
+
+func (t *Table) Fill(sequence string) *Table {
+	t.Cell(sequence, Options{fill: true})
+	return t
 }
 
 func (t *Table) ToString() string {
 	result := ""
-	for i, cell := range t.cells {
+	for i, c := range t.cells {
 		col := i % t.numberOfColumns
 		if i > 0 && col == 0 {
 			result += "\n"
@@ -53,14 +88,18 @@ func (t *Table) ToString() string {
 		if col > 0 {
 			result += t.columnSeparator
 		}
-		padding := strings.Repeat(" ", t.longestCell[col]-len(cell))
-		if t.alignments[i] == ALIGN_RIGHT {
-			result += padding
-		}
-		result += cell
-		if t.alignments[i] == ALIGN_LEFT {
-			result += padding
+		if c.fill {
+			result += strings.Repeat(c.value, t.longestCell[col])
+		} else {
+			padding := strings.Repeat(" ", t.longestCell[col]-c.len)
+			if c.align == ALIGN_RIGHT {
+				result += padding
+			}
+			result += c.value
+			if c.align == ALIGN_LEFT {
+				result += padding
+			}
 		}
 	}
-	return result
+	return result + "\n"
 }

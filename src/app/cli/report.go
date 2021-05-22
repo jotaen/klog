@@ -5,8 +5,8 @@ import (
 	. "klog"
 	"klog/app"
 	"klog/app/cli/lib"
+	"klog/lib/jotaen/terminalformat"
 	"klog/service"
-	"strings"
 )
 
 type Report struct {
@@ -30,72 +30,83 @@ func (opt *Report) Run(ctx app.Context) error {
 	}
 	now := ctx.Now()
 	records = opt.ApplyFilter(now, records)
-	indentation := strings.Repeat(" ", len("2020 Dec   Wed 30. "))
+	numberOfValueColumns := func() int {
+		if opt.Diff {
+			return 3
+		}
+		return 1
+	}()
+	numberOfColumns := 4 + numberOfValueColumns
+	table := terminalformat.NewTable(numberOfColumns, " ")
 	records = service.Sort(records, true)
-	ctx.Print(indentation + "    Total")
+	table.
+		CellL("    ").   // 2020
+		CellL("   ").    // Dec
+		CellL("      "). // Sun
+		CellR("   ").    // 17.
+		CellR("   Total")
 	if opt.Diff {
-		ctx.Print("    Should     Diff")
+		table.CellR("   Should").CellR("    Diff")
 	}
-	ctx.Print("\n")
+	recordGroups, dates := groupByDate(records)
 	y := -1
 	m := -1
-	recordGroups, dates := groupByDate(records)
 	if opt.Fill {
 		dates = allDatesRange(records[0].Date(), records[len(records)-1].Date())
 	}
 	for _, date := range dates {
-		year := func() string {
-			if date.Year() != y {
-				y = date.Year()
-				m = -1 // force month to be recalculated
-				return fmt.Sprintf("%d", y)
-			}
-			return "    "
-		}()
-		month := func() string {
-			if date.Month() != m {
-				m = date.Month()
-				return lib.PrettyMonth(m)[:3]
-			}
-			return "   "
-		}()
-		day := func() string {
-			return fmt.Sprintf("%s %2v.", lib.PrettyDay(date.Weekday())[:3], date.Day())
-		}()
-		ctx.Print(fmt.Sprintf("%s %s    %s  ", year, month, day))
+		// Year
+		if date.Year() != y {
+			m = -1 // force month to be recalculated
+			table.CellR(fmt.Sprint(date.Year()))
+			y = date.Year()
+		} else {
+			table.Skip(1)
+		}
+
+		// Month
+		if date.Month() != m {
+			m = date.Month()
+			table.CellR(lib.PrettyMonth(m)[:3])
+		} else {
+			table.Skip(1)
+		}
+
+		// Day
+		table.CellR(lib.PrettyDay(date.Weekday())[:3]).CellR(fmt.Sprintf("%2v.", date.Day()))
 
 		rs := recordGroups[date.Hash()]
 		if len(rs) == 0 {
-			ctx.Print("\n")
+			table.Skip(numberOfValueColumns)
 			continue
 		}
 		total := opt.NowArgs.Total(now, rs...)
-		ctx.Print(lib.Pad(7-len(total.ToString())) + ctx.Serialiser().Duration(total))
-
+		table.CellR(ctx.Serialiser().Duration(total))
 		if opt.Diff {
 			should := service.ShouldTotalSum(rs...)
-			ctx.Print(lib.Pad(10-len(should.ToString())) + ctx.Serialiser().ShouldTotal(should))
 			diff := service.Diff(should, total)
-			ctx.Print(lib.Pad(9-len(diff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(diff))
+			table.CellR(ctx.Serialiser().ShouldTotal(should)).CellR(ctx.Serialiser().SignedDuration(diff))
 		}
-
-		ctx.Print("\n")
 	}
-	ctx.Print(indentation + " " + strings.Repeat("=", 8))
+
+	// Line
+	table.Skip(4).Fill("=")
 	if opt.Diff {
-		ctx.Print(strings.Repeat("=", 19))
+		table.Fill("=").Fill("=")
 	}
 	ctx.Print("\n")
 	grandTotal := opt.NowArgs.Total(now, records...)
-	ctx.Print(indentation + lib.Pad(9-len(grandTotal.ToString())) + ctx.Serialiser().Duration(grandTotal))
+
+	// Totals
+	table.Skip(4)
+	table.CellR(ctx.Serialiser().Duration(grandTotal))
 	if opt.Diff {
 		grandShould := service.ShouldTotalSum(records...)
-		ctx.Print(lib.Pad(10-len(grandShould.ToString())) + ctx.Serialiser().ShouldTotal(grandShould))
 		grandDiff := service.Diff(grandShould, grandTotal)
-		ctx.Print(lib.Pad(9-len(grandDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(grandDiff))
+		table.CellR(ctx.Serialiser().ShouldTotal(grandShould)).CellR(ctx.Serialiser().SignedDuration(grandDiff))
 	}
-	ctx.Print("\n")
 
+	ctx.Print(table.ToString())
 	ctx.Print(opt.WarnArgs.ToString(now, records))
 	return nil
 }
