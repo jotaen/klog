@@ -71,10 +71,10 @@ func TestReportConsecutive(t *testing.T) {
 	assert.Equal(t, `
                        Total
 2020 Sep    Tue 29.       1h
-            Wed 30.  
-     Oct    Thu  1.  
+            Wed 30.         
+     Oct    Thu  1.         
             Fri  2.       0m
-            Sat  3.  
+            Sat  3.         
             Sun  4.       3h
                     ========
                           4h
@@ -100,7 +100,7 @@ func TestReportWithDiff(t *testing.T) {
 2018 Jul    Sat  7.       8h       8h!       0m
             Sun  8.       2h    5h30m!   -3h30m
             Mon  9.    5h20m    2h19m!    +3h1m
-                    ===========================
+                    ======== ========= ========
                       15h20m   15h49m!     -29m
 `, state.printBuffer)
 }

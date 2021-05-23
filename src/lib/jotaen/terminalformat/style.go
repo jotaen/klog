@@ -1,4 +1,4 @@
-package tf
+package terminalformat
 
 type Style struct {
 	Color        string

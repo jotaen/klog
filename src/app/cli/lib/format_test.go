@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"klog/app"
+	"klog/lib/jotaen/terminalformat"
 	"klog/parser/parsing"
 	"testing"
 )
@@ -33,7 +34,7 @@ func TestFormatParserError(t *testing.T) {
     ^^^^
     Error: Short explanation.
 
-`, StripAllAnsiSequences(text))
+`, terminalformat.StripAllAnsiSequences(text))
 }
 
 func TestFormatAppError(t *testing.T) {
