@@ -4,9 +4,9 @@ import (
 	. "klog"
 	"klog/app"
 	"klog/app/cli/lib"
+	"klog/lib/jotaen/terminalformat"
 	"klog/service"
 	"sort"
-	"strings"
 )
 
 type Tags struct {
@@ -25,30 +25,29 @@ func (opt *Tags) Run(ctx app.Context) error {
 	now := ctx.Now()
 	records = opt.ApplyFilter(now, records)
 	entriesByTag, _ := service.EntryTagLookup(records...)
-	tagsOrdered, maxLength := sortTags(entriesByTag)
+	tagsOrdered := sortTags(entriesByTag)
+	if len(tagsOrdered) == 0 {
+		return nil
+	}
+	table := terminalformat.NewTable(2, " ")
 	for _, t := range tagsOrdered {
 		es := entriesByTag[t]
-		ctx.Print(t.ToString())
-		ctx.Print(strings.Repeat(" ", maxLength-len(t)) + " ")
-		ctx.Print(ctx.Serialiser().Duration(service.TotalEntries(es...)))
-		ctx.Print("\n")
+		table.
+			CellL(t.ToString()).
+			CellL(ctx.Serialiser().Duration(service.TotalEntries(es...)))
 	}
-
+	ctx.Print(table.ToString())
 	ctx.Print(opt.WarnArgs.ToString(now, records))
 	return nil
 }
 
-func sortTags(ts map[Tag][]Entry) ([]Tag, int) {
+func sortTags(ts map[Tag][]Entry) []Tag {
 	var result []Tag
-	maxLength := 0
 	for t := range ts {
 		result = append(result, t)
-		if len(t) > maxLength {
-			maxLength = len(t)
-		}
 	}
 	sort.Slice(result, func(i int, j int) bool {
 		return result[i] < result[j]
 	})
-	return result, maxLength
+	return result
 }

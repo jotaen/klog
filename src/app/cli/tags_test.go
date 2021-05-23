@@ -43,7 +43,7 @@ Was #sick, need to compensate later
 	assert.Equal(t, `
 #badminton 3h45m
 #running   4h30m
-#sick      -30m
-#sports    8h
+#sick      -30m 
+#sports    8h   
 `, state.printBuffer)
 }
