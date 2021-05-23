@@ -78,28 +78,27 @@ func (t *Table) Fill(sequence string) *Table {
 	return t
 }
 
-func (t *Table) ToString() string {
-	result := ""
+func (t *Table) Collect(fn func(string)) {
 	for i, c := range t.cells {
 		col := i % t.numberOfColumns
 		if i > 0 && col == 0 {
-			result += "\n"
+			fn("\n")
 		}
 		if col > 0 {
-			result += t.columnSeparator
+			fn(t.columnSeparator)
 		}
 		if c.fill {
-			result += strings.Repeat(c.value, t.longestCell[col])
+			fn(strings.Repeat(c.value, t.longestCell[col]))
 		} else {
 			padding := strings.Repeat(" ", t.longestCell[col]-c.len)
 			if c.align == ALIGN_RIGHT {
-				result += padding
+				fn(padding)
 			}
-			result += c.value
+			fn(c.value)
 			if c.align == ALIGN_LEFT {
-				result += padding
+				fn(padding)
 			}
 		}
 	}
-	return result + "\n"
+	fn("\n")
 }

@@ -106,7 +106,7 @@ func (opt *Report) Run(ctx app.Context) error {
 		table.CellR(ctx.Serialiser().ShouldTotal(grandShould)).CellR(ctx.Serialiser().SignedDuration(grandDiff))
 	}
 
-	ctx.Print(table.ToString())
+	table.Collect(ctx.Print)
 	ctx.Print(opt.WarnArgs.ToString(now, records))
 	return nil
 }

@@ -6,6 +6,7 @@ import (
 )
 
 func TestPrintTable(t *testing.T) {
+	result := ""
 	table := NewTable(3, " ")
 	table.
 		Cell("FIRST", Options{align: ALIGN_LEFT}).
@@ -19,9 +20,10 @@ func TestPrintTable(t *testing.T) {
 		Fill("-").
 		Skip(2).
 		Cell("foo", Options{align: ALIGN_LEFT})
+	table.Collect(func(x string) { result += x })
 	assert.Equal(t, `FIRST     SECOND THIRD
 1              2     3
 long-text   `+"\x1b[0m\x1b[4m"+`asdf`+"\x1b[0m"+` -----
                  foo  
-`, table.ToString())
+`, result)
 }
