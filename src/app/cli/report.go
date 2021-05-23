@@ -37,8 +37,8 @@ func (opt *Report) Run(ctx app.Context) error {
 		return 1
 	}()
 	numberOfColumns := 4 + numberOfValueColumns
-	table := terminalformat.NewTable(numberOfColumns, " ")
 	records = service.Sort(records, true)
+	table := terminalformat.NewTable(numberOfColumns, " ")
 	table.
 		CellL("    ").   // 2020
 		CellL("   ").    // Dec

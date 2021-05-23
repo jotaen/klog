@@ -63,7 +63,7 @@ func TestPrintsEvaluationWithDiff(t *testing.T) {
              Total    Should     Diff
 Today        3h35m       6h!   -2h25m
 Other        6h50m    3h10m!   +3h40m
-          ===========================
+          ======== ========= ========
 All         10h25m    9h10m!   +1h15m
 `, state.printBuffer)
 }
@@ -98,8 +98,8 @@ func TestPrintsEvaluationWithDiffAndNow(t *testing.T) {
 	assert.Equal(t, `
              Total    Should     Diff   End-Time
 Today        3h35m       6h!   -2h25m      20:38
-Other        6h50m    3h10m!   +3h40m
-          ===========================
+Other        6h50m    3h10m!   +3h40m           
+          ======== ========= ========           
 All         10h25m    9h10m!   +1h15m      16:58
 `, state.printBuffer)
 }
@@ -113,8 +113,8 @@ func TestPrintsPlaceholderIfEndTimeIsOutOfBounds(t *testing.T) {
 	assert.Equal(t, `
              Total    Should     Diff   End-Time
 Today           1h      60h!     -59h        ???
-Other           0m       0m!       0m
-          ===========================
+Other           0m       0m!       0m           
+          ======== ========= ========           
 All             1h      60h!     -59h        ???
 `, state.printBuffer)
 }
@@ -128,8 +128,8 @@ func TestPrintsNAWhenNoCurrentRecord(t *testing.T) {
 	assert.Equal(t, `
              Total    Should     Diff   End-Time
 Today          n/a       n/a      n/a        n/a
-Other        6h50m    3h10m!   +3h40m
-          ===========================
+Other        6h50m    3h10m!   +3h40m           
+          ======== ========= ========           
 All          6h50m    3h10m!   +3h40m        n/a
 `, state.printBuffer)
 }

@@ -5,6 +5,7 @@ import (
 	. "klog"
 	"klog/app"
 	"klog/app/cli/lib"
+	"klog/lib/jotaen/terminalformat"
 	"klog/service"
 	"os"
 	"os/signal"
@@ -69,85 +70,101 @@ func handle(opt *Today, ctx app.Context) error {
 	grandDiff := service.Diff(grandShouldTotal, grandTotal)
 	grandEndTime, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(grandDiff))
 
+	numberOfValueColumns := func() int {
+		if opt.Diff {
+			if opt.Now {
+				return 4
+			}
+			return 3
+		}
+		return 1
+	}()
+	numberOfColumns := 1 + numberOfValueColumns
+	table := terminalformat.NewTable(numberOfColumns, " ")
+
 	// Headline:
-	ctx.Print(INDENT + "   Total")
+	table.
+		CellL("         ").
+		CellR("   Total")
 	if opt.Diff {
-		ctx.Print("    Should     Diff")
+		table.CellR("   Should").CellR("    Diff")
 		if opt.Now {
-			ctx.Print("   End-Time")
+			table.CellR("  End-Time")
 		}
 	}
-	ctx.Print("\n")
 
 	// Current:
 	if isYesterday {
-		ctx.Print("Yesterday ")
+		table.CellL("Yesterday")
 	} else {
-		ctx.Print("Today     ")
+		table.CellL("Today")
 	}
 	if hasCurrentRecords {
-		ctx.Print(lib.Pad(COL_1-len(currentTotal.ToString())) + ctx.Serialiser().Duration(currentTotal))
+		table.CellR(ctx.Serialiser().Duration(currentTotal))
 	} else {
-		ctx.Print(lib.Pad(COL_1-len(N_A)) + N_A)
+		table.CellR(N_A)
 	}
 	if opt.Diff {
 		if hasCurrentRecords {
-			ctx.Print(lib.Pad(COL_2-len(currentShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(currentShouldTotal))
-			ctx.Print(lib.Pad(COL_3-len(currentDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(currentDiff))
+			table.
+				CellR(ctx.Serialiser().ShouldTotal(currentShouldTotal)).
+				CellR(ctx.Serialiser().SignedDuration(currentDiff))
 		} else {
-			ctx.Print(lib.Pad(COL_2-len(N_A)) + N_A)
-			ctx.Print(lib.Pad(COL_3-len(N_A)) + N_A)
+			table.CellR(N_A).CellR(N_A)
 		}
 		if opt.Now {
 			if hasCurrentRecords {
 				if currentEndTime != nil {
-					ctx.Print(lib.Pad(COL_4-len(currentEndTime.ToString())) + ctx.Serialiser().Time(currentEndTime))
+					table.CellR(ctx.Serialiser().Time(currentEndTime))
 				} else {
-					ctx.Print(lib.Pad(COL_4-len(QQQ)) + QQQ)
+					table.CellR(QQQ)
 				}
 			} else {
-				ctx.Print(lib.Pad(COL_4-len(N_A)) + N_A)
+				table.CellR(N_A)
 			}
 		}
 	}
-	ctx.Print("\n")
 
 	// Other:
-	ctx.Print("Other     ")
-	ctx.Print(lib.Pad(COL_1-len(otherTotal.ToString())) + ctx.Serialiser().Duration(otherTotal))
+	table.CellL("Other").CellR(ctx.Serialiser().Duration(otherTotal))
 	if opt.Diff {
-		ctx.Print(lib.Pad(COL_2-len(otherShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(otherShouldTotal))
-		ctx.Print(lib.Pad(COL_3-len(otherDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(otherDiff))
+		table.
+			CellR(ctx.Serialiser().ShouldTotal(otherShouldTotal)).
+			CellR(ctx.Serialiser().SignedDuration(otherDiff))
+		if opt.Now {
+			table.Skip(1)
+		}
 	}
-	ctx.Print("\n")
 
 	// Line:
-	ctx.Print(INDENT + "========")
+	table.Skip(1).Fill("=")
 	if opt.Diff {
-		ctx.Print("===================")
+		table.Fill("=").Fill("=")
+		if opt.Now {
+			table.Skip(1)
+		}
 	}
-	ctx.Print("\n")
 
 	// GrandTotal:
-	ctx.Print("All       ")
-	ctx.Print(lib.Pad(COL_1-len(grandTotal.ToString())) + ctx.Serialiser().Duration(grandTotal))
+	table.CellL("All").CellR(ctx.Serialiser().Duration(grandTotal))
 	if opt.Diff {
-		ctx.Print(lib.Pad(COL_2-len(grandShouldTotal.ToString())) + ctx.Serialiser().ShouldTotal(grandShouldTotal))
-		ctx.Print(lib.Pad(COL_3-len(grandDiff.ToStringWithSign())) + ctx.Serialiser().SignedDuration(grandDiff))
+		table.
+			CellR(ctx.Serialiser().ShouldTotal(grandShouldTotal)).
+			CellR(ctx.Serialiser().SignedDuration(grandDiff))
 		if opt.Now {
 			if hasCurrentRecords {
 				if grandEndTime != nil {
-					ctx.Print(lib.Pad(COL_4-len(grandEndTime.ToString())) + ctx.Serialiser().Time(grandEndTime))
+					table.CellR(ctx.Serialiser().Time(grandEndTime))
 				} else {
-					ctx.Print(lib.Pad(COL_4-len(QQQ)) + QQQ)
+					table.CellR(QQQ)
 				}
 			} else {
-				ctx.Print(lib.Pad(COL_4-len(N_A)) + N_A)
+				table.CellR(N_A)
 			}
 		}
 	}
-	ctx.Print("\n")
 
+	ctx.Print(table.ToString())
 	ctx.Print(opt.WarnArgs.ToString(now, records))
 	return nil
 }
