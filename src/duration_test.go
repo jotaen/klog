@@ -11,7 +11,7 @@ func TestSerialiseDurationOnlyWithMeaningfulValues(t *testing.T) {
 	assert.Equal(t, "15h", NewDuration(15, 0).ToString())
 }
 
-func TestSerialiseDurationOfLargeValues(t *testing.T) {
+func TestSerialiseDurationOfLargeHourValues(t *testing.T) {
 	assert.Equal(t, "265h45m", NewDuration(265, 45).ToString())
 }
 
@@ -34,13 +34,18 @@ func TestSerialiseDurationOfExplicitlyPositiveValues(t *testing.T) {
 	assert.Equal(t, "0m", NewDuration(0, 0).ToStringWithSign())
 }
 
+func TestNormaliseDurationsWhenSerialising(t *testing.T) {
+	assert.Equal(t, "2h", NewDuration(0, 120).ToString())
+	assert.Equal(t, "2h30m", NewDuration(0, 150).ToString())
+}
+
 func TestParsingDurationWithHoursAndMinutes(t *testing.T) {
 	duration, err := NewDurationFromString("2h6m")
 	assert.Nil(t, err)
 	assert.Equal(t, NewDuration(2, 6), duration)
 }
 
-func TestParsingDurationWithHoursOnly(t *testing.T) {
+func TestParsingDurationWithHourValueOnly(t *testing.T) {
 	for _, d := range []string{
 		"13h",
 		"13h0m",
@@ -51,14 +56,21 @@ func TestParsingDurationWithHoursOnly(t *testing.T) {
 	}
 }
 
-func TestParsingDurationWithMinutesOnly(t *testing.T) {
-	for _, d := range []string{
-		"48m",
-		"0h48m",
+func TestParsingDurationWithMinuteValueOnly(t *testing.T) {
+	for _, d := range []struct {
+		text   string
+		expect Duration
+	}{
+		{"48m", NewDuration(0, 48)},
+		{"0h48m", NewDuration(0, 48)},
+
+		// Minutes >60 are okay if there is no hour part present
+		{"120m", NewDuration(2, 0)},
+		{"150m", NewDuration(2, 30)},
 	} {
-		duration, err := NewDurationFromString(d)
+		duration, err := NewDurationFromString(d.text)
 		assert.Nil(t, err)
-		assert.Equal(t, NewDuration(0, 48), duration)
+		assert.Equal(t, d.expect, duration)
 	}
 }
 
@@ -100,10 +112,11 @@ func TestParsingFailsWithInvalidValue(t *testing.T) {
 	}
 }
 
-func TestParsingFailsWithMinutesGreaterThan60(t *testing.T) {
+func TestParsingFailsWithMinutesGreaterThan60WhenHourPartPresent(t *testing.T) {
 	for _, d := range []string{
 		"1h60m",
 		"8h1653m",
+		"-8h1653m",
 	} {
 		duration, err := NewDurationFromString(d)
 		assert.EqualError(t, err, "UNREPRESENTABLE_DURATION")
