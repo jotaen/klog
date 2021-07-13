@@ -114,8 +114,8 @@ Start and end MUST be written in chronological order.
 They MAY be equal.
 
 There MUST be a `-` between the two values.
-There MAY appear “spaces” on either side of the `-`;
-for this case it is RECOMMENDED to use exactly one “space” on both sides.
+There MAY appear “spaces” on either side of the `-`,
+in which case it is RECOMMENDED to use exactly one “space” on both sides of the dash.
 
 *Time* values MAY be *shifted* to the next or to the previous day:
 - To associate the *time* with the day before the *record’s* date,
