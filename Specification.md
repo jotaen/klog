@@ -74,7 +74,7 @@ There are two places where *summary* text MAY appear in *records*:
   (there MAY be multiple “spaces”).
 
 ### Tags
-The purpose of *tags* is to help categorise records and entries.
+The purpose of *tags* is to help categorise *records* and *entries*.
 
 Any amount of *tags* MAY appear anywhere within *summaries*.
 A *tag* MUST be a sequence of “letters”, “digits” or the `_` character,
@@ -118,10 +118,10 @@ There MAY appear “spaces” on either side of the `-`,
 in which case it is RECOMMENDED to use exactly one “space” on both sides of the dash.
 
 *Time* values MAY be *shifted* to the next or to the previous day:
-- To associate the *time* with the day before the *record’s* date,
+- To associate the *time* with the day before the *record’s* *date*,
   a `<` prefix MUST be used,
   e.g. `<23:00`.
-- To associate the *time* with the day after the *record’s* date,
+- To associate the *time* with the day after the *record’s* *date*,
   a `>` suffix MUST be used,
   e.g. `1:30>`.
 
@@ -139,7 +139,7 @@ e.g. `9:00 - ?`.
 The `?` MAY be repeated, e.g. `9:00 - ???`.
 The placeholder MUST NOT be *shifted*.
 
-*Open ranges* MUST NOT appear more than once per record.
+*Open ranges* MUST NOT appear more than once per *record*.
 
 ### Duration
 A *duration* is an *entry* that represents a period of time.
@@ -185,8 +185,8 @@ additional “blank lines” MAY appear.
 
 *Records* MAY appear in any order in the file.
 
-There MAY exist multiple *records* with the same date.
 These MUST be treated as distinct.
+There MAY exist multiple *records* with the same *date*.
 
 The file extension SHOULD be `.klg`, e.g. `times.klg`.
 The file encoding MUST be UTF-8.
@@ -201,7 +201,7 @@ There SHOULD be a newline at the end of the file.
 ## III. Evaluating data
 
 ### Total time
-The resulting *total time* of a record MUST be computed by summing up its *entries*:
+The resulting *total time* of a *record* MUST be computed by summing up its *entries*:
 positive values add to the *total time*,
 negative values deduct from it.
 The resulting *total time* MAY be 0;
@@ -210,7 +210,7 @@ it MAY be greater than 24 hours.
 
 Overlapping *ranges* MUST be counted individually
 and MUST NOT be offset against each other.
-E.g., the two entries `12:00 - 13:00` and `12:30 - 13:30` result in total time of `2h`.
+E.g., the two *entries* `12:00 - 13:00` and `12:30 - 13:30` result in *total time* of `2h`.
 
 *Ranges* with *shifted times* MUST be fully counted towards
 the *date* at which they appear in the *record*.
