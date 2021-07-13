@@ -132,10 +132,11 @@ Examples of *ranges* with *shifted times*:
 An *open range* can be used to track the start *time* of an activity,
 i.e. the end *time* is not determined yet.
 
-*Open ranges* are formatted in the same way as *ranges*, except that
-the end *time* MUST be replaced by a `?` placeholder,
-e.g. `9:00 - ?`;
-the `?` MAY be repeated, e.g. `9:00 - ???`.
+*Open ranges* are formatted in the same way as *ranges*,
+except that the end *time* MUST be replaced by a placeholder.
+The placeholder MUST be denoted by the character `?`,
+e.g. `9:00 - ?`. 
+The `?` MAY be repeated, e.g. `9:00 - ???`.
 The placeholder MUST NOT be *shifted*.
 
 *Open ranges* MUST NOT appear more than once per record.
