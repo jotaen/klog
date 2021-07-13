@@ -220,7 +220,6 @@ they MAY be factored in upon explicit request, though.
 
 Multiple *records* with the same *date* MUST be treated as distinct
 and MUST NOT be combined into a single *record*.
-(This is important when filtering by *tags*, for example.)
 
 ## III. Appendix
 
