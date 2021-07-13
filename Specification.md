@@ -1,19 +1,10 @@
 # klog – File Format Specification
 
+**Version 1.0**
+
 klog is a file format for tracking time.
 
 It is free and open-source software distributed under the MIT-License.
-
-> **Current state**: version 1 RFC (request for comments)
->
-> This is a draft for the first version of the klog file format.
-> While the basic structure will likely remain as it is,
-> there still might be minor additions or corrections necessary.
-> Time will tell when it’s good to go to be finalised as version 1.
-> 
-> In case you have comments or thoughts, please file an issue
-> in the [klog repository](https://github.com/jotaen/klog)
-> so that they can be discussed.
 
 ## Preface
 
