@@ -207,8 +207,9 @@ The resulting *total time* MAY be 0;
 it MAY be negative;
 it MAY be greater than 24 hours.
 
-Overlapping *ranges* MUST be counted individually.
-(They MUST NOT be merged together.)
+Overlapping *ranges* MUST be counted individually
+and MUST NOT be offset against each other.
+E.g., the two entries `12:00 - 13:00` and `12:30 - 13:30` result in total time of `2h`.
 
 *Ranges* with *shifted times* MUST be fully counted towards
 the *date* at which they appear in the *record*.
