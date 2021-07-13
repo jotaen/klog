@@ -185,7 +185,6 @@ additional “blank lines” MAY appear.
 
 *Records* MAY appear in any order in the file.
 
-These MUST be treated as distinct.
 There MAY exist multiple *records* with the same *date*.
 
 The file extension SHOULD be `.klg`, e.g. `times.klg`.
@@ -218,6 +217,10 @@ They MUST NOT be implicitly split across the two adjacent *dates*.
 
 *Open ranges* MUST NOT be counted by default;
 they MAY be factored in upon explicit request, though.
+
+Multiple *records* with the same *date* MUST be treated as distinct
+and MUST NOT be combined into a single *record*.
+(This is important when filtering by *tags*, for example.)
 
 ## III. Appendix
 
