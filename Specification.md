@@ -126,7 +126,7 @@ for this case it is RECOMMENDED to use exactly one “space” on both sides.
   e.g. `1:30>`.
 
 Examples of *ranges* with *shifted times*:
-`<23:00 - 5:00`, `19:00 - 0:30>`, `<22:25 - <23:59`, `<15:00 - 12:00>`.
+`<23:00 - 5:00`, `19:00 - 0:30>`, `<22:25 - <23:59`, `<15:00 - 12:00>`, `0:30> - 4:00>`.
 
 ### Open range
 An *open range* can be used to track the start *time* of an activity,
