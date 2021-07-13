@@ -84,7 +84,7 @@ e.g. `#gym`, `#24hours` or `#home_office`.
 ### Entry
 *Entry* is an abstract term for time-related data.
 *Durations*, *ranges* and *open ranges* are instances of *entries*.
-A *summary* MAY be associated with an *entry* (see above).
+A *summary* MAY be associated with an *entry* (see section Summary).
 
 Each *entry* MUST appear on its own line and
 MUST be indented in one of the following ways:
