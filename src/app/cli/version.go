@@ -23,7 +23,7 @@ func (opt *Version) Run(ctx app.Context) error {
 	}
 	ctx.Print("Command line tool: " + ctx.MetaInfo().Version)
 	ctx.Print("  [" + ctx.MetaInfo().BuildHash + "]\n")
-	ctx.Print("File format: version 1 (RFC)\n")
+	ctx.Print("File format: version 1.0\n")
 
 	if opt.NoCheck {
 		return nil
