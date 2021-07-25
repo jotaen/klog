@@ -39,14 +39,14 @@ It MUST be formatted according to one of the following patterns:
 - `YYYY-MM-DD` (RECOMMENDED),
 - `YYYY/MM/DD`
 
-(Where `Y` is a digit to denote the year, `M` the month, `D` the day.)
+(Where `Y` is a “digit” to denote the year, `M` the month, `D` the day.)
 
 ### Should-Total
 A *should-total* denotes the targeted total time of a *record*.
 
 A *should-total* MUST be a *duration* value
 followed by a `!`
-and wrapped in parentheses,
+and wrapped in “parentheses”,
 e.g. `(8h!)` or `(-5h30m!)`.
 
 ### Summary
@@ -91,7 +91,7 @@ e.g. `9:00`, `23:18`, `6:30am`, `9:23pm`
 
 A *time* value MUST consist of both an hour part and a minute part.
 Single-digit hour parts MAY be padded with a `0`.
-The minute part MUST always contain two digits.
+The minute part MUST always contain two “digits”.
 
 As default, *times* are to be interpreted as 24-hour clock values.
 An `am` or `pm` suffix MAY be used to denote that the value is
@@ -220,7 +220,7 @@ and MUST NOT be combined into a single *record*.
 - “tab”: The tab character (U+0009), escape sequence `\t`
 - “whitespace”: A “space”, a “tab”, or another character that appears blank
 - “parenthesis”: The opening and closing parentheses `(` and `)` (U+0028 and U+0029)
-- “blank line”: A line that only contains whitespace characters
+- “blank line”: A line that only contains “whitespace” characters
 - “letter”: A character as defined by the Unicode letter category, regex `\p{L}`
 - “digit”: Any of 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 - “integer”: An unsigned number without fractional component
