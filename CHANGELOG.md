@@ -1,5 +1,11 @@
 # Changelog (command line tool)
 
+## v2.6
+- **[ INFO ]** Release first version of the file format
+  specification (v1.0)
+- **[ FIX ]** If a duration only contains a minute part,
+  allow the value to be greater than 59, e.g. `120m`.
+
 ## v2.5
 - **[ BREAKING ]** Rename `klog now` to `klog today`; restructure the
   output, especially when using the `--diff`/`--now` flag
