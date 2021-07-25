@@ -13,7 +13,7 @@ in this document are to be interpreted as described in [RFC 2119](https://tools.
 
 Whenever a word has special meaning in klog, it is formatted in *italics*.
 
-Other technical terms are surrounded by “quotes”. These are defined at the end of this specification.
+Other technical terms are surrounded by “quotes”. These are defined in the appendix.
 
 ## I. Records
 
@@ -165,7 +165,7 @@ which MAY be indicated by a leading `+` character,
 e.g. `+4h12m`.
 If the *duration* is supposed to be negative, it MUST be preceded by a `-` character.
 
-## II. Organizing records in files
+## II. Organising records in files
 
 A file MAY hold any amount of *records*.
 Apart from that it MUST NOT contain anything
