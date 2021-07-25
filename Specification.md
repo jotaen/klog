@@ -120,7 +120,8 @@ Examples of *ranges* with *shifted times*:
 `<23:00 - 5:00`, `19:00 - 0:30>`, `<22:25 - <23:59`, `<15:00 - 12:00>`, `0:30> - 4:00>`.
 
 ### Open range
-An *open range* can be used to track the start *time* of an activity,
+An *open range* is an *entry*
+that can be used to track the start *time* of an activity,
 i.e. the end *time* is not determined yet.
 
 *Open ranges* are formatted in the same way as *ranges*,
