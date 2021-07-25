@@ -1,19 +1,10 @@
 # klog – File Format Specification
 
+**Version 1.0**
+
 klog is a file format for tracking time.
 
 It is free and open-source software distributed under the MIT-License.
-
-> **Current state**: version 1 RFC (request for comments)
->
-> This is a draft for the first version of the klog file format.
-> While the basic structure will likely remain as it is,
-> there still might be minor additions or corrections necessary.
-> Time will tell when it’s good to go to be finalised as version 1.
-> 
-> In case you have comments or thoughts, please file an issue
-> in the [klog repository](https://github.com/jotaen/klog)
-> so that they can be discussed.
 
 ## Preface
 
@@ -22,7 +13,7 @@ in this document are to be interpreted as described in [RFC 2119](https://tools.
 
 Whenever a word has special meaning in klog, it is formatted in *italics*.
 
-Other technical terms are surrounded by “quotes”. These are defined at the end of this specification.
+Other technical terms are surrounded by “quotes”. These are defined in the appendix.
 
 ## I. Records
 
@@ -48,14 +39,14 @@ It MUST be formatted according to one of the following patterns:
 - `YYYY-MM-DD` (RECOMMENDED),
 - `YYYY/MM/DD`
 
-(Where `Y` is a digit to denote the year, `M` the month, `D` the day.)
+(Where `Y` is a “digit” to denote the year, `M` the month, `D` the day.)
 
 ### Should-Total
 A *should-total* denotes the targeted total time of a *record*.
 
 A *should-total* MUST be a *duration* value
 followed by a `!`
-and wrapped in parentheses,
+and wrapped in “parentheses”,
 e.g. `(8h!)` or `(-5h30m!)`.
 
 ### Summary
@@ -100,7 +91,7 @@ e.g. `9:00`, `23:18`, `6:30am`, `9:23pm`
 
 A *time* value MUST consist of both an hour part and a minute part.
 Single-digit hour parts MAY be padded with a `0`.
-The minute part MUST always contain two digits.
+The minute part MUST always contain two “digits”.
 
 As default, *times* are to be interpreted as 24-hour clock values.
 An `am` or `pm` suffix MAY be used to denote that the value is
@@ -129,7 +120,8 @@ Examples of *ranges* with *shifted times*:
 `<23:00 - 5:00`, `19:00 - 0:30>`, `<22:25 - <23:59`, `<15:00 - 12:00>`, `0:30> - 4:00>`.
 
 ### Open range
-An *open range* can be used to track the start *time* of an activity,
+An *open range* is an *entry*
+that can be used to track the start *time* of an activity,
 i.e. the end *time* is not determined yet.
 
 *Open ranges* are formatted in the same way as *ranges*,
@@ -169,12 +161,12 @@ If the minute part is missing, a value of `0m` is assumed.
 The *duration* as a whole is a signed value:
 That means it is either positive (i.e. adding to the *total time*)
 or negative (i.e. deducting from the *total time*).
-As default a *duration* is positive,
+By default, a *duration* is positive,
 which MAY be indicated by a leading `+` character,
 e.g. `+4h12m`.
 If the *duration* is supposed to be negative, it MUST be preceded by a `-` character.
 
-## II. Organizing records in files
+## II. Organising records in files
 
 A file MAY hold any amount of *records*.
 Apart from that it MUST NOT contain anything
@@ -221,7 +213,7 @@ they MAY be factored in upon explicit request, though.
 Multiple *records* with the same *date* MUST be treated as distinct
 and MUST NOT be combined into a single *record*.
 
-## III. Appendix
+## IV. Appendix
 
 ### Glossary of technical terms
 
@@ -229,7 +221,7 @@ and MUST NOT be combined into a single *record*.
 - “tab”: The tab character (U+0009), escape sequence `\t`
 - “whitespace”: A “space”, a “tab”, or another character that appears blank
 - “parenthesis”: The opening and closing parentheses `(` and `)` (U+0028 and U+0029)
-- “blank line”: A line that only contains whitespace characters
+- “blank line”: A line that only contains “whitespace” characters
 - “letter”: A character as defined by the Unicode letter category, regex `\p{L}`
 - “digit”: Any of 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 - “integer”: An unsigned number without fractional component
