@@ -160,7 +160,7 @@ If the minute part is missing, a value of `0m` is assumed.
 The *duration* as a whole is a signed value:
 That means it is either positive (i.e. adding to the *total time*)
 or negative (i.e. deducting from the *total time*).
-As default a *duration* is positive,
+By default, a *duration* is positive,
 which MAY be indicated by a leading `+` character,
 e.g. `+4h12m`.
 If the *duration* is supposed to be negative, it MUST be preceded by a `-` character.
