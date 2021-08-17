@@ -6,7 +6,9 @@ import (
 	"klog/app"
 	"klog/app/cli/lib"
 	"klog/lib/jotaen/terminalformat"
+	"klog/parser"
 	"klog/service"
+	gotime "time"
 )
 
 type Report struct {
@@ -30,6 +32,32 @@ func (opt *Report) Run(ctx app.Context) error {
 	}
 	now := ctx.Now()
 	records = opt.ApplyFilter(now, records)
+	records = service.Sort(records, true)
+	table := opt.aggregateByDay(ctx.Serialiser(), now, records)
+
+	// Line
+	table.Skip(4).Fill("=")
+	if opt.Diff {
+		table.Fill("=").Fill("=")
+	}
+	ctx.Print("\n")
+	grandTotal := opt.NowArgs.Total(now, records...)
+
+	// Totals
+	table.Skip(4)
+	table.CellR(ctx.Serialiser().Duration(grandTotal))
+	if opt.Diff {
+		grandShould := service.ShouldTotalSum(records...)
+		grandDiff := service.Diff(grandShould, grandTotal)
+		table.CellR(ctx.Serialiser().ShouldTotal(grandShould)).CellR(ctx.Serialiser().SignedDuration(grandDiff))
+	}
+
+	table.Collect(ctx.Print)
+	ctx.Print(opt.WarnArgs.ToString(now, records))
+	return nil
+}
+
+func (opt *Report) aggregateByDay(serialiser *parser.Serialiser, now gotime.Time, records []Record) *terminalformat.Table {
 	numberOfValueColumns := func() int {
 		if opt.Diff {
 			return 3
@@ -37,7 +65,6 @@ func (opt *Report) Run(ctx app.Context) error {
 		return 1
 	}()
 	numberOfColumns := 4 + numberOfValueColumns
-	records = service.Sort(records, true)
 	table := terminalformat.NewTable(numberOfColumns, " ")
 	table.
 		CellL("    ").   // 2020
@@ -48,9 +75,10 @@ func (opt *Report) Run(ctx app.Context) error {
 	if opt.Diff {
 		table.CellR("   Should").CellR("    Diff")
 	}
-	recordGroups, dates := groupByDate(records)
 	y := -1
 	m := -1
+
+	recordGroups, dates := groupByDate(records)
 	if opt.Fill {
 		dates = allDatesRange(records[0].Date(), records[len(records)-1].Date())
 	}
@@ -75,40 +103,23 @@ func (opt *Report) Run(ctx app.Context) error {
 		// Day
 		table.CellR(lib.PrettyDay(date.Weekday())[:3]).CellR(fmt.Sprintf("%2v.", date.Day()))
 
+		// Total
 		rs := recordGroups[date.Hash()]
 		if len(rs) == 0 {
 			table.Skip(numberOfValueColumns)
 			continue
 		}
 		total := opt.NowArgs.Total(now, rs...)
-		table.CellR(ctx.Serialiser().Duration(total))
+		table.CellR(serialiser.Duration(total))
+
+		// Should/Diff
 		if opt.Diff {
 			should := service.ShouldTotalSum(rs...)
 			diff := service.Diff(should, total)
-			table.CellR(ctx.Serialiser().ShouldTotal(should)).CellR(ctx.Serialiser().SignedDuration(diff))
+			table.CellR(serialiser.ShouldTotal(should)).CellR(serialiser.SignedDuration(diff))
 		}
 	}
-
-	// Line
-	table.Skip(4).Fill("=")
-	if opt.Diff {
-		table.Fill("=").Fill("=")
-	}
-	ctx.Print("\n")
-	grandTotal := opt.NowArgs.Total(now, records...)
-
-	// Totals
-	table.Skip(4)
-	table.CellR(ctx.Serialiser().Duration(grandTotal))
-	if opt.Diff {
-		grandShould := service.ShouldTotalSum(records...)
-		grandDiff := service.Diff(grandShould, grandTotal)
-		table.CellR(ctx.Serialiser().ShouldTotal(grandShould)).CellR(ctx.Serialiser().SignedDuration(grandDiff))
-	}
-
-	table.Collect(ctx.Print)
-	ctx.Print(opt.WarnArgs.ToString(now, records))
-	return nil
+	return table
 }
 
 func allDatesRange(from Date, to Date) []Date {
