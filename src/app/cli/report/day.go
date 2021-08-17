@@ -11,11 +11,10 @@ import (
 type dayAggregator struct {
 	y int
 	m int
-	d int
 }
 
 func NewDayAggregator() Aggregator {
-	return &dayAggregator{-1, -1, -1}
+	return &dayAggregator{-1, -1}
 }
 
 func (a *dayAggregator) NumberOfPrefixColumns() int {

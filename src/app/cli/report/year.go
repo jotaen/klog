@@ -7,12 +7,10 @@ import (
 	"klog/service"
 )
 
-type yearAggregator struct {
-	y int
-}
+type yearAggregator struct{}
 
 func NewYearAggregator() Aggregator {
-	return &yearAggregator{-1}
+	return &yearAggregator{}
 }
 
 func (a *yearAggregator) NumberOfPrefixColumns() int {
@@ -30,10 +28,5 @@ func (a *yearAggregator) OnHeaderPrefix(table *terminalformat.Table) {
 
 func (a *yearAggregator) OnRowPrefix(table *terminalformat.Table, date Date) {
 	// Year
-	if date.Year() != a.y {
-		table.CellR(fmt.Sprint(date.Year()))
-		a.y = date.Year()
-	} else {
-		table.Skip(1)
-	}
+	table.CellR(fmt.Sprint(date.Year()))
 }

@@ -10,11 +10,10 @@ import (
 
 type monthAggregator struct {
 	y int
-	m int
 }
 
 func NewMonthAggregator() Aggregator {
-	return &monthAggregator{-1, -1}
+	return &monthAggregator{-1}
 }
 
 func (a *monthAggregator) NumberOfPrefixColumns() int {
@@ -34,7 +33,6 @@ func (a *monthAggregator) OnHeaderPrefix(table *terminalformat.Table) {
 func (a *monthAggregator) OnRowPrefix(table *terminalformat.Table, date Date) {
 	// Year
 	if date.Year() != a.y {
-		a.m = -1 // force month to be recalculated
 		table.CellR(fmt.Sprint(date.Year()))
 		a.y = date.Year()
 	} else {
@@ -42,10 +40,5 @@ func (a *monthAggregator) OnRowPrefix(table *terminalformat.Table, date Date) {
 	}
 
 	// Month
-	if date.Month() != a.m {
-		a.m = date.Month()
-		table.CellR(lib.PrettyMonth(a.m)[:3])
-	} else {
-		table.Skip(1)
-	}
+	table.CellR(lib.PrettyMonth(date.Month())[:3])
 }

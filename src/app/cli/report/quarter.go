@@ -9,11 +9,10 @@ import (
 
 type quarterAggregator struct {
 	y int
-	q int
 }
 
 func NewQuarterAggregator() Aggregator {
-	return &quarterAggregator{-1, -1}
+	return &quarterAggregator{-1}
 }
 
 func (a *quarterAggregator) NumberOfPrefixColumns() int {
@@ -33,7 +32,6 @@ func (a *quarterAggregator) OnHeaderPrefix(table *terminalformat.Table) {
 func (a *quarterAggregator) OnRowPrefix(table *terminalformat.Table, date Date) {
 	// Year
 	if date.Year() != a.y {
-		a.q = -1 // force quarter to be recalculated
 		table.CellR(fmt.Sprint(date.Year()))
 		a.y = date.Year()
 	} else {
@@ -41,9 +39,5 @@ func (a *quarterAggregator) OnRowPrefix(table *terminalformat.Table, date Date) 
 	}
 
 	// Quarter
-	if date.Quarter() != a.q {
-		table.CellR(fmt.Sprintf("Q%1v", date.Quarter()))
-	} else {
-		table.Skip(1)
-	}
+	table.CellR(fmt.Sprintf("Q%1v", date.Quarter()))
 }
