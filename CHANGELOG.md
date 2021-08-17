@@ -1,5 +1,9 @@
 # Changelog (command line tool)
 
+## v2.7
+- **[ FEATURE ]** Allow value of `--sort` flag to be uppercase
+  or lowercase (`ASC`/`asc` or `DESC`/`desc`)
+
 ## v2.6
 - **[ INFO ]** Release first version of the file format
   specification (v1.0)
