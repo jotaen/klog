@@ -1,6 +1,8 @@
 # Changelog (command line tool)
 
 ## v2.7
+- **[ FEATURE ]** Add additional evaluation options for `klog report`
+  to aggregate the data by day, week, month, quarter or year
 - **[ FEATURE ]** Allow value of `--sort` flag to be uppercase
   or lowercase (`ASC`/`asc` or `DESC`/`desc`)
 
