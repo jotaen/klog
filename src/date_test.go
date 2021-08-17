@@ -11,6 +11,8 @@ func TestRecognisesValidDate(t *testing.T) {
 	assert.Equal(t, 2005, d.Year())
 	assert.Equal(t, 4, d.Month())
 	assert.Equal(t, 15, d.Day())
+	assert.Equal(t, 2, d.Quarter())
+	assert.Equal(t, 15, d.WeekNumber())
 }
 
 func TestReconWithDate(t *testing.T) {
@@ -112,4 +114,33 @@ func TestCalculateWeekday(t *testing.T) {
 	} {
 		assert.Equal(t, d.w, d.d.Weekday())
 	}
+}
+
+func TestCalculateQuarter(t *testing.T) {
+	assert.Equal(t, 1, Ɀ_Date_(2021, 1, 1).Quarter())
+	assert.Equal(t, 1, Ɀ_Date_(2021, 2, 12).Quarter())
+	assert.Equal(t, 1, Ɀ_Date_(2021, 3, 31).Quarter())
+
+	assert.Equal(t, 2, Ɀ_Date_(2021, 4, 1).Quarter())
+	assert.Equal(t, 2, Ɀ_Date_(2021, 4, 4).Quarter())
+	assert.Equal(t, 2, Ɀ_Date_(2021, 6, 30).Quarter())
+
+	assert.Equal(t, 3, Ɀ_Date_(2021, 7, 1).Quarter())
+	assert.Equal(t, 3, Ɀ_Date_(2021, 7, 22).Quarter())
+	assert.Equal(t, 3, Ɀ_Date_(2021, 9, 30).Quarter())
+
+	assert.Equal(t, 4, Ɀ_Date_(2021, 10, 1).Quarter())
+	assert.Equal(t, 4, Ɀ_Date_(2021, 12, 2).Quarter())
+	assert.Equal(t, 4, Ɀ_Date_(2021, 12, 31).Quarter())
+}
+
+func TestCalculateWeekNumber(t *testing.T) {
+	assert.Equal(t, 53, Ɀ_Date_(2021, 1, 1).WeekNumber())
+	assert.Equal(t, 53, Ɀ_Date_(2021, 1, 3).WeekNumber())
+	assert.Equal(t, 1, Ɀ_Date_(2021, 1, 4).WeekNumber())
+	assert.Equal(t, 1, Ɀ_Date_(2021, 1, 10).WeekNumber())
+	assert.Equal(t, 2, Ɀ_Date_(2021, 1, 11).WeekNumber())
+	assert.Equal(t, 33, Ɀ_Date_(2021, 8, 17).WeekNumber())
+	assert.Equal(t, 52, Ɀ_Date_(2021, 12, 31).WeekNumber())
+	assert.Equal(t, 52, Ɀ_Date_(2022, 1, 1).WeekNumber())
 }

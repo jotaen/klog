@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/civil"
 	"errors"
 	"fmt"
+	"math"
 	"regexp"
 	"strings"
 	gotime "time"
@@ -15,6 +16,8 @@ type Date interface {
 	Month() int
 	Day() int
 	Weekday() int
+	Quarter() int
+	WeekNumber() int
 	IsEqualTo(Date) bool
 	IsAfterOrEqual(Date) bool
 	ToString() string
@@ -105,6 +108,20 @@ func (d *date) Weekday() int {
 		return 7
 	}
 	return x
+}
+
+func (d *date) Quarter() int {
+	quarter := math.Ceil(float64(d.Month()) / 3)
+	return int(quarter)
+}
+
+func (d *date) WeekNumber() int {
+	_, week := civil.Date{
+		Year:  d.year,
+		Month: gotime.Month(d.month),
+		Day:   d.day,
+	}.In(gotime.UTC).ISOWeek()
+	return week
 }
 
 func (d *date) IsEqualTo(otherDate Date) bool {
