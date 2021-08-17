@@ -11,6 +11,8 @@ func TestRecognisesValidDate(t *testing.T) {
 	assert.Equal(t, 2005, d.Year())
 	assert.Equal(t, 4, d.Month())
 	assert.Equal(t, 15, d.Day())
+	assert.Equal(t, 2, d.Quarter())
+	assert.Equal(t, 15, d.WeekNumber())
 }
 
 func TestReconWithDate(t *testing.T) {
@@ -25,23 +27,22 @@ func TestPlusDaysAccountsForLeapYear(t *testing.T) {
 	assert.Equal(t, Ɀ_Date_(2020, 2, 29), d.PlusDays(1))
 }
 
-func TestHashYieldsDistinctValues(t *testing.T) {
-	hashes := make(map[DateHash]bool)
-	for i, d := 0, Ɀ_Date_(1000, 1, 1); i < 1000; i++ {
-		d = d.PlusDays(i)
-		hashes[d.Hash()] = true
-	}
-	assert.Len(t, hashes, 1000)
-}
-
 func TestDetectsUnrepresentableDates(t *testing.T) {
-	invalidMonth, err := NewDate(2005, 13, 15)
-	assert.Nil(t, invalidMonth)
-	assert.EqualError(t, err, "UNREPRESENTABLE_DATE")
-
-	invalidDay, err := NewDate(2005, 2, 30)
-	assert.Nil(t, invalidDay)
-	assert.EqualError(t, err, "UNREPRESENTABLE_DATE")
+	for _, dateProvider := range []func() (Date, error){
+		func() (Date, error) { return NewDate(2005, 13, 15) }, // Month too large
+		func() (Date, error) { return NewDate(2005, 0, 15) },  // Month too small
+		func() (Date, error) { return NewDate(2005, -1, 15) }, // Month too small
+		func() (Date, error) { return NewDate(2005, 1, 32) },  // Day too big
+		func() (Date, error) { return NewDate(2005, 2, 30) },  // Day too big
+		func() (Date, error) { return NewDate(2005, 2, 0) },   // Day too small
+		func() (Date, error) { return NewDate(2005, 2, -1) },  // Day too small
+		func() (Date, error) { return NewDate(10000, 2, 30) }, // Year too big
+		func() (Date, error) { return NewDate(-1, 2, 30) },    // Year too small
+	} {
+		invalidDate, err := dateProvider()
+		assert.Nil(t, invalidDate)
+		assert.EqualError(t, err, "UNREPRESENTABLE_DATE")
+	}
 }
 
 func TestSerialiseDate(t *testing.T) {
@@ -121,4 +122,33 @@ func TestCalculateWeekday(t *testing.T) {
 	} {
 		assert.Equal(t, d.w, d.d.Weekday())
 	}
+}
+
+func TestCalculateQuarter(t *testing.T) {
+	assert.Equal(t, 1, Ɀ_Date_(2021, 1, 1).Quarter())
+	assert.Equal(t, 1, Ɀ_Date_(2021, 2, 12).Quarter())
+	assert.Equal(t, 1, Ɀ_Date_(2021, 3, 31).Quarter())
+
+	assert.Equal(t, 2, Ɀ_Date_(2021, 4, 1).Quarter())
+	assert.Equal(t, 2, Ɀ_Date_(2021, 4, 4).Quarter())
+	assert.Equal(t, 2, Ɀ_Date_(2021, 6, 30).Quarter())
+
+	assert.Equal(t, 3, Ɀ_Date_(2021, 7, 1).Quarter())
+	assert.Equal(t, 3, Ɀ_Date_(2021, 7, 22).Quarter())
+	assert.Equal(t, 3, Ɀ_Date_(2021, 9, 30).Quarter())
+
+	assert.Equal(t, 4, Ɀ_Date_(2021, 10, 1).Quarter())
+	assert.Equal(t, 4, Ɀ_Date_(2021, 12, 2).Quarter())
+	assert.Equal(t, 4, Ɀ_Date_(2021, 12, 31).Quarter())
+}
+
+func TestCalculateWeekNumber(t *testing.T) {
+	assert.Equal(t, 53, Ɀ_Date_(2021, 1, 1).WeekNumber())
+	assert.Equal(t, 53, Ɀ_Date_(2021, 1, 3).WeekNumber())
+	assert.Equal(t, 1, Ɀ_Date_(2021, 1, 4).WeekNumber())
+	assert.Equal(t, 1, Ɀ_Date_(2021, 1, 10).WeekNumber())
+	assert.Equal(t, 2, Ɀ_Date_(2021, 1, 11).WeekNumber())
+	assert.Equal(t, 33, Ɀ_Date_(2021, 8, 17).WeekNumber())
+	assert.Equal(t, 52, Ɀ_Date_(2021, 12, 31).WeekNumber())
+	assert.Equal(t, 52, Ɀ_Date_(2022, 1, 1).WeekNumber())
 }

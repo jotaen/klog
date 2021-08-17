@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/civil"
 	"errors"
 	"fmt"
+	"math"
 	"regexp"
 	"strings"
 	gotime "time"
@@ -15,14 +16,13 @@ type Date interface {
 	Month() int
 	Day() int
 	Weekday() int
+	Quarter() int
+	WeekNumber() int
 	IsEqualTo(Date) bool
 	IsAfterOrEqual(Date) bool
 	ToString() string
-	Hash() DateHash
 	PlusDays(int) Date
 }
-
-type DateHash uint32
 
 type date struct {
 	year             int
@@ -39,7 +39,7 @@ func NewDate(year int, month int, day int) (Date, error) {
 		Month: gotime.Month(month),
 		Day:   day,
 	}
-	return cd2Date(cd, true)
+	return civil2Date(cd, true)
 }
 
 func NewDateFromString(yyyymmdd string) (Date, error) {
@@ -54,7 +54,7 @@ func NewDateFromString(yyyymmdd string) (Date, error) {
 	if err != nil || !cd.IsValid() {
 		return nil, errors.New("UNREPRESENTABLE_DATE")
 	}
-	return cd2Date(cd, strings.Contains(yyyymmdd, "-"))
+	return civil2Date(cd, strings.Contains(yyyymmdd, "-"))
 }
 
 func NewDateFromTime(t gotime.Time) Date {
@@ -66,8 +66,12 @@ func NewDateFromTime(t gotime.Time) Date {
 	return d
 }
 
-func cd2Date(cd civil.Date, formatWithDashes bool) (Date, error) {
+func civil2Date(cd civil.Date, formatWithDashes bool) (Date, error) {
 	if !cd.IsValid() {
+		return nil, errors.New("UNREPRESENTABLE_DATE")
+	}
+	if cd.Year > 9999 {
+		// A year greater than 9999 cannot be serialised according to YYYY-MM-DD.
 		return nil, errors.New("UNREPRESENTABLE_DATE")
 	}
 	return &date{
@@ -76,6 +80,14 @@ func cd2Date(cd civil.Date, formatWithDashes bool) (Date, error) {
 		day:              cd.Day,
 		formatWithDashes: formatWithDashes,
 	}, nil
+}
+
+func date2Civil(d *date) civil.Date {
+	return civil.Date{
+		Year:  d.year,
+		Month: gotime.Month(d.month),
+		Day:   d.day,
+	}
 }
 
 func (d *date) ToString() string {
@@ -99,15 +111,21 @@ func (d *date) Day() int {
 }
 
 func (d *date) Weekday() int {
-	x := int(civil.Date{
-		Year:  d.year,
-		Month: gotime.Month(d.month),
-		Day:   d.day,
-	}.In(gotime.UTC).Weekday())
+	x := int(date2Civil(d).In(gotime.UTC).Weekday())
 	if x == 0 {
 		return 7
 	}
 	return x
+}
+
+func (d *date) Quarter() int {
+	quarter := math.Ceil(float64(d.Month()) / 3)
+	return int(quarter)
+}
+
+func (d *date) WeekNumber() int {
+	_, week := date2Civil(d).In(gotime.UTC).ISOWeek()
+	return week
 }
 
 func (d *date) IsEqualTo(otherDate Date) bool {
@@ -124,21 +142,9 @@ func (d *date) IsAfterOrEqual(otherDate Date) bool {
 	return d.Day() >= otherDate.Day()
 }
 
-func (d *date) Hash() DateHash {
-	hash := DateHash(0)                  // bit layout: ...YYYYYYYYYMMMMDDDDD
-	hash = hash | DateHash(d.Day())<<0   // needs 5 bits max
-	hash = hash | DateHash(d.Month())<<5 // needs 4 bits max
-	hash = hash | DateHash(d.Year())<<9
-	return hash
-}
-
 func (d *date) PlusDays(dayIncrement int) Date {
-	cd := civil.Date{
-		Year:  d.year,
-		Month: gotime.Month(d.month),
-		Day:   d.day,
-	}.AddDays(dayIncrement)
-	newDate, err := cd2Date(cd, true)
+	cd := date2Civil(d).AddDays(dayIncrement)
+	newDate, err := civil2Date(cd, true)
 	if err != nil {
 		panic(err)
 	}

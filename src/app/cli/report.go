@@ -1,19 +1,21 @@
 package cli
 
 import (
-	"fmt"
 	. "klog"
 	"klog/app"
 	"klog/app/cli/lib"
+	"klog/app/cli/report"
 	"klog/lib/jotaen/terminalformat"
 	"klog/service"
+	"strings"
 )
 
 type Report struct {
+	AggregateBy string `name:"by" help:"Aggregate by different categories (day, week, month, quarter, year)" enum:"DAY,day,d,WEEK,week,w,MONTH,month,m,QUARTER,quarter,q,YEAR,year,y,"`
+	Fill        bool   `name:"fill" short:"f" help:"Fill the gaps and show consecutive stream of days"`
 	lib.DiffArgs
 	lib.FilterArgs
 	lib.WarnArgs
-	Fill bool `name:"fill" short:"f" help:"Fill the gaps and show consecutive stream of days"`
 	lib.NowArgs
 	lib.NoStyleArgs
 	lib.InputFilesArgs
@@ -30,58 +32,50 @@ func (opt *Report) Run(ctx app.Context) error {
 	}
 	now := ctx.Now()
 	records = opt.ApplyFilter(now, records)
+	records = service.Sort(records, true)
+	aggregator := opt.findAggregator()
+	recordGroups, dates := groupByDate(aggregator.DateHash, records)
+	if opt.Fill {
+		dates = allDatesRange(records[0].Date(), records[len(records)-1].Date())
+	}
+
+	// Table setup
 	numberOfValueColumns := func() int {
 		if opt.Diff {
 			return 3
 		}
 		return 1
 	}()
-	numberOfColumns := 4 + numberOfValueColumns
-	records = service.Sort(records, true)
-	table := terminalformat.NewTable(numberOfColumns, " ")
-	table.
-		CellL("    ").   // 2020
-		CellL("   ").    // Dec
-		CellL("      "). // Sun
-		CellR("   ").    // 17.
-		CellR("   Total")
+	table := terminalformat.NewTable(
+		aggregator.NumberOfPrefixColumns()+numberOfValueColumns,
+		" ",
+	)
+
+	// Header
+	aggregator.OnHeaderPrefix(table)
+	table.CellR("   Total")
 	if opt.Diff {
 		table.CellR("   Should").CellR("    Diff")
 	}
-	recordGroups, dates := groupByDate(records)
-	y := -1
-	m := -1
-	if opt.Fill {
-		dates = allDatesRange(records[0].Date(), records[len(records)-1].Date())
-	}
+
+	// Rows
+	hashesAlreadyProcessed := make(map[report.Hash]bool)
 	for _, date := range dates {
-		// Year
-		if date.Year() != y {
-			m = -1 // force month to be recalculated
-			table.CellR(fmt.Sprint(date.Year()))
-			y = date.Year()
-		} else {
-			table.Skip(1)
+		hash := aggregator.DateHash(date)
+		if hashesAlreadyProcessed[hash] {
+			continue
 		}
-
-		// Month
-		if date.Month() != m {
-			m = date.Month()
-			table.CellR(lib.PrettyMonth(m)[:3])
-		} else {
-			table.Skip(1)
-		}
-
-		// Day
-		table.CellR(lib.PrettyDay(date.Weekday())[:3]).CellR(fmt.Sprintf("%2v.", date.Day()))
-
-		rs := recordGroups[date.Hash()]
+		hashesAlreadyProcessed[hash] = true
+		aggregator.OnRowPrefix(table, date)
+		rs := recordGroups[hash]
 		if len(rs) == 0 {
 			table.Skip(numberOfValueColumns)
 			continue
 		}
+
 		total := opt.NowArgs.Total(now, rs...)
 		table.CellR(ctx.Serialiser().Duration(total))
+
 		if opt.Diff {
 			should := service.ShouldTotalSum(rs...)
 			diff := service.Diff(should, total)
@@ -90,15 +84,15 @@ func (opt *Report) Run(ctx app.Context) error {
 	}
 
 	// Line
-	table.Skip(4).Fill("=")
+	table.Skip(aggregator.NumberOfPrefixColumns()).Fill("=")
 	if opt.Diff {
 		table.Fill("=").Fill("=")
 	}
 	ctx.Print("\n")
 	grandTotal := opt.NowArgs.Total(now, records...)
 
-	// Totals
-	table.Skip(4)
+	// Footer
+	table.Skip(aggregator.NumberOfPrefixColumns())
 	table.CellR(ctx.Serialiser().Duration(grandTotal))
 	if opt.Diff {
 		grandShould := service.ShouldTotalSum(records...)
@@ -109,6 +103,28 @@ func (opt *Report) Run(ctx app.Context) error {
 	table.Collect(ctx.Print)
 	ctx.Print(opt.WarnArgs.ToString(now, records))
 	return nil
+}
+
+func (opt *Report) findAggregator() report.Aggregator {
+	category := (func() string {
+		if opt.AggregateBy == "" {
+			return "d"
+		} else {
+			return strings.ToLower(opt.AggregateBy[:1])
+		}
+	})()
+	switch category {
+	case "y":
+		return report.NewYearAggregator()
+	case "q":
+		return report.NewQuarterAggregator()
+	case "m":
+		return report.NewMonthAggregator()
+	case "w":
+		return report.NewWeekAggregator()
+	default: // "d"
+		return report.NewDayAggregator()
+	}
 }
 
 func allDatesRange(from Date, to Date) []Date {
@@ -123,11 +139,11 @@ func allDatesRange(from Date, to Date) []Date {
 	return result
 }
 
-func groupByDate(rs []Record) (map[DateHash][]Record, []Date) {
-	days := make(map[DateHash][]Record, len(rs))
+func groupByDate(hashProvider func(Date) report.Hash, rs []Record) (map[report.Hash][]Record, []Date) {
+	days := make(map[report.Hash][]Record, len(rs))
 	var order []Date
 	for _, r := range rs {
-		h := r.Date().Hash()
+		h := hashProvider(r.Date())
 		if _, ok := days[h]; !ok {
 			days[h] = []Record{}
 			order = append(order, r.Date())

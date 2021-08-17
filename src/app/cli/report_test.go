@@ -13,7 +13,7 @@ func TestReportOfEmptyInput(t *testing.T) {
 	assert.Equal(t, "", state.printBuffer)
 }
 
-func TestReportOfRecords(t *testing.T) {
+func TestDayReportOfRecords(t *testing.T) {
 	/*
 		Aspects tested:
 		- Multiple records per date unified into one item
@@ -57,7 +57,7 @@ func TestReportOfRecords(t *testing.T) {
 `, state.printBuffer)
 }
 
-func TestReportConsecutive(t *testing.T) {
+func TestDayReportConsecutive(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 2020-09-29
 	1h
@@ -81,7 +81,7 @@ func TestReportConsecutive(t *testing.T) {
 `, state.printBuffer)
 }
 
-func TestReportWithDiff(t *testing.T) {
+func TestDayReportWithDiff(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 2018-07-07 (8h!)
 	8h
@@ -102,5 +102,115 @@ func TestReportWithDiff(t *testing.T) {
             Mon  9.    5h20m    2h19m!    +3h1m
                     ======== ========= ========
                       15h20m   15h49m!     -29m
+`, state.printBuffer)
+}
+
+func TestWeekReport(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+2018-03-02 (8h!)
+	8h
+
+2018-03-10 (5h30m!)
+	2h
+
+2018-03-23 (2h!)
+	5h20m
+
+2018-04-01 (19m!)
+`)._Run((&Report{AggregateBy: "week", DiffArgs: lib.DiffArgs{Diff: true}, Fill: true}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+                 Total    Should     Diff
+2018  Week  9       8h       8h!       0m
+      Week 10       2h    5h30m!   -3h30m
+      Week 11                            
+      Week 12    5h20m       2h!   +3h20m
+      Week 13       0m      19m!     -19m
+              ======== ========= ========
+                15h20m   15h49m!     -29m
+`, state.printBuffer)
+}
+
+func TestQuarterReport(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+2018-02-02 (8h!)
+	8h
+
+2018-04-10 (5h30m!)
+	2h
+
+2018-05-23 (2h!)
+	5h20m
+
+2019-01-01 (19m!)
+`)._Run((&Report{AggregateBy: "quarter", DiffArgs: lib.DiffArgs{Diff: true}, Fill: true}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+           Total    Should     Diff
+2018 Q1       8h       8h!       0m
+     Q2    7h20m    7h30m!     -10m
+     Q3                            
+     Q4                            
+2019 Q1       0m      19m!     -19m
+        ======== ========= ========
+          15h20m   15h49m!     -29m
+`, state.printBuffer)
+}
+
+func TestMonthReport(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+2018-02-02 (8h!)
+	8h
+
+2018-04-10 (5h30m!)
+	2h
+
+2018-05-23 (2h!)
+	5h20m
+
+2019-01-01 (19m!)
+`)._Run((&Report{AggregateBy: "month", DiffArgs: lib.DiffArgs{Diff: true}, Fill: true}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+            Total    Should     Diff
+2018 Feb       8h       8h!       0m
+     Mar                            
+     Apr       2h    5h30m!   -3h30m
+     May    5h20m       2h!   +3h20m
+     Jun                            
+     Jul                            
+     Aug                            
+     Sep                            
+     Oct                            
+     Nov                            
+     Dec                            
+2019 Jan       0m      19m!     -19m
+         ======== ========= ========
+           15h20m   15h49m!     -29m
+`, state.printBuffer)
+}
+
+func TestYearReport(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+2016-02-02 (8h!)
+	8h
+
+2018-04-10 (5h30m!)
+	2h
+
+2018-05-23 (2h!)
+	5h20m
+
+2019-01-01 (19m!)
+`)._Run((&Report{AggregateBy: "year", DiffArgs: lib.DiffArgs{Diff: true}, Fill: true}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+        Total    Should     Diff
+2016       8h       8h!       0m
+2017                            
+2018    7h20m    7h30m!     -10m
+2019       0m      19m!     -19m
+     ======== ========= ========
+       15h20m   15h49m!     -29m
 `, state.printBuffer)
 }
