@@ -6,6 +6,7 @@ import (
 	"klog/parser"
 	"klog/service"
 	"os"
+	"strings"
 	gotime "time"
 )
 
@@ -126,7 +127,7 @@ type QuietArgs struct {
 }
 
 type SortArgs struct {
-	Sort string `name:"sort" help:"Sort output by date (ASC or DESC)" enum:"ASC,DESC,"`
+	Sort string `name:"sort" help:"Sort output by date (ASC or DESC)" enum:"ASC,DESC,asc,desc,"`
 }
 
 func (args *SortArgs) ApplySort(rs []Record) []Record {
@@ -134,7 +135,7 @@ func (args *SortArgs) ApplySort(rs []Record) []Record {
 		return rs
 	}
 	startWithOldest := false
-	if args.Sort == "ASC" {
+	if strings.ToLower(args.Sort) == "asc" {
 		startWithOldest = true
 	}
 	return service.Sort(rs, startWithOldest)
