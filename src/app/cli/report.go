@@ -11,7 +11,7 @@ import (
 )
 
 type Report struct {
-	AggregateBy string `name:"by" default:"day" help:"Aggregate by different categories (day, week, month, quarter, year)" enum:"DAY,day,d,WEEK,week,w,MONTH,month,m,QUARTER,quarter,q,YEAR,year,y"`
+	AggregateBy string `name:"by" help:"Aggregate by different categories (day, week, month, quarter, year)" enum:"DAY,day,d,WEEK,week,w,MONTH,month,m,QUARTER,quarter,q,YEAR,year,y,"`
 	Fill        bool   `name:"fill" short:"f" help:"Fill the gaps and show consecutive stream of days"`
 	lib.DiffArgs
 	lib.FilterArgs
@@ -106,7 +106,14 @@ func (opt *Report) Run(ctx app.Context) error {
 }
 
 func (opt *Report) findAggregator() report.Aggregator {
-	switch strings.ToLower(opt.AggregateBy[:1]) {
+	category := (func() string {
+		if opt.AggregateBy == "" {
+			return "d"
+		} else {
+			return strings.ToLower(opt.AggregateBy[:1])
+		}
+	})()
+	switch category {
 	case "y":
 		return report.NewYearAggregator()
 	case "q":
