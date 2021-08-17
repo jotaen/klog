@@ -28,13 +28,21 @@ func TestPlusDaysAccountsForLeapYear(t *testing.T) {
 }
 
 func TestDetectsUnrepresentableDates(t *testing.T) {
-	invalidMonth, err := NewDate(2005, 13, 15)
-	assert.Nil(t, invalidMonth)
-	assert.EqualError(t, err, "UNREPRESENTABLE_DATE")
-
-	invalidDay, err := NewDate(2005, 2, 30)
-	assert.Nil(t, invalidDay)
-	assert.EqualError(t, err, "UNREPRESENTABLE_DATE")
+	for _, dateProvider := range []func() (Date, error){
+		func() (Date, error) { return NewDate(2005, 13, 15) }, // Month too large
+		func() (Date, error) { return NewDate(2005, 0, 15) },  // Month too small
+		func() (Date, error) { return NewDate(2005, -1, 15) }, // Month too small
+		func() (Date, error) { return NewDate(2005, 1, 32) },  // Day too big
+		func() (Date, error) { return NewDate(2005, 2, 30) },  // Day too big
+		func() (Date, error) { return NewDate(2005, 2, 0) },   // Day too small
+		func() (Date, error) { return NewDate(2005, 2, -1) },  // Day too small
+		func() (Date, error) { return NewDate(10000, 2, 30) }, // Year too big
+		func() (Date, error) { return NewDate(-1, 2, 30) },    // Year too small
+	} {
+		invalidDate, err := dateProvider()
+		assert.Nil(t, invalidDate)
+		assert.EqualError(t, err, "UNREPRESENTABLE_DATE")
+	}
 }
 
 func TestSerialiseDate(t *testing.T) {
