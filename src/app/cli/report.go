@@ -3,14 +3,15 @@ package cli
 import (
 	. "klog"
 	"klog/app"
-	"klog/app/cli/aggregators"
 	"klog/app/cli/lib"
+	"klog/app/cli/report"
 	"klog/lib/jotaen/terminalformat"
 	"klog/service"
+	"strings"
 )
 
 type Report struct {
-	AggregateBy string `name:"by" default:"day" help:"Aggregate by different categories" enum:"DAY,day,WEEK,week"`
+	AggregateBy string `name:"by" default:"day" help:"Aggregate by different categories (day, week, month, quarter, year)" enum:"DAY,day,d,WEEK,week,w,MONTH,month,m,QUARTER,quarter,q,YEAR,year,y"`
 	Fill        bool   `name:"fill" short:"f" help:"Fill the gaps and show consecutive stream of days"`
 	lib.DiffArgs
 	lib.FilterArgs
@@ -58,24 +59,23 @@ func (opt *Report) Run(ctx app.Context) error {
 	}
 
 	// Rows
-	rowsSeen := make(map[report.Hash]bool)
+	hashesAlreadyProcessed := make(map[report.Hash]bool)
 	for _, date := range dates {
 		hash := aggregator.DateHash(date)
-		if rowsSeen[hash] {
+		if hashesAlreadyProcessed[hash] {
 			continue
 		}
-		rowsSeen[hash] = true
+		hashesAlreadyProcessed[hash] = true
 		aggregator.OnRowPrefix(table, date)
 		rs := recordGroups[hash]
 		if len(rs) == 0 {
 			table.Skip(numberOfValueColumns)
 			continue
 		}
-		// Total
+
 		total := opt.NowArgs.Total(now, rs...)
 		table.CellR(ctx.Serialiser().Duration(total))
 
-		// Should/Diff
 		if opt.Diff {
 			should := service.ShouldTotalSum(rs...)
 			diff := service.Diff(should, total)
@@ -106,11 +106,18 @@ func (opt *Report) Run(ctx app.Context) error {
 }
 
 func (opt *Report) findAggregator() report.Aggregator {
-	switch opt.AggregateBy {
-	case "week":
+	switch strings.ToLower(opt.AggregateBy[:1]) {
+	case "y":
+		return report.NewYearAggregator()
+	case "q":
+		return report.NewQuarterAggregator()
+	case "m":
+		return report.NewMonthAggregator()
+	case "w":
 		return report.NewWeekAggregator()
+	default: // "d"
+		return report.NewDayAggregator()
 	}
-	return report.NewDayAggregator()
 }
 
 func allDatesRange(from Date, to Date) []Date {
