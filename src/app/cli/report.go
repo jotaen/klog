@@ -104,7 +104,7 @@ func (opt *Report) aggregateByDay(serialiser *parser.Serialiser, now gotime.Time
 		table.CellR(lib.PrettyDay(date.Weekday())[:3]).CellR(fmt.Sprintf("%2v.", date.Day()))
 
 		// Total
-		rs := recordGroups[date.Hash()]
+		rs := recordGroups[service.NewDayHash(date)]
 		if len(rs) == 0 {
 			table.Skip(numberOfValueColumns)
 			continue
@@ -134,11 +134,11 @@ func allDatesRange(from Date, to Date) []Date {
 	return result
 }
 
-func groupByDate(rs []Record) (map[DateHash][]Record, []Date) {
-	days := make(map[DateHash][]Record, len(rs))
+func groupByDate(rs []Record) (map[service.DayHash][]Record, []Date) {
+	days := make(map[service.DayHash][]Record, len(rs))
 	var order []Date
 	for _, r := range rs {
-		h := r.Date().Hash()
+		h := service.NewDayHash(r.Date())
 		if _, ok := days[h]; !ok {
 			days[h] = []Record{}
 			order = append(order, r.Date())

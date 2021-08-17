@@ -18,7 +18,7 @@ func Filter(rs []Record, o FilterQry) []Record {
 	dates := newDateSet(o.Dates)
 	var records []Record
 	for _, r := range rs {
-		if len(dates) > 0 && !dates[r.Date().Hash()] {
+		if len(dates) > 0 && !dates[NewDayHash(r.Date())] {
 			continue
 		}
 		if o.BeforeOrEqual != nil && !o.BeforeOrEqual.IsAfterOrEqual(r.Date()) {
@@ -107,10 +107,10 @@ func EntryTagLookup(rs ...Record) (map[Tag][]Entry, map[Entry]TagSet) {
 	return entriesByTag, tagsByEntry
 }
 
-func newDateSet(ds []Date) map[DateHash]bool {
-	dict := make(map[DateHash]bool, len(ds))
+func newDateSet(ds []Date) map[DayHash]bool {
+	dict := make(map[DayHash]bool, len(ds))
 	for _, d := range ds {
-		dict[d.Hash()] = true
+		dict[NewDayHash(d)] = true
 	}
 	return dict
 }
