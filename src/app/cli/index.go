@@ -2,7 +2,7 @@ package cli
 
 import (
 	"errors"
-	"klog/app"
+	"github.com/jotaen/klog/src/app"
 )
 
 type Cli struct {

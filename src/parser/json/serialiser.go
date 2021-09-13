@@ -3,9 +3,9 @@ package json
 import (
 	"bytes"
 	"encoding/json"
-	. "klog"
-	"klog/parser/parsing"
-	"klog/service"
+	. "github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/parser/parsing"
+	"github.com/jotaen/klog/src/service"
 	"strings"
 )
 

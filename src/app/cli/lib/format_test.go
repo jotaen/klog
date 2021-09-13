@@ -2,10 +2,10 @@ package lib
 
 import (
 	"errors"
+	"github.com/jotaen/klog/src/app"
+	"github.com/jotaen/klog/src/lib/jotaen/terminalformat"
+	"github.com/jotaen/klog/src/parser/parsing"
 	"github.com/stretchr/testify/assert"
-	"klog/app"
-	"klog/lib/jotaen/terminalformat"
-	"klog/parser/parsing"
 	"testing"
 )
 

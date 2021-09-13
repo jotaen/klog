@@ -2,8 +2,8 @@ package parser
 
 import (
 	"errors"
-	. "klog"
-	"klog/parser/parsing"
+	. "github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/parser/parsing"
 	"regexp"
 )
 

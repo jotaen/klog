@@ -1,7 +1,7 @@
 package parser
 
 import (
-	. "klog/parser/parsing"
+	. "github.com/jotaen/klog/src/parser/parsing"
 )
 
 func ErrorInvalidDate(e Error) Error {

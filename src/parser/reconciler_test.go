@@ -1,10 +1,10 @@
 package parser
 
 import (
+	. "github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/parser/parsing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	. "klog"
-	"klog/parser/parsing"
 	"testing"
 )
 

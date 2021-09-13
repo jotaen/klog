@@ -1,11 +1,11 @@
 package cli
 
 import (
-	. "klog"
-	"klog/app"
-	"klog/app/cli/lib"
-	"klog/parser"
-	"klog/parser/parsing"
+	. "github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/app"
+	"github.com/jotaen/klog/src/app/cli/lib"
+	"github.com/jotaen/klog/src/parser"
+	"github.com/jotaen/klog/src/parser/parsing"
 )
 
 type Create struct {

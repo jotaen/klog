@@ -2,9 +2,9 @@ package app
 
 import (
 	"fmt"
-	. "klog"
-	"klog/parser"
-	"klog/parser/parsing"
+	. "github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/parser"
+	"github.com/jotaen/klog/src/parser/parsing"
 	"os"
 	"os/exec"
 	"os/user"

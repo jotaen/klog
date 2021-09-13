@@ -2,10 +2,10 @@ package mac_widget
 
 import (
 	"fmt"
-	"klog"
-	"klog/app"
-	"klog/lib/caseymrm/menuet"
-	"klog/service"
+	"github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/app"
+	"github.com/jotaen/klog/src/lib/caseymrm/menuet"
+	"github.com/jotaen/klog/src/service"
 )
 
 var blinker = blinkerT{1}

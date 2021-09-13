@@ -1,4 +1,4 @@
-module klog
+module github.com/jotaen/klog
 
 go 1.17
 

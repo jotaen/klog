@@ -1,7 +1,7 @@
 package parser
 
 import (
-	. "klog"
+	. "github.com/jotaen/klog/src"
 	"strings"
 )
 

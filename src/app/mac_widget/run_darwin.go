@@ -1,9 +1,9 @@
 package mac_widget
 
 import (
-	"klog/app"
-	"klog/lib/caseymrm/menuet"
-	"klog/parser"
+	"github.com/jotaen/klog/src/app"
+	"github.com/jotaen/klog/src/lib/caseymrm/menuet"
+	"github.com/jotaen/klog/src/parser"
 	"os"
 	"os/exec"
 	"time"

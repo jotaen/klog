@@ -1,7 +1,7 @@
 package mac_widget
 
 import (
-	"klog/app"
+	"github.com/jotaen/klog/src/app"
 	"os"
 )
 

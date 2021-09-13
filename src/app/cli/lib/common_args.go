@@ -1,10 +1,10 @@
 package lib
 
 import (
-	. "klog"
-	"klog/app"
-	"klog/parser"
-	"klog/service"
+	. "github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/app"
+	"github.com/jotaen/klog/src/parser"
+	"github.com/jotaen/klog/src/service"
 	"os"
 	"strings"
 	gotime "time"

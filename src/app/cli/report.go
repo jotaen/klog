@@ -1,12 +1,12 @@
 package cli
 
 import (
-	. "klog"
-	"klog/app"
-	"klog/app/cli/lib"
-	"klog/app/cli/report"
-	"klog/lib/jotaen/terminalformat"
-	"klog/service"
+	. "github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/app"
+	"github.com/jotaen/klog/src/app/cli/lib"
+	"github.com/jotaen/klog/src/app/cli/report"
+	"github.com/jotaen/klog/src/lib/jotaen/terminalformat"
+	"github.com/jotaen/klog/src/service"
 	"strings"
 )
 

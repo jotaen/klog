@@ -1,8 +1,8 @@
 package report
 
 import (
-	. "klog"
-	"klog/lib/jotaen/terminalformat"
+	. "github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/lib/jotaen/terminalformat"
 )
 
 type Hash uint32
