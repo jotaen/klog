@@ -36,6 +36,14 @@ go build src/app/cli/main/klog.go
 This automatically resolves the dependencies and compiles the source code into an
 executable for your platform.
 
+In order to re-use klog in your own application, you have the following options:
+- Execute `klog json` as subprocess and process the output.
+  (Run `klog json --help` to explore all available options.)
+- If your application is written in Go, you can add this package as code dependency.
+  Please keep in mind that there are no separate releases of the source code itself,
+  so the APIs and code structure might change anytime. Therefore, it’s recommended
+  to specify the commit hash when adding the dependency.
+
 ## About
 
 klog is free and open-source software distributed under the [MIT license](LICENSE.txt).
