@@ -1,7 +1,7 @@
 package service
 
 import (
-	. "klog"
+	. "github.com/jotaen/klog/src"
 	"time"
 )
 

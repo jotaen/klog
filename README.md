@@ -26,15 +26,23 @@ version numbers of both are independent of each other.
 ## Build klog from sources
 
 As prerequisite, you need to have the [Go compiler](https://golang.org/doc/install).
-Please check the [`src/go.mod`](src/go.mod) file to see what version klog requires. 
-In order to build the project, navigate to the [`src/`](src) folder and run:
+Please check the [`go.mod`](go.mod) file to see what version klog requires. 
+In order to build the project, run:
 
 ```
-go build app/cli/main/klog.go
+go build src/app/cli/main/klog.go
 ```
 
 This automatically resolves the dependencies and compiles the source code into an
 executable for your platform.
+
+In order to re-use klog in your own application, you have the following options:
+- Execute `klog json` as subprocess and process the output.
+  (Run `klog json --help` to explore all available options.)
+- If your application is written in Go, you can add this package as code dependency.
+  Please keep in mind that there are no separate releases of the source code itself,
+  so the APIs and code structure might change anytime. Therefore, it’s recommended
+  to specify the commit hash when adding the dependency.
 
 ## About
 

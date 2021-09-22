@@ -1,10 +1,10 @@
 package json
 
 import (
+	. "github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/parser"
+	"github.com/jotaen/klog/src/parser/parsing"
 	"github.com/stretchr/testify/assert"
-	. "klog"
-	"klog/parser"
-	"klog/parser/parsing"
 	"testing"
 )
 

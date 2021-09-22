@@ -1,9 +1,9 @@
 package mac_widget
 
 import (
-	"klog/app"
-	"klog/lib/caseymrm/menuet"
-	"klog/parser"
+	menuet2 "github.com/jotaen/klog/lib/caseymrm/menuet"
+	"github.com/jotaen/klog/src/app"
+	"github.com/jotaen/klog/src/parser"
 	"os"
 	"os/exec"
 	"time"
@@ -28,22 +28,22 @@ func Run(forceRunThroughLaunchAgent bool) {
 		os.Exit(0)
 	}
 
-	menuet.App().SetMenuState(&menuet.MenuState{
+	menuet2.App().SetMenuState(&menuet2.MenuState{
 		Title: "⏱",
 	})
-	menuet.App().Name = "klog widget"
-	menuet.App().Label = "-" // not actually needed, but needs to be set
-	menuet.App().Children = func() []menuet.MenuItem {
+	menuet2.App().Name = "klog widget"
+	menuet2.App().Label = "-" // not actually needed, but needs to be set
+	menuet2.App().Children = func() []menuet2.MenuItem {
 		return render(ctx, &launchAgent)
 	}
 
 	go updateTimer()
-	menuet.App().RunApplication()
+	menuet2.App().RunApplication()
 }
 
 func updateTimer() {
 	for {
 		<-ticker.C
-		menuet.App().MenuChanged()
+		menuet2.App().MenuChanged()
 	}
 }

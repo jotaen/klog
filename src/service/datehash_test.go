@@ -1,8 +1,8 @@
 package service
 
 import (
+	. "github.com/jotaen/klog/src"
 	"github.com/stretchr/testify/assert"
-	. "klog"
 	"testing"
 )
 

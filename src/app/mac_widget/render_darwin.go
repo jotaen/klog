@@ -2,23 +2,23 @@ package mac_widget
 
 import (
 	"fmt"
-	"klog"
-	"klog/app"
-	"klog/lib/caseymrm/menuet"
-	"klog/service"
+	menuet2 "github.com/jotaen/klog/lib/caseymrm/menuet"
+	"github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/app"
+	"github.com/jotaen/klog/src/service"
 )
 
 var blinker = blinkerT{1}
 
-func render(ctx app.Context, agent *launchAgent) []menuet.MenuItem {
-	var items []menuet.MenuItem
+func render(ctx app.Context, agent *launchAgent) []menuet2.MenuItem {
+	var items []menuet2.MenuItem
 
-	items = append(items, func() []menuet.MenuItem {
+	items = append(items, func() []menuet2.MenuItem {
 		file, err := ctx.Bookmark()
 		if err != nil {
-			return []menuet.MenuItem{{
+			return []menuet2.MenuItem{{
 				Text:       "No bookmark specified",
-				FontWeight: menuet.WeightBold,
+				FontWeight: menuet2.WeightBold,
 			}, {
 				Text: "Bookmark a file by running:",
 			}, {
@@ -27,7 +27,7 @@ func render(ctx app.Context, agent *launchAgent) []menuet.MenuItem {
 		}
 		rs, pErr := ctx.ReadInputs()
 		if pErr != nil {
-			return []menuet.MenuItem{{
+			return []menuet2.MenuItem{{
 				Text: file.Name,
 			}, {
 				Text: "Error: file cannot be parsed",
@@ -36,12 +36,12 @@ func render(ctx app.Context, agent *launchAgent) []menuet.MenuItem {
 		return renderRecords(ctx, rs, file)
 	}()...)
 
-	items = append(items, menuet.MenuItem{
-		Type: menuet.Separator,
-	}, menuet.MenuItem{
+	items = append(items, menuet2.MenuItem{
+		Type: menuet2.Separator,
+	}, menuet2.MenuItem{
 		Text: "Settings",
-		Children: func() []menuet.MenuItem {
-			return []menuet.MenuItem{{
+		Children: func() []menuet2.MenuItem {
+			return []menuet2.MenuItem{{
 				Text:  "Launch widget on login",
 				State: agent.isActive(),
 				Clicked: func() {
@@ -62,8 +62,8 @@ func render(ctx app.Context, agent *launchAgent) []menuet.MenuItem {
 	return items
 }
 
-func renderRecords(ctx app.Context, records []klog.Record, file *app.File) []menuet.MenuItem {
-	var items []menuet.MenuItem
+func renderRecords(ctx app.Context, records []klog.Record, file *app.File) []menuet2.MenuItem {
+	var items []menuet2.MenuItem
 
 	today := service.Filter(records, service.FilterQry{Dates: []klog.Date{klog.NewDateFromTime(ctx.Now())}})
 	if today != nil {
@@ -72,14 +72,14 @@ func renderRecords(ctx app.Context, records []klog.Record, file *app.File) []men
 		if isOngoing {
 			indicator = "  " + blinker.blink()
 		}
-		items = append(items, menuet.MenuItem{
+		items = append(items, menuet2.MenuItem{
 			Text: "Today: " + total.ToString() + indicator,
 		})
 	}
 
-	items = append(items, menuet.MenuItem{
+	items = append(items, menuet2.MenuItem{
 		Text: file.Name,
-		Children: func() []menuet.MenuItem {
+		Children: func() []menuet2.MenuItem {
 			total := service.Total(records...)
 			should := service.ShouldTotalSum(records...)
 			diff := service.Diff(should, total)
@@ -87,14 +87,14 @@ func renderRecords(ctx app.Context, records []klog.Record, file *app.File) []men
 			if diff.InMinutes() > 0 {
 				plus = "+"
 			}
-			items := []menuet.MenuItem{
+			items := []menuet2.MenuItem{
 				{
 					Text: "Show in Finder...",
 					Clicked: func() {
 						_ = ctx.OpenInFileBrowser(file.Location)
 					},
 				},
-				{Type: menuet.Separator},
+				{Type: menuet2.Separator},
 				{Text: "Total: " + total.ToString()},
 				{Text: "Should: " + should.ToString()},
 				{Text: "Diff: " + plus + diff.ToString()},
@@ -102,13 +102,13 @@ func renderRecords(ctx app.Context, records []klog.Record, file *app.File) []men
 			showMax := 7
 			for i, r := range service.Sort(records, false) {
 				if i == 0 {
-					items = append(items, menuet.MenuItem{Type: menuet.Separator})
+					items = append(items, menuet2.MenuItem{Type: menuet2.Separator})
 				}
 				if i == showMax {
-					items = append(items, menuet.MenuItem{Text: fmt.Sprintf("(%d more)", len(records)-showMax)})
+					items = append(items, menuet2.MenuItem{Text: fmt.Sprintf("(%d more)", len(records)-showMax)})
 					break
 				}
-				items = append(items, menuet.MenuItem{Text: r.Date().ToString() + ": " + service.Total(r).ToString()})
+				items = append(items, menuet2.MenuItem{Text: r.Date().ToString() + ": " + service.Total(r).ToString()})
 			}
 			return items
 		},

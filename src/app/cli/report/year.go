@@ -2,9 +2,9 @@ package report
 
 import (
 	"fmt"
-	. "klog"
-	"klog/lib/jotaen/terminalformat"
-	"klog/service"
+	"github.com/jotaen/klog/lib/jotaen/terminalformat"
+	. "github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/service"
 )
 
 type yearAggregator struct{}

@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/jotaen/klog/src/app"
+	"github.com/jotaen/klog/src/app/cli/lib"
 	"io"
-	"klog/app"
-	"klog/app/cli/lib"
 	"net/http"
 	"time"
 )

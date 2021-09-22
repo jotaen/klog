@@ -2,9 +2,9 @@ package cli
 
 import (
 	"fmt"
-	"klog/app"
-	"klog/app/cli/lib"
-	"klog/service"
+	"github.com/jotaen/klog/src/app"
+	"github.com/jotaen/klog/src/app/cli/lib"
+	"github.com/jotaen/klog/src/service"
 )
 
 type Total struct {
