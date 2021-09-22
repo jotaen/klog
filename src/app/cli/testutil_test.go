@@ -1,10 +1,10 @@
 package cli
 
 import (
+	"github.com/jotaen/klog/lib/jotaen/terminalformat"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/cli/lib"
-	"github.com/jotaen/klog/src/lib/jotaen/terminalformat"
 	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/parser/parsing"
 	gotime "time"

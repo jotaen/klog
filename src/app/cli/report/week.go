@@ -2,8 +2,8 @@ package report
 
 import (
 	"fmt"
+	"github.com/jotaen/klog/lib/jotaen/terminalformat"
 	. "github.com/jotaen/klog/src"
-	"github.com/jotaen/klog/src/lib/jotaen/terminalformat"
 	"github.com/jotaen/klog/src/service"
 )
 
