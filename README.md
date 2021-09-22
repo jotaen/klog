@@ -26,11 +26,11 @@ version numbers of both are independent of each other.
 ## Build klog from sources
 
 As prerequisite, you need to have the [Go compiler](https://golang.org/doc/install).
-Please check the [`src/go.mod`](go.mod) file to see what version klog requires. 
-In order to build the project, navigate to the [`src/`](src) folder and run:
+Please check the [`go.mod`](go.mod) file to see what version klog requires. 
+In order to build the project, run:
 
 ```
-go build app/cli/main/klog.go
+go build src/app/cli/main/klog.go
 ```
 
 This automatically resolves the dependencies and compiles the source code into an
