@@ -56,7 +56,7 @@ There are two places where *summary* text MAY appear in *records*:
 - Underneath the *date*:
   In this case the *summary* is considered to be associated with the entire *record*.
   The *summary* MAY span multiple lines.
-  Each of its lines MUST NOT start with “whitespace”.
+  Each of its lines MUST NOT start with a “space” or a “tab”.
 - Behind *entries*:
   In this case the *summary* is only considered to be referring to the corresponding *entry*.
   The *summary* text follows the *entry* on the same line,
@@ -219,9 +219,8 @@ and MUST NOT be combined into a single *record*.
 
 - “space”: The character ` ` (U+0020)
 - “tab”: The tab character (U+0009), escape sequence `\t`
-- “whitespace”: A “space”, a “tab”, or another character that appears blank
+- “blank line”: A line that only contains “spaces” or “tabs”
 - “parenthesis”: The opening and closing parentheses `(` and `)` (U+0028 and U+0029)
-- “blank line”: A line that only contains “whitespace” characters
 - “letter”: A character as defined by the Unicode letter category, regex `\p{L}`
 - “digit”: Any of 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 - “integer”: An unsigned number without fractional component
