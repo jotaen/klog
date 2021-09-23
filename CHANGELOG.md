@@ -5,6 +5,7 @@
   to aggregate the data by day, week, month, quarter or year
 - **[ FEATURE ]** Allow value of `--sort` flag to be uppercase
   or lowercase (`ASC`/`asc` or `DESC`/`desc`)
+- **[ FEATURE ]** Support `klog --version` in addition to `klog version`
 
 ## v2.6
 - **[ INFO ]** Release first version of the file format
