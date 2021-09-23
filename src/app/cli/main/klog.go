@@ -23,11 +23,7 @@ func main() {
 	cliApp := kong.Parse(
 		&cli.Cli{},
 		kong.Name("klog"),
-		kong.Description(
-			"klog time tracking: command line app for interacting with `.klg` files.\n\n"+
-				"Run the --help flag on subcommands to learn how they work.\n"+
-				"Find a comprehensive documentation at https://klog.jotaen.net",
-		),
+		kong.Description(cli.DESCRIPTION),
 		func() kong.Option {
 			datePrototype, _ := klog.NewDate(1, 1, 1)
 			return kong.TypeMapper(reflect.TypeOf(&datePrototype).Elem(), dateDecoder())
