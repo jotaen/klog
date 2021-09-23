@@ -8,6 +8,8 @@ import (
 	"syscall"
 )
 
+var POTENTIAL_EDITORS = []string{"notepad"}
+
 func flagAsHidden(path string) {
 	winFileName, err := syscall.UTF16PtrFromString(path)
 	if err != nil {
