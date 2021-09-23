@@ -6,6 +6,8 @@
 - **[ FEATURE ]** Allow value of `--sort` flag to be uppercase
   or lowercase (`ASC`/`asc` or `DESC`/`desc`)
 - **[ FEATURE ]** Support `klog --version` in addition to `klog version`
+- **[ FEATURE ]** For `klog bookmark edit`, if `$EDITOR` is not set,
+  attempt to open common editors
 
 ## v2.6
 - **[ INFO ]** Release first version of the file format
