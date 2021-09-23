@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"klog/app"
+	"github.com/jotaen/klog/src/app"
 )
 
 const DESCRIPTION = "klog: command line app for time tracking with plain-text files.\n" +
