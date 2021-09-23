@@ -2,7 +2,7 @@ package lib
 
 import (
 	"errors"
-	"klog"
+	"github.com/jotaen/klog/src"
 	"regexp"
 	"strconv"
 	"strings"

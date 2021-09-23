@@ -1,10 +1,10 @@
 package cli
 
 import (
-	"klog/app"
-	"klog/app/cli/lib"
-	"klog/parser/json"
-	"klog/parser/parsing"
+	"github.com/jotaen/klog/src/app"
+	"github.com/jotaen/klog/src/app/cli/lib"
+	"github.com/jotaen/klog/src/parser/json"
+	"github.com/jotaen/klog/src/parser/parsing"
 )
 
 type Json struct {

@@ -2,10 +2,10 @@ package report
 
 import (
 	"fmt"
-	. "klog"
-	"klog/app/cli/lib"
-	"klog/lib/jotaen/terminalformat"
-	"klog/service"
+	"github.com/jotaen/klog/lib/jotaen/terminalformat"
+	. "github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/app/cli/lib"
+	"github.com/jotaen/klog/src/service"
 )
 
 type monthAggregator struct {

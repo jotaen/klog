@@ -2,9 +2,9 @@ package app
 
 import (
 	"fmt"
-	. "klog"
-	"klog/parser"
-	"klog/parser/parsing"
+	. "github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/parser"
+	"github.com/jotaen/klog/src/parser/parsing"
 	"os"
 	"os/exec"
 	"os/user"
@@ -303,26 +303,27 @@ func (ctx *context) OpenInFileBrowser(path string) Error {
 }
 
 func (ctx *context) OpenInEditor(path string) Error {
-	editor := os.Getenv("EDITOR")
-	if editor == "" {
-		return NewError(
-			"No default editor set",
-			"Please specify you editor via the $EDITOR environment variable",
-			nil,
-		)
+	hint := "You can specify your preferred editor via the $EDITOR environment variable.\n"
+	preferredEditor := os.Getenv("EDITOR")
+	editors := append([]string{preferredEditor}, POTENTIAL_EDITORS...)
+	for _, editor := range editors {
+		cmd := exec.Command(editor, path)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		err := cmd.Run()
+		if err == nil {
+			if preferredEditor == "" {
+				// Inform the user that they can configure their editor:
+				ctx.Print(hint)
+			}
+			return nil
+		}
 	}
-	cmd := exec.Command(editor, path)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	err := cmd.Run()
-	if err != nil {
-		return NewError(
-			"Cannot open editor",
-			"Tried to run: "+editor+" "+path,
-			err,
-		)
-	}
-	return nil
+	return NewError(
+		"Cannot open any editor",
+		hint,
+		nil,
+	)
 }
 
 func (ctx *context) InstantiateTemplate(templateName string) ([]parsing.Text, Error) {

@@ -5,6 +5,8 @@ package app
 
 import "os"
 
+var POTENTIAL_EDITORS = []string{"vim", "vi", "nano", "pico"}
+
 func flagAsHidden(path string) {
 	// Nothing to do on UNIX
 }

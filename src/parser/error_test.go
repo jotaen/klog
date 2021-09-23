@@ -1,7 +1,7 @@
 package parser
 
 import (
-	. "klog/parser/parsing"
+	. "github.com/jotaen/klog/src/parser/parsing"
 	"reflect"
 	"runtime"
 	"strings"
@@ -16,7 +16,7 @@ type Err struct {
 
 func id(fn interface{}) string {
 	fullyQualifiedName := runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
-	return fullyQualifiedName[strings.Index(fullyQualifiedName, ".")+1:]
+	return fullyQualifiedName[strings.LastIndex(fullyQualifiedName, ".")+1:]
 }
 
 func toErr(e Error) Err {

@@ -2,8 +2,8 @@ package lib
 
 import (
 	"errors"
-	"klog/app"
-	"klog/parser"
+	"github.com/jotaen/klog/src/app"
+	"github.com/jotaen/klog/src/parser"
 )
 
 type ReconcilerChain struct {

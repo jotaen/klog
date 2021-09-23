@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"klog/app"
-	systray "klog/app/mac_widget"
+	"github.com/jotaen/klog/src/app"
+	systray "github.com/jotaen/klog/src/app/mac_widget"
 )
 
 type Widget struct {

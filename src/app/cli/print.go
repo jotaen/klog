@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"klog/app"
-	"klog/app/cli/lib"
+	"github.com/jotaen/klog/src/app"
+	"github.com/jotaen/klog/src/app/cli/lib"
 )
 
 type Print struct {
