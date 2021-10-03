@@ -24,14 +24,18 @@ type BookmarkGet struct {
 }
 
 func (opt *BookmarkGet) Run(ctx app.Context) error {
-	b, err := ctx.Bookmark()
+	bc, err := ctx.ReadBookmarks()
 	if err != nil {
 		return err
+	}
+	defaultBookmark := bc.Default()
+	if defaultBookmark == nil {
+		return newNoBookmarkSetError()
 	}
 	if !opt.Quiet {
 		ctx.Print("Current bookmark: ")
 	}
-	ctx.Print(b.Path + "\n")
+	ctx.Print(defaultBookmark.Target().Path + "\n")
 	return nil
 }
 
@@ -41,7 +45,12 @@ type BookmarkSet struct {
 }
 
 func (args *BookmarkSet) Run(ctx app.Context) error {
-	err := ctx.SetBookmark(args.File)
+	bc, err := ctx.ReadBookmarks()
+	if err != nil {
+		return err
+	}
+	bc.Add(app.NewDefaultBookmark(args.File))
+	err = ctx.SaveBookmarks(bc)
 	if err != nil {
 		return err
 	}
@@ -55,20 +64,38 @@ func (args *BookmarkSet) Run(ctx app.Context) error {
 type BookmarkEdit struct{}
 
 func (args *BookmarkEdit) Run(ctx app.Context) error {
-	b, appErr := ctx.Bookmark()
-	if appErr != nil {
-		return appErr
+	bc, err := ctx.ReadBookmarks()
+	if err != nil {
+		return err
 	}
-	return ctx.OpenInEditor(b.Path)
+	defaultBookmark := bc.Default()
+	if defaultBookmark == nil {
+		return newNoBookmarkSetError()
+	}
+	return ctx.OpenInEditor(defaultBookmark.Target().Path)
 }
 
 type BookmarkUnset struct{}
 
 func (args *BookmarkUnset) Run(ctx app.Context) error {
-	err := ctx.UnsetBookmark()
+	bc, err := ctx.ReadBookmarks()
+	if err != nil {
+		return err
+	}
+	bc.Clear()
+	err = ctx.SaveBookmarks(bc)
 	if err != nil {
 		return err
 	}
 	ctx.Print("Cleared bookmark\n")
 	return nil
+}
+
+func newNoBookmarkSetError() error {
+	return app.NewErrorWithCode(
+		app.NO_BOOKMARK_SET_ERROR,
+		"No bookmark set",
+		"You can set a bookmark by running: klog bookmark set somefile.klg",
+		nil,
+	)
 }

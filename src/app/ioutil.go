@@ -3,7 +3,22 @@ package app
 import (
 	"io"
 	"os"
+	"path/filepath"
 )
+
+type File struct {
+	Name     string
+	Location string
+	Path     string
+}
+
+func NewFile(path string) *File {
+	return &File{
+		Name:     filepath.Base(path),
+		Location: filepath.Dir(path),
+		Path:     path,
+	}
+}
 
 func ReadFile(path string) (string, Error) {
 	contents, err := os.ReadFile(path)

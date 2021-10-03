@@ -11,6 +11,7 @@ import (
 )
 
 func NewTestingContext() TestingContext {
+	bc, _ := app.NewBookmarksCollectionFromJson(``)
 	return TestingContext{
 		State: State{
 			printBuffer:         "",
@@ -20,6 +21,7 @@ func NewTestingContext() TestingContext {
 		records:     nil,
 		parseResult: nil,
 		serialiser:  lib.NewCliSerialiser(),
+		bookmarks:   bc,
 	}
 }
 
@@ -58,6 +60,7 @@ type TestingContext struct {
 	records     []Record
 	parseResult *parser.ParseResult
 	serialiser  *parser.Serialiser
+	bookmarks   app.BookmarksCollection
 }
 
 func (ctx *TestingContext) Print(s string) {
@@ -99,19 +102,12 @@ func (ctx *TestingContext) Now() gotime.Time {
 	return ctx.now
 }
 
-func (ctx *TestingContext) SetBookmark(_ string) app.Error {
-	return nil
+func (ctx *TestingContext) ReadBookmarks() (app.BookmarksCollection, app.Error) {
+	return ctx.bookmarks, nil
 }
 
-func (ctx *TestingContext) Bookmark() (*app.File, app.Error) {
-	return &app.File{
-		Name:     "myfile.klg",
-		Location: "/",
-		Path:     "/myfile.klg",
-	}, nil
-}
-
-func (ctx *TestingContext) UnsetBookmark() app.Error {
+func (ctx *TestingContext) SaveBookmarks(bc app.BookmarksCollection) app.Error {
+	ctx.bookmarks = bc
 	return nil
 }
 

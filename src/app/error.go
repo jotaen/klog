@@ -9,6 +9,7 @@ const (
 	IO_ERROR
 	BOOKMARK_ACCESS_ERROR
 	NO_BOOKMARK_SET_ERROR
+	BOOKMARK_CONFIG_ERROR
 )
 
 func (c Code) ToInt() int {
