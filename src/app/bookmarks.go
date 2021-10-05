@@ -20,13 +20,13 @@ func (n Name) Value() string {
 
 type Bookmark interface {
 	Name() Name
-	Target() *File
+	Target() File
 	IsDefault() bool
 }
 
 type bookmark struct {
 	name   Name
-	target *File
+	target File
 }
 
 func NewBookmark(name string, targetPath string) Bookmark {
@@ -41,7 +41,7 @@ func (b *bookmark) Name() Name {
 	return b.name
 }
 
-func (b *bookmark) Target() *File {
+func (b *bookmark) Target() File {
 	return b.target
 }
 
@@ -128,7 +128,7 @@ func (bc *bookmarksCollection) ToJson() string {
 		return ""
 	}
 	name := bc.Default().Name().Value()
-	path := bc.Default().Target().Path
+	path := bc.Default().Target().Path()
 	bookmarksAsJson := []bookmarkJson{
 		{&name, &path},
 	}

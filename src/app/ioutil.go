@@ -6,18 +6,30 @@ import (
 	"path/filepath"
 )
 
-type File struct {
-	Name     string
-	Location string
-	Path     string
+type File interface {
+	Name() string
+	Location() string
+	Path() string
 }
 
-func NewFile(path string) *File {
-	return &File{
-		Name:     filepath.Base(path),
-		Location: filepath.Dir(path),
-		Path:     path,
-	}
+type file struct {
+	path string
+}
+
+func NewFile(path string) File {
+	return &file{path}
+}
+
+func (f *file) Name() string {
+	return filepath.Base(f.path)
+}
+
+func (f *file) Location() string {
+	return filepath.Dir(f.path)
+}
+
+func (f *file) Path() string {
+	return f.path
 }
 
 func ReadFile(path string) (string, Error) {

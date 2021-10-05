@@ -24,8 +24,8 @@ type Context interface {
 		BuildHash string
 	}
 	ReadInputs(...string) ([]Record, error)
-	ReadFileInput(string) (*parser.ParseResult, *File, error)
-	WriteFile(*File, string) Error
+	ReadFileInput(string) (*parser.ParseResult, File, error)
+	WriteFile(File, string) Error
 	Now() gotime.Time
 	ReadBookmarks() (BookmarksCollection, Error)
 	SaveBookmarks(BookmarksCollection) Error
@@ -128,7 +128,7 @@ func (ctx *context) ReadInputs(fileArgs ...string) ([]Record, error) {
 	return records, nil
 }
 
-func (ctx *context) ReadFileInput(path string) (*parser.ParseResult, *File, error) {
+func (ctx *context) ReadFileInput(path string) (*parser.ParseResult, File, error) {
 	bc, err := ctx.ReadBookmarks()
 	if err != nil {
 		return nil, nil, err
@@ -150,14 +150,14 @@ func (ctx *context) ReadFileInput(path string) (*parser.ParseResult, *File, erro
 	if parserErrors != nil {
 		return nil, nil, parserErrors
 	}
-	return pr, NewFile(target.Path), nil
+	return pr, NewFile(target.Path()), nil
 }
 
-func (ctx *context) WriteFile(target *File, contents string) Error {
+func (ctx *context) WriteFile(target File, contents string) Error {
 	if target == nil {
 		panic("No path specified")
 	}
-	return WriteToFile(target.Path, contents)
+	return WriteToFile(target.Path(), contents)
 }
 
 func (ctx *context) Now() gotime.Time {
@@ -179,7 +179,7 @@ func (ctx *context) initialiseKlogFolder() Error {
 }
 
 func (ctx *context) ReadBookmarks() (BookmarksCollection, Error) {
-	bookmarksDatabase, err := ReadFile(ctx.bookmarkDatabasePath().Path)
+	bookmarksDatabase, err := ReadFile(ctx.bookmarkDatabasePath().Path())
 	if err != nil {
 		// If database doesn’t exist, try to convert from legacy bookmark file.
 		if os.IsNotExist(err.Original()) {
@@ -200,19 +200,15 @@ func (ctx *context) SaveBookmarks(bc BookmarksCollection) Error {
 		return err
 	}
 	_ = os.Remove(ctx.bookmarkLegacySymlinkPath()) // Clean up legacy bookmark file, if exists
-	return WriteToFile(ctx.bookmarkDatabasePath().Path, bc.ToJson())
+	return WriteToFile(ctx.bookmarkDatabasePath().Path(), bc.ToJson())
 }
 
 func (ctx *context) bookmarkLegacySymlinkPath() string {
 	return ctx.KlogFolder() + "bookmark.klg"
 }
 
-func (ctx *context) bookmarkDatabasePath() *File {
-	return &File{
-		"bookmarks.json",
-		ctx.KlogFolder(),
-		ctx.KlogFolder() + "/bookmarks.json",
-	}
+func (ctx *context) bookmarkDatabasePath() File {
+	return NewFile(ctx.KlogFolder() + "/bookmarks.json")
 }
 
 func (ctx *context) OpenInFileBrowser(path string) Error {

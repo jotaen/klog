@@ -29,7 +29,7 @@ func render(ctx app.Context, agent *launchAgent) []menuet2.MenuItem {
 		rs, pErr := ctx.ReadInputs()
 		if pErr != nil {
 			return []menuet2.MenuItem{{
-				Text: defaultBookmark.Target().Name,
+				Text: defaultBookmark.Target().Name(),
 			}, {
 				Text: "Error: file cannot be parsed",
 			}}
@@ -63,7 +63,7 @@ func render(ctx app.Context, agent *launchAgent) []menuet2.MenuItem {
 	return items
 }
 
-func renderRecords(ctx app.Context, records []klog.Record, file *app.File) []menuet2.MenuItem {
+func renderRecords(ctx app.Context, records []klog.Record, file app.File) []menuet2.MenuItem {
 	var items []menuet2.MenuItem
 
 	today := service.Filter(records, service.FilterQry{Dates: []klog.Date{klog.NewDateFromTime(ctx.Now())}})
@@ -79,7 +79,7 @@ func renderRecords(ctx app.Context, records []klog.Record, file *app.File) []men
 	}
 
 	items = append(items, menuet2.MenuItem{
-		Text: file.Name,
+		Text: file.Name(),
 		Children: func() []menuet2.MenuItem {
 			total := service.Total(records...)
 			should := service.ShouldTotalSum(records...)
@@ -92,7 +92,7 @@ func renderRecords(ctx app.Context, records []klog.Record, file *app.File) []men
 				{
 					Text: "Show in Finder...",
 					Clicked: func() {
-						_ = ctx.OpenInFileBrowser(file.Location)
+						_ = ctx.OpenInFileBrowser(file.Location())
 					},
 				},
 				{Type: menuet2.Separator},

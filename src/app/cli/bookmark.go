@@ -5,25 +5,28 @@ import (
 	"github.com/jotaen/klog/src/app/cli/lib"
 )
 
-type Bookmark struct {
-	Get   BookmarkGet   `cmd name:"get" group:"Bookmark" help:"Show current bookmark"`
-	Set   BookmarkSet   `cmd name:"set" group:"Bookmark" help:"Set bookmark to a file"`
-	Edit  BookmarkEdit  `cmd name:"edit" group:"Bookmark" help:"Open bookmark in your editor"`
-	Unset BookmarkUnset `cmd name:"unset" group:"Bookmark" help:"Clear current bookmark"`
+type Bookmarks struct {
+	List  BookmarksList `cmd name:"get" help:"Show current bookmark"`
+	Get   BookmarksList `cmd hidden help:"Alias"`
+	Ls    BookmarksList `cmd hidden help:"Alias"`
+	Set   BookmarkSet   `cmd name:"set" help:"Set bookmark to a file"`
+	Edit  BookmarkEdit  `cmd name:"edit" help:"Open bookmark in your editor"` // TODO remove
+	Unset BookmarkUnset `cmd name:"unset" help:"Clear current bookmark"`
+	// TODO Clear
 }
 
-func (opt *Bookmark) Help() string {
+func (opt *Bookmarks) Help() string {
 	return `With bookmarks you can make klog always read from a default file, in case you don’t specify one explicitly.
 
 This is handy in case you always use the same file.
 You can then interact with it regardless of your current working directory.`
 }
 
-type BookmarkGet struct {
+type BookmarksList struct {
 	lib.QuietArgs
 }
 
-func (opt *BookmarkGet) Run(ctx app.Context) error {
+func (opt *BookmarksList) Run(ctx app.Context) error {
 	bc, err := ctx.ReadBookmarks()
 	if err != nil {
 		return err
@@ -35,7 +38,7 @@ func (opt *BookmarkGet) Run(ctx app.Context) error {
 	if !opt.Quiet {
 		ctx.Print("Current bookmark: ")
 	}
-	ctx.Print(defaultBookmark.Target().Path + "\n")
+	ctx.Print(defaultBookmark.Target().Path() + "\n")
 	return nil
 }
 
@@ -72,7 +75,7 @@ func (args *BookmarkEdit) Run(ctx app.Context) error {
 	if defaultBookmark == nil {
 		return newNoBookmarkSetError()
 	}
-	return ctx.OpenInEditor(defaultBookmark.Target().Path)
+	return ctx.OpenInEditor(defaultBookmark.Target().Path())
 }
 
 type BookmarkUnset struct{}

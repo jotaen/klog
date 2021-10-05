@@ -33,7 +33,7 @@ func (ir *fileRetriever) Retrieve(fileArgs ...string) ([]fileWithContent, Error)
 	if len(fileArgs) == 0 {
 		defaultBookmark := ir.bookmarks.Default()
 		if defaultBookmark != nil {
-			fileArgs = []string{defaultBookmark.Target().Path}
+			fileArgs = []string{defaultBookmark.Target().Path()}
 		}
 	}
 	var results []fileWithContent
@@ -45,7 +45,7 @@ func (ir *fileRetriever) Retrieve(fileArgs ...string) ([]fileWithContent, Error)
 				if b == nil {
 					return arg, errors.New("No such bookmark")
 				}
-				return b.Target().Path, nil
+				return b.Target().Path(), nil
 			}
 			return arg, nil
 		})()
@@ -58,7 +58,7 @@ func (ir *fileRetriever) Retrieve(fileArgs ...string) ([]fileWithContent, Error)
 			errs = append(errs, readErr.Error()+": "+path)
 			continue
 		}
-		results = append(results, fileWithContent{*NewFile(path), content})
+		results = append(results, fileWithContent{NewFile(path), content})
 	}
 	if len(errs) > 0 {
 		return nil, NewErrorWithCode(
@@ -88,7 +88,7 @@ func (r *stdinRetriever) Retrieve(fileArgs ...string) ([]fileWithContent, Error)
 		return nil, nil
 	}
 	return []fileWithContent{{
-		File:    *NewFile("/dev/stdin"), // Fake file just to fulfill interface
+		File:    NewFile("/dev/stdin"), // Fake file just to fulfill interface
 		content: stdin,
 	}}, nil
 }
