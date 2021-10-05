@@ -10,14 +10,14 @@ import (
 
 type Name string
 
-var defaultName = "default"
+var bookmarkDefaultName = "default"
 
-var prefix = "@"
+var bookmarkPrefix = "@"
 
 func NewName(name string) Name {
-	value := strings.TrimLeft(name, prefix)
+	value := strings.TrimLeft(name, bookmarkPrefix)
 	if value == "" {
-		value = defaultName
+		value = bookmarkDefaultName
 	}
 	return Name(value)
 }
@@ -27,11 +27,11 @@ func (n Name) Value() string {
 }
 
 func (n Name) ValuePretty() string {
-	return prefix + n.Value()
+	return bookmarkPrefix + n.Value()
 }
 
 func IsValidBookmarkName(value string) bool {
-	return strings.HasPrefix(value, prefix)
+	return strings.HasPrefix(value, bookmarkPrefix)
 }
 
 type Bookmark interface {
@@ -50,7 +50,7 @@ func NewBookmark(name string, target File) Bookmark {
 }
 
 func NewDefaultBookmark(target File) Bookmark {
-	return NewBookmark(defaultName, target)
+	return NewBookmark(bookmarkDefaultName, target)
 }
 
 func (b *bookmark) Name() Name {
@@ -62,14 +62,14 @@ func (b *bookmark) Target() File {
 }
 
 func (b *bookmark) IsDefault() bool {
-	return b.name.Value() == defaultName
+	return b.name.Value() == bookmarkDefaultName
 }
 
 type BookmarksCollection interface {
 	Get(Name) Bookmark
 	All() []Bookmark
 	Default() Bookmark
-	Add(Bookmark)
+	Set(Bookmark)
 	Remove(Name) bool
 	Clear()
 	ToJson() string
@@ -81,7 +81,7 @@ type bookmarksCollection struct {
 }
 
 func (bc *bookmarksCollection) Default() Bookmark {
-	return bc.bookmarks[Name(defaultName)]
+	return bc.bookmarks[Name(bookmarkDefaultName)]
 }
 
 type bookmarkJson struct {
@@ -122,7 +122,7 @@ func NewBookmarksCollectionFromJson(jsonText string) (BookmarksCollection, Error
 		if fErr != nil {
 			return nil, fErr
 		}
-		bc.Add(NewBookmark(*b.Name, file))
+		bc.Set(NewBookmark(*b.Name, file))
 	}
 	return bc, nil
 }
@@ -142,7 +142,7 @@ func (bc *bookmarksCollection) All() []Bookmark {
 	return sortedBookmarks
 }
 
-func (bc *bookmarksCollection) Add(b Bookmark) {
+func (bc *bookmarksCollection) Set(b Bookmark) {
 	bc.bookmarks[b.Name()] = b
 }
 

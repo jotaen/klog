@@ -17,7 +17,7 @@ func (fs MockFs) readFile(source File) (string, Error) {
 
 func TestFileRetrieverResolvesFilesAndBookmarks(t *testing.T) {
 	bc := NewEmptyBookmarksCollection()
-	bc.Add(NewBookmark("foo", NewFileOrPanic("/foo.klg")))
+	bc.Set(NewBookmark("foo", NewFileOrPanic("/foo.klg")))
 	files, err := (&fileRetriever{
 		MockFs{"/asdf.klg": true, "/foo.klg": true}.readFile,
 		bc,
@@ -31,7 +31,7 @@ func TestFileRetrieverResolvesFilesAndBookmarks(t *testing.T) {
 
 func TestReturnsErrorIfBookmarksOrFilesAreInvalid(t *testing.T) {
 	bc := NewEmptyBookmarksCollection()
-	bc.Add(NewBookmark("foo", NewFileOrPanic("/foo.klg")))
+	bc.Set(NewBookmark("foo", NewFileOrPanic("/foo.klg")))
 	files, err := (&fileRetriever{
 		MockFs{}.readFile,
 		bc,
@@ -46,7 +46,7 @@ func TestReturnsErrorIfBookmarksOrFilesAreInvalid(t *testing.T) {
 
 func TestFallsBackToDefaultBookmark(t *testing.T) {
 	bc := NewEmptyBookmarksCollection()
-	bc.Add(NewDefaultBookmark(NewFileOrPanic("/foo.klg")))
+	bc.Set(NewDefaultBookmark(NewFileOrPanic("/foo.klg")))
 	retriever := &fileRetriever{
 		MockFs{"/foo.klg": true}.readFile,
 		bc,

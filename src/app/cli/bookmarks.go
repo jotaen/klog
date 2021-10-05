@@ -7,10 +7,15 @@ import (
 )
 
 type Bookmarks struct {
-	List  BookmarksList  `cmd name:"list" help:"Display all bookmarks"`
-	Ls    BookmarksList  `cmd name:"ls" hidden help:"Alias"`
-	Set   BookmarksSet   `cmd name:"set" help:"Define a bookmark"`
+	List BookmarksList `cmd name:"list" help:"Display all bookmarks"`
+	Ls   BookmarksList `cmd name:"ls" hidden help:"Alias for 'list'"`
+
+	Set BookmarksSet `cmd name:"set" help:"Define a bookmark"`
+	New BookmarksSet `cmd name:"new" hidden help:"Alias for 'set'"`
+
 	Unset BookmarksUnset `cmd name:"unset" help:"Remove a bookmark"`
+	Rm    BookmarksUnset `cmd name:"rm" hidden help:"Alias for 'unset'"`
+
 	Clear BookmarksClear `cmd name:"clear" help:"Clear entire bookmark collection"`
 }
 
@@ -59,22 +64,24 @@ func (opt *BookmarksSet) Run(ctx app.Context) error {
 			)
 		}
 	}
-	return ctx.ManipulateBookmarks(func(bc app.BookmarksCollection) app.Error {
-		bookmark := (func() app.Bookmark {
-			if opt.Name == "" {
-				return app.NewDefaultBookmark(file)
-			}
-			return app.NewBookmark(opt.Name, file)
-		})()
-		bc.Add(bookmark)
-		if opt.Quiet {
-			ctx.Print(bookmark.Name().ValuePretty() + " -> " + bookmark.Target().Path())
-		} else {
-			ctx.Print("Created bookmark " + bookmark.Name().ValuePretty() + " for file " + bookmark.Target().Path())
+	bookmark := (func() app.Bookmark {
+		if opt.Name == "" {
+			return app.NewDefaultBookmark(file)
 		}
-		ctx.Print("\n")
+		return app.NewBookmark(opt.Name, file)
+	})()
+	mErr := ctx.ManipulateBookmarks(func(bc app.BookmarksCollection) app.Error {
+		bc.Set(bookmark)
 		return nil
 	})
+	if mErr != nil {
+		return mErr
+	}
+	if !opt.Quiet {
+		ctx.Print("Created new bookmark:\n")
+	}
+	ctx.Print(bookmark.Name().ValuePretty() + " -> " + bookmark.Target().Path() + "\n")
+	return nil
 }
 
 type BookmarksUnset struct {
@@ -84,8 +91,8 @@ type BookmarksUnset struct {
 }
 
 func (opt *BookmarksUnset) Run(ctx app.Context) error {
-	return ctx.ManipulateBookmarks(func(bc app.BookmarksCollection) app.Error {
-		name := app.NewName(opt.Name)
+	name := app.NewName(opt.Name)
+	err := ctx.ManipulateBookmarks(func(bc app.BookmarksCollection) app.Error {
 		hasRemoved := bc.Remove(name)
 		if !hasRemoved {
 			return app.NewErrorWithCode(
@@ -95,11 +102,15 @@ func (opt *BookmarksUnset) Run(ctx app.Context) error {
 				nil,
 			)
 		}
-		if !opt.Quiet {
-			ctx.Print("Removed bookmark " + name.ValuePretty() + "\n")
-		}
 		return nil
 	})
+	if err != nil {
+		return err
+	}
+	if !opt.Quiet {
+		ctx.Print("Removed bookmark " + name.ValuePretty() + "\n")
+	}
+	return nil
 }
 
 type BookmarksClear struct {
@@ -118,11 +129,15 @@ func (opt *BookmarksClear) Run(ctx app.Context) error {
 			return nil
 		}
 	}
-	return ctx.ManipulateBookmarks(func(bc app.BookmarksCollection) app.Error {
+	err := ctx.ManipulateBookmarks(func(bc app.BookmarksCollection) app.Error {
 		bc.Clear()
-		if !opt.Quiet {
-			ctx.Print("Cleared all bookmarks\n")
-		}
 		return nil
 	})
+	if err != nil {
+		return err
+	}
+	if !opt.Quiet {
+		ctx.Print("Cleared all bookmarks\n")
+	}
+	return nil
 }

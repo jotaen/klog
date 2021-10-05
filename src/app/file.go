@@ -13,8 +13,8 @@ type File interface {
 	Path() string
 }
 
-type absoluteFile struct {
-	absolute string
+type fileWithPath struct {
+	absolutePath string
 }
 
 func NewFile(path string) (File, Error) {
@@ -34,19 +34,19 @@ func NewFileOrPanic(absolutePath string) File {
 	if !path.IsAbs(absolutePath) {
 		panic("Not an absolute path: " + absolutePath)
 	}
-	return &absoluteFile{absolutePath}
+	return &fileWithPath{absolutePath}
 }
 
-func (f *absoluteFile) Name() string {
-	return filepath.Base(f.absolute)
+func (f *fileWithPath) Name() string {
+	return filepath.Base(f.absolutePath)
 }
 
-func (f *absoluteFile) Location() string {
-	return filepath.Dir(f.absolute)
+func (f *fileWithPath) Location() string {
+	return filepath.Dir(f.absolutePath)
 }
 
-func (f *absoluteFile) Path() string {
-	return f.absolute
+func (f *fileWithPath) Path() string {
+	return f.absolutePath
 }
 
 func ReadFile(source File) (string, Error) {

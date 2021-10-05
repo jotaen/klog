@@ -28,11 +28,11 @@ func TestNormalizesBookmarkName(t *testing.T) {
 func TestGetsBookmarks(t *testing.T) {
 	bc := NewEmptyBookmarksCollection()
 	foo := NewBookmark("foo", NewFileOrPanic("/foo.klg"))
-	bc.Add(foo)
+	bc.Set(foo)
 	asdf := NewBookmark("asdf", NewFileOrPanic("/asdf.klg"))
-	bc.Add(asdf)
+	bc.Set(asdf)
 	bar := NewBookmark("bar", NewFileOrPanic("/bar.klg"))
-	bc.Add(bar)
+	bc.Set(bar)
 
 	assert.Equal(t, foo, bc.Get("foo"))
 	assert.Equal(t, bar, bc.Get("bar"))
@@ -44,19 +44,19 @@ func TestGetsBookmarks(t *testing.T) {
 func TestCanAddAndRemoveBookmarks(t *testing.T) {
 	bc := NewEmptyBookmarksCollection()
 
-	bc.Add(NewDefaultBookmark(NewFileOrPanic("/old.klg")))
+	bc.Set(NewDefaultBookmark(NewFileOrPanic("/old.klg")))
 	assert.Equal(t, "default", bc.Default().Name().Value())
 	assert.Equal(t, "/old.klg", bc.Default().Target().Path())
 	assert.Equal(t, 1, bc.Count())
 
 	// Overwrites existing bookmark
-	bc.Add(NewDefaultBookmark(NewFileOrPanic("/new.klg")))
+	bc.Set(NewDefaultBookmark(NewFileOrPanic("/new.klg")))
 	assert.Equal(t, "/new.klg", bc.Default().Target().Path())
 	assert.Equal(t, 1, bc.Count())
 
 	// Add another bookmark
 	foo := NewName("foo")
-	bc.Add(NewBookmark(foo.Value(), NewFileOrPanic("/qwer.klg")))
+	bc.Set(NewBookmark(foo.Value(), NewFileOrPanic("/qwer.klg")))
 	assert.Equal(t, foo, bc.Get(foo).Name())
 	assert.Equal(t, 2, bc.Count())
 

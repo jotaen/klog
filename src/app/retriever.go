@@ -28,10 +28,10 @@ func removeBlankEntries(fileArgs ...FileOrBookmarkName) []FileOrBookmarkName {
 	return result
 }
 
-func (ir *fileRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fileWithContent, Error) {
+func (retriever *fileRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fileWithContent, Error) {
 	fileArgs = removeBlankEntries(fileArgs...)
 	if len(fileArgs) == 0 {
-		defaultBookmark := ir.bookmarks.Default()
+		defaultBookmark := retriever.bookmarks.Default()
 		if defaultBookmark != nil {
 			fileArgs = []FileOrBookmarkName{
 				FileOrBookmarkName(defaultBookmark.Target().Path()),
@@ -44,7 +44,7 @@ func (ir *fileRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fileWithCo
 		argValue := string(arg)
 		path, pathErr := (func() (string, error) {
 			if IsValidBookmarkName(argValue) {
-				b := ir.bookmarks.Get(NewName(argValue))
+				b := retriever.bookmarks.Get(NewName(argValue))
 				if b == nil {
 					return argValue, errors.New("No such bookmark")
 				}
@@ -60,7 +60,7 @@ func (ir *fileRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fileWithCo
 		if fErr != nil {
 			errs = append(errs, "Invalid file path: "+path)
 		}
-		content, readErr := ir.readFile(file)
+		content, readErr := retriever.readFile(file)
 		if readErr != nil {
 			errs = append(errs, readErr.Error()+": "+file.Path())
 			continue
@@ -82,12 +82,12 @@ type stdinRetriever struct {
 	readStdin func() (string, Error)
 }
 
-func (r *stdinRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fileWithContent, Error) {
+func (retriever *stdinRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fileWithContent, Error) {
 	fileArgs = removeBlankEntries(fileArgs...)
 	if len(fileArgs) > 0 {
 		return nil, nil
 	}
-	stdin, err := r.readStdin()
+	stdin, err := retriever.readStdin()
 	if err != nil {
 		return nil, err
 	}
