@@ -23,6 +23,14 @@ func NewFile(path string) *File {
 func ReadFile(path string) (string, Error) {
 	contents, err := os.ReadFile(path)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return "", NewErrorWithCode(
+				NO_SUCH_FILE,
+				"No such file",
+				"Location: "+path,
+				err,
+			)
+		}
 		return "", NewErrorWithCode(
 			IO_ERROR,
 			"Cannot read file",
