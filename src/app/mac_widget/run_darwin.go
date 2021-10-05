@@ -23,7 +23,7 @@ func Run(forceRunThroughLaunchAgent bool) {
 		if !launchAgent.isActive() {
 			_ = launchAgent.activate()
 		}
-		_ = exec.Command("launchctl", "load", launchAgent.plistFilePath).Run()
+		_ = exec.Command("launchctl", "load", launchAgent.plistFile.Path()).Run()
 		_ = exec.Command("launchctl", "start", launchAgent.name).Run()
 		os.Exit(0)
 	}

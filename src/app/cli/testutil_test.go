@@ -11,7 +11,7 @@ import (
 )
 
 func NewTestingContext() TestingContext {
-	bc, _ := app.NewBookmarksCollectionFromJson(``)
+	bc := app.NewEmptyBookmarksCollection()
 	return TestingContext{
 		State: State{
 			printBuffer:         "",
@@ -67,6 +67,10 @@ func (ctx *TestingContext) Print(s string) {
 	ctx.printBuffer += s
 }
 
+func (ctx *TestingContext) ReadLine() (string, app.Error) {
+	return "", nil
+}
+
 func (ctx *TestingContext) HomeFolder() string {
 	return "~"
 }
@@ -85,15 +89,15 @@ func (ctx *TestingContext) MetaInfo() struct {
 	}{"v0.0", "abcdef1"}
 }
 
-func (ctx *TestingContext) ReadInputs(_ ...string) ([]Record, error) {
+func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, error) {
 	return ctx.records, nil
 }
 
-func (ctx *TestingContext) ReadFileInput(string) (*parser.ParseResult, *app.File, error) {
+func (ctx *TestingContext) ReadFileInput(app.FileOrBookmarkName) (*parser.ParseResult, app.File, error) {
 	return ctx.parseResult, nil, nil
 }
 
-func (ctx *TestingContext) WriteFile(_ *app.File, contents string) app.Error {
+func (ctx *TestingContext) WriteFile(_ app.File, contents string) app.Error {
 	ctx.writtenFileContents = contents
 	return nil
 }
@@ -106,16 +110,15 @@ func (ctx *TestingContext) ReadBookmarks() (app.BookmarksCollection, app.Error) 
 	return ctx.bookmarks, nil
 }
 
-func (ctx *TestingContext) SaveBookmarks(bc app.BookmarksCollection) app.Error {
-	ctx.bookmarks = bc
+func (ctx *TestingContext) ManipulateBookmarks(_ func(app.BookmarksCollection) app.Error) app.Error {
 	return nil
 }
 
-func (ctx *TestingContext) OpenInFileBrowser(_ string) app.Error {
+func (ctx *TestingContext) OpenInFileBrowser(_ app.File) app.Error {
 	return nil
 }
 
-func (ctx *TestingContext) OpenInEditor(_ string) app.Error {
+func (ctx *TestingContext) OpenInEditor(_ app.FileOrBookmarkName, _ func(string)) app.Error {
 	return nil
 }
 

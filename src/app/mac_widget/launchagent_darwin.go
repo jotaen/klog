@@ -9,7 +9,7 @@ type launchAgent struct {
 	name           string
 	klogBinPath    string
 	launchAgentDir string
-	plistFilePath  string
+	plistFile      app.File
 }
 
 func newLaunchAgent(homeDir string, klogBinPath string) launchAgent {
@@ -19,7 +19,7 @@ func newLaunchAgent(homeDir string, klogBinPath string) launchAgent {
 		name:           name,
 		klogBinPath:    klogBinPath,
 		launchAgentDir: launchAgentDir,
-		plistFilePath:  launchAgentDir + name + ".plist",
+		plistFile:      app.NewFileOrPanic(launchAgentDir + name + ".plist"),
 	}
 }
 
@@ -48,15 +48,15 @@ func (l *launchAgent) activate() error {
 	if err != nil {
 		return err
 	}
-	err = app.WriteToFile(l.plistFilePath, contents)
+	err = app.WriteToFile(l.plistFile, contents)
 	return err
 }
 
 func (l *launchAgent) deactivate() error {
-	return os.Remove(l.plistFilePath)
+	return os.Remove(l.plistFile.Path())
 }
 
 func (l *launchAgent) isActive() bool {
-	fi, err := os.Stat(l.plistFilePath)
+	fi, err := os.Stat(l.plistFile.Path())
 	return err == nil && !fi.IsDir()
 }

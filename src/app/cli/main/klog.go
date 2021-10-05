@@ -130,3 +130,15 @@ func periodDecoder() kong.MapperFunc {
 		return nil
 	}
 }
+
+func fileOrBookmarkDecoder() kong.MapperFunc {
+	return func(ctx *kong.DecodeContext, target reflect.Value) error {
+		var value string
+		if err := ctx.Scan.PopValueInto("fileOrBookmarkName", &value); err != nil {
+			return err
+		}
+		fileOrBookmarkName := app.FileOrBookmarkName(value)
+		target.Set(reflect.ValueOf(fileOrBookmarkName))
+		return nil
+	}
+}

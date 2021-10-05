@@ -11,11 +11,11 @@ import (
 )
 
 type InputFilesArgs struct {
-	File []string `arg optional type:"existingfile" name:"file" help:".klg source file(s) (if empty the bookmark is used)"`
+	File []app.FileOrBookmarkName `arg optional type:"fileOrBookmarkName" name:"file or bookmark" help:".klg source file(s) (if empty the bookmark is used)"`
 }
 
 type OutputFileArgs struct {
-	File string `arg optional type:"existingfile" name:"file" help:".klg source file (if empty the bookmark is used)"`
+	File app.FileOrBookmarkName `arg optional type:"fileOrBookmarkName" name:"file or bookmark" help:".klg source file (if empty the bookmark is used)"`
 }
 
 type AtDateArgs struct {
@@ -123,7 +123,7 @@ func (args *NoStyleArgs) Apply(ctx *app.Context) {
 }
 
 type QuietArgs struct {
-	Quiet bool `name:"quiet" help:"Output raw data without any labels"`
+	Quiet bool `name:"quiet" help:"Output parseable data without descriptive text"`
 }
 
 type SortArgs struct {
