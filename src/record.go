@@ -5,6 +5,10 @@ import (
 	"regexp"
 )
 
+// SPEC_VERSION contains the version number of the file format
+// specification which this implementation is based on.
+const SPEC_VERSION = "1.0"
+
 // Record is a standalone piece of data that holds the time tracking
 // information associated with a certain date.
 type Record interface {

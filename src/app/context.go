@@ -210,7 +210,7 @@ func (ctx *context) ReadBookmarks() (BookmarksCollection, Error) {
 		if os.IsNotExist(err.Original()) {
 			legacyTarget, err := os.Readlink(ctx.bookmarkLegacySymlinkPath())
 			if err == nil {
-				bookmarksDatabase = `[{"name":"` + bookmarkDefaultName + `", "path": "` + legacyTarget + `"}]`
+				bookmarksDatabase = `[{"name":"` + BOOKMARK_DEFAULT_NAME + `", "path": "` + legacyTarget + `"}]`
 			}
 		} else {
 			return nil, err

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/cli/lib"
 	"io"
@@ -23,7 +24,7 @@ func (opt *Version) Run(ctx app.Context) error {
 	}
 	ctx.Print("Command line tool: " + ctx.MetaInfo().Version)
 	ctx.Print("  [" + ctx.MetaInfo().BuildHash + "]\n")
-	ctx.Print("File format: version 1.0\n")
+	ctx.Print("File format: version " + SPEC_VERSION + "\n")
 
 	if opt.NoCheck {
 		return nil

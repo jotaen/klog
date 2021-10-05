@@ -10,14 +10,15 @@ import (
 
 type Name string
 
-var bookmarkDefaultName = "default"
-
-var bookmarkPrefix = "@"
+const (
+	BOOKMARK_DEFAULT_NAME = "default"
+	BOOKMARK_PREFIX       = "@"
+)
 
 func NewName(name string) Name {
-	value := strings.TrimLeft(name, bookmarkPrefix)
+	value := strings.TrimLeft(name, BOOKMARK_PREFIX)
 	if value == "" {
-		value = bookmarkDefaultName
+		value = BOOKMARK_DEFAULT_NAME
 	}
 	return Name(value)
 }
@@ -27,11 +28,11 @@ func (n Name) Value() string {
 }
 
 func (n Name) ValuePretty() string {
-	return bookmarkPrefix + n.Value()
+	return BOOKMARK_PREFIX + n.Value()
 }
 
 func IsValidBookmarkName(value string) bool {
-	return strings.HasPrefix(value, bookmarkPrefix)
+	return strings.HasPrefix(value, BOOKMARK_PREFIX)
 }
 
 type Bookmark interface {
@@ -50,7 +51,7 @@ func NewBookmark(name string, target File) Bookmark {
 }
 
 func NewDefaultBookmark(target File) Bookmark {
-	return NewBookmark(bookmarkDefaultName, target)
+	return NewBookmark(BOOKMARK_DEFAULT_NAME, target)
 }
 
 func (b *bookmark) Name() Name {
@@ -62,7 +63,7 @@ func (b *bookmark) Target() File {
 }
 
 func (b *bookmark) IsDefault() bool {
-	return b.name.Value() == bookmarkDefaultName
+	return b.name.Value() == BOOKMARK_DEFAULT_NAME
 }
 
 type BookmarksCollection interface {
@@ -81,7 +82,7 @@ type bookmarksCollection struct {
 }
 
 func (bc *bookmarksCollection) Default() Bookmark {
-	return bc.bookmarks[Name(bookmarkDefaultName)]
+	return bc.bookmarks[Name(BOOKMARK_DEFAULT_NAME)]
 }
 
 type bookmarkJson struct {
