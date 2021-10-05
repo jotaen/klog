@@ -1,13 +1,15 @@
 # Changelog (command line tool)
 
-## v2.7
+## v3.0
+- **[ FEATURE ]** Support setting multiple named bookmarks
 - **[ FEATURE ]** Add additional evaluation options for `klog report`
   to aggregate the data by day, week, month, quarter or year
 - **[ FEATURE ]** Allow value of `--sort` flag to be uppercase
   or lowercase (`ASC`/`asc` or `DESC`/`desc`)
 - **[ FEATURE ]** Support `klog --version` in addition to `klog version`
-- **[ FEATURE ]** For `klog bookmark edit`, if `$EDITOR` is not set,
-  attempt to open common editors
+- **[ FEATURE ]** Add `klog edit` command for opening a file in an editor.
+  If `$EDITOR` is not set, attempt to open common editors.
+- **[ FIX ]** Windows: don’t require admin privileges for setting a bookmark 
 
 ## v2.6
 - **[ INFO ]** Release first version of the file format
