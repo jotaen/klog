@@ -14,8 +14,8 @@ func render(ctx app.Context, agent *launchAgent) []menuet2.MenuItem {
 	var items []menuet2.MenuItem
 
 	items = append(items, func() []menuet2.MenuItem {
-		file, err := ctx.Bookmark()
-		if err != nil {
+		bc, err := ctx.ReadBookmarks()
+		if err != nil || bc.Default() == nil {
 			return []menuet2.MenuItem{{
 				Text:       "No bookmark specified",
 				FontWeight: menuet2.WeightBold,
@@ -25,15 +25,16 @@ func render(ctx app.Context, agent *launchAgent) []menuet2.MenuItem {
 				Text: "klog bookmark set yourfile.klg",
 			}}
 		}
+		defaultBookmark := bc.Default()
 		rs, pErr := ctx.ReadInputs()
 		if pErr != nil {
 			return []menuet2.MenuItem{{
-				Text: file.Name,
+				Text: defaultBookmark.Target().Name(),
 			}, {
 				Text: "Error: file cannot be parsed",
 			}}
 		}
-		return renderRecords(ctx, rs, file)
+		return renderRecords(ctx, rs, defaultBookmark.Target())
 	}()...)
 
 	items = append(items, menuet2.MenuItem{
@@ -62,7 +63,7 @@ func render(ctx app.Context, agent *launchAgent) []menuet2.MenuItem {
 	return items
 }
 
-func renderRecords(ctx app.Context, records []klog.Record, file *app.File) []menuet2.MenuItem {
+func renderRecords(ctx app.Context, records []klog.Record, file app.File) []menuet2.MenuItem {
 	var items []menuet2.MenuItem
 
 	today := service.Filter(records, service.FilterQry{Dates: []klog.Date{klog.NewDateFromTime(ctx.Now())}})
@@ -78,7 +79,7 @@ func renderRecords(ctx app.Context, records []klog.Record, file *app.File) []men
 	}
 
 	items = append(items, menuet2.MenuItem{
-		Text: file.Name,
+		Text: file.Name(),
 		Children: func() []menuet2.MenuItem {
 			total := service.Total(records...)
 			should := service.ShouldTotalSum(records...)
@@ -91,7 +92,7 @@ func renderRecords(ctx app.Context, records []klog.Record, file *app.File) []men
 				{
 					Text: "Show in Finder...",
 					Clicked: func() {
-						_ = ctx.OpenInFileBrowser(file.Location)
+						_ = ctx.OpenInFileBrowser(file)
 					},
 				},
 				{Type: menuet2.Separator},

@@ -11,6 +11,7 @@ import (
 )
 
 func NewTestingContext() TestingContext {
+	bc := app.NewEmptyBookmarksCollection()
 	return TestingContext{
 		State: State{
 			printBuffer:         "",
@@ -20,6 +21,7 @@ func NewTestingContext() TestingContext {
 		records:     nil,
 		parseResult: nil,
 		serialiser:  lib.NewCliSerialiser(),
+		bookmarks:   bc,
 	}
 }
 
@@ -58,10 +60,15 @@ type TestingContext struct {
 	records     []Record
 	parseResult *parser.ParseResult
 	serialiser  *parser.Serialiser
+	bookmarks   app.BookmarksCollection
 }
 
 func (ctx *TestingContext) Print(s string) {
 	ctx.printBuffer += s
+}
+
+func (ctx *TestingContext) ReadLine() (string, app.Error) {
+	return "", nil
 }
 
 func (ctx *TestingContext) HomeFolder() string {
@@ -82,15 +89,15 @@ func (ctx *TestingContext) MetaInfo() struct {
 	}{"v0.0", "abcdef1"}
 }
 
-func (ctx *TestingContext) ReadInputs(_ ...string) ([]Record, error) {
+func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, error) {
 	return ctx.records, nil
 }
 
-func (ctx *TestingContext) ReadFileInput(string) (*parser.ParseResult, *app.File, error) {
+func (ctx *TestingContext) ReadFileInput(app.FileOrBookmarkName) (*parser.ParseResult, app.File, error) {
 	return ctx.parseResult, nil, nil
 }
 
-func (ctx *TestingContext) WriteFile(_ *app.File, contents string) app.Error {
+func (ctx *TestingContext) WriteFile(_ app.File, contents string) app.Error {
 	ctx.writtenFileContents = contents
 	return nil
 }
@@ -99,27 +106,19 @@ func (ctx *TestingContext) Now() gotime.Time {
 	return ctx.now
 }
 
-func (ctx *TestingContext) SetBookmark(_ string) app.Error {
+func (ctx *TestingContext) ReadBookmarks() (app.BookmarksCollection, app.Error) {
+	return ctx.bookmarks, nil
+}
+
+func (ctx *TestingContext) ManipulateBookmarks(_ func(app.BookmarksCollection) app.Error) app.Error {
 	return nil
 }
 
-func (ctx *TestingContext) Bookmark() (*app.File, app.Error) {
-	return &app.File{
-		Name:     "myfile.klg",
-		Location: "/",
-		Path:     "/myfile.klg",
-	}, nil
-}
-
-func (ctx *TestingContext) UnsetBookmark() app.Error {
+func (ctx *TestingContext) OpenInFileBrowser(_ app.File) app.Error {
 	return nil
 }
 
-func (ctx *TestingContext) OpenInFileBrowser(_ string) app.Error {
-	return nil
-}
-
-func (ctx *TestingContext) OpenInEditor(_ string) app.Error {
+func (ctx *TestingContext) OpenInEditor(_ app.FileOrBookmarkName, _ func(string)) app.Error {
 	return nil
 }
 

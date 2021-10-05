@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bufio"
 	"fmt"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/parser"
@@ -8,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
-	"path/filepath"
 	"strings"
 	gotime "time"
 )
@@ -16,23 +16,25 @@ import (
 var BinaryVersion string   // will be set during build
 var BinaryBuildHash string // will be set during build
 
+type FileOrBookmarkName string
+
 type Context interface {
 	Print(string)
+	ReadLine() (string, Error)
 	KlogFolder() string
 	HomeFolder() string
 	MetaInfo() struct {
 		Version   string
 		BuildHash string
 	}
-	ReadInputs(...string) ([]Record, error)
-	ReadFileInput(string) (*parser.ParseResult, *File, error)
-	WriteFile(*File, string) Error
+	ReadInputs(...FileOrBookmarkName) ([]Record, error)
+	ReadFileInput(FileOrBookmarkName) (*parser.ParseResult, File, error)
+	WriteFile(File, string) Error
 	Now() gotime.Time
-	Bookmark() (*File, Error)
-	SetBookmark(string) Error
-	UnsetBookmark() Error
-	OpenInFileBrowser(string) Error
-	OpenInEditor(string) Error
+	ReadBookmarks() (BookmarksCollection, Error)
+	ManipulateBookmarks(func(BookmarksCollection) Error) Error
+	OpenInFileBrowser(File) Error
+	OpenInEditor(FileOrBookmarkName, func(string)) Error
 	InstantiateTemplate(string) ([]parsing.Text, Error)
 	Serialiser() *parser.Serialiser
 	SetSerialiser(*parser.Serialiser)
@@ -60,6 +62,20 @@ func NewContextFromEnv(serialiser *parser.Serialiser) (Context, error) {
 
 func (ctx *context) Print(text string) {
 	fmt.Print(text)
+}
+
+func (ctx *context) ReadLine() (string, Error) {
+	scanner := bufio.NewScanner(os.Stdin)
+	if scanner.Scan() {
+		input := scanner.Text()
+		return input, nil
+	}
+	return "", NewErrorWithCode(
+		IO_ERROR,
+		"Cannot process input",
+		"Reading from stdin failed",
+		nil,
+	)
 }
 
 func (ctx *context) HomeFolder() string {
@@ -96,58 +112,32 @@ func (ctx *context) MetaInfo() struct {
 	}
 }
 
-func retrieveInputs(
-	filePaths []string,
-	readStdin func() (string, Error),
-	bookmarkOrNil func() (*File, Error),
-) ([]string, Error) {
-	if len(filePaths) > 0 {
-		var result []string
-		for _, p := range filePaths {
-			content, err := ReadFile(p)
-			if err != nil {
-				return nil, err
-			}
-			result = append(result, content)
-		}
-		return result, nil
+func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, error) {
+	bc, bErr := ctx.ReadBookmarks()
+	if bErr != nil {
+		return nil, bErr
 	}
-	stdin, err := readStdin()
-	if err != nil {
-		return nil, err
+	files, rErr := retrieveFirst([]Retriever{
+		(&stdinRetriever{ReadStdin}).Retrieve,
+		(&fileRetriever{ReadFile, bc}).Retrieve,
+	}, fileArgs...)
+	if rErr != nil {
+		return nil, rErr
 	}
-	if stdin != "" {
-		return []string{stdin}, nil
-	}
-	b, err := bookmarkOrNil()
-	if err != nil {
-		return nil, err
-	} else if b != nil {
-		content, err := ReadFile(b.Path)
-		if err != nil {
-			return nil, err
-		}
-		return []string{content}, nil
-	}
-	return nil, NewErrorWithCode(
-		NO_INPUT_ERROR,
-		"No input given",
-		"Please do one of the following:\n"+
-			"    a) pass one or multiple file names as argument\n"+
-			"    b) pipe file contents via stdin\n"+
-			"    c) specify a bookmark to read from by default",
-		err,
-	)
-}
-
-func (ctx *context) ReadInputs(paths ...string) ([]Record, error) {
-	inputs, err := retrieveInputs(paths, ReadStdin, ctx.bookmarkOrNil)
-	if err != nil {
-		return nil, err
+	if len(files) == 0 {
+		return nil, NewErrorWithCode(
+			NO_INPUT_ERROR,
+			"No input given",
+			"Please do one of the following:\n"+
+				"    a) specify one or multiple file names or bookmark names\n"+
+				"    b) pipe file contents via stdin\n"+
+				"    c) set a default bookmark to read from",
+			nil,
+		)
 	}
 	var records []Record
-	for _, in := range inputs {
-		pr, parserErrors := parser.Parse(in)
+	for _, f := range files {
+		pr, parserErrors := parser.Parse(f.content)
 		if parserErrors != nil {
 			return nil, parserErrors
 		}
@@ -156,107 +146,52 @@ func (ctx *context) ReadInputs(paths ...string) ([]Record, error) {
 	return records, nil
 }
 
-func (ctx *context) ReadFileInput(path string) (*parser.ParseResult, *File, error) {
-	if path == "" {
-		b, err := ctx.bookmarkOrNil()
-		if err != nil {
-			return nil, nil, err
-		} else if b == nil {
-			return nil, nil, NewErrorWithCode(
-				NO_TARGET_FILE,
-				"No file specified",
-				"You can either specify a file path, or you set a bookmark",
-				nil,
-			)
-		}
-		path = b.Path
+func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (*fileWithContent, Error) {
+	bc, err := ctx.ReadBookmarks()
+	if err != nil {
+		return nil, err
 	}
-	content, err := ReadFile(path)
+	inputs, err := (&fileRetriever{ReadFile, bc}).Retrieve(fileArg)
+	if err != nil {
+		return nil, err
+	}
+	if len(inputs) == 0 {
+		return nil, NewErrorWithCode(
+			NO_TARGET_FILE,
+			"No file specified",
+			"Either specify a file name or bookmark name, or set a default bookmark",
+			nil,
+		)
+	}
+	return inputs[0], nil
+}
+
+func (ctx *context) ReadFileInput(fileArg FileOrBookmarkName) (*parser.ParseResult, File, error) {
+	target, err := ctx.retrieveTargetFile(fileArg)
 	if err != nil {
 		return nil, nil, err
 	}
-	pr, parserErrors := parser.Parse(content)
+	pr, parserErrors := parser.Parse(target.content)
 	if parserErrors != nil {
 		return nil, nil, parserErrors
 	}
-	return pr, newFile(path), nil
+	return pr, target, nil
 }
 
-func (ctx *context) WriteFile(target *File, contents string) Error {
+func (ctx *context) WriteFile(target File, contents string) Error {
 	if target == nil {
 		panic("No path specified")
 	}
-	return WriteToFile(target.Path, contents)
+	return WriteToFile(target, contents)
 }
 
 func (ctx *context) Now() gotime.Time {
 	return gotime.Now()
 }
 
-type File struct {
-	Name     string
-	Location string
-	Path     string
-}
-
-func newFile(path string) *File {
-	return &File{
-		Name:     filepath.Base(path),
-		Location: filepath.Dir(path),
-		Path:     path,
-	}
-}
-
-func (ctx *context) bookmarkOrNil() (*File, Error) {
-	bookmarkPath := ctx.bookmarkOrigin()
-	dest, err := os.Readlink(bookmarkPath)
-	if err != nil {
-		return nil, nil
-	}
-	_, err = os.Stat(dest)
-	if err != nil {
-		return nil, NewErrorWithCode(
-			BOOKMARK_ACCESS_ERROR,
-			"Bookmark doesn’t point to valid file",
-			"Please check the current bookmark location or set a new one",
-			err,
-		)
-	}
-	return newFile(dest), nil
-}
-
-func (ctx *context) bookmarkOrigin() string {
-	return ctx.KlogFolder() + "bookmark.klg"
-}
-
-func (ctx *context) Bookmark() (*File, Error) {
-	b, err := ctx.bookmarkOrNil()
-	if err != nil {
-		return nil, err
-	}
-	if b == nil {
-		return nil, NewErrorWithCode(
-			NO_BOOKMARK_SET_ERROR,
-			"No bookmark set",
-			"You can set a bookmark by running: klog bookmark set somefile.klg",
-			err,
-		)
-	}
-	return b, nil
-}
-
-func (ctx *context) SetBookmark(path string) Error {
-	bookmark, err := filepath.Abs(path)
-	if err != nil {
-		return NewErrorWithCode(
-			BOOKMARK_ACCESS_ERROR,
-			"Invalid target file",
-			"Please check the file path",
-			err,
-		)
-	}
+func (ctx *context) initialiseKlogFolder() Error {
 	klogFolder := ctx.KlogFolder()
-	err = os.MkdirAll(klogFolder, 0700)
+	err := os.MkdirAll(klogFolder, 0700)
 	flagAsHidden(klogFolder)
 	if err != nil {
 		return NewError(
@@ -265,32 +200,52 @@ func (ctx *context) SetBookmark(path string) Error {
 			err,
 		)
 	}
-	appErr := ctx.UnsetBookmark()
-	if appErr != nil {
-		return appErr
-	}
-	appErr = createSymlinkForBookmark(bookmark, ctx.bookmarkOrigin())
-	if appErr != nil {
-		return appErr
-	}
 	return nil
 }
 
-func (ctx *context) UnsetBookmark() Error {
-	err := os.Remove(ctx.bookmarkOrigin())
-	if err != nil && !os.IsNotExist(err) {
-		return NewErrorWithCode(
-			BOOKMARK_ACCESS_ERROR,
-			"Failed to unset bookmark",
-			"The current bookmark could not be cleared",
-			err,
-		)
+func (ctx *context) ReadBookmarks() (BookmarksCollection, Error) {
+	bookmarksDatabase, err := ReadFile(ctx.bookmarkDatabasePath())
+	if err != nil {
+		// If database doesn’t exist, try to convert from legacy bookmark file.
+		if os.IsNotExist(err.Original()) {
+			legacyTarget, err := os.Readlink(ctx.bookmarkLegacySymlinkPath())
+			if err == nil {
+				bookmarksDatabase = `[{"name":"` + bookmarkDefaultName + `", "path": "` + legacyTarget + `"}]`
+			}
+		} else {
+			return nil, err
+		}
 	}
-	return nil
+	return NewBookmarksCollectionFromJson(bookmarksDatabase)
 }
 
-func (ctx *context) OpenInFileBrowser(path string) Error {
-	cmd := exec.Command("open", path)
+func (ctx *context) ManipulateBookmarks(manipulate func(BookmarksCollection) Error) Error {
+	bc, bErr := ctx.ReadBookmarks()
+	if bErr != nil {
+		return bErr
+	}
+	mErr := manipulate(bc)
+	if mErr != nil {
+		return mErr
+	}
+	iErr := ctx.initialiseKlogFolder()
+	if iErr != nil {
+		return iErr
+	}
+	_ = os.Remove(ctx.bookmarkLegacySymlinkPath()) // Clean up legacy bookmark file, if exists
+	return WriteToFile(ctx.bookmarkDatabasePath(), bc.ToJson())
+}
+
+func (ctx *context) bookmarkLegacySymlinkPath() string {
+	return ctx.KlogFolder() + "bookmark.klg"
+}
+
+func (ctx *context) bookmarkDatabasePath() File {
+	return NewFileOrPanic(ctx.KlogFolder() + "/bookmarks.json")
+}
+
+func (ctx *context) OpenInFileBrowser(target File) Error {
+	cmd := exec.Command("open", target.Location())
 	err := cmd.Run()
 	if err != nil {
 		return NewError(
@@ -302,19 +257,23 @@ func (ctx *context) OpenInFileBrowser(path string) Error {
 	return nil
 }
 
-func (ctx *context) OpenInEditor(path string) Error {
+func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(string)) Error {
+	target, err := ctx.retrieveTargetFile(fileArg)
+	if err != nil {
+		return err
+	}
 	hint := "You can specify your preferred editor via the $EDITOR environment variable.\n"
 	preferredEditor := os.Getenv("EDITOR")
 	editors := append([]string{preferredEditor}, POTENTIAL_EDITORS...)
 	for _, editor := range editors {
-		cmd := exec.Command(editor, path)
+		cmd := exec.Command(editor, target.Path())
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		err := cmd.Run()
 		if err == nil {
 			if preferredEditor == "" {
 				// Inform the user that they can configure their editor:
-				ctx.Print(hint)
+				printHint(hint)
 			}
 			return nil
 		}
@@ -327,12 +286,12 @@ func (ctx *context) OpenInEditor(path string) Error {
 }
 
 func (ctx *context) InstantiateTemplate(templateName string) ([]parsing.Text, Error) {
-	location := ctx.KlogFolder() + templateName + ".template.klg"
+	location := NewFileOrPanic(ctx.KlogFolder() + templateName + ".template.klg")
 	template, err := ReadFile(location)
 	if err != nil {
 		return nil, NewError(
 			"No such template",
-			"There is no template at location "+location,
+			"There is no template at location "+location.Path(),
 			err,
 		)
 	}

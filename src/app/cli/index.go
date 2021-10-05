@@ -20,11 +20,15 @@ type Cli struct {
 	Stop   Stop   `cmd group:"Manipulate" aliases:"out" help:"Closes open time range"`
 	Create Create `cmd group:"Manipulate" help:"Creates a new record"`
 
+	// Bookmarks
+	Bookmarks Bookmarks `cmd group:"Bookmarks" help:"Named aliases for often-used files"`
+	Bookmark  Bookmarks `cmd group:"Misc" hidden help:"Alias"`
+
 	// Misc
-	Bookmark Bookmark `cmd group:"Misc" help:"Default file that klog reads from"`
-	Json     Json     `cmd group:"Misc" help:"Converts records to JSON"`
-	Widget   Widget   `cmd group:"Misc" help:"Starts menu bar widget (MacOS only)"`
-	Version  Version  `cmd group:"Misc" help:"Prints version info and check for updates"`
+	Edit    Edit    `cmd group:"Misc" help:"Open a file or bookmark in your editor"`
+	Json    Json    `cmd group:"Misc" help:"Converts records to JSON"`
+	Widget  Widget  `cmd group:"Misc" help:"Starts menu bar widget (MacOS only)"`
+	Version Version `cmd group:"Misc" help:"Prints version info and check for updates"`
 
 	// Default command for displaying info text (hidden)
 	Info Info `cmd default:"1" hidden:"1"`
