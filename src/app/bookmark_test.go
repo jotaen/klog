@@ -19,6 +19,26 @@ func TestNormalizesBookmarkName(t *testing.T) {
 	assert.Equal(t, "foo", NewName("foo").Value())
 	assert.Equal(t, "foo", NewName("@foo").Value())
 	assert.Equal(t, "foo", NewName("@@foo").Value())
+
+	assert.Equal(t, "default", NewName("default").Value())
+
+	assert.Equal(t, "@foo", NewName("foo").ValuePretty())
+}
+
+func TestGetsBookmarks(t *testing.T) {
+	bc := NewEmptyBookmarksCollection()
+	foo := NewBookmark("foo", "/foo.klg")
+	bc.Add(foo)
+	asdf := NewBookmark("asdf", "/asdf.klg")
+	bc.Add(asdf)
+	bar := NewBookmark("bar", "/bar.klg")
+	bc.Add(bar)
+
+	assert.Equal(t, foo, bc.Get("foo"))
+	assert.Equal(t, bar, bc.Get("bar"))
+	assert.Equal(t, asdf, bc.Get("asdf"))
+
+	assert.Equal(t, []Bookmark{asdf, bar, foo}, bc.All())
 }
 
 func TestCanAddAndRemoveBookmarks(t *testing.T) {
@@ -40,14 +60,20 @@ func TestCanAddAndRemoveBookmarks(t *testing.T) {
 	assert.Equal(t, foo, bc.Get(foo).Name())
 	assert.Equal(t, 2, bc.Count())
 
-	// Remove again
-	bc.Remove(foo)
+	// Remove
+	hasRemoved := bc.Remove(foo)
+	assert.True(t, hasRemoved)
 	assert.Nil(t, bc.Get(foo))
 	assert.Equal(t, 1, bc.Count())
+
+	// Removing again is no-op
+	hasRemovedAgain := bc.Remove(foo)
+	assert.False(t, hasRemovedAgain)
 
 	// Clear all
 	bc.Clear()
 	assert.Nil(t, bc.Default())
+	assert.Equal(t, 0, bc.Count())
 
 	bc.Clear() // Idempotent operation
 	assert.Nil(t, bc.Default())
@@ -96,6 +122,10 @@ func TestSerializeCollectionToJson(t *testing.T) {
   {
     "name": "default",
     "path": "/asdf.klg"
+  },
+  {
+    "name": "foo",
+    "path": "/home/foo.klg"
   }
 ]
 `

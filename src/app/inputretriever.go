@@ -43,7 +43,7 @@ func (ir *fileRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fileWithCo
 	for _, arg := range fileArgs {
 		argValue := string(arg)
 		path, pathErr := (func() (string, error) {
-			if strings.HasPrefix(argValue, "@") {
+			if IsValidBookmarkName(argValue) {
 				b := ir.bookmarks.Get(NewName(argValue))
 				if b == nil {
 					return argValue, errors.New("No such bookmark")

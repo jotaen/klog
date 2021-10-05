@@ -67,6 +67,10 @@ func (ctx *TestingContext) Print(s string) {
 	ctx.printBuffer += s
 }
 
+func (ctx *TestingContext) ReadLine() (string, app.Error) {
+	return "", nil
+}
+
 func (ctx *TestingContext) HomeFolder() string {
 	return "~"
 }
@@ -106,8 +110,7 @@ func (ctx *TestingContext) ReadBookmarks() (app.BookmarksCollection, app.Error) 
 	return ctx.bookmarks, nil
 }
 
-func (ctx *TestingContext) SaveBookmarks(bc app.BookmarksCollection) app.Error {
-	ctx.bookmarks = bc
+func (ctx *TestingContext) ManipulateBookmarks(_ func(app.BookmarksCollection) app.Error) app.Error {
 	return nil
 }
 

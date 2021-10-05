@@ -123,7 +123,7 @@ func (args *NoStyleArgs) Apply(ctx *app.Context) {
 }
 
 type QuietArgs struct {
-	Quiet bool `name:"quiet" help:"Output raw data without any labels"`
+	Quiet bool `name:"quiet" help:"Output parseable data without descriptive text"`
 }
 
 type SortArgs struct {

@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"encoding/json"
+	"sort"
 	"strings"
 )
 
@@ -10,12 +11,26 @@ type Name string
 
 var defaultName = "default"
 
+var prefix = "@"
+
 func NewName(name string) Name {
-	return Name(strings.TrimLeft(name, "@"))
+	value := strings.TrimLeft(name, prefix)
+	if value == "" {
+		value = defaultName
+	}
+	return Name(value)
 }
 
 func (n Name) Value() string {
 	return string(n)
+}
+
+func (n Name) ValuePretty() string {
+	return prefix + n.Value()
+}
+
+func IsValidBookmarkName(value string) bool {
+	return strings.HasPrefix(value, prefix)
 }
 
 type Bookmark interface {
@@ -51,12 +66,13 @@ func (b *bookmark) IsDefault() bool {
 
 type BookmarksCollection interface {
 	Get(Name) Bookmark
+	All() []Bookmark
 	Default() Bookmark
 	Add(Bookmark)
-	Remove(Name)
+	Remove(Name) bool
 	Clear()
-	Count() int
 	ToJson() string
+	Count() int
 }
 
 type bookmarksCollection struct {
@@ -107,12 +123,27 @@ func (bc *bookmarksCollection) Get(n Name) Bookmark {
 	return bc.bookmarks[n]
 }
 
+func (bc *bookmarksCollection) All() []Bookmark {
+	sortedBookmarks := make([]Bookmark, 0, len(bc.bookmarks))
+	for _, b := range bc.bookmarks {
+		sortedBookmarks = append(sortedBookmarks, b)
+	}
+	sort.Slice(sortedBookmarks, func(i, j int) bool {
+		return sortedBookmarks[i].Name() < sortedBookmarks[j].Name()
+	})
+	return sortedBookmarks
+}
+
 func (bc *bookmarksCollection) Add(b Bookmark) {
 	bc.bookmarks[b.Name()] = b
 }
 
-func (bc *bookmarksCollection) Remove(n Name) {
+func (bc *bookmarksCollection) Remove(n Name) bool {
+	if bc.bookmarks[n] == nil {
+		return false
+	}
 	delete(bc.bookmarks, n)
+	return true
 }
 
 func (bc *bookmarksCollection) Clear() {
@@ -124,13 +155,16 @@ func (bc *bookmarksCollection) Count() int {
 }
 
 func (bc *bookmarksCollection) ToJson() string {
-	if bc.Default() == nil {
-		return ""
+	var bookmarksAsJson []bookmarkJson
+	for _, b := range bc.All() {
+		name := b.Name().Value()
+		path := b.Target().Path()
+		bookmarksAsJson = append(bookmarksAsJson, bookmarkJson{
+			&name, &path,
+		})
 	}
-	name := bc.Default().Name().Value()
-	path := bc.Default().Target().Path()
-	bookmarksAsJson := []bookmarkJson{
-		{&name, &path},
+	if len(bookmarksAsJson) == 0 {
+		return ""
 	}
 	buffer := new(bytes.Buffer)
 	enc := json.NewEncoder(buffer)

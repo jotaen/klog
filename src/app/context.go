@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bufio"
 	"fmt"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/parser"
@@ -19,6 +20,7 @@ type FileOrBookmarkName string
 
 type Context interface {
 	Print(string)
+	ReadLine() (string, Error)
 	KlogFolder() string
 	HomeFolder() string
 	MetaInfo() struct {
@@ -30,7 +32,7 @@ type Context interface {
 	WriteFile(File, string) Error
 	Now() gotime.Time
 	ReadBookmarks() (BookmarksCollection, Error)
-	SaveBookmarks(BookmarksCollection) Error
+	ManipulateBookmarks(func(BookmarksCollection) Error) Error
 	OpenInFileBrowser(string) Error
 	OpenInEditor(FileOrBookmarkName, func(string)) Error
 	InstantiateTemplate(string) ([]parsing.Text, Error)
@@ -60,6 +62,20 @@ func NewContextFromEnv(serialiser *parser.Serialiser) (Context, error) {
 
 func (ctx *context) Print(text string) {
 	fmt.Print(text)
+}
+
+func (ctx *context) ReadLine() (string, Error) {
+	scanner := bufio.NewScanner(os.Stdin)
+	if scanner.Scan() {
+		input := scanner.Text()
+		return input, nil
+	}
+	return "", NewErrorWithCode(
+		IO_ERROR,
+		"Cannot process input",
+		"Reading from stdin failed",
+		nil,
+	)
 }
 
 func (ctx *context) HomeFolder() string {
@@ -203,10 +219,18 @@ func (ctx *context) ReadBookmarks() (BookmarksCollection, Error) {
 	return NewBookmarksCollectionFromJson(bookmarksDatabase)
 }
 
-func (ctx *context) SaveBookmarks(bc BookmarksCollection) Error {
-	err := ctx.initialiseKlogFolder()
-	if err != nil {
-		return err
+func (ctx *context) ManipulateBookmarks(manipulate func(BookmarksCollection) Error) Error {
+	bc, bErr := ctx.ReadBookmarks()
+	if bErr != nil {
+		return bErr
+	}
+	mErr := manipulate(bc)
+	if mErr != nil {
+		return mErr
+	}
+	iErr := ctx.initialiseKlogFolder()
+	if iErr != nil {
+		return iErr
 	}
 	_ = os.Remove(ctx.bookmarkLegacySymlinkPath()) // Clean up legacy bookmark file, if exists
 	return WriteToFile(ctx.bookmarkDatabasePath().Path(), bc.ToJson())
