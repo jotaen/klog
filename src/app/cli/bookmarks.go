@@ -15,10 +15,12 @@ type Bookmarks struct {
 }
 
 func (opt *Bookmarks) Help() string {
-	return `With bookmarks you can make klog always read from a default file, in case you don’t specify one explicitly.
+	return `Bookmarks allow you to interact with often-used files via a short alias,
+regardless of your current working directory.
 
-This is handy in case you always use the same file.
-You can then interact with it regardless of your current working directory.`
+E.g.: klog total @myfile
+
+You can specify as many bookmarks as you want. There can even be one “unnamed” bookmark.`
 }
 
 type BookmarksList struct{}

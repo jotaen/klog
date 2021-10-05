@@ -21,7 +21,7 @@ type Cli struct {
 	Create Create `cmd group:"Manipulate" help:"Creates a new record"`
 
 	// Bookmarks
-	Bookmarks Bookmarks `cmd group:"Bookmarks" help:"Default file that klog reads from"`
+	Bookmarks Bookmarks `cmd group:"Bookmarks" help:"Named aliases for often-used files"`
 	Bookmark  Bookmarks `cmd group:"Misc" hidden help:"Alias"`
 
 	// Misc
