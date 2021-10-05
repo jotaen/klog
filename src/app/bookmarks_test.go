@@ -22,16 +22,30 @@ func TestNormalizesBookmarkName(t *testing.T) {
 }
 
 func TestCanAddAndRemoveBookmarks(t *testing.T) {
-	bc, _ := NewBookmarksCollectionFromJson("")
+	bc := NewEmptyBookmarksCollection()
 
 	bc.Add(NewDefaultBookmark("/old.klg"))
 	assert.Equal(t, "default", bc.Default().Name().Value())
 	assert.Equal(t, "/old.klg", bc.Default().Target().Path)
+	assert.Equal(t, 1, bc.Count())
 
 	// Overwrites existing bookmark
 	bc.Add(NewDefaultBookmark("/new.klg"))
 	assert.Equal(t, "/new.klg", bc.Default().Target().Path)
+	assert.Equal(t, 1, bc.Count())
 
+	// Add another bookmark
+	foo := NewName("foo")
+	bc.Add(NewBookmark(foo.Value(), "/qwer.klg"))
+	assert.Equal(t, foo, bc.Get(foo).Name())
+	assert.Equal(t, 2, bc.Count())
+
+	// Remove again
+	bc.Remove(foo)
+	assert.Nil(t, bc.Get(foo))
+	assert.Equal(t, 1, bc.Count())
+
+	// Clear all
 	bc.Clear()
 	assert.Nil(t, bc.Default())
 
@@ -73,7 +87,7 @@ func TestParsingFailsForMalformedJson(t *testing.T) {
 		bc, err := NewBookmarksCollectionFromJson(json)
 		require.Nil(t, bc)
 		assert.Error(t, err)
-		assert.Equal(t, BOOKMARK_CONFIG_ERROR, err.Code())
+		assert.Equal(t, CONFIG_ERROR, err.Code())
 	}
 }
 

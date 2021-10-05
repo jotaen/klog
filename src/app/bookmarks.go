@@ -50,9 +50,12 @@ func (b *bookmark) IsDefault() bool {
 }
 
 type BookmarksCollection interface {
+	Get(Name) Bookmark
 	Default() Bookmark
 	Add(Bookmark)
+	Remove(Name)
 	Clear()
+	Count() int
 	ToJson() string
 }
 
@@ -69,16 +72,20 @@ type bookmarkJson struct {
 	Path *string `json:"path"`
 }
 
+func NewEmptyBookmarksCollection() BookmarksCollection {
+	return &bookmarksCollection{make(map[Name]Bookmark)}
+}
+
 func NewBookmarksCollectionFromJson(jsonText string) (BookmarksCollection, Error) {
 	newMalformedJsonError := func(err error) Error {
 		return NewErrorWithCode(
-			BOOKMARK_CONFIG_ERROR,
+			CONFIG_ERROR,
 			"Invalid JSON",
 			"The JSON in your bookmarks file is malformed",
 			err,
 		)
 	}
-	bc := &bookmarksCollection{make(map[Name]Bookmark)}
+	bc := NewEmptyBookmarksCollection()
 	if jsonText == "" {
 		return bc, nil
 	}
@@ -96,12 +103,24 @@ func NewBookmarksCollectionFromJson(jsonText string) (BookmarksCollection, Error
 	return bc, nil
 }
 
+func (bc *bookmarksCollection) Get(n Name) Bookmark {
+	return bc.bookmarks[n]
+}
+
 func (bc *bookmarksCollection) Add(b Bookmark) {
 	bc.bookmarks[b.Name()] = b
 }
 
+func (bc *bookmarksCollection) Remove(n Name) {
+	delete(bc.bookmarks, n)
+}
+
 func (bc *bookmarksCollection) Clear() {
 	bc.bookmarks = make(map[Name]Bookmark)
+}
+
+func (bc *bookmarksCollection) Count() int {
+	return len(bc.bookmarks)
 }
 
 func (bc *bookmarksCollection) ToJson() string {

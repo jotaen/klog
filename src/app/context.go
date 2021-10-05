@@ -94,64 +94,32 @@ func (ctx *context) MetaInfo() struct {
 	}
 }
 
-func retrieveInputs(
-	filePaths []string,
-	readStdin func() (string, Error),
-	defaultBookmark func() (Bookmark, Error),
-) ([]string, Error) {
-	if len(filePaths) > 0 {
-		var result []string
-		for _, p := range filePaths {
-			content, err := ReadFile(p)
-			if err != nil {
-				return nil, err
-			}
-			result = append(result, content)
-		}
-		return result, nil
+func (ctx *context) ReadInputs(fileArgs ...string) ([]Record, error) {
+	bc, bErr := ctx.ReadBookmarks()
+	if bErr != nil {
+		return nil, bErr
 	}
-	stdin, err := readStdin()
-	if err != nil {
-		return nil, err
+	files, rErr := retrieveFirst([]Retriever{
+		(&stdinRetriever{ReadStdin}).Retrieve,
+		(&fileRetriever{ReadFile, bc}).Retrieve,
+	}, fileArgs...)
+	if rErr != nil {
+		return nil, rErr
 	}
-	if stdin != "" {
-		return []string{stdin}, nil
-	}
-	b, err := defaultBookmark()
-	if err != nil {
-		return nil, err
-	} else if b != nil {
-		content, err := ReadFile(b.Target().Path)
-		if err != nil {
-			return nil, err
-		}
-		return []string{content}, nil
-	}
-	return nil, NewErrorWithCode(
-		NO_INPUT_ERROR,
-		"No input given",
-		"Please do one of the following:\n"+
-			"    a) pass one or multiple file names as argument\n"+
-			"    b) pipe file contents via stdin\n"+
-			"    c) specify a bookmark to read from by default",
-		err,
-	)
-}
-
-func (ctx *context) ReadInputs(paths ...string) ([]Record, error) {
-	inputs, err := retrieveInputs(paths, ReadStdin, func() (Bookmark, Error) {
-		bc, err := ctx.ReadBookmarks()
-		if err != nil {
-			return nil, err
-		}
-		return bc.Default(), nil
-	})
-	if err != nil {
-		return nil, err
+	if len(files) == 0 {
+		return nil, NewErrorWithCode(
+			NO_INPUT_ERROR,
+			"No input given",
+			"Please do one of the following:\n"+
+				"    a) specify one or multiple file names or bookmark names\n"+
+				"    b) pipe file contents via stdin\n"+
+				"    c) set a default bookmark to read from",
+			nil,
+		)
 	}
 	var records []Record
-	for _, in := range inputs {
-		pr, parserErrors := parser.Parse(in)
+	for _, f := range files {
+		pr, parserErrors := parser.Parse(f.content)
 		if parserErrors != nil {
 			return nil, parserErrors
 		}
@@ -161,29 +129,28 @@ func (ctx *context) ReadInputs(paths ...string) ([]Record, error) {
 }
 
 func (ctx *context) ReadFileInput(path string) (*parser.ParseResult, *File, error) {
-	if path == "" {
-		bc, err := ctx.ReadBookmarks()
-		if err != nil {
-			return nil, nil, err
-		} else if bc.Default() == nil {
-			return nil, nil, NewErrorWithCode(
-				NO_TARGET_FILE,
-				"No file specified",
-				"You can either specify a file path, or you set a bookmark",
-				nil,
-			)
-		}
-		path = bc.Default().Target().Path
-	}
-	content, err := ReadFile(path)
+	bc, err := ctx.ReadBookmarks()
 	if err != nil {
 		return nil, nil, err
 	}
-	pr, parserErrors := parser.Parse(content)
+	inputs, err := (&fileRetriever{ReadFile, bc}).Retrieve(path)
+	if err != nil {
+		return nil, nil, err
+	}
+	if len(inputs) == 0 {
+		return nil, nil, NewErrorWithCode(
+			NO_TARGET_FILE,
+			"No file specified",
+			"Either specify a file name or bookmark name, or set a default bookmark",
+			nil,
+		)
+	}
+	target := inputs[0]
+	pr, parserErrors := parser.Parse(target.content)
 	if parserErrors != nil {
 		return nil, nil, parserErrors
 	}
-	return pr, NewFile(path), nil
+	return pr, NewFile(target.Path), nil
 }
 
 func (ctx *context) WriteFile(target *File, contents string) Error {
@@ -197,7 +164,7 @@ func (ctx *context) Now() gotime.Time {
 	return gotime.Now()
 }
 
-func (ctx *context) initializeKlogFolder() Error {
+func (ctx *context) initialiseKlogFolder() Error {
 	klogFolder := ctx.KlogFolder()
 	err := os.MkdirAll(klogFolder, 0700)
 	flagAsHidden(klogFolder)
@@ -228,7 +195,7 @@ func (ctx *context) ReadBookmarks() (BookmarksCollection, Error) {
 }
 
 func (ctx *context) SaveBookmarks(bc BookmarksCollection) Error {
-	err := ctx.initializeKlogFolder()
+	err := ctx.initialiseKlogFolder()
 	if err != nil {
 		return err
 	}

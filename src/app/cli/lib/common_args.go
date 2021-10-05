@@ -11,11 +11,11 @@ import (
 )
 
 type InputFilesArgs struct {
-	File []string `arg optional type:"existingfile" name:"file" help:".klg source file(s) (if empty the bookmark is used)"`
+	File []string `arg optional type:"string" name:"file or bookmark" help:".klg source file(s) (if empty the bookmark is used)"`
 }
 
 type OutputFileArgs struct {
-	File string `arg optional type:"existingfile" name:"file" help:".klg source file (if empty the bookmark is used)"`
+	File string `arg optional type:"string" name:"file or bookmark" help:".klg source file (if empty the bookmark is used)"`
 }
 
 type AtDateArgs struct {

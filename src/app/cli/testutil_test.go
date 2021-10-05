@@ -11,7 +11,7 @@ import (
 )
 
 func NewTestingContext() TestingContext {
-	bc, _ := app.NewBookmarksCollectionFromJson(``)
+	bc := app.NewEmptyBookmarksCollection()
 	return TestingContext{
 		State: State{
 			printBuffer:         "",
