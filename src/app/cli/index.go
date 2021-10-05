@@ -25,6 +25,7 @@ type Cli struct {
 	Bookmark  Bookmarks `cmd group:"Misc" hidden help:"Alias"`
 
 	// Misc
+	Edit    Edit    `cmd group:"Misc" help:"Open a file or bookmark in your editor"`
 	Json    Json    `cmd group:"Misc" help:"Converts records to JSON"`
 	Widget  Widget  `cmd group:"Misc" help:"Starts menu bar widget (MacOS only)"`
 	Version Version `cmd group:"Misc" help:"Prints version info and check for updates"`

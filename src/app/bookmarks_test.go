@@ -9,7 +9,7 @@ import (
 func TestCreatesNewBookmark(t *testing.T) {
 	b := NewBookmark("foo", "/asdf/foo.klg")
 	assert.Equal(t, "foo", b.Name().Value())
-	assert.Equal(t, "/asdf/foo.klg", b.Target().Path)
+	assert.Equal(t, "/asdf/foo.klg", b.Target().Path())
 }
 
 func TestNormalizesBookmarkName(t *testing.T) {
@@ -26,12 +26,12 @@ func TestCanAddAndRemoveBookmarks(t *testing.T) {
 
 	bc.Add(NewDefaultBookmark("/old.klg"))
 	assert.Equal(t, "default", bc.Default().Name().Value())
-	assert.Equal(t, "/old.klg", bc.Default().Target().Path)
+	assert.Equal(t, "/old.klg", bc.Default().Target().Path())
 	assert.Equal(t, 1, bc.Count())
 
 	// Overwrites existing bookmark
 	bc.Add(NewDefaultBookmark("/new.klg"))
-	assert.Equal(t, "/new.klg", bc.Default().Target().Path)
+	assert.Equal(t, "/new.klg", bc.Default().Target().Path())
 	assert.Equal(t, 1, bc.Count())
 
 	// Add another bookmark
@@ -62,7 +62,7 @@ func TestParseBookmarksCollectionFromString(t *testing.T) {
 	def := bc.Default()
 	require.NotNil(t, def)
 	assert.Equal(t, "default", def.Name().Value())
-	assert.Equal(t, "/asdf/foo.klg", def.Target().Path)
+	assert.Equal(t, "/asdf/foo.klg", def.Target().Path())
 }
 
 func TestParseEmptyBookmarksCollectionFromString(t *testing.T) {

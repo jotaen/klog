@@ -9,10 +9,9 @@ type Bookmarks struct {
 	List  BookmarksList `cmd name:"get" help:"Show current bookmark"`
 	Get   BookmarksList `cmd hidden help:"Alias"`
 	Ls    BookmarksList `cmd hidden help:"Alias"`
-	Set   BookmarkSet   `cmd name:"set" help:"Set bookmark to a file"`
-	Edit  BookmarkEdit  `cmd name:"edit" help:"Open bookmark in your editor"` // TODO remove
-	Unset BookmarkUnset `cmd name:"unset" help:"Clear current bookmark"`
-	// TODO Clear
+	Set   BookmarkSet   `cmd name:"set" help:"Define a bookmark"`
+	Unset BookmarkUnset `cmd name:"unset" help:"Unset a bookmark definition"`
+	// TODO Add Clear cmd
 }
 
 func (opt *Bookmarks) Help() string {
@@ -62,20 +61,6 @@ func (args *BookmarkSet) Run(ctx app.Context) error {
 	}
 	ctx.Print(args.File + "\n")
 	return nil
-}
-
-type BookmarkEdit struct{}
-
-func (args *BookmarkEdit) Run(ctx app.Context) error {
-	bc, err := ctx.ReadBookmarks()
-	if err != nil {
-		return err
-	}
-	defaultBookmark := bc.Default()
-	if defaultBookmark == nil {
-		return newNoBookmarkSetError()
-	}
-	return ctx.OpenInEditor(defaultBookmark.Target().Path())
 }
 
 type BookmarkUnset struct{}

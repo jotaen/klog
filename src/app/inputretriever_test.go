@@ -25,8 +25,8 @@ func TestFileRetrieverResolvesFilesAndBookmarks(t *testing.T) {
 
 	require.Nil(t, err)
 	require.Len(t, files, 2)
-	assert.Equal(t, "/asdf.klg", files[0].Path)
-	assert.Equal(t, "/foo.klg", files[1].Path)
+	assert.Equal(t, "/asdf.klg", files[0].Path())
+	assert.Equal(t, "/foo.klg", files[1].Path())
 }
 
 func TestReturnsErrorIfBookmarksOrFilesAreInvalid(t *testing.T) {
@@ -51,15 +51,15 @@ func TestFallsBackToDefaultBookmark(t *testing.T) {
 		MockFs{"/foo.klg": true}.readFile,
 		bc,
 	}
-	for _, f := range []func() ([]fileWithContent, Error){
-		func() ([]fileWithContent, Error) { return retriever.Retrieve() },
-		func() ([]fileWithContent, Error) { return retriever.Retrieve("") },
-		func() ([]fileWithContent, Error) { return retriever.Retrieve("", " ") },
+	for _, f := range []func() ([]*fileWithContent, Error){
+		func() ([]*fileWithContent, Error) { return retriever.Retrieve() },
+		func() ([]*fileWithContent, Error) { return retriever.Retrieve("") },
+		func() ([]*fileWithContent, Error) { return retriever.Retrieve("", " ") },
 	} {
 		files, err := f()
 		require.Nil(t, err)
 		require.Len(t, files, 1)
-		assert.Equal(t, "/foo.klg", files[0].Path)
+		assert.Equal(t, "/foo.klg", files[0].Path())
 	}
 }
 
@@ -67,10 +67,10 @@ func TestReturnsStdinInput(t *testing.T) {
 	retriever := &stdinRetriever{
 		func() (string, Error) { return "2021-01-01", nil },
 	}
-	for _, f := range []func() ([]fileWithContent, Error){
-		func() ([]fileWithContent, Error) { return retriever.Retrieve() },
-		func() ([]fileWithContent, Error) { return retriever.Retrieve("") },
-		func() ([]fileWithContent, Error) { return retriever.Retrieve("", " ") },
+	for _, f := range []func() ([]*fileWithContent, Error){
+		func() ([]*fileWithContent, Error) { return retriever.Retrieve() },
+		func() ([]*fileWithContent, Error) { return retriever.Retrieve("") },
+		func() ([]*fileWithContent, Error) { return retriever.Retrieve("", " ") },
 	} {
 		files, err := f()
 		require.Nil(t, err)

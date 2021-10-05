@@ -7,7 +7,7 @@ import (
 )
 
 type ReconcilerChain struct {
-	File string
+	File app.FileOrBookmarkName
 	Ctx  app.Context
 }
 

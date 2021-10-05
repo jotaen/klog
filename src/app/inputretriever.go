@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type Retriever func(fileArgs ...string) ([]fileWithContent, Error)
+type Retriever func(fileArgs ...FileOrBookmarkName) ([]*fileWithContent, Error)
 
 type fileRetriever struct {
 	readFile  func(string) (string, Error)
@@ -17,10 +17,10 @@ type fileWithContent struct {
 	content string
 }
 
-func removeBlankEntries(fileArgs ...string) []string {
-	var result []string
+func removeBlankEntries(fileArgs ...FileOrBookmarkName) []FileOrBookmarkName {
+	var result []FileOrBookmarkName
 	for _, f := range fileArgs {
-		if strings.TrimLeft(f, " ") == "" {
+		if strings.TrimLeft(string(f), " ") == "" {
 			continue
 		}
 		result = append(result, f)
@@ -28,29 +28,32 @@ func removeBlankEntries(fileArgs ...string) []string {
 	return result
 }
 
-func (ir *fileRetriever) Retrieve(fileArgs ...string) ([]fileWithContent, Error) {
+func (ir *fileRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fileWithContent, Error) {
 	fileArgs = removeBlankEntries(fileArgs...)
 	if len(fileArgs) == 0 {
 		defaultBookmark := ir.bookmarks.Default()
 		if defaultBookmark != nil {
-			fileArgs = []string{defaultBookmark.Target().Path()}
+			fileArgs = []FileOrBookmarkName{
+				FileOrBookmarkName(defaultBookmark.Target().Path()),
+			}
 		}
 	}
-	var results []fileWithContent
+	var results []*fileWithContent
 	var errs []string
 	for _, arg := range fileArgs {
+		argValue := string(arg)
 		path, pathErr := (func() (string, error) {
-			if strings.HasPrefix(arg, "@") {
-				b := ir.bookmarks.Get(NewName(arg))
+			if strings.HasPrefix(argValue, "@") {
+				b := ir.bookmarks.Get(NewName(argValue))
 				if b == nil {
-					return arg, errors.New("No such bookmark")
+					return argValue, errors.New("No such bookmark")
 				}
 				return b.Target().Path(), nil
 			}
-			return arg, nil
+			return argValue, nil
 		})()
 		if pathErr != nil {
-			errs = append(errs, pathErr.Error()+": "+arg)
+			errs = append(errs, pathErr.Error()+": "+argValue)
 			continue
 		}
 		content, readErr := ir.readFile(path)
@@ -58,7 +61,7 @@ func (ir *fileRetriever) Retrieve(fileArgs ...string) ([]fileWithContent, Error)
 			errs = append(errs, readErr.Error()+": "+path)
 			continue
 		}
-		results = append(results, fileWithContent{NewFile(path), content})
+		results = append(results, &fileWithContent{NewFile(path), content})
 	}
 	if len(errs) > 0 {
 		return nil, NewErrorWithCode(
@@ -75,7 +78,7 @@ type stdinRetriever struct {
 	readStdin func() (string, Error)
 }
 
-func (r *stdinRetriever) Retrieve(fileArgs ...string) ([]fileWithContent, Error) {
+func (r *stdinRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fileWithContent, Error) {
 	fileArgs = removeBlankEntries(fileArgs...)
 	if len(fileArgs) > 0 {
 		return nil, nil
@@ -87,13 +90,13 @@ func (r *stdinRetriever) Retrieve(fileArgs ...string) ([]fileWithContent, Error)
 	if stdin == "" {
 		return nil, nil
 	}
-	return []fileWithContent{{
+	return []*fileWithContent{{
 		File:    NewFile("/dev/stdin"), // Fake file just to fulfill interface
 		content: stdin,
 	}}, nil
 }
 
-func retrieveFirst(rs []Retriever, fileArgs ...string) ([]fileWithContent, Error) {
+func retrieveFirst(rs []Retriever, fileArgs ...FileOrBookmarkName) ([]*fileWithContent, Error) {
 	for _, r := range rs {
 		files, err := r(fileArgs...)
 		if err != nil {

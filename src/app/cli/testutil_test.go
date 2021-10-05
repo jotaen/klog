@@ -85,11 +85,11 @@ func (ctx *TestingContext) MetaInfo() struct {
 	}{"v0.0", "abcdef1"}
 }
 
-func (ctx *TestingContext) ReadInputs(_ ...string) ([]Record, error) {
+func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, error) {
 	return ctx.records, nil
 }
 
-func (ctx *TestingContext) ReadFileInput(string) (*parser.ParseResult, app.File, error) {
+func (ctx *TestingContext) ReadFileInput(app.FileOrBookmarkName) (*parser.ParseResult, app.File, error) {
 	return ctx.parseResult, nil, nil
 }
 
@@ -115,7 +115,7 @@ func (ctx *TestingContext) OpenInFileBrowser(_ string) app.Error {
 	return nil
 }
 
-func (ctx *TestingContext) OpenInEditor(_ string) app.Error {
+func (ctx *TestingContext) OpenInEditor(_ app.FileOrBookmarkName, _ func(string)) app.Error {
 	return nil
 }
 

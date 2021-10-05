@@ -15,6 +15,8 @@ import (
 var BinaryVersion string   // will be set during build
 var BinaryBuildHash string // will be set during build
 
+type FileOrBookmarkName string
+
 type Context interface {
 	Print(string)
 	KlogFolder() string
@@ -23,14 +25,14 @@ type Context interface {
 		Version   string
 		BuildHash string
 	}
-	ReadInputs(...string) ([]Record, error)
-	ReadFileInput(string) (*parser.ParseResult, File, error)
+	ReadInputs(...FileOrBookmarkName) ([]Record, error)
+	ReadFileInput(FileOrBookmarkName) (*parser.ParseResult, File, error)
 	WriteFile(File, string) Error
 	Now() gotime.Time
 	ReadBookmarks() (BookmarksCollection, Error)
 	SaveBookmarks(BookmarksCollection) Error
 	OpenInFileBrowser(string) Error
-	OpenInEditor(string) Error
+	OpenInEditor(FileOrBookmarkName, func(string)) Error
 	InstantiateTemplate(string) ([]parsing.Text, Error)
 	Serialiser() *parser.Serialiser
 	SetSerialiser(*parser.Serialiser)
@@ -94,7 +96,7 @@ func (ctx *context) MetaInfo() struct {
 	}
 }
 
-func (ctx *context) ReadInputs(fileArgs ...string) ([]Record, error) {
+func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, error) {
 	bc, bErr := ctx.ReadBookmarks()
 	if bErr != nil {
 		return nil, bErr
@@ -128,24 +130,31 @@ func (ctx *context) ReadInputs(fileArgs ...string) ([]Record, error) {
 	return records, nil
 }
 
-func (ctx *context) ReadFileInput(path string) (*parser.ParseResult, File, error) {
+func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (*fileWithContent, Error) {
 	bc, err := ctx.ReadBookmarks()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	inputs, err := (&fileRetriever{ReadFile, bc}).Retrieve(path)
+	inputs, err := (&fileRetriever{ReadFile, bc}).Retrieve(fileArg)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	if len(inputs) == 0 {
-		return nil, nil, NewErrorWithCode(
+		return nil, NewErrorWithCode(
 			NO_TARGET_FILE,
 			"No file specified",
 			"Either specify a file name or bookmark name, or set a default bookmark",
 			nil,
 		)
 	}
-	target := inputs[0]
+	return inputs[0], nil
+}
+
+func (ctx *context) ReadFileInput(fileArg FileOrBookmarkName) (*parser.ParseResult, File, error) {
+	target, err := ctx.retrieveTargetFile(fileArg)
+	if err != nil {
+		return nil, nil, err
+	}
 	pr, parserErrors := parser.Parse(target.content)
 	if parserErrors != nil {
 		return nil, nil, parserErrors
@@ -224,19 +233,23 @@ func (ctx *context) OpenInFileBrowser(path string) Error {
 	return nil
 }
 
-func (ctx *context) OpenInEditor(path string) Error {
+func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(string)) Error {
+	target, err := ctx.retrieveTargetFile(fileArg)
+	if err != nil {
+		return err
+	}
 	hint := "You can specify your preferred editor via the $EDITOR environment variable.\n"
 	preferredEditor := os.Getenv("EDITOR")
 	editors := append([]string{preferredEditor}, POTENTIAL_EDITORS...)
 	for _, editor := range editors {
-		cmd := exec.Command(editor, path)
+		cmd := exec.Command(editor, target.Path())
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		err := cmd.Run()
 		if err == nil {
 			if preferredEditor == "" {
 				// Inform the user that they can configure their editor:
-				ctx.Print(hint)
+				printHint(hint)
 			}
 			return nil
 		}
