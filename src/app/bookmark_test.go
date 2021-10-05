@@ -7,13 +7,13 @@ import (
 )
 
 func TestCreatesNewBookmark(t *testing.T) {
-	b := NewBookmark("foo", "/asdf/foo.klg")
+	b := NewBookmark("foo", NewFileOrPanic("/asdf/foo.klg"))
 	assert.Equal(t, "foo", b.Name().Value())
 	assert.Equal(t, "/asdf/foo.klg", b.Target().Path())
 }
 
 func TestNormalizesBookmarkName(t *testing.T) {
-	b := NewBookmark("@foo", "/asdf/foo.klg")
+	b := NewBookmark("@foo", NewFileOrPanic("/asdf/foo.klg"))
 	assert.Equal(t, "foo", b.Name().Value())
 
 	assert.Equal(t, "foo", NewName("foo").Value())
@@ -27,11 +27,11 @@ func TestNormalizesBookmarkName(t *testing.T) {
 
 func TestGetsBookmarks(t *testing.T) {
 	bc := NewEmptyBookmarksCollection()
-	foo := NewBookmark("foo", "/foo.klg")
+	foo := NewBookmark("foo", NewFileOrPanic("/foo.klg"))
 	bc.Add(foo)
-	asdf := NewBookmark("asdf", "/asdf.klg")
+	asdf := NewBookmark("asdf", NewFileOrPanic("/asdf.klg"))
 	bc.Add(asdf)
-	bar := NewBookmark("bar", "/bar.klg")
+	bar := NewBookmark("bar", NewFileOrPanic("/bar.klg"))
 	bc.Add(bar)
 
 	assert.Equal(t, foo, bc.Get("foo"))
@@ -44,19 +44,19 @@ func TestGetsBookmarks(t *testing.T) {
 func TestCanAddAndRemoveBookmarks(t *testing.T) {
 	bc := NewEmptyBookmarksCollection()
 
-	bc.Add(NewDefaultBookmark("/old.klg"))
+	bc.Add(NewDefaultBookmark(NewFileOrPanic("/old.klg")))
 	assert.Equal(t, "default", bc.Default().Name().Value())
 	assert.Equal(t, "/old.klg", bc.Default().Target().Path())
 	assert.Equal(t, 1, bc.Count())
 
 	// Overwrites existing bookmark
-	bc.Add(NewDefaultBookmark("/new.klg"))
+	bc.Add(NewDefaultBookmark(NewFileOrPanic("/new.klg")))
 	assert.Equal(t, "/new.klg", bc.Default().Target().Path())
 	assert.Equal(t, 1, bc.Count())
 
 	// Add another bookmark
 	foo := NewName("foo")
-	bc.Add(NewBookmark(foo.Value(), "/qwer.klg"))
+	bc.Add(NewBookmark(foo.Value(), NewFileOrPanic("/qwer.klg")))
 	assert.Equal(t, foo, bc.Get(foo).Name())
 	assert.Equal(t, 2, bc.Count())
 
@@ -109,6 +109,7 @@ func TestParsingFailsForMalformedJson(t *testing.T) {
 		`{"name": "default", "path": "/asdf/foo.klg"}`, // No array
 		`[{"name": "default"}]`,                        // Missing field
 		`[{"name": "default", "path": true}]`,          // Wrong type
+		`[{"name": "default", "path": "foo.klg"}]`,     // Relative path
 	} {
 		bc, err := NewBookmarksCollectionFromJson(json)
 		require.Nil(t, bc)

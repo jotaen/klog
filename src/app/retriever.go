@@ -8,7 +8,7 @@ import (
 type Retriever func(fileArgs ...FileOrBookmarkName) ([]*fileWithContent, Error)
 
 type fileRetriever struct {
-	readFile  func(string) (string, Error)
+	readFile  func(File) (string, Error)
 	bookmarks BookmarksCollection
 }
 
@@ -56,12 +56,16 @@ func (ir *fileRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fileWithCo
 			errs = append(errs, pathErr.Error()+": "+argValue)
 			continue
 		}
-		content, readErr := ir.readFile(path)
+		file, fErr := NewFile(path)
+		if fErr != nil {
+			errs = append(errs, "Invalid file path: "+path)
+		}
+		content, readErr := ir.readFile(file)
 		if readErr != nil {
-			errs = append(errs, readErr.Error()+": "+path)
+			errs = append(errs, readErr.Error()+": "+file.Path())
 			continue
 		}
-		results = append(results, &fileWithContent{NewFile(path), content})
+		results = append(results, &fileWithContent{file, content})
 	}
 	if len(errs) > 0 {
 		return nil, NewErrorWithCode(
@@ -91,7 +95,7 @@ func (r *stdinRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fileWithCo
 		return nil, nil
 	}
 	return []*fileWithContent{{
-		File:    NewFile("/dev/stdin"), // Fake file just to fulfill interface
+		File:    NewFileOrPanic("/dev/stdin"), // Fake file just to fulfill interface
 		content: stdin,
 	}}, nil
 }

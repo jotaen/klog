@@ -114,7 +114,7 @@ func (ctx *TestingContext) ManipulateBookmarks(_ func(app.BookmarksCollection) a
 	return nil
 }
 
-func (ctx *TestingContext) OpenInFileBrowser(_ string) app.Error {
+func (ctx *TestingContext) OpenInFileBrowser(_ app.File) app.Error {
 	return nil
 }
 

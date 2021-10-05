@@ -37,18 +37,34 @@ func (opt *BookmarksList) Run(ctx app.Context) error {
 }
 
 type BookmarksSet struct {
-	File string `arg type:"existingfile" help:".klg source file"`
-	Name string `arg name:"bookmark" type:"string" optional:"1" help:"The name of the bookmark"`
+	File  string `arg type:"string" help:".klg source file"`
+	Name  string `arg name:"bookmark" type:"string" optional:"1" help:"The name of the bookmark"`
+	Force bool   `name:"force" help:"Force setting, even if target file does not exist"`
 	lib.QuietArgs
 }
 
 func (opt *BookmarksSet) Run(ctx app.Context) error {
+	file, err := app.NewFile(opt.File)
+	if err != nil {
+		return err
+	}
+	if !opt.Force {
+		_, rErr := ctx.ReadInputs(app.FileOrBookmarkName(file.Path()))
+		if rErr != nil {
+			return app.NewErrorWithCode(
+				app.GENERAL_ERROR,
+				"Invalid bookmark target",
+				"Please check that the file exists and is valid",
+				rErr,
+			)
+		}
+	}
 	return ctx.ManipulateBookmarks(func(bc app.BookmarksCollection) app.Error {
 		bookmark := (func() app.Bookmark {
 			if opt.Name == "" {
-				return app.NewDefaultBookmark(opt.File)
+				return app.NewDefaultBookmark(file)
 			}
-			return app.NewBookmark(opt.Name, opt.File)
+			return app.NewBookmark(opt.Name, file)
 		})()
 		bc.Add(bookmark)
 		if opt.Quiet {
@@ -73,7 +89,7 @@ func (opt *BookmarksUnset) Run(ctx app.Context) error {
 		hasRemoved := bc.Remove(name)
 		if !hasRemoved {
 			return app.NewErrorWithCode(
-				app.NO_BOOKMARK_SET_ERROR,
+				app.NO_SUCH_BOOKMARK_ERROR,
 				"No such bookmark",
 				"Name: "+name.ValuePretty(),
 				nil,

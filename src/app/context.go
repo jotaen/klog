@@ -33,7 +33,7 @@ type Context interface {
 	Now() gotime.Time
 	ReadBookmarks() (BookmarksCollection, Error)
 	ManipulateBookmarks(func(BookmarksCollection) Error) Error
-	OpenInFileBrowser(string) Error
+	OpenInFileBrowser(File) Error
 	OpenInEditor(FileOrBookmarkName, func(string)) Error
 	InstantiateTemplate(string) ([]parsing.Text, Error)
 	Serialiser() *parser.Serialiser
@@ -175,14 +175,14 @@ func (ctx *context) ReadFileInput(fileArg FileOrBookmarkName) (*parser.ParseResu
 	if parserErrors != nil {
 		return nil, nil, parserErrors
 	}
-	return pr, NewFile(target.Path()), nil
+	return pr, target, nil
 }
 
 func (ctx *context) WriteFile(target File, contents string) Error {
 	if target == nil {
 		panic("No path specified")
 	}
-	return WriteToFile(target.Path(), contents)
+	return WriteToFile(target, contents)
 }
 
 func (ctx *context) Now() gotime.Time {
@@ -204,7 +204,7 @@ func (ctx *context) initialiseKlogFolder() Error {
 }
 
 func (ctx *context) ReadBookmarks() (BookmarksCollection, Error) {
-	bookmarksDatabase, err := ReadFile(ctx.bookmarkDatabasePath().Path())
+	bookmarksDatabase, err := ReadFile(ctx.bookmarkDatabasePath())
 	if err != nil {
 		// If database doesn’t exist, try to convert from legacy bookmark file.
 		if os.IsNotExist(err.Original()) {
@@ -233,7 +233,7 @@ func (ctx *context) ManipulateBookmarks(manipulate func(BookmarksCollection) Err
 		return iErr
 	}
 	_ = os.Remove(ctx.bookmarkLegacySymlinkPath()) // Clean up legacy bookmark file, if exists
-	return WriteToFile(ctx.bookmarkDatabasePath().Path(), bc.ToJson())
+	return WriteToFile(ctx.bookmarkDatabasePath(), bc.ToJson())
 }
 
 func (ctx *context) bookmarkLegacySymlinkPath() string {
@@ -241,11 +241,11 @@ func (ctx *context) bookmarkLegacySymlinkPath() string {
 }
 
 func (ctx *context) bookmarkDatabasePath() File {
-	return NewFile(ctx.KlogFolder() + "/bookmarks.json")
+	return NewFileOrPanic(ctx.KlogFolder() + "/bookmarks.json")
 }
 
-func (ctx *context) OpenInFileBrowser(path string) Error {
-	cmd := exec.Command("open", path)
+func (ctx *context) OpenInFileBrowser(target File) Error {
+	cmd := exec.Command("open", target.Location())
 	err := cmd.Run()
 	if err != nil {
 		return NewError(
@@ -286,12 +286,12 @@ func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(stri
 }
 
 func (ctx *context) InstantiateTemplate(templateName string) ([]parsing.Text, Error) {
-	location := ctx.KlogFolder() + templateName + ".template.klg"
+	location := NewFileOrPanic(ctx.KlogFolder() + templateName + ".template.klg")
 	template, err := ReadFile(location)
 	if err != nil {
 		return nil, NewError(
 			"No such template",
-			"There is no template at location "+location,
+			"There is no template at location "+location.Path(),
 			err,
 		)
 	}

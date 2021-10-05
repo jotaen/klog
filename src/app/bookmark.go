@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"encoding/json"
+	"path"
 	"sort"
 	"strings"
 )
@@ -44,12 +45,12 @@ type bookmark struct {
 	target File
 }
 
-func NewBookmark(name string, targetPath string) Bookmark {
-	return &bookmark{NewName(name), NewFile(targetPath)}
+func NewBookmark(name string, target File) Bookmark {
+	return &bookmark{NewName(name), target}
 }
 
-func NewDefaultBookmark(targetPath string) Bookmark {
-	return NewBookmark(defaultName, targetPath)
+func NewDefaultBookmark(target File) Bookmark {
+	return NewBookmark(defaultName, target)
 }
 
 func (b *bookmark) Name() Name {
@@ -114,7 +115,14 @@ func NewBookmarksCollectionFromJson(jsonText string) (BookmarksCollection, Error
 		if b.Name == nil || b.Path == nil {
 			return nil, newMalformedJsonError(nil)
 		}
-		bc.Add(NewBookmark(*b.Name, *b.Path))
+		if !path.IsAbs(*b.Path) {
+			return nil, newMalformedJsonError(nil)
+		}
+		file, fErr := NewFile(*b.Path)
+		if fErr != nil {
+			return nil, fErr
+		}
+		bc.Add(NewBookmark(*b.Name, file))
 	}
 	return bc, nil
 }

@@ -3,6 +3,7 @@ package app
 import (
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 )
 
@@ -12,54 +13,70 @@ type File interface {
 	Path() string
 }
 
-type file struct {
-	path string
+type absoluteFile struct {
+	absolute string
 }
 
-func NewFile(path string) File {
-	return &file{path}
+func NewFile(path string) (File, Error) {
+	absolutePath, err := filepath.Abs(path)
+	if err != nil {
+		return nil, NewErrorWithCode(
+			IO_ERROR,
+			"Invalid file path",
+			"Location: "+path,
+			err,
+		)
+	}
+	return NewFileOrPanic(absolutePath), nil
 }
 
-func (f *file) Name() string {
-	return filepath.Base(f.path)
+func NewFileOrPanic(absolutePath string) File {
+	if !path.IsAbs(absolutePath) {
+		panic("Not an absolute path: " + absolutePath)
+	}
+	return &absoluteFile{absolutePath}
 }
 
-func (f *file) Location() string {
-	return filepath.Dir(f.path)
+func (f *absoluteFile) Name() string {
+	return filepath.Base(f.absolute)
 }
 
-func (f *file) Path() string {
-	return f.path
+func (f *absoluteFile) Location() string {
+	return filepath.Dir(f.absolute)
 }
 
-func ReadFile(path string) (string, Error) {
-	contents, err := os.ReadFile(path)
+func (f *absoluteFile) Path() string {
+	return f.absolute
+}
+
+func ReadFile(source File) (string, Error) {
+	contents, err := os.ReadFile(source.Path())
 	if err != nil {
 		if os.IsNotExist(err) {
 			return "", NewErrorWithCode(
 				NO_SUCH_FILE,
 				"No such file",
-				"Location: "+path,
+				"Location: "+source.Path(),
 				err,
 			)
 		}
 		return "", NewErrorWithCode(
 			IO_ERROR,
 			"Cannot read file",
-			"Location: "+path,
+			"Location: "+source.Path(),
 			err,
 		)
 	}
 	return string(contents), nil
 }
 
-func WriteToFile(path string, contents string) Error {
-	err := os.WriteFile(path, []byte(contents), 0644)
+func WriteToFile(target File, contents string) Error {
+	err := os.WriteFile(target.Path(), []byte(contents), 0644)
 	if err != nil {
 		return NewErrorWithCode(
 			IO_ERROR,
 			"Cannot write to file",
-			"Location: "+path,
+			"Location: "+target.Path(),
 			err,
 		)
 	}

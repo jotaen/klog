@@ -92,7 +92,7 @@ func renderRecords(ctx app.Context, records []klog.Record, file app.File) []menu
 				{
 					Text: "Show in Finder...",
 					Clicked: func() {
-						_ = ctx.OpenInFileBrowser(file.Location())
+						_ = ctx.OpenInFileBrowser(file)
 					},
 				},
 				{Type: menuet2.Separator},

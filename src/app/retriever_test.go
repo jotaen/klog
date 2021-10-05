@@ -8,16 +8,16 @@ import (
 
 type MockFs map[string]bool
 
-func (fs MockFs) readFile(path string) (string, Error) {
-	if fs[path] {
-		return path, nil
+func (fs MockFs) readFile(source File) (string, Error) {
+	if fs[source.Path()] {
+		return source.Path(), nil
 	}
-	return "", NewError("", path, nil)
+	return "", NewError("", source.Path(), nil)
 }
 
 func TestFileRetrieverResolvesFilesAndBookmarks(t *testing.T) {
 	bc := NewEmptyBookmarksCollection()
-	bc.Add(NewBookmark("foo", "/foo.klg"))
+	bc.Add(NewBookmark("foo", NewFileOrPanic("/foo.klg")))
 	files, err := (&fileRetriever{
 		MockFs{"/asdf.klg": true, "/foo.klg": true}.readFile,
 		bc,
@@ -31,7 +31,7 @@ func TestFileRetrieverResolvesFilesAndBookmarks(t *testing.T) {
 
 func TestReturnsErrorIfBookmarksOrFilesAreInvalid(t *testing.T) {
 	bc := NewEmptyBookmarksCollection()
-	bc.Add(NewBookmark("foo", "/foo.klg"))
+	bc.Add(NewBookmark("foo", NewFileOrPanic("/foo.klg")))
 	files, err := (&fileRetriever{
 		MockFs{}.readFile,
 		bc,
@@ -46,7 +46,7 @@ func TestReturnsErrorIfBookmarksOrFilesAreInvalid(t *testing.T) {
 
 func TestFallsBackToDefaultBookmark(t *testing.T) {
 	bc := NewEmptyBookmarksCollection()
-	bc.Add(NewDefaultBookmark("/foo.klg"))
+	bc.Add(NewDefaultBookmark(NewFileOrPanic("/foo.klg")))
 	retriever := &fileRetriever{
 		MockFs{"/foo.klg": true}.readFile,
 		bc,
