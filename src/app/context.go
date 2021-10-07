@@ -207,11 +207,19 @@ func (ctx *context) ReadBookmarks() (BookmarksCollection, Error) {
 	bookmarksDatabase, err := ReadFile(ctx.bookmarkDatabasePath())
 	if err != nil {
 		// If database doesn’t exist, try to convert from legacy bookmark file.
+		// If that fails for whatever reason, don’t bother and create fresh collection.
 		if os.IsNotExist(err.Original()) {
-			legacyTarget, err := os.Readlink(ctx.bookmarkLegacySymlinkPath())
-			if err == nil {
-				bookmarksDatabase = `[{"name":"` + BOOKMARK_DEFAULT_NAME + `", "path": "` + legacyTarget + `"}]`
+			newBc := NewEmptyBookmarksCollection()
+			legacyTargetPath, rErr := os.Readlink(ctx.bookmarkLegacySymlinkPath())
+			if rErr != nil {
+				return newBc, nil
 			}
+			legacyTarget, fErr := NewFile(legacyTargetPath)
+			if fErr != nil {
+				return newBc, nil
+			}
+			newBc.Set(NewDefaultBookmark(legacyTarget))
+			return newBc, nil
 		} else {
 			return nil, err
 		}
@@ -241,7 +249,7 @@ func (ctx *context) bookmarkLegacySymlinkPath() string {
 }
 
 func (ctx *context) bookmarkDatabasePath() File {
-	return NewFileOrPanic(ctx.KlogFolder() + "/bookmarks.json")
+	return NewFileOrPanic(ctx.KlogFolder() + "bookmarks.json")
 }
 
 func (ctx *context) OpenInFileBrowser(target File) Error {

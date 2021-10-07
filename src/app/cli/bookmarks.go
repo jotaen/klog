@@ -7,23 +7,23 @@ import (
 )
 
 type Bookmarks struct {
-	List BookmarksList `cmd name:"list" help:"Display all bookmarks"`
+	List BookmarksList `cmd name:"list" help:"Displays all bookmarks"`
 	Ls   BookmarksList `cmd name:"ls" hidden help:"Alias for 'list'"`
 
-	Set BookmarksSet `cmd name:"set" help:"Define a bookmark"`
+	Set BookmarksSet `cmd name:"set" help:"Defines a bookmark (or overwrites an existing one)"`
 	New BookmarksSet `cmd name:"new" hidden help:"Alias for 'set'"`
 
-	Unset BookmarksUnset `cmd name:"unset" help:"Remove a bookmark"`
+	Unset BookmarksUnset `cmd name:"unset" help:"Removes a bookmark from the collection"`
 	Rm    BookmarksUnset `cmd name:"rm" hidden help:"Alias for 'unset'"`
 
-	Clear BookmarksClear `cmd name:"clear" help:"Clear entire bookmark collection"`
+	Clear BookmarksClear `cmd name:"clear" help:"Clears entire bookmark collection"`
 }
 
 func (opt *Bookmarks) Help() string {
-	return `Bookmarks allow you to interact with often-used files via a short alias,
-regardless of your current working directory.
+	return `Bookmarks allow you to interact with often-used files via an alias,
+regardless of your current working directory. A bookmark name is always prefixed with an '@'.
 
-E.g.: klog total @myfile
+E.g.: klog total @work
 
 You can specify as many bookmarks as you want. There can even be one “unnamed” bookmark.`
 }
@@ -35,6 +35,10 @@ func (opt *BookmarksList) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
+	if bc.Count() == 0 {
+		ctx.Print("There are no bookmarks defined yet.\n")
+		return nil
+	}
 	for _, b := range bc.All() {
 		ctx.Print(b.Name().ValuePretty() + " -> " + b.Target().Path() + "\n")
 	}
@@ -43,8 +47,8 @@ func (opt *BookmarksList) Run(ctx app.Context) error {
 
 type BookmarksSet struct {
 	File  string `arg type:"string" help:".klg source file"`
-	Name  string `arg name:"bookmark" type:"string" optional:"1" help:"The name of the bookmark"`
-	Force bool   `name:"force" help:"Force setting, even if target file does not exist"`
+	Name  string `arg name:"bookmark" type:"string" optional:"1" help:"The name of the bookmark."`
+	Force bool   `name:"force" help:"Force to set, even if target file does not exist or is invalid"`
 	lib.QuietArgs
 }
 

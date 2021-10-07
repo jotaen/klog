@@ -1,4 +1,17 @@
-# Changelog (command line tool)
+# Changelog
+**Summary of changes of the command line tool**
+
+## v3.0
+- **[ FEATURE ]** Support multiple (named) bookmarks to quickly
+  reference often-used files, e.g. `klog total @work`
+- **[ FEATURE ]** Add additional evaluation options for `klog report`
+  to aggregate the data by day, week, month, quarter or year
+- **[ FEATURE ]** Add `klog edit` command for opening a file in an editor
+  (Based on the `$EDITOR` variable.)
+- **[ FEATURE ]** Allow value of `--sort` flag to be uppercase
+  or lowercase (`ASC`/`asc` or `DESC`/`desc`)
+- **[ FEATURE ]** Support `klog --version` in addition to `klog version`
+- **[ FIX ]** Windows: don’t require admin privileges for setting bookmarks 
 
 ## v2.6
 - **[ INFO ]** Release first version of the file format

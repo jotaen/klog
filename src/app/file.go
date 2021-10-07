@@ -3,7 +3,6 @@ package app
 import (
 	"io"
 	"os"
-	"path"
 	"path/filepath"
 )
 
@@ -31,7 +30,7 @@ func NewFile(path string) (File, Error) {
 }
 
 func NewFileOrPanic(absolutePath string) File {
-	if !path.IsAbs(absolutePath) {
+	if !filepath.IsAbs(absolutePath) {
 		panic("Not an absolute path: " + absolutePath)
 	}
 	return &fileWithPath{absolutePath}
@@ -47,6 +46,10 @@ func (f *fileWithPath) Location() string {
 
 func (f *fileWithPath) Path() string {
 	return f.absolutePath
+}
+
+func IsAbs(path string) bool {
+	return filepath.IsAbs(path)
 }
 
 func ReadFile(source File) (string, Error) {

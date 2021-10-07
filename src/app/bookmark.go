@@ -3,7 +3,6 @@ package app
 import (
 	"bytes"
 	"encoding/json"
-	"path"
 	"sort"
 	"strings"
 )
@@ -116,7 +115,7 @@ func NewBookmarksCollectionFromJson(jsonText string) (BookmarksCollection, Error
 		if b.Name == nil || b.Path == nil {
 			return nil, newMalformedJsonError(nil)
 		}
-		if !path.IsAbs(*b.Path) {
+		if !IsAbs(*b.Path) {
 			return nil, newMalformedJsonError(nil)
 		}
 		file, fErr := NewFile(*b.Path)
