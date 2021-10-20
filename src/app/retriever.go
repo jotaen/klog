@@ -95,7 +95,7 @@ func (retriever *stdinRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fi
 		return nil, nil
 	}
 	return []*fileWithContent{{
-		File:    NewFileOrPanic("/dev/stdin"), // Fake file just to fulfill interface
+		File:    nil,
 		content: stdin,
 	}}, nil
 }

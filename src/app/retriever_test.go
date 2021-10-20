@@ -75,6 +75,7 @@ func TestReturnsStdinInput(t *testing.T) {
 		files, err := f()
 		require.Nil(t, err)
 		require.Len(t, files, 1)
+		require.Nil(t, files[0].File)
 		assert.Equal(t, "2021-01-01", files[0].content)
 	}
 }

@@ -1,6 +1,9 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## v3.1
+- **[ FIX ]** Fix stdin processing on Windows
+
 ## v3.0
 - **[ FEATURE ]** Support multiple (named) bookmarks to quickly
   reference often-used files, e.g. `klog total @work`
