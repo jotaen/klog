@@ -1,6 +1,10 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## v3.2
+- **[ FEATURE ]** Allow version check via `klog -v` (in addition
+  to `klog --version` or `klog version`)
+
 ## v3.1
 - **[ FIX ]** Fix stdin processing on Windows
 
