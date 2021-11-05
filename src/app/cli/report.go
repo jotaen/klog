@@ -11,7 +11,7 @@ import (
 )
 
 type Report struct {
-	AggregateBy string `name:"aggregate" short:"a" help:"Aggregate data by: day, week, month, quarter, year" enum:"DAY,day,d,WEEK,week,w,MONTH,month,m,QUARTER,quarter,q,YEAR,year,y,"`
+	AggregateBy string `name:"aggregate" short:"a" help:"Aggregate data by: day, week, month, quarter, year" enum:"DAY,day,d,WEEK,week,w,MONTH,month,m,QUARTER,quarter,q,YEAR,year,y," default:"day"`
 	Fill        bool   `name:"fill" short:"f" help:"Fill the gaps and show a consecutive stream"`
 	lib.DiffArgs
 	lib.FilterArgs
