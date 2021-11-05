@@ -26,11 +26,5 @@ type Cli struct {
 	Version Version `cmd group:"Misc" help:"Prints version info and check for updates"`
 
 	// Default command for displaying info text (hidden)
-	Info Info `cmd default:"1" hidden:"1"`
-
-	// Workaround for supporting --version in addition to the `version` subcommand.
-	// It’s hidden, otherwise the flag would appear in the help text on all subcommands.
-	// There is no short flag (-v) defined, otherwise no subcommand could define -v anymore.
-	// The flag is processed by the `Info` subcommand.
-	VersionFlag bool `name:"version" hidden:"1"`
+	Info Info `cmd default:"withargs" hidden:"1"`
 }

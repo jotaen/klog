@@ -8,10 +8,12 @@ const DESCRIPTION = "klog: command line app for time tracking with plain-text fi
 	"Run with --help to learn usage.\n" +
 	"Documentation online at https://klog.jotaen.net"
 
-type Info struct{}
+type Info struct {
+	Version bool `short:"v" name:"version" help:"Alias for 'klog version'"`
+}
 
 func (opt *Info) Run(ctx app.Context, cli *Cli) error {
-	if cli.VersionFlag {
+	if opt.Version {
 		versionCmd := Version{}
 		return versionCmd.Run(ctx)
 	}
