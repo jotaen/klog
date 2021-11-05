@@ -127,7 +127,7 @@ type QuietArgs struct {
 }
 
 type SortArgs struct {
-	Sort string `name:"sort" help:"Sort output by date (ASC or DESC)" enum:"ASC,DESC,asc,desc," default:"desc"`
+	Sort string `name:"sort" help:"Sort output by date (ASC or DESC)" enum:"ASC,DESC,asc,desc," default:"asc"`
 }
 
 func (args *SortArgs) ApplySort(rs []Record) []Record {
