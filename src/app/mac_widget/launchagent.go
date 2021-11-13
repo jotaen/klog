@@ -1,3 +1,5 @@
+//go:build darwin && amd64
+
 package mac_widget
 
 import (
