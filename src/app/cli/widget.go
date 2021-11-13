@@ -19,6 +19,13 @@ Note that this is an experimental feature, it might be discontinued.`
 }
 
 func (opt *Widget) Run(ctx app.Context) error {
+	if !systray.IsWidgetAvailable() {
+		return app.NewError(
+			"Cannot start widget",
+			"The widget is currently only supported on MacOS.",
+			nil,
+		)
+	}
 	if !opt.Detach {
 		ctx.Print("If you would like to run the widget on its own\n")
 		ctx.Print("run this command again with --detach\n")
