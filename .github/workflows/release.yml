@@ -22,9 +22,8 @@ jobs:
           body: |
             Download the klog binary here:
 
-            - **MacOS**
-              - [Intel](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac-intel.zip)
-              - [M1 (ARM)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac-arm.zip)
+            - [**MacOS** Intel](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac-intel.zip)
+            - [**MacOS** M1 (ARM)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac-arm.zip)
             - [**Linux**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-linux.zip)
             - [**Windows**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-windows.zip)
 
