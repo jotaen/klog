@@ -22,7 +22,9 @@ jobs:
           body: |
             Download the klog binary here:
 
-            - [**MacOS**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac.zip)
+            - **MacOS**
+              - [Intel](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac-intel.zip)
+              - [M1 (ARM)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac-arm.zip)
             - [**Linux**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-linux.zip)
             - [**Windows**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-windows.zip)
 
@@ -48,6 +50,11 @@ jobs:
             runner_os: macos-latest
             go_os: darwin
             go_arch: amd64
+            binary_name: klog
+          - name: mac-arm
+            runner_os: macos-latest
+            go_os: darwin
+            go_arch: arm64
             binary_name: klog
           - name: windows
             runner_os: ubuntu-latest # Run on Linux for portability of workflow
