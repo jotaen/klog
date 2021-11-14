@@ -8,8 +8,9 @@ notifications on [Github](https://github.com/jotaen/klog) (at the top right:
 For an archive of all klog releases, [see here](https://github.com/jotaen/klog/releases).
 
 ## MacOS
-1. [**Download**](https://github.com/jotaen/klog/releases/latest/download/klog-mac.zip)
-   the latest version and unzip
+1. Download the latest version and unzip
+   - [**Download for Intel**](https://github.com/jotaen/klog/releases/latest/download/klog-mac-intel.zip)
+   - [**Download for M1 (ARM)**](https://github.com/jotaen/klog/releases/latest/download/klog-mac-arm.zip)
 2. Right-click on the binary and select “Open“
    (due to [Gatekeeper](https://support.apple.com/en-us/HT202491))
 3. Copy to path, e.g. `mv klog /usr/local/bin/klog` (might require `sudo`)
