@@ -27,3 +27,26 @@ For an archive of all klog releases, [see here](https://github.com/jotaen/klog/r
 
 By the way, as an alternative you can also use the Linux binary on
 the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+
+# Build klog from sources
+
+Instead of downloading the binaries, you can also build klog yourself.
+
+As prerequisite, you need to have the [Go compiler](https://golang.org/doc/install).
+Please check the [`go.mod`](go.mod) file to see what Go version klog requires.
+
+Fetch the sources:
+
+```
+git clone https://github.com/jotaen/klog.git
+cd klog
+```
+
+In order to build the project, run:
+
+```
+go build src/app/cli/main/klog.go
+```
+
+This automatically resolves the dependencies and compiles the source code into an
+executable for your platform.
