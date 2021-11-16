@@ -20,8 +20,8 @@ func NewCliSerialiser() *parser.Serialiser {
 		ShouldTotal: func(d Duration) string {
 			return Style{Color: "213"}.Format(d.ToString())
 		},
-		Summary: func(s Summary) string {
-			txt := strings.Join(s, "\n")
+		Summary: func(s parser.SummaryText) string {
+			txt := s.ToString()
 			style := Style{Color: "249"}
 			hashStyle := style.ChangedBold(true).ChangedColor("251")
 			txt = HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {

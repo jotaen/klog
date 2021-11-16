@@ -6,22 +6,42 @@ import (
 	"strings"
 )
 
-// Summary is arbitrary text that can be associated with a Record or an Entry.
-type Summary []string
+type RecordSummary []string
 
-func NewSummary(line ...string) Summary {
+type EntrySummary []string
+
+func NewRecordSummary(line ...string) RecordSummary {
 	return line
 }
 
-func NewEntrySummary(text string) Summary {
+func NewEntrySummary(text string) EntrySummary {
 	if text == "" {
-		return NewSummary()
+		return nil
 	}
-	return NewSummary(text)
+	return []string{text}
 }
 
-func (s Summary) IsEmpty() bool {
+func (s RecordSummary) IsEmpty() bool {
 	return len(s) == 0
+}
+
+func (s EntrySummary) IsEmpty() bool {
+	return RecordSummary(s).IsEmpty()
+}
+
+func (s RecordSummary) Tags() TagSet {
+	tags := NewTagSet()
+	for _, l := range s {
+		for _, m := range HashTagPattern.FindAllStringSubmatch(l, -1) {
+			tag := NewTag(m[1])
+			tags[tag] = true
+		}
+	}
+	return tags
+}
+
+func (s EntrySummary) Tags() TagSet {
+	return RecordSummary(s).Tags()
 }
 
 var HashTagPattern = regexp.MustCompile(`#([\p{L}\d_]+)`)
@@ -63,17 +83,6 @@ func NewTag(value string) Tag {
 		value = value[1:]
 	}
 	return Tag(strings.ToLower(value))
-}
-
-func (s Summary) Tags() TagSet {
-	tags := NewTagSet()
-	for _, l := range s {
-		for _, m := range HashTagPattern.FindAllStringSubmatch(l, -1) {
-			tag := NewTag(m[1])
-			tags[tag] = true
-		}
-	}
-	return tags
 }
 
 func NewTagSet(tags ...string) TagSet {

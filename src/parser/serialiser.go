@@ -22,7 +22,7 @@ func (h *Serialiser) serialiseRecord(r Record) string {
 	}
 	text += "\n"
 	if !r.Summary().IsEmpty() {
-		text += h.Summary(r.Summary()) + "\n"
+		text += h.Summary(SummaryText(r.Summary())) + "\n"
 	}
 	for _, e := range r.Entries() {
 		text += "    " // indentation
@@ -32,21 +32,23 @@ func (h *Serialiser) serialiseRecord(r Record) string {
 			func(o OpenRange) interface{} { return h.OpenRange(o) },
 		)).(string)
 		if !e.Summary().IsEmpty() {
-			text += " " + h.Summary(e.Summary())
+			text += " " + h.Summary(SummaryText(e.Summary()))
 		}
 		text += "\n"
 	}
 	return text
 }
 
-func serialiseSummary(s Summary) string {
+type SummaryText []string
+
+func (s SummaryText) ToString() string {
 	return strings.Join(s, "\n")
 }
 
 type Serialiser struct {
 	Date           func(Date) string
 	ShouldTotal    func(Duration) string
-	Summary        func(Summary) string
+	Summary        func(SummaryText) string
 	Range          func(Range) string
 	OpenRange      func(OpenRange) string
 	Duration       func(Duration) string
@@ -57,7 +59,7 @@ type Serialiser struct {
 var PlainSerialiser = Serialiser{
 	Date:           Date.ToString,
 	ShouldTotal:    Duration.ToString,
-	Summary:        serialiseSummary,
+	Summary:        SummaryText.ToString,
 	Range:          Range.ToString,
 	OpenRange:      OpenRange.ToString,
 	Duration:       Duration.ToString,

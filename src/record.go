@@ -17,15 +17,15 @@ type Record interface {
 	ShouldTotal() ShouldTotal
 	SetShouldTotal(Duration)
 
-	Summary() Summary
-	SetSummary(Summary) error
+	Summary() RecordSummary
+	SetSummary(RecordSummary) error
 
 	Entries() []Entry
 	SetEntries([]Entry)
-	AddDuration(Duration, Summary)
-	AddRange(Range, Summary)
+	AddDuration(Duration, EntrySummary)
+	AddRange(Range, EntrySummary)
 	OpenRange() OpenRange
-	StartOpenRange(Time, Summary) error
+	StartOpenRange(Time, EntrySummary) error
 	EndOpenRange(Time) error
 }
 
@@ -52,7 +52,7 @@ func (s shouldTotal) ToString() string {
 type record struct {
 	date        Date
 	shouldTotal ShouldTotal
-	summary     Summary
+	summary     RecordSummary
 	entries     []Entry
 }
 
@@ -71,11 +71,11 @@ func (r *record) SetShouldTotal(t Duration) {
 	r.shouldTotal = NewShouldTotal(0, t.InMinutes())
 }
 
-func (r *record) Summary() Summary {
+func (r *record) Summary() RecordSummary {
 	return r.summary
 }
 
-func (r *record) SetSummary(summary Summary) error {
+func (r *record) SetSummary(summary RecordSummary) error {
 	for _, l := range summary {
 		if strings.HasPrefix(l, " ") {
 			return errors.New("MALFORMED_SUMMARY")
@@ -93,11 +93,11 @@ func (r *record) SetEntries(es []Entry) {
 	r.entries = es
 }
 
-func (r *record) AddDuration(d Duration, s Summary) {
+func (r *record) AddDuration(d Duration, s EntrySummary) {
 	r.entries = append(r.entries, NewEntry(d, s))
 }
 
-func (r *record) AddRange(tr Range, s Summary) {
+func (r *record) AddRange(tr Range, s EntrySummary) {
 	r.entries = append(r.entries, NewEntry(tr, s))
 }
 
@@ -111,7 +111,7 @@ func (r *record) OpenRange() OpenRange {
 	return nil
 }
 
-func (r *record) StartOpenRange(t Time, s Summary) error {
+func (r *record) StartOpenRange(t Time, s EntrySummary) error {
 	if r.OpenRange() != nil {
 		return errors.New("DUPLICATE_OPEN_RANGE")
 	}

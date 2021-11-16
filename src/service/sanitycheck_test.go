@@ -20,12 +20,12 @@ func TestNoWarningWhenAllGood(t *testing.T) {
 		}(), func() Record {
 			// OK: Open range today
 			r := NewRecord(today)
-			r.StartOpenRange(now, NewSummary())
+			r.StartOpenRange(now, nil)
 			return r
 		}(), func() Record {
 			// OK: Just a regular record in the past
 			r := NewRecord(today.PlusDays(-1))
-			r.AddDuration(NewDuration(1, 2), NewSummary())
+			r.AddDuration(NewDuration(1, 2), nil)
 			return r
 		}(),
 	}
@@ -41,7 +41,7 @@ func TestNoOpenRangeWarningWhenYesterdayAndNoRecordToday(t *testing.T) {
 		func() Record {
 			// This open range is okay, because there is no record at today’s date
 			r := NewRecord(today.PlusDays(-1))
-			r.StartOpenRange(now, NewSummary())
+			r.StartOpenRange(now, nil)
 			return r
 		}(), func() Record {
 			r := NewRecord(today.PlusDays(2))
@@ -61,7 +61,7 @@ func TestOpenRangeWarningWhenUnclosedOpenRangeBeforeTodayRegardlessOfOrder(t *te
 		func() Record {
 			// NOT OK: There is a record at today’s date
 			r := NewRecord(today.PlusDays(-1))
-			r.StartOpenRange(now, NewSummary())
+			r.StartOpenRange(now, nil)
 			return r
 		}(), func() Record {
 			r := NewRecord(today)
@@ -69,7 +69,7 @@ func TestOpenRangeWarningWhenUnclosedOpenRangeBeforeTodayRegardlessOfOrder(t *te
 		}(), func() Record {
 			// NOT OK: There is a record at today’s date
 			r := NewRecord(today.PlusDays(-2))
-			r.StartOpenRange(now, NewSummary())
+			r.StartOpenRange(now, nil)
 			return r
 		}(),
 	}
@@ -89,7 +89,7 @@ func TestFutureEntriesWarning(t *testing.T) {
 	rs := []Record{
 		func() Record {
 			r := NewRecord(today.PlusDays(1))
-			r.AddDuration(NewDuration(2, 0), NewSummary())
+			r.AddDuration(NewDuration(2, 0), nil)
 			return r
 		}(), func() Record {
 			r := NewRecord(today)
@@ -111,17 +111,17 @@ func TestMoreThan24HoursPerRecord(t *testing.T) {
 	rs := []Record{
 		func() Record {
 			r := NewRecord(today.PlusDays(-1))
-			r.AddDuration(NewDuration(24, 1), NewSummary())
+			r.AddDuration(NewDuration(24, 1), nil)
 			return r
 		}(), func() Record {
 			r := NewRecord(today)
-			r.AddRange(Ɀ_Range_(Ɀ_Time_(0, 0), Ɀ_Time_(23, 0)), NewSummary())
-			r.AddDuration(NewDuration(2, 0), NewSummary())
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(0, 0), Ɀ_Time_(23, 0)), nil)
+			r.AddDuration(NewDuration(2, 0), nil)
 			return r
 		}(),
 		func() Record {
 			r := NewRecord(today.PlusDays(-3))
-			r.AddDuration(NewDuration(24, 0), NewSummary())
+			r.AddDuration(NewDuration(24, 0), nil)
 			return r
 		}(),
 	}
@@ -142,28 +142,28 @@ func TestOverlappingTimeRanges(t *testing.T) {
 		func() Record {
 			// No overlap
 			r := NewRecord(today)
-			r.AddDuration(NewDuration(5, 0), NewSummary())
-			r.AddRange(Ɀ_Range_(Ɀ_Time_(4, 0), Ɀ_Time_(4, 59)), NewSummary())
-			r.AddRange(Ɀ_Range_(Ɀ_Time_(0, 0), Ɀ_Time_(2, 0)), NewSummary())
-			r.AddRange(Ɀ_Range_(Ɀ_Time_(2, 0), Ɀ_Time_(4, 0)), NewSummary())
-			r.AddRange(Ɀ_Range_(Ɀ_Time_(4, 0), Ɀ_Time_(4, 0)), NewSummary()) // point in time range
-			r.AddRange(Ɀ_Range_(Ɀ_Time_(5, 0), Ɀ_Time_(6, 0)), NewSummary())
-			r.StartOpenRange(Ɀ_Time_(0, 44), NewSummary())
+			r.AddDuration(NewDuration(5, 0), nil)
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(4, 0), Ɀ_Time_(4, 59)), nil)
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(0, 0), Ɀ_Time_(2, 0)), nil)
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(2, 0), Ɀ_Time_(4, 0)), nil)
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(4, 0), Ɀ_Time_(4, 0)), nil) // point in time range
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(5, 0), Ɀ_Time_(6, 0)), nil)
+			r.StartOpenRange(Ɀ_Time_(0, 44), nil)
 			return r
 		}(), func() Record {
 			// Overlap with sorted entries
 			r := NewRecord(today.PlusDays(-1))
-			r.AddRange(Ɀ_Range_(Ɀ_Time_(0, 30), Ɀ_Time_(1, 0)), NewSummary())
-			r.AddRange(Ɀ_Range_(Ɀ_Time_(2, 0), Ɀ_Time_(5, 0)), NewSummary())
-			r.AddRange(Ɀ_Range_(Ɀ_Time_(4, 59), Ɀ_Time_(6, 0)), NewSummary())
-			r.AddRange(Ɀ_Range_(Ɀ_Time_(18, 30), Ɀ_Time_(19, 0)), NewSummary())
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(0, 30), Ɀ_Time_(1, 0)), nil)
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(2, 0), Ɀ_Time_(5, 0)), nil)
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(4, 59), Ɀ_Time_(6, 0)), nil)
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(18, 30), Ɀ_Time_(19, 0)), nil)
 			return r
 		}(), func() Record {
 			// Overlap with unsorted entries
 			r := NewRecord(today.PlusDays(-2))
-			r.AddRange(Ɀ_Range_(Ɀ_Time_(0, 30), Ɀ_Time_(0, 45)), NewSummary())
-			r.AddRange(Ɀ_Range_(Ɀ_Time_(2, 45), Ɀ_Time_(3, 45)), NewSummary())
-			r.AddRange(Ɀ_Range_(Ɀ_TimeYesterday_(23, 0), Ɀ_Time_(1, 0)), NewSummary())
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(0, 30), Ɀ_Time_(0, 45)), nil)
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(2, 45), Ɀ_Time_(3, 45)), nil)
+			r.AddRange(Ɀ_Range_(Ɀ_TimeYesterday_(23, 0), Ɀ_Time_(1, 0)), nil)
 			return r
 		}(),
 	}
