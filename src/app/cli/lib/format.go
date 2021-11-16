@@ -21,7 +21,7 @@ func NewCliSerialiser() *parser.Serialiser {
 			return Style{Color: "213"}.Format(d.ToString())
 		},
 		Summary: func(s Summary) string {
-			txt := s.ToString()
+			txt := strings.Join(s, "\n")
 			style := Style{Color: "249"}
 			hashStyle := style.ChangedBold(true).ChangedColor("251")
 			txt = HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {

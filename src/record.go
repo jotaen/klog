@@ -2,7 +2,7 @@ package klog
 
 import (
 	"errors"
-	"regexp"
+	"strings"
 )
 
 // SPEC_VERSION contains the version number of the file format
@@ -18,7 +18,7 @@ type Record interface {
 	SetShouldTotal(Duration)
 
 	Summary() Summary
-	SetSummary(string) error
+	SetSummary(Summary) error
 
 	Entries() []Entry
 	SetEntries([]Entry)
@@ -75,11 +75,13 @@ func (r *record) Summary() Summary {
 	return r.summary
 }
 
-func (r *record) SetSummary(summary string) error {
-	if regexp.MustCompile(`(^|\n) `).MatchString(summary) {
-		return errors.New("MALFORMED_SUMMARY")
+func (r *record) SetSummary(summary Summary) error {
+	for _, l := range summary {
+		if strings.HasPrefix(l, " ") {
+			return errors.New("MALFORMED_SUMMARY")
+		}
 	}
-	r.summary = Summary(summary)
+	r.summary = summary
 	return nil
 }
 

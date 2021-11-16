@@ -108,18 +108,15 @@ func parseRecord(block []Line) (Record, []Error) {
 	}
 
 	// ========== SUMMARY LINES ==========
-	for i, s := range block {
+	for _, s := range block {
 		summary := NewParseable(s)
 		if summary.IndentationLevel() > 0 {
 			break
 		} else if summary.IndentationLevel() < 0 {
 			errs = append(errs, ErrorIllegalIndentation(NewError(summary.Line, 0, summary.Length())))
 		}
-		lineBreak := ""
-		if i > 0 {
-			lineBreak = "\n"
-		}
-		err := record.SetSummary(record.Summary().ToString() + lineBreak + summary.ToString())
+		newSummary := NewSummary(append(record.Summary(), summary.ToString())...)
+		err := record.SetSummary(newSummary)
 		block = block[1:]
 		if err != nil {
 			errs = append(errs, ErrorMalformedSummary(NewError(summary.Line, 0, summary.Length())))
@@ -140,7 +137,7 @@ entries:
 			entry.Advance(durationCandidate.Length())
 			entry.SkipWhitespace()
 			summaryText, _ := entry.PeekUntil(func(r rune) bool { return false })
-			record.AddDuration(duration, Summary(summaryText.ToString()))
+			record.AddDuration(duration, NewEntrySummary(summaryText.ToString()))
 			continue
 		}
 		startCandidate, _ := entry.PeekUntil(func(r rune) bool { return r == '-' || IsWhitespace(r) })
@@ -175,7 +172,7 @@ entries:
 			entry.Advance(placeholder.Length())
 			entry.SkipWhitespace()
 			summaryText, _ := entry.PeekUntil(func(r rune) bool { return false })
-			err := record.StartOpenRange(start, Summary(summaryText.ToString()))
+			err := record.StartOpenRange(start, NewEntrySummary(summaryText.ToString()))
 			if err != nil {
 				errs = append(errs, ErrorDuplicateOpenRange(NewError(entry.Line, 0, entry.PointerPosition)))
 				continue
@@ -199,7 +196,7 @@ entries:
 			}
 			entry.SkipWhitespace()
 			summaryText, _ := entry.PeekUntil(func(r rune) bool { return false })
-			record.AddRange(timeRange, Summary(summaryText.ToString()))
+			record.AddRange(timeRange, NewEntrySummary(summaryText.ToString()))
 		}
 	}
 

@@ -7,10 +7,21 @@ import (
 )
 
 // Summary is arbitrary text that can be associated with a Record or an Entry.
-type Summary string
+type Summary []string
 
-func (s Summary) ToString() string {
-	return string(s)
+func NewSummary(line ...string) Summary {
+	return line
+}
+
+func NewEntrySummary(text string) Summary {
+	if text == "" {
+		return NewSummary()
+	}
+	return NewSummary(text)
+}
+
+func (s Summary) IsEmpty() bool {
+	return len(s) == 0
 }
 
 var HashTagPattern = regexp.MustCompile(`#([\p{L}\d_]+)`)
@@ -56,9 +67,11 @@ func NewTag(value string) Tag {
 
 func (s Summary) Tags() TagSet {
 	tags := NewTagSet()
-	for _, m := range HashTagPattern.FindAllStringSubmatch(string(s), -1) {
-		tag := NewTag(m[1])
-		tags[tag] = true
+	for _, l := range s {
+		for _, m := range HashTagPattern.FindAllStringSubmatch(l, -1) {
+			tag := NewTag(m[1])
+			tags[tag] = true
+		}
 	}
 	return tags
 }
@@ -71,6 +84,16 @@ func NewTagSet(tags ...string) TagSet {
 		}
 		tag := NewTag(v)
 		result[tag] = true
+	}
+	return result
+}
+
+func Merge(tagSets ...TagSet) TagSet {
+	result := NewTagSet()
+	for _, ts := range tagSets {
+		for t, _ := range ts {
+			result[t] = true
+		}
 	}
 	return result
 }

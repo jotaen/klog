@@ -91,7 +91,7 @@ func TestReconcilerClosesOpenRangeWithNewSummary(t *testing.T) {
 	})
 	require.NotNil(t, reconciler)
 	result, err := reconciler.CloseOpenRange(func(r Record) (Time, Summary) {
-		return Ɀ_Time_(15, 22), "Finished."
+		return Ɀ_Time_(15, 22), NewSummary("Finished.")
 	})
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -113,7 +113,7 @@ func TestReconcilerClosesOpenRangeWithExtendingSummary(t *testing.T) {
 	})
 	require.NotNil(t, reconciler)
 	result, err := reconciler.CloseOpenRange(func(r Record) (Time, Summary) {
-		return Ɀ_Time_(16, 42), "Yes!"
+		return Ɀ_Time_(16, 42), NewSummary("Yes!")
 	})
 	require.Nil(t, err)
 	assert.Equal(t, `

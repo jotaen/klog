@@ -27,11 +27,11 @@ Empty
 	require.Len(t, pr.Records, 2)
 
 	assert.Equal(t, klog.Ɀ_Date_(1999, 5, 31), pr.Records[0].Date())
-	assert.Equal(t, klog.Summary(""), pr.Records[0].Summary())
+	assert.Equal(t, klog.NewSummary(), pr.Records[0].Summary())
 	assert.Len(t, pr.Records[0].Entries(), 0)
 
 	assert.Equal(t, klog.Ɀ_Date_(1999, 6, 3), pr.Records[1].Date())
-	assert.Equal(t, klog.Summary("Empty"), pr.Records[1].Summary())
+	assert.Equal(t, klog.NewSummary("Empty"), pr.Records[1].Summary())
 	assert.Equal(t, klog.NewDuration(8, 15).InMinutes(), pr.Records[1].ShouldTotal().InMinutes())
 	assert.Len(t, pr.Records[1].Entries(), 0)
 }
@@ -99,22 +99,22 @@ func TestParseDocumentSucceedsWithCorrectEntries(t *testing.T) {
 	for _, test := range []struct {
 		text          string
 		expectEntry   interface{}
-		expectSummary string
+		expectSummary klog.Summary
 	}{
-		{"1234-12-12\n\t5h Some remark", klog.NewDuration(5, 0), "Some remark"},
-		{"1234-12-12\n\t2h30m", klog.NewDuration(2, 30), ""},
-		{"1234-12-12\n\t2m", klog.NewDuration(0, 2), ""},
-		{"1234-12-12\n\t+5h", klog.NewDuration(5, 0), ""},
-		{"1234-12-12\n\t+2h30m", klog.NewDuration(2, 30), ""},
-		{"1234-12-12\n\t+2m", klog.NewDuration(0, 2), ""},
-		{"1234-12-12\n\t-5h", klog.NewDuration(-5, -0), ""},
-		{"1234-12-12\n\t-2h30m", klog.NewDuration(-2, -30), ""},
-		{"1234-12-12\n\t-2m", klog.NewDuration(-0, -2), ""},
-		{"1234-12-12\n\t3:05 - 11:59 Did this and that", klog.Ɀ_Range_(klog.Ɀ_Time_(3, 5), klog.Ɀ_Time_(11, 59)), "Did this and that"},
-		{"1234-12-12\n\t<23:30 - 0:10", klog.Ɀ_Range_(klog.Ɀ_TimeYesterday_(23, 30), klog.Ɀ_Time_(0, 10)), ""},
-		{"1234-12-12\n\t22:17 - 1:00>", klog.Ɀ_Range_(klog.Ɀ_Time_(22, 17), klog.Ɀ_TimeTomorrow_(1, 00)), ""},
-		{"1234-12-12\n\t18:45 - ? Just started something", klog.NewOpenRange(klog.Ɀ_Time_(18, 45)), "Just started something"},
-		{"1234-12-12\n\t<3:12-??????", klog.NewOpenRange(klog.Ɀ_TimeYesterday_(3, 12)), ""},
+		{"1234-12-12\n\t5h Some remark", klog.NewDuration(5, 0), klog.NewSummary("Some remark")},
+		{"1234-12-12\n\t2h30m", klog.NewDuration(2, 30), klog.NewSummary()},
+		{"1234-12-12\n\t2m", klog.NewDuration(0, 2), klog.NewSummary()},
+		{"1234-12-12\n\t+5h", klog.NewDuration(5, 0), klog.NewSummary()},
+		{"1234-12-12\n\t+2h30m", klog.NewDuration(2, 30), klog.NewSummary()},
+		{"1234-12-12\n\t+2m", klog.NewDuration(0, 2), klog.NewSummary()},
+		{"1234-12-12\n\t-5h", klog.NewDuration(-5, -0), klog.NewSummary()},
+		{"1234-12-12\n\t-2h30m", klog.NewDuration(-2, -30), klog.NewSummary()},
+		{"1234-12-12\n\t-2m", klog.NewDuration(-0, -2), klog.NewSummary()},
+		{"1234-12-12\n\t3:05 - 11:59 Did this and that", klog.Ɀ_Range_(klog.Ɀ_Time_(3, 5), klog.Ɀ_Time_(11, 59)), klog.NewSummary("Did this and that")},
+		{"1234-12-12\n\t<23:30 - 0:10", klog.Ɀ_Range_(klog.Ɀ_TimeYesterday_(23, 30), klog.Ɀ_Time_(0, 10)), klog.NewSummary()},
+		{"1234-12-12\n\t22:17 - 1:00>", klog.Ɀ_Range_(klog.Ɀ_Time_(22, 17), klog.Ɀ_TimeTomorrow_(1, 00)), klog.NewSummary()},
+		{"1234-12-12\n\t18:45 - ? Just started something", klog.NewOpenRange(klog.Ɀ_Time_(18, 45)), klog.NewSummary("Just started something")},
+		{"1234-12-12\n\t<3:12-??????", klog.NewOpenRange(klog.Ɀ_TimeYesterday_(3, 12)), klog.NewSummary()},
 	} {
 		pr, errs := Parse(test.text)
 		require.Nil(t, errs, test.text)
@@ -126,7 +126,7 @@ func TestParseDocumentSucceedsWithCorrectEntries(t *testing.T) {
 			func(o klog.OpenRange) interface{} { return o },
 		)
 		assert.Equal(t, test.expectEntry, value, test.text)
-		assert.Equal(t, klog.Summary(test.expectSummary), pr.Records[0].Entries()[0].Summary(), test.text)
+		assert.Equal(t, test.expectSummary, pr.Records[0].Entries()[0].Summary(), test.text)
 	}
 }
 
