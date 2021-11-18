@@ -56,10 +56,9 @@ func reduceRecordToMatchingTags(queriedTags []string, r Record) (Record, bool) {
 	if isSubsetOf(queriedTags, r.Summary().Tags()) {
 		return r, true
 	}
-	_, tagsByEntry := EntryTagLookup(r)
 	var matchingEntries []Entry
 	for _, e := range r.Entries() {
-		if isSubsetOf(queriedTags, tagsByEntry[e]) {
+		if isSubsetOf(queriedTags, Merge(r.Summary().Tags(), e.Summary().Tags())) {
 			matchingEntries = append(matchingEntries, e)
 		}
 	}
@@ -79,9 +78,8 @@ func isSubsetOf(queriedTags []string, allTags TagSet) bool {
 	return true
 }
 
-func EntryTagLookup(rs ...Record) (map[Tag][]Entry, map[Entry]TagSet) {
+func EntryTagLookup(rs ...Record) map[Tag][]Entry {
 	entriesByTag := make(map[Tag][]Entry)
-	tagsByEntry := make(map[Entry]TagSet)
 	for _, r := range rs {
 		alreadyAdded := make(map[Tag]bool)
 		for t := range r.Summary().Tags() {
@@ -89,13 +87,6 @@ func EntryTagLookup(rs ...Record) (map[Tag][]Entry, map[Entry]TagSet) {
 			alreadyAdded[t] = true
 		}
 		for _, e := range r.Entries() {
-			tagsByEntry[e] = func() TagSet {
-				result := r.Summary().Tags()
-				for t := range e.Summary().Tags() {
-					result[t] = true
-				}
-				return result
-			}()
 			for t := range e.Summary().Tags() {
 				if alreadyAdded[t] {
 					continue
@@ -104,7 +95,7 @@ func EntryTagLookup(rs ...Record) (map[Tag][]Entry, map[Entry]TagSet) {
 			}
 		}
 	}
-	return entriesByTag, tagsByEntry
+	return entriesByTag
 }
 
 func newDateSet(ds []Date) map[DayHash]bool {

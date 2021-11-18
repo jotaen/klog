@@ -24,7 +24,7 @@ func (opt *Tags) Run(ctx app.Context) error {
 	}
 	now := ctx.Now()
 	records = opt.ApplyFilter(now, records)
-	entriesByTag, _ := service.EntryTagLookup(records...)
+	entriesByTag := service.EntryTagLookup(records...)
 	tagsOrdered := sortTags(entriesByTag)
 	if len(tagsOrdered) == 0 {
 		return nil

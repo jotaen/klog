@@ -1,6 +1,6 @@
 # klog – File Format Specification
 
-**Version 1.0**
+**Version X.X**
 
 klog is a file format for tracking time.
 
@@ -225,3 +225,7 @@ and MUST NOT be combined into a single *record*.
 - “letter”: A character as defined by the Unicode Letter category (L)
 - “digit”: Any of 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 - “integer”: An unsigned number without fractional component
+
+## V. Changelog
+
+## (Unreleased)

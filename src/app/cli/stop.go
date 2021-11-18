@@ -36,7 +36,7 @@ func (opt *Stop) Run(ctx app.Context) error {
 				return nil, lib.NotEligibleError{}
 			}
 			return reconciler.CloseOpenRange(
-				func(r Record) (Time, Summary) { return time, Summary(opt.Summary) },
+				func(r Record) (Time, EntrySummary) { return time, NewEntrySummary(opt.Summary) },
 			)
 		},
 		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
@@ -54,7 +54,7 @@ func (opt *Stop) Run(ctx app.Context) error {
 				return timeTomorrow
 			}()
 			return reconciler.CloseOpenRange(
-				func(r Record) (Time, Summary) { return adjustedTime, Summary(opt.Summary) },
+				func(r Record) (Time, EntrySummary) { return adjustedTime, NewEntrySummary(opt.Summary) },
 			)
 		},
 	)
