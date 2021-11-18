@@ -232,3 +232,5 @@ and MUST NOT be combined into a single *record*.
 ## V. Changelog
 
 ## (Unreleased)
+- Add a constraint regarding the indentation that requires the indentation style
+  to be uniform within a record.
