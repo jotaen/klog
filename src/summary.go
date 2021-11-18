@@ -13,6 +13,12 @@ type EntrySummary []string
 
 func NewRecordSummary(line ...string) (RecordSummary, error) {
 	for _, l := range line {
+		if len(l) == 0 {
+			return nil, errors.New("MALFORMED_SUMMARY")
+		}
+		if regexp.MustCompile(`^[\p{Zs}\t]`).MatchString(l) {
+			return nil, errors.New("MALFORMED_SUMMARY")
+		}
 	}
 	return line, nil
 }
