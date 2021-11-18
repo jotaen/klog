@@ -219,9 +219,9 @@ and MUST NOT be combined into a single *record*.
 
 - “space”: The character ` ` (U+0020)
 - “tab”: The tab character (U+0009), escape sequence `\t`
-- “blank character”: A “tab”, or a character as defined by the Unicode space separator category (regex `\p{Zs}`)
+- “blank character”: A “tab”, or a character as defined by the Unicode Space Separator category (Zs)
 - “blank line”: A line that only contains “blank characters”
 - “parenthesis”: The opening and closing parentheses `(` and `)` (U+0028 and U+0029)
-- “letter”: A character as defined by the Unicode letter category (regex `\p{L}`)
+- “letter”: A character as defined by the Unicode Letter category (L)
 - “digit”: Any of 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 - “integer”: An unsigned number without fractional component
