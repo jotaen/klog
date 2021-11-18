@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	. "github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/parser/parsing"
 	"github.com/jotaen/klog/src/service"
 	"strings"
@@ -44,7 +45,7 @@ func toRecordViews(rs []Record) []RecordView {
 		diff := service.Diff(should, total)
 		v := RecordView{
 			Date:            r.Date().ToString(),
-			Summary:         r.Summary().ToString(),
+			Summary:         parser.SummaryText(r.Summary()).ToString(),
 			Total:           total.ToString(),
 			TotalMins:       total.InMinutes(),
 			ShouldTotal:     should.ToString(),
@@ -71,7 +72,7 @@ func toEntryViews(es []Entry) []interface{} {
 	views := []interface{}{}
 	for _, e := range es {
 		base := EntryView{
-			Summary:   e.Summary().ToString(),
+			Summary:   parser.SummaryText(e.Summary()).ToString(),
 			Tags:      toTagViews(e.Summary().Tags()),
 			Total:     e.Duration().ToString(),
 			TotalMins: e.Duration().InMinutes(),
