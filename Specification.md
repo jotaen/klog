@@ -83,7 +83,7 @@ MUST be indented in one of the following ways:
 - by two or three “spaces”
 - by one “tab”
 
-The indentation style MUST be consistent within records.
+The indentation style MUST be uniform within records.
 (It MAY differ between records, though.)
 
 ### Time
