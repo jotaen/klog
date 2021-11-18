@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"github.com/jotaen/klog/src"
+	. "github.com/jotaen/klog/src"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -12,7 +12,7 @@ func TestParseMinimalDocument(t *testing.T) {
 	pr, errs := Parse(text)
 	require.Nil(t, errs)
 	require.Len(t, pr.Records, 1)
-	assert.Equal(t, klog.Ɀ_Date_(2000, 1, 1), pr.Records[0].Date())
+	assert.Equal(t, Ɀ_Date_(2000, 1, 1), pr.Records[0].Date())
 }
 
 func TestParseMultipleRecords(t *testing.T) {
@@ -26,13 +26,13 @@ Empty
 	require.Nil(t, errs)
 	require.Len(t, pr.Records, 2)
 
-	assert.Equal(t, klog.Ɀ_Date_(1999, 5, 31), pr.Records[0].Date())
-	assert.Equal(t, klog.NewRecordSummary(), pr.Records[0].Summary())
+	assert.Equal(t, Ɀ_Date_(1999, 5, 31), pr.Records[0].Date())
+	assert.Equal(t, Ɀ_RecordSummary_(), pr.Records[0].Summary())
 	assert.Len(t, pr.Records[0].Entries(), 0)
 
-	assert.Equal(t, klog.Ɀ_Date_(1999, 6, 3), pr.Records[1].Date())
-	assert.Equal(t, klog.NewRecordSummary("Empty"), pr.Records[1].Summary())
-	assert.Equal(t, klog.NewDuration(8, 15).InMinutes(), pr.Records[1].ShouldTotal().InMinutes())
+	assert.Equal(t, Ɀ_Date_(1999, 6, 3), pr.Records[1].Date())
+	assert.Equal(t, Ɀ_RecordSummary_("Empty"), pr.Records[1].Summary())
+	assert.Equal(t, NewDuration(8, 15).InMinutes(), pr.Records[1].ShouldTotal().InMinutes())
 	assert.Len(t, pr.Records[1].Entries(), 0)
 }
 
@@ -99,31 +99,31 @@ func TestParseDocumentSucceedsWithCorrectEntries(t *testing.T) {
 	for _, test := range []struct {
 		text          string
 		expectEntry   interface{}
-		expectSummary klog.EntrySummary
+		expectSummary EntrySummary
 	}{
-		{"1234-12-12\n\t5h Some remark", klog.NewDuration(5, 0), klog.NewEntrySummary("Some remark")},
-		{"1234-12-12\n\t2h30m", klog.NewDuration(2, 30), nil},
-		{"1234-12-12\n\t2m", klog.NewDuration(0, 2), nil},
-		{"1234-12-12\n\t+5h", klog.NewDuration(5, 0), nil},
-		{"1234-12-12\n\t+2h30m", klog.NewDuration(2, 30), nil},
-		{"1234-12-12\n\t+2m", klog.NewDuration(0, 2), nil},
-		{"1234-12-12\n\t-5h", klog.NewDuration(-5, -0), nil},
-		{"1234-12-12\n\t-2h30m", klog.NewDuration(-2, -30), nil},
-		{"1234-12-12\n\t-2m", klog.NewDuration(-0, -2), nil},
-		{"1234-12-12\n\t3:05 - 11:59 Did this and that", klog.Ɀ_Range_(klog.Ɀ_Time_(3, 5), klog.Ɀ_Time_(11, 59)), klog.NewEntrySummary("Did this and that")},
-		{"1234-12-12\n\t<23:30 - 0:10", klog.Ɀ_Range_(klog.Ɀ_TimeYesterday_(23, 30), klog.Ɀ_Time_(0, 10)), nil},
-		{"1234-12-12\n\t22:17 - 1:00>", klog.Ɀ_Range_(klog.Ɀ_Time_(22, 17), klog.Ɀ_TimeTomorrow_(1, 00)), nil},
-		{"1234-12-12\n\t18:45 - ? Just started something", klog.NewOpenRange(klog.Ɀ_Time_(18, 45)), klog.NewEntrySummary("Just started something")},
-		{"1234-12-12\n\t<3:12-??????", klog.NewOpenRange(klog.Ɀ_TimeYesterday_(3, 12)), nil},
+		{"1234-12-12\n\t5h Some remark", NewDuration(5, 0), NewEntrySummary("Some remark")},
+		{"1234-12-12\n\t2h30m", NewDuration(2, 30), nil},
+		{"1234-12-12\n\t2m", NewDuration(0, 2), nil},
+		{"1234-12-12\n\t+5h", NewDuration(5, 0), nil},
+		{"1234-12-12\n\t+2h30m", NewDuration(2, 30), nil},
+		{"1234-12-12\n\t+2m", NewDuration(0, 2), nil},
+		{"1234-12-12\n\t-5h", NewDuration(-5, -0), nil},
+		{"1234-12-12\n\t-2h30m", NewDuration(-2, -30), nil},
+		{"1234-12-12\n\t-2m", NewDuration(-0, -2), nil},
+		{"1234-12-12\n\t3:05 - 11:59 Did this and that", Ɀ_Range_(Ɀ_Time_(3, 5), Ɀ_Time_(11, 59)), NewEntrySummary("Did this and that")},
+		{"1234-12-12\n\t<23:30 - 0:10", Ɀ_Range_(Ɀ_TimeYesterday_(23, 30), Ɀ_Time_(0, 10)), nil},
+		{"1234-12-12\n\t22:17 - 1:00>", Ɀ_Range_(Ɀ_Time_(22, 17), Ɀ_TimeTomorrow_(1, 00)), nil},
+		{"1234-12-12\n\t18:45 - ? Just started something", NewOpenRange(Ɀ_Time_(18, 45)), NewEntrySummary("Just started something")},
+		{"1234-12-12\n\t<3:12-??????", NewOpenRange(Ɀ_TimeYesterday_(3, 12)), nil},
 	} {
 		pr, errs := Parse(test.text)
 		require.Nil(t, errs, test.text)
 		require.Len(t, pr.Records, 1, test.text)
 		require.Len(t, pr.Records[0].Entries(), 1, test.text)
 		value := pr.Records[0].Entries()[0].Unbox(
-			func(r klog.Range) interface{} { return r },
-			func(d klog.Duration) interface{} { return d },
-			func(o klog.OpenRange) interface{} { return o },
+			func(r Range) interface{} { return r },
+			func(d Duration) interface{} { return d },
+			func(o OpenRange) interface{} { return o },
 		)
 		assert.Equal(t, test.expectEntry, value, test.text)
 		assert.Equal(t, test.expectSummary, pr.Records[0].Entries()[0].Summary(), test.text)

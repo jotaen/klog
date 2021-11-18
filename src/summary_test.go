@@ -6,11 +6,22 @@ import (
 	"testing"
 )
 
-func TestSavesSummary(t *testing.T) {
-	r := NewRecord(Ɀ_Date_(2020, 1, 1))
-	err := r.SetSummary(NewRecordSummary("Hello World"))
+func TestCreatesEmptySummary(t *testing.T) {
+	summary, err := NewRecordSummary()
 	require.Nil(t, err)
-	assert.Equal(t, NewRecordSummary("Hello World"), r.Summary())
+	assert.Nil(t, summary.Lines())
+	assert.True(t, summary.IsEmpty())
+	assert.Empty(t, summary.Tags())
+}
+
+func TestCreatesValidMultilineSummary(t *testing.T) {
+	summary, err := NewRecordSummary("First line", "Second line")
+	require.Nil(t, err)
+	assert.Equal(t, []string{"First line", "Second line"}, summary.Lines())
+	assert.False(t, summary.IsEmpty())
+	assert.Empty(t, summary.Tags())
+}
+
 }
 
 func TestSummaryCannotContainWhitespaceAtBeginningOfLine(t *testing.T) {
@@ -21,17 +32,17 @@ func TestSummaryCannotContainWhitespaceAtBeginningOfLine(t *testing.T) {
 }
 
 func TestRecognisesAllTags(t *testing.T) {
-	s := NewRecordSummary("Hello #world, I feel #GREAT-ish today #123_test!")
-	assert.Equal(t, s.Tags().ToStrings(), []string{"#123_test", "#great", "#world"})
-	assert.True(t, s.Tags().Contains("#123_test"))
-	assert.True(t, s.Tags().Contains("great"))
-	assert.True(t, s.Tags().Contains("world"))
+	summary, _ := NewRecordSummary("Hello #world, I feel", "#GREAT-ish today #123_test!")
+	assert.Equal(t, summary.Tags().ToStrings(), []string{"#123_test", "#great", "#world"})
+	assert.True(t, summary.Tags().Contains("#123_test"))
+	assert.True(t, summary.Tags().Contains("great"))
+	assert.True(t, summary.Tags().Contains("world"))
 }
 
 func TestPerformsFuzzyMatching(t *testing.T) {
-	s := NewRecordSummary("Hello #world, I feel #GREAT-ish today #123_test!")
-	assert.True(t, s.Tags().Contains("#123_..."))
-	assert.True(t, s.Tags().Contains("GR..."))
-	assert.True(t, s.Tags().Contains("WoRl..."))
-	assert.False(t, s.Tags().Contains("worl"))
+	summary, _ := NewRecordSummary("Hello #world, I feel #GREAT-ish today #123_test!")
+	assert.True(t, summary.Tags().Contains("#123_..."))
+	assert.True(t, summary.Tags().Contains("GR..."))
+	assert.True(t, summary.Tags().Contains("WoRl..."))
+	assert.False(t, summary.Tags().Contains("worl"))
 }

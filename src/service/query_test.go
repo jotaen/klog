@@ -11,7 +11,7 @@ func sampleRecordsForQuerying() []Record {
 	return []Record{
 		func() Record {
 			r := NewRecord(Ɀ_Date_(1999, 12, 30))
-			_ = r.SetSummary(NewRecordSummary("#foo"))
+			r.SetSummary(Ɀ_RecordSummary_("#foo"))
 			return r
 		}(), func() Record {
 			r := NewRecord(Ɀ_Date_(1999, 12, 31))
@@ -19,19 +19,19 @@ func sampleRecordsForQuerying() []Record {
 			return r
 		}(), func() Record {
 			r := NewRecord(Ɀ_Date_(2000, 1, 1))
-			_ = r.SetSummary(NewRecordSummary("#foo"))
+			r.SetSummary(Ɀ_RecordSummary_("#foo"))
 			r.AddDuration(NewDuration(0, 15), nil)
 			r.AddDuration(NewDuration(6, 0), NewEntrySummary("#bar"))
 			r.AddDuration(NewDuration(0, -30), nil)
 			return r
 		}(), func() Record {
 			r := NewRecord(Ɀ_Date_(2000, 1, 2))
-			_ = r.SetSummary(NewRecordSummary("#foo"))
+			r.SetSummary(Ɀ_RecordSummary_("#foo"))
 			r.AddDuration(NewDuration(7, 0), nil)
 			return r
 		}(), func() Record {
 			r := NewRecord(Ɀ_Date_(2000, 1, 3))
-			_ = r.SetSummary(NewRecordSummary("#foo"))
+			r.SetSummary(Ɀ_RecordSummary_("#foo"))
 			r.AddDuration(NewDuration(4, 0), NewEntrySummary("#bar"))
 			r.AddDuration(NewDuration(4, 0), NewEntrySummary("#bar"))
 			return r

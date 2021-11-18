@@ -115,12 +115,12 @@ func parseRecord(block []Line) (Record, []Error) {
 		} else if summary.IndentationLevel() < 0 {
 			errs = append(errs, ErrorIllegalIndentation(NewError(summary.Line, 0, summary.Length())))
 		}
-		newSummary := NewRecordSummary(append([]string(record.Summary()), summary.ToString())...)
-		err := record.SetSummary(newSummary)
-		block = block[1:]
+		newSummary, err := NewRecordSummary(append(record.Summary(), summary.ToString())...)
 		if err != nil {
 			errs = append(errs, ErrorMalformedSummary(NewError(summary.Line, 0, summary.Length())))
 		}
+		block = block[1:]
+		record.SetSummary(newSummary)
 	}
 
 	// ========== ENTRIES ==========

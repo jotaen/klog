@@ -26,7 +26,7 @@ func TestSerialiseRecordWithMinimalRecord(t *testing.T) {
 func TestSerialiseRecordWithCompleteRecord(t *testing.T) {
 	r := NewRecord(Ɀ_Date_(2020, 01, 15))
 	r.SetShouldTotal(NewDuration(7, 30))
-	_ = r.SetSummary(NewRecordSummary("This is a", "multiline summary"))
+	r.SetSummary(Ɀ_RecordSummary_("This is a", "multiline summary"))
 	r.AddRange(Ɀ_Range_(Ɀ_Time_(8, 00), Ɀ_Time_(12, 15)), NewEntrySummary("Foo"))
 	r.AddDuration(NewDuration(2, 15), NewEntrySummary("Bar"))
 	_ = r.StartOpenRange(Ɀ_Time_(14, 38), NewEntrySummary("Baz"))

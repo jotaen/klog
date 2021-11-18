@@ -2,7 +2,6 @@ package klog
 
 import (
 	"errors"
-	"strings"
 )
 
 // SPEC_VERSION contains the version number of the file format
@@ -18,7 +17,7 @@ type Record interface {
 	SetShouldTotal(Duration)
 
 	Summary() RecordSummary
-	SetSummary(RecordSummary) error
+	SetSummary(RecordSummary)
 
 	Entries() []Entry
 	SetEntries([]Entry)
@@ -75,14 +74,8 @@ func (r *record) Summary() RecordSummary {
 	return r.summary
 }
 
-func (r *record) SetSummary(summary RecordSummary) error {
-	for _, l := range summary {
-		if strings.HasPrefix(l, " ") {
-			return errors.New("MALFORMED_SUMMARY")
-		}
-	}
+func (r *record) SetSummary(summary RecordSummary) {
 	r.summary = summary
-	return nil
 }
 
 func (r *record) Entries() []Entry {

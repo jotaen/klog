@@ -1,6 +1,7 @@
 package klog
 
 import (
+	"errors"
 	"regexp"
 	"sort"
 	"strings"
@@ -10,8 +11,10 @@ type RecordSummary []string
 
 type EntrySummary []string
 
-func NewRecordSummary(line ...string) RecordSummary {
-	return line
+func NewRecordSummary(line ...string) (RecordSummary, error) {
+	for _, l := range line {
+	}
+	return line, nil
 }
 
 func NewEntrySummary(text string) EntrySummary {
@@ -19,6 +22,14 @@ func NewEntrySummary(text string) EntrySummary {
 		return nil
 	}
 	return []string{text}
+}
+
+func (s RecordSummary) Lines() []string {
+	return s
+}
+
+func (s EntrySummary) Lines() []string {
+	return RecordSummary(s).Lines()
 }
 
 func (s RecordSummary) IsEmpty() bool {

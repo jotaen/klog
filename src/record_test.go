@@ -11,8 +11,14 @@ func TestInitialiseRecord(t *testing.T) {
 	r := NewRecord(date)
 	assert.Equal(t, r.Date(), date)
 	assert.Equal(t, NewDuration(0, 0).InMinutes(), r.ShouldTotal().InMinutes())
-	assert.Equal(t, NewRecordSummary(), r.Summary())
+	assert.Equal(t, Ɀ_RecordSummary_(), r.Summary())
 	assert.Len(t, r.Entries(), 0)
+}
+
+func TestSavesSummary(t *testing.T) {
+	r := NewRecord(Ɀ_Date_(2020, 1, 1))
+	r.SetSummary(Ɀ_RecordSummary_("Hello World"))
+	assert.Equal(t, Ɀ_RecordSummary_("Hello World"), r.Summary())
 }
 
 func TestSavesShouldTotal(t *testing.T) {
