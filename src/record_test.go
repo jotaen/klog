@@ -19,6 +19,9 @@ func TestSavesSummary(t *testing.T) {
 	r := NewRecord(Ɀ_Date_(2020, 1, 1))
 	r.SetSummary(Ɀ_RecordSummary_("Hello World"))
 	assert.Equal(t, Ɀ_RecordSummary_("Hello World"), r.Summary())
+
+	r.SetSummary(nil)
+	assert.Nil(t, r.Summary())
 }
 
 func TestSavesShouldTotal(t *testing.T) {
@@ -33,12 +36,12 @@ func TestAddRanges(t *testing.T) {
 	range2 := Ɀ_Range_(Ɀ_Time_(13, 49), Ɀ_Time_(17, 12))
 	w := NewRecord(Ɀ_Date_(2020, 1, 1))
 	w.AddRange(range1, NewEntrySummary("Range 1"))
-	w.AddRange(range2, NewEntrySummary("Range 2"))
+	w.AddRange(range2, nil)
 	require.Len(t, w.Entries(), 2)
 	assert.Equal(t, range1, w.Entries()[0].value)
 	assert.Equal(t, NewEntrySummary("Range 1"), w.Entries()[0].Summary())
 	assert.Equal(t, range2, w.Entries()[1].value)
-	assert.Equal(t, NewEntrySummary("Range 2"), w.Entries()[1].Summary())
+	assert.Nil(t, w.Entries()[1].Summary())
 }
 
 func TestStartOpenRange(t *testing.T) {
@@ -89,10 +92,10 @@ func TestAddDurations(t *testing.T) {
 	d2 := NewDuration(2, 50)
 	w := NewRecord(Ɀ_Date_(2020, 1, 1))
 	w.AddDuration(d1, NewEntrySummary("Duration 1"))
-	w.AddDuration(d2, NewEntrySummary("Duration 2"))
+	w.AddDuration(d2, nil)
 	require.Len(t, w.Entries(), 2)
 	assert.Equal(t, d1, w.Entries()[0].value)
 	assert.Equal(t, NewEntrySummary("Duration 1"), w.Entries()[0].Summary())
 	assert.Equal(t, d2, w.Entries()[1].value)
-	assert.Equal(t, NewEntrySummary("Duration 2"), w.Entries()[1].Summary())
+	assert.Nil(t, w.Entries()[1].Summary())
 }
