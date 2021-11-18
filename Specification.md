@@ -83,6 +83,9 @@ MUST be indented in one of the following ways:
 - by two or three “spaces”
 - by one “tab”
 
+The indentation style MUST be uniform within records.
+(It MAY differ between records, though.)
+
 ### Time
 A *time* is a value that represents a point in time throughout a day
 as it would be displayed by a wall clock (which divides a day into
@@ -229,5 +232,7 @@ and MUST NOT be combined into a single *record*.
 ## V. Changelog
 
 ## (Unreleased)
+- Add a constraint regarding the indentation that requires the indentation style
+  to be uniform within a record.
 - Remove technical term “whitespace”, since its meaning is ambiguous and the definition lacked clarity.
   Replace it with “blank character” and base the definition on the Unicode category.
