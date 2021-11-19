@@ -8,7 +8,7 @@ build() {
 	go build \
 	  -ldflags "-X 'github.com/jotaen/klog/src/app.BinaryVersion=$1' -X 'github.com/jotaen/klog/src/app.BinaryBuildHash=$2'" \
 	  -o ./out/klog \
-	  src/app/cli/main/klog.go
+	  src/app/main/klog.go
 }
 
 test() {
@@ -20,7 +20,7 @@ format() {
 }
 
 cli() {
-	go run src/app/cli/main/*.go "$@"
+	go run src/app/main/klog.go "$@"
 }
 
 # MAIN
