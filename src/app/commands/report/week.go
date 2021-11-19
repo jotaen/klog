@@ -19,8 +19,8 @@ func (a *weekAggregator) NumberOfPrefixColumns() int {
 	return 2
 }
 
-func (a *weekAggregator) DateHash(date Date) Hash {
-	return Hash(service.NewWeekHash(date))
+func (a *weekAggregator) DateHash(date Date) service.Hash {
+	return service.Hash(service.NewWeekHash(date))
 }
 
 func (a *weekAggregator) OnHeaderPrefix(table *terminalformat.Table) {

@@ -1,3 +1,6 @@
+/*
+Package parser contains the logic how to convert Record objects from and to plain text.
+*/
 package parser
 
 import (
@@ -5,6 +8,8 @@ import (
 	. "github.com/jotaen/klog/src/parser/parsing"
 )
 
+// ParseResult contains the resulting records along with meta information
+// obtained throughout the parsing process.
 type ParseResult struct {
 	Records          []Record
 	lines            []Line

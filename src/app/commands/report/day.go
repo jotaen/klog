@@ -21,8 +21,8 @@ func (a *dayAggregator) NumberOfPrefixColumns() int {
 	return 4
 }
 
-func (a *dayAggregator) DateHash(date Date) Hash {
-	return Hash(service.NewDayHash(date))
+func (a *dayAggregator) DateHash(date Date) service.Hash {
+	return service.Hash(service.NewDayHash(date))
 }
 
 func (a *dayAggregator) OnHeaderPrefix(table *terminalformat.Table) {

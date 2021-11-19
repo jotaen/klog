@@ -7,10 +7,17 @@ import (
 	"strings"
 )
 
+// RecordSummary contains the summary lines of the overall summary that
+// appears underneath the date of a record.
 type RecordSummary []string
 
+// EntrySummary contains the summary line that appears behind the time value
+// of an entry.
 type EntrySummary []string
 
+// NewRecordSummary creates a new RecordSummary from individual lines of text.
+// None of the lines can start with blank characters, and none of the lines
+// can be empty.
 func NewRecordSummary(line ...string) (RecordSummary, error) {
 	for _, l := range line {
 		if len(l) == 0 {
@@ -23,6 +30,7 @@ func NewRecordSummary(line ...string) (RecordSummary, error) {
 	return line, nil
 }
 
+// NewEntrySummary creates an EntrySummary from a single line of text.
 func NewEntrySummary(text string) EntrySummary {
 	if text == "" {
 		return nil

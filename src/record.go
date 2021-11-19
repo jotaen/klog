@@ -1,3 +1,8 @@
+/*
+Package klog is the implementation of the domain logic of klog.
+It is essentially the code representation of the concepts as they are defined
+in the file format specification.
+*/
 package klog
 
 import (
@@ -8,7 +13,7 @@ import (
 // specification which this implementation is based on.
 const SPEC_VERSION = "1.0"
 
-// Record is a standalone piece of data that holds the time tracking
+// Record is a self-contained data container that holds the time tracking
 // information associated with a certain date.
 type Record interface {
 	Date() Date
@@ -19,12 +24,24 @@ type Record interface {
 	Summary() RecordSummary
 	SetSummary(RecordSummary)
 
+	// Entries returns a list of all entries that are associated with this record.
 	Entries() []Entry
+
+	// SetEntries associates new entries with the record.
 	SetEntries([]Entry)
 	AddDuration(Duration, EntrySummary)
 	AddRange(Range, EntrySummary)
+
+	// OpenRange returns the open time range, or `nil` if there is none.
 	OpenRange() OpenRange
+
+	// StartOpenRange starts a new open time range. It returns an error if
+	// there is already an open time range present. (There can only be one.)
 	StartOpenRange(Time, EntrySummary) error
+
+	// EndOpenRange ends the open time range. It returns an error if there is
+	// no open time range present, or if start and end time cannot be converted
+	// into a valid time range.
 	EndOpenRange(Time) error
 }
 
@@ -32,20 +49,6 @@ func NewRecord(date Date) Record {
 	return &record{
 		date: date,
 	}
-}
-
-// ShouldTotal is the targeted total time of a Record.
-type ShouldTotal Duration
-type shouldTotal struct {
-	Duration
-}
-
-func NewShouldTotal(hours int, minutes int) ShouldTotal {
-	return shouldTotal{NewDuration(hours, minutes)}
-}
-
-func (s shouldTotal) ToString() string {
-	return s.Duration.ToString() + "!"
 }
 
 type record struct {

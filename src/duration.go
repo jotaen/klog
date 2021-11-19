@@ -7,26 +7,39 @@ import (
 	"strconv"
 )
 
-type duration int
-
 // Duration represents a time span.
 type Duration interface {
 	InMinutes() int
+
+	// Plus adds up two durations and returns a new duration.
+	// It doesn’t alter the original duration object.
 	Plus(Duration) Duration
+
+	// Minus subtracts the second from the first duration.
+	// It doesn’t alter the original duration object.
 	Minus(Duration) Duration
+
+	// ToString serialises the duration. If the duration is negative,
+	// the value is preceded by a `-`. E.g. `45m` or `-2h15m`.
 	ToString() string
+
+	// ToStringWithSign serialises the duration. In contrast to `ToString`
+	// it also precedes positive values with a `+`. If the duration is `0`,
+	// no sign will be added. E.g. `-45m` or `0` or `+6h`.
 	ToStringWithSign() string
 }
+
+func NewDuration(amountHours int, amountMinutes int) Duration {
+	return duration(amountHours*60) + duration(amountMinutes)
+}
+
+type duration int
 
 func abs(x int) int {
 	if x < 0 {
 		return -x
 	}
 	return x
-}
-
-func NewDuration(amountHours int, amountMinutes int) Duration {
-	return duration(amountHours*60) + duration(amountMinutes)
 }
 
 func (d duration) InMinutes() int {

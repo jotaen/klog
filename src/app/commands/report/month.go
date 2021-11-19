@@ -20,8 +20,8 @@ func (a *monthAggregator) NumberOfPrefixColumns() int {
 	return 2
 }
 
-func (a *monthAggregator) DateHash(date Date) Hash {
-	return Hash(service.NewMonthHash(date))
+func (a *monthAggregator) DateHash(date Date) service.Hash {
+	return service.Hash(service.NewMonthHash(date))
 }
 
 func (a *monthAggregator) OnHeaderPrefix(table *terminalformat.Table) {

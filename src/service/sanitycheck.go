@@ -42,6 +42,9 @@ type unclosedOpenRangeChecker struct {
 	encounteredRecordAtToday bool
 }
 
+// Warn returns warnings for all open ranges before yesterday, as these
+// cannot be closed anymore via a shifted time. It also returns a warning
+// if there is an open range yesterday, when there is a record today already.
 func (c *unclosedOpenRangeChecker) Warn(record Record) *Warning {
 	if record.Date().IsEqualTo(c.today) {
 		// Open ranges at today’s date are always okay
@@ -49,7 +52,7 @@ func (c *unclosedOpenRangeChecker) Warn(record Record) *Warning {
 		return nil
 	}
 	if !c.encounteredRecordAtToday && c.today.PlusDays(-1).IsEqualTo(record.Date()) {
-		// Open ranges at yesterday’s date are only okay if there is no entry today today
+		// Open ranges at yesterday’s date are only okay if there is no entry today
 		return nil
 	}
 	if record.OpenRange() != nil {
@@ -66,6 +69,8 @@ type futureEntriesChecker struct {
 	today Date
 }
 
+// Warn returns warnings if there are entries at future dates. It doesn’t
+// return warnings if there are future records that don’t contain entries.
 func (c *futureEntriesChecker) Warn(record Record) *Warning {
 	if record.Date().IsAfterOrEqual(c.today.PlusDays(1)) && len(record.Entries()) > 0 {
 		return &Warning{
@@ -78,6 +83,8 @@ func (c *futureEntriesChecker) Warn(record Record) *Warning {
 
 type overlappingTimeRangesChecker struct{}
 
+// Warn returns warnings if there are entries with overlapping time ranges.
+// E.g. `8:00-9:00` and `8:30-9:30`.
 func (c *overlappingTimeRangesChecker) Warn(record Record) *Warning {
 	var orderedRanges []Range
 	for _, e := range record.Entries() {
@@ -114,6 +121,7 @@ func (c *overlappingTimeRangesChecker) Warn(record Record) *Warning {
 
 type moreThan24HoursChecker struct{}
 
+// Warn returns warnings if there are records with a total time of more than 24h.
 func (c *moreThan24HoursChecker) Warn(record Record) *Warning {
 	if Total(record).InMinutes() > 24*60 {
 		return &Warning{

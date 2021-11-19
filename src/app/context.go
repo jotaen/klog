@@ -1,3 +1,8 @@
+/*
+Package app contains the functionality that is related to the application layer.
+This includes all code for the command line interface and the procedures to
+interact with the runtime environment.
+*/
 package app
 
 import (
@@ -13,41 +18,81 @@ import (
 	gotime "time"
 )
 
+// FileOrBookmarkName is either a file name or a bookmark name
+// as specified as argument on the command line.
 type FileOrBookmarkName string
 
+// Context is a representation of the runtime environment of klog.
+// The commands carry out all side effects via this interface.
 type Context interface {
+	// Print prints to stdout.
 	Print(string)
+
+	// ReadLine reads user input from stdin.
 	ReadLine() (string, Error)
+
+	// KlogFolder returns the path of the .klog folder.
 	KlogFolder() string
+
+	// HomeFolder returns the path of the user’s home folder.
 	HomeFolder() string
+
+	// Meta returns miscellaneous meta information.
 	Meta() Meta
+
+	// ReadInputs retrieves all input from the given file or bookmark names.
 	ReadInputs(...FileOrBookmarkName) ([]Record, error)
+
+	// ReadFileInput retrieves the input from one given file. It returns the
+	// ParseResult, which can be used to reconcile the file.
 	ReadFileInput(FileOrBookmarkName) (*parser.ParseResult, File, error)
+
+	// WriteFile saves content in a file on disk.
 	WriteFile(File, string) Error
+
+	// Now returns the current timestamp.
 	Now() gotime.Time
+
+	// ReadBookmarks returns all configured bookmarks of the user.
 	ReadBookmarks() (BookmarksCollection, Error)
+
+	// ManipulateBookmarks saves a modified bookmark collection.
 	ManipulateBookmarks(func(BookmarksCollection) Error) Error
+
+	// OpenInFileBrowser tries to open the file explorer at the location of the file.
 	OpenInFileBrowser(File) Error
+
+	// OpenInEditor tries to open a file or bookmark in the user’s preferred $EDITOR.
 	OpenInEditor(FileOrBookmarkName, func(string)) Error
-	InstantiateTemplate(string) ([]parsing.Text, Error)
+
+	// Serialiser returns the current serialiser.
 	Serialiser() *parser.Serialiser
+
+	// SetSerialiser sets the current serialiser.
 	SetSerialiser(*parser.Serialiser)
+
+	// InstantiateTemplate reads a template from disk and substitutes all placeholders.
+	InstantiateTemplate(string) ([]parsing.Text, Error)
 }
 
+// Meta holds miscellaneous information about the klog binary.
 type Meta struct {
+
+	// Specification contains the file format specification in full text.
 	Specification string
-	License       string
-	Version       string
-	BuildHash     string
+
+	// License contains the license text.
+	License string
+
+	// Version contains the build version.
+	Version string
+
+	// BuildHash contains a unique build identifier.
+	BuildHash string
 }
 
-type context struct {
-	homeDir    string
-	serialiser *parser.Serialiser
-	meta       Meta
-}
-
-func NewContext(homeDir string, meta Meta, serialiser *parser.Serialiser) (Context, error) {
+// NewContext creates a new Context object.
+func NewContext(homeDir string, meta Meta, serialiser *parser.Serialiser) Context {
 	if meta.Version == "" {
 		meta.Version = "v?.?"
 	}
@@ -58,15 +103,23 @@ func NewContext(homeDir string, meta Meta, serialiser *parser.Serialiser) (Conte
 		homeDir,
 		serialiser,
 		meta,
-	}, nil
+	}
 }
 
+// NewContextFromEnv creates a Context object by automatically discovering certain parameters.
+// It returns an error if the auto-discovery failed.
 func NewContextFromEnv(meta Meta, serialiser *parser.Serialiser) (Context, error) {
 	homeDir, err := user.Current()
 	if err != nil {
 		return nil, err
 	}
-	return NewContext(homeDir.HomeDir, meta, serialiser)
+	return NewContext(homeDir.HomeDir, meta, serialiser), nil
+}
+
+type context struct {
+	homeDir    string
+	serialiser *parser.Serialiser
+	meta       Meta
 }
 
 func (ctx *context) Print(text string) {
@@ -105,8 +158,8 @@ func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, error)
 		return nil, bErr
 	}
 	files, rErr := retrieveFirst([]Retriever{
-		(&stdinRetriever{ReadStdin}).Retrieve,
-		(&fileRetriever{ReadFile, bc}).Retrieve,
+		(&StdinRetriever{ReadStdin}).Retrieve,
+		(&FileRetriever{ReadFile, bc}).Retrieve,
 	}, fileArgs...)
 	if rErr != nil {
 		return nil, rErr
@@ -124,7 +177,7 @@ func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, error)
 	}
 	var records []Record
 	for _, f := range files {
-		pr, parserErrors := parser.Parse(f.content)
+		pr, parserErrors := parser.Parse(f.Contents())
 		if parserErrors != nil {
 			return nil, parserErrors
 		}
@@ -133,12 +186,12 @@ func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, error)
 	return records, nil
 }
 
-func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (*fileWithContent, Error) {
+func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithContents, Error) {
 	bc, err := ctx.ReadBookmarks()
 	if err != nil {
 		return nil, err
 	}
-	inputs, err := (&fileRetriever{ReadFile, bc}).Retrieve(fileArg)
+	inputs, err := (&FileRetriever{ReadFile, bc}).Retrieve(fileArg)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +211,7 @@ func (ctx *context) ReadFileInput(fileArg FileOrBookmarkName) (*parser.ParseResu
 	if err != nil {
 		return nil, nil, err
 	}
-	pr, parserErrors := parser.Parse(target.content)
+	pr, parserErrors := parser.Parse(target.Contents())
 	if parserErrors != nil {
 		return nil, nil, parserErrors
 	}

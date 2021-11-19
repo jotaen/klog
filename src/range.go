@@ -4,26 +4,22 @@ import (
 	"errors"
 )
 
-// Range is the period of time between two times.
+// Range represents the period of time between two points of time.
 type Range interface {
 	Start() Time
 	End() Time
 	Duration() Duration
+
+	// ToString serialises the range, e.g. `13:15 - 17:23`.
 	ToString() string
 }
 
+// OpenRange represents a range that has not ended yet.
 type OpenRange interface {
 	Start() Time
+
+	// ToString serialises the open range, e.g. `9:00 - ?`.
 	ToString() string
-}
-
-type timeRange struct {
-	start Time
-	end   Time
-}
-
-type openRange struct {
-	start Time
 }
 
 func NewRange(start Time, end Time) (Range, error) {
@@ -38,6 +34,15 @@ func NewRange(start Time, end Time) (Range, error) {
 
 func NewOpenRange(start Time) OpenRange {
 	return &openRange{start: start}
+}
+
+type timeRange struct {
+	start Time
+	end   Time
+}
+
+type openRange struct {
+	start Time
 }
 
 func (tr *timeRange) Start() Time {

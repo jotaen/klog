@@ -7,16 +7,25 @@ import (
 	"regexp"
 )
 
+// ReconcileResult is the return value of reconcilers and contains
+// the modified record as Record and serialised.
+// The idea of reconcilers in general is to add or modify serialised records
+// in a minimally invasive manner. Instead or re-serialising the record itself,
+// it tries to find the location in the original text and modify that directly.
+// While this approach might feel a little hacky, it avoids lots of other
+// complications and sources of bugs, that could potentially mess up user data.
 type ReconcileResult struct {
 	NewRecord Record
 	NewText   string
 }
 
+// RecordReconciler is for inserting a new entry into a record.
 type RecordReconciler struct {
 	pr            *ParseResult
 	recordPointer uint // `-1` indicates to prepend
 }
 
+// BlockReconciler is for inserting a new record into a list of records.
 type BlockReconciler struct {
 	pr                 *ParseResult
 	maybeRecordPointer int

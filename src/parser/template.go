@@ -11,6 +11,7 @@ import (
 
 var markerPattern = regexp.MustCompile(`{{.+}}`)
 
+// RenderTemplate replaces placeholders in a template with actual values.
 func RenderTemplate(templateText string, time gotime.Time) ([]parsing.Text, error) {
 	today := klog.NewDateFromTime(time)
 	now := klog.NewTimeFromTime(time)
