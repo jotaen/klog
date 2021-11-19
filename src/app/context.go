@@ -13,9 +13,6 @@ import (
 	gotime "time"
 )
 
-var BinaryVersion string   // will be set during build
-var BinaryBuildHash string // will be set during build
-
 type FileOrBookmarkName string
 
 type Context interface {
@@ -23,10 +20,7 @@ type Context interface {
 	ReadLine() (string, Error)
 	KlogFolder() string
 	HomeFolder() string
-	MetaInfo() struct {
-		Version   string
-		BuildHash string
-	}
+	Meta() Meta
 	ReadInputs(...FileOrBookmarkName) ([]Record, error)
 	ReadFileInput(FileOrBookmarkName) (*parser.ParseResult, File, error)
 	WriteFile(File, string) Error
@@ -40,24 +34,39 @@ type Context interface {
 	SetSerialiser(*parser.Serialiser)
 }
 
+type Meta struct {
+	Specification string
+	License       string
+	Version       string
+	BuildHash     string
+}
+
 type context struct {
 	homeDir    string
 	serialiser *parser.Serialiser
+	meta       Meta
 }
 
-func NewContext(homeDir string, serialiser *parser.Serialiser) (Context, error) {
+func NewContext(homeDir string, meta Meta, serialiser *parser.Serialiser) (Context, error) {
+	if meta.Version == "" {
+		meta.Version = "v?.?"
+	}
+	if meta.BuildHash == "" {
+		strings.Repeat("?", 7)
+	}
 	return &context{
-		homeDir:    homeDir,
-		serialiser: serialiser,
+		homeDir,
+		serialiser,
+		meta,
 	}, nil
 }
 
-func NewContextFromEnv(serialiser *parser.Serialiser) (Context, error) {
+func NewContextFromEnv(meta Meta, serialiser *parser.Serialiser) (Context, error) {
 	homeDir, err := user.Current()
 	if err != nil {
 		return nil, err
 	}
-	return NewContext(homeDir.HomeDir, serialiser)
+	return NewContext(homeDir.HomeDir, meta, serialiser)
 }
 
 func (ctx *context) Print(text string) {
@@ -86,30 +95,8 @@ func (ctx *context) KlogFolder() string {
 	return ctx.homeDir + "/.klog/"
 }
 
-func (ctx *context) MetaInfo() struct {
-	Version   string
-	BuildHash string
-} {
-	return struct {
-		Version   string
-		BuildHash string
-	}{
-		Version: func() string {
-			if BinaryVersion == "" {
-				return "v?.?"
-			}
-			return BinaryVersion
-		}(),
-		BuildHash: func() string {
-			if BinaryBuildHash == "" {
-				return strings.Repeat("?", 7)
-			}
-			if len(BinaryBuildHash) > 7 {
-				return BinaryBuildHash[:7]
-			}
-			return BinaryBuildHash
-		}(),
-	}
+func (ctx *context) Meta() Meta {
+	return ctx.meta
 }
 
 func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, error) {
