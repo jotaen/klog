@@ -20,7 +20,7 @@ jobs:
       - name: Run unit tests
         run: |
           ./run test
-      - name: Run functional tests
+      - name: Run smoke tests
         run: |
           ./run build && sudo mv out/klog /usr/bin/klog
-          ./src/app/cli/main/functional_test.sh
+          ./.github/smoke_test.sh

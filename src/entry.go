@@ -4,14 +4,14 @@ package klog
 // A time value can be a Range, a Duration, or an OpenRange.
 type Entry struct {
 	value   interface{}
-	summary Summary
+	summary EntrySummary
 }
 
-func NewEntry(value interface{}, summary Summary) Entry {
+func NewEntry(value interface{}, summary EntrySummary) Entry {
 	return Entry{value, summary}
 }
 
-func (e *Entry) Summary() Summary {
+func (e *Entry) Summary() EntrySummary {
 	return e.summary
 }
 

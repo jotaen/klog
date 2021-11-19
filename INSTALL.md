@@ -8,8 +8,9 @@ notifications on [Github](https://github.com/jotaen/klog) (at the top right:
 For an archive of all klog releases, [see here](https://github.com/jotaen/klog/releases).
 
 ## MacOS
-1. [**Download**](https://github.com/jotaen/klog/releases/latest/download/klog-mac.zip)
-   the latest version and unzip
+1. Download the latest version and unzip
+   - [**Download for Intel**](https://github.com/jotaen/klog/releases/latest/download/klog-mac-intel.zip)
+   - [**Download for M1 (ARM)**](https://github.com/jotaen/klog/releases/latest/download/klog-mac-arm.zip)
 2. Right-click on the binary and select “Open“
    (due to [Gatekeeper](https://support.apple.com/en-us/HT202491))
 3. Copy to path, e.g. `mv klog /usr/local/bin/klog` (might require `sudo`)
@@ -26,3 +27,26 @@ For an archive of all klog releases, [see here](https://github.com/jotaen/klog/r
 
 By the way, as an alternative you can also use the Linux binary on
 the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+
+# Build klog from sources
+
+Instead of downloading the binaries, you can also build klog yourself.
+
+As prerequisite, you need to have the [Go compiler](https://golang.org/doc/install).
+Please check the [`go.mod`](go.mod) file to see what Go version klog requires.
+
+Fetch the sources:
+
+```
+git clone https://github.com/jotaen/klog.git
+cd klog
+```
+
+In order to build the project, run:
+
+```
+go build klog.go
+```
+
+This automatically resolves the dependencies and compiles the source code into an
+executable for your platform.

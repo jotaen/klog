@@ -21,8 +21,8 @@ func (h *Serialiser) serialiseRecord(r Record) string {
 		text += " (" + h.ShouldTotal(r.ShouldTotal()) + ")"
 	}
 	text += "\n"
-	if r.Summary() != "" {
-		text += h.Summary(r.Summary()) + "\n"
+	if !r.Summary().IsEmpty() {
+		text += h.Summary(SummaryText(r.Summary())) + "\n"
 	}
 	for _, e := range r.Entries() {
 		text += "    " // indentation
@@ -31,18 +31,24 @@ func (h *Serialiser) serialiseRecord(r Record) string {
 			func(d Duration) interface{} { return h.Duration(d) },
 			func(o OpenRange) interface{} { return h.OpenRange(o) },
 		)).(string)
-		if e.Summary() != "" {
-			text += " " + h.Summary(e.Summary())
+		if !e.Summary().IsEmpty() {
+			text += " " + h.Summary(SummaryText(e.Summary()))
 		}
 		text += "\n"
 	}
 	return text
 }
 
+type SummaryText []string
+
+func (s SummaryText) ToString() string {
+	return strings.Join(s, "\n")
+}
+
 type Serialiser struct {
 	Date           func(Date) string
 	ShouldTotal    func(Duration) string
-	Summary        func(Summary) string
+	Summary        func(SummaryText) string
 	Range          func(Range) string
 	OpenRange      func(OpenRange) string
 	Duration       func(Duration) string
@@ -53,7 +59,7 @@ type Serialiser struct {
 var PlainSerialiser = Serialiser{
 	Date:           Date.ToString,
 	ShouldTotal:    Duration.ToString,
-	Summary:        Summary.ToString,
+	Summary:        SummaryText.ToString,
 	Range:          Range.ToString,
 	OpenRange:      OpenRange.ToString,
 	Duration:       Duration.ToString,

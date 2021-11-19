@@ -23,19 +23,6 @@ This repository contains the sources of the command line tool as well as
 the [specification](Specification.md) of the klog file format. Note, that the
 version numbers of both are independent of each other.
 
-## Build klog from sources
-
-As prerequisite, you need to have the [Go compiler](https://golang.org/doc/install).
-Please check the [`go.mod`](go.mod) file to see what version klog requires. 
-In order to build the project, run:
-
-```
-go build src/app/cli/main/klog.go
-```
-
-This automatically resolves the dependencies and compiles the source code into an
-executable for your platform.
-
 ## About
 
 klog is free and open-source software distributed under the [MIT license](LICENSE.txt).

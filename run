@@ -6,9 +6,9 @@ install() {
 
 build() {
 	go build \
-	  -ldflags "-X 'github.com/jotaen/klog/src/app.BinaryVersion=$1' -X 'github.com/jotaen/klog/src/app.BinaryBuildHash=$2'" \
+	  -ldflags "-X 'main.BinaryVersion=$1' -X 'main.BinaryBuildHash=$2'" \
 	  -o ./out/klog \
-	  src/app/cli/main/klog.go
+	  klog.go
 }
 
 test() {
@@ -20,7 +20,7 @@ format() {
 }
 
 cli() {
-	go run src/app/cli/main/*.go "$@"
+	go run klog.go "$@"
 }
 
 # MAIN

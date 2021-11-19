@@ -90,8 +90,8 @@ func TestReconcilerClosesOpenRangeWithNewSummary(t *testing.T) {
 		return r.Date().ToString() == "2018-01-01"
 	})
 	require.NotNil(t, reconciler)
-	result, err := reconciler.CloseOpenRange(func(r Record) (Time, Summary) {
-		return Ɀ_Time_(15, 22), "Finished."
+	result, err := reconciler.CloseOpenRange(func(r Record) (Time, EntrySummary) {
+		return Ɀ_Time_(15, 22), NewEntrySummary("Finished.")
 	})
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -112,8 +112,8 @@ func TestReconcilerClosesOpenRangeWithExtendingSummary(t *testing.T) {
 		return r.Date().ToString() == "2018-01-01"
 	})
 	require.NotNil(t, reconciler)
-	result, err := reconciler.CloseOpenRange(func(r Record) (Time, Summary) {
-		return Ɀ_Time_(16, 42), "Yes!"
+	result, err := reconciler.CloseOpenRange(func(r Record) (Time, EntrySummary) {
+		return Ɀ_Time_(16, 42), NewEntrySummary("Yes!")
 	})
 	require.Nil(t, err)
 	assert.Equal(t, `
