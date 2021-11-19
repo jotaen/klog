@@ -6,6 +6,7 @@
   to `klog --version` or `klog version`)
 - **[ FEATURE ]** Embed specification and license in the binary
   (via `klog --spec` and `klog --license`)
+- **[ FIX ]** Fix default sort order of `--sort` flag to be `asc`
 
 ## v3.1
 - **[ FIX ]** Fix stdin processing on Windows
