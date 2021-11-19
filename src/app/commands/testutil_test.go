@@ -79,14 +79,13 @@ func (ctx *TestingContext) KlogFolder() string {
 	return ctx.HomeFolder() + "/.klog/"
 }
 
-func (ctx *TestingContext) MetaInfo() struct {
-	Version   string
-	BuildHash string
-} {
-	return struct {
-		Version   string
-		BuildHash string
-	}{"v0.0", "abcdef1"}
+func (ctx *TestingContext) Meta() app.Meta {
+	return app.Meta{
+		Specification: "",
+		License:       "",
+		Version:       "v0.0",
+		BuildHash:     "abcdef1",
+	}
 }
 
 func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, error) {

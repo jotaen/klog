@@ -19,11 +19,11 @@ type Version struct {
 
 func (opt *Version) Run(ctx app.Context) error {
 	if opt.Quiet {
-		ctx.Print(ctx.MetaInfo().Version + "\n")
+		ctx.Print(ctx.Meta().Version + "\n")
 		return nil
 	}
-	ctx.Print("Command line tool: " + ctx.MetaInfo().Version)
-	ctx.Print("  [" + ctx.MetaInfo().BuildHash + "]\n")
+	ctx.Print("Command line tool: " + ctx.Meta().Version)
+	ctx.Print("  [" + ctx.Meta().BuildHash + "]\n")
 	ctx.Print("File format: version " + SPEC_VERSION + "\n")
 
 	if opt.NoCheck {
@@ -34,7 +34,7 @@ func (opt *Version) Run(ctx app.Context) error {
 	if v == nil {
 		return errors.New("Failed to check for new version, please try again later")
 	}
-	if v.Version() == ctx.MetaInfo().Version && ctx.MetaInfo().BuildHash == v.BuildHash() {
+	if v.Version() == ctx.Meta().Version && ctx.Meta().BuildHash == v.BuildHash() {
 		ctx.Print(fmt.Sprintf("You already have the latest version!\n"))
 	} else {
 		ctx.Print(fmt.Sprintf("New version available: %s  [%s]\n", v.Version(), v.BuildHash()))

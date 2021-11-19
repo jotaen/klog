@@ -18,7 +18,7 @@ func IsWidgetAvailable() bool {
 }
 
 func Run(forceRunThroughLaunchAgent bool) {
-	ctx, err := app.NewContextFromEnv(&parser.PlainSerialiser)
+	ctx, err := app.NewContextFromEnv(app.Meta{}, &parser.PlainSerialiser)
 	if err != nil {
 		os.Exit(1)
 	}

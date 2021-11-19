@@ -1,4 +1,4 @@
-package main
+package klog
 
 import (
 	"errors"
@@ -13,8 +13,8 @@ import (
 	"strings"
 )
 
-func main() {
-	ctx, err := app.NewContextFromEnv(lib.NewCliSerialiser())
+func Run(meta app.Meta) app.Error {
+	ctx, err := app.NewContextFromEnv(meta, lib.NewCliSerialiser())
 	if err != nil {
 		fmt.Println("Failed to initialise application. Error:")
 		fmt.Println(err)
@@ -51,14 +51,21 @@ func main() {
 		if os.Getenv("KLOG_DEBUG") != "" {
 			isDebug = true
 		}
-		fmt.Println(lib.PrettifyError(err, isDebug))
-		exitCode := app.GENERAL_ERROR
+		ctx.Print(lib.PrettifyError(err, isDebug).Error() + "\n")
 		if appErr, isAppError := err.(app.Error); isAppError {
-			exitCode = appErr.Code()
+			return appErr
+		} else {
+			// Remember that kong errors always panic (such as flag parsing),
+			// so we can’t handle them here.
+			return app.NewErrorWithCode(
+				app.GENERAL_ERROR,
+				"An unknown error occurred",
+				err.Error(),
+				err,
+			)
 		}
-		os.Exit(exitCode.ToInt())
 	}
-	os.Exit(0)
+	return nil
 }
 
 func dateDecoder() kong.MapperFunc {
