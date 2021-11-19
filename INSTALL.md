@@ -45,7 +45,7 @@ cd klog
 In order to build the project, run:
 
 ```
-go build src/app/cli/main/klog.go
+go build klog.go
 ```
 
 This automatically resolves the dependencies and compiles the source code into an
