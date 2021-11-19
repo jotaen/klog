@@ -4,6 +4,8 @@
 ## v3.2
 - **[ FEATURE ]** Allow version check via `klog -v` (in addition
   to `klog --version` or `klog version`)
+- **[ FEATURE ]** Embed specification and license in the binary
+  (via `klog --spec` and `klog --license`)
 
 ## v3.1
 - **[ FIX ]** Fix stdin processing on Windows
