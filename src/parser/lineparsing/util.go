@@ -1,4 +1,4 @@
-package parsing
+package lineparsing
 
 // SubRune returns a subset of a rune list. It might be shorter than
 // the requested length, if the text doesn’t contain enough characters.

@@ -12,7 +12,7 @@ import (
 	"errors"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/parsing"
+	"github.com/jotaen/klog/src/parser/lineparsing"
 	"regexp"
 )
 
@@ -137,8 +137,8 @@ func (r *BlockReconciler) InsertBlock(texts []Text) (*ReconcileResult, error) {
 	return makeResult(lines, newRecordIndex)
 }
 
-func makeResult(ls []parsing.Line, recordIndex uint) (*ReconcileResult, error) {
-	newText := parsing.Join(ls)
+func makeResult(ls []lineparsing.Line, recordIndex uint) (*ReconcileResult, error) {
+	newText := lineparsing.Join(ls)
 	newRecords, pErr := parser.Parse(newText)
 	if pErr != nil {
 		err := pErr.Get()[0]

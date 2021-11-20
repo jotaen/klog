@@ -1,4 +1,4 @@
-package parsing
+package lineparsing
 
 import (
 	"github.com/stretchr/testify/assert"

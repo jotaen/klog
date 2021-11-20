@@ -1,6 +1,6 @@
 package reconciler
 
-import "github.com/jotaen/klog/src/parser/parsing"
+import "github.com/jotaen/klog/src/parser/lineparsing"
 
 type Text struct {
 	Text        string
@@ -8,11 +8,11 @@ type Text struct {
 }
 
 // Insert inserts some new lines into a text at a specific line number (position).
-func Insert(ls []parsing.Line, position int, texts []Text, prefs parsing.Preferences) []parsing.Line {
+func Insert(ls []lineparsing.Line, position int, texts []Text, prefs lineparsing.Preferences) []lineparsing.Line {
 	if position > len(ls)+1 {
 		panic("Out of bounds")
 	}
-	result := make([]parsing.Line, len(ls)+len(texts))
+	result := make([]lineparsing.Line, len(ls)+len(texts))
 	offset := 0
 	for i := range result {
 		if i >= position && offset < len(texts) {
@@ -21,7 +21,7 @@ func Insert(ls []parsing.Line, position int, texts []Text, prefs parsing.Prefere
 				line += prefs.IndentationStyle
 			}
 			line += texts[offset].Text + prefs.LineEnding
-			result[i] = parsing.NewLineFromString(line, -999)
+			result[i] = lineparsing.NewLineFromString(line, -999)
 			offset++
 		} else {
 			result[i] = ls[i-offset]

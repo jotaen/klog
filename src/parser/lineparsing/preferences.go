@@ -1,4 +1,4 @@
-package parsing
+package lineparsing
 
 // Preferences holds information what kinds of variations were encountered.
 // E.g., if the text was indented with tabs or spaces, or if the line endings

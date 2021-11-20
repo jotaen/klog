@@ -1,8 +1,8 @@
 /*
-Package parsing is a generic utility for parsing and processing a text
+Package lineparsing is a generic utility for parsing and processing a text
 that is structured in individual lines.
 */
-package parsing
+package lineparsing
 
 // Parseable is utility data structure for processing a Line in a parser.
 type Parseable struct {

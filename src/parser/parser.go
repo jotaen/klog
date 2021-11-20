@@ -5,7 +5,7 @@ package parser
 
 import (
 	. "github.com/jotaen/klog/src"
-	. "github.com/jotaen/klog/src/parser/parsing"
+	. "github.com/jotaen/klog/src/parser/lineparsing"
 )
 
 // ParseResult contains the resulting records along with meta information
