@@ -10,7 +10,7 @@ import (
 	"fmt"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/parsing"
+	"github.com/jotaen/klog/src/parser/reconciler"
 	"os"
 	"os/exec"
 	"os/user"
@@ -72,7 +72,7 @@ type Context interface {
 	SetSerialiser(*parser.Serialiser)
 
 	// InstantiateTemplate reads a template from disk and substitutes all placeholders.
-	InstantiateTemplate(string) ([]parsing.Text, Error)
+	InstantiateTemplate(string) ([]reconciler.Text, Error)
 }
 
 // Meta holds miscellaneous information about the klog binary.
@@ -333,7 +333,7 @@ func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(stri
 	)
 }
 
-func (ctx *context) InstantiateTemplate(templateName string) ([]parsing.Text, Error) {
+func (ctx *context) InstantiateTemplate(templateName string) ([]reconciler.Text, Error) {
 	location := NewFileOrPanic(ctx.KlogFolder() + templateName + ".template.klg")
 	template, err := ReadFile(location)
 	if err != nil {
@@ -343,7 +343,7 @@ func (ctx *context) InstantiateTemplate(templateName string) ([]parsing.Text, Er
 			err,
 		)
 	}
-	instance, tErr := parser.RenderTemplate(template, ctx.Now())
+	instance, tErr := reconciler.RenderTemplate(template, ctx.Now())
 	if tErr != nil {
 		return nil, NewError(
 			"Invalid template",

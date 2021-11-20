@@ -6,7 +6,7 @@ import (
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/parsing"
+	"github.com/jotaen/klog/src/parser/reconciler"
 	gotime "time"
 )
 
@@ -121,7 +121,7 @@ func (ctx *TestingContext) OpenInEditor(_ app.FileOrBookmarkName, _ func(string)
 	return nil
 }
 
-func (ctx *TestingContext) InstantiateTemplate(_ string) ([]parsing.Text, app.Error) {
+func (ctx *TestingContext) InstantiateTemplate(_ string) ([]reconciler.Text, app.Error) {
 	return nil, nil
 }
 

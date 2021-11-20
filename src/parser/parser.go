@@ -12,33 +12,33 @@ import (
 // obtained throughout the parsing process.
 type ParseResult struct {
 	Records          []Record
-	lines            []Line
-	lastLineOfRecord []int
-	preferences      Preferences
+	Lines            []Line
+	LastLineOfRecord []int
+	Preferences      Preferences
 }
 
 // Parse parses a text with records into Record data structures.
 func Parse(recordsAsText string) (*ParseResult, Errors) {
 	parseResult := ParseResult{
 		Records:          nil,
-		lines:            Split(recordsAsText),
-		lastLineOfRecord: nil,
-		preferences:      DefaultPreferences(),
+		Lines:            Split(recordsAsText),
+		LastLineOfRecord: nil,
+		Preferences:      DefaultPreferences(),
 	}
 	var allErrs []Error
-	blocks := GroupIntoBlocks(parseResult.lines)
+	blocks := GroupIntoBlocks(parseResult.Lines)
 	for _, block := range blocks {
 		r, errs := parseRecord(block)
 		if len(errs) > 0 {
 			allErrs = append(allErrs, errs...)
 		}
 		parseResult.Records = append(parseResult.Records, r)
-		parseResult.lastLineOfRecord = append(
-			parseResult.lastLineOfRecord,
+		parseResult.LastLineOfRecord = append(
+			parseResult.LastLineOfRecord,
 			block[len(block)-1].LineNumber,
 		)
 		for _, l := range block {
-			parseResult.preferences.Adapt(&l)
+			parseResult.Preferences.Adapt(&l)
 		}
 	}
 	if len(allErrs) > 0 {

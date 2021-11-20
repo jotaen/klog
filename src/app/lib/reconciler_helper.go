@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/parser"
+	"github.com/jotaen/klog/src/parser/reconciler"
 )
 
 // ReconcilerChain is an automatism that reads input from a file, runs one or
@@ -18,13 +19,13 @@ type NotEligibleError struct{}
 func (e NotEligibleError) Error() string { return "No record found at that date" }
 
 func (c ReconcilerChain) Apply(
-	applicators ...func(pr *parser.ParseResult) (*parser.ReconcileResult, error),
+	applicators ...func(pr *parser.ParseResult) (*reconciler.ReconcileResult, error),
 ) error {
 	pr, targetFilePath, err := c.Ctx.ReadFileInput(c.File)
 	if err != nil {
 		return err
 	}
-	result, err := func() (*parser.ReconcileResult, error) {
+	result, err := func() (*reconciler.ReconcileResult, error) {
 		for i, a := range applicators {
 			result, err := a(pr)
 			if result != nil {

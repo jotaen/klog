@@ -5,7 +5,7 @@ import (
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/parsing"
+	"github.com/jotaen/klog/src/parser/reconciler"
 )
 
 type Create struct {
@@ -24,7 +24,7 @@ func (opt *Create) Help() string {
 func (opt *Create) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())
-	lines, err := func() ([]parsing.Text, error) {
+	lines, err := func() ([]reconciler.Text, error) {
 		if opt.Template != "" {
 			return ctx.InstantiateTemplate(opt.Template)
 		}
@@ -32,7 +32,7 @@ func (opt *Create) Run(ctx app.Context) error {
 		if opt.ShouldTotal != nil {
 			headline += " (" + opt.ShouldTotal.ToString() + "!)"
 		}
-		return []parsing.Text{
+		return []reconciler.Text{
 			{headline, 0},
 		}, nil
 	}()
@@ -43,8 +43,8 @@ func (opt *Create) Run(ctx app.Context) error {
 		File: opt.OutputFileArgs.File,
 		Ctx:  ctx,
 	}.Apply(
-		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
-			reconciler := parser.NewBlockReconciler(pr, date)
+		func(pr *parser.ParseResult) (*reconciler.ReconcileResult, error) {
+			reconciler := reconciler.NewBlockReconciler(pr, date)
 			return reconciler.InsertBlock(lines)
 		},
 	)

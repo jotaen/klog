@@ -1,7 +1,6 @@
-package parser
+package reconciler
 
 import (
-	"github.com/jotaen/klog/src/parser/parsing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -20,7 +19,7 @@ Foo #xyz
 	{{ NOW }} - ?
 `, now)
 	require.Nil(t, err)
-	assert.Equal(t, []parsing.Text{
+	assert.Equal(t, []Text{
 		{"", 0},
 		{"1995-03-31", 0},
 		{"Foo #xyz", 0},

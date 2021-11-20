@@ -5,6 +5,7 @@ import (
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
 	"github.com/jotaen/klog/src/parser"
+	"github.com/jotaen/klog/src/parser/reconciler"
 )
 
 type Stop struct {
@@ -28,8 +29,8 @@ func (opt *Stop) Run(ctx app.Context) error {
 		File: opt.OutputFileArgs.File,
 		Ctx:  ctx,
 	}.Apply(
-		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
-			reconciler := parser.NewRecordReconciler(pr, func(r Record) bool {
+		func(pr *parser.ParseResult) (*reconciler.ReconcileResult, error) {
+			reconciler := reconciler.NewRecordReconciler(pr, func(r Record) bool {
 				return r.Date().IsEqualTo(date)
 			})
 			if reconciler == nil {
@@ -39,8 +40,8 @@ func (opt *Stop) Run(ctx app.Context) error {
 				func(r Record) (Time, EntrySummary) { return time, NewEntrySummary(opt.Summary) },
 			)
 		},
-		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
-			reconciler := parser.NewRecordReconciler(pr, func(r Record) bool {
+		func(pr *parser.ParseResult) (*reconciler.ReconcileResult, error) {
+			reconciler := reconciler.NewRecordReconciler(pr, func(r Record) bool {
 				return r.Date().IsEqualTo(date.PlusDays(-1))
 			})
 			if reconciler == nil {

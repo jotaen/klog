@@ -5,7 +5,7 @@ import (
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/parsing"
+	"github.com/jotaen/klog/src/parser/reconciler"
 )
 
 type Start struct {
@@ -36,25 +36,25 @@ func (opt *Start) Run(ctx app.Context) error {
 		File: opt.OutputFileArgs.File,
 		Ctx:  ctx,
 	}.Apply(
-		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
-			reconciler := parser.NewRecordReconciler(pr, func(r Record) bool {
+		func(pr *parser.ParseResult) (*reconciler.ReconcileResult, error) {
+			recordReconciler := reconciler.NewRecordReconciler(pr, func(r Record) bool {
 				return r.Date().IsEqualTo(date)
 			})
-			if reconciler == nil {
+			if recordReconciler == nil {
 				return nil, lib.NotEligibleError{}
 			}
-			return reconciler.AppendEntry(func(r Record) string {
+			return recordReconciler.AppendEntry(func(r Record) string {
 				return entry
 			})
 		},
-		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
-			reconciler := parser.NewBlockReconciler(pr, date)
+		func(pr *parser.ParseResult) (*reconciler.ReconcileResult, error) {
+			blockReconciler := reconciler.NewBlockReconciler(pr, date)
 			headline := opt.AtDate(ctx.Now()).ToString()
-			lines := []parsing.Text{
+			lines := []reconciler.Text{
 				{headline, 0},
 				{entry, 1},
 			}
-			return reconciler.InsertBlock(lines)
+			return blockReconciler.InsertBlock(lines)
 		},
 	)
 }
