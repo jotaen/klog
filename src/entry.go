@@ -1,6 +1,6 @@
 package klog
 
-// Entry is a time value and a summary.
+// Entry is a time value and an associated entry summary.
 // A time value can be a Range, a Duration, or an OpenRange.
 type Entry struct {
 	value   interface{}
@@ -15,6 +15,8 @@ func (e *Entry) Summary() EntrySummary {
 	return e.summary
 }
 
+// Unbox makes the underlying time value accessible through callback functions.
+// It returns whatever the callback returns.
 func (e *Entry) Unbox(r func(Range) interface{}, d func(Duration) interface{}, o func(OpenRange) interface{}) interface{} {
 	switch x := e.value.(type) {
 	case Range:
@@ -27,6 +29,7 @@ func (e *Entry) Unbox(r func(Range) interface{}, d func(Duration) interface{}, o
 	panic("Incomplete switch statement")
 }
 
+// Duration returns the duration value of the underlying time value.
 func (e *Entry) Duration() Duration {
 	return (e.Unbox(
 		func(r Range) interface{} { return r.Duration() },

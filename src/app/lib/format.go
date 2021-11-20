@@ -12,6 +12,8 @@ import (
 	"strings"
 )
 
+// NewCliSerialiser creates a serialiser that can print on a terminal.
+// It supports coloured output via ANSI escape sequences.
 func NewCliSerialiser() *parser.Serialiser {
 	return &parser.Serialiser{
 		Date: func(d Date) string {
@@ -55,9 +57,9 @@ func NewCliSerialiser() *parser.Serialiser {
 	}
 }
 
-var reflower = NewReflower(60, "\n")
-
+// PrettifyError turns an error into a coloured and well-structured form.
 func PrettifyError(err error, isDebug bool) error {
+	reflower := NewReflower(60, "\n")
 	switch e := err.(type) {
 	case parsing.Errors:
 		message := ""
@@ -92,6 +94,7 @@ func PrettifyError(err error, isDebug bool) error {
 	return errors.New("Error: " + err.Error())
 }
 
+// PrettifyWarnings turns an error into a coloured and well-structured form.
 func PrettifyWarnings(ws []service.Warning) string {
 	result := ""
 	for _, w := range ws {
@@ -103,6 +106,7 @@ func PrettifyWarnings(ws []service.Warning) string {
 	return result
 }
 
+// PrettyMonth returns the full english name of a month.
 func PrettyMonth(m int) string {
 	switch m {
 	case 1:
@@ -133,6 +137,7 @@ func PrettyMonth(m int) string {
 	panic("Illegal month") // this can/should never happen
 }
 
+// PrettyDay returns the full english name of a weekday.
 func PrettyDay(d int) string {
 	switch d {
 	case 1:

@@ -1,3 +1,6 @@
+/*
+Package commands contains handlers for all available commands.
+*/
 package commands
 
 type Cli struct {

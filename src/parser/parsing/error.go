@@ -23,16 +23,36 @@ func (pe errors) Get() []Error {
 	return pe.errors
 }
 
+// Error contains infos about a parsing error in a Line.
 type Error interface {
+	// Error is an alias for Message.
 	Error() string
+
+	// Context is the Line in which the error occurred.
 	Context() Line
-	Position() int // text position _without_ indentation
-	Column() int   // column number _with_ indentation
+
+	// Position is the cursor position in the line, excluding the indentation.
+	Position() int
+
+	// Column is the cursor position in the line, including the indentation.
+	Column() int
+
+	// Length returns the number of erroneous characters.
 	Length() int
+
+	// Code returns a unique identifier of the error kind.
 	Code() string
+
+	// Title returns a short error description.
 	Title() string
+
+	// Details returns additional information, such as hints or further explanations.
 	Details() string
+
+	// Message is a combination of Title and Details.
 	Message() string
+
+	// Set fills in Code, Title and Message (in this order).
 	Set(string, string, string) Error
 }
 

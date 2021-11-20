@@ -6,6 +6,8 @@ import (
 	"github.com/jotaen/klog/src/parser"
 )
 
+// ReconcilerChain is an automatism that reads input from a file, runs one or
+// more reconcilers on it, and then writes the result back to the file.
 type ReconcilerChain struct {
 	File app.FileOrBookmarkName
 	Ctx  app.Context

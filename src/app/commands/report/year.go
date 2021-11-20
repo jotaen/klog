@@ -17,8 +17,8 @@ func (a *yearAggregator) NumberOfPrefixColumns() int {
 	return 1
 }
 
-func (a *yearAggregator) DateHash(date Date) Hash {
-	return Hash(service.NewYearHash(date))
+func (a *yearAggregator) DateHash(date Date) service.Hash {
+	return service.Hash(service.NewYearHash(date))
 }
 
 func (a *yearAggregator) OnHeaderPrefix(table *terminalformat.Table) {

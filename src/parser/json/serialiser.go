@@ -1,3 +1,6 @@
+/*
+Package json contains the logic of serialising Record’s as JSON.
+*/
 package json
 
 import (
@@ -10,6 +13,8 @@ import (
 	"strings"
 )
 
+// ToJson serialises records into their JSON representation. The output
+// structure is RecordView at the top level.
 func ToJson(rs []Record, errs parsing.Errors, prettyPrint bool) string {
 	envelop := func() Envelop {
 		if errs == nil {

@@ -10,11 +10,15 @@ import (
 
 var periodPattern = regexp.MustCompile(`^\d{4}(-\d{2})?$`)
 
+// Period is a representation of a period of time that is representable
+// by the patterns YYYY-MM or YYYY.
 type Period struct {
 	Since klog.Date
 	Until klog.Date
 }
 
+// NewPeriodFromString turns a string into a Period objects. The string
+// must be formatted according to the patterns YYYY-MM or YYYY.
 func NewPeriodFromString(yyyymm string) (Period, error) {
 	if yyyymm == "" || !periodPattern.MatchString(yyyymm) {
 		return Period{}, errors.New("Please provide a valid period")

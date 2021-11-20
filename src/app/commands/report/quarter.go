@@ -19,8 +19,8 @@ func (a *quarterAggregator) NumberOfPrefixColumns() int {
 	return 2
 }
 
-func (a *quarterAggregator) DateHash(date Date) Hash {
-	return Hash(service.NewQuarterHash(date))
+func (a *quarterAggregator) DateHash(date Date) service.Hash {
+	return service.Hash(service.NewQuarterHash(date))
 }
 
 func (a *quarterAggregator) OnHeaderPrefix(table *terminalformat.Table) {

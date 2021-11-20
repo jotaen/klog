@@ -5,15 +5,24 @@ import (
 	"strings"
 )
 
+// Line is a data structure that represent one line of the source file.
 type Line struct {
-	Text                string
-	LineNumber          int
-	originalLineEnding  string
+	// Text contains the copy of the line.
+	Text string
+
+	// LineNumber is the line number, starting with 1.
+	LineNumber int
+
+	// originalLineEnding is the encountered line ending sequence `\n` or `\r\n`.
+	originalLineEnding string
+
+	// originalIndentation is the exact whitespace sequence used for indentation.
 	originalIndentation string
 }
 
 var lineDelimiterPattern = regexp.MustCompile(`^.*\n?`)
 
+// NewLineFromString turns data into a Line object.
 func NewLineFromString(rawLineText string, lineNumber int) Line {
 	text, indentation := splitOffPrecedingWhitespace(rawLineText)
 	text, lineEnding := splitOffLineEnding(text)
@@ -25,10 +34,12 @@ func NewLineFromString(rawLineText string, lineNumber int) Line {
 	}
 }
 
+// Original returns the (byte-wise) identical line of text as it appeared in the file.
 func (l *Line) Original() string {
 	return l.originalIndentation + l.Text + l.originalLineEnding
 }
 
+// IndentationLevel returns `0` for top level, `1` for first level, and `-1` for illegal indentation styles.
 func (l *Line) IndentationLevel() int {
 	normalised := strings.ReplaceAll(l.originalIndentation, "\t", "    ")
 	if normalised == "" {
@@ -40,6 +51,8 @@ func (l *Line) IndentationLevel() int {
 	return 1
 }
 
+// Split breaks up text into a list of Line’s. The text must use `\n` as
+// line delimiters.
 func Split(text string) []Line {
 	var result []Line
 	remainder := text
@@ -53,6 +66,8 @@ func Split(text string) []Line {
 	return result
 }
 
+// Join restores a blob of text from Line’s. The result is (byte-wise) identical
+// to the original copy.
 func Join(ls []Line) string {
 	result := ""
 	for _, l := range ls {

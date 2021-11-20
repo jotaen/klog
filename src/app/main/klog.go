@@ -1,3 +1,6 @@
+/*
+Package klog is the entry point of the command line tool.
+*/
 package klog
 
 import (

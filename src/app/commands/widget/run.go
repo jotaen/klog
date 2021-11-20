@@ -1,5 +1,9 @@
 //go:build darwin && amd64
 
+/*
+Package widget is a native Mac Widget. It’s not maintained anymore and might
+be discontinued.
+*/
 package widget
 
 import (

@@ -5,6 +5,7 @@ import (
 	gosort "sort"
 )
 
+// FilterQry represents the filter clauses of a query.
 type FilterQry struct {
 	Tags          []string
 	BeforeOrEqual Date
@@ -52,6 +53,27 @@ func Sort(rs []Record, startWithOldest bool) []Record {
 	return sorted
 }
 
+// EntryTagLookup returns a map for looking up matching entries for a given tag.
+func EntryTagLookup(rs ...Record) map[Tag][]Entry {
+	entriesByTag := make(map[Tag][]Entry)
+	for _, r := range rs {
+		alreadyAdded := make(map[Tag]bool)
+		for t := range r.Summary().Tags() {
+			entriesByTag[t] = append(entriesByTag[t], r.Entries()...)
+			alreadyAdded[t] = true
+		}
+		for _, e := range r.Entries() {
+			for t := range e.Summary().Tags() {
+				if alreadyAdded[t] {
+					continue
+				}
+				entriesByTag[t] = append(entriesByTag[t], e)
+			}
+		}
+	}
+	return entriesByTag
+}
+
 func reduceRecordToMatchingTags(queriedTags []string, r Record) (Record, bool) {
 	if isSubsetOf(queriedTags, r.Summary().Tags()) {
 		return r, true
@@ -76,26 +98,6 @@ func isSubsetOf(queriedTags []string, allTags TagSet) bool {
 		}
 	}
 	return true
-}
-
-func EntryTagLookup(rs ...Record) map[Tag][]Entry {
-	entriesByTag := make(map[Tag][]Entry)
-	for _, r := range rs {
-		alreadyAdded := make(map[Tag]bool)
-		for t := range r.Summary().Tags() {
-			entriesByTag[t] = append(entriesByTag[t], r.Entries()...)
-			alreadyAdded[t] = true
-		}
-		for _, e := range r.Entries() {
-			for t := range e.Summary().Tags() {
-				if alreadyAdded[t] {
-					continue
-				}
-				entriesByTag[t] = append(entriesByTag[t], e)
-			}
-		}
-	}
-	return entriesByTag
 }
 
 func newDateSet(ds []Date) map[DayHash]bool {

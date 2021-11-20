@@ -5,30 +5,18 @@ import (
 	"strings"
 )
 
-type Retriever func(fileArgs ...FileOrBookmarkName) ([]*fileWithContent, Error)
+// Retriever is the function interface for retrieving the input data from
+// various kinds of sources.
+type Retriever func(fileArgs ...FileOrBookmarkName) ([]FileWithContents, Error)
 
-type fileRetriever struct {
+type FileRetriever struct {
 	readFile  func(File) (string, Error)
 	bookmarks BookmarksCollection
 }
 
-type fileWithContent struct {
-	File
-	content string
-}
-
-func removeBlankEntries(fileArgs ...FileOrBookmarkName) []FileOrBookmarkName {
-	var result []FileOrBookmarkName
-	for _, f := range fileArgs {
-		if strings.TrimLeft(string(f), " ") == "" {
-			continue
-		}
-		result = append(result, f)
-	}
-	return result
-}
-
-func (retriever *fileRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fileWithContent, Error) {
+// Retrieve retrieves the contents from files or bookmarks. If no arguments were
+// specified, it tries to read from the default bookmark.
+func (retriever *FileRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]FileWithContents, Error) {
 	fileArgs = removeBlankEntries(fileArgs...)
 	if len(fileArgs) == 0 {
 		defaultBookmark := retriever.bookmarks.Default()
@@ -38,7 +26,7 @@ func (retriever *fileRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fil
 			}
 		}
 	}
-	var results []*fileWithContent
+	var results []FileWithContents
 	var errs []string
 	for _, arg := range fileArgs {
 		argValue := string(arg)
@@ -65,7 +53,7 @@ func (retriever *fileRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fil
 			errs = append(errs, readErr.Error()+": "+file.Path())
 			continue
 		}
-		results = append(results, &fileWithContent{file, content})
+		results = append(results, &fileWithContents{file, content})
 	}
 	if len(errs) > 0 {
 		return nil, NewErrorWithCode(
@@ -78,11 +66,13 @@ func (retriever *fileRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fil
 	return results, nil
 }
 
-type stdinRetriever struct {
+type StdinRetriever struct {
 	readStdin func() (string, Error)
 }
 
-func (retriever *stdinRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fileWithContent, Error) {
+// Retrieve retrieves the content from stdin. It only returns something if no
+// file or bookmark names were specified explicitly.
+func (retriever *StdinRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]FileWithContents, Error) {
 	fileArgs = removeBlankEntries(fileArgs...)
 	if len(fileArgs) > 0 {
 		return nil, nil
@@ -94,13 +84,25 @@ func (retriever *stdinRetriever) Retrieve(fileArgs ...FileOrBookmarkName) ([]*fi
 	if stdin == "" {
 		return nil, nil
 	}
-	return []*fileWithContent{{
-		File:    nil,
-		content: stdin,
+	return []FileWithContents{&fileWithContents{
+		File:     &fileWithPath{""},
+		contents: stdin,
 	}}, nil
 }
 
-func retrieveFirst(rs []Retriever, fileArgs ...FileOrBookmarkName) ([]*fileWithContent, Error) {
+func removeBlankEntries(fileArgs ...FileOrBookmarkName) []FileOrBookmarkName {
+	var result []FileOrBookmarkName
+	for _, f := range fileArgs {
+		if strings.TrimLeft(string(f), " ") == "" {
+			continue
+		}
+		result = append(result, f)
+	}
+	return result
+}
+
+// retrieveFirst returns the result from the first Retriever that yields something.
+func retrieveFirst(rs []Retriever, fileArgs ...FileOrBookmarkName) ([]FileWithContents, Error) {
 	for _, r := range rs {
 		files, err := r(fileArgs...)
 		if err != nil {
