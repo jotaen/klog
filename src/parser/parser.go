@@ -121,7 +121,6 @@ func parseRecord(block []Line) (Record, []Error) {
 			errs = append(errs, iErr)
 		}
 		if isIndented {
-			//indentationDetector.Configure(s) // TODO
 			break
 		}
 		newSummary, err := NewRecordSummary(append(record.Summary(), summary.ToString())...)
@@ -221,25 +220,23 @@ entries:
 }
 
 type IndentationDetector struct {
-	firstLevelIndentationStyle string
+	indentationStyles []string
 }
 
 func NewIndentationDetector() *IndentationDetector {
-	return &IndentationDetector{""}
+	return &IndentationDetector{
+		[]string{"  ", "   ", "    ", "\t"},
+	}
 }
 
 func (i *IndentationDetector) IsIndented(l Line) (bool, Error) {
 	if len(l.PrecedingWhitespace) == 0 {
 		return false, nil
 	}
-	for _, s := range []string{"  ", "   ", "    ", "\t"} {
+	for _, s := range i.indentationStyles {
 		if l.PrecedingWhitespace == s {
 			return true, nil
 		}
 	}
 	return false, ErrorIllegalIndentation(NewError(l, 0, len(l.Text)))
-}
-
-func (i *IndentationDetector) Configure(l Line) {
-	i.firstLevelIndentationStyle = l.PrecedingWhitespace
 }
