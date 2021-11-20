@@ -175,12 +175,19 @@ func TestReportErrorsInSummary(t *testing.T) {
 This is a summary that contains
  whitespace at the beginning of the line.
 That is not allowed.
+ Other kinds of blank characters are not allowed there neither.
+ And neither are fake blank lines:
+    
+End.
 `
 	pr, errs := Parse(text)
 	require.Nil(t, pr)
 	require.NotNil(t, errs)
-	require.Len(t, errs.Get(), 1)
+	require.Len(t, errs.Get(), 4)
 	assert.Equal(t, Err{id(ErrorIllegalIndentation), 4, 0, 40}, toErr(errs.Get()[0]))
+	assert.Equal(t, Err{id(ErrorMalformedSummary), 6, 0, 63}, toErr(errs.Get()[1]))
+	assert.Equal(t, Err{id(ErrorMalformedSummary), 7, 0, 34}, toErr(errs.Get()[2]))
+	assert.Equal(t, Err{id(ErrorMalformedSummary), 8, 0, 4}, toErr(errs.Get()[3]))
 }
 
 func TestReportErrorsInEntries(t *testing.T) {
