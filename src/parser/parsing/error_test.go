@@ -7,10 +7,10 @@ import (
 
 func TestCreateError(t *testing.T) {
 	err := NewError(Line{
-		Text:                        "Hello World",
-		LineNumber:                  2,
-		originalLineEnding:          "\n",
-		originalPrecedingWhitespace: "  ",
+		Text:                "Hello World",
+		LineNumber:          2,
+		LineEnding:          "\n",
+		PrecedingWhitespace: "  ",
 	}, 0, 5)
 	err = err.Set("CODE", "Title", "Details")
 	assert.Equal(t, "CODE", err.Code())

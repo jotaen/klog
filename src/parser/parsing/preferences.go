@@ -18,10 +18,10 @@ func DefaultPreferences() Preferences {
 
 // Adapt adjusts the preferences to what is encountered in the Line.
 func (p *Preferences) Adapt(l *Line) {
-	if len(l.PrecedingWhitespace()) > 0 {
-		p.IndentationStyle = l.PrecedingWhitespace()
+	if len(l.PrecedingWhitespace) > 0 {
+		p.IndentationStyle = l.PrecedingWhitespace
 	}
-	if l.originalLineEnding != "" {
-		p.LineEnding = l.originalLineEnding
+	if l.LineEnding != "" {
+		p.LineEnding = l.LineEnding
 	}
 }

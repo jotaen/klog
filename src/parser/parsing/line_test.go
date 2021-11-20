@@ -32,11 +32,11 @@ func TestDeterminesLineEndings(t *testing.T) {
 	ls := Split(text)
 	require.Len(t, ls, 3)
 	assert.Equal(t, "foo", ls[0].Text)
-	assert.Equal(t, "\n", ls[0].originalLineEnding)
+	assert.Equal(t, "\n", ls[0].LineEnding)
 	assert.Equal(t, "bar", ls[1].Text)
-	assert.Equal(t, "\r\n", ls[1].originalLineEnding)
+	assert.Equal(t, "\r\n", ls[1].LineEnding)
 	assert.Equal(t, "baz", ls[2].Text)
-	assert.Equal(t, "", ls[2].originalLineEnding)
+	assert.Equal(t, "", ls[2].LineEnding)
 }
 
 func TestDeterminesPrecedingWhitespace(t *testing.T) {
@@ -53,7 +53,7 @@ func TestDeterminesPrecedingWhitespace(t *testing.T) {
 		{"   \t     \t\t \t   wild mix", "   \t     \t\t \t   "},
 	} {
 		line := NewLineFromString(x.text, 0)
-		assert.Equal(t, x.expectedWhitespace, line.PrecedingWhitespace())
+		assert.Equal(t, x.expectedWhitespace, line.PrecedingWhitespace)
 	}
 }
 

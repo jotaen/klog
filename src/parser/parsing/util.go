@@ -78,8 +78,8 @@ func Insert(ls []Line, position int, texts []Text, prefs Preferences) []Line {
 		}
 		result[i].LineNumber = i + 1
 	}
-	if position > 0 && result[position-1].originalLineEnding == "" {
-		result[position-1].originalLineEnding = prefs.LineEnding
+	if position > 0 && result[position-1].LineEnding == "" {
+		result[position-1].LineEnding = prefs.LineEnding
 	}
 	return result
 }

@@ -13,11 +13,11 @@ type Line struct {
 	// LineNumber is the line number, starting with 1.
 	LineNumber int
 
-	// originalLineEnding is the encountered line ending sequence `\n` or `\r\n`.
-	originalLineEnding string
+	// LineEnding is the encountered line ending sequence `\n` or `\r\n`.
+	LineEnding string
 
-	// originalPrecedingWhitespace is the exact whitespace sequence used for indentation.
-	originalPrecedingWhitespace string
+	// PrecedingWhitespace is the exact original whitespace sequence used for indentation.
+	PrecedingWhitespace string
 }
 
 var lineDelimiterPattern = regexp.MustCompile(`^.*\n?`)
@@ -27,20 +27,16 @@ func NewLineFromString(rawLineText string, lineNumber int) Line {
 	text, precedingWhitespace := splitOffPrecedingWhitespace(rawLineText)
 	text, lineEnding := splitOffLineEnding(text)
 	return Line{
-		Text:                        text,
-		LineNumber:                  lineNumber,
-		originalLineEnding:          lineEnding,
-		originalPrecedingWhitespace: precedingWhitespace,
+		Text:                text,
+		LineNumber:          lineNumber,
+		LineEnding:          lineEnding,
+		PrecedingWhitespace: precedingWhitespace,
 	}
 }
 
 // Original returns the (byte-wise) identical line of text as it appeared in the file.
 func (l *Line) Original() string {
-	return l.originalPrecedingWhitespace + l.Text + l.originalLineEnding
-}
-
-func (l *Line) PrecedingWhitespace() string {
-	return l.originalPrecedingWhitespace
+	return l.PrecedingWhitespace + l.Text + l.LineEnding
 }
 
 // Split breaks up text into a list of Line’s. The text must use `\n` as

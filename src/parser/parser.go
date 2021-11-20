@@ -52,7 +52,7 @@ func parseRecord(block []Line) (Record, []Error) {
 
 	// ========== HEADLINE ==========
 	record := func(headline Parseable) Record {
-		if len(headline.PrecedingWhitespace()) > 0 {
+		if len(headline.PrecedingWhitespace) > 0 {
 			errs = append(errs, ErrorIllegalIndentation(NewError(headline.Line, 0, headline.Length())))
 			return nil
 		}
@@ -229,11 +229,11 @@ func NewIndentationDetector() *IndentationDetector {
 }
 
 func (i *IndentationDetector) IsIndented(l Line) (bool, Error) {
-	if len(l.PrecedingWhitespace()) == 0 {
+	if len(l.PrecedingWhitespace) == 0 {
 		return false, nil
 	}
 	for _, s := range []string{"  ", "   ", "    ", "\t"} {
-		if l.PrecedingWhitespace() == s {
+		if l.PrecedingWhitespace == s {
 			return true, nil
 		}
 	}
@@ -241,5 +241,5 @@ func (i *IndentationDetector) IsIndented(l Line) (bool, Error) {
 }
 
 func (i *IndentationDetector) Configure(l Line) {
-	i.firstLevelIndentationStyle = l.PrecedingWhitespace()
+	i.firstLevelIndentationStyle = l.PrecedingWhitespace
 }
