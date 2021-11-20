@@ -54,16 +54,6 @@ func Split(text string) []Line {
 	return result
 }
 
-// Join restores a blob of text from Line’s. The result is (byte-wise) identical
-// to the original copy.
-func Join(ls []Line) string {
-	result := ""
-	for _, l := range ls {
-		result += l.Original()
-	}
-	return result
-}
-
 var lineEndingPatterns = []string{"\r\n", "\n"}
 
 func splitOffLineEnding(text string) (string, string) {

@@ -45,7 +45,7 @@ type Context interface {
 
 	// ReadFileInput retrieves the input from one given file. It returns the
 	// ParseResult, which can be used to reconcile the file.
-	ReadFileInput(FileOrBookmarkName) (*parser.ParseResult, File, error)
+	ReadFileInput(FileOrBookmarkName) ([]Record, File, error)
 
 	// WriteFile saves content in a file on disk.
 	WriteFile(File, string) Error
@@ -72,7 +72,7 @@ type Context interface {
 	SetSerialiser(*parser.Serialiser)
 
 	// InstantiateTemplate reads a template from disk and substitutes all placeholders.
-	InstantiateTemplate(string) ([]reconciler.Text, Error)
+	InstantiateTemplate(string) ([]reconciler.InsertableText, Error)
 }
 
 // Meta holds miscellaneous information about the klog binary.
@@ -175,15 +175,15 @@ func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, error)
 			nil,
 		)
 	}
-	var records []Record
+	var allRecords []Record
 	for _, f := range files {
-		pr, parserErrors := parser.Parse(f.Contents())
+		records, _, parserErrors := parser.Parse(f.Contents())
 		if parserErrors != nil {
 			return nil, parserErrors
 		}
-		records = append(records, pr.Records...)
+		allRecords = append(allRecords, records...)
 	}
-	return records, nil
+	return allRecords, nil
 }
 
 func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithContents, Error) {
@@ -206,16 +206,16 @@ func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithCont
 	return inputs[0], nil
 }
 
-func (ctx *context) ReadFileInput(fileArg FileOrBookmarkName) (*parser.ParseResult, File, error) {
+func (ctx *context) ReadFileInput(fileArg FileOrBookmarkName) ([]Record, File, error) {
 	target, err := ctx.retrieveTargetFile(fileArg)
 	if err != nil {
 		return nil, nil, err
 	}
-	pr, parserErrors := parser.Parse(target.Contents())
+	records, _, parserErrors := parser.Parse(target.Contents())
 	if parserErrors != nil {
 		return nil, nil, parserErrors
 	}
-	return pr, target, nil
+	return records, target, nil
 }
 
 func (ctx *context) WriteFile(target File, contents string) Error {
@@ -333,7 +333,7 @@ func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(stri
 	)
 }
 
-func (ctx *context) InstantiateTemplate(templateName string) ([]reconciler.Text, Error) {
+func (ctx *context) InstantiateTemplate(templateName string) ([]reconciler.InsertableText, Error) {
 	location := NewFileOrPanic(ctx.KlogFolder() + templateName + ".template.klg")
 	template, err := ReadFile(location)
 	if err != nil {

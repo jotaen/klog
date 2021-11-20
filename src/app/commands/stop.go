@@ -29,22 +29,22 @@ func (opt *Stop) Run(ctx app.Context) error {
 		File: opt.OutputFileArgs.File,
 		Ctx:  ctx,
 	}.Apply(
-		func(pr *parser.ParseResult) (*reconciler.ReconcileResult, error) {
-			reconciler := reconciler.NewRecordReconciler(pr, func(r Record) bool {
+		func(records []parser.ParsedRecord) (*reconciler.ReconcileResult, error) {
+			recordReconciler := reconciler.NewRecordReconciler(records, func(r Record) bool {
 				return r.Date().IsEqualTo(date)
 			})
-			if reconciler == nil {
+			if recordReconciler == nil {
 				return nil, lib.NotEligibleError{}
 			}
-			return reconciler.CloseOpenRange(
+			return recordReconciler.CloseOpenRange(
 				func(r Record) (Time, EntrySummary) { return time, NewEntrySummary(opt.Summary) },
 			)
 		},
-		func(pr *parser.ParseResult) (*reconciler.ReconcileResult, error) {
-			reconciler := reconciler.NewRecordReconciler(pr, func(r Record) bool {
+		func(record []parser.ParsedRecord) (*reconciler.ReconcileResult, error) {
+			recordReconciler := reconciler.NewRecordReconciler(record, func(r Record) bool {
 				return r.Date().IsEqualTo(date.PlusDays(-1))
 			})
-			if reconciler == nil {
+			if recordReconciler == nil {
 				return nil, lib.NotEligibleError{}
 			}
 			adjustedTime := func() Time {
@@ -54,7 +54,7 @@ func (opt *Stop) Run(ctx app.Context) error {
 				timeTomorrow, _ := time.Add(NewDuration(24, 0))
 				return timeTomorrow
 			}()
-			return reconciler.CloseOpenRange(
+			return recordReconciler.CloseOpenRange(
 				func(r Record) (Time, EntrySummary) { return adjustedTime, NewEntrySummary(opt.Summary) },
 			)
 		},

@@ -17,21 +17,19 @@ func NewTestingContext() TestingContext {
 			printBuffer:         "",
 			writtenFileContents: "",
 		},
-		now:         gotime.Now(),
-		records:     nil,
-		parseResult: nil,
-		serialiser:  lib.NewCliSerialiser(),
-		bookmarks:   bc,
+		now:        gotime.Now(),
+		records:    nil,
+		serialiser: lib.NewCliSerialiser(),
+		bookmarks:  bc,
 	}
 }
 
-func (ctx TestingContext) _SetRecords(records string) TestingContext {
-	pr, err := parser.Parse(records)
+func (ctx TestingContext) _SetRecords(recordsText string) TestingContext {
+	records, _, err := parser.Parse(recordsText)
 	if err != nil {
 		panic("Invalid records")
 	}
-	ctx.parseResult = pr
-	ctx.records = pr.Records
+	ctx.records = records
 	return ctx
 }
 
@@ -56,11 +54,10 @@ type State struct {
 
 type TestingContext struct {
 	State
-	now         gotime.Time
-	records     []Record
-	parseResult *parser.ParseResult
-	serialiser  *parser.Serialiser
-	bookmarks   app.BookmarksCollection
+	now        gotime.Time
+	records    []Record
+	serialiser *parser.Serialiser
+	bookmarks  app.BookmarksCollection
 }
 
 func (ctx *TestingContext) Print(s string) {
@@ -92,8 +89,8 @@ func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, er
 	return ctx.records, nil
 }
 
-func (ctx *TestingContext) ReadFileInput(app.FileOrBookmarkName) (*parser.ParseResult, app.File, error) {
-	return ctx.parseResult, nil, nil
+func (ctx *TestingContext) ReadFileInput(app.FileOrBookmarkName) ([]Record, app.File, error) {
+	return ctx.records, nil, nil
 }
 
 func (ctx *TestingContext) WriteFile(_ app.File, contents string) app.Error {
@@ -121,7 +118,7 @@ func (ctx *TestingContext) OpenInEditor(_ app.FileOrBookmarkName, _ func(string)
 	return nil
 }
 
-func (ctx *TestingContext) InstantiateTemplate(_ string) ([]reconciler.Text, app.Error) {
+func (ctx *TestingContext) InstantiateTemplate(_ string) ([]reconciler.InsertableText, app.Error) {
 	return nil, nil
 }
 

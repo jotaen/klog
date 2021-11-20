@@ -12,7 +12,7 @@ import (
 var markerPattern = regexp.MustCompile(`{{.+}}`)
 
 // RenderTemplate replaces placeholders in a template with actual values.
-func RenderTemplate(templateText string, time gotime.Time) ([]Text, error) {
+func RenderTemplate(templateText string, time gotime.Time) ([]InsertableText, error) {
 	today := klog.NewDateFromTime(time)
 	now := klog.NewTimeFromTime(time)
 	variables := map[string]string{
@@ -26,17 +26,19 @@ func RenderTemplate(templateText string, time gotime.Time) ([]Text, error) {
 		m = strings.TrimSpace(m)
 		return variables[m]
 	})
-	pr, err := parser.Parse(instance)
+	_, blocks, err := parser.Parse(instance)
 	if err != nil {
 		return nil, errors.New("Cannot parse:\n" + instance)
 	}
-	var texts []Text
-	for _, l := range pr.Lines {
-		indentationLevel := 0
-		if len(l.PrecedingWhitespace) > 0 {
-			indentationLevel = 1
+	var texts []InsertableText
+	for _, b := range blocks {
+		for _, l := range b {
+			indentationLevel := 0
+			if len(l.PrecedingWhitespace) > 0 {
+				indentationLevel = 1
+			}
+			texts = append(texts, InsertableText{l.Text, indentationLevel})
 		}
-		texts = append(texts, Text{l.Text, indentationLevel})
 	}
 	return texts, nil
 }

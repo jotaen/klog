@@ -24,7 +24,7 @@ func (opt *Create) Help() string {
 func (opt *Create) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())
-	lines, err := func() ([]reconciler.Text, error) {
+	lines, err := func() ([]reconciler.InsertableText, error) {
 		if opt.Template != "" {
 			return ctx.InstantiateTemplate(opt.Template)
 		}
@@ -32,7 +32,7 @@ func (opt *Create) Run(ctx app.Context) error {
 		if opt.ShouldTotal != nil {
 			headline += " (" + opt.ShouldTotal.ToString() + "!)"
 		}
-		return []reconciler.Text{
+		return []reconciler.InsertableText{
 			{headline, 0},
 		}, nil
 	}()
@@ -43,9 +43,9 @@ func (opt *Create) Run(ctx app.Context) error {
 		File: opt.OutputFileArgs.File,
 		Ctx:  ctx,
 	}.Apply(
-		func(pr *parser.ParseResult) (*reconciler.ReconcileResult, error) {
-			reconciler := reconciler.NewBlockReconciler(pr, date)
-			return reconciler.InsertBlock(lines)
+		func(records []parser.ParsedRecord) (*reconciler.ReconcileResult, error) {
+			blockReconciler := reconciler.NewBlockReconciler(records, date)
+			return blockReconciler.InsertBlock(lines)
 		},
 	)
 }

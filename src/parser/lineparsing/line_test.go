@@ -65,8 +65,3 @@ func TestToStringRestoresOriginal(t *testing.T) {
 	assert.Equal(t, "\tTest 123\r\n", ls[1].Original())
 	assert.Equal(t, "      Foo Bar BAZ", ls[2].Original())
 }
-
-func TestSplitAndJoinResultsInOriginalText(t *testing.T) {
-	text := "x\n1293871jh23981y293j\n  asdfkj     askdlfjh\n\nalkdjhf\r\n\tasdkljfh\n"
-	assert.Equal(t, text, Join(Split(text)))
-}

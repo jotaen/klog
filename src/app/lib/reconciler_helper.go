@@ -19,7 +19,7 @@ type NotEligibleError struct{}
 func (e NotEligibleError) Error() string { return "No record found at that date" }
 
 func (c ReconcilerChain) Apply(
-	applicators ...func(pr *parser.ParseResult) (*reconciler.ReconcileResult, error),
+	applicators ...func(records []parser.ParsedRecord) (*reconciler.ReconcileResult, error),
 ) error {
 	pr, targetFilePath, err := c.Ctx.ReadFileInput(c.File)
 	if err != nil {

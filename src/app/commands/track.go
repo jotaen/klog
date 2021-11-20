@@ -33,8 +33,8 @@ func (opt *Track) Run(ctx app.Context) error {
 		File: opt.OutputFileArgs.File,
 		Ctx:  ctx,
 	}.Apply(
-		func(pr *parser.ParseResult) (*reconciler.ReconcileResult, error) {
-			recordReconciler := reconciler.NewRecordReconciler(pr, func(r Record) bool {
+		func(records []parser.ParsedRecord) (*reconciler.ReconcileResult, error) {
+			recordReconciler := reconciler.NewRecordReconciler(records, func(r Record) bool {
 				return r.Date().IsEqualTo(date)
 			})
 			if recordReconciler == nil {
@@ -42,10 +42,10 @@ func (opt *Track) Run(ctx app.Context) error {
 			}
 			return recordReconciler.AppendEntry(func(r Record) string { return value })
 		},
-		func(pr *parser.ParseResult) (*reconciler.ReconcileResult, error) {
-			blockReconciler := reconciler.NewBlockReconciler(pr, date)
+		func(records []parser.ParsedRecord) (*reconciler.ReconcileResult, error) {
+			blockReconciler := reconciler.NewBlockReconciler(records, date)
 			headline := opt.AtDate(ctx.Now()).ToString()
-			lines := []reconciler.Text{
+			lines := []reconciler.InsertableText{
 				{headline, 0},
 				{value, 1},
 			}

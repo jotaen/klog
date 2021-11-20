@@ -19,7 +19,7 @@ Foo #xyz
 	{{ NOW }} - ?
 `, now)
 	require.Nil(t, err)
-	assert.Equal(t, []Text{
+	assert.Equal(t, []InsertableText{
 		{"", 0},
 		{"1995-03-31", 0},
 		{"Foo #xyz", 0},
