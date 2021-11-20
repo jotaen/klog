@@ -39,33 +39,22 @@ func TestDeterminesLineEndings(t *testing.T) {
 	assert.Equal(t, "", ls[2].originalLineEnding)
 }
 
-func TestDeterminesIndentation(t *testing.T) {
-	text := "  two spaces\n   three spaces\n    four spaces\n\tone tab"
-	ls := Split(text)
-	require.Len(t, ls, 4)
-	assert.Equal(t, "  ", ls[0].originalIndentation)
-	assert.Equal(t, 1, ls[0].IndentationLevel())
-	assert.Equal(t, "   ", ls[1].originalIndentation)
-	assert.Equal(t, 1, ls[1].IndentationLevel())
-	assert.Equal(t, "    ", ls[2].originalIndentation)
-	assert.Equal(t, 1, ls[2].IndentationLevel())
-	assert.Equal(t, "\t", ls[3].originalIndentation)
-	assert.Equal(t, 1, ls[3].IndentationLevel())
-}
-
-func TestInvalidIndentation(t *testing.T) {
-	text := "     NO: five spaces\n\t\tNO: two tabs\n NO: one space"
-	ls := Split(text)
-	require.Len(t, ls, 3)
-	assert.Equal(t, "     ", ls[0].originalIndentation)
-	assert.Equal(t, "     NO: five spaces\n", ls[0].Original())
-	assert.Equal(t, -1, ls[0].IndentationLevel())
-	assert.Equal(t, "\t\t", ls[1].originalIndentation)
-	assert.Equal(t, "\t\tNO: two tabs\n", ls[1].Original())
-	assert.Equal(t, -1, ls[1].IndentationLevel())
-	assert.Equal(t, " ", ls[2].originalIndentation)
-	assert.Equal(t, -1, ls[2].IndentationLevel())
-	assert.Equal(t, " NO: one space", ls[2].Original())
+func TestDeterminesPrecedingWhitespace(t *testing.T) {
+	for _, x := range []struct {
+		text               string
+		expectedWhitespace string
+	}{
+		{" one space", " "},
+		{"  two spaces", "  "},
+		{"   three spaces", "   "},
+		{"    four spaces", "    "},
+		{"\tone tab", "\t"},
+		{"\t\ttwo tabs", "\t\t"},
+		{"   \t     \t\t \t   wild mix", "   \t     \t\t \t   "},
+	} {
+		line := NewLineFromString(x.text, 0)
+		assert.Equal(t, x.expectedWhitespace, line.PrecedingWhitespace())
+	}
 }
 
 func TestToStringRestoresOriginal(t *testing.T) {

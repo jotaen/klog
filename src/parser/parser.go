@@ -52,7 +52,7 @@ func parseRecord(block []Line) (Record, []Error) {
 
 	// ========== HEADLINE ==========
 	record := func(headline Parseable) Record {
-		if headline.IndentationLevel() != 0 {
+		if len(headline.PrecedingWhitespace()) > 0 {
 			errs = append(errs, ErrorIllegalIndentation(NewError(headline.Line, 0, headline.Length())))
 			return nil
 		}
@@ -111,14 +111,18 @@ func parseRecord(block []Line) (Record, []Error) {
 		dummyDate, _ := NewDate(0, 0, 0)
 		record = NewRecord(dummyDate)
 	}
+	indentationDetector := NewIndentationDetector()
 
 	// ========== SUMMARY LINES ==========
 	for _, s := range block {
 		summary := NewParseable(s)
-		if summary.IndentationLevel() > 0 {
+		isIndented, iErr := indentationDetector.IsIndented(s)
+		if iErr != nil {
+			errs = append(errs, iErr)
+		}
+		if isIndented {
+			//indentationDetector.Configure(s) // TODO
 			break
-		} else if summary.IndentationLevel() < 0 {
-			errs = append(errs, ErrorIllegalIndentation(NewError(summary.Line, 0, summary.Length())))
 		}
 		newSummary, err := NewRecordSummary(append(record.Summary(), summary.ToString())...)
 		if err != nil {
@@ -132,7 +136,12 @@ func parseRecord(block []Line) (Record, []Error) {
 entries:
 	for _, e := range block {
 		entry := NewParseable(e)
-		if entry.IndentationLevel() != 1 {
+		isIndented, iErr := indentationDetector.IsIndented(e)
+		if iErr != nil {
+			errs = append(errs, iErr)
+			continue
+		}
+		if !isIndented {
 			errs = append(errs, ErrorIllegalIndentation(NewError(entry.Line, 0, entry.Length())))
 			continue
 		}
@@ -209,4 +218,28 @@ entries:
 		return nil, errs
 	}
 	return record, nil
+}
+
+type IndentationDetector struct {
+	firstLevelIndentationStyle string
+}
+
+func NewIndentationDetector() *IndentationDetector {
+	return &IndentationDetector{""}
+}
+
+func (i *IndentationDetector) IsIndented(l Line) (bool, Error) {
+	if len(l.PrecedingWhitespace()) == 0 {
+		return false, nil
+	}
+	for _, s := range []string{"  ", "   ", "    ", "\t"} {
+		if l.PrecedingWhitespace() == s {
+			return true, nil
+		}
+	}
+	return false, ErrorIllegalIndentation(NewError(l, 0, len(l.Text)))
+}
+
+func (i *IndentationDetector) Configure(l Line) {
+	i.firstLevelIndentationStyle = l.PrecedingWhitespace()
 }

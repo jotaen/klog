@@ -68,7 +68,7 @@ func Insert(ls []Line, position int, texts []Text, prefs Preferences) []Line {
 		if i >= position && offset < len(texts) {
 			line := ""
 			if texts[offset].Indentation > 0 {
-				line += prefs.Indentation
+				line += prefs.IndentationStyle
 			}
 			line += texts[offset].Text + prefs.LineEnding
 			result[i] = NewLineFromString(line, -999)

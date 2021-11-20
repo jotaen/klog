@@ -32,7 +32,11 @@ func RenderTemplate(templateText string, time gotime.Time) ([]parsing.Text, erro
 	}
 	var texts []parsing.Text
 	for _, l := range pr.lines {
-		texts = append(texts, parsing.Text{l.Text, l.IndentationLevel()})
+		indentationLevel := 0
+		if len(l.PrecedingWhitespace()) > 0 {
+			indentationLevel = 1
+		}
+		texts = append(texts, parsing.Text{l.Text, indentationLevel})
 	}
 	return texts, nil
 }

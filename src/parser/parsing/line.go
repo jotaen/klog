@@ -16,39 +16,31 @@ type Line struct {
 	// originalLineEnding is the encountered line ending sequence `\n` or `\r\n`.
 	originalLineEnding string
 
-	// originalIndentation is the exact whitespace sequence used for indentation.
-	originalIndentation string
+	// originalPrecedingWhitespace is the exact whitespace sequence used for indentation.
+	originalPrecedingWhitespace string
 }
 
 var lineDelimiterPattern = regexp.MustCompile(`^.*\n?`)
 
 // NewLineFromString turns data into a Line object.
 func NewLineFromString(rawLineText string, lineNumber int) Line {
-	text, indentation := splitOffPrecedingWhitespace(rawLineText)
+	text, precedingWhitespace := splitOffPrecedingWhitespace(rawLineText)
 	text, lineEnding := splitOffLineEnding(text)
 	return Line{
-		Text:                text,
-		LineNumber:          lineNumber,
-		originalLineEnding:  lineEnding,
-		originalIndentation: indentation,
+		Text:                        text,
+		LineNumber:                  lineNumber,
+		originalLineEnding:          lineEnding,
+		originalPrecedingWhitespace: precedingWhitespace,
 	}
 }
 
 // Original returns the (byte-wise) identical line of text as it appeared in the file.
 func (l *Line) Original() string {
-	return l.originalIndentation + l.Text + l.originalLineEnding
+	return l.originalPrecedingWhitespace + l.Text + l.originalLineEnding
 }
 
-// IndentationLevel returns `0` for top level, `1` for first level, and `-1` for illegal indentation styles.
-func (l *Line) IndentationLevel() int {
-	normalised := strings.ReplaceAll(l.originalIndentation, "\t", "    ")
-	if normalised == "" {
-		return 0
-	}
-	if len(normalised) == 1 || len(normalised) > 4 {
-		return -1
-	}
-	return 1
+func (l *Line) PrecedingWhitespace() string {
+	return l.originalPrecedingWhitespace
 }
 
 // Split breaks up text into a list of Line’s. The text must use `\n` as
@@ -88,8 +80,6 @@ func splitOffLineEnding(text string) (string, string) {
 }
 
 func splitOffPrecedingWhitespace(line string) (string, string) {
-	text := strings.TrimLeftFunc(line, func(r rune) bool {
-		return r == '\t' || r == ' '
-	})
+	text := strings.TrimLeftFunc(line, IsWhitespace)
 	return text, line[:len(line)-len(text)]
 }
