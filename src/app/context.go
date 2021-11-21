@@ -10,7 +10,7 @@ import (
 	"fmt"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/reconciler"
+	"github.com/jotaen/klog/src/parser/reconciling"
 	"os"
 	"os/exec"
 	"os/user"
@@ -44,7 +44,7 @@ type Context interface {
 	ReadInputs(...FileOrBookmarkName) ([]Record, error)
 
 	// ReconcileFile ... // TODO
-	ReconcileFile(FileOrBookmarkName, ...reconciler.Reconcile) error
+	ReconcileFile(FileOrBookmarkName, ...reconciling.Handler) error
 
 	// Now returns the current timestamp.
 	Now() gotime.Time
@@ -68,7 +68,7 @@ type Context interface {
 	SetSerialiser(*parser.Serialiser)
 
 	// InstantiateTemplate reads a template from disk and substitutes all placeholders.
-	InstantiateTemplate(string) ([]reconciler.InsertableText, Error)
+	InstantiateTemplate(string) ([]reconciling.InsertableText, Error)
 }
 
 // Meta holds miscellaneous information about the klog binary.
@@ -202,7 +202,7 @@ func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithCont
 	return inputs[0], nil
 }
 
-func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, reconcilers ...reconciler.Reconcile) error {
+func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, handler ...reconciling.Handler) error {
 	target, err := ctx.retrieveTargetFile(fileArg)
 	if err != nil {
 		return err
@@ -211,16 +211,16 @@ func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, reconcilers ...rec
 	if parserErrors != nil {
 		return parserErrors
 	}
-	baseReconciler := reconciler.NewReconciler(records, blocks)
-	result, rErr := reconciler.Chain(baseReconciler, reconcilers...)
+	baseReconciler := reconciling.NewReconciler(records, blocks)
+	result, rErr := reconciling.Chain(baseReconciler, handler...)
 	if rErr != nil {
 		return rErr
 	}
-	wErr := WriteToFile(target, result.NewText)
+	wErr := WriteToFile(target, result.FileContents())
 	if wErr != nil {
 		return wErr
 	}
-	ctx.Print("\n" + ctx.Serialiser().SerialiseRecords(result.NewRecord) + "\n")
+	ctx.Print("\n" + ctx.Serialiser().SerialiseRecords(result.Record()) + "\n")
 	return nil
 }
 
@@ -332,7 +332,7 @@ func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(stri
 	)
 }
 
-func (ctx *context) InstantiateTemplate(templateName string) ([]reconciler.InsertableText, Error) {
+func (ctx *context) InstantiateTemplate(templateName string) ([]reconciling.InsertableText, Error) {
 	location := NewFileOrPanic(ctx.KlogFolder() + templateName + ".template.klg")
 	template, err := ReadFile(location)
 	if err != nil {
@@ -342,7 +342,7 @@ func (ctx *context) InstantiateTemplate(templateName string) ([]reconciler.Inser
 			err,
 		)
 	}
-	instance, tErr := reconciler.RenderTemplate(template, ctx.Now())
+	instance, tErr := reconciling.RenderTemplate(template, ctx.Now())
 	if tErr != nil {
 		return nil, NewError(
 			"Invalid template",

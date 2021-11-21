@@ -7,7 +7,7 @@ import (
 	"github.com/jotaen/klog/src/app/lib"
 	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/parser/lineparsing"
-	"github.com/jotaen/klog/src/parser/reconciler"
+	"github.com/jotaen/klog/src/parser/reconciling"
 	gotime "time"
 )
 
@@ -92,12 +92,12 @@ func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, er
 	return ctx.records, nil
 }
 
-func (ctx *TestingContext) ReconcileFile(_ app.FileOrBookmarkName, reconcilers ...reconciler.Reconcile) error {
-	result, err := reconciler.Chain(reconciler.NewReconciler(ctx.records, ctx.blocks), reconcilers...)
+func (ctx *TestingContext) ReconcileFile(_ app.FileOrBookmarkName, handler ...reconciling.Handler) error {
+	result, err := reconciling.Chain(reconciling.NewReconciler(ctx.records, ctx.blocks), handler...)
 	if err != nil {
 		return err
 	}
-	ctx.writtenFileContents = result.NewText
+	ctx.writtenFileContents = result.FileContents()
 	return nil
 }
 
@@ -126,7 +126,7 @@ func (ctx *TestingContext) OpenInEditor(_ app.FileOrBookmarkName, _ func(string)
 	return nil
 }
 
-func (ctx *TestingContext) InstantiateTemplate(_ string) ([]reconciler.InsertableText, app.Error) {
+func (ctx *TestingContext) InstantiateTemplate(_ string) ([]reconciling.InsertableText, app.Error) {
 	return nil, nil
 }
 

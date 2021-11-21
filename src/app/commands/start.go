@@ -4,7 +4,7 @@ import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
-	"github.com/jotaen/klog/src/parser/reconciler"
+	"github.com/jotaen/klog/src/parser/reconciling"
 )
 
 type Start struct {
@@ -31,26 +31,21 @@ func (opt *Start) Run(ctx app.Context) error {
 		}
 		return time.ToString() + " - ?" + summary
 	}()
-	return ctx.ReconcileFile(opt.OutputFileArgs.File,
-		func(base reconciler.Reconciler) (*reconciler.ReconcileResult, error) {
-			entryReconciler := reconciler.NewEntryReconciler(base, func(r Record) bool {
-				return r.Date().IsEqualTo(date)
-			})
-			if entryReconciler == nil {
-				return nil, reconciler.NotEligibleError{}
-			}
-			return entryReconciler.AppendEntry(func(r Record) string {
-				return entry
-			})
+	return ctx.ReconcileFile(
+		opt.OutputFileArgs.File,
+		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
+			return reconciler.AppendEntry(
+				func(r Record) bool { return r.Date().IsEqualTo(date) },
+				func(r Record) string { return entry },
+			)
 		},
-		func(base reconciler.Reconciler) (*reconciler.ReconcileResult, error) {
-			recordReconciler := reconciler.NewRecordReconciler(base, date)
+		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
 			headline := opt.AtDate(ctx.Now()).ToString()
-			lines := []reconciler.InsertableText{
+			lines := []reconciling.InsertableText{
 				{headline, 0},
 				{entry, 1},
 			}
-			return recordReconciler.InsertBlock(lines)
+			return reconciler.InsertBlock(date, lines)
 		},
 	)
 }

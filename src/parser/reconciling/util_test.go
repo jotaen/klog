@@ -1,4 +1,4 @@
-package reconciler
+package reconciling
 
 import (
 	"github.com/jotaen/klog/src/parser/lineparsing"

@@ -4,7 +4,7 @@ import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
-	"github.com/jotaen/klog/src/parser/reconciler"
+	"github.com/jotaen/klog/src/parser/reconciling"
 )
 
 type Stop struct {
@@ -24,25 +24,15 @@ func (opt *Stop) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())
 	time := opt.AtTime(ctx.Now())
-	return ctx.ReconcileFile(opt.OutputFileArgs.File,
-		func(base reconciler.Reconciler) (*reconciler.ReconcileResult, error) {
-			entryReconciler := reconciler.NewEntryReconciler(base, func(r Record) bool {
-				return r.Date().IsEqualTo(date)
-			})
-			if entryReconciler == nil {
-				return nil, reconciler.NotEligibleError{}
-			}
-			return entryReconciler.CloseOpenRange(
+	return ctx.ReconcileFile(
+		opt.OutputFileArgs.File,
+		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
+			return reconciler.CloseOpenRange(
+				func(r Record) bool { return r.Date().IsEqualTo(date) },
 				func(r Record) (Time, EntrySummary) { return time, NewEntrySummary(opt.Summary) },
 			)
 		},
-		func(base reconciler.Reconciler) (*reconciler.ReconcileResult, error) {
-			entryReconciler := reconciler.NewEntryReconciler(base, func(r Record) bool {
-				return r.Date().IsEqualTo(date.PlusDays(-1))
-			})
-			if entryReconciler == nil {
-				return nil, reconciler.NotEligibleError{}
-			}
+		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
 			adjustedTime := func() Time {
 				if time.IsTomorrow() {
 					return time
@@ -50,7 +40,8 @@ func (opt *Stop) Run(ctx app.Context) error {
 				timeTomorrow, _ := time.Add(NewDuration(24, 0))
 				return timeTomorrow
 			}()
-			return entryReconciler.CloseOpenRange(
+			return reconciler.CloseOpenRange(
+				func(r Record) bool { return r.Date().IsEqualTo(date.PlusDays(-1)) },
 				func(r Record) (Time, EntrySummary) { return adjustedTime, NewEntrySummary(opt.Summary) },
 			)
 		},

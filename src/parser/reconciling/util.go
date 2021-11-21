@@ -1,61 +1,23 @@
-/*
-Package reconciler contains logic to manipulate klog source text.
-The idea of reconcilers in general is to add or modify serialised records
-in a minimally invasive manner. Instead or re-serialising the record itself,
-it tries to find the location in the original text and modify that directly.
-While this approach might feel a little hacky, it avoids lots of other
-complications and sources of bugs, that could potentially mess up user data.
-*/
-package reconciler
+package reconciling
 
 import (
 	"errors"
-	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/parser/lineparsing"
 )
 
-// ReconcileResult is the return value of reconcilers and contains
-// the modified record as Record and serialised.
-// Deprecated. (Use multiple return value instead!)
-type ReconcileResult struct {
-	NewRecord Record
-	NewText   string
-}
-
-type Reconciler struct {
-	records []Record
-	blocks  []lineparsing.Block
-}
-
-func NewReconciler(records []Record, blocks []lineparsing.Block) Reconciler {
-	return Reconciler{records, blocks}
-}
-
-type Reconcile func(Reconciler) (*ReconcileResult, error)
-
-// InsertableText is for inserting lines of text into a list of Line’s,
-// without needing to know anything about indentation or line ending style.
-type InsertableText struct {
-	Text        string
-	Indentation int
-}
-
-// NotEligibleError is for Chain to indicate that it should proceed with the next reconciler.
-type NotEligibleError struct{}
-
-func (e NotEligibleError) Error() string { return "Boom" } // TODO
+type Handler func(Reconciler) (*Result, error)
 
 // Chain tries to apply multiple reconcilers one after the other. It returns the result
 // of the first successful one.
-func Chain(base Reconciler, reconcilers ...Reconcile) (*ReconcileResult, error) {
-	for i, reconcile := range reconcilers {
+func Chain(base Reconciler, handler ...Handler) (*Result, error) {
+	for i, reconcile := range handler {
 		result, err := reconcile(base)
 		if err == nil && result != nil {
 			return result, nil
 		}
 		_, isNotEligibleError := err.(NotEligibleError)
-		if isNotEligibleError && i < len(reconcilers)-1 {
+		if isNotEligibleError && i < len(handler)-1 {
 			// Try next reconcile function
 			continue
 		}
@@ -88,14 +50,14 @@ func stylePreferencesOrDefault(b lineparsing.Block) stylePreferences {
 	return defaultPrefs
 }
 
-func makeResult(ls []lineparsing.Line, recordIndex uint) (*ReconcileResult, error) {
+func makeResult(ls []lineparsing.Line, recordIndex uint) (*Result, error) {
 	newText := join(ls)
 	newRecords, _, pErr := parser.Parse(newText)
 	if pErr != nil {
 		err := pErr.Get()[0]
 		return nil, errors.New(err.Message())
 	}
-	return &ReconcileResult{
+	return &Result{
 		newRecords[recordIndex],
 		newText,
 	}, nil

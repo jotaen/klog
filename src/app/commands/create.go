@@ -4,7 +4,7 @@ import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
-	"github.com/jotaen/klog/src/parser/reconciler"
+	"github.com/jotaen/klog/src/parser/reconciling"
 )
 
 type Create struct {
@@ -23,7 +23,7 @@ func (opt *Create) Help() string {
 func (opt *Create) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())
-	lines, err := func() ([]reconciler.InsertableText, error) {
+	lines, err := func() ([]reconciling.InsertableText, error) {
 		if opt.Template != "" {
 			return ctx.InstantiateTemplate(opt.Template)
 		}
@@ -31,17 +31,17 @@ func (opt *Create) Run(ctx app.Context) error {
 		if opt.ShouldTotal != nil {
 			headline += " (" + opt.ShouldTotal.ToString() + "!)"
 		}
-		return []reconciler.InsertableText{
+		return []reconciling.InsertableText{
 			{headline, 0},
 		}, nil
 	}()
 	if err != nil {
 		return err
 	}
-	return ctx.ReconcileFile(opt.OutputFileArgs.File,
-		func(base reconciler.Reconciler) (*reconciler.ReconcileResult, error) {
-			recordReconciler := reconciler.NewRecordReconciler(base, date)
-			return recordReconciler.InsertBlock(lines)
+	return ctx.ReconcileFile(
+		opt.OutputFileArgs.File,
+		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
+			return reconciler.InsertBlock(date, lines)
 		},
 	)
 }
