@@ -6,6 +6,17 @@ import (
 	"testing"
 )
 
+func TestGroupEmptyInput(t *testing.T) {
+	for _, ls := range [][]Line{
+		{},
+		{{Text: ""}},
+		{{Text: ""}, {Text: "  "}, {Text: "\t\t"}},
+	} {
+		blocks := GroupIntoBlocks(ls)
+		require.Nil(t, blocks)
+	}
+}
+
 func TestGroupLinesOfSingleBlock(t *testing.T) {
 	for _, ls := range [][]Line{
 		{{Text: "a1"}},
