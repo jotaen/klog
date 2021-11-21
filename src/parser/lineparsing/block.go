@@ -1,7 +1,8 @@
 package lineparsing
 
-// Block is basically like a paragraph of text. It might be surrounded
-// by any number of blank lines.
+// Block is multiple consecutive lines with text, with no blank lines
+// in between, but possibly one or more blank lines before or after.
+// It’s basically like a paragraph of text, with surrounding whitespace.
 type Block []Line
 
 // SignificantLines returns the lines that are not blank.
@@ -21,6 +22,7 @@ func GroupIntoBlocks(lines []Line) []Block {
 	var currentBlock Block
 	significantMode := false
 	isFirstException := true
+	hasSeenSignificantContent := false
 	for _, l := range lines {
 		shallCommit := false
 		if significantMode || isBlank(l) {
@@ -34,6 +36,9 @@ func GroupIntoBlocks(lines []Line) []Block {
 			isFirstException = false
 		}
 		if shallCommit {
+			if !hasSeenSignificantContent && !isBlank(l) {
+				hasSeenSignificantContent = true
+			}
 			currentBlock = append(currentBlock, l)
 			continue
 		}
@@ -44,7 +49,7 @@ func GroupIntoBlocks(lines []Line) []Block {
 	if currentBlock != nil {
 		blocks = append(blocks, currentBlock)
 	}
-	if len(blocks) == 1 && !significantMode {
+	if len(blocks) == 1 && !hasSeenSignificantContent {
 		return nil
 	}
 	return blocks

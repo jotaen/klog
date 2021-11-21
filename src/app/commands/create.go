@@ -4,7 +4,7 @@ import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
-	"github.com/jotaen/klog/src/parser"
+	"github.com/jotaen/klog/src/parser/lineparsing"
 	"github.com/jotaen/klog/src/parser/reconciler"
 )
 
@@ -43,8 +43,8 @@ func (opt *Create) Run(ctx app.Context) error {
 		File: opt.OutputFileArgs.File,
 		Ctx:  ctx,
 	}.Apply(
-		func(records []parser.ParsedRecord) (*reconciler.ReconcileResult, error) {
-			blockReconciler := reconciler.NewBlockReconciler(records, date)
+		func(records []Record, blocks []lineparsing.Block) (*reconciler.ReconcileResult, error) {
+			blockReconciler := reconciler.NewBlockReconciler(records, blocks, date)
 			return blockReconciler.InsertBlock(lines)
 		},
 	)

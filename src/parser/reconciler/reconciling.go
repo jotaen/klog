@@ -17,6 +17,7 @@ import (
 
 // ReconcileResult is the return value of reconcilers and contains
 // the modified record as Record and serialised.
+// Deprecated. (Use multiple return value instead!)
 type ReconcileResult struct {
 	NewRecord Record
 	NewText   string
@@ -34,11 +35,23 @@ type stylePreferences struct {
 	lineEndingStyle  string
 }
 
-func newDefaultStylePreferences() stylePreferences {
-	return stylePreferences{
+func stylePreferencesOrDefault(b lineparsing.Block) stylePreferences {
+	defaultPrefs := stylePreferences{
 		indentationStyle: "    ",
 		lineEndingStyle:  "\n",
 	}
+	if b == nil {
+		return defaultPrefs
+	}
+	for _, l := range b.SignificantLines() {
+		if len(l.LineEnding) > 0 {
+			defaultPrefs.lineEndingStyle = l.LineEnding
+		}
+		if len(l.PrecedingWhitespace) > 0 {
+			defaultPrefs.indentationStyle = l.PrecedingWhitespace
+		}
+	}
+	return defaultPrefs
 }
 
 func makeResult(ls []lineparsing.Line, recordIndex uint) (*ReconcileResult, error) {
@@ -55,7 +68,7 @@ func makeResult(ls []lineparsing.Line, recordIndex uint) (*ReconcileResult, erro
 }
 
 // insert inserts some new lines into a text at a specific line number (position).
-func insert(ls []lineparsing.Line, position int, texts []InsertableText, stylePrefs parser.StylePreferences) []lineparsing.Line {
+func insert(ls []lineparsing.Line, position int, texts []InsertableText, stylePrefs stylePreferences) []lineparsing.Line {
 	if position > len(ls)+1 {
 		panic("Out of bounds")
 	}
@@ -65,9 +78,9 @@ func insert(ls []lineparsing.Line, position int, texts []InsertableText, stylePr
 		if i >= position && offset < len(texts) {
 			line := ""
 			if texts[offset].Indentation > 0 {
-				line += stylePrefs.IndentationStyle()
+				line += stylePrefs.indentationStyle
 			}
-			line += texts[offset].Text + stylePrefs.LineEndingStyle()
+			line += texts[offset].Text + stylePrefs.lineEndingStyle
 			result[i] = lineparsing.NewLineFromString(line, -999)
 			offset++
 		} else {
@@ -76,7 +89,7 @@ func insert(ls []lineparsing.Line, position int, texts []InsertableText, stylePr
 		result[i].LineNumber = i + 1
 	}
 	if position > 0 && result[position-1].LineEnding == "" {
-		result[position-1].LineEnding = stylePrefs.LineEndingStyle()
+		result[position-1].LineEnding = stylePrefs.lineEndingStyle
 	}
 	return result
 }
@@ -89,10 +102,14 @@ func join(ls []lineparsing.Line) string {
 	return result
 }
 
-func decompose(records []parser.ParsedRecord) []lineparsing.Line {
+func flatten(blocks []lineparsing.Block) []lineparsing.Line {
 	var result []lineparsing.Line
-	for _, r := range records {
-		result = append(result, r.Block()...)
+	for _, bs := range blocks {
+		result = append(result, bs...)
 	}
 	return result
+}
+
+func lastLine(ls []lineparsing.Line) lineparsing.Line {
+	return ls[len(ls)-1]
 }

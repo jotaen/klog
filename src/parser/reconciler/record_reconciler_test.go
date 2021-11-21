@@ -21,8 +21,8 @@ Hello World
 2018-01-03
     5h
 `
-	rs, _ := parser.Parse(original)
-	reconciler := NewRecordReconciler(rs, func(r Record) bool {
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewRecordReconciler(rs, bs, func(r Record) bool {
 		return r.Date().ToString() == "2018-01-02"
 	})
 	require.NotNil(t, reconciler)
@@ -49,8 +49,8 @@ func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 	original := `
 2018-01-01
     1h`
-	rs, _ := parser.Parse(original)
-	reconciler := NewRecordReconciler(rs, func(r Record) bool {
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewRecordReconciler(rs, bs, func(r Record) bool {
 		return r.Date().ToString() == "2018-01-01"
 	})
 	require.NotNil(t, reconciler)
@@ -65,15 +65,15 @@ func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 
 func TestReconcilerSkipsIfNoRecordMatches(t *testing.T) {
 	original := "2018-01-01\n"
-	rs, _ := parser.Parse(original)
-	reconciler := NewRecordReconciler(rs, func(r Record) bool { return false })
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewRecordReconciler(rs, bs, func(r Record) bool { return false })
 	require.Nil(t, reconciler)
 }
 
 func TestReconcilerRejectsInvalidEntry(t *testing.T) {
 	original := "2018-01-01\n"
-	rs, _ := parser.Parse(original)
-	reconciler := NewRecordReconciler(rs, func(r Record) bool { return true })
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewRecordReconciler(rs, bs, func(r Record) bool { return true })
 	require.NotNil(t, reconciler)
 	result, err := reconciler.AppendEntry(func(r Record) string { return "this is not valid entry text" })
 	require.Nil(t, result)
@@ -85,8 +85,8 @@ func TestReconcilerClosesOpenRangeWithNewSummary(t *testing.T) {
 2018-01-01
     15:00 - ?
 `
-	rs, _ := parser.Parse(original)
-	reconciler := NewRecordReconciler(rs, func(r Record) bool {
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewRecordReconciler(rs, bs, func(r Record) bool {
 		return r.Date().ToString() == "2018-01-01"
 	})
 	require.NotNil(t, reconciler)
@@ -107,8 +107,8 @@ func TestReconcilerClosesOpenRangeWithExtendingSummary(t *testing.T) {
     15:00-??? Will this close? I hope so!?!?
 	2m
 `
-	rs, _ := parser.Parse(original)
-	reconciler := NewRecordReconciler(rs, func(r Record) bool {
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewRecordReconciler(rs, bs, func(r Record) bool {
 		return r.Date().ToString() == "2018-01-01"
 	})
 	require.NotNil(t, reconciler)

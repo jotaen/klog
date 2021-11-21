@@ -2,8 +2,9 @@ package lib
 
 import (
 	"errors"
+	klog "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
-	"github.com/jotaen/klog/src/parser"
+	"github.com/jotaen/klog/src/parser/lineparsing"
 	"github.com/jotaen/klog/src/parser/reconciler"
 )
 
@@ -19,15 +20,15 @@ type NotEligibleError struct{}
 func (e NotEligibleError) Error() string { return "No record found at that date" }
 
 func (c ReconcilerChain) Apply(
-	applicators ...func(records []parser.ParsedRecord) (*reconciler.ReconcileResult, error),
+	applicators ...func(records []klog.Record, blocks []lineparsing.Block) (*reconciler.ReconcileResult, error),
 ) error {
-	pr, targetFilePath, err := c.Ctx.ReadFileInput(c.File)
+	records, blocks, targetFilePath, err := c.Ctx.ReadFileInput(c.File)
 	if err != nil {
 		return err
 	}
 	result, err := func() (*reconciler.ReconcileResult, error) {
 		for i, a := range applicators {
-			result, err := a(pr)
+			result, err := a(records, blocks)
 			if result != nil {
 				return result, nil
 			}

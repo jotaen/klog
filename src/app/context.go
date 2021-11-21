@@ -10,6 +10,7 @@ import (
 	"fmt"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/parser"
+	"github.com/jotaen/klog/src/parser/lineparsing"
 	"github.com/jotaen/klog/src/parser/reconciler"
 	"os"
 	"os/exec"
@@ -45,7 +46,7 @@ type Context interface {
 
 	// ReadFileInput retrieves the input from one given file. It returns the
 	// ParseResult, which can be used to reconcile the file.
-	ReadFileInput(FileOrBookmarkName) ([]Record, File, error)
+	ReadFileInput(FileOrBookmarkName) ([]Record, []lineparsing.Block, File, error)
 
 	// WriteFile saves content in a file on disk.
 	WriteFile(File, string) Error
@@ -206,16 +207,16 @@ func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithCont
 	return inputs[0], nil
 }
 
-func (ctx *context) ReadFileInput(fileArg FileOrBookmarkName) ([]Record, File, error) {
+func (ctx *context) ReadFileInput(fileArg FileOrBookmarkName) ([]Record, []lineparsing.Block, File, error) {
 	target, err := ctx.retrieveTargetFile(fileArg)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
-	records, _, parserErrors := parser.Parse(target.Contents())
+	records, blocks, parserErrors := parser.Parse(target.Contents())
 	if parserErrors != nil {
-		return nil, nil, parserErrors
+		return nil, nil, nil, parserErrors
 	}
-	return records, target, nil
+	return records, blocks, target, nil
 }
 
 func (ctx *context) WriteFile(target File, contents string) Error {

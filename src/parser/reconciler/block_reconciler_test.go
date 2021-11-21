@@ -9,8 +9,8 @@ import (
 )
 
 func TestReconcileAddBlockIfOriginalIsEmpty(t *testing.T) {
-	rs, _, _ := parser.Parse("")
-	reconciler := NewBlockReconciler(rs, Ɀ_Date_(3333, 1, 1))
+	rs, bs, _ := parser.Parse("")
+	reconciler := NewBlockReconciler(rs, bs, Ɀ_Date_(3333, 1, 1))
 	result, err := reconciler.InsertBlock([]InsertableText{
 		{"2000-05-05", 0},
 	})
@@ -22,8 +22,8 @@ func TestReconcileAddBlockToEnd(t *testing.T) {
 	original := `
 2018-01-01
     1h`
-	rs, _, _ := parser.Parse(original)
-	reconciler := NewBlockReconciler(rs, Ɀ_Date_(2018, 1, 2))
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewBlockReconciler(rs, bs, Ɀ_Date_(2018, 1, 2))
 	result, err := reconciler.InsertBlock([]InsertableText{
 		{"2018-01-02", 0},
 	})
@@ -42,8 +42,8 @@ func TestReconcileAddBlockToEndWithTrailingNewlines(t *testing.T) {
     1h
 
 `
-	rs, _, _ := parser.Parse(original)
-	reconciler := NewBlockReconciler(rs, Ɀ_Date_(2018, 1, 2))
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewBlockReconciler(rs, bs, Ɀ_Date_(2018, 1, 2))
 	result, err := reconciler.InsertBlock([]InsertableText{
 		{"2018-01-02", 0},
 	})
@@ -59,8 +59,8 @@ func TestReconcileAddBlockToEndWithTrailingNewlines(t *testing.T) {
 
 func TestReconcileAddBlockToBeginning(t *testing.T) {
 	original := "2018-01-02"
-	rs, _, _ := parser.Parse(original)
-	reconciler := NewBlockReconciler(rs, Ɀ_Date_(2018, 1, 1))
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewBlockReconciler(rs, bs, Ɀ_Date_(2018, 1, 1))
 	result, err := reconciler.InsertBlock([]InsertableText{
 		{"2018-01-01", 0},
 	})
@@ -72,8 +72,8 @@ func TestReconcileAddBlockToBeginning(t *testing.T) {
 
 func TestReconcileAddBlockToBeginningWithLeadingNewlines(t *testing.T) {
 	original := "\n\n2018-01-02"
-	rs, _, _ := parser.Parse(original)
-	reconciler := NewBlockReconciler(rs, Ɀ_Date_(2018, 1, 1))
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewBlockReconciler(rs, bs, Ɀ_Date_(2018, 1, 1))
 	result, err := reconciler.InsertBlock([]InsertableText{
 		{"2018-01-01", 0},
 	})
@@ -92,8 +92,8 @@ func TestReconcileAddBlockInBetween(t *testing.T) {
 
 2018-01-03
     3h`
-	pr, _, _ := parser.Parse(original)
-	reconciler := NewBlockReconciler(pr, Ɀ_Date_(2018, 1, 2))
+	pr, bs, _ := parser.Parse(original)
+	reconciler := NewBlockReconciler(pr, bs, Ɀ_Date_(2018, 1, 2))
 	result, err := reconciler.InsertBlock([]InsertableText{
 		{"2018-01-02", 0},
 		{"This and that", 0},

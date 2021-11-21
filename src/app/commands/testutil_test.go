@@ -6,6 +6,7 @@ import (
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
 	"github.com/jotaen/klog/src/parser"
+	"github.com/jotaen/klog/src/parser/lineparsing"
 	"github.com/jotaen/klog/src/parser/reconciler"
 	gotime "time"
 )
@@ -25,11 +26,12 @@ func NewTestingContext() TestingContext {
 }
 
 func (ctx TestingContext) _SetRecords(recordsText string) TestingContext {
-	records, _, err := parser.Parse(recordsText)
+	records, blocks, err := parser.Parse(recordsText)
 	if err != nil {
 		panic("Invalid records")
 	}
 	ctx.records = records
+	ctx.blocks = blocks
 	return ctx
 }
 
@@ -56,6 +58,7 @@ type TestingContext struct {
 	State
 	now        gotime.Time
 	records    []Record
+	blocks     []lineparsing.Block
 	serialiser *parser.Serialiser
 	bookmarks  app.BookmarksCollection
 }
@@ -89,8 +92,8 @@ func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, er
 	return ctx.records, nil
 }
 
-func (ctx *TestingContext) ReadFileInput(app.FileOrBookmarkName) ([]Record, app.File, error) {
-	return ctx.records, nil, nil
+func (ctx *TestingContext) ReadFileInput(app.FileOrBookmarkName) ([]Record, []lineparsing.Block, app.File, error) {
+	return ctx.records, ctx.blocks, nil, nil
 }
 
 func (ctx *TestingContext) WriteFile(_ app.File, contents string) app.Error {

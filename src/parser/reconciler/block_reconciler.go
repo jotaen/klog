@@ -2,16 +2,17 @@ package reconciler
 
 import (
 	. "github.com/jotaen/klog/src"
-	"github.com/jotaen/klog/src/parser"
+	"github.com/jotaen/klog/src/parser/lineparsing"
 )
 
 // BlockReconciler is for inserting a new record into a list of records.
 type BlockReconciler struct {
-	records            []parser.ParsedRecord
+	records            []Record
+	blocks             []lineparsing.Block
 	maybeRecordPointer int
 }
 
-func NewBlockReconciler(rs []parser.ParsedRecord, newDate Date) *BlockReconciler {
+func NewBlockReconciler(rs []Record, bs []lineparsing.Block, newDate Date) *BlockReconciler {
 	index := -1
 	for i, r := range rs {
 		if i == 0 && !newDate.IsAfterOrEqual(r.Date()) {
@@ -28,6 +29,7 @@ func NewBlockReconciler(rs []parser.ParsedRecord, newDate Date) *BlockReconciler
 	}
 	return &BlockReconciler{
 		records:            rs,
+		blocks:             bs,
 		maybeRecordPointer: index,
 	}
 }
@@ -35,22 +37,27 @@ func NewBlockReconciler(rs []parser.ParsedRecord, newDate Date) *BlockReconciler
 var blankLine = InsertableText{"", 0}
 
 func (r *BlockReconciler) InsertBlock(texts []InsertableText) (*ReconcileResult, error) {
-	lineIndex, newRecordIndex, insertable := func() (int, uint, []InsertableText) {
+	lineNumber, newRecordIndex, insertable := func() (int, uint, []InsertableText) {
 		if r.maybeRecordPointer == -1 {
 			if len(r.records) == 0 {
 				return 0, 0, texts
 			}
 			return 0, 0, append(texts, blankLine)
 		}
-		return r.pr.LastLineOfRecord[r.maybeRecordPointer],
+		lastEntry := lastLine(r.blocks[r.maybeRecordPointer].SignificantLines())
+		return lastEntry.LineNumber,
 			uint(r.maybeRecordPointer + 1),
 			append([]InsertableText{blankLine}, texts...)
 	}()
+	var styleReferenceBlock lineparsing.Block
+	if len(r.blocks) > 0 {
+		styleReferenceBlock = r.blocks[0]
+	}
 	lines := insert(
-		decompose(r.records),
-		lineIndex,
+		flatten(r.blocks),
+		lineNumber,
 		insertable,
-		r.pr.Preferences,
+		stylePreferencesOrDefault(styleReferenceBlock),
 	)
 	return makeResult(lines, newRecordIndex)
 }

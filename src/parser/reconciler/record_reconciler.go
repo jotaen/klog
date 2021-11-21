@@ -1,18 +1,20 @@
 package reconciler
 
 import (
+	"errors"
 	. "github.com/jotaen/klog/src"
-	"github.com/jotaen/klog/src/parser"
+	"github.com/jotaen/klog/src/parser/lineparsing"
 	"regexp"
 )
 
 // RecordReconciler is for inserting a new entry into a record.
 type RecordReconciler struct {
-	records       []parser.ParsedRecord
+	records       []Record
+	blocks        []lineparsing.Block
 	recordPointer uint // `-1` indicates to prepend
 }
 
-func NewRecordReconciler(rs []parser.ParsedRecord, matchRecord func(Record) bool) *RecordReconciler {
+func NewRecordReconciler(rs []Record, bs []lineparsing.Block, matchRecord func(Record) bool) *RecordReconciler {
 	index := -1
 	for i, r := range rs {
 		if matchRecord(r) {
@@ -25,47 +27,51 @@ func NewRecordReconciler(rs []parser.ParsedRecord, matchRecord func(Record) bool
 	}
 	return &RecordReconciler{
 		records:       rs,
+		blocks:        bs,
 		recordPointer: uint(index),
 	}
 }
 
 func (r *RecordReconciler) AppendEntry(handler func(Record) string) (*ReconcileResult, error) {
 	newEntry := handler(r.records[r.recordPointer])
+	lastEntry := lastLine(r.blocks[r.recordPointer].SignificantLines())
 	result := insert(
-		decompose(r.records),
-		r.pr.LastLineOfRecord[r.recordPointer],
+		flatten(r.blocks),
+		lastEntry.LineNumber,
 		[]InsertableText{{newEntry, 1}},
-		r.records[r.recordPointer],
+		stylePreferencesOrDefault(r.blocks[r.recordPointer]),
 	)
 	return makeResult(result, r.recordPointer)
 }
 
 func (r *RecordReconciler) CloseOpenRange(handler func(Record) (Time, EntrySummary)) (*ReconcileResult, error) {
 	record := r.records[r.recordPointer]
-	if record.OpenRange() == nil {
-		return nil, errors.New("No open time range found")
-	}
-	entryIndex := 0
+	openRangeEntryIndex := -1
 	for i, e := range record.Entries() {
 		e.Unbox(
 			func(Range) interface{} { return nil },
 			func(Duration) interface{} { return nil },
 			func(OpenRange) interface{} {
-				entryIndex = i
+				openRangeEntryIndex = i
 				return nil
 			},
 		)
 	}
+	if openRangeEntryIndex == -1 {
+		return nil, errors.New("No open time range found")
+	}
 	time, summary := handler(record)
-	openRangeLineIndex := r.pr.LastLineOfRecord[r.recordPointer] - len(record.Entries()) + entryIndex
-	originalText := r.pr.Lines[openRangeLineIndex].Text
+	lastEntry := lastLine(r.blocks[r.recordPointer].SignificantLines())
+	openRangeLineIndex := lastEntry.LineNumber - len(record.Entries()) + openRangeEntryIndex
+	allLines := flatten(r.blocks)
+	originalText := allLines[openRangeLineIndex].Text
 	summaryText := func() string {
 		if summary.IsEmpty() {
 			return ""
 		}
 		return " " + summary[0]
 	}()
-	r.pr.Lines[openRangeLineIndex].Text = regexp.MustCompile(`^(.*?)\?+(.*)$`).
+	allLines[openRangeLineIndex].Text = regexp.MustCompile(`^(.*?)\?+(.*)$`).
 		ReplaceAllString(originalText, "${1}"+time.ToString()+"${2}"+summaryText)
-	return makeResult(decompose(r.records), r.recordPointer)
+	return makeResult(allLines, r.recordPointer)
 }
