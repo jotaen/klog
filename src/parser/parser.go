@@ -91,12 +91,12 @@ func parseRecord(lines []Line) (Record, []Error) {
 		dummyDate, _ := NewDate(0, 0, 0)
 		record = NewRecord(dummyDate)
 	}
-	indentationDetector := NewIndentationDetector()
+	indentationDetector := newIndentationDetector()
 
 	// ========== SUMMARY LINES ==========
 	for _, s := range lines {
 		summary := NewParseable(s)
-		isIndented, iErr := indentationDetector.IsIndented(s)
+		isIndented, iErr := indentationDetector.isIndented(summary)
 		if iErr != nil {
 			errs = append(errs, iErr)
 		}
@@ -115,13 +115,9 @@ func parseRecord(lines []Line) (Record, []Error) {
 entries:
 	for _, e := range lines {
 		entry := NewParseable(e)
-		isIndented, iErr := indentationDetector.IsIndented(e)
+		iErr := indentationDetector.collate(entry)
 		if iErr != nil {
 			errs = append(errs, iErr)
-			continue
-		}
-		if !isIndented {
-			errs = append(errs, ErrorIllegalIndentation(NewError(entry.Line, 0, entry.Length())))
 			continue
 		}
 		durationCandidate, _ := entry.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
@@ -199,24 +195,37 @@ entries:
 	return record, nil
 }
 
-type IndentationDetector struct {
-	indentationStyles []string
+type indentationDetector struct {
+	allowedIndentationStyles []string
+	actualIndentationStyle   string
 }
 
-func NewIndentationDetector() *IndentationDetector {
-	return &IndentationDetector{
-		[]string{"  ", "   ", "    ", "\t"},
+func newIndentationDetector() *indentationDetector {
+	return &indentationDetector{
+		allowedIndentationStyles: []string{"  ", "   ", "    ", "\t"},
 	}
 }
 
-func (i *IndentationDetector) IsIndented(l Line) (bool, Error) {
+// collate requires a line to be indented and enforces the indentation style to
+// be consistent across subsequent calls.
+func (i *indentationDetector) collate(p Parseable) Error {
+	if i.actualIndentationStyle == "" {
+		i.actualIndentationStyle = p.PrecedingWhitespace
+	} else if p.PrecedingWhitespace != i.actualIndentationStyle {
+		return ErrorIllegalIndentation(NewError(p.Line, 0, p.Length()))
+	}
+	return nil
+}
+
+// isIndented checks whether a line is indented according to one of the allowed styles.
+func (i *indentationDetector) isIndented(l Parseable) (bool, Error) {
 	if len(l.PrecedingWhitespace) == 0 {
 		return false, nil
 	}
-	for _, s := range i.indentationStyles {
+	for _, s := range i.allowedIndentationStyles {
 		if l.PrecedingWhitespace == s {
 			return true, nil
 		}
 	}
-	return false, ErrorIllegalIndentation(NewError(l, 0, len(l.Text)))
+	return false, ErrorIllegalIndentation(NewError(l.Line, 0, l.Length()))
 }

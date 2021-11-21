@@ -17,7 +17,8 @@ func ErrorIllegalIndentation(e Error) Error {
 	return e.Set(
 		"ErrorIllegalIndentation",
 		"Unexpected indentation",
-		"Please correct the indentation of this line.",
+		"Please correct the indentation of this line. Indentation must be 2-4 spaces or one tab. "+
+			"You cannot mix different indentation styles within the same record.",
 	)
 }
 
