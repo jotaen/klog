@@ -6,7 +6,7 @@ import (
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/lineparsing"
+	"github.com/jotaen/klog/src/parser/engine"
 	"github.com/jotaen/klog/src/parser/reconciling"
 	gotime "time"
 )
@@ -58,7 +58,7 @@ type TestingContext struct {
 	State
 	now        gotime.Time
 	records    []Record
-	blocks     []lineparsing.Block
+	blocks     []engine.Block
 	serialiser *parser.Serialiser
 	bookmarks  app.BookmarksCollection
 }

@@ -7,7 +7,7 @@ import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/lineparsing"
+	"github.com/jotaen/klog/src/parser/engine"
 	"github.com/jotaen/klog/src/service"
 	"strings"
 )
@@ -61,7 +61,7 @@ func NewCliSerialiser() *parser.Serialiser {
 func PrettifyError(err error, isDebug bool) error {
 	reflower := NewReflower(60, "\n")
 	switch e := err.(type) {
-	case lineparsing.Errors:
+	case engine.Errors:
 		message := ""
 		INDENT := "    "
 		for _, e := range e.Get() {

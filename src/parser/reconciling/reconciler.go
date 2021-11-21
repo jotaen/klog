@@ -11,13 +11,13 @@ package reconciling
 import (
 	"errors"
 	. "github.com/jotaen/klog/src"
-	"github.com/jotaen/klog/src/parser/lineparsing"
+	"github.com/jotaen/klog/src/parser/engine"
 	"regexp"
 )
 
 type Reconciler struct {
 	records []Record
-	blocks  []lineparsing.Block
+	blocks  []engine.Block
 }
 
 // Result contains the result of applied reconcilers.
@@ -41,7 +41,7 @@ type InsertableText struct {
 	Indentation int
 }
 
-func NewReconciler(records []Record, blocks []lineparsing.Block) Reconciler {
+func NewReconciler(records []Record, blocks []engine.Block) Reconciler {
 	return Reconciler{records, blocks}
 }
 
@@ -115,7 +115,7 @@ func (r *Reconciler) InsertRecord(newDate Date, texts []InsertableText) (*Result
 			uint(recordIndex + 1),
 			append([]InsertableText{blankLine}, texts...)
 	}()
-	var styleReferenceBlock lineparsing.Block
+	var styleReferenceBlock engine.Block
 	if len(r.blocks) > 0 {
 		styleReferenceBlock = r.blocks[0]
 	}

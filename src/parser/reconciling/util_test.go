@@ -1,14 +1,14 @@
 package reconciling
 
 import (
-	"github.com/jotaen/klog/src/parser/lineparsing"
+	"github.com/jotaen/klog/src/parser/engine"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestInsertInBetween(t *testing.T) {
-	before := lineparsing.Split("first\nthird\nfourth")
+	before := engine.Split("first\nthird\nfourth")
 	after := insert(before, 1, []InsertableText{
 		{"second", 0},
 	}, stylePreferencesOrDefault(nil))
@@ -27,7 +27,7 @@ func TestInsertInBetween(t *testing.T) {
 }
 
 func TestInsertAtBeginningAndEnd(t *testing.T) {
-	before := lineparsing.Split("beginning\nend")
+	before := engine.Split("beginning\nend")
 	after := insert(before, 0, []InsertableText{
 		{"first", 0},
 	}, stylePreferencesOrDefault(nil))
@@ -42,7 +42,7 @@ func TestInsertAtBeginningAndEnd(t *testing.T) {
 }
 
 func TestInsertMultipleTexts(t *testing.T) {
-	before := lineparsing.Split("first\nfourth\nfifth\n")
+	before := engine.Split("first\nfourth\nfifth\n")
 	after := insert(before, 1, []InsertableText{
 		{"second", 0},
 		{"third", 1},
@@ -61,7 +61,7 @@ func TestInsertMultipleTexts(t *testing.T) {
 }
 
 func TestInsertWithLineEndingsAndIndentation(t *testing.T) {
-	before := lineparsing.Split("bar")
+	before := engine.Split("bar")
 	after := insert(before, 0, []InsertableText{{"foo", 0}}, stylePreferencesOrDefault(nil))
 	after = insert(after, 2, []InsertableText{{"baz", 1}}, stylePreferences{"\t", "\r\n"})
 	after = insert(after, 0, []InsertableText{{"hello", 1}}, stylePreferencesOrDefault(nil))
@@ -73,7 +73,7 @@ func TestInsertWithLineEndingsAndIndentation(t *testing.T) {
 }
 
 func TestInsertIntoEmptySlice(t *testing.T) {
-	var before []lineparsing.Line
+	var before []engine.Line
 	after := insert(before, 0, []InsertableText{{"Hello World", 0}}, stylePreferencesOrDefault(nil))
 	require.Len(t, after, 1)
 	assert.Equal(t, "Hello World\n", after[0].Original())

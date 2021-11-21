@@ -1,4 +1,4 @@
-package lineparsing
+package engine
 
 // Block is multiple consecutive lines with text, with no blank lines
 // in between, but possibly one or more blank lines before or after.

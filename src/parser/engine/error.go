@@ -1,4 +1,4 @@
-package lineparsing
+package engine
 
 import "fmt"
 

@@ -5,7 +5,7 @@ package parser
 
 import (
 	. "github.com/jotaen/klog/src"
-	. "github.com/jotaen/klog/src/parser/lineparsing"
+	. "github.com/jotaen/klog/src/parser/engine"
 )
 
 // Parse parses a text into a list of Record datastructures.

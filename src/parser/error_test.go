@@ -1,7 +1,7 @@
 package parser
 
 import (
-	. "github.com/jotaen/klog/src/parser/lineparsing"
+	. "github.com/jotaen/klog/src/parser/engine"
 	"reflect"
 	"runtime"
 	"strings"

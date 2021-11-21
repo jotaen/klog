@@ -3,8 +3,8 @@ package commands
 import (
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
+	"github.com/jotaen/klog/src/parser/engine"
 	"github.com/jotaen/klog/src/parser/json"
-	"github.com/jotaen/klog/src/parser/lineparsing"
 )
 
 type Json struct {
@@ -28,7 +28,7 @@ The structure of the objects is always uniform, so you can explore it by running
 func (opt *Json) Run(ctx app.Context) error {
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
-		parserErrs, isParserErr := err.(lineparsing.Errors)
+		parserErrs, isParserErr := err.(engine.Errors)
 		if isParserErr {
 			ctx.Print(json.ToJson(nil, parserErrs, opt.Pretty) + "\n")
 			return nil

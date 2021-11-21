@@ -3,7 +3,7 @@ package reconciling
 import (
 	"errors"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/lineparsing"
+	"github.com/jotaen/klog/src/parser/engine"
 )
 
 type Handler func(Reconciler) (*Result, error)
@@ -31,7 +31,7 @@ type stylePreferences struct {
 	lineEndingStyle  string
 }
 
-func stylePreferencesOrDefault(b lineparsing.Block) stylePreferences {
+func stylePreferencesOrDefault(b engine.Block) stylePreferences {
 	defaultPrefs := stylePreferences{
 		indentationStyle: "    ",
 		lineEndingStyle:  "\n",
@@ -50,7 +50,7 @@ func stylePreferencesOrDefault(b lineparsing.Block) stylePreferences {
 	return defaultPrefs
 }
 
-func makeResult(ls []lineparsing.Line, recordIndex uint) (*Result, error) {
+func makeResult(ls []engine.Line, recordIndex uint) (*Result, error) {
 	newText := join(ls)
 	newRecords, _, pErr := parser.Parse(newText)
 	if pErr != nil {
@@ -64,11 +64,11 @@ func makeResult(ls []lineparsing.Line, recordIndex uint) (*Result, error) {
 }
 
 // insert inserts some new lines into a text at a specific line number (position).
-func insert(ls []lineparsing.Line, position int, texts []InsertableText, stylePrefs stylePreferences) []lineparsing.Line {
+func insert(ls []engine.Line, position int, texts []InsertableText, stylePrefs stylePreferences) []engine.Line {
 	if position > len(ls)+1 {
 		panic("Out of bounds")
 	}
-	result := make([]lineparsing.Line, len(ls)+len(texts))
+	result := make([]engine.Line, len(ls)+len(texts))
 	offset := 0
 	for i := range result {
 		if i >= position && offset < len(texts) {
@@ -77,7 +77,7 @@ func insert(ls []lineparsing.Line, position int, texts []InsertableText, stylePr
 				line += stylePrefs.indentationStyle
 			}
 			line += texts[offset].Text + stylePrefs.lineEndingStyle
-			result[i] = lineparsing.NewLineFromString(line, -999)
+			result[i] = engine.NewLineFromString(line, -999)
 			offset++
 		} else {
 			result[i] = ls[i-offset]
@@ -90,7 +90,7 @@ func insert(ls []lineparsing.Line, position int, texts []InsertableText, stylePr
 	return result
 }
 
-func join(ls []lineparsing.Line) string {
+func join(ls []engine.Line) string {
 	result := ""
 	for _, l := range ls {
 		result += l.Original()
@@ -98,14 +98,14 @@ func join(ls []lineparsing.Line) string {
 	return result
 }
 
-func flatten(blocks []lineparsing.Block) []lineparsing.Line {
-	var result []lineparsing.Line
+func flatten(blocks []engine.Block) []engine.Line {
+	var result []engine.Line
 	for _, bs := range blocks {
 		result = append(result, bs...)
 	}
 	return result
 }
 
-func lastLine(ls []lineparsing.Line) lineparsing.Line {
+func lastLine(ls []engine.Line) engine.Line {
 	return ls[len(ls)-1]
 }
