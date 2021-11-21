@@ -2,6 +2,8 @@
 **Summary of changes of the command line tool**
 
 ## v3.2
+- **[ BREAKING ]** Don’t allow mixing the indentation style within a
+  record. (Indentation styles may still differ *between* records, though.)
 - **[ FEATURE ]** Allow version check via `klog -v` (in addition
   to `klog --version` or `klog version`)
 - **[ FEATURE ]** Embed specification and license in the binary
