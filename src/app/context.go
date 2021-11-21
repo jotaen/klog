@@ -43,7 +43,7 @@ type Context interface {
 	// ReadInputs retrieves all input from the given file or bookmark names.
 	ReadInputs(...FileOrBookmarkName) ([]Record, error)
 
-	// ReconcileFile ... // TODO
+	// ReconcileFile applies one or more reconcile handlers to a file and saves it.
 	ReconcileFile(FileOrBookmarkName, ...reconciling.Handler) error
 
 	// Now returns the current timestamp.

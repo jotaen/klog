@@ -131,7 +131,7 @@ func (r *Reconciler) InsertRecord(newDate Date, texts []InsertableText) (*Result
 // NotEligibleError is to indicate that a reconciler isn’t applicable.
 type NotEligibleError struct{}
 
-func (e NotEligibleError) Error() string { return "Boom" } // TODO
+func (e NotEligibleError) Error() string { return "No eligible record found." }
 
 var blankLine = InsertableText{"", 0}
 
