@@ -5,54 +5,34 @@ package parser
 
 import (
 	. "github.com/jotaen/klog/src"
-	. "github.com/jotaen/klog/src/parser/parsing"
+	. "github.com/jotaen/klog/src/parser/engine"
 )
 
-// ParseResult contains the resulting records along with meta information
-// obtained throughout the parsing process.
-type ParseResult struct {
-	Records          []Record
-	lines            []Line
-	lastLineOfRecord []int
-	preferences      Preferences
-}
-
-// Parse parses a text with records into Record data structures.
-func Parse(recordsAsText string) (*ParseResult, Errors) {
-	parseResult := ParseResult{
-		Records:          nil,
-		lines:            Split(recordsAsText),
-		lastLineOfRecord: nil,
-		preferences:      DefaultPreferences(),
-	}
+// Parse parses a text into a list of Record datastructures.
+func Parse(recordsAsText string) ([]Record, []Block, Errors) {
+	var records []Record
 	var allErrs []Error
-	blocks := GroupIntoBlocks(parseResult.lines)
+	blocks := GroupIntoBlocks(Split(recordsAsText))
 	for _, block := range blocks {
-		r, errs := parseRecord(block)
+		record, errs := parseRecord(block.SignificantLines())
 		if len(errs) > 0 {
 			allErrs = append(allErrs, errs...)
+			continue
 		}
-		parseResult.Records = append(parseResult.Records, r)
-		parseResult.lastLineOfRecord = append(
-			parseResult.lastLineOfRecord,
-			block[len(block)-1].LineNumber,
-		)
-		for _, l := range block {
-			parseResult.preferences.Adapt(&l)
-		}
+		records = append(records, record)
 	}
 	if len(allErrs) > 0 {
-		return nil, NewErrors(allErrs)
+		return nil, nil, NewErrors(allErrs)
 	}
-	return &parseResult, nil
+	return records, blocks, nil
 }
 
-func parseRecord(block []Line) (Record, []Error) {
+func parseRecord(lines []Line) (Record, []Error) {
 	var errs []Error
 
 	// ========== HEADLINE ==========
 	record := func(headline Parseable) Record {
-		if headline.IndentationLevel() != 0 {
+		if len(headline.PrecedingWhitespace) > 0 {
 			errs = append(errs, ErrorIllegalIndentation(NewError(headline.Line, 0, headline.Length())))
 			return nil
 		}
@@ -102,37 +82,45 @@ func parseRecord(block []Line) (Record, []Error) {
 			errs = append(errs, ErrorUnrecognisedTextInHeadline(NewError(headline.Line, headline.PointerPosition, headline.RemainingLength())))
 		}
 		return r
-	}(NewParseable(block[0]))
-	block = block[1:]
+	}(NewParseable(lines[0]))
+	lines = lines[1:]
 
-	// In case there was an error, generate dummy record to ensure that we have something to
-	// work with during parsing. That allows us to continue even if there are errors early on.
 	if record == nil {
+		// In case there was an error, generate dummy record to ensure that we have something to
+		// work with during parsing. That allows us to continue even if there are errors early on.
 		dummyDate, _ := NewDate(0, 0, 0)
 		record = NewRecord(dummyDate)
 	}
+	indentationDetector := NewIndentationDetector()
 
 	// ========== SUMMARY LINES ==========
-	for _, s := range block {
+	for _, s := range lines {
 		summary := NewParseable(s)
-		if summary.IndentationLevel() > 0 {
+		isIndented, iErr := indentationDetector.IsIndented(s)
+		if iErr != nil {
+			errs = append(errs, iErr)
+		}
+		if isIndented {
 			break
-		} else if summary.IndentationLevel() < 0 {
-			errs = append(errs, ErrorIllegalIndentation(NewError(summary.Line, 0, summary.Length())))
 		}
 		newSummary, err := NewRecordSummary(append(record.Summary(), summary.ToString())...)
 		if err != nil {
 			errs = append(errs, ErrorMalformedSummary(NewError(summary.Line, 0, summary.Length())))
 		}
-		block = block[1:]
+		lines = lines[1:]
 		record.SetSummary(newSummary)
 	}
 
 	// ========== ENTRIES ==========
 entries:
-	for _, e := range block {
+	for _, e := range lines {
 		entry := NewParseable(e)
-		if entry.IndentationLevel() != 1 {
+		isIndented, iErr := indentationDetector.IsIndented(e)
+		if iErr != nil {
+			errs = append(errs, iErr)
+			continue
+		}
+		if !isIndented {
 			errs = append(errs, ErrorIllegalIndentation(NewError(entry.Line, 0, entry.Length())))
 			continue
 		}
@@ -209,4 +197,26 @@ entries:
 		return nil, errs
 	}
 	return record, nil
+}
+
+type IndentationDetector struct {
+	indentationStyles []string
+}
+
+func NewIndentationDetector() *IndentationDetector {
+	return &IndentationDetector{
+		[]string{"  ", "   ", "    ", "\t"},
+	}
+}
+
+func (i *IndentationDetector) IsIndented(l Line) (bool, Error) {
+	if len(l.PrecedingWhitespace) == 0 {
+		return false, nil
+	}
+	for _, s := range i.indentationStyles {
+		if l.PrecedingWhitespace == s {
+			return true, nil
+		}
+	}
+	return false, ErrorIllegalIndentation(NewError(l, 0, len(l.Text)))
 }

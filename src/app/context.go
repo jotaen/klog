@@ -10,7 +10,7 @@ import (
 	"fmt"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/parsing"
+	"github.com/jotaen/klog/src/parser/reconciling"
 	"os"
 	"os/exec"
 	"os/user"
@@ -43,12 +43,8 @@ type Context interface {
 	// ReadInputs retrieves all input from the given file or bookmark names.
 	ReadInputs(...FileOrBookmarkName) ([]Record, error)
 
-	// ReadFileInput retrieves the input from one given file. It returns the
-	// ParseResult, which can be used to reconcile the file.
-	ReadFileInput(FileOrBookmarkName) (*parser.ParseResult, File, error)
-
-	// WriteFile saves content in a file on disk.
-	WriteFile(File, string) Error
+	// ReconcileFile applies one or more reconcile handlers to a file and saves it.
+	ReconcileFile(FileOrBookmarkName, ...reconciling.Handler) error
 
 	// Now returns the current timestamp.
 	Now() gotime.Time
@@ -70,9 +66,6 @@ type Context interface {
 
 	// SetSerialiser sets the current serialiser.
 	SetSerialiser(*parser.Serialiser)
-
-	// InstantiateTemplate reads a template from disk and substitutes all placeholders.
-	InstantiateTemplate(string) ([]parsing.Text, Error)
 }
 
 // Meta holds miscellaneous information about the klog binary.
@@ -175,15 +168,15 @@ func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, error)
 			nil,
 		)
 	}
-	var records []Record
+	var allRecords []Record
 	for _, f := range files {
-		pr, parserErrors := parser.Parse(f.Contents())
+		records, _, parserErrors := parser.Parse(f.Contents())
 		if parserErrors != nil {
 			return nil, parserErrors
 		}
-		records = append(records, pr.Records...)
+		allRecords = append(allRecords, records...)
 	}
-	return records, nil
+	return allRecords, nil
 }
 
 func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithContents, Error) {
@@ -206,23 +199,26 @@ func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithCont
 	return inputs[0], nil
 }
 
-func (ctx *context) ReadFileInput(fileArg FileOrBookmarkName) (*parser.ParseResult, File, error) {
+func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, handler ...reconciling.Handler) error {
 	target, err := ctx.retrieveTargetFile(fileArg)
 	if err != nil {
-		return nil, nil, err
+		return err
 	}
-	pr, parserErrors := parser.Parse(target.Contents())
+	records, blocks, parserErrors := parser.Parse(target.Contents())
 	if parserErrors != nil {
-		return nil, nil, parserErrors
+		return parserErrors
 	}
-	return pr, target, nil
-}
-
-func (ctx *context) WriteFile(target File, contents string) Error {
-	if target == nil {
-		panic("No path specified")
+	baseReconciler := reconciling.NewReconciler(records, blocks)
+	result, rErr := reconciling.Chain(baseReconciler, handler...)
+	if rErr != nil {
+		return rErr
 	}
-	return WriteToFile(target, contents)
+	wErr := WriteToFile(target, result.FileContents())
+	if wErr != nil {
+		return wErr
+	}
+	ctx.Print("\n" + ctx.Serialiser().SerialiseRecords(result.Record()) + "\n")
+	return nil
 }
 
 func (ctx *context) Now() gotime.Time {
@@ -331,27 +327,6 @@ func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(stri
 		hint,
 		nil,
 	)
-}
-
-func (ctx *context) InstantiateTemplate(templateName string) ([]parsing.Text, Error) {
-	location := NewFileOrPanic(ctx.KlogFolder() + templateName + ".template.klg")
-	template, err := ReadFile(location)
-	if err != nil {
-		return nil, NewError(
-			"No such template",
-			"There is no template at location "+location.Path(),
-			err,
-		)
-	}
-	instance, tErr := parser.RenderTemplate(template, ctx.Now())
-	if tErr != nil {
-		return nil, NewError(
-			"Invalid template",
-			tErr.Error(),
-			tErr,
-		)
-	}
-	return instance, nil
 }
 
 func (ctx *context) Serialiser() *parser.Serialiser {

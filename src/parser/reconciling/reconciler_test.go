@@ -1,8 +1,8 @@
-package parser
+package reconciling
 
 import (
 	. "github.com/jotaen/klog/src"
-	"github.com/jotaen/klog/src/parser/parsing"
+	"github.com/jotaen/klog/src/parser"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -21,15 +21,16 @@ Hello World
 2018-01-03
     5h
 `
-	pr, _ := Parse(original)
-	reconciler := NewRecordReconciler(pr, func(r Record) bool {
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs, bs)
+	match := func(r Record) bool {
 		return r.Date().ToString() == "2018-01-02"
-	})
+	}
 	require.NotNil(t, reconciler)
-	result, err := reconciler.AppendEntry(func(r Record) string { return "2h30m" })
+	result, err := reconciler.AppendEntry(match, func(r Record) string { return "2h30m" })
 	require.Nil(t, err)
 	require.NotNil(t, result)
-	require.Equal(t, 150, result.NewRecord.Entries()[2].Duration().InMinutes())
+	require.Equal(t, 150, result.Record().Entries()[2].Duration().InMinutes())
 	assert.Equal(t, `
 2018-01-01
     1h
@@ -42,40 +43,45 @@ Hello World
 
 2018-01-03
     5h
-`, result.NewText)
+`, result.FileContents())
 }
 
 func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 	original := `
 2018-01-01
     1h`
-	pr, _ := Parse(original)
-	reconciler := NewRecordReconciler(pr, func(r Record) bool {
+	rs, bs, _ := parser.Parse(original)
+
+	reconciler := NewReconciler(rs, bs)
+	match := func(r Record) bool {
 		return r.Date().ToString() == "2018-01-01"
-	})
+	}
 	require.NotNil(t, reconciler)
-	result, err := reconciler.AppendEntry(func(r Record) string { return "16:00-17:00" })
+	result, err := reconciler.AppendEntry(match, func(r Record) string { return "16:00-17:00" })
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01
     1h
     16:00-17:00
-`, result.NewText)
+`, result.FileContents())
 }
 
 func TestReconcilerSkipsIfNoRecordMatches(t *testing.T) {
 	original := "2018-01-01\n"
-	pr, _ := Parse(original)
-	reconciler := NewRecordReconciler(pr, func(r Record) bool { return false })
-	require.Nil(t, reconciler)
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs, bs)
+	match := func(r Record) bool { return false }
+	_, err := reconciler.AppendEntry(match, func(record Record) string { return "" })
+	require.ErrorIs(t, err, NotEligibleError{})
 }
 
 func TestReconcilerRejectsInvalidEntry(t *testing.T) {
 	original := "2018-01-01\n"
-	pr, _ := Parse(original)
-	reconciler := NewRecordReconciler(pr, func(r Record) bool { return true })
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs, bs)
+	match := func(r Record) bool { return true }
 	require.NotNil(t, reconciler)
-	result, err := reconciler.AppendEntry(func(r Record) string { return "this is not valid entry text" })
+	result, err := reconciler.AppendEntry(match, func(r Record) string { return "this is not valid entry text" })
 	require.Nil(t, result)
 	assert.Error(t, err)
 }
@@ -85,19 +91,20 @@ func TestReconcilerClosesOpenRangeWithNewSummary(t *testing.T) {
 2018-01-01
     15:00 - ?
 `
-	pr, _ := Parse(original)
-	reconciler := NewRecordReconciler(pr, func(r Record) bool {
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs, bs)
+	match := func(r Record) bool {
 		return r.Date().ToString() == "2018-01-01"
-	})
+	}
 	require.NotNil(t, reconciler)
-	result, err := reconciler.CloseOpenRange(func(r Record) (Time, EntrySummary) {
+	result, err := reconciler.CloseOpenRange(match, func(r Record) (Time, EntrySummary) {
 		return Ɀ_Time_(15, 22), NewEntrySummary("Finished.")
 	})
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01
     15:00 - 15:22 Finished.
-`, result.NewText)
+`, result.FileContents())
 }
 
 func TestReconcilerClosesOpenRangeWithExtendingSummary(t *testing.T) {
@@ -107,12 +114,13 @@ func TestReconcilerClosesOpenRangeWithExtendingSummary(t *testing.T) {
     15:00-??? Will this close? I hope so!?!?
 	2m
 `
-	pr, _ := Parse(original)
-	reconciler := NewRecordReconciler(pr, func(r Record) bool {
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs, bs)
+	match := func(r Record) bool {
 		return r.Date().ToString() == "2018-01-01"
-	})
+	}
 	require.NotNil(t, reconciler)
-	result, err := reconciler.CloseOpenRange(func(r Record) (Time, EntrySummary) {
+	result, err := reconciler.CloseOpenRange(match, func(r Record) (Time, EntrySummary) {
 		return Ɀ_Time_(16, 42), NewEntrySummary("Yes!")
 	})
 	require.Nil(t, err)
@@ -121,26 +129,28 @@ func TestReconcilerClosesOpenRangeWithExtendingSummary(t *testing.T) {
     1h
     15:00-16:42 Will this close? I hope so!?!? Yes!
 	2m
-`, result.NewText)
+`, result.FileContents())
 }
 
 func TestReconcileAddBlockIfOriginalIsEmpty(t *testing.T) {
-	pr, _ := Parse("")
-	reconciler := NewBlockReconciler(pr, Ɀ_Date_(3333, 1, 1))
-	result, err := reconciler.InsertBlock([]parsing.Text{
+	rs, bs, _ := parser.Parse("")
+	reconciler := NewReconciler(rs, bs)
+	date := Ɀ_Date_(3333, 1, 1)
+	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2000-05-05", 0},
 	})
 	require.Nil(t, err)
-	assert.Equal(t, "2000-05-05\n", result.NewText)
+	assert.Equal(t, "2000-05-05\n", result.FileContents())
 }
 
 func TestReconcileAddBlockToEnd(t *testing.T) {
 	original := `
 2018-01-01
     1h`
-	pr, _ := Parse(original)
-	reconciler := NewBlockReconciler(pr, Ɀ_Date_(2018, 1, 2))
-	result, err := reconciler.InsertBlock([]parsing.Text{
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs, bs)
+	date := Ɀ_Date_(2018, 1, 2)
+	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2018-01-02", 0},
 	})
 	require.Nil(t, err)
@@ -149,7 +159,7 @@ func TestReconcileAddBlockToEnd(t *testing.T) {
     1h
 
 2018-01-02
-`, result.NewText)
+`, result.FileContents())
 }
 
 func TestReconcileAddBlockToEndWithTrailingNewlines(t *testing.T) {
@@ -158,9 +168,10 @@ func TestReconcileAddBlockToEndWithTrailingNewlines(t *testing.T) {
     1h
 
 `
-	pr, _ := Parse(original)
-	reconciler := NewBlockReconciler(pr, Ɀ_Date_(2018, 1, 2))
-	result, err := reconciler.InsertBlock([]parsing.Text{
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs, bs)
+	date := Ɀ_Date_(2018, 1, 2)
+	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2018-01-02", 0},
 	})
 	require.Nil(t, err)
@@ -170,27 +181,29 @@ func TestReconcileAddBlockToEndWithTrailingNewlines(t *testing.T) {
 
 2018-01-02
 
-`, result.NewText)
+`, result.FileContents())
 }
 
 func TestReconcileAddBlockToBeginning(t *testing.T) {
 	original := "2018-01-02"
-	pr, _ := Parse(original)
-	reconciler := NewBlockReconciler(pr, Ɀ_Date_(2018, 1, 1))
-	result, err := reconciler.InsertBlock([]parsing.Text{
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs, bs)
+	date := Ɀ_Date_(2018, 1, 1)
+	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2018-01-01", 0},
 	})
 	require.Nil(t, err)
 	assert.Equal(t, `2018-01-01
 
-2018-01-02`, result.NewText)
+2018-01-02`, result.FileContents())
 }
 
 func TestReconcileAddBlockToBeginningWithLeadingNewlines(t *testing.T) {
 	original := "\n\n2018-01-02"
-	pr, _ := Parse(original)
-	reconciler := NewBlockReconciler(pr, Ɀ_Date_(2018, 1, 1))
-	result, err := reconciler.InsertBlock([]parsing.Text{
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs, bs)
+	date := Ɀ_Date_(2018, 1, 1)
+	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2018-01-01", 0},
 	})
 	require.Nil(t, err)
@@ -198,7 +211,7 @@ func TestReconcileAddBlockToBeginningWithLeadingNewlines(t *testing.T) {
 
 
 
-2018-01-02`, result.NewText)
+2018-01-02`, result.FileContents())
 }
 
 func TestReconcileAddBlockInBetween(t *testing.T) {
@@ -208,9 +221,10 @@ func TestReconcileAddBlockInBetween(t *testing.T) {
 
 2018-01-03
     3h`
-	pr, _ := Parse(original)
-	reconciler := NewBlockReconciler(pr, Ɀ_Date_(2018, 1, 2))
-	result, err := reconciler.InsertBlock([]parsing.Text{
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs, bs)
+	date := Ɀ_Date_(2018, 1, 2)
+	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2018-01-02", 0},
 		{"This and that", 0},
 		{"30m worked", 1},
@@ -225,5 +239,5 @@ This and that
     30m worked
 
 2018-01-03
-    3h`, result.NewText)
+    3h`, result.FileContents())
 }

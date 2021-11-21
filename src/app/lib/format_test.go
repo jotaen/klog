@@ -4,19 +4,19 @@ import (
 	"errors"
 	"github.com/jotaen/klog/lib/jotaen/terminalformat"
 	"github.com/jotaen/klog/src/app"
-	"github.com/jotaen/klog/src/parser/parsing"
+	"github.com/jotaen/klog/src/parser/engine"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestFormatParserError(t *testing.T) {
-	err := parsing.NewErrors([]parsing.Error{
-		func() parsing.Error {
-			err := parsing.NewError(parsing.NewLineFromString("Foo bar", 2), 4, 3)
+	err := engine.NewErrors([]engine.Error{
+		func() engine.Error {
+			err := engine.NewError(engine.NewLineFromString("Foo bar", 2), 4, 3)
 			return err.Set("CODE", "Some Title", "A verbose description with details, potentially spanning multiple lines with a comprehensive text and tremendously helpful information.\nBut it respects newlines.")
 		}(),
-		func() parsing.Error {
-			err := parsing.NewError(parsing.NewLineFromString("Some malformed text", 39), 0, 4)
+		func() engine.Error {
+			err := engine.NewError(engine.NewLineFromString("Some malformed text", 39), 0, 4)
 			return err.Set("CODE", "Error", "Short explanation.")
 		}(),
 	})

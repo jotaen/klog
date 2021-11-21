@@ -1,4 +1,4 @@
-package parsing
+package engine
 
 import (
 	"regexp"
@@ -13,42 +13,30 @@ type Line struct {
 	// LineNumber is the line number, starting with 1.
 	LineNumber int
 
-	// originalLineEnding is the encountered line ending sequence `\n` or `\r\n`.
-	originalLineEnding string
+	// LineEnding is the encountered line ending sequence `\n` or `\r\n`.
+	LineEnding string
 
-	// originalIndentation is the exact whitespace sequence used for indentation.
-	originalIndentation string
+	// PrecedingWhitespace is the exact original whitespace sequence used for indentation.
+	PrecedingWhitespace string
 }
 
 var lineDelimiterPattern = regexp.MustCompile(`^.*\n?`)
 
 // NewLineFromString turns data into a Line object.
 func NewLineFromString(rawLineText string, lineNumber int) Line {
-	text, indentation := splitOffPrecedingWhitespace(rawLineText)
+	text, precedingWhitespace := splitOffPrecedingWhitespace(rawLineText)
 	text, lineEnding := splitOffLineEnding(text)
 	return Line{
 		Text:                text,
 		LineNumber:          lineNumber,
-		originalLineEnding:  lineEnding,
-		originalIndentation: indentation,
+		LineEnding:          lineEnding,
+		PrecedingWhitespace: precedingWhitespace,
 	}
 }
 
 // Original returns the (byte-wise) identical line of text as it appeared in the file.
 func (l *Line) Original() string {
-	return l.originalIndentation + l.Text + l.originalLineEnding
-}
-
-// IndentationLevel returns `0` for top level, `1` for first level, and `-1` for illegal indentation styles.
-func (l *Line) IndentationLevel() int {
-	normalised := strings.ReplaceAll(l.originalIndentation, "\t", "    ")
-	if normalised == "" {
-		return 0
-	}
-	if len(normalised) == 1 || len(normalised) > 4 {
-		return -1
-	}
-	return 1
+	return l.PrecedingWhitespace + l.Text + l.LineEnding
 }
 
 // Split breaks up text into a list of Line’s. The text must use `\n` as
@@ -66,16 +54,6 @@ func Split(text string) []Line {
 	return result
 }
 
-// Join restores a blob of text from Line’s. The result is (byte-wise) identical
-// to the original copy.
-func Join(ls []Line) string {
-	result := ""
-	for _, l := range ls {
-		result += l.Original()
-	}
-	return result
-}
-
 var lineEndingPatterns = []string{"\r\n", "\n"}
 
 func splitOffLineEnding(text string) (string, string) {
@@ -88,8 +66,6 @@ func splitOffLineEnding(text string) (string, string) {
 }
 
 func splitOffPrecedingWhitespace(line string) (string, string) {
-	text := strings.TrimLeftFunc(line, func(r rune) bool {
-		return r == '\t' || r == ' '
-	})
+	text := strings.TrimLeftFunc(line, IsWhitespace)
 	return text, line[:len(line)-len(text)]
 }

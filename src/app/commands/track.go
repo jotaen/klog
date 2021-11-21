@@ -4,8 +4,7 @@ import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
-	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/parsing"
+	"github.com/jotaen/klog/src/parser/reconciling"
 	"strings"
 )
 
@@ -29,27 +28,20 @@ func (opt *Track) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())
 	value := sanitiseQuotedLeadingDash(opt.Entry)
-	return lib.ReconcilerChain{
-		File: opt.OutputFileArgs.File,
-		Ctx:  ctx,
-	}.Apply(
-		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
-			reconciler := parser.NewRecordReconciler(pr, func(r Record) bool {
-				return r.Date().IsEqualTo(date)
-			})
-			if reconciler == nil {
-				return nil, lib.NotEligibleError{}
-			}
-			return reconciler.AppendEntry(func(r Record) string { return value })
+	return ctx.ReconcileFile(
+		opt.OutputFileArgs.File,
+		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
+			return reconciler.AppendEntry(
+				func(r Record) bool { return r.Date().IsEqualTo(date) },
+				func(r Record) string { return value })
 		},
-		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
-			reconciler := parser.NewBlockReconciler(pr, date)
+		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
 			headline := opt.AtDate(ctx.Now()).ToString()
-			lines := []parsing.Text{
+			lines := []reconciling.InsertableText{
 				{headline, 0},
 				{value, 1},
 			}
-			return reconciler.InsertBlock(lines)
+			return reconciler.InsertRecord(date, lines)
 		},
 	)
 }

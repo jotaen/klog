@@ -1,4 +1,4 @@
-package parsing
+package engine
 
 import "fmt"
 
@@ -68,7 +68,7 @@ type err struct {
 func (e *err) Error() string   { return e.Message() }
 func (e *err) Context() Line   { return e.context }
 func (e *err) Position() int   { return e.position }
-func (e *err) Column() int     { return len(e.context.originalIndentation) + e.position + 1 }
+func (e *err) Column() int     { return len(e.context.PrecedingWhitespace) + e.position + 1 }
 func (e *err) Length() int     { return e.length }
 func (e *err) Code() string    { return e.code }
 func (e *err) Title() string   { return e.title }
