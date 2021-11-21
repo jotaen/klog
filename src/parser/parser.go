@@ -96,7 +96,7 @@ func parseRecord(lines []Line) (Record, []Error) {
 	// ========== SUMMARY LINES ==========
 	for _, s := range lines {
 		summary := NewParseable(s)
-		isIndented, iErr := indentationDetector.isIndented(s)
+		isIndented, iErr := indentationDetector.isIndented(summary)
 		if iErr != nil {
 			errs = append(errs, iErr)
 		}
@@ -206,6 +206,8 @@ func newIndentationDetector() *indentationDetector {
 	}
 }
 
+// collate requires a line to be indented and enforces the indentation style to
+// be consistent across subsequent calls.
 func (i *indentationDetector) collate(p Parseable) Error {
 	if i.actualIndentationStyle == "" {
 		i.actualIndentationStyle = p.PrecedingWhitespace
@@ -215,7 +217,8 @@ func (i *indentationDetector) collate(p Parseable) Error {
 	return nil
 }
 
-func (i *indentationDetector) isIndented(l Line) (bool, Error) {
+// isIndented checks whether a line is indented according to one of the allowed styles.
+func (i *indentationDetector) isIndented(l Parseable) (bool, Error) {
 	if len(l.PrecedingWhitespace) == 0 {
 		return false, nil
 	}
@@ -224,5 +227,5 @@ func (i *indentationDetector) isIndented(l Line) (bool, Error) {
 			return true, nil
 		}
 	}
-	return false, ErrorIllegalIndentation(NewError(l, 0, len(l.Text)))
+	return false, ErrorIllegalIndentation(NewError(l.Line, 0, l.Length()))
 }
