@@ -1,6 +1,6 @@
 # klog – File Format Specification
 
-**Version X.X**
+**Version 1.1**
 
 klog is a file format for tracking time.
 
@@ -231,7 +231,7 @@ and MUST NOT be combined into a single *record*.
 
 ## V. Changelog
 
-## (Unreleased)
+## Version 1.1
 - Add a constraint regarding the indentation that requires the indentation style
   to be uniform within a record.
 - Remove technical term “whitespace”, since its meaning is ambiguous and the definition lacked clarity.
