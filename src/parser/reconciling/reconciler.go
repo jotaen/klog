@@ -83,19 +83,24 @@ func (r *Reconciler) CloseOpenRange(matchRecord func(Record) bool, handler func(
 	if openRangeEntryIndex == -1 {
 		return nil, errors.New("No open time range found")
 	}
-	time, summary := handler(record)
+	time, additionalSummary := handler(record)
 	lastEntry := lastLine(r.blocks[recordIndex].SignificantLines())
 	openRangeLineIndex := lastEntry.LineNumber - len(record.Entries()) + openRangeEntryIndex
 	allLines := flatten(r.blocks)
-	originalText := allLines[openRangeLineIndex].Text
 	summaryText := func() string {
-		if summary.IsEmpty() {
+		if additionalSummary.IsEmpty() {
 			return ""
 		}
-		return " " + summary[0]
+		// If there is additional summary text, always prepend a space to delimit
+		// the additional summary from either the time value or from an already
+		// existing summary text.
+		return " " + additionalSummary[0]
 	}()
 	allLines[openRangeLineIndex].Text = regexp.MustCompile(`^(.*?)\?+(.*)$`).
-		ReplaceAllString(originalText, "${1}"+time.ToString()+"${2}"+summaryText)
+		ReplaceAllString(
+			allLines[openRangeLineIndex].Text,
+			"${1}"+time.ToString()+"${2}"+summaryText,
+		)
 	return makeResult(allLines, uint(recordIndex))
 }
 
@@ -108,6 +113,7 @@ func (r *Reconciler) InsertRecord(newDate Date, texts []InsertableText) (*Result
 			if len(r.records) == 0 {
 				return 0, 0, texts
 			}
+			// If the new record is dated before the existing ones, prepend it.
 			return 0, 0, append(texts, blankLine)
 		}
 		lastEntry := lastLine(r.blocks[recordIndex].SignificantLines())
@@ -117,7 +123,9 @@ func (r *Reconciler) InsertRecord(newDate Date, texts []InsertableText) (*Result
 	}()
 	var styleReferenceBlock engine.Block
 	if len(r.blocks) > 0 {
-		styleReferenceBlock = r.blocks[0]
+		// If there are records in the file, take over the style preferences
+		// from the last one.
+		styleReferenceBlock = r.blocks[len(r.blocks)-1]
 	}
 	lines := insert(
 		flatten(r.blocks),

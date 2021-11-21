@@ -26,30 +26,6 @@ func Chain(base Reconciler, handler ...Handler) (*Result, error) {
 	return nil, NotEligibleError{}
 }
 
-type stylePreferences struct {
-	indentationStyle string
-	lineEndingStyle  string
-}
-
-func stylePreferencesOrDefault(b engine.Block) stylePreferences {
-	defaultPrefs := stylePreferences{
-		indentationStyle: "    ",
-		lineEndingStyle:  "\n",
-	}
-	if b == nil {
-		return defaultPrefs
-	}
-	for _, l := range b.SignificantLines() {
-		if len(l.LineEnding) > 0 {
-			defaultPrefs.lineEndingStyle = l.LineEnding
-		}
-		if len(l.PrecedingWhitespace) > 0 {
-			defaultPrefs.indentationStyle = l.PrecedingWhitespace
-		}
-	}
-	return defaultPrefs
-}
-
 func makeResult(ls []engine.Line, recordIndex uint) (*Result, error) {
 	newText := join(ls)
 	newRecords, _, pErr := parser.Parse(newText)
