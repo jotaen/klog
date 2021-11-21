@@ -32,6 +32,29 @@ type InsertableText struct {
 	Indentation int
 }
 
+// NotEligibleError is for Chain to indicate that it should proceed with the next reconciler.
+type NotEligibleError struct{}
+
+func (e NotEligibleError) Error() string { return "Boom" } // TODO
+
+// Chain tries to apply multiple reconcilers one after the other. It returns the result
+// of the first successful one.
+func Chain(records []Record, blocks []lineparsing.Block, reconcilers ...Reconcile) (*ReconcileResult, error) {
+	for i, reconcile := range reconcilers {
+		result, err := reconcile(records, blocks)
+		if err == nil && result != nil {
+			return result, nil
+		}
+		_, isNotEligibleError := err.(NotEligibleError)
+		if isNotEligibleError && i < len(reconcilers)-1 {
+			// Try next reconcile function
+			continue
+		}
+		return nil, err
+	}
+	return nil, NotEligibleError{}
+}
+
 type stylePreferences struct {
 	indentationStyle string
 	lineEndingStyle  string

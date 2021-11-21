@@ -10,7 +10,6 @@ import (
 	"fmt"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/lineparsing"
 	"github.com/jotaen/klog/src/parser/reconciler"
 	"os"
 	"os/exec"
@@ -203,26 +202,6 @@ func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithCont
 	return inputs[0], nil
 }
 
-type ReconcilerNotEligibleError struct{}
-
-func (e ReconcilerNotEligibleError) Error() string { return "Boom" } // TODO
-
-func ApplyReconcilers(records []Record, blocks []lineparsing.Block, reconcilers ...reconciler.Reconcile) (*reconciler.ReconcileResult, error) {
-	for i, reconcile := range reconcilers {
-		result, err := reconcile(records, blocks)
-		if result != nil {
-			return result, nil
-		}
-		_, isNotEligibleError := err.(ReconcilerNotEligibleError)
-		if isNotEligibleError && i < len(reconcilers)-1 {
-			// Try next reconcile function
-			continue
-		}
-		return nil, err
-	}
-	return nil, ReconcilerNotEligibleError{}
-}
-
 func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, reconcilers ...reconciler.Reconcile) error {
 	target, err := ctx.retrieveTargetFile(fileArg)
 	if err != nil {
@@ -232,7 +211,7 @@ func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, reconcilers ...rec
 	if parserErrors != nil {
 		return parserErrors
 	}
-	result, rErr := ApplyReconcilers(records, blocks, reconcilers...)
+	result, rErr := reconciler.Chain(records, blocks, reconcilers...)
 	if rErr != nil {
 		return rErr
 	}

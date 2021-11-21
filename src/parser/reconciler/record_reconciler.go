@@ -1,77 +1,63 @@
 package reconciler
 
 import (
-	"errors"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/parser/lineparsing"
-	"regexp"
 )
 
-// RecordReconciler is for inserting a new entry into a record.
+// RecordReconciler is for inserting a new record into a list of records.
 type RecordReconciler struct {
-	records       []Record
-	blocks        []lineparsing.Block
-	recordPointer uint // `-1` indicates to prepend
+	records            []Record
+	blocks             []lineparsing.Block
+	maybeRecordPointer int
 }
 
-func NewRecordReconciler(rs []Record, bs []lineparsing.Block, matchRecord func(Record) bool) *RecordReconciler {
+func NewRecordReconciler(rs []Record, bs []lineparsing.Block, newDate Date) *RecordReconciler {
 	index := -1
 	for i, r := range rs {
-		if matchRecord(r) {
+		if i == 0 && !newDate.IsAfterOrEqual(r.Date()) {
+			break
+		}
+		if i == len(rs)-1 {
+			index = len(rs) - 1
+			break
+		}
+		if newDate.IsAfterOrEqual(r.Date()) && !newDate.IsAfterOrEqual(rs[i+1].Date()) {
 			index = i
 			break
 		}
 	}
-	if index == -1 {
-		return nil
-	}
 	return &RecordReconciler{
-		records:       rs,
-		blocks:        bs,
-		recordPointer: uint(index),
+		records:            rs,
+		blocks:             bs,
+		maybeRecordPointer: index,
 	}
 }
 
-func (r *RecordReconciler) AppendEntry(handler func(Record) string) (*ReconcileResult, error) {
-	newEntry := handler(r.records[r.recordPointer])
-	lastEntry := lastLine(r.blocks[r.recordPointer].SignificantLines())
-	result := insert(
-		flatten(r.blocks),
-		lastEntry.LineNumber,
-		[]InsertableText{{newEntry, 1}},
-		stylePreferencesOrDefault(r.blocks[r.recordPointer]),
-	)
-	return makeResult(result, r.recordPointer)
-}
+var blankLine = InsertableText{"", 0}
 
-func (r *RecordReconciler) CloseOpenRange(handler func(Record) (Time, EntrySummary)) (*ReconcileResult, error) {
-	record := r.records[r.recordPointer]
-	openRangeEntryIndex := -1
-	for i, e := range record.Entries() {
-		e.Unbox(
-			func(Range) interface{} { return nil },
-			func(Duration) interface{} { return nil },
-			func(OpenRange) interface{} {
-				openRangeEntryIndex = i
-				return nil
-			},
-		)
-	}
-	if openRangeEntryIndex == -1 {
-		return nil, errors.New("No open time range found")
-	}
-	time, summary := handler(record)
-	lastEntry := lastLine(r.blocks[r.recordPointer].SignificantLines())
-	openRangeLineIndex := lastEntry.LineNumber - len(record.Entries()) + openRangeEntryIndex
-	allLines := flatten(r.blocks)
-	originalText := allLines[openRangeLineIndex].Text
-	summaryText := func() string {
-		if summary.IsEmpty() {
-			return ""
+func (r *RecordReconciler) InsertBlock(texts []InsertableText) (*ReconcileResult, error) {
+	lineNumber, newRecordIndex, insertable := func() (int, uint, []InsertableText) {
+		if r.maybeRecordPointer == -1 {
+			if len(r.records) == 0 {
+				return 0, 0, texts
+			}
+			return 0, 0, append(texts, blankLine)
 		}
-		return " " + summary[0]
+		lastEntry := lastLine(r.blocks[r.maybeRecordPointer].SignificantLines())
+		return lastEntry.LineNumber,
+			uint(r.maybeRecordPointer + 1),
+			append([]InsertableText{blankLine}, texts...)
 	}()
-	allLines[openRangeLineIndex].Text = regexp.MustCompile(`^(.*?)\?+(.*)$`).
-		ReplaceAllString(originalText, "${1}"+time.ToString()+"${2}"+summaryText)
-	return makeResult(allLines, r.recordPointer)
+	var styleReferenceBlock lineparsing.Block
+	if len(r.blocks) > 0 {
+		styleReferenceBlock = r.blocks[0]
+	}
+	lines := insert(
+		flatten(r.blocks),
+		lineNumber,
+		insertable,
+		stylePreferencesOrDefault(styleReferenceBlock),
+	)
+	return makeResult(lines, newRecordIndex)
 }

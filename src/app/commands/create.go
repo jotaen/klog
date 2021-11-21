@@ -41,8 +41,8 @@ func (opt *Create) Run(ctx app.Context) error {
 	}
 	return ctx.ReconcileFile(opt.OutputFileArgs.File,
 		func(records []Record, blocks []lineparsing.Block) (*reconciler.ReconcileResult, error) {
-			blockReconciler := reconciler.NewBlockReconciler(records, blocks, date)
-			return blockReconciler.InsertBlock(lines)
+			recordReconciler := reconciler.NewRecordReconciler(records, blocks, date)
+			return recordReconciler.InsertBlock(lines)
 		},
 	)
 }

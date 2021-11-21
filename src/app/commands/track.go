@@ -31,22 +31,22 @@ func (opt *Track) Run(ctx app.Context) error {
 	value := sanitiseQuotedLeadingDash(opt.Entry)
 	return ctx.ReconcileFile(opt.OutputFileArgs.File,
 		func(records []Record, blocks []lineparsing.Block) (*reconciler.ReconcileResult, error) {
-			recordReconciler := reconciler.NewRecordReconciler(records, blocks, func(r Record) bool {
+			entryReconciler := reconciler.NewEntryReconciler(records, blocks, func(r Record) bool {
 				return r.Date().IsEqualTo(date)
 			})
-			if recordReconciler == nil {
-				return nil, app.ReconcilerNotEligibleError{}
+			if entryReconciler == nil {
+				return nil, reconciler.NotEligibleError{}
 			}
-			return recordReconciler.AppendEntry(func(r Record) string { return value })
+			return entryReconciler.AppendEntry(func(r Record) string { return value })
 		},
 		func(records []Record, blocks []lineparsing.Block) (*reconciler.ReconcileResult, error) {
-			blockReconciler := reconciler.NewBlockReconciler(records, blocks, date)
+			recordReconciler := reconciler.NewRecordReconciler(records, blocks, date)
 			headline := opt.AtDate(ctx.Now()).ToString()
 			lines := []reconciler.InsertableText{
 				{headline, 0},
 				{value, 1},
 			}
-			return blockReconciler.InsertBlock(lines)
+			return recordReconciler.InsertBlock(lines)
 		},
 	)
 }
