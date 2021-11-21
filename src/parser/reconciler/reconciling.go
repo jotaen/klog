@@ -23,6 +23,8 @@ type ReconcileResult struct {
 	NewText   string
 }
 
+type Reconcile func(records []Record, blocks []lineparsing.Block) (*ReconcileResult, error)
+
 // InsertableText is for inserting lines of text into a list of Line’s,
 // without needing to know anything about indentation or line ending style.
 type InsertableText struct {

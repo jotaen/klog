@@ -92,8 +92,13 @@ func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, er
 	return ctx.records, nil
 }
 
-func (ctx *TestingContext) ReadFileInput(app.FileOrBookmarkName) ([]Record, []lineparsing.Block, app.File, error) {
-	return ctx.records, ctx.blocks, nil, nil
+func (ctx *TestingContext) ReconcileFile(name app.FileOrBookmarkName, reconcilers ...reconciler.Reconcile) error {
+	result, err := app.ApplyReconcilers(ctx.records, ctx.blocks, reconcilers...)
+	if err != nil {
+		return err
+	}
+	ctx.writtenFileContents = result.NewText
+	return nil
 }
 
 func (ctx *TestingContext) WriteFile(_ app.File, contents string) app.Error {

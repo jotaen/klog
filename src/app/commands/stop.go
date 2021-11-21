@@ -25,16 +25,13 @@ func (opt *Stop) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())
 	time := opt.AtTime(ctx.Now())
-	return lib.ReconcilerChain{
-		File: opt.OutputFileArgs.File,
-		Ctx:  ctx,
-	}.Apply(
+	return ctx.ReconcileFile(opt.OutputFileArgs.File,
 		func(records []Record, blocks []lineparsing.Block) (*reconciler.ReconcileResult, error) {
 			recordReconciler := reconciler.NewRecordReconciler(records, blocks, func(r Record) bool {
 				return r.Date().IsEqualTo(date)
 			})
 			if recordReconciler == nil {
-				return nil, lib.NotEligibleError{}
+				return nil, app.ReconcilerNotEligibleError{}
 			}
 			return recordReconciler.CloseOpenRange(
 				func(r Record) (Time, EntrySummary) { return time, NewEntrySummary(opt.Summary) },
@@ -45,7 +42,7 @@ func (opt *Stop) Run(ctx app.Context) error {
 				return r.Date().IsEqualTo(date.PlusDays(-1))
 			})
 			if recordReconciler == nil {
-				return nil, lib.NotEligibleError{}
+				return nil, app.ReconcilerNotEligibleError{}
 			}
 			adjustedTime := func() Time {
 				if time.IsTomorrow() {

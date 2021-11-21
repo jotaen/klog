@@ -44,12 +44,8 @@ type Context interface {
 	// ReadInputs retrieves all input from the given file or bookmark names.
 	ReadInputs(...FileOrBookmarkName) ([]Record, error)
 
-	// ReadFileInput retrieves the input from one given file. It returns the
-	// ParseResult, which can be used to reconcile the file.
-	ReadFileInput(FileOrBookmarkName) ([]Record, []lineparsing.Block, File, error)
-
-	// WriteFile saves content in a file on disk.
-	WriteFile(File, string) Error
+	// ReconcileFile ... // TODO
+	ReconcileFile(FileOrBookmarkName, ...reconciler.Reconcile) error
 
 	// Now returns the current timestamp.
 	Now() gotime.Time
@@ -207,23 +203,45 @@ func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithCont
 	return inputs[0], nil
 }
 
-func (ctx *context) ReadFileInput(fileArg FileOrBookmarkName) ([]Record, []lineparsing.Block, File, error) {
+type ReconcilerNotEligibleError struct{}
+
+func (e ReconcilerNotEligibleError) Error() string { return "Boom" } // TODO
+
+func ApplyReconcilers(records []Record, blocks []lineparsing.Block, reconcilers ...reconciler.Reconcile) (*reconciler.ReconcileResult, error) {
+	for i, reconcile := range reconcilers {
+		result, err := reconcile(records, blocks)
+		if result != nil {
+			return result, nil
+		}
+		_, isNotEligibleError := err.(ReconcilerNotEligibleError)
+		if isNotEligibleError && i < len(reconcilers)-1 {
+			// Try next reconcile function
+			continue
+		}
+		return nil, err
+	}
+	return nil, ReconcilerNotEligibleError{}
+}
+
+func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, reconcilers ...reconciler.Reconcile) error {
 	target, err := ctx.retrieveTargetFile(fileArg)
 	if err != nil {
-		return nil, nil, nil, err
+		return err
 	}
 	records, blocks, parserErrors := parser.Parse(target.Contents())
 	if parserErrors != nil {
-		return nil, nil, nil, parserErrors
+		return parserErrors
 	}
-	return records, blocks, target, nil
-}
-
-func (ctx *context) WriteFile(target File, contents string) Error {
-	if target == nil {
-		panic("No path specified")
+	result, rErr := ApplyReconcilers(records, blocks, reconcilers...)
+	if rErr != nil {
+		return rErr
 	}
-	return WriteToFile(target, contents)
+	wErr := WriteToFile(target, result.NewText)
+	if wErr != nil {
+		return wErr
+	}
+	ctx.Print("\n" + ctx.Serialiser().SerialiseRecords(result.NewRecord) + "\n")
+	return nil
 }
 
 func (ctx *context) Now() gotime.Time {
