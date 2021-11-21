@@ -136,7 +136,7 @@ func TestReconcileAddBlockIfOriginalIsEmpty(t *testing.T) {
 	rs, bs, _ := parser.Parse("")
 	reconciler := NewReconciler(rs, bs)
 	date := Ɀ_Date_(3333, 1, 1)
-	result, err := reconciler.InsertBlock(date, []InsertableText{
+	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2000-05-05", 0},
 	})
 	require.Nil(t, err)
@@ -150,7 +150,7 @@ func TestReconcileAddBlockToEnd(t *testing.T) {
 	rs, bs, _ := parser.Parse(original)
 	reconciler := NewReconciler(rs, bs)
 	date := Ɀ_Date_(2018, 1, 2)
-	result, err := reconciler.InsertBlock(date, []InsertableText{
+	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2018-01-02", 0},
 	})
 	require.Nil(t, err)
@@ -171,7 +171,7 @@ func TestReconcileAddBlockToEndWithTrailingNewlines(t *testing.T) {
 	rs, bs, _ := parser.Parse(original)
 	reconciler := NewReconciler(rs, bs)
 	date := Ɀ_Date_(2018, 1, 2)
-	result, err := reconciler.InsertBlock(date, []InsertableText{
+	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2018-01-02", 0},
 	})
 	require.Nil(t, err)
@@ -189,7 +189,7 @@ func TestReconcileAddBlockToBeginning(t *testing.T) {
 	rs, bs, _ := parser.Parse(original)
 	reconciler := NewReconciler(rs, bs)
 	date := Ɀ_Date_(2018, 1, 1)
-	result, err := reconciler.InsertBlock(date, []InsertableText{
+	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2018-01-01", 0},
 	})
 	require.Nil(t, err)
@@ -203,7 +203,7 @@ func TestReconcileAddBlockToBeginningWithLeadingNewlines(t *testing.T) {
 	rs, bs, _ := parser.Parse(original)
 	reconciler := NewReconciler(rs, bs)
 	date := Ɀ_Date_(2018, 1, 1)
-	result, err := reconciler.InsertBlock(date, []InsertableText{
+	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2018-01-01", 0},
 	})
 	require.Nil(t, err)
@@ -224,7 +224,7 @@ func TestReconcileAddBlockInBetween(t *testing.T) {
 	rs, bs, _ := parser.Parse(original)
 	reconciler := NewReconciler(rs, bs)
 	date := Ɀ_Date_(2018, 1, 2)
-	result, err := reconciler.InsertBlock(date, []InsertableText{
+	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2018-01-02", 0},
 		{"This and that", 0},
 		{"30m worked", 1},

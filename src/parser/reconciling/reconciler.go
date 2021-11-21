@@ -1,6 +1,6 @@
 /*
 Package reconciling contains logic to manipulate klog source text.
-The idea of reconcilers in general is to add or modify serialised records
+The idea of the reconciler generally is to add or modify serialised records
 in a minimally invasive manner. Instead or re-serialising the record itself,
 it tries to find the location in the original text and modify that directly.
 While this approach might feel a little hacky, it avoids lots of other
@@ -45,6 +45,7 @@ func NewReconciler(records []Record, blocks []lineparsing.Block) Reconciler {
 	return Reconciler{records, blocks}
 }
 
+// AppendEntry tries to find the matching record and append a new entry to it.
 func (r *Reconciler) AppendEntry(matchRecord func(Record) bool, handler func(Record) string) (*Result, error) {
 	recordIndex := findRecordIndex(r.records, matchRecord)
 	if recordIndex == -1 {
@@ -61,6 +62,7 @@ func (r *Reconciler) AppendEntry(matchRecord func(Record) bool, handler func(Rec
 	return makeResult(result, uint(recordIndex))
 }
 
+// CloseOpenRange tries to find the matching record and closes its open time range.
 func (r *Reconciler) CloseOpenRange(matchRecord func(Record) bool, handler func(Record) (Time, EntrySummary)) (*Result, error) {
 	recordIndex := findRecordIndex(r.records, matchRecord)
 	if recordIndex == -1 {
@@ -97,7 +99,9 @@ func (r *Reconciler) CloseOpenRange(matchRecord func(Record) bool, handler func(
 	return makeResult(allLines, uint(recordIndex))
 }
 
-func (r *Reconciler) InsertBlock(newDate Date, texts []InsertableText) (*Result, error) {
+// InsertRecord inserts a new record. For finding the right position, it assumes that
+// the existing records are chronologically ordered.
+func (r *Reconciler) InsertRecord(newDate Date, texts []InsertableText) (*Result, error) {
 	recordIndex := findRecordIndexAfterDate(r.records, newDate)
 	lineNumber, newRecordIndex, insertable := func() (int, uint, []InsertableText) {
 		if recordIndex == -1 {

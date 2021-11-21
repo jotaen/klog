@@ -66,9 +66,6 @@ type Context interface {
 
 	// SetSerialiser sets the current serialiser.
 	SetSerialiser(*parser.Serialiser)
-
-	// InstantiateTemplate reads a template from disk and substitutes all placeholders.
-	InstantiateTemplate(string) ([]reconciling.InsertableText, Error)
 }
 
 // Meta holds miscellaneous information about the klog binary.
@@ -330,27 +327,6 @@ func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(stri
 		hint,
 		nil,
 	)
-}
-
-func (ctx *context) InstantiateTemplate(templateName string) ([]reconciling.InsertableText, Error) {
-	location := NewFileOrPanic(ctx.KlogFolder() + templateName + ".template.klg")
-	template, err := ReadFile(location)
-	if err != nil {
-		return nil, NewError(
-			"No such template",
-			"There is no template at location "+location.Path(),
-			err,
-		)
-	}
-	instance, tErr := reconciling.RenderTemplate(template, ctx.Now())
-	if tErr != nil {
-		return nil, NewError(
-			"Invalid template",
-			tErr.Error(),
-			tErr,
-		)
-	}
-	return instance, nil
 }
 
 func (ctx *context) Serialiser() *parser.Serialiser {

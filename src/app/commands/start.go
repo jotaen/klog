@@ -45,7 +45,7 @@ func (opt *Start) Run(ctx app.Context) error {
 				{headline, 0},
 				{entry, 1},
 			}
-			return reconciler.InsertBlock(date, lines)
+			return reconciler.InsertRecord(date, lines)
 		},
 	)
 }

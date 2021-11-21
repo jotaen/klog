@@ -8,7 +8,6 @@ import (
 )
 
 type Create struct {
-	Template    string   `name:"template" hidden help:"The name of the template to instantiate"`
 	ShouldTotal Duration `name:"should" help:"The should-total of the record"`
 	lib.AtDateArgs
 	lib.NoStyleArgs
@@ -24,9 +23,6 @@ func (opt *Create) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())
 	lines, err := func() ([]reconciling.InsertableText, error) {
-		if opt.Template != "" {
-			return ctx.InstantiateTemplate(opt.Template)
-		}
 		headline := opt.AtDate(ctx.Now()).ToString()
 		if opt.ShouldTotal != nil {
 			headline += " (" + opt.ShouldTotal.ToString() + "!)"
@@ -41,7 +37,7 @@ func (opt *Create) Run(ctx app.Context) error {
 	return ctx.ReconcileFile(
 		opt.OutputFileArgs.File,
 		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
-			return reconciler.InsertBlock(date, lines)
+			return reconciler.InsertRecord(date, lines)
 		},
 	)
 }

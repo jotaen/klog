@@ -126,10 +126,6 @@ func (ctx *TestingContext) OpenInEditor(_ app.FileOrBookmarkName, _ func(string)
 	return nil
 }
 
-func (ctx *TestingContext) InstantiateTemplate(_ string) ([]reconciling.InsertableText, app.Error) {
-	return nil, nil
-}
-
 func (ctx *TestingContext) Serialiser() *parser.Serialiser {
 	return ctx.serialiser
 }
