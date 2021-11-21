@@ -85,7 +85,9 @@ func TestAcceptTabOrSpacesAsIndentation(t *testing.T) {
 		expect interface{}
 	}{
 		{"2000-01-01\n\t8h", nil},
+		{"2000-01-01\n\t8h\n\t15m", nil},
 		{"2000-05-31\n  6h", nil},
+		{"2000-05-31\n  6h\n  20m", nil},
 		{"2000-05-31\n   6h", nil},
 		{"2000-05-31\n    6h", nil},
 	} {
@@ -190,6 +192,44 @@ End.
 	assert.Equal(t, Err{id(ErrorMalformedSummary), 8, 0, 4}, toErr(errs.Get()[3]))
 }
 
+func TestReportErrorsIfIndentationIsIncorrect(t *testing.T) {
+	for _, test := range []struct {
+		text   string
+		expect Err
+	}{
+		{"2020-01-01\n 8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
+		{"2020-01-01\n\t 8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
+		{"2020-01-01\n\t\t8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
+		{"2020-01-01\n     8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
+		{"2020-01-01\n    8h\n\t2h", Err{id(ErrorIllegalIndentation), 3, 0, 2}},
+		{"2020-01-01\n  8h\n   2h", Err{id(ErrorIllegalIndentation), 3, 0, 2}},
+		{"2020-01-01\n  8h\n  2h\n\t1h2m", Err{id(ErrorIllegalIndentation), 4, 0, 4}},
+	} {
+		rs, _, errs := Parse(test.text)
+		require.Nil(t, rs, test.text)
+		require.NotNil(t, errs, test.text)
+		require.Len(t, errs.Get(), 1, test.text)
+		assert.Equal(t, test.expect, toErr(errs.Get()[0]), test.text)
+	}
+}
+
+func TestAcceptMixingIndentationStylesAcrossRecords(t *testing.T) {
+	text := `
+2020-01-01
+  4h This is two spaces
+  2h So is this
+
+2020-01-02
+    6h This is 4 spaces
+
+2020-01-03
+	12m This is a tab
+`
+	rs, _, errs := Parse(text)
+	require.Nil(t, errs)
+	require.Len(t, rs, 3)
+}
+
 func TestReportErrorsInEntries(t *testing.T) {
 	for _, test := range []struct {
 		text   string
@@ -205,10 +245,6 @@ func TestReportErrorsInEntries(t *testing.T) {
 		{"2020-01-01\n\t15:00 - 14:00", Err{id(ErrorIllegalRange), 2, 0, 13}},
 		{"2020-01-01\n\t-18:00", Err{id(ErrorMalformedEntry), 2, 0, 6}},
 		{"2020-01-01\n\t15:30 Foo Bar Baz", Err{id(ErrorMalformedEntry), 2, 6, 1}},
-		{"2020-01-01\n 8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
-		{"2020-01-01\n\t 8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
-		{"2020-01-01\n\t\t8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
-		{"2020-01-01\n     8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
 	} {
 		rs, _, errs := Parse(test.text)
 		require.Nil(t, rs, test.text)
