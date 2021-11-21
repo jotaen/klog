@@ -112,7 +112,7 @@ func TestReconcilerClosesOpenRangeWithExtendingSummary(t *testing.T) {
 2018-01-01
     1h
     15:00-??? Will this close? I hope so!?!?
-	2m
+    2m
 `
 	rs, bs, _ := parser.Parse(original)
 	reconciler := NewReconciler(rs, bs)
@@ -128,7 +128,7 @@ func TestReconcilerClosesOpenRangeWithExtendingSummary(t *testing.T) {
 2018-01-01
     1h
     15:00-16:42 Will this close? I hope so!?!? Yes!
-	2m
+    2m
 `, result.FileContents())
 }
 
