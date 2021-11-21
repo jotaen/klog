@@ -23,7 +23,16 @@ type ReconcileResult struct {
 	NewText   string
 }
 
-type Reconcile func(records []Record, blocks []lineparsing.Block) (*ReconcileResult, error)
+type Reconciler struct {
+	records []Record
+	blocks  []lineparsing.Block
+}
+
+func NewReconciler(records []Record, blocks []lineparsing.Block) Reconciler {
+	return Reconciler{records, blocks}
+}
+
+type Reconcile func(Reconciler) (*ReconcileResult, error)
 
 // InsertableText is for inserting lines of text into a list of Line’s,
 // without needing to know anything about indentation or line ending style.
@@ -39,9 +48,9 @@ func (e NotEligibleError) Error() string { return "Boom" } // TODO
 
 // Chain tries to apply multiple reconcilers one after the other. It returns the result
 // of the first successful one.
-func Chain(records []Record, blocks []lineparsing.Block, reconcilers ...Reconcile) (*ReconcileResult, error) {
+func Chain(base Reconciler, reconcilers ...Reconcile) (*ReconcileResult, error) {
 	for i, reconcile := range reconcilers {
-		result, err := reconcile(records, blocks)
+		result, err := reconcile(base)
 		if err == nil && result != nil {
 			return result, nil
 		}

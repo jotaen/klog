@@ -211,7 +211,8 @@ func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, reconcilers ...rec
 	if parserErrors != nil {
 		return parserErrors
 	}
-	result, rErr := reconciler.Chain(records, blocks, reconcilers...)
+	baseReconciler := reconciler.NewReconciler(records, blocks)
+	result, rErr := reconciler.Chain(baseReconciler, reconcilers...)
 	if rErr != nil {
 		return rErr
 	}

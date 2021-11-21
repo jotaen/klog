@@ -3,20 +3,18 @@ package reconciler
 import (
 	"errors"
 	. "github.com/jotaen/klog/src"
-	"github.com/jotaen/klog/src/parser/lineparsing"
 	"regexp"
 )
 
 // EntryReconciler is for an existing or inserting a new entry into a record.
 type EntryReconciler struct {
-	records       []Record
-	blocks        []lineparsing.Block
+	Reconciler
 	recordPointer uint // `-1` indicates to prepend
 }
 
-func NewEntryReconciler(rs []Record, bs []lineparsing.Block, matchRecord func(Record) bool) *EntryReconciler {
+func NewEntryReconciler(base Reconciler, matchRecord func(Record) bool) *EntryReconciler {
 	index := -1
-	for i, r := range rs {
+	for i, r := range base.records {
 		if matchRecord(r) {
 			index = i
 			break
@@ -26,8 +24,7 @@ func NewEntryReconciler(rs []Record, bs []lineparsing.Block, matchRecord func(Re
 		return nil
 	}
 	return &EntryReconciler{
-		records:       rs,
-		blocks:        bs,
+		Reconciler:    base,
 		recordPointer: uint(index),
 	}
 }

@@ -10,7 +10,7 @@ import (
 
 func TestReconcileAddBlockIfOriginalIsEmpty(t *testing.T) {
 	rs, bs, _ := parser.Parse("")
-	reconciler := NewRecordReconciler(rs, bs, Ɀ_Date_(3333, 1, 1))
+	reconciler := NewRecordReconciler(NewReconciler(rs, bs), Ɀ_Date_(3333, 1, 1))
 	result, err := reconciler.InsertBlock([]InsertableText{
 		{"2000-05-05", 0},
 	})
@@ -23,7 +23,7 @@ func TestReconcileAddBlockToEnd(t *testing.T) {
 2018-01-01
     1h`
 	rs, bs, _ := parser.Parse(original)
-	reconciler := NewRecordReconciler(rs, bs, Ɀ_Date_(2018, 1, 2))
+	reconciler := NewRecordReconciler(NewReconciler(rs, bs), Ɀ_Date_(2018, 1, 2))
 	result, err := reconciler.InsertBlock([]InsertableText{
 		{"2018-01-02", 0},
 	})
@@ -43,7 +43,7 @@ func TestReconcileAddBlockToEndWithTrailingNewlines(t *testing.T) {
 
 `
 	rs, bs, _ := parser.Parse(original)
-	reconciler := NewRecordReconciler(rs, bs, Ɀ_Date_(2018, 1, 2))
+	reconciler := NewRecordReconciler(NewReconciler(rs, bs), Ɀ_Date_(2018, 1, 2))
 	result, err := reconciler.InsertBlock([]InsertableText{
 		{"2018-01-02", 0},
 	})
@@ -60,7 +60,7 @@ func TestReconcileAddBlockToEndWithTrailingNewlines(t *testing.T) {
 func TestReconcileAddBlockToBeginning(t *testing.T) {
 	original := "2018-01-02"
 	rs, bs, _ := parser.Parse(original)
-	reconciler := NewRecordReconciler(rs, bs, Ɀ_Date_(2018, 1, 1))
+	reconciler := NewRecordReconciler(NewReconciler(rs, bs), Ɀ_Date_(2018, 1, 1))
 	result, err := reconciler.InsertBlock([]InsertableText{
 		{"2018-01-01", 0},
 	})
@@ -73,7 +73,7 @@ func TestReconcileAddBlockToBeginning(t *testing.T) {
 func TestReconcileAddBlockToBeginningWithLeadingNewlines(t *testing.T) {
 	original := "\n\n2018-01-02"
 	rs, bs, _ := parser.Parse(original)
-	reconciler := NewRecordReconciler(rs, bs, Ɀ_Date_(2018, 1, 1))
+	reconciler := NewRecordReconciler(NewReconciler(rs, bs), Ɀ_Date_(2018, 1, 1))
 	result, err := reconciler.InsertBlock([]InsertableText{
 		{"2018-01-01", 0},
 	})
@@ -92,8 +92,8 @@ func TestReconcileAddBlockInBetween(t *testing.T) {
 
 2018-01-03
     3h`
-	pr, bs, _ := parser.Parse(original)
-	reconciler := NewRecordReconciler(pr, bs, Ɀ_Date_(2018, 1, 2))
+	rs, bs, _ := parser.Parse(original)
+	reconciler := NewRecordReconciler(NewReconciler(rs, bs), Ɀ_Date_(2018, 1, 2))
 	result, err := reconciler.InsertBlock([]InsertableText{
 		{"2018-01-02", 0},
 		{"This and that", 0},

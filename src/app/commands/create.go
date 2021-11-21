@@ -4,7 +4,6 @@ import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
-	"github.com/jotaen/klog/src/parser/lineparsing"
 	"github.com/jotaen/klog/src/parser/reconciler"
 )
 
@@ -40,8 +39,8 @@ func (opt *Create) Run(ctx app.Context) error {
 		return err
 	}
 	return ctx.ReconcileFile(opt.OutputFileArgs.File,
-		func(records []Record, blocks []lineparsing.Block) (*reconciler.ReconcileResult, error) {
-			recordReconciler := reconciler.NewRecordReconciler(records, blocks, date)
+		func(base reconciler.Reconciler) (*reconciler.ReconcileResult, error) {
+			recordReconciler := reconciler.NewRecordReconciler(base, date)
 			return recordReconciler.InsertBlock(lines)
 		},
 	)

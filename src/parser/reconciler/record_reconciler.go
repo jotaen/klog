@@ -7,29 +7,27 @@ import (
 
 // RecordReconciler is for inserting a new record into a list of records.
 type RecordReconciler struct {
-	records            []Record
-	blocks             []lineparsing.Block
+	Reconciler
 	maybeRecordPointer int
 }
 
-func NewRecordReconciler(rs []Record, bs []lineparsing.Block, newDate Date) *RecordReconciler {
+func NewRecordReconciler(base Reconciler, newDate Date) *RecordReconciler {
 	index := -1
-	for i, r := range rs {
+	for i, r := range base.records {
 		if i == 0 && !newDate.IsAfterOrEqual(r.Date()) {
 			break
 		}
-		if i == len(rs)-1 {
-			index = len(rs) - 1
+		if i == len(base.records)-1 {
+			index = len(base.records) - 1
 			break
 		}
-		if newDate.IsAfterOrEqual(r.Date()) && !newDate.IsAfterOrEqual(rs[i+1].Date()) {
+		if newDate.IsAfterOrEqual(r.Date()) && !newDate.IsAfterOrEqual(base.records[i+1].Date()) {
 			index = i
 			break
 		}
 	}
 	return &RecordReconciler{
-		records:            rs,
-		blocks:             bs,
+		Reconciler:         base,
 		maybeRecordPointer: index,
 	}
 }

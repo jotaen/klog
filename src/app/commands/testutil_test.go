@@ -92,8 +92,8 @@ func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, er
 	return ctx.records, nil
 }
 
-func (ctx *TestingContext) ReconcileFile(name app.FileOrBookmarkName, reconcilers ...reconciler.Reconcile) error {
-	result, err := reconciler.Chain(ctx.records, ctx.blocks, reconcilers...)
+func (ctx *TestingContext) ReconcileFile(_ app.FileOrBookmarkName, reconcilers ...reconciler.Reconcile) error {
+	result, err := reconciler.Chain(reconciler.NewReconciler(ctx.records, ctx.blocks), reconcilers...)
 	if err != nil {
 		return err
 	}

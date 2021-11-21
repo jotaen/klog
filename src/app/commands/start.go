@@ -4,7 +4,6 @@ import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
-	"github.com/jotaen/klog/src/parser/lineparsing"
 	"github.com/jotaen/klog/src/parser/reconciler"
 )
 
@@ -33,8 +32,8 @@ func (opt *Start) Run(ctx app.Context) error {
 		return time.ToString() + " - ?" + summary
 	}()
 	return ctx.ReconcileFile(opt.OutputFileArgs.File,
-		func(records []Record, blocks []lineparsing.Block) (*reconciler.ReconcileResult, error) {
-			entryReconciler := reconciler.NewEntryReconciler(records, blocks, func(r Record) bool {
+		func(base reconciler.Reconciler) (*reconciler.ReconcileResult, error) {
+			entryReconciler := reconciler.NewEntryReconciler(base, func(r Record) bool {
 				return r.Date().IsEqualTo(date)
 			})
 			if entryReconciler == nil {
@@ -44,8 +43,8 @@ func (opt *Start) Run(ctx app.Context) error {
 				return entry
 			})
 		},
-		func(records []Record, blocks []lineparsing.Block) (*reconciler.ReconcileResult, error) {
-			recordReconciler := reconciler.NewRecordReconciler(records, blocks, date)
+		func(base reconciler.Reconciler) (*reconciler.ReconcileResult, error) {
+			recordReconciler := reconciler.NewRecordReconciler(base, date)
 			headline := opt.AtDate(ctx.Now()).ToString()
 			lines := []reconciler.InsertableText{
 				{headline, 0},

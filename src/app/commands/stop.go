@@ -4,7 +4,6 @@ import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
-	"github.com/jotaen/klog/src/parser/lineparsing"
 	"github.com/jotaen/klog/src/parser/reconciler"
 )
 
@@ -26,8 +25,8 @@ func (opt *Stop) Run(ctx app.Context) error {
 	date := opt.AtDate(ctx.Now())
 	time := opt.AtTime(ctx.Now())
 	return ctx.ReconcileFile(opt.OutputFileArgs.File,
-		func(records []Record, blocks []lineparsing.Block) (*reconciler.ReconcileResult, error) {
-			entryReconciler := reconciler.NewEntryReconciler(records, blocks, func(r Record) bool {
+		func(base reconciler.Reconciler) (*reconciler.ReconcileResult, error) {
+			entryReconciler := reconciler.NewEntryReconciler(base, func(r Record) bool {
 				return r.Date().IsEqualTo(date)
 			})
 			if entryReconciler == nil {
@@ -37,8 +36,8 @@ func (opt *Stop) Run(ctx app.Context) error {
 				func(r Record) (Time, EntrySummary) { return time, NewEntrySummary(opt.Summary) },
 			)
 		},
-		func(record []Record, blocks []lineparsing.Block) (*reconciler.ReconcileResult, error) {
-			entryReconciler := reconciler.NewEntryReconciler(record, blocks, func(r Record) bool {
+		func(base reconciler.Reconciler) (*reconciler.ReconcileResult, error) {
+			entryReconciler := reconciler.NewEntryReconciler(base, func(r Record) bool {
 				return r.Date().IsEqualTo(date.PlusDays(-1))
 			})
 			if entryReconciler == nil {
