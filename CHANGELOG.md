@@ -9,6 +9,8 @@
 - **[ FEATURE ]** Embed specification and license in the binary
   (via `klog --spec` and `klog --license`)
 - **[ FIX ]** Fix default sort order of `--sort` flag to be `asc`
+- **[ INFO ]** The widget feature (for MacOS) is deprecated and will
+  be removed in one of the next releases.
 
 ## v3.1
 - **[ FIX ]** Fix stdin processing on Windows
