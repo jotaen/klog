@@ -42,6 +42,11 @@ func render(ctx app.Context, agent *launchAgent) []menuet2.MenuItem {
 	items = append(items, menuet2.MenuItem{
 		Type: menuet2.Separator,
 	}, menuet2.MenuItem{
+		Text: "Note: this widget is deprecated\n" +
+			"and will be removed in one\n" +
+			"of the next releases of klog.",
+		FontSize: 12,
+	}, menuet2.MenuItem{
 		Text: "Settings",
 		Children: func() []menuet2.MenuItem {
 			return []menuet2.MenuItem{{
