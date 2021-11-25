@@ -27,62 +27,66 @@ func Parse(recordsAsText string) ([]Record, []Block, Errors) {
 	return records, blocks, nil
 }
 
+var allowedIndentationStyles = []string{"    ", "   ", "  ", "\t"}
+
 func parseRecord(lines []Line) (Record, []Error) {
 	var errs []Error
 
 	// ========== HEADLINE ==========
-	record := func(headline Parseable) Record {
-		if len(headline.PrecedingWhitespace) > 0 {
-			errs = append(errs, ErrorIllegalIndentation(NewError(headline.Line, 0, headline.Length())))
+	record := func() Record {
+		headline := NewParseable(lines[0], 0)
+		headline.SkipWhile(IsSpaceOrTab)
+		if headline.PointerPosition > 0 {
+			errs = append(errs, ErrorIllegalIndentation().New(lines[0], 0, len(lines[0].Text)))
 			return nil
 		}
-		dateText, _ := headline.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
+		dateText, _ := headline.PeekUntil(IsSpaceOrTab)
 		date, err := NewDateFromString(dateText.ToString())
 		if err != nil {
-			errs = append(errs, ErrorInvalidDate(NewError(headline.Line, headline.PointerPosition, dateText.Length())))
+			errs = append(errs, ErrorInvalidDate().New(headline.Line, headline.PointerPosition, dateText.Length()))
 			return nil
 		}
 		headline.Advance(dateText.Length())
-		headline.SkipWhitespace()
+		headline.SkipWhile(IsSpaceOrTab)
 		r := NewRecord(date)
 		if headline.Peek() == '(' {
 			headline.Advance(1) // '('
-			headline.SkipWhitespace()
+			headline.SkipWhile(IsSpaceOrTab)
 			allPropsText, hasClosingParenthesis := headline.PeekUntil(func(r rune) bool { return r == ')' })
 			if !hasClosingParenthesis {
-				errs = append(errs, ErrorMalformedPropertiesSyntax(NewError(headline.Line, headline.Length(), 1)))
+				errs = append(errs, ErrorMalformedPropertiesSyntax().New(headline.Line, headline.Length(), 1))
 				return r
 			}
 			if allPropsText.Length() == 0 {
-				errs = append(errs, ErrorMalformedPropertiesSyntax(NewError(headline.Line, headline.PointerPosition, 1)))
+				errs = append(errs, ErrorMalformedPropertiesSyntax().New(headline.Line, headline.PointerPosition, 1))
 				return r
 			}
 			shouldTotalText, hasExclamationMark := headline.PeekUntil(func(r rune) bool { return r == '!' })
 			if !hasExclamationMark {
-				errs = append(errs, ErrorUnrecognisedProperty(NewError(headline.Line, headline.PointerPosition, shouldTotalText.Length()-1)))
+				errs = append(errs, ErrorUnrecognisedProperty().New(headline.Line, headline.PointerPosition, shouldTotalText.Length()-1))
 				return r
 			}
 			shouldTotal, err := NewDurationFromString(shouldTotalText.ToString())
 			if err != nil {
-				errs = append(errs, ErrorMalformedShouldTotal(NewError(headline.Line, headline.PointerPosition, shouldTotalText.Length())))
+				errs = append(errs, ErrorMalformedShouldTotal().New(headline.Line, headline.PointerPosition, shouldTotalText.Length()))
 				return r
 			}
 			r.SetShouldTotal(shouldTotal)
 			headline.Advance(shouldTotalText.Length())
 			headline.Advance(1) // '!'
-			headline.SkipWhitespace()
+			headline.SkipWhile(IsSpaceOrTab)
 			if headline.Peek() != ')' {
-				errs = append(errs, ErrorUnrecognisedProperty(NewError(headline.Line, headline.PointerPosition, headline.RemainingLength()-1)))
+				errs = append(errs, ErrorUnrecognisedProperty().New(headline.Line, headline.PointerPosition, headline.RemainingLength()-1))
 				return r
 			}
 			headline.Advance(1) // ')'
 		}
-		headline.SkipWhitespace()
+		headline.SkipWhile(IsSpaceOrTab)
 		if headline.RemainingLength() > 0 {
-			errs = append(errs, ErrorUnrecognisedTextInHeadline(NewError(headline.Line, headline.PointerPosition, headline.RemainingLength())))
+			errs = append(errs, ErrorUnrecognisedTextInHeadline().New(headline.Line, headline.PointerPosition, headline.RemainingLength()))
 		}
 		return r
-	}(NewParseable(lines[0]))
+	}()
 	lines = lines[1:]
 
 	if record == nil {
@@ -91,101 +95,99 @@ func parseRecord(lines []Line) (Record, []Error) {
 		dummyDate, _ := NewDate(0, 0, 0)
 		record = NewRecord(dummyDate)
 	}
-	indentationDetector := newIndentationDetector()
+
+	var indentator *Indentator
 
 	// ========== SUMMARY LINES ==========
-	for _, s := range lines {
-		summary := NewParseable(s)
-		isIndented, iErr := indentationDetector.isIndented(summary)
-		if iErr != nil {
-			errs = append(errs, iErr)
-		}
-		if isIndented {
+	for _, l := range lines {
+		indentator = NewIndentator(allowedIndentationStyles, lines[0])
+		if indentator != nil {
 			break
 		}
+		summary := NewParseable(l, 0)
 		newSummary, err := NewRecordSummary(append(record.Summary(), summary.ToString())...)
 		if err != nil {
-			errs = append(errs, ErrorMalformedSummary(NewError(summary.Line, 0, summary.Length())))
+			errs = append(errs, ErrorMalformedSummary().New(summary.Line, 0, summary.Length()))
 		}
 		lines = lines[1:]
 		record.SetSummary(newSummary)
 	}
 
 	// ========== ENTRIES ==========
-entries:
-	for _, e := range lines {
-		entry := NewParseable(e)
-		iErr := indentationDetector.collate(entry)
-		if iErr != nil {
-			errs = append(errs, iErr)
-			continue
+	for _, l := range lines {
+		if indentator == nil {
+			// We should never make it here if the indentation could not be determined.
+			panic("Could not detect indentation")
 		}
-		durationCandidate, _ := entry.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
-		duration, err := NewDurationFromString(durationCandidate.ToString())
-		if err == nil {
-			entry.Advance(durationCandidate.Length())
-			entry.SkipWhitespace()
-			summaryText, _ := entry.PeekUntil(func(r rune) bool { return false })
-			record.AddDuration(duration, NewEntrySummary(summaryText.ToString()))
-			continue
-		}
-		startCandidate, _ := entry.PeekUntil(func(r rune) bool { return r == '-' || IsWhitespace(r) })
-		if startCandidate.Length() == 0 {
-			// Handle case where `-` appears right at the beginning of the line
-			firstToken, _ := entry.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
-			errs = append(errs, ErrorMalformedEntry(NewError(entry.Line, entry.PointerPosition, firstToken.Length())))
-			continue
-		}
-		start, err := NewTimeFromString(startCandidate.ToString())
-		if err != nil {
-			errs = append(errs, ErrorMalformedEntry(NewError(entry.Line, entry.PointerPosition, startCandidate.Length())))
-			continue
-		}
-		entry.Advance(startCandidate.Length())
-		entry.SkipWhitespace()
-		if entry.Peek() != '-' {
-			errs = append(errs, ErrorMalformedEntry(NewError(entry.Line, entry.PointerPosition, 1)))
-			continue
-		}
-		entry.Advance(1) // '-'
-		entry.SkipWhitespace()
-		if entry.Peek() == '?' {
-			entry.Advance(1)
-			placeholder, _ := entry.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
-			for _, p := range placeholder.Chars {
-				if p != '?' {
-					errs = append(errs, ErrorMalformedEntry(NewError(entry.Line, entry.PointerPosition, placeholder.Length())))
-					continue entries
+		err := func() Error {
+			entry := indentator.NewIndentedParseable(l, 1)
+			if entry == nil || IsSpaceOrTab(entry.Peek()) {
+				return ErrorIllegalIndentation().New(l, 0, len(l.Text))
+			}
+			durationCandidate, _ := entry.PeekUntil(IsSpaceOrTab)
+			duration, err := NewDurationFromString(durationCandidate.ToString())
+			if err == nil {
+				entry.Advance(durationCandidate.Length())
+				entry.SkipWhile(IsSpaceOrTab)
+				summaryText, _ := entry.PeekUntil(func(r rune) bool { return false })
+				record.AddDuration(duration, NewEntrySummary(summaryText.ToString()))
+				return nil
+			}
+			startCandidate, _ := entry.PeekUntil(func(r rune) bool { return r == '-' || IsSpace(r) })
+			if startCandidate.Length() == 0 {
+				// Handle case where `-` appears right at the beginning of the line
+				firstToken, _ := entry.PeekUntil(IsSpaceOrTab)
+				return ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, firstToken.Length())
+			}
+			start, err := NewTimeFromString(startCandidate.ToString())
+			if err != nil {
+				return ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, startCandidate.Length())
+			}
+			entryStartPosition := startCandidate.PointerPosition
+			entry.Advance(startCandidate.Length())
+			entry.SkipWhile(IsSpace)
+			if entry.Peek() != '-' {
+				return ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, 1)
+			}
+			entry.Advance(1) // '-'
+			entry.SkipWhile(IsSpace)
+			if entry.Peek() == '?' {
+				entry.Advance(1)
+				placeholder, _ := entry.PeekUntil(IsSpaceOrTab)
+				for _, p := range placeholder.Chars {
+					if p != '?' {
+						return ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, placeholder.Length())
+					}
 				}
+				entry.Advance(placeholder.Length())
+				entry.SkipWhile(IsSpaceOrTab)
+				summaryText, _ := entry.PeekUntil(func(r rune) bool { return false })
+				err := record.StartOpenRange(start, NewEntrySummary(summaryText.ToString()))
+				if err != nil {
+					return ErrorDuplicateOpenRange().New(entry.Line, entryStartPosition, entry.PointerPosition-entryStartPosition)
+				}
+			} else {
+				endCandidate, _ := entry.PeekUntil(IsSpaceOrTab)
+				if endCandidate.Length() == 0 {
+					return ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, 1)
+				}
+				end, err := NewTimeFromString(endCandidate.ToString())
+				if err != nil {
+					return ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, endCandidate.Length())
+				}
+				entry.Advance(endCandidate.Length())
+				timeRange, err := NewRange(start, end)
+				if err != nil {
+					return ErrorIllegalRange().New(entry.Line, entryStartPosition, entry.PointerPosition-entryStartPosition)
+				}
+				entry.SkipWhile(IsSpaceOrTab)
+				summaryText, _ := entry.PeekUntil(func(r rune) bool { return false })
+				record.AddRange(timeRange, NewEntrySummary(summaryText.ToString()))
 			}
-			entry.Advance(placeholder.Length())
-			entry.SkipWhitespace()
-			summaryText, _ := entry.PeekUntil(func(r rune) bool { return false })
-			err := record.StartOpenRange(start, NewEntrySummary(summaryText.ToString()))
-			if err != nil {
-				errs = append(errs, ErrorDuplicateOpenRange(NewError(entry.Line, 0, entry.PointerPosition)))
-				continue
-			}
-		} else {
-			endCandidate, _ := entry.PeekUntil(func(r rune) bool { return IsWhitespace(r) })
-			if endCandidate.Length() == 0 {
-				errs = append(errs, ErrorMalformedEntry(NewError(entry.Line, entry.PointerPosition, 1)))
-				continue
-			}
-			end, err := NewTimeFromString(endCandidate.ToString())
-			if err != nil {
-				errs = append(errs, ErrorMalformedEntry(NewError(entry.Line, entry.PointerPosition, endCandidate.Length())))
-				continue
-			}
-			entry.Advance(endCandidate.Length())
-			timeRange, err := NewRange(start, end)
-			if err != nil {
-				errs = append(errs, ErrorIllegalRange(NewError(entry.Line, 0, entry.PointerPosition)))
-				continue
-			}
-			entry.SkipWhitespace()
-			summaryText, _ := entry.PeekUntil(func(r rune) bool { return false })
-			record.AddRange(timeRange, NewEntrySummary(summaryText.ToString()))
+			return nil
+		}()
+		if err != nil {
+			errs = append(errs, err)
 		}
 	}
 
@@ -193,39 +195,4 @@ entries:
 		return nil, errs
 	}
 	return record, nil
-}
-
-type indentationDetector struct {
-	allowedIndentationStyles []string
-	actualIndentationStyle   string
-}
-
-func newIndentationDetector() *indentationDetector {
-	return &indentationDetector{
-		allowedIndentationStyles: []string{"  ", "   ", "    ", "\t"},
-	}
-}
-
-// collate requires a line to be indented and enforces the indentation style to
-// be consistent across subsequent calls.
-func (i *indentationDetector) collate(p Parseable) Error {
-	if i.actualIndentationStyle == "" {
-		i.actualIndentationStyle = p.PrecedingWhitespace
-	} else if p.PrecedingWhitespace != i.actualIndentationStyle {
-		return ErrorIllegalIndentation(NewError(p.Line, 0, p.Length()))
-	}
-	return nil
-}
-
-// isIndented checks whether a line is indented according to one of the allowed styles.
-func (i *indentationDetector) isIndented(l Parseable) (bool, Error) {
-	if len(l.PrecedingWhitespace) == 0 {
-		return false, nil
-	}
-	for _, s := range i.allowedIndentationStyles {
-		if l.PrecedingWhitespace == s {
-			return true, nil
-		}
-	}
-	return false, ErrorIllegalIndentation(NewError(l.Line, 0, l.Length()))
 }

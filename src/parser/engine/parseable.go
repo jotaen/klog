@@ -13,9 +13,9 @@ type Parseable struct {
 
 var END_OF_TEXT int32 = -1
 
-func NewParseable(l Line) Parseable {
-	return Parseable{
-		PointerPosition: 0,
+func NewParseable(l Line, startPointerPosition int) *Parseable {
+	return &Parseable{
+		PointerPosition: startPointerPosition,
 		Chars:           []rune(l.Text),
 		Line:            l,
 	}
@@ -54,9 +54,9 @@ func (p *Parseable) Advance(increment int) {
 	p.PointerPosition += increment
 }
 
-// SkipWhitespace consumes all white space (space or tab).
-func (p *Parseable) SkipWhitespace() {
-	for IsWhitespace(p.Peek()) {
+// SkipWhile consumes all upcoming characters that match the predicate.
+func (p *Parseable) SkipWhile(isMatch func(rune) bool) {
+	for IsSpaceOrTab(p.Peek()) {
 		p.Advance(1)
 	}
 	return

@@ -13,7 +13,12 @@ func SubRune(text []rune, start int, length int) []rune {
 	return text[start : start+length]
 }
 
-// IsWhitespace checks whether a rune is a space or a tab.
-func IsWhitespace(r rune) bool {
+// IsSpaceOrTab checks whether a rune is a space or a tab character.
+func IsSpaceOrTab(r rune) bool {
 	return r == ' ' || r == '\t'
+}
+
+// IsSpace checks whether a rune is a space character.
+func IsSpace(r rune) bool {
+	return r == ' '
 }

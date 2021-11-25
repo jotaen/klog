@@ -95,10 +95,10 @@ func TestSerialiseFullBlownRecord(t *testing.T) {
 
 func TestSerialiseParserErrors(t *testing.T) {
 	json := ToJson(nil, engine.NewErrors([]engine.Error{
-		parser.ErrorInvalidDate(engine.NewError(engine.Line{
+		parser.ErrorInvalidDate().New(engine.Line{
 			Text:       "2018-99-99",
 			LineNumber: 7,
-		}, 0, 10)),
+		}, 0, 10),
 	}), false)
 	assert.Equal(t, `{"records":null,"errors":[{`+
 		`"line":7,`+

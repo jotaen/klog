@@ -142,32 +142,32 @@ Why is there a summary at the end?
 	require.Nil(t, rs)
 	require.NotNil(t, errs)
 	require.Len(t, errs.Get(), 1)
-	assert.Equal(t, Err{id(ErrorIllegalIndentation), 4, 0, 34}, toErr(errs.Get()[0]))
+	assert.Equal(t, ErrorIllegalIndentation().toErrData(4, 0, 34), toErrData(errs.Get()[0]))
 }
 
 func TestReportErrorsInHeadline(t *testing.T) {
 	for _, test := range []struct {
 		text   string
-		expect Err
+		expect errData
 	}{
-		{"Hello 123", Err{id(ErrorInvalidDate), 1, 0, 5}},
-		{" 2020-01-01", Err{id(ErrorIllegalIndentation), 1, 0, 10}},
-		{"   2020-01-01", Err{id(ErrorIllegalIndentation), 1, 0, 10}},
-		{"2020-01-01 ()", Err{id(ErrorMalformedPropertiesSyntax), 1, 12, 1}},
-		{"2020-01-01 (asdf)", Err{id(ErrorUnrecognisedProperty), 1, 12, 4}},
-		{"2020-01-01 (asdf!)", Err{id(ErrorMalformedShouldTotal), 1, 12, 4}},
-		{"2020-01-01 5h30m!", Err{id(ErrorUnrecognisedTextInHeadline), 1, 11, 6}},
-		{"2020-01-01 (5h30m!", Err{id(ErrorMalformedPropertiesSyntax), 1, 18, 1}},
-		{"2020-01-01 (", Err{id(ErrorMalformedPropertiesSyntax), 1, 12, 1}},
-		{"2020-01-01 (5h!) foo", Err{id(ErrorUnrecognisedTextInHeadline), 1, 17, 3}},
-		{"2020-01-01 (5h! asdf)", Err{id(ErrorUnrecognisedProperty), 1, 16, 4}},
-		{"2020-01-01 (5h!!!)", Err{id(ErrorUnrecognisedProperty), 1, 15, 2}},
+		{"Hello 123", ErrorInvalidDate().toErrData(1, 0, 5)},
+		{" 2020-01-01", ErrorIllegalIndentation().toErrData(1, 0, 11)},
+		{"   2020-01-01", ErrorIllegalIndentation().toErrData(1, 0, 13)},
+		{"2020-01-01 ()", ErrorMalformedPropertiesSyntax().toErrData(1, 12, 1)},
+		{"2020-01-01 (asdf)", ErrorUnrecognisedProperty().toErrData(1, 12, 4)},
+		{"2020-01-01 (asdf!)", ErrorMalformedShouldTotal().toErrData(1, 12, 4)},
+		{"2020-01-01 5h30m!", ErrorUnrecognisedTextInHeadline().toErrData(1, 11, 6)},
+		{"2020-01-01 (5h30m!", ErrorMalformedPropertiesSyntax().toErrData(1, 18, 1)},
+		{"2020-01-01 (", ErrorMalformedPropertiesSyntax().toErrData(1, 12, 1)},
+		{"2020-01-01 (5h!) foo", ErrorUnrecognisedTextInHeadline().toErrData(1, 17, 3)},
+		{"2020-01-01 (5h! asdf)", ErrorUnrecognisedProperty().toErrData(1, 16, 4)},
+		{"2020-01-01 (5h!!!)", ErrorUnrecognisedProperty().toErrData(1, 15, 2)},
 	} {
 		rs, _, errs := Parse(test.text)
 		require.Nil(t, rs)
 		require.NotNil(t, errs)
 		require.Len(t, errs.Get(), 1)
-		assert.Equal(t, test.expect, toErr(errs.Get()[0]), test.text)
+		assert.Equal(t, test.expect, toErrData(errs.Get()[0]), test.text)
 	}
 }
 
@@ -186,30 +186,40 @@ End.
 	require.Nil(t, rs)
 	require.NotNil(t, errs)
 	require.Len(t, errs.Get(), 4)
-	assert.Equal(t, Err{id(ErrorIllegalIndentation), 4, 0, 40}, toErr(errs.Get()[0]))
-	assert.Equal(t, Err{id(ErrorMalformedSummary), 6, 0, 63}, toErr(errs.Get()[1]))
-	assert.Equal(t, Err{id(ErrorMalformedSummary), 7, 0, 34}, toErr(errs.Get()[2]))
-	assert.Equal(t, Err{id(ErrorMalformedSummary), 8, 0, 4}, toErr(errs.Get()[3]))
+	assert.Equal(t, ErrorMalformedSummary().toErrData(4, 0, 41), toErrData(errs.Get()[0]))
+	assert.Equal(t, ErrorMalformedSummary().toErrData(6, 0, 63), toErrData(errs.Get()[1]))
+	assert.Equal(t, ErrorMalformedSummary().toErrData(7, 0, 34), toErrData(errs.Get()[2]))
+	assert.Equal(t, ErrorMalformedSummary().toErrData(8, 0, 4), toErrData(errs.Get()[3]))
 }
 
 func TestReportErrorsIfIndentationIsIncorrect(t *testing.T) {
 	for _, test := range []struct {
 		text   string
-		expect Err
+		expect errData
 	}{
-		{"2020-01-01\n 8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
-		{"2020-01-01\n\t 8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
-		{"2020-01-01\n\t\t8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
-		{"2020-01-01\n     8h", Err{id(ErrorIllegalIndentation), 2, 0, 2}},
-		{"2020-01-01\n    8h\n\t2h", Err{id(ErrorIllegalIndentation), 3, 0, 2}},
-		{"2020-01-01\n  8h\n   2h", Err{id(ErrorIllegalIndentation), 3, 0, 2}},
-		{"2020-01-01\n  8h\n  2h\n\t1h2m", Err{id(ErrorIllegalIndentation), 4, 0, 4}},
+		// To few characters (that’s actually a malformed summary, though):
+		{"2020-01-01\n 8h", ErrorMalformedSummary().toErrData(2, 0, 3)},
+
+		// Not exactly one indentation level:
+		{"2020-01-01\n\t 8h", ErrorIllegalIndentation().toErrData(2, 0, 4)},
+		{"2020-01-01\n\t\t8h", ErrorIllegalIndentation().toErrData(2, 0, 4)},
+		{"2020-01-01\n     8h", ErrorIllegalIndentation().toErrData(2, 0, 7)},
+
+		// Mixed styles within one record:
+		{"2020-01-01\n    8h\n\t2h", ErrorIllegalIndentation().toErrData(3, 0, 3)},
+		{"2020-01-01\n  8h\n\t2h", ErrorIllegalIndentation().toErrData(3, 0, 3)},
+		{"2020-01-01\n\t8h\n    2h", ErrorIllegalIndentation().toErrData(3, 0, 6)},
+		{"2020-01-01\n\t8h\n  2h", ErrorIllegalIndentation().toErrData(3, 0, 4)},
+		{"2020-01-01\n  8h\n    2h", ErrorIllegalIndentation().toErrData(3, 0, 6)},
+		{"2020-01-01\n    8h\n  2h", ErrorIllegalIndentation().toErrData(3, 0, 4)},
+		{"2020-01-01\n  8h\n   2h", ErrorIllegalIndentation().toErrData(3, 0, 5)},
+		{"2020-01-01\n  8h\n  2h\n\t1h2m", ErrorIllegalIndentation().toErrData(4, 0, 5)},
 	} {
 		rs, _, errs := Parse(test.text)
 		require.Nil(t, rs, test.text)
 		require.NotNil(t, errs, test.text)
 		require.Len(t, errs.Get(), 1, test.text)
-		assert.Equal(t, test.expect, toErr(errs.Get()[0]), test.text)
+		assert.Equal(t, test.expect, toErrData(errs.Get()[0]), test.text)
 	}
 }
 
@@ -233,23 +243,23 @@ func TestAcceptMixingIndentationStylesAcrossRecords(t *testing.T) {
 func TestReportErrorsInEntries(t *testing.T) {
 	for _, test := range []struct {
 		text   string
-		expect Err
+		expect errData
 	}{
-		{"2020-01-01\n\t5h1", Err{id(ErrorMalformedEntry), 2, 0, 3}},
-		{"2020-01-01\n\tasdf Test 123", Err{id(ErrorMalformedEntry), 2, 0, 4}},
-		{"2020-01-01\n\t15:30", Err{id(ErrorMalformedEntry), 2, 5, 1}},
-		{"2020-01-01\n\t08:00-", Err{id(ErrorMalformedEntry), 2, 6, 1}},
-		{"2020-01-01\n\t08:00-asdf", Err{id(ErrorMalformedEntry), 2, 6, 4}},
-		{"2020-01-01\n\t08:00 - ?asdf", Err{id(ErrorMalformedEntry), 2, 9, 4}},
-		{"2020-01-01\n\t08:00- ?\n\t09:00 - ?", Err{id(ErrorDuplicateOpenRange), 3, 0, 9}},
-		{"2020-01-01\n\t15:00 - 14:00", Err{id(ErrorIllegalRange), 2, 0, 13}},
-		{"2020-01-01\n\t-18:00", Err{id(ErrorMalformedEntry), 2, 0, 6}},
-		{"2020-01-01\n\t15:30 Foo Bar Baz", Err{id(ErrorMalformedEntry), 2, 6, 1}},
+		{"2020-01-01\n\t5h1", ErrorMalformedEntry().toErrData(2, 1, 3)},
+		{"2020-01-01\n\tasdf Test 123", ErrorMalformedEntry().toErrData(2, 1, 4)},
+		{"2020-01-01\n\t15:30", ErrorMalformedEntry().toErrData(2, 6, 1)},
+		{"2020-01-01\n\t08:00-", ErrorMalformedEntry().toErrData(2, 7, 1)},
+		{"2020-01-01\n\t08:00-asdf", ErrorMalformedEntry().toErrData(2, 7, 4)},
+		{"2020-01-01\n\t08:00 - ?asdf", ErrorMalformedEntry().toErrData(2, 10, 4)},
+		{"2020-01-01\n\t08:00- ?\n\t09:00 - ?", ErrorDuplicateOpenRange().toErrData(3, 1, 9)},
+		{"2020-01-01\n\t15:00 - 14:00", ErrorIllegalRange().toErrData(2, 1, 13)},
+		{"2020-01-01\n\t-18:00", ErrorMalformedEntry().toErrData(2, 1, 6)},
+		{"2020-01-01\n\t15:30 Foo Bar Baz", ErrorMalformedEntry().toErrData(2, 7, 1)},
 	} {
 		rs, _, errs := Parse(test.text)
 		require.Nil(t, rs, test.text)
 		require.NotNil(t, errs, test.text)
 		require.Len(t, errs.Get(), 1, test.text)
-		assert.Equal(t, test.expect, toErr(errs.Get()[0]), test.text)
+		assert.Equal(t, test.expect, toErrData(errs.Get()[0]), test.text)
 	}
 }

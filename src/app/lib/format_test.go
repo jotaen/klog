@@ -11,14 +11,8 @@ import (
 
 func TestFormatParserError(t *testing.T) {
 	err := engine.NewErrors([]engine.Error{
-		func() engine.Error {
-			err := engine.NewError(engine.NewLineFromString("Foo bar", 2), 4, 3)
-			return err.Set("CODE", "Some Title", "A verbose description with details, potentially spanning multiple lines with a comprehensive text and tremendously helpful information.\nBut it respects newlines.")
-		}(),
-		func() engine.Error {
-			err := engine.NewError(engine.NewLineFromString("Some malformed text", 39), 0, 4)
-			return err.Set("CODE", "Error", "Short explanation.")
-		}(),
+		engine.NewError(engine.NewLineFromString("Foo bar", 2), 4, 3, "CODE", "Some Title", "A verbose description with details, potentially spanning multiple lines with a comprehensive text and tremendously helpful information.\nBut it respects newlines."),
+		engine.NewError(engine.NewLineFromString("Some malformed text", 39), 0, 4, "CODE", "Error", "Short explanation."),
 	})
 	text := PrettifyError(err, false).Error()
 	assert.Equal(t, ` ERROR in line 2: 

@@ -39,24 +39,6 @@ func TestDeterminesLineEndings(t *testing.T) {
 	assert.Equal(t, "", ls[2].LineEnding)
 }
 
-func TestDeterminesPrecedingWhitespace(t *testing.T) {
-	for _, x := range []struct {
-		text               string
-		expectedWhitespace string
-	}{
-		{" one space", " "},
-		{"  two spaces", "  "},
-		{"   three spaces", "   "},
-		{"    four spaces", "    "},
-		{"\tone tab", "\t"},
-		{"\t\ttwo tabs", "\t\t"},
-		{"   \t     \t\t \t   wild mix", "   \t     \t\t \t   "},
-	} {
-		line := NewLineFromString(x.text, 0)
-		assert.Equal(t, x.expectedWhitespace, line.PrecedingWhitespace)
-	}
-}
-
 func TestToStringRestoresOriginal(t *testing.T) {
 	text := "  Hello World\n\tTest 123\r\n      Foo Bar BAZ"
 	ls := Split(text)

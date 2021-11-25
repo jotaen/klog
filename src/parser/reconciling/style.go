@@ -1,6 +1,9 @@
 package reconciling
 
-import "github.com/jotaen/klog/src/parser/engine"
+import (
+	"github.com/jotaen/klog/src/parser/engine"
+	"strings"
+)
 
 type stylePreferences struct {
 	indentationStyle string
@@ -19,9 +22,15 @@ func stylePreferencesOrDefault(b engine.Block) stylePreferences {
 		if len(l.LineEnding) > 0 {
 			defaultPrefs.lineEndingStyle = l.LineEnding
 		}
-		if len(l.PrecedingWhitespace) > 0 {
-			defaultPrefs.indentationStyle = l.PrecedingWhitespace
+		precedingWhitespace := precedingWhitespace(l.Text)
+		if len(precedingWhitespace) > 0 {
+			defaultPrefs.indentationStyle = precedingWhitespace
 		}
 	}
 	return defaultPrefs
+}
+
+func precedingWhitespace(line string) string {
+	netText := strings.TrimLeftFunc(line, engine.IsSpaceOrTab)
+	return line[:len(line)-len(netText)]
 }

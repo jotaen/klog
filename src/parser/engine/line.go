@@ -14,29 +14,25 @@ type Line struct {
 	LineNumber int
 
 	// LineEnding is the encountered line ending sequence `\n` or `\r\n`.
+	// Note that for the last line in a file, there might be no line ending.
 	LineEnding string
-
-	// PrecedingWhitespace is the exact original whitespace sequence used for indentation.
-	PrecedingWhitespace string
 }
 
 var lineDelimiterPattern = regexp.MustCompile(`^.*\n?`)
 
 // NewLineFromString turns data into a Line object.
 func NewLineFromString(rawLineText string, lineNumber int) Line {
-	text, precedingWhitespace := splitOffPrecedingWhitespace(rawLineText)
-	text, lineEnding := splitOffLineEnding(text)
+	text, lineEnding := splitOffLineEnding(rawLineText)
 	return Line{
-		Text:                text,
-		LineNumber:          lineNumber,
-		LineEnding:          lineEnding,
-		PrecedingWhitespace: precedingWhitespace,
+		Text:       text,
+		LineNumber: lineNumber,
+		LineEnding: lineEnding,
 	}
 }
 
 // Original returns the (byte-wise) identical line of text as it appeared in the file.
 func (l *Line) Original() string {
-	return l.PrecedingWhitespace + l.Text + l.LineEnding
+	return l.Text + l.LineEnding
 }
 
 // Split breaks up text into a list of Line’s. The text must use `\n` as
@@ -63,9 +59,4 @@ func splitOffLineEnding(text string) (string, string) {
 		}
 	}
 	return text, ""
-}
-
-func splitOffPrecedingWhitespace(line string) (string, string) {
-	text := strings.TrimLeftFunc(line, IsWhitespace)
-	return text, line[:len(line)-len(text)]
 }
