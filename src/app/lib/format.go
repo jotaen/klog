@@ -3,9 +3,9 @@ package lib
 import (
 	"errors"
 	"fmt"
-	. "github.com/jotaen/klog/lib/jotaen/terminalformat"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
+	. "github.com/jotaen/klog/src/app/lib/terminalformat"
 	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/parser/engine"
 	"github.com/jotaen/klog/src/service"

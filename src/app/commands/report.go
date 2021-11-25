@@ -1,11 +1,11 @@
 package commands
 
 import (
-	"github.com/jotaen/klog/lib/jotaen/terminalformat"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/commands/report"
 	"github.com/jotaen/klog/src/app/lib"
+	"github.com/jotaen/klog/src/app/lib/terminalformat"
 	"github.com/jotaen/klog/src/service"
 	"strings"
 )

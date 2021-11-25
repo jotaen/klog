@@ -2,8 +2,8 @@ package lib
 
 import (
 	"errors"
-	"github.com/jotaen/klog/lib/jotaen/terminalformat"
 	"github.com/jotaen/klog/src/app"
+	"github.com/jotaen/klog/src/app/lib/terminalformat"
 	"github.com/jotaen/klog/src/parser/engine"
 	"github.com/stretchr/testify/assert"
 	"testing"

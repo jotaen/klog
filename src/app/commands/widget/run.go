@@ -7,8 +7,8 @@ be discontinued.
 package widget
 
 import (
-	menuet2 "github.com/jotaen/klog/lib/caseymrm/menuet"
 	"github.com/jotaen/klog/src/app"
+	"github.com/jotaen/klog/src/app/commands/widget/menuet"
 	"github.com/jotaen/klog/src/parser"
 	"os"
 	"os/exec"
@@ -38,22 +38,22 @@ func Run(forceRunThroughLaunchAgent bool) {
 		os.Exit(0)
 	}
 
-	menuet2.App().SetMenuState(&menuet2.MenuState{
+	menuet.App().SetMenuState(&menuet.MenuState{
 		Title: "⏱",
 	})
-	menuet2.App().Name = "klog widget"
-	menuet2.App().Label = "-" // not actually needed, but needs to be set
-	menuet2.App().Children = func() []menuet2.MenuItem {
+	menuet.App().Name = "klog widget"
+	menuet.App().Label = "-" // not actually needed, but needs to be set
+	menuet.App().Children = func() []menuet.MenuItem {
 		return render(ctx, &launchAgent)
 	}
 
 	go updateTimer()
-	menuet2.App().RunApplication()
+	menuet.App().RunApplication()
 }
 
 func updateTimer() {
 	for {
 		<-ticker.C
-		menuet2.App().MenuChanged()
+		menuet.App().MenuChanged()
 	}
 }
