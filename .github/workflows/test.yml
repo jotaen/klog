@@ -20,7 +20,3 @@ jobs:
       - name: Run unit tests
         run: |
           ./run test
-      - name: Run smoke tests
-        run: |
-          ./run build && sudo mv out/klog /usr/bin/klog
-          ./.github/smoke_test.sh
