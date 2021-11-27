@@ -5,25 +5,18 @@ package klog
 
 import (
 	"errors"
-	"fmt"
 	"github.com/alecthomas/kong"
 	"github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/commands"
 	"github.com/jotaen/klog/src/app/lib"
-	"os"
 	"reflect"
 	"strings"
 )
 
-func Run(meta app.Meta) app.Error {
-	ctx, err := app.NewContextFromEnv(meta, lib.NewCliSerialiser())
-	if err != nil {
-		fmt.Println("Failed to initialise application. Error:")
-		fmt.Println(err)
-		os.Exit(-1)
-	}
-	cliApp := kong.Parse(
+func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (error, int) {
+	ctx := app.NewContext(homeDir, meta, lib.NewCliSerialiser())
+	kongApp, nErr := kong.New(
 		&commands.Cli{},
 		kong.Name("klog"),
 		kong.Description(commands.DESCRIPTION),
@@ -47,28 +40,26 @@ func Run(meta app.Meta) app.Error {
 			Compact: true,
 		}),
 	)
-	cliApp.BindTo(ctx, (*app.Context)(nil))
-	err = cliApp.Run(&ctx)
-	if err != nil {
-		isDebug := false
-		if os.Getenv("KLOG_DEBUG") != "" {
-			isDebug = true
-		}
-		ctx.Print(lib.PrettifyError(err, isDebug).Error() + "\n")
-		if appErr, isAppError := err.(app.Error); isAppError {
-			return appErr
+	if nErr != nil {
+		return nErr, -1
+	}
+
+	kongCtx, cErr := kongApp.Parse(args)
+	if cErr != nil {
+		return cErr, -1
+	}
+	kongCtx.BindTo(ctx, (*app.Context)(nil))
+
+	rErr := kongCtx.Run()
+	if rErr != nil {
+		ctx.Print(lib.PrettifyError(rErr, isDebug).Error() + "\n")
+		if appErr, isAppError := rErr.(app.Error); isAppError {
+			return nil, int(appErr.Code())
 		} else {
-			// Remember that kong errors always panic (such as flag parsing),
-			// so we can’t handle them here.
-			return app.NewErrorWithCode(
-				app.GENERAL_ERROR,
-				"An unknown error occurred",
-				err.Error(),
-				err,
-			)
+			return rErr, -1
 		}
 	}
-	return nil
+	return nil, 0
 }
 
 func dateDecoder() kong.MapperFunc {

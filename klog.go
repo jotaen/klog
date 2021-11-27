@@ -2,9 +2,11 @@ package main
 
 import (
 	_ "embed"
+	"fmt"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/main"
 	"os"
+	"os/user"
 )
 
 //go:embed Specification.md
@@ -20,14 +22,24 @@ func main() {
 	if len(BinaryBuildHash) > 7 {
 		BinaryBuildHash = BinaryBuildHash[:7]
 	}
-	appErr := klog.Run(app.Meta{
+	isDebug := false
+	if os.Getenv("KLOG_DEBUG") != "" {
+		isDebug = true
+	}
+	homeDir, err := user.Current()
+	if err != nil {
+		fmt.Println("Failed to initialise application. Error:")
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	runErr, exitCode := klog.Run(homeDir.HomeDir, app.Meta{
 		Specification: specification,
 		License:       license,
 		Version:       BinaryVersion,
 		BuildHash:     BinaryBuildHash,
-	})
-	if appErr != nil {
-		os.Exit(appErr.Code().ToInt())
+	}, isDebug, os.Args[1:])
+	if runErr != nil {
+		fmt.Println(runErr)
 	}
-	os.Exit(0)
+	os.Exit(exitCode)
 }

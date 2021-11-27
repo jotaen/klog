@@ -13,7 +13,6 @@ import (
 	"github.com/jotaen/klog/src/parser/reconciling"
 	"os"
 	"os/exec"
-	"os/user"
 	"strings"
 	gotime "time"
 )
@@ -97,16 +96,6 @@ func NewContext(homeDir string, meta Meta, serialiser *parser.Serialiser) Contex
 		serialiser,
 		meta,
 	}
-}
-
-// NewContextFromEnv creates a Context object by automatically discovering certain parameters.
-// It returns an error if the auto-discovery failed.
-func NewContextFromEnv(meta Meta, serialiser *parser.Serialiser) (Context, error) {
-	homeDir, err := user.Current()
-	if err != nil {
-		return nil, err
-	}
-	return NewContext(homeDir.HomeDir, meta, serialiser), nil
 }
 
 type context struct {

@@ -12,6 +12,7 @@ import (
 	"github.com/jotaen/klog/src/parser"
 	"os"
 	"os/exec"
+	"os/user"
 	"time"
 )
 
@@ -22,10 +23,11 @@ func IsWidgetAvailable() bool {
 }
 
 func Run(forceRunThroughLaunchAgent bool) {
-	ctx, err := app.NewContextFromEnv(app.Meta{}, &parser.PlainSerialiser)
+	homeDir, err := user.Current()
 	if err != nil {
 		os.Exit(1)
 	}
+	ctx := app.NewContext(homeDir.HomeDir, app.Meta{}, &parser.PlainSerialiser)
 	binPath, _ := os.Executable()
 	launchAgent := newLaunchAgent(ctx.HomeFolder(), binPath)
 
