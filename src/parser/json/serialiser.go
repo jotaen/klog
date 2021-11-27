@@ -111,7 +111,7 @@ func toEntryViews(es []Entry) []interface{} {
 
 func toErrorViews(errs engine.Errors) []ErrorView {
 	var result []ErrorView
-	for _, e := range errs.Get() {
+	for _, e := range errs.All() {
 		result = append(result, ErrorView{
 			Line:    e.Context().LineNumber,
 			Column:  e.Column(),

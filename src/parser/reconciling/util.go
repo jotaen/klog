@@ -30,7 +30,7 @@ func makeResult(ls []engine.Line, recordIndex uint) (*Result, error) {
 	newText := join(ls)
 	newRecords, _, pErr := parser.Parse(newText)
 	if pErr != nil {
-		err := pErr.Get()[0]
+		err := pErr.All()[0]
 		return nil, errors.New(err.Message())
 	}
 	return &Result{

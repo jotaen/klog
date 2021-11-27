@@ -18,7 +18,13 @@ func IsSpaceOrTab(r rune) bool {
 	return r == ' ' || r == '\t'
 }
 
-// IsSpace checks whether a rune is a space character.
-func IsSpace(r rune) bool {
-	return r == ' '
+func Is(matchingCharacter ...rune) func(rune) bool {
+	return func(r rune) bool {
+		for _, m := range matchingCharacter {
+			if m == r {
+				return true
+			}
+		}
+		return false
+	}
 }

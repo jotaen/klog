@@ -64,7 +64,7 @@ func PrettifyError(err error, isDebug bool) error {
 	case engine.Errors:
 		message := ""
 		INDENT := "    "
-		for _, e := range e.Get() {
+		for _, e := range e.All() {
 			message += fmt.Sprintf(
 				Style{Background: "160", Color: "015"}.Format(" ERROR in line %d: "),
 				e.Context().LineNumber,

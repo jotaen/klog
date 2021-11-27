@@ -3,7 +3,7 @@ package engine
 import "fmt"
 
 type Errors interface {
-	Get() []Error
+	All() []Error
 	Error() string
 }
 
@@ -19,7 +19,7 @@ func (pe errors) Error() string {
 	return fmt.Sprintf("%d parsing errors", len(pe.errors))
 }
 
-func (pe errors) Get() []Error {
+func (pe errors) All() []Error {
 	return pe.errors
 }
 
