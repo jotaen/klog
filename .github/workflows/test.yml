@@ -1,6 +1,21 @@
 name: Tests
 on: push
 jobs:
+  statistics:
+    name: Statistics
+    runs-on: ubuntu-latest
+    env:
+      TARGET: src/
+      TEST_FILE_PATTERN: .*_test\.go
+      IMAGE_NAME: aldanial/cloc
+    steps:
+      - uses: actions/checkout@v2
+      - name: Prepare tooling
+        run: docker pull "${IMAGE_NAME}:1.90"
+      - name: LOC of source files
+        run: docker run --rm -v $(pwd):/wdir:ro -w /wdir "${IMAGE_NAME}" --not-match-f="${TEST_FILE_PATTERN}" "${TARGET}"
+      - name: LOC of test files
+        run: docker run --rm -v $(pwd):/wdir:ro -w /wdir "${IMAGE_NAME}" --match-f="${TEST_FILE_PATTERN}" "${TARGET}"
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
