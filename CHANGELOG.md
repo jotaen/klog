@@ -12,6 +12,7 @@
   to `klog --version` or `klog version`)
 - **[ FEATURE ]** Embed specification and license in the binary
   (via `klog --spec` and `klog --license`)
+- **[ FEATURE ]** Provide binaries for M1 Macs (ARM) for download.
 - **[ FIX ]** Fix default sort order of `--sort` flag to be `asc`
 - **[ INFO ]** Deprecate the embedded native widget (for MacOS). It will be
   removed in one of the next releases.
