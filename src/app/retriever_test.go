@@ -18,7 +18,7 @@ func (fs MockFs) readFile(source File) (string, Error) {
 func TestFileRetrieverResolvesFilesAndBookmarks(t *testing.T) {
 	bc := NewEmptyBookmarksCollection()
 	bc.Set(NewBookmark("foo", NewFileOrPanic("/foo.klg")))
-	files, err := (&fileRetriever{
+	files, err := (&FileRetriever{
 		MockFs{"/asdf.klg": true, "/foo.klg": true}.readFile,
 		bc,
 	}).Retrieve("/asdf.klg", "@foo")
@@ -32,7 +32,7 @@ func TestFileRetrieverResolvesFilesAndBookmarks(t *testing.T) {
 func TestReturnsErrorIfBookmarksOrFilesAreInvalid(t *testing.T) {
 	bc := NewEmptyBookmarksCollection()
 	bc.Set(NewBookmark("foo", NewFileOrPanic("/foo.klg")))
-	files, err := (&fileRetriever{
+	files, err := (&FileRetriever{
 		MockFs{}.readFile,
 		bc,
 	}).Retrieve("/asdf.klg", "@foo", "@bar")
@@ -47,14 +47,14 @@ func TestReturnsErrorIfBookmarksOrFilesAreInvalid(t *testing.T) {
 func TestFallsBackToDefaultBookmark(t *testing.T) {
 	bc := NewEmptyBookmarksCollection()
 	bc.Set(NewDefaultBookmark(NewFileOrPanic("/foo.klg")))
-	retriever := &fileRetriever{
+	retriever := &FileRetriever{
 		MockFs{"/foo.klg": true}.readFile,
 		bc,
 	}
-	for _, f := range []func() ([]*fileWithContent, Error){
-		func() ([]*fileWithContent, Error) { return retriever.Retrieve() },
-		func() ([]*fileWithContent, Error) { return retriever.Retrieve("") },
-		func() ([]*fileWithContent, Error) { return retriever.Retrieve("", " ") },
+	for _, f := range []func() ([]FileWithContents, Error){
+		func() ([]FileWithContents, Error) { return retriever.Retrieve() },
+		func() ([]FileWithContents, Error) { return retriever.Retrieve("") },
+		func() ([]FileWithContents, Error) { return retriever.Retrieve("", " ") },
 	} {
 		files, err := f()
 		require.Nil(t, err)
@@ -64,24 +64,24 @@ func TestFallsBackToDefaultBookmark(t *testing.T) {
 }
 
 func TestReturnsStdinInput(t *testing.T) {
-	retriever := &stdinRetriever{
+	retriever := &StdinRetriever{
 		func() (string, Error) { return "2021-01-01", nil },
 	}
-	for _, f := range []func() ([]*fileWithContent, Error){
-		func() ([]*fileWithContent, Error) { return retriever.Retrieve() },
-		func() ([]*fileWithContent, Error) { return retriever.Retrieve("") },
-		func() ([]*fileWithContent, Error) { return retriever.Retrieve("", " ") },
+	for _, f := range []func() ([]FileWithContents, Error){
+		func() ([]FileWithContents, Error) { return retriever.Retrieve() },
+		func() ([]FileWithContents, Error) { return retriever.Retrieve("") },
+		func() ([]FileWithContents, Error) { return retriever.Retrieve("", " ") },
 	} {
 		files, err := f()
 		require.Nil(t, err)
 		require.Len(t, files, 1)
-		require.Nil(t, files[0].File)
-		assert.Equal(t, "2021-01-01", files[0].content)
+		require.Equal(t, "", files[0].Path())
+		assert.Equal(t, "2021-01-01", files[0].Contents())
 	}
 }
 
 func TestBailsOutIfFileArgsGiven(t *testing.T) {
-	files, err := (&stdinRetriever{
+	files, err := (&StdinRetriever{
 		func() (string, Error) { return "", nil },
 	}).Retrieve("foo.klg")
 

@@ -4,12 +4,10 @@ import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
-	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/parsing"
+	"github.com/jotaen/klog/src/parser/reconciling"
 )
 
 type Create struct {
-	Template    string   `name:"template" hidden help:"The name of the template to instantiate"`
 	ShouldTotal Duration `name:"should" help:"The should-total of the record"`
 	lib.AtDateArgs
 	lib.NoStyleArgs
@@ -24,28 +22,22 @@ func (opt *Create) Help() string {
 func (opt *Create) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())
-	lines, err := func() ([]parsing.Text, error) {
-		if opt.Template != "" {
-			return ctx.InstantiateTemplate(opt.Template)
-		}
+	lines, err := func() ([]reconciling.InsertableText, error) {
 		headline := opt.AtDate(ctx.Now()).ToString()
 		if opt.ShouldTotal != nil {
 			headline += " (" + opt.ShouldTotal.ToString() + "!)"
 		}
-		return []parsing.Text{
+		return []reconciling.InsertableText{
 			{headline, 0},
 		}, nil
 	}()
 	if err != nil {
 		return err
 	}
-	return lib.ReconcilerChain{
-		File: opt.OutputFileArgs.File,
-		Ctx:  ctx,
-	}.Apply(
-		func(pr *parser.ParseResult) (*parser.ReconcileResult, error) {
-			reconciler := parser.NewBlockReconciler(pr, date)
-			return reconciler.InsertBlock(lines)
+	return ctx.ReconcileFile(
+		opt.OutputFileArgs.File,
+		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
+			return reconciler.InsertRecord(date, lines)
 		},
 	)
 }

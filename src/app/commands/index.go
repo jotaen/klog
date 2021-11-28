@@ -1,3 +1,6 @@
+/*
+Package commands contains handlers for all available commands.
+*/
 package commands
 
 type Cli struct {
@@ -23,6 +26,6 @@ type Cli struct {
 	Edit    Edit    `cmd group:"Misc" help:"Opens a file or bookmark in your editor"`
 	Json    Json    `cmd group:"Misc" help:"Converts records to JSON"`
 	Info    Info    `cmd group:"Misc" default:"withargs" help:"Displays meta info about klog"`
-	Widget  Widget  `cmd group:"Misc" help:"Starts menu bar widget (MacOS only)"`
+	Widget  Widget  `cmd group:"Misc" help:"Starts menu bar widget (MacOS only)" hidden:""`
 	Version Version `cmd group:"Misc" help:"Prints version info and check for updates"`
 }

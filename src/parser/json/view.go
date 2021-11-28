@@ -1,10 +1,14 @@
 package json
 
+// Envelop is the top level data structure of the JSON output.
+// It contains two nodes, `records` and `errors`, one of which is always `null`.
 type Envelop struct {
 	Records []RecordView `json:"records"`
 	Errors  []ErrorView  `json:"errors"`
 }
 
+// RecordView is the JSON representation of a record.
+// It also contains some evaluation data, such as the total time.
 type RecordView struct {
 	Date            string        `json:"date"`
 	Summary         string        `json:"summary"`
@@ -18,9 +22,13 @@ type RecordView struct {
 	Entries         []interface{} `json:"entries"`
 }
 
+// EntryView is the JSON representation of an entry.
 type EntryView struct {
-	Type      string   `json:"type"`
-	Summary   string   `json:"summary"`
+	// Type is one of `range`, `duration`, or `open_range`.
+	Type    string `json:"type"`
+	Summary string `json:"summary"`
+
+	// Tags is a list of all tags that the entry summary contains.
 	Tags      []string `json:"tags"`
 	Total     string   `json:"total"`
 	TotalMins int      `json:"total_mins"`
@@ -38,6 +46,7 @@ type RangeView struct {
 	EndMins int    `json:"end_mins"`
 }
 
+// ErrorView is the JSON representation of a parsing error.
 type ErrorView struct {
 	Line    int    `json:"line"`
 	Column  int    `json:"column"`

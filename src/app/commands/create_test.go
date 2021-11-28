@@ -41,7 +41,7 @@ func TestCreateFromBlank(t *testing.T) {
 		_SetNow(1999, 10, 4, 0, 1).
 		_Run((&Create{}).Run)
 	require.Nil(t, err)
-	assert.Equal(t, "1999-10-04\n\n\n\n\n", state.writtenFileContents)
+	assert.Equal(t, "1999-10-04\n", state.writtenFileContents)
 }
 
 func TestCreateWithValues(t *testing.T) {

@@ -1,25 +1,55 @@
 package app
 
+import (
+	"fmt"
+	"github.com/jotaen/klog/src/parser/engine"
+)
+
 type Code int
 
 const (
+	// GENERAL_ERROR should be used for generic, otherwise unspecified errors.
 	GENERAL_ERROR Code = iota + 1
+
+	// NO_INPUT_ERROR should be used if no input was specified.
 	NO_INPUT_ERROR
+
+	// NO_TARGET_FILE should be used if no target file was specified.
 	NO_TARGET_FILE
+
+	// IO_ERROR should be used for errors during I/O processes.
 	IO_ERROR
+
+	// CONFIG_ERROR should be used for .klog-folder-related problems.
 	CONFIG_ERROR
+
+	// NO_SUCH_BOOKMARK_ERROR should be used if the specified an unknown bookmark name.
 	NO_SUCH_BOOKMARK_ERROR
+
+	// NO_SUCH_FILE should be used if the specified file does not exit.
 	NO_SUCH_FILE
+
+	// LOGICAL_ERROR should be used syntax or logical violations.
+	LOGICAL_ERROR
 )
 
+// ToInt returns the numeric value of the error. This is typically used as exit code.
 func (c Code) ToInt() int {
 	return int(c)
 }
 
+// Error is a representation of an application error.
 type Error interface {
+	// Error returns the error message.
 	Error() string
+
+	// Details returns additional details, such as a hint how to solve the problem.
 	Details() string
+
+	// Original returns the original underlying error, if it exists.
 	Original() error
+
+	// Code returns the error code.
 	Code() Code
 }
 
@@ -52,4 +82,37 @@ func (e AppError) Original() error {
 
 func (e AppError) Code() Code {
 	return e.code
+}
+
+type ParserErrors interface {
+	Error
+	All() []engine.Error
+}
+
+type parserErrors struct {
+	errors []engine.Error
+}
+
+func NewParserErrors(errs []engine.Error) ParserErrors {
+	return parserErrors{errs}
+}
+
+func (pe parserErrors) Error() string {
+	return fmt.Sprintf("%d parsing errors", len(pe.errors))
+}
+
+func (pe parserErrors) Details() string {
+	return fmt.Sprintf("%d parsing errors", len(pe.errors))
+}
+
+func (pe parserErrors) Original() error {
+	return nil
+}
+
+func (pe parserErrors) Code() Code {
+	return LOGICAL_ERROR
+}
+
+func (pe parserErrors) All() []engine.Error {
+	return pe.errors
 }

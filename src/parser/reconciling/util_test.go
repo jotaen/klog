@@ -1,39 +1,17 @@
-package parsing
+package reconciling
 
 import (
+	"github.com/jotaen/klog/src/parser/engine"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
-func TestGroupLines(t *testing.T) {
-	blocks := GroupIntoBlocks([]Line{
-		{Text: "a1"},
-		{Text: "a2"},
-		{Text: ""},
-		{Text: "b1"},
-		{Text: "    "},
-		{Text: "\t"},
-		{Text: "c1"},
-	})
-	require.Len(t, blocks, 3)
-
-	require.Len(t, blocks[0], 2)
-	assert.Equal(t, blocks[0][0].Text, "a1")
-	assert.Equal(t, blocks[0][1].Text, "a2")
-
-	require.Len(t, blocks[1], 1)
-	assert.Equal(t, blocks[1][0].Text, "b1")
-
-	require.Len(t, blocks[2], 1)
-	assert.Equal(t, blocks[2][0].Text, "c1")
-}
-
 func TestInsertInBetween(t *testing.T) {
-	before := Split("first\nthird\nfourth")
-	after := Insert(before, 1, []Text{
+	before := engine.Split("first\nthird\nfourth")
+	after := insert(before, 1, []InsertableText{
 		{"second", 0},
-	}, DefaultPreferences())
+	}, stylePreferencesOrDefault(nil))
 	require.Len(t, after, 4)
 	assert.Equal(t, before[0].Original(), after[0].Original())
 	assert.Equal(t, 1, after[0].LineNumber)
@@ -49,13 +27,13 @@ func TestInsertInBetween(t *testing.T) {
 }
 
 func TestInsertAtBeginningAndEnd(t *testing.T) {
-	before := Split("beginning\nend")
-	after := Insert(before, 0, []Text{
+	before := engine.Split("beginning\nend")
+	after := insert(before, 0, []InsertableText{
 		{"first", 0},
-	}, DefaultPreferences())
-	after = Insert(after, 3, []Text{
+	}, stylePreferencesOrDefault(nil))
+	after = insert(after, 3, []InsertableText{
 		{"last", 0},
-	}, DefaultPreferences())
+	}, stylePreferencesOrDefault(nil))
 	require.Len(t, after, 4)
 	assert.Equal(t, "first\n", after[0].Original())
 	assert.Equal(t, "beginning\n", after[1].Original())
@@ -64,11 +42,11 @@ func TestInsertAtBeginningAndEnd(t *testing.T) {
 }
 
 func TestInsertMultipleTexts(t *testing.T) {
-	before := Split("first\nfourth\nfifth\n")
-	after := Insert(before, 1, []Text{
+	before := engine.Split("first\nfourth\nfifth\n")
+	after := insert(before, 1, []InsertableText{
 		{"second", 0},
 		{"third", 1},
-	}, DefaultPreferences())
+	}, stylePreferencesOrDefault(nil))
 	require.Len(t, after, 5)
 	assert.Equal(t, "first\n", after[0].Original())
 	assert.Equal(t, 1, after[0].LineNumber)
@@ -83,10 +61,10 @@ func TestInsertMultipleTexts(t *testing.T) {
 }
 
 func TestInsertWithLineEndingsAndIndentation(t *testing.T) {
-	before := Split("bar")
-	after := Insert(before, 0, []Text{{"foo", 0}}, DefaultPreferences())
-	after = Insert(after, 2, []Text{{"baz", 1}}, Preferences{"\r\n", "\t"})
-	after = Insert(after, 0, []Text{{"hello", 1}}, DefaultPreferences())
+	before := engine.Split("bar")
+	after := insert(before, 0, []InsertableText{{"foo", 0}}, stylePreferencesOrDefault(nil))
+	after = insert(after, 2, []InsertableText{{"baz", 1}}, stylePreferences{"\t", "\r\n"})
+	after = insert(after, 0, []InsertableText{{"hello", 1}}, stylePreferencesOrDefault(nil))
 	require.Len(t, after, 4)
 	assert.Equal(t, "    hello\n", after[0].Original())
 	assert.Equal(t, "foo\n", after[1].Original())
@@ -95,8 +73,8 @@ func TestInsertWithLineEndingsAndIndentation(t *testing.T) {
 }
 
 func TestInsertIntoEmptySlice(t *testing.T) {
-	var before []Line
-	after := Insert(before, 0, []Text{{"Hello World", 0}}, DefaultPreferences())
+	var before []engine.Line
+	after := insert(before, 0, []InsertableText{{"Hello World", 0}}, stylePreferencesOrDefault(nil))
 	require.Len(t, after, 1)
 	assert.Equal(t, "Hello World\n", after[0].Original())
 }

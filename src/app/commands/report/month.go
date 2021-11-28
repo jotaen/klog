@@ -2,9 +2,9 @@ package report
 
 import (
 	"fmt"
-	"github.com/jotaen/klog/lib/jotaen/terminalformat"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app/lib"
+	"github.com/jotaen/klog/src/app/lib/terminalformat"
 	"github.com/jotaen/klog/src/service"
 )
 
@@ -20,8 +20,8 @@ func (a *monthAggregator) NumberOfPrefixColumns() int {
 	return 2
 }
 
-func (a *monthAggregator) DateHash(date Date) Hash {
-	return Hash(service.NewMonthHash(date))
+func (a *monthAggregator) DateHash(date Date) service.Hash {
+	return service.Hash(service.NewMonthHash(date))
 }
 
 func (a *monthAggregator) OnHeaderPrefix(table *terminalformat.Table) {

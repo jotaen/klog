@@ -6,6 +6,7 @@ import (
 )
 
 // SerialiseRecords serialises records into the canonical string representation.
+// (So it doesn’t and cannot restore the original formatting!)
 func (h *Serialiser) SerialiseRecords(rs ...Record) string {
 	var text []string
 	for _, r := range rs {
@@ -45,6 +46,7 @@ func (s SummaryText) ToString() string {
 	return strings.Join(s, "\n")
 }
 
+// Serialiser is used when the output should be modified, e.g. coloured.
 type Serialiser struct {
 	Date           func(Date) string
 	ShouldTotal    func(Duration) string
@@ -56,6 +58,7 @@ type Serialiser struct {
 	Time           func(Time) string
 }
 
+// PlainSerialiser is used for unmodified (i.e. uncoloured) output.
 var PlainSerialiser = Serialiser{
 	Date:           Date.ToString,
 	ShouldTotal:    Duration.ToString,

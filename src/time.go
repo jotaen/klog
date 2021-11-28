@@ -13,13 +13,27 @@ import (
 type Time interface {
 	Hour() int
 	Minute() int
+
+	// MidnightOffset returns the duration since (positive) or until (negative) midnight.
 	MidnightOffset() Duration
+
+	// IsYesterday checks whether the time is shifted to the previous day.
 	IsYesterday() bool
+
+	// IsTomorrow checks whether the time is shifted to the next day.
 	IsTomorrow() bool
+
+	// IsToday checks whether the time is not shifted.
 	IsToday() bool
 	IsEqualTo(Time) bool
 	IsAfterOrEqual(Time) bool
+
+	// Add returns a time, where the specified duration was added. It doesn’t modify
+	// the original object. If the resulting time would be shifted by more than one
+	// day, it returns an error.
 	Add(Duration) (Time, error)
+
+	// ToString serialises the time, e.g. `8:00` or `23:00>`
 	ToString() string
 }
 

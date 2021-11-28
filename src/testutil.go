@@ -38,6 +38,16 @@ func Ɀ_Time_(hour int, minute int) Time {
 }
 
 // Deprecated
+func Ɀ_IsAmPm_(t Time) Time {
+	tm, canCast := t.(*time)
+	if !canCast {
+		panic("Operation failed!")
+	}
+	tm.is24HourClock = false
+	return tm
+}
+
+// Deprecated
 func Ɀ_TimeYesterday_(hour int, minute int) Time {
 	time, err := NewTimeYesterday(hour, minute)
 	if err != nil {

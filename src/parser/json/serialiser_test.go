@@ -3,7 +3,7 @@ package json
 import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/parsing"
+	"github.com/jotaen/klog/src/parser/engine"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -94,12 +94,12 @@ func TestSerialiseFullBlownRecord(t *testing.T) {
 }
 
 func TestSerialiseParserErrors(t *testing.T) {
-	json := ToJson(nil, parsing.NewErrors([]parsing.Error{
-		parser.ErrorInvalidDate(parsing.NewError(parsing.Line{
+	json := ToJson(nil, []engine.Error{
+		parser.ErrorInvalidDate().New(engine.Line{
 			Text:       "2018-99-99",
 			LineNumber: 7,
-		}, 0, 10)),
-	}), false)
+		}, 0, 10),
+	}, false)
 	assert.Equal(t, `{"records":null,"errors":[{`+
 		`"line":7,`+
 		`"column":1,`+

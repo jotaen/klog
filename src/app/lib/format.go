@@ -3,15 +3,16 @@ package lib
 import (
 	"errors"
 	"fmt"
-	. "github.com/jotaen/klog/lib/jotaen/terminalformat"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
+	. "github.com/jotaen/klog/src/app/lib/terminalformat"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/parsing"
 	"github.com/jotaen/klog/src/service"
 	"strings"
 )
 
+// NewCliSerialiser creates a serialiser that can print on a terminal.
+// It supports coloured output via ANSI escape sequences.
 func NewCliSerialiser() *parser.Serialiser {
 	return &parser.Serialiser{
 		Date: func(d Date) string {
@@ -55,14 +56,14 @@ func NewCliSerialiser() *parser.Serialiser {
 	}
 }
 
-var reflower = NewReflower(60, "\n")
-
+// PrettifyError turns an error into a coloured and well-structured form.
 func PrettifyError(err error, isDebug bool) error {
+	reflower := NewReflower(60, "\n")
 	switch e := err.(type) {
-	case parsing.Errors:
+	case app.ParserErrors:
 		message := ""
 		INDENT := "    "
-		for _, e := range e.Get() {
+		for _, e := range e.All() {
 			message += fmt.Sprintf(
 				Style{Background: "160", Color: "015"}.Format(" ERROR in line %d: "),
 				e.Context().LineNumber,
@@ -92,6 +93,7 @@ func PrettifyError(err error, isDebug bool) error {
 	return errors.New("Error: " + err.Error())
 }
 
+// PrettifyWarnings turns an error into a coloured and well-structured form.
 func PrettifyWarnings(ws []service.Warning) string {
 	result := ""
 	for _, w := range ws {
@@ -103,6 +105,7 @@ func PrettifyWarnings(ws []service.Warning) string {
 	return result
 }
 
+// PrettyMonth returns the full english name of a month.
 func PrettyMonth(m int) string {
 	switch m {
 	case 1:
@@ -133,6 +136,7 @@ func PrettyMonth(m int) string {
 	panic("Illegal month") // this can/should never happen
 }
 
+// PrettyDay returns the full english name of a weekday.
 func PrettyDay(d int) string {
 	switch d {
 	case 1:

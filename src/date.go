@@ -12,16 +12,36 @@ import (
 
 // Date represents a day in the gregorian calendar.
 type Date interface {
+	// Year returns the year as number, e.g. `2004`.
 	Year() int
+
+	// Month returns the month as number, e.g. `3` for March.
 	Month() int
+
+	// Day returns the day as number, e.g. `21`.
 	Day() int
+
+	// Weekday returns the day of the week, starting from Monday = 1.
 	Weekday() int
+
+	// Quarter returns the quarter that the date is in, e.g. `2` for `2010-04-15`.
 	Quarter() int
+
+	// WeekNumber returns the number of the week in the calendar year.
 	WeekNumber() int
+
+	// IsEqualTo checks whether two dates are the same.
 	IsEqualTo(Date) bool
+
+	// IsAfterOrEqual checks whether the given date occurs afterwards or at the same date.
 	IsAfterOrEqual(Date) bool
-	ToString() string
+
+	// PlusDays adds a number of days to the date. It doesn’t modify
+	// the original object.
 	PlusDays(int) Date
+
+	// ToString serialises the date, e.g. `2017-04-23`.
+	ToString() string
 }
 
 type date struct {

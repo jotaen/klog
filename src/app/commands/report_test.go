@@ -35,7 +35,7 @@ func TestDayReportOfRecords(t *testing.T) {
 
 2020-12-30
 	1h
-    8:00am - 04:47pm
+	8:00am - 04:47pm
 
 2021-03-02
     -8h2m

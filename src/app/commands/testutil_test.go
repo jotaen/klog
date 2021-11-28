@@ -1,12 +1,13 @@
 package commands
 
 import (
-	"github.com/jotaen/klog/lib/jotaen/terminalformat"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
+	"github.com/jotaen/klog/src/app/lib/terminalformat"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/parsing"
+	"github.com/jotaen/klog/src/parser/engine"
+	"github.com/jotaen/klog/src/parser/reconciling"
 	gotime "time"
 )
 
@@ -17,21 +18,20 @@ func NewTestingContext() TestingContext {
 			printBuffer:         "",
 			writtenFileContents: "",
 		},
-		now:         gotime.Now(),
-		records:     nil,
-		parseResult: nil,
-		serialiser:  lib.NewCliSerialiser(),
-		bookmarks:   bc,
+		now:        gotime.Now(),
+		records:    nil,
+		serialiser: lib.NewCliSerialiser(),
+		bookmarks:  bc,
 	}
 }
 
-func (ctx TestingContext) _SetRecords(records string) TestingContext {
-	pr, err := parser.Parse(records)
+func (ctx TestingContext) _SetRecords(recordsText string) TestingContext {
+	records, blocks, err := parser.Parse(recordsText)
 	if err != nil {
 		panic("Invalid records")
 	}
-	ctx.parseResult = pr
-	ctx.records = pr.Records
+	ctx.records = records
+	ctx.blocks = blocks
 	return ctx
 }
 
@@ -56,11 +56,11 @@ type State struct {
 
 type TestingContext struct {
 	State
-	now         gotime.Time
-	records     []Record
-	parseResult *parser.ParseResult
-	serialiser  *parser.Serialiser
-	bookmarks   app.BookmarksCollection
+	now        gotime.Time
+	records    []Record
+	blocks     []engine.Block
+	serialiser *parser.Serialiser
+	bookmarks  app.BookmarksCollection
 }
 
 func (ctx *TestingContext) Print(s string) {
@@ -88,12 +88,17 @@ func (ctx *TestingContext) Meta() app.Meta {
 	}
 }
 
-func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, error) {
+func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, app.Error) {
 	return ctx.records, nil
 }
 
-func (ctx *TestingContext) ReadFileInput(app.FileOrBookmarkName) (*parser.ParseResult, app.File, error) {
-	return ctx.parseResult, nil, nil
+func (ctx *TestingContext) ReconcileFile(_ app.FileOrBookmarkName, handler ...reconciling.Handler) app.Error {
+	result, err := reconciling.Chain(reconciling.NewReconciler(ctx.records, ctx.blocks), handler...)
+	if err != nil {
+		return app.NewError(err.Error(), err.Error(), err)
+	}
+	ctx.writtenFileContents = result.FileContents()
+	return nil
 }
 
 func (ctx *TestingContext) WriteFile(_ app.File, contents string) app.Error {
@@ -119,10 +124,6 @@ func (ctx *TestingContext) OpenInFileBrowser(_ app.File) app.Error {
 
 func (ctx *TestingContext) OpenInEditor(_ app.FileOrBookmarkName, _ func(string)) app.Error {
 	return nil
-}
-
-func (ctx *TestingContext) InstantiateTemplate(_ string) ([]parsing.Text, app.Error) {
-	return nil, nil
 }
 
 func (ctx *TestingContext) Serialiser() *parser.Serialiser {

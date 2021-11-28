@@ -1,3 +1,8 @@
+/*
+Package app contains the functionality that is related to the application layer.
+This includes all code for the command line interface and the procedures to
+interact with the runtime environment.
+*/
 package app
 
 import (
@@ -5,49 +10,81 @@ import (
 	"fmt"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/parsing"
+	"github.com/jotaen/klog/src/parser/reconciling"
 	"os"
 	"os/exec"
-	"os/user"
 	"strings"
 	gotime "time"
 )
 
+// FileOrBookmarkName is either a file name or a bookmark name
+// as specified as argument on the command line.
 type FileOrBookmarkName string
 
+// Context is a representation of the runtime environment of klog.
+// The commands carry out all side effects via this interface.
 type Context interface {
+	// Print prints to stdout.
 	Print(string)
+
+	// ReadLine reads user input from stdin.
 	ReadLine() (string, Error)
+
+	// KlogFolder returns the path of the .klog folder.
 	KlogFolder() string
+
+	// HomeFolder returns the path of the user’s home folder.
 	HomeFolder() string
+
+	// Meta returns miscellaneous meta information.
 	Meta() Meta
-	ReadInputs(...FileOrBookmarkName) ([]Record, error)
-	ReadFileInput(FileOrBookmarkName) (*parser.ParseResult, File, error)
-	WriteFile(File, string) Error
+
+	// ReadInputs retrieves all input from the given file or bookmark names.
+	ReadInputs(...FileOrBookmarkName) ([]Record, Error)
+
+	// ReconcileFile applies one or more reconcile handlers to a file and saves it.
+	ReconcileFile(FileOrBookmarkName, ...reconciling.Handler) Error
+
+	// Now returns the current timestamp.
 	Now() gotime.Time
+
+	// ReadBookmarks returns all configured bookmarks of the user.
 	ReadBookmarks() (BookmarksCollection, Error)
+
+	// ManipulateBookmarks saves a modified bookmark collection.
 	ManipulateBookmarks(func(BookmarksCollection) Error) Error
+
+	// OpenInFileBrowser tries to open the file explorer at the location of the file.
 	OpenInFileBrowser(File) Error
+
+	// OpenInEditor tries to open a file or bookmark in the user’s preferred $EDITOR.
 	OpenInEditor(FileOrBookmarkName, func(string)) Error
-	InstantiateTemplate(string) ([]parsing.Text, Error)
+
+	// Serialiser returns the current serialiser.
 	Serialiser() *parser.Serialiser
+
+	// SetSerialiser sets the current serialiser.
 	SetSerialiser(*parser.Serialiser)
 }
 
+// Meta holds miscellaneous information about the klog binary.
 type Meta struct {
+
+	// Specification contains the file format specification in full text.
 	Specification string
-	License       string
-	Version       string
-	BuildHash     string
+
+	// License contains the license text.
+	License string
+
+	// Version contains the build version.
+	Version string
+
+	// BuildHash contains a unique build identifier.
+	BuildHash string
 }
 
-type context struct {
-	homeDir    string
-	serialiser *parser.Serialiser
-	meta       Meta
-}
-
-func NewContext(homeDir string, meta Meta, serialiser *parser.Serialiser) (Context, error) {
+// NewContext creates a new Context object.
+func NewContext(homeDir string, meta Meta, serialiser *parser.Serialiser) Context {
 	if meta.Version == "" {
 		meta.Version = "v?.?"
 	}
@@ -58,15 +95,13 @@ func NewContext(homeDir string, meta Meta, serialiser *parser.Serialiser) (Conte
 		homeDir,
 		serialiser,
 		meta,
-	}, nil
+	}
 }
 
-func NewContextFromEnv(meta Meta, serialiser *parser.Serialiser) (Context, error) {
-	homeDir, err := user.Current()
-	if err != nil {
-		return nil, err
-	}
-	return NewContext(homeDir.HomeDir, meta, serialiser)
+type context struct {
+	homeDir    string
+	serialiser *parser.Serialiser
+	meta       Meta
 }
 
 func (ctx *context) Print(text string) {
@@ -99,14 +134,14 @@ func (ctx *context) Meta() Meta {
 	return ctx.meta
 }
 
-func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, error) {
+func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, Error) {
 	bc, bErr := ctx.ReadBookmarks()
 	if bErr != nil {
 		return nil, bErr
 	}
 	files, rErr := retrieveFirst([]Retriever{
-		(&stdinRetriever{ReadStdin}).Retrieve,
-		(&fileRetriever{ReadFile, bc}).Retrieve,
+		(&StdinRetriever{ReadStdin}).Retrieve,
+		(&FileRetriever{ReadFile, bc}).Retrieve,
 	}, fileArgs...)
 	if rErr != nil {
 		return nil, rErr
@@ -122,23 +157,23 @@ func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, error)
 			nil,
 		)
 	}
-	var records []Record
+	var allRecords []Record
 	for _, f := range files {
-		pr, parserErrors := parser.Parse(f.content)
+		records, _, parserErrors := parser.Parse(f.Contents())
 		if parserErrors != nil {
-			return nil, parserErrors
+			return nil, NewParserErrors(parserErrors)
 		}
-		records = append(records, pr.Records...)
+		allRecords = append(allRecords, records...)
 	}
-	return records, nil
+	return allRecords, nil
 }
 
-func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (*fileWithContent, Error) {
+func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithContents, Error) {
 	bc, err := ctx.ReadBookmarks()
 	if err != nil {
 		return nil, err
 	}
-	inputs, err := (&fileRetriever{ReadFile, bc}).Retrieve(fileArg)
+	inputs, err := (&FileRetriever{ReadFile, bc}).Retrieve(fileArg)
 	if err != nil {
 		return nil, err
 	}
@@ -153,23 +188,31 @@ func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (*fileWithCon
 	return inputs[0], nil
 }
 
-func (ctx *context) ReadFileInput(fileArg FileOrBookmarkName) (*parser.ParseResult, File, error) {
+func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, handler ...reconciling.Handler) Error {
 	target, err := ctx.retrieveTargetFile(fileArg)
 	if err != nil {
-		return nil, nil, err
+		return err
 	}
-	pr, parserErrors := parser.Parse(target.content)
+	records, blocks, parserErrors := parser.Parse(target.Contents())
 	if parserErrors != nil {
-		return nil, nil, parserErrors
+		return NewParserErrors(parserErrors)
 	}
-	return pr, target, nil
-}
-
-func (ctx *context) WriteFile(target File, contents string) Error {
-	if target == nil {
-		panic("No path specified")
+	baseReconciler := reconciling.NewReconciler(records, blocks)
+	result, rErr := reconciling.Chain(baseReconciler, handler...)
+	if rErr != nil {
+		return NewErrorWithCode(
+			LOGICAL_ERROR,
+			"Cannot alter record",
+			rErr.Error(),
+			err,
+		)
 	}
-	return WriteToFile(target, contents)
+	wErr := WriteToFile(target, result.FileContents())
+	if wErr != nil {
+		return wErr
+	}
+	ctx.Print("\n" + ctx.Serialiser().SerialiseRecords(result.Record()) + "\n")
+	return nil
 }
 
 func (ctx *context) Now() gotime.Time {
@@ -278,27 +321,6 @@ func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(stri
 		hint,
 		nil,
 	)
-}
-
-func (ctx *context) InstantiateTemplate(templateName string) ([]parsing.Text, Error) {
-	location := NewFileOrPanic(ctx.KlogFolder() + templateName + ".template.klg")
-	template, err := ReadFile(location)
-	if err != nil {
-		return nil, NewError(
-			"No such template",
-			"There is no template at location "+location.Path(),
-			err,
-		)
-	}
-	instance, tErr := parser.RenderTemplate(template, ctx.Now())
-	if tErr != nil {
-		return nil, NewError(
-			"Invalid template",
-			tErr.Error(),
-			tErr,
-		)
-	}
-	return instance, nil
 }
 
 func (ctx *context) Serialiser() *parser.Serialiser {
