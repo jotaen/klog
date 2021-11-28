@@ -33,7 +33,7 @@ func (opt *Track) Run(ctx app.Context) error {
 		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
 			return reconciler.AppendEntry(
 				func(r Record) bool { return r.Date().IsEqualTo(date) },
-				func(r Record) string { return value })
+				func(r Record) (string, error) { return value, nil })
 		},
 		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
 			headline := opt.AtDate(ctx.Now()).ToString()

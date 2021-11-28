@@ -1,5 +1,10 @@
 package app
 
+import (
+	"fmt"
+	"github.com/jotaen/klog/src/parser/engine"
+)
+
 type Code int
 
 const (
@@ -23,6 +28,9 @@ const (
 
 	// NO_SUCH_FILE should be used if the specified file does not exit.
 	NO_SUCH_FILE
+
+	// LOGICAL_ERROR should be used syntax or logical violations.
+	LOGICAL_ERROR
 )
 
 // ToInt returns the numeric value of the error. This is typically used as exit code.
@@ -74,4 +82,37 @@ func (e AppError) Original() error {
 
 func (e AppError) Code() Code {
 	return e.code
+}
+
+type ParserErrors interface {
+	Error
+	All() []engine.Error
+}
+
+type parserErrors struct {
+	errors []engine.Error
+}
+
+func NewParserErrors(errs []engine.Error) ParserErrors {
+	return parserErrors{errs}
+}
+
+func (pe parserErrors) Error() string {
+	return fmt.Sprintf("%d parsing errors", len(pe.errors))
+}
+
+func (pe parserErrors) Details() string {
+	return fmt.Sprintf("%d parsing errors", len(pe.errors))
+}
+
+func (pe parserErrors) Original() error {
+	return nil
+}
+
+func (pe parserErrors) Code() Code {
+	return LOGICAL_ERROR
+}
+
+func (pe parserErrors) All() []engine.Error {
+	return pe.errors
 }

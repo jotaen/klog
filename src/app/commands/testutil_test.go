@@ -88,14 +88,14 @@ func (ctx *TestingContext) Meta() app.Meta {
 	}
 }
 
-func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, error) {
+func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, app.Error) {
 	return ctx.records, nil
 }
 
-func (ctx *TestingContext) ReconcileFile(_ app.FileOrBookmarkName, handler ...reconciling.Handler) error {
+func (ctx *TestingContext) ReconcileFile(_ app.FileOrBookmarkName, handler ...reconciling.Handler) app.Error {
 	result, err := reconciling.Chain(reconciling.NewReconciler(ctx.records, ctx.blocks), handler...)
 	if err != nil {
-		return err
+		return app.NewError(err.Error(), err.Error(), err)
 	}
 	ctx.writtenFileContents = result.FileContents()
 	return nil

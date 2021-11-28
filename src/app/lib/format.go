@@ -7,7 +7,6 @@ import (
 	"github.com/jotaen/klog/src/app"
 	. "github.com/jotaen/klog/src/app/lib/terminalformat"
 	"github.com/jotaen/klog/src/parser"
-	"github.com/jotaen/klog/src/parser/engine"
 	"github.com/jotaen/klog/src/service"
 	"strings"
 )
@@ -61,7 +60,7 @@ func NewCliSerialiser() *parser.Serialiser {
 func PrettifyError(err error, isDebug bool) error {
 	reflower := NewReflower(60, "\n")
 	switch e := err.(type) {
-	case engine.Errors:
+	case app.ParserErrors:
 		message := ""
 		INDENT := "    "
 		for _, e := range e.All() {

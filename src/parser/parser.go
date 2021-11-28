@@ -8,8 +8,10 @@ import (
 	. "github.com/jotaen/klog/src/parser/engine"
 )
 
-// Parse parses a text into a list of Record datastructures.
-func Parse(recordsAsText string) ([]Record, []Block, Errors) {
+// Parse parses a text into a list of Record datastructures. On success, it returns
+// the Record’s and the corresponding Block’s (both lists have the same arity).
+// Otherwise, it returns all encountered parser errors.
+func Parse(recordsAsText string) ([]Record, []Block, []Error) {
 	var records []Record
 	var allErrs []Error
 	blocks := GroupIntoBlocks(Split(recordsAsText))
@@ -22,7 +24,7 @@ func Parse(recordsAsText string) ([]Record, []Block, Errors) {
 		records = append(records, record)
 	}
 	if len(allErrs) > 0 {
-		return nil, nil, NewErrors(allErrs)
+		return nil, nil, allErrs
 	}
 	return records, blocks, nil
 }

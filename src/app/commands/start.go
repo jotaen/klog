@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
@@ -36,7 +37,12 @@ func (opt *Start) Run(ctx app.Context) error {
 		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
 			return reconciler.AppendEntry(
 				func(r Record) bool { return r.Date().IsEqualTo(date) },
-				func(r Record) string { return entry },
+				func(r Record) (string, error) {
+					if r.OpenRange() != nil {
+						return "", errors.New("There is already an open range")
+					}
+					return entry, nil
+				},
 			)
 		},
 		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {

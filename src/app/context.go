@@ -40,10 +40,10 @@ type Context interface {
 	Meta() Meta
 
 	// ReadInputs retrieves all input from the given file or bookmark names.
-	ReadInputs(...FileOrBookmarkName) ([]Record, error)
+	ReadInputs(...FileOrBookmarkName) ([]Record, Error)
 
 	// ReconcileFile applies one or more reconcile handlers to a file and saves it.
-	ReconcileFile(FileOrBookmarkName, ...reconciling.Handler) error
+	ReconcileFile(FileOrBookmarkName, ...reconciling.Handler) Error
 
 	// Now returns the current timestamp.
 	Now() gotime.Time
@@ -134,7 +134,7 @@ func (ctx *context) Meta() Meta {
 	return ctx.meta
 }
 
-func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, error) {
+func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, Error) {
 	bc, bErr := ctx.ReadBookmarks()
 	if bErr != nil {
 		return nil, bErr
@@ -161,7 +161,7 @@ func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, error)
 	for _, f := range files {
 		records, _, parserErrors := parser.Parse(f.Contents())
 		if parserErrors != nil {
-			return nil, parserErrors
+			return nil, NewParserErrors(parserErrors)
 		}
 		allRecords = append(allRecords, records...)
 	}
@@ -188,19 +188,24 @@ func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithCont
 	return inputs[0], nil
 }
 
-func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, handler ...reconciling.Handler) error {
+func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, handler ...reconciling.Handler) Error {
 	target, err := ctx.retrieveTargetFile(fileArg)
 	if err != nil {
 		return err
 	}
 	records, blocks, parserErrors := parser.Parse(target.Contents())
 	if parserErrors != nil {
-		return parserErrors
+		return NewParserErrors(parserErrors)
 	}
 	baseReconciler := reconciling.NewReconciler(records, blocks)
 	result, rErr := reconciling.Chain(baseReconciler, handler...)
 	if rErr != nil {
-		return rErr
+		return NewErrorWithCode(
+			LOGICAL_ERROR,
+			"Cannot alter record",
+			rErr.Error(),
+			err,
+		)
 	}
 	wErr := WriteToFile(target, result.FileContents())
 	if wErr != nil {

@@ -154,8 +154,8 @@ Why is there a summary at the end?
 	rs, _, errs := Parse(text)
 	require.Nil(t, rs)
 	require.NotNil(t, errs)
-	require.Len(t, errs.All(), 1)
-	assert.Equal(t, ErrorIllegalIndentation().toErrData(4, 0, 34), toErrData(errs.All()[0]))
+	require.Len(t, errs, 1)
+	assert.Equal(t, ErrorIllegalIndentation().toErrData(4, 0, 34), toErrData(errs[0]))
 }
 
 func TestReportErrorsInHeadline(t *testing.T) {
@@ -179,8 +179,8 @@ func TestReportErrorsInHeadline(t *testing.T) {
 		rs, _, errs := Parse(test.text)
 		require.Nil(t, rs)
 		require.NotNil(t, errs)
-		require.Len(t, errs.All(), 1)
-		assert.Equal(t, test.expect, toErrData(errs.All()[0]), test.text)
+		require.Len(t, errs, 1)
+		assert.Equal(t, test.expect, toErrData(errs[0]), test.text)
 	}
 }
 
@@ -198,11 +198,11 @@ End.
 	rs, _, errs := Parse(text)
 	require.Nil(t, rs)
 	require.NotNil(t, errs)
-	require.Len(t, errs.All(), 4)
-	assert.Equal(t, ErrorMalformedSummary().toErrData(4, 0, 41), toErrData(errs.All()[0]))
-	assert.Equal(t, ErrorMalformedSummary().toErrData(6, 0, 63), toErrData(errs.All()[1]))
-	assert.Equal(t, ErrorMalformedSummary().toErrData(7, 0, 34), toErrData(errs.All()[2]))
-	assert.Equal(t, ErrorMalformedSummary().toErrData(8, 0, 4), toErrData(errs.All()[3]))
+	require.Len(t, errs, 4)
+	assert.Equal(t, ErrorMalformedSummary().toErrData(4, 0, 41), toErrData(errs[0]))
+	assert.Equal(t, ErrorMalformedSummary().toErrData(6, 0, 63), toErrData(errs[1]))
+	assert.Equal(t, ErrorMalformedSummary().toErrData(7, 0, 34), toErrData(errs[2]))
+	assert.Equal(t, ErrorMalformedSummary().toErrData(8, 0, 4), toErrData(errs[3]))
 }
 
 func TestReportErrorsIfIndentationIsIncorrect(t *testing.T) {
@@ -231,8 +231,8 @@ func TestReportErrorsIfIndentationIsIncorrect(t *testing.T) {
 		rs, _, errs := Parse(test.text)
 		require.Nil(t, rs, test.text)
 		require.NotNil(t, errs, test.text)
-		require.Len(t, errs.All(), 1, test.text)
-		assert.Equal(t, test.expect, toErrData(errs.All()[0]), test.text)
+		require.Len(t, errs, 1, test.text)
+		assert.Equal(t, test.expect, toErrData(errs[0]), test.text)
 	}
 }
 
@@ -272,7 +272,7 @@ func TestReportErrorsInEntries(t *testing.T) {
 		rs, _, errs := Parse(test.text)
 		require.Nil(t, rs, test.text)
 		require.NotNil(t, errs, test.text)
-		require.Len(t, errs.All(), 1, test.text)
-		assert.Equal(t, test.expect, toErrData(errs.All()[0]), test.text)
+		require.Len(t, errs, 1, test.text)
+		assert.Equal(t, test.expect, toErrData(errs[0]), test.text)
 	}
 }

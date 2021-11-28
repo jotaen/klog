@@ -28,10 +28,11 @@ func Chain(base Reconciler, handler ...Handler) (*Result, error) {
 
 func makeResult(ls []engine.Line, recordIndex uint) (*Result, error) {
 	newText := join(ls)
-	newRecords, _, pErr := parser.Parse(newText)
-	if pErr != nil {
-		err := pErr.All()[0]
-		return nil, errors.New(err.Message())
+	newRecords, _, pErrs := parser.Parse(newText)
+	if pErrs != nil {
+		// This is just a safe guard mechanism. If it happens, then there is a bug
+		// in the calling reconciler method.
+		return nil, errors.New("This operation wouldn’t result in a valid record")
 	}
 	return &Result{
 		newRecords[recordIndex],

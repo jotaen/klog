@@ -1,28 +1,5 @@
 package engine
 
-import "fmt"
-
-type Errors interface {
-	All() []Error
-	Error() string
-}
-
-type errors struct {
-	errors []Error
-}
-
-func NewErrors(errs []Error) Errors {
-	return errors{errs}
-}
-
-func (pe errors) Error() string {
-	return fmt.Sprintf("%d parsing errors", len(pe.errors))
-}
-
-func (pe errors) All() []Error {
-	return pe.errors
-}
-
 // Error contains infos about a parsing error in a Line.
 type Error interface {
 	// Error is an alias for Message.

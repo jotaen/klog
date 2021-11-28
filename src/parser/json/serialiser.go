@@ -15,7 +15,7 @@ import (
 
 // ToJson serialises records into their JSON representation. The output
 // structure is RecordView at the top level.
-func ToJson(rs []Record, errs engine.Errors, prettyPrint bool) string {
+func ToJson(rs []Record, errs []engine.Error, prettyPrint bool) string {
 	envelop := func() Envelop {
 		if errs == nil {
 			return Envelop{
@@ -109,9 +109,9 @@ func toEntryViews(es []Entry) []interface{} {
 	return views
 }
 
-func toErrorViews(errs engine.Errors) []ErrorView {
+func toErrorViews(errs []engine.Error) []ErrorView {
 	var result []ErrorView
-	for _, e := range errs.All() {
+	for _, e := range errs {
 		result = append(result, ErrorView{
 			Line:    e.Context().LineNumber,
 			Column:  e.Column(),

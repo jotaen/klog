@@ -46,12 +46,15 @@ func NewReconciler(records []Record, blocks []engine.Block) Reconciler {
 }
 
 // AppendEntry tries to find the matching record and append a new entry to it.
-func (r *Reconciler) AppendEntry(matchRecord func(Record) bool, handler func(Record) string) (*Result, error) {
+func (r *Reconciler) AppendEntry(matchRecord func(Record) bool, handler func(Record) (string, error)) (*Result, error) {
 	recordIndex := findRecordIndex(r.records, matchRecord)
 	if recordIndex == -1 {
 		return nil, NotEligibleError{}
 	}
-	newEntry := handler(r.records[recordIndex])
+	newEntry, err := handler(r.records[recordIndex])
+	if err != nil {
+		return nil, err
+	}
 	lastEntry := lastLine(r.blocks[recordIndex].SignificantLines())
 	result := insert(
 		flatten(r.blocks),
