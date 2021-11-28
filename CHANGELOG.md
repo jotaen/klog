@@ -3,14 +3,18 @@
 
 ## v3.2
 - **[ BREAKING ]** Don’t allow mixing the indentation style within a
-  record. (Indentation styles may still differ *between* records, though.)
+  record. (It might still differ *between* records, though.) For example: if
+  the first entry is indented with a tab, then it also needs to be tabs for
+  all further entries of that record. In order to check that your existing
+  files conform, you can run `klog total ~/**/*.klg` to see whether any 
+  indentation-related errors are reported.
 - **[ FEATURE ]** Allow version check via `klog -v` (in addition
   to `klog --version` or `klog version`)
 - **[ FEATURE ]** Embed specification and license in the binary
   (via `klog --spec` and `klog --license`)
 - **[ FIX ]** Fix default sort order of `--sort` flag to be `asc`
-- **[ INFO ]** The widget feature (for MacOS) is deprecated and will
-  be removed in one of the next releases.
+- **[ INFO ]** Deprecate the embedded native widget (for MacOS). It will be
+  removed in one of the next releases.
 
 ## v3.1
 - **[ FIX ]** Fix stdin processing on Windows
