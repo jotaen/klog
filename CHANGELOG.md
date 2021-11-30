@@ -4,10 +4,11 @@
 ## v3.2
 - **[ BREAKING ]** Don’t allow mixing the indentation style within a
   record. (It might still differ *between* records, though.) For example: if
-  the first entry is indented with a tab, then it also needs to be tabs for
-  all further entries of that record. In order to check that your existing
-  files conform, you can run `klog total ~/**/*.klg` to see whether any 
-  indentation-related errors are reported.
+  the first entry is indented with a tab, then all further entries of that
+  particular record have to be indented with a tab as well. In order to check
+  that your existing files conform, you can parse all your `.klg` files at once
+  via a wildcard lookup, in order to see whether any indentation-related
+  errors are reported. On Linux, e.g.: `klog total ~/**/*.klg`.
 - **[ FEATURE ]** Allow version check via `klog -v` (in addition
   to `klog --version` or `klog version`)
 - **[ FEATURE ]** Embed specification and license in the binary
