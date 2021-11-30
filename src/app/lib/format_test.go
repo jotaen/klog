@@ -11,8 +11,26 @@ import (
 
 func TestFormatParserError(t *testing.T) {
 	err := app.NewParserErrors([]engine.Error{
-		engine.NewError(engine.NewLineFromString("Foo bar", 2), 4, 3, "CODE", "Some Title", "A verbose description with details, potentially spanning multiple lines with a comprehensive text and tremendously helpful information.\nBut it respects newlines."),
 		engine.NewError(engine.NewLineFromString("Some malformed text", 39), 0, 4, "CODE", "Error", "Short explanation."),
+		engine.NewError(engine.NewLineFromString("Another issue!", 134), 8, 5, "CODE", "Problem", "More info."),
+	})
+	text := PrettifyError(err, false).Error()
+	assert.Equal(t, ` ERROR in line 39: 
+    Some malformed text
+    ^^^^
+    Error: Short explanation.
+
+ ERROR in line 134: 
+    Another issue!
+            ^^^^^
+    Problem: More info.
+
+`, terminalformat.StripAllAnsiSequences(text))
+}
+
+func TestReflowsLongMessages(t *testing.T) {
+	err := app.NewParserErrors([]engine.Error{
+		engine.NewError(engine.NewLineFromString("Foo bar", 2), 4, 3, "CODE", "Some Title", "A verbose description with details, potentially spanning multiple lines with a comprehensive text and tremendously helpful information.\nBut it respects newlines."),
 	})
 	text := PrettifyError(err, false).Error()
 	assert.Equal(t, ` ERROR in line 2: 
@@ -23,10 +41,18 @@ func TestFormatParserError(t *testing.T) {
     and tremendously helpful information.
     But it respects newlines.
 
- ERROR in line 39: 
-    Some malformed text
-    ^^^^
-    Error: Short explanation.
+`, terminalformat.StripAllAnsiSequences(text))
+}
+
+func TestConvertsTabToSpaces(t *testing.T) {
+	err := app.NewParserErrors([]engine.Error{
+		engine.NewError(engine.NewLineFromString("\tFoo\tbar", 14), 0, 8, "CODE", "Error title", "Error details"),
+	})
+	text := PrettifyError(err, false).Error()
+	assert.Equal(t, ` ERROR in line 14: 
+     Foo bar
+    ^^^^^^^^
+    Error title: Error details
 
 `, terminalformat.StripAllAnsiSequences(text))
 }

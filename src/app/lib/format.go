@@ -70,7 +70,10 @@ func PrettifyError(err error, isDebug bool) error {
 			) + "\n"
 			message += fmt.Sprintf(
 				Style{Color: "247"}.Format(INDENT+"%s"),
-				e.Context().Text,
+				// Replace all tabs with one space each, otherwise the carets might
+				// not be in line with the text anymore (since we can’t know how wide
+				// a tab is).
+				strings.Replace(e.Context().Text, "\t", " ", -1),
 			) + "\n"
 			message += fmt.Sprintf(
 				Style{Color: "160"}.Format(INDENT+"%s%s"),
