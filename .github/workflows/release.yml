@@ -80,7 +80,7 @@ jobs:
           EXPECTED_SPEC_PATH: Specification.md
           EXPECTED_LICENSE_PATH: LICENSE.txt
         run: |
-          sudo mv out/klog /usr/bin/klog
+          sudo cp out/klog /usr/bin/klog
           ./.github/smoke_test.sh
       - name: Bundle
         run: |
