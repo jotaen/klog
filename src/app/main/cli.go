@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (error, int) {
+func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error) {
 	ctx := app.NewContext(homeDir, meta, lib.NewCliSerialiser())
 	kongApp, nErr := kong.New(
 		&commands.Cli{},
@@ -41,12 +41,12 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (error, int
 		}),
 	)
 	if nErr != nil {
-		return nErr, -1
+		return -1, nErr
 	}
 
 	kongCtx, cErr := kongApp.Parse(args)
 	if cErr != nil {
-		return cErr, -1
+		return -1, cErr
 	}
 	kongCtx.BindTo(ctx, (*app.Context)(nil))
 
@@ -54,12 +54,12 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (error, int
 	if rErr != nil {
 		ctx.Print(lib.PrettifyError(rErr, isDebug).Error() + "\n")
 		if appErr, isAppError := rErr.(app.Error); isAppError {
-			return nil, int(appErr.Code())
+			return int(appErr.Code()), nil
 		} else {
-			return rErr, -1
+			return -1, rErr
 		}
 	}
-	return nil, 0
+	return 0, nil
 }
 
 func dateDecoder() kong.MapperFunc {

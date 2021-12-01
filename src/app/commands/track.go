@@ -10,7 +10,7 @@ import (
 
 type Track struct {
 	lib.AtDateArgs
-	Entry string `arg required help:"The new entry to add"`
+	Entry string `arg:"" required:"" help:"The new entry to add"`
 	lib.NoStyleArgs
 	lib.OutputFileArgs
 }
@@ -38,8 +38,8 @@ func (opt *Track) Run(ctx app.Context) error {
 		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
 			headline := opt.AtDate(ctx.Now()).ToString()
 			lines := []reconciling.InsertableText{
-				{headline, 0},
-				{value, 1},
+				{Text: headline, Indentation: 0},
+				{Text: value, Indentation: 1},
 			}
 			return reconciler.InsertRecord(date, lines)
 		},

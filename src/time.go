@@ -179,8 +179,7 @@ func (t *time) ToString() string {
 	if t.IsTomorrow() {
 		tomorrowSuffix = ">"
 	}
-	hour := t.hour
-	hour, am_pm := func() (int, string) {
+	hour, amPmSuffix := func() (int, string) {
 		if t.is24HourClock {
 			return t.hour, ""
 		}
@@ -195,5 +194,5 @@ func (t *time) ToString() string {
 		}
 		return t.hour, "am"
 	}()
-	return fmt.Sprintf("%s%d:%02d%s%s", yesterdayPrefix, hour, t.minute, am_pm, tomorrowSuffix)
+	return fmt.Sprintf("%s%d:%02d%s%s", yesterdayPrefix, hour, t.minute, amPmSuffix, tomorrowSuffix)
 }

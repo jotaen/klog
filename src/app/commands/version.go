@@ -29,16 +29,16 @@ func (opt *Version) Run(ctx app.Context) error {
 	if opt.NoCheck {
 		return nil
 	}
-	ctx.Print(fmt.Sprintf("\nChecking for newer version...\n"))
+	ctx.Print("\nChecking for newer version...\n")
 	v := fetchVersionInfo("https://api.github.com/repos/jotaen/klog/releases/latest")
 	if v == nil {
 		return errors.New("Failed to check for new version, please try again later")
 	}
 	if v.Version() == ctx.Meta().Version && ctx.Meta().BuildHash == v.BuildHash() {
-		ctx.Print(fmt.Sprintf("You already have the latest version!\n"))
+		ctx.Print("You already have the latest version!\n")
 	} else {
 		ctx.Print(fmt.Sprintf("New version available: %s  [%s]\n", v.Version(), v.BuildHash()))
-		ctx.Print(fmt.Sprintf("See: https://github.com/jotaen/klog\n"))
+		ctx.Print("See: https://github.com/jotaen/klog\n")
 	}
 	return nil
 }

@@ -129,7 +129,7 @@ func (opt *Report) findAggregator() report.Aggregator {
 
 func allDatesRange(from Date, to Date) []Date {
 	result := []Date{from}
-	for true {
+	for {
 		last := result[len(result)-1]
 		if last.IsAfterOrEqual(to) {
 			break

@@ -33,7 +33,7 @@ func NewPeriodFromString(yyyymm string) (Period, error) {
 	}
 	start, _ := klog.NewDate(year, monthStart, 1)
 	end, _ := klog.NewDate(year, monthEnd, 28)
-	for true {
+	for {
 		next := end.PlusDays(1)
 		if next.Month() != end.Month() {
 			break
