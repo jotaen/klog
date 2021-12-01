@@ -125,7 +125,7 @@ func NewTagSet(tags ...string) TagSet {
 func Merge(tagSets ...TagSet) TagSet {
 	result := NewTagSet()
 	for _, ts := range tagSets {
-		for t, _ := range ts {
+		for t := range ts {
 			result[t] = true
 		}
 	}

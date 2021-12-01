@@ -89,7 +89,7 @@ func NewContext(homeDir string, meta Meta, serialiser *parser.Serialiser) Contex
 		meta.Version = "v?.?"
 	}
 	if meta.BuildHash == "" {
-		strings.Repeat("?", 7)
+		meta.BuildHash = strings.Repeat("?", 7)
 	}
 	return &context{
 		homeDir,

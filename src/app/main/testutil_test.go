@@ -34,7 +34,7 @@ func (e *Env) run(invocation ...[]string) []string {
 		r, w, _ := os.Pipe()
 		os.Stdout = w
 
-		runErr, code := Run(tmpDir, app.Meta{
+		code, runErr := Run(tmpDir, app.Meta{
 			Specification: "[Specification text]",
 			License:       "[License text]",
 			Version:       "v0.0",

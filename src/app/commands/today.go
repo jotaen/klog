@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"fmt"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
@@ -211,7 +210,6 @@ func withRepeat(ctx app.Context, fn func() error) error {
 	go func() {
 		<-c
 		os.Exit(0)
-		return
 	}()
 
 	// Call handler function repetitively
@@ -220,7 +218,7 @@ func withRepeat(ctx app.Context, fn func() error) error {
 	defer ticker.Stop()
 	i := 5 // seconds to display help text (how to exit)
 	for ; true; <-ticker.C {
-		ctx.Print(fmt.Sprintf("\033[H\033[J")) // Cursor reset
+		ctx.Print("\033[H\033[J") // Cursor reset
 		err := fn()
 		ctx.Print("\n")
 		if i > 0 {

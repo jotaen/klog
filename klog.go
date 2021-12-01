@@ -32,7 +32,7 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	runErr, exitCode := klog.Run(homeDir.HomeDir, app.Meta{
+	exitCode, runErr := klog.Run(homeDir.HomeDir, app.Meta{
 		Specification: specification,
 		License:       license,
 		Version:       BinaryVersion,

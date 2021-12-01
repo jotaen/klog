@@ -59,7 +59,6 @@ func (p *Parseable) SkipWhile(isMatch func(rune) bool) {
 	for IsSpaceOrTab(p.Peek()) {
 		p.Advance(1)
 	}
-	return
 }
 
 // Length returns the total length of the line.
