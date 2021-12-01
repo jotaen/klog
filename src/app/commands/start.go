@@ -48,8 +48,8 @@ func (opt *Start) Run(ctx app.Context) error {
 		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
 			headline := opt.AtDate(ctx.Now()).ToString()
 			lines := []reconciling.InsertableText{
-				{headline, 0},
-				{entry, 1},
+				{Text: headline, Indentation: 0},
+				{Text: entry, Indentation: 1},
 			}
 			return reconciler.InsertRecord(date, lines)
 		},

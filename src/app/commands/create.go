@@ -28,7 +28,7 @@ func (opt *Create) Run(ctx app.Context) error {
 			headline += " (" + opt.ShouldTotal.ToString() + "!)"
 		}
 		return []reconciling.InsertableText{
-			{headline, 0},
+			{Text: headline, Indentation: 0},
 		}, nil
 	}()
 	if err != nil {

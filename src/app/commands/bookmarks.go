@@ -7,16 +7,16 @@ import (
 )
 
 type Bookmarks struct {
-	List BookmarksList `cmd name:"list" help:"Displays all bookmarks"`
-	Ls   BookmarksList `cmd name:"ls" hidden help:"Alias for 'list'"`
+	List BookmarksList `cmd:"" name:"list" help:"Displays all bookmarks"`
+	Ls   BookmarksList `cmd:"" name:"ls" hidden:"" help:"Alias for 'list'"`
 
-	Set BookmarksSet `cmd name:"set" help:"Defines a bookmark (or overwrites an existing one)"`
-	New BookmarksSet `cmd name:"new" hidden help:"Alias for 'set'"`
+	Set BookmarksSet `cmd:"" name:"set" help:"Defines a bookmark (or overwrites an existing one)"`
+	New BookmarksSet `cmd:"" name:"new" hidden:"" help:"Alias for 'set'"`
 
-	Unset BookmarksUnset `cmd name:"unset" help:"Removes a bookmark from the collection"`
-	Rm    BookmarksUnset `cmd name:"rm" hidden help:"Alias for 'unset'"`
+	Unset BookmarksUnset `cmd:"" name:"unset" help:"Removes a bookmark from the collection"`
+	Rm    BookmarksUnset `cmd:"" name:"rm" hidden:"" help:"Alias for 'unset'"`
 
-	Clear BookmarksClear `cmd name:"clear" help:"Clears entire bookmark collection"`
+	Clear BookmarksClear `cmd:"" name:"clear" help:"Clears entire bookmark collection"`
 }
 
 func (opt *Bookmarks) Help() string {
@@ -46,8 +46,8 @@ func (opt *BookmarksList) Run(ctx app.Context) error {
 }
 
 type BookmarksSet struct {
-	File  string `arg type:"string" help:".klg source file"`
-	Name  string `arg name:"bookmark" type:"string" optional:"1" help:"The name of the bookmark."`
+	File  string `arg:"" type:"string" help:".klg source file"`
+	Name  string `arg:"" name:"bookmark" type:"string" optional:"1" help:"The name of the bookmark."`
 	Force bool   `name:"force" help:"Force to set, even if target file does not exist or is invalid"`
 	lib.QuietArgs
 }
@@ -90,7 +90,7 @@ func (opt *BookmarksSet) Run(ctx app.Context) error {
 
 type BookmarksUnset struct {
 	// The name is not optional here, to avoid accidental invocations
-	Name string `arg name:"bookmark" type:"string" help:"The name of the bookmark"`
+	Name string `arg:"" name:"bookmark" type:"string" help:"The name of the bookmark"`
 	lib.QuietArgs
 }
 
