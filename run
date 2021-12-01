@@ -19,6 +19,12 @@ format() {
 	go fmt ./...
 }
 
+lint() {
+  set -o errexit
+  go vet ./...
+  staticcheck ./...
+}
+
 cli() {
 	go run klog.go "$@"
 }
