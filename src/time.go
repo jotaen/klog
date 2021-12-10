@@ -45,14 +45,12 @@ type time struct {
 }
 
 func newTime(hour int, minute int, dayShift int, is24HourClock bool) (Time, error) {
-	if hour == 24 && minute == 00 && dayShift == 0 {
+	if hour == 24 && minute == 00 && dayShift <= 0 {
 		// Accept a time of 24:00 (today), and interpret it as 0:00 (tomorrow).
-		hour = 0
-		dayShift = 1
-	} else if hour == 24 && minute == 00 && dayShift == -1 {
 		// Accept a time of 24:00 (yesterday), and interpret it as 0:00 (today).
+		// This case is not supported for 24:00 (tomorrow), since that couldn’t be represented.
 		hour = 0
-		dayShift = 0
+		dayShift += 1
 	}
 	ct := civil.Time{Hour: hour, Minute: minute}
 	if !ct.IsValid() {
