@@ -117,6 +117,8 @@ func TestParseDocumentSucceedsWithCorrectEntries(t *testing.T) {
 		{"1234-12-12\n\t3:05 - 11:59 Did this and that", Ɀ_Range_(Ɀ_Time_(3, 5), Ɀ_Time_(11, 59)), NewEntrySummary("Did this and that")},
 		{"1234-12-12\n\t3:05 - 11:59   Foo", Ɀ_Range_(Ɀ_Time_(3, 5), Ɀ_Time_(11, 59)), NewEntrySummary("  Foo")},
 		{"1234-12-12\n\t3:05 - 11:59\tFoo", Ɀ_Range_(Ɀ_Time_(3, 5), Ɀ_Time_(11, 59)), NewEntrySummary("Foo")},
+		{"1234-12-12\n\t22:00 - 24:00\tFoo", Ɀ_Range_(Ɀ_Time_(22, 0), Ɀ_TimeTomorrow_(0, 0)), NewEntrySummary("Foo")},
+		{"1234-12-12\n\t<22:00 - <24:00\tFoo", Ɀ_Range_(Ɀ_TimeYesterday_(22, 0), Ɀ_Time_(0, 0)), NewEntrySummary("Foo")},
 		{"1234-12-12\n\t9:00am - 1:43pm", Ɀ_Range_(Ɀ_IsAmPm_(Ɀ_Time_(9, 00)), Ɀ_IsAmPm_(Ɀ_Time_(13, 43))), nil},
 		{"1234-12-12\n\t9:00am-1:43pm", Ɀ_Range_(Ɀ_IsAmPm_(Ɀ_Time_(9, 00)), Ɀ_IsAmPm_(Ɀ_Time_(13, 43))), nil},
 		{"1234-12-12\n\t9:00am-8:12am> Things", Ɀ_Range_(Ɀ_IsAmPm_(Ɀ_Time_(9, 00)), Ɀ_IsAmPm_(Ɀ_TimeTomorrow_(8, 12))), NewEntrySummary("Things")},
@@ -258,16 +260,23 @@ func TestReportErrorsInEntries(t *testing.T) {
 		text   string
 		expect errData
 	}{
+		// Malformed syntax
 		{"2020-01-01\n\t5h1", ErrorMalformedEntry().toErrData(2, 1, 3)},
 		{"2020-01-01\n\tasdf Test 123", ErrorMalformedEntry().toErrData(2, 1, 4)},
 		{"2020-01-01\n\t15:30", ErrorMalformedEntry().toErrData(2, 6, 1)},
 		{"2020-01-01\n\t08:00-", ErrorMalformedEntry().toErrData(2, 7, 1)},
 		{"2020-01-01\n\t08:00-asdf", ErrorMalformedEntry().toErrData(2, 7, 4)},
 		{"2020-01-01\n\t08:00 - ?asdf", ErrorMalformedEntry().toErrData(2, 10, 4)},
-		{"2020-01-01\n\t08:00- ?\n\t09:00 - ?", ErrorDuplicateOpenRange().toErrData(3, 1, 9)},
-		{"2020-01-01\n\t15:00 - 14:00", ErrorIllegalRange().toErrData(2, 1, 13)},
 		{"2020-01-01\n\t-18:00", ErrorMalformedEntry().toErrData(2, 1, 6)},
 		{"2020-01-01\n\t15:30 Foo Bar Baz", ErrorMalformedEntry().toErrData(2, 7, 1)},
+
+		// Logical errors
+		{"2020-01-01\n\t08:00- ?\n\t09:00 - ?", ErrorDuplicateOpenRange().toErrData(3, 1, 9)},
+		{"2020-01-01\n\t15:00 - 14:00", ErrorIllegalRange().toErrData(2, 1, 13)},
+		{"2020-01-01\n\t12:76 - 13:00", ErrorMalformedEntry().toErrData(2, 1, 5)},
+		{"2020-01-01\n\t12:00 - 44:00", ErrorMalformedEntry().toErrData(2, 9, 5)},
+		{"2020-01-01\n\t23:00> - 25:61>", ErrorMalformedEntry().toErrData(2, 10, 6)},
+		{"2020-01-01\n\t12:00> - 24:00>", ErrorMalformedEntry().toErrData(2, 10, 6)},
 	} {
 		rs, _, errs := Parse(test.text)
 		require.Nil(t, rs, test.text)

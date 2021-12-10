@@ -16,18 +16,61 @@ func TestOnlyConstructsValidTimes(t *testing.T) {
 	assert.Equal(t, tm.IsTomorrow(), false)
 }
 
+func TestHandle2400Time(t *testing.T) {
+	{
+		tm, err := NewTime(24, 00)
+		require.Nil(t, err)
+		assert.Equal(t, tm.Hour(), 0)
+		assert.Equal(t, tm.Minute(), 0)
+		assert.Equal(t, tm.IsToday(), false)
+		assert.Equal(t, tm.IsYesterday(), false)
+		assert.Equal(t, tm.IsTomorrow(), true)
+	}
+	{
+		tm, err := NewTimeYesterday(24, 00)
+		require.Nil(t, err)
+		assert.Equal(t, tm.Hour(), 0)
+		assert.Equal(t, tm.Minute(), 0)
+		assert.Equal(t, tm.IsToday(), true)
+		assert.Equal(t, tm.IsYesterday(), false)
+		assert.Equal(t, tm.IsTomorrow(), false)
+	}
+	{
+		// 24:00 tomorrow cannot be represented.
+		tm, err := NewTimeTomorrow(24, 00)
+		require.Nil(t, tm)
+		require.Error(t, err)
+	}
+}
+
 func TestDetectsInvalidTimes(t *testing.T) {
-	invalidHour, err := NewTime(25, 30)
-	assert.EqualError(t, err, "INVALID_TIME")
-	assert.Nil(t, invalidHour)
+	for _, invalidTime := range []struct {
+		hours   int
+		minutes int
+	}{
+		// Invalid hours
+		{24, 01},
+		{25, 30},
+		{124, 34},
+		{-12, 34},
 
-	invalidMinute, err := NewTime(4, 85)
-	assert.EqualError(t, err, "INVALID_TIME")
-	assert.Nil(t, invalidMinute)
+		// Invalid minutes
+		{05, 60},
+		{05, 61},
+		{05, 245},
+		{05, -12},
 
-	invalidTime, err := NewTime(24, 00)
-	assert.EqualError(t, err, "INVALID_TIME")
-	assert.Nil(t, invalidTime)
+		// Both invalid
+		{1575, 28293},
+	} {
+		for _, constructor := range []func(int, int) (Time, error){
+			NewTime, NewTimeYesterday, NewTimeTomorrow,
+		} {
+			invalidTime, err := constructor(invalidTime.hours, invalidTime.minutes)
+			assert.EqualError(t, err, "INVALID_TIME")
+			assert.Nil(t, invalidTime)
+		}
+	}
 }
 
 func TestSerialiseTime(t *testing.T) {
