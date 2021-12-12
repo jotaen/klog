@@ -44,6 +44,14 @@ func TestCreateFromBlank(t *testing.T) {
 	assert.Equal(t, "1999-10-04\n", state.writtenFileContents)
 }
 
+func TestCreateConformsToStyle(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords("2020/01/28").
+		_SetNow(2020, 1, 29, 0, 1).
+		_Run((&Create{}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, "2020/01/28\n\n2020/01/29", state.writtenFileContents)
+}
+
 func TestCreateWithValues(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 1975-12-31
