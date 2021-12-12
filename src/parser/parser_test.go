@@ -9,7 +9,7 @@ import (
 
 func TestParseMinimalDocument(t *testing.T) {
 	text := `2000-01-01`
-	rs, _, errs := Parse(text)
+	rs, errs := Parse(text)
 	require.Nil(t, errs)
 	require.Len(t, rs, 1)
 	assert.Equal(t, Ɀ_Date_(2000, 1, 1), rs[0].Date())
@@ -22,7 +22,7 @@ func TestParseMultipleRecords(t *testing.T) {
 1999-06-03 (8h15m!)
 Empty
 `
-	rs, _, errs := Parse(text)
+	rs, errs := Parse(text)
 	require.Nil(t, errs)
 	require.Len(t, rs, 2)
 
@@ -43,7 +43,7 @@ func TestParseEmptyOrBlankDocument(t *testing.T) {
 		"\n\n\n\n\n",
 		"\n\t     \n \n         ",
 	} {
-		rs, _, errs := Parse(text)
+		rs, errs := Parse(text)
 		require.Nil(t, errs)
 		require.Len(t, rs, 0)
 	}
@@ -51,14 +51,14 @@ func TestParseEmptyOrBlankDocument(t *testing.T) {
 
 func TestParseWindowsAndUnixLineEndings(t *testing.T) {
 	text := "2000-01-01\r\n\r\n2000-01-02\n\n2000-01-03"
-	rs, _, errs := Parse(text)
+	rs, errs := Parse(text)
 	require.Nil(t, errs)
 	require.Len(t, rs, 3)
 }
 
 func TestParseMultipleRecordsWhenBlankLineContainsWhitespace(t *testing.T) {
 	text := "2018-01-01\n    1h\n" + "    \n" + "2019-01-01\n"
-	rs, _, errs := Parse(text)
+	rs, errs := Parse(text)
 	require.Nil(t, errs)
 	require.Len(t, rs, 2)
 }
@@ -71,7 +71,7 @@ func TestParseAlternativeFormatting(t *testing.T) {
 1999-05-31
 	8:00am-1:00pm
 `
-	rs, _, errs := Parse(text)
+	rs, errs := Parse(text)
 	require.Nil(t, errs)
 	require.Len(t, rs, 2)
 
@@ -91,7 +91,7 @@ func TestAcceptTabOrSpacesAsIndentation(t *testing.T) {
 		{"2000-05-31\n   6h", nil},
 		{"2000-05-31\n    6h", nil},
 	} {
-		rs, _, errs := Parse(test.text)
+		rs, errs := Parse(test.text)
 		require.Nil(t, errs)
 		require.Len(t, rs, 1)
 	}
@@ -133,7 +133,7 @@ func TestParseDocumentSucceedsWithCorrectEntries(t *testing.T) {
 		{"1234-12-12\n\t18:45 - ???       ASDF", NewOpenRange(Ɀ_Time_(18, 45)), NewEntrySummary("      ASDF")},
 		{"1234-12-12\n\t<3:12-??????", NewOpenRange(Ɀ_TimeYesterday_(3, 12)), nil},
 	} {
-		rs, _, errs := Parse(test.text)
+		rs, errs := Parse(test.text)
 		require.Nil(t, errs, test.text)
 		require.Len(t, rs, 1, test.text)
 		require.Len(t, rs[0].Entries(), 1, test.text)
@@ -153,7 +153,7 @@ func TestMalformedRecord(t *testing.T) {
 	5h30m This and that
 Why is there a summary at the end?
 `
-	rs, _, errs := Parse(text)
+	rs, errs := Parse(text)
 	require.Nil(t, rs)
 	require.NotNil(t, errs)
 	require.Len(t, errs, 1)
@@ -178,7 +178,7 @@ func TestReportErrorsInHeadline(t *testing.T) {
 		{"2020-01-01 (5h! asdf)", ErrorUnrecognisedProperty().toErrData(1, 16, 4)},
 		{"2020-01-01 (5h!!!)", ErrorUnrecognisedProperty().toErrData(1, 15, 2)},
 	} {
-		rs, _, errs := Parse(test.text)
+		rs, errs := Parse(test.text)
 		require.Nil(t, rs)
 		require.NotNil(t, errs)
 		require.Len(t, errs, 1)
@@ -197,7 +197,7 @@ That is not allowed.
     
 End.
 `
-	rs, _, errs := Parse(text)
+	rs, errs := Parse(text)
 	require.Nil(t, rs)
 	require.NotNil(t, errs)
 	require.Len(t, errs, 4)
@@ -230,7 +230,7 @@ func TestReportErrorsIfIndentationIsIncorrect(t *testing.T) {
 		{"2020-01-01\n  8h\n   2h", ErrorIllegalIndentation().toErrData(3, 0, 5)},
 		{"2020-01-01\n  8h\n  2h\n\t1h2m", ErrorIllegalIndentation().toErrData(4, 0, 5)},
 	} {
-		rs, _, errs := Parse(test.text)
+		rs, errs := Parse(test.text)
 		require.Nil(t, rs, test.text)
 		require.NotNil(t, errs, test.text)
 		require.Len(t, errs, 1, test.text)
@@ -250,7 +250,7 @@ func TestAcceptMixingIndentationStylesAcrossRecords(t *testing.T) {
 2020-01-03
 	12m This is a tab
 `
-	rs, _, errs := Parse(text)
+	rs, errs := Parse(text)
 	require.Nil(t, errs)
 	require.Len(t, rs, 3)
 }
@@ -278,7 +278,7 @@ func TestReportErrorsInEntries(t *testing.T) {
 		{"2020-01-01\n\t23:00> - 25:61>", ErrorMalformedEntry().toErrData(2, 10, 6)},
 		{"2020-01-01\n\t12:00> - 24:00>", ErrorMalformedEntry().toErrData(2, 10, 6)},
 	} {
-		rs, _, errs := Parse(test.text)
+		rs, errs := Parse(test.text)
 		require.Nil(t, rs, test.text)
 		require.NotNil(t, errs, test.text)
 		require.Len(t, errs, 1, test.text)

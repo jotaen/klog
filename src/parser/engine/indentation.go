@@ -28,3 +28,7 @@ func (i *Indentator) NewIndentedParseable(l Line, atLevel int) *Parseable {
 	}
 	return NewParseable(l, len(expectedIndentation))
 }
+
+func (i *Indentator) Style() string {
+	return i.indentationStyle
+}

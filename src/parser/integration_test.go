@@ -17,7 +17,7 @@ lines and contains a #tag as well.
     1:00am - 3:12pm
     7:00 - ?
 `
-	rs, _, _ := Parse(text)
-	s := PlainSerialiser.SerialiseRecords(rs...)
+	rs, _ := Parse(text)
+	s := PlainSerialiser.SerialiseRecords(ToRecords(rs)...)
 	assert.Equal(t, text, s)
 }

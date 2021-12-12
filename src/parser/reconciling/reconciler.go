@@ -11,13 +11,12 @@ package reconciling
 import (
 	"errors"
 	. "github.com/jotaen/klog/src"
-	"github.com/jotaen/klog/src/parser/engine"
+	"github.com/jotaen/klog/src/parser"
 	"regexp"
 )
 
 type Reconciler struct {
-	records []Record
-	blocks  []engine.Block
+	parsedRecords []parser.ParsedRecord
 }
 
 // Result contains the result of applied reconcilers.
@@ -41,37 +40,37 @@ type InsertableText struct {
 	Indentation int
 }
 
-func NewReconciler(records []Record, blocks []engine.Block) Reconciler {
-	return Reconciler{records, blocks}
+func NewReconciler(parsedRecords []parser.ParsedRecord) Reconciler {
+	return Reconciler{parsedRecords}
 }
 
 // AppendEntry tries to find the matching record and append a new entry to it.
 func (r *Reconciler) AppendEntry(matchRecord func(Record) bool, handler func(Record) (string, error)) (*Result, error) {
-	recordIndex := findRecordIndex(r.records, matchRecord)
+	recordIndex := findRecordIndex(parser.ToRecords(r.parsedRecords), matchRecord)
 	if recordIndex == -1 {
 		return nil, NotEligibleError{}
 	}
-	newEntry, err := handler(r.records[recordIndex])
+	newEntry, err := handler(r.parsedRecords[recordIndex])
 	if err != nil {
 		return nil, err
 	}
-	lastEntry := lastLine(r.blocks[recordIndex].SignificantLines())
+	lastEntry := lastLine(r.parsedRecords[recordIndex].Block.SignificantLines())
 	result := insert(
-		flatten(r.blocks),
+		flatten(parser.ToBlocks(r.parsedRecords)),
 		lastEntry.LineNumber,
 		[]InsertableText{{newEntry, 1}},
-		stylePreferencesOrDefault(r.blocks[recordIndex]),
+		r.parsedRecords[recordIndex].Style,
 	)
 	return makeResult(result, uint(recordIndex))
 }
 
 // CloseOpenRange tries to find the matching record and closes its open time range.
 func (r *Reconciler) CloseOpenRange(matchRecord func(Record) bool, handler func(Record) (Time, EntrySummary)) (*Result, error) {
-	recordIndex := findRecordIndex(r.records, matchRecord)
+	recordIndex := findRecordIndex(parser.ToRecords(r.parsedRecords), matchRecord)
 	if recordIndex == -1 {
 		return nil, NotEligibleError{}
 	}
-	record := r.records[recordIndex]
+	record := r.parsedRecords[recordIndex]
 	openRangeEntryIndex := -1
 	for i, e := range record.Entries() {
 		e.Unbox(
@@ -87,9 +86,9 @@ func (r *Reconciler) CloseOpenRange(matchRecord func(Record) bool, handler func(
 		return nil, errors.New("No open time range found")
 	}
 	time, additionalSummary := handler(record)
-	lastEntry := lastLine(r.blocks[recordIndex].SignificantLines())
+	lastEntry := lastLine(r.parsedRecords[recordIndex].Block.SignificantLines())
 	openRangeLineIndex := lastEntry.LineNumber - len(record.Entries()) + openRangeEntryIndex
-	allLines := flatten(r.blocks)
+	allLines := flatten(parser.ToBlocks(r.parsedRecords))
 	summaryText := func() string {
 		if additionalSummary.IsEmpty() {
 			return ""
@@ -110,31 +109,31 @@ func (r *Reconciler) CloseOpenRange(matchRecord func(Record) bool, handler func(
 // InsertRecord inserts a new record. For finding the right position, it assumes that
 // the existing records are chronologically ordered.
 func (r *Reconciler) InsertRecord(newDate Date, texts []InsertableText) (*Result, error) {
-	recordIndex := findRecordIndexAfterDate(r.records, newDate)
+	recordIndex := findRecordIndexAfterDate(parser.ToRecords(r.parsedRecords), newDate)
 	lineNumber, newRecordIndex, insertable := func() (int, uint, []InsertableText) {
 		if recordIndex == -1 {
-			if len(r.records) == 0 {
+			if len(r.parsedRecords) == 0 {
 				return 0, 0, texts
 			}
 			// If the new record is dated before the existing ones, prepend it.
 			return 0, 0, append(texts, blankLine)
 		}
-		lastEntry := lastLine(r.blocks[recordIndex].SignificantLines())
+		lastEntry := lastLine(r.parsedRecords[recordIndex].Block.SignificantLines())
 		return lastEntry.LineNumber,
 			uint(recordIndex + 1),
 			append([]InsertableText{blankLine}, texts...)
 	}()
-	var styleReferenceBlock engine.Block
-	if len(r.blocks) > 0 {
+	style := parser.DefaultStyle()
+	if len(r.parsedRecords) > 0 {
 		// If there are records in the file, take over the style preferences
 		// from the last one.
-		styleReferenceBlock = r.blocks[len(r.blocks)-1]
+		style = r.parsedRecords[len(r.parsedRecords)-1].Style
 	}
 	lines := insert(
-		flatten(r.blocks),
+		flatten(parser.ToBlocks(r.parsedRecords)),
 		lineNumber,
 		insertable,
-		stylePreferencesOrDefault(styleReferenceBlock),
+		style,
 	)
 	return makeResult(lines, newRecordIndex)
 }

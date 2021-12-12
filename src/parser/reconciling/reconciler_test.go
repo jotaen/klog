@@ -22,8 +22,8 @@ Hello World
 2018-01-03
     5h
 `
-	rs, bs, _ := parser.Parse(original)
-	reconciler := NewReconciler(rs, bs)
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs)
 	match := func(r Record) bool {
 		return r.Date().ToString() == "2018-01-02"
 	}
@@ -51,9 +51,9 @@ func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 	original := `
 2018-01-01
     1h`
-	rs, bs, _ := parser.Parse(original)
+	rs, _ := parser.Parse(original)
 
-	reconciler := NewReconciler(rs, bs)
+	reconciler := NewReconciler(rs)
 	match := func(r Record) bool {
 		return r.Date().ToString() == "2018-01-01"
 	}
@@ -69,8 +69,8 @@ func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 
 func TestReconcilerSkipsIfNoRecordMatches(t *testing.T) {
 	original := "2018-01-01\n"
-	rs, bs, _ := parser.Parse(original)
-	reconciler := NewReconciler(rs, bs)
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs)
 	match := func(r Record) bool { return false }
 	_, err := reconciler.AppendEntry(match, func(record Record) (string, error) { return "", nil })
 	require.ErrorIs(t, err, NotEligibleError{})
@@ -78,8 +78,8 @@ func TestReconcilerSkipsIfNoRecordMatches(t *testing.T) {
 
 func TestReconcilerRejectsInvalidEntry(t *testing.T) {
 	original := "2018-01-01\n"
-	rs, bs, _ := parser.Parse(original)
-	reconciler := NewReconciler(rs, bs)
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs)
 	match := func(r Record) bool { return true }
 	require.NotNil(t, reconciler)
 	result1, err1 := reconciler.AppendEntry(match, func(r Record) (string, error) { return "this is not valid entry text", nil })
@@ -96,8 +96,8 @@ func TestReconcilerClosesOpenRangeWithNewSummary(t *testing.T) {
 2018-01-01
     15:00 - ?
 `
-	rs, bs, _ := parser.Parse(original)
-	reconciler := NewReconciler(rs, bs)
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs)
 	match := func(r Record) bool {
 		return r.Date().ToString() == "2018-01-01"
 	}
@@ -119,8 +119,8 @@ func TestReconcilerClosesOpenRangeWithExtendingSummary(t *testing.T) {
     15:00-??? Will this close? I hope so!?!?
     2m
 `
-	rs, bs, _ := parser.Parse(original)
-	reconciler := NewReconciler(rs, bs)
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs)
 	match := func(r Record) bool {
 		return r.Date().ToString() == "2018-01-01"
 	}
@@ -138,8 +138,8 @@ func TestReconcilerClosesOpenRangeWithExtendingSummary(t *testing.T) {
 }
 
 func TestReconcileAddBlockIfOriginalIsEmpty(t *testing.T) {
-	rs, bs, _ := parser.Parse("")
-	reconciler := NewReconciler(rs, bs)
+	rs, _ := parser.Parse("")
+	reconciler := NewReconciler(rs)
 	date := Ɀ_Date_(3333, 1, 1)
 	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2000-05-05", 0},
@@ -152,8 +152,8 @@ func TestReconcileAddBlockToEnd(t *testing.T) {
 	original := `
 2018-01-01
     1h`
-	rs, bs, _ := parser.Parse(original)
-	reconciler := NewReconciler(rs, bs)
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs)
 	date := Ɀ_Date_(2018, 1, 2)
 	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2018-01-02", 0},
@@ -173,8 +173,8 @@ func TestReconcileAddBlockToEndWithTrailingNewlines(t *testing.T) {
     1h
 
 `
-	rs, bs, _ := parser.Parse(original)
-	reconciler := NewReconciler(rs, bs)
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs)
 	date := Ɀ_Date_(2018, 1, 2)
 	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2018-01-02", 0},
@@ -191,8 +191,8 @@ func TestReconcileAddBlockToEndWithTrailingNewlines(t *testing.T) {
 
 func TestReconcileAddBlockToBeginning(t *testing.T) {
 	original := "2018-01-02"
-	rs, bs, _ := parser.Parse(original)
-	reconciler := NewReconciler(rs, bs)
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs)
 	date := Ɀ_Date_(2018, 1, 1)
 	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2018-01-01", 0},
@@ -205,8 +205,8 @@ func TestReconcileAddBlockToBeginning(t *testing.T) {
 
 func TestReconcileAddBlockToBeginningWithLeadingNewlines(t *testing.T) {
 	original := "\n\n2018-01-02"
-	rs, bs, _ := parser.Parse(original)
-	reconciler := NewReconciler(rs, bs)
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs)
 	date := Ɀ_Date_(2018, 1, 1)
 	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2018-01-01", 0},
@@ -226,8 +226,8 @@ func TestReconcileAddBlockInBetween(t *testing.T) {
 
 2018-01-03
     3h`
-	rs, bs, _ := parser.Parse(original)
-	reconciler := NewReconciler(rs, bs)
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconciler(rs)
 	date := Ɀ_Date_(2018, 1, 2)
 	result, err := reconciler.InsertRecord(date, []InsertableText{
 		{"2018-01-02", 0},

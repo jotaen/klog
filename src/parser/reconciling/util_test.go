@@ -1,6 +1,7 @@
 package reconciling
 
 import (
+	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/parser/engine"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -11,7 +12,7 @@ func TestInsertInBetween(t *testing.T) {
 	before := engine.Split("first\nthird\nfourth")
 	after := insert(before, 1, []InsertableText{
 		{"second", 0},
-	}, stylePreferencesOrDefault(nil))
+	}, parser.DefaultStyle())
 	require.Len(t, after, 4)
 	assert.Equal(t, before[0].Original(), after[0].Original())
 	assert.Equal(t, 1, after[0].LineNumber)
@@ -30,10 +31,10 @@ func TestInsertAtBeginningAndEnd(t *testing.T) {
 	before := engine.Split("beginning\nend")
 	after := insert(before, 0, []InsertableText{
 		{"first", 0},
-	}, stylePreferencesOrDefault(nil))
+	}, parser.DefaultStyle())
 	after = insert(after, 3, []InsertableText{
 		{"last", 0},
-	}, stylePreferencesOrDefault(nil))
+	}, parser.DefaultStyle())
 	require.Len(t, after, 4)
 	assert.Equal(t, "first\n", after[0].Original())
 	assert.Equal(t, "beginning\n", after[1].Original())
@@ -46,7 +47,7 @@ func TestInsertMultipleTexts(t *testing.T) {
 	after := insert(before, 1, []InsertableText{
 		{"second", 0},
 		{"third", 1},
-	}, stylePreferencesOrDefault(nil))
+	}, parser.DefaultStyle())
 	require.Len(t, after, 5)
 	assert.Equal(t, "first\n", after[0].Original())
 	assert.Equal(t, 1, after[0].LineNumber)
@@ -62,9 +63,9 @@ func TestInsertMultipleTexts(t *testing.T) {
 
 func TestInsertWithLineEndingsAndIndentation(t *testing.T) {
 	before := engine.Split("bar")
-	after := insert(before, 0, []InsertableText{{"foo", 0}}, stylePreferencesOrDefault(nil))
-	after = insert(after, 2, []InsertableText{{"baz", 1}}, stylePreferences{"\t", "\r\n"})
-	after = insert(after, 0, []InsertableText{{"hello", 1}}, stylePreferencesOrDefault(nil))
+	after := insert(before, 0, []InsertableText{{"foo", 0}}, parser.DefaultStyle())
+	after = insert(after, 2, []InsertableText{{"baz", 1}}, parser.Style{LineEnding: "\r\n", Indentation: "\t"})
+	after = insert(after, 0, []InsertableText{{"hello", 1}}, parser.DefaultStyle())
 	require.Len(t, after, 4)
 	assert.Equal(t, "    hello\n", after[0].Original())
 	assert.Equal(t, "foo\n", after[1].Original())
@@ -74,7 +75,25 @@ func TestInsertWithLineEndingsAndIndentation(t *testing.T) {
 
 func TestInsertIntoEmptySlice(t *testing.T) {
 	var before []engine.Line
-	after := insert(before, 0, []InsertableText{{"Hello World", 0}}, stylePreferencesOrDefault(nil))
+	after := insert(before, 0, []InsertableText{{"Hello World", 0}}, parser.DefaultStyle())
 	require.Len(t, after, 1)
 	assert.Equal(t, "Hello World\n", after[0].Original())
+}
+
+func TestInsertRespectsExplicitStylePrefs(t *testing.T) {
+	result := insert(
+		[]engine.Line{
+			engine.NewLineFromString("Hello\r\n", 1),
+			engine.NewLineFromString("World!\r\n", 2),
+			engine.NewLineFromString("How are you?\r\n", 3),
+			engine.NewLineFromString("Bye.\r\n", 4),
+		},
+		3,
+		[]InsertableText{
+			{"I’m great.", 0},
+			{"(I hope you too.)", 1},
+		},
+		parser.Style{LineEnding: "\r\n", Indentation: "  "},
+	)
+	assert.Equal(t, "Hello\r\nWorld!\r\nHow are you?\r\nI’m great.\r\n  (I hope you too.)\r\nBye.\r\n", join(result))
 }

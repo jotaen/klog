@@ -159,11 +159,11 @@ func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, Error)
 	}
 	var allRecords []Record
 	for _, f := range files {
-		records, _, parserErrors := parser.Parse(f.Contents())
+		parsedRecords, parserErrors := parser.Parse(f.Contents())
 		if parserErrors != nil {
 			return nil, NewParserErrors(parserErrors)
 		}
-		allRecords = append(allRecords, records...)
+		allRecords = append(allRecords, parser.ToRecords(parsedRecords)...)
 	}
 	return allRecords, nil
 }
@@ -193,11 +193,11 @@ func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, handler ...reconci
 	if err != nil {
 		return err
 	}
-	records, blocks, parserErrors := parser.Parse(target.Contents())
+	parsedRecords, parserErrors := parser.Parse(target.Contents())
 	if parserErrors != nil {
 		return NewParserErrors(parserErrors)
 	}
-	baseReconciler := reconciling.NewReconciler(records, blocks)
+	baseReconciler := reconciling.NewReconciler(parsedRecords)
 	result, rErr := reconciling.Chain(baseReconciler, handler...)
 	if rErr != nil {
 		return NewErrorWithCode(

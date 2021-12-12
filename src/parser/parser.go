@@ -6,33 +6,53 @@ package parser
 import (
 	. "github.com/jotaen/klog/src"
 	. "github.com/jotaen/klog/src/parser/engine"
+	"strings"
 )
 
+// ParsedRecord is a record along with some meta information which is
+// obtained throughout the parsing process.
+type ParsedRecord struct {
+	Record
+
+	// Block contains the original lines of text.
+	Block Block
+
+	// Style contains the original styling preferences.
+	Style Style
+}
+
 // Parse parses a text into a list of Record datastructures. On success, it returns
-// the Record’s and the corresponding Block’s (both lists have the same arity).
-// Otherwise, it returns all encountered parser errors.
-func Parse(recordsAsText string) ([]Record, []Block, []Error) {
-	var records []Record
+// the parsed records. Otherwise, it returns all encountered parser errors.
+func Parse(recordsAsText string) ([]ParsedRecord, []Error) {
+	var results []ParsedRecord
 	var allErrs []Error
 	blocks := GroupIntoBlocks(Split(recordsAsText))
 	for _, block := range blocks {
-		record, errs := parseRecord(block.SignificantLines())
+		record, style, errs := parseRecord(block.SignificantLines())
 		if len(errs) > 0 {
 			allErrs = append(allErrs, errs...)
 			continue
 		}
-		records = append(records, record)
+		if block[0].LineEnding != "" {
+			style.LineEnding = block[0].LineEnding
+		}
+		results = append(results, ParsedRecord{
+			Record: record,
+			Block:  block,
+			Style:  style,
+		})
 	}
 	if len(allErrs) > 0 {
-		return nil, nil, allErrs
+		return nil, allErrs
 	}
-	return records, blocks, nil
+	return results, nil
 }
 
 var allowedIndentationStyles = []string{"    ", "   ", "  ", "\t"}
 
-func parseRecord(lines []Line) (Record, []Error) {
+func parseRecord(lines []Line) (Record, Style, []Error) {
 	var errs []Error
+	style := DefaultStyle()
 
 	// ========== HEADLINE ==========
 	record := func() Record {
@@ -46,14 +66,15 @@ func parseRecord(lines []Line) (Record, []Error) {
 
 		// Parse the date.
 		dateText, _ := headline.PeekUntil(IsSpaceOrTab)
-		date, dErr := NewDateFromString(dateText.ToString())
+		rDate, dErr := NewDateFromString(dateText.ToString())
 		if dErr != nil {
 			errs = append(errs, ErrorInvalidDate().New(headline.Line, headline.PointerPosition, dateText.Length()))
 			return nil
 		}
 		headline.Advance(dateText.Length())
 		headline.SkipWhile(IsSpaceOrTab)
-		r := NewRecord(date)
+		r := NewRecord(rDate)
+		style.UsesDashesInDate = strings.Contains(rDate.ToString(), "-")
 
 		// Check if there is a should-total set, and if so, parse it.
 		if headline.Peek() == '(' {
@@ -130,6 +151,7 @@ func parseRecord(lines []Line) (Record, []Error) {
 			// We should never make it here if the indentation could not be determined.
 			panic("Could not detect indentation")
 		}
+		style.Indentation = indentator.Style()
 		eErr := func() Error {
 			// Check for correct indentation.
 			entry := indentator.NewIndentedParseable(l, 1)
@@ -163,7 +185,14 @@ func parseRecord(lines []Line) (Record, []Error) {
 			}
 			entryStartPosition := startCandidate.PointerPosition
 			entry.Advance(startCandidate.Length())
+			style.Uses24HourClock = !(strings.HasSuffix(start.ToString(), "am") || strings.HasSuffix(start.ToString(), "pm"))
+
+			entryStartPositionEnds := entry.PointerPosition
 			entry.SkipWhile(Is(' '))
+			if entryStartPositionEnds == entry.PointerPosition {
+				style.UsesSpaceInRange = false
+			}
+
 			if entry.Peek() != '-' {
 				return ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, 1)
 			}
@@ -218,7 +247,7 @@ func parseRecord(lines []Line) (Record, []Error) {
 	}
 
 	if len(errs) > 0 {
-		return nil, errs
+		return nil, Style{}, errs
 	}
-	return record, nil
+	return record, style, nil
 }

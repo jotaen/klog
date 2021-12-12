@@ -28,20 +28,20 @@ func Chain(base Reconciler, handler ...Handler) (*Result, error) {
 
 func makeResult(ls []engine.Line, recordIndex uint) (*Result, error) {
 	newText := join(ls)
-	newRecords, _, pErrs := parser.Parse(newText)
+	newParseResults, pErrs := parser.Parse(newText)
 	if pErrs != nil {
 		// This is just a safe guard mechanism. If it happens, then there is a bug
 		// in the calling reconciler method.
 		return nil, errors.New("This operation wouldn’t result in a valid record")
 	}
 	return &Result{
-		newRecords[recordIndex],
+		newParseResults[recordIndex],
 		newText,
 	}, nil
 }
 
 // insert inserts some new lines into a text at a specific line number (position).
-func insert(ls []engine.Line, position int, texts []InsertableText, stylePrefs stylePreferences) []engine.Line {
+func insert(ls []engine.Line, position int, texts []InsertableText, style parser.Style) []engine.Line {
 	if position > len(ls)+1 {
 		panic("Out of bounds")
 	}
@@ -51,9 +51,9 @@ func insert(ls []engine.Line, position int, texts []InsertableText, stylePrefs s
 		if i >= position && offset < len(texts) {
 			line := ""
 			if texts[offset].Indentation > 0 {
-				line += stylePrefs.indentationStyle
+				line += style.Indentation
 			}
-			line += texts[offset].Text + stylePrefs.lineEndingStyle
+			line += texts[offset].Text + style.LineEnding
 			result[i] = engine.NewLineFromString(line, -999)
 			offset++
 		} else {
@@ -62,7 +62,7 @@ func insert(ls []engine.Line, position int, texts []InsertableText, stylePrefs s
 		result[i].LineNumber = i + 1
 	}
 	if position > 0 && result[position-1].LineEnding == "" {
-		result[position-1].LineEnding = stylePrefs.lineEndingStyle
+		result[position-1].LineEnding = style.LineEnding
 	}
 	return result
 }
