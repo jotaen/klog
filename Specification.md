@@ -33,7 +33,7 @@ Any amount of *entries* MAY appear afterwards.
 ### Date
 A *date* is a day that is representable in the Gregorian calendar.
 
-Each *record* MUST contain a *date*.
+> Examples: `2020-01-01`, `1984-08-30`, `2004/12/24`.
 
 It MUST be formatted according to one of the following patterns:
 - `YYYY-MM-DD` (RECOMMENDED),
@@ -44,15 +44,16 @@ It MUST be formatted according to one of the following patterns:
 ### Should-Total
 A *should-total* denotes the targeted total time of a *record*.
 
+> Examples: `(8h!)`, `(5h15m!)`, `(-3h30m!)`.
+
 A *should-total* MUST be a *duration* value
 followed by a `!`
-and wrapped in “parentheses”,
-e.g. `(8h!)` or `(-5h30m!)`.
+and wrapped in “parentheses”.
 
 ### Summary
 A *summary* is user-provided text for holding arbitrary information.
-There are two places where *summary* text MAY appear in *records*:
 
+There are two places where *summary* text MAY appear in *records*:
 - Underneath the *date*:
   In this case the *summary* is considered to be associated with the entire *record*.
   The *summary* MAY span multiple lines.
@@ -61,21 +62,22 @@ There are two places where *summary* text MAY appear in *records*:
   In this case the *summary* is only considered to be referring to the corresponding *entry*.
   The *summary* text follows the *entry* on the same line,
   and it ends at the end of that line.
-  It MUST be separated from the *entry* by one “space”
-  (there MAY be multiple “spaces”).
+  It MUST be separated from the *entry* by one “space”.
 
 ### Tags
 The purpose of *tags* is to help categorise *records* and *entries*.
 
+> Examples: `#gym`, `#24hours`, `#home_office`, `#読む`.
+
 Any amount of *tags* MAY appear anywhere within *summaries*.
 A *tag* MUST be a sequence of “letters”, “digits” or the `_` character,
-preceded by a single `#` character,
-e.g. `#gym`, `#24hours` or `#home_office`.
+preceded by a single `#` character.
 
 ### Entry
 *Entry* is an abstract term for time-related data.
 *Durations*, *ranges* and *open ranges* are instances of *entries*.
-A *summary* MAY be associated with an *entry* (see section Summary).
+
+> Examples (indentation omitted): `5h`, `5h Gardening`, `11:00 - 14:15`, `8:00 - 15:00 Long day at #school`.
 
 Each *entry* MUST appear on its own line and
 MUST be indented in one of the following ways:
@@ -86,30 +88,14 @@ MUST be indented in one of the following ways:
 The indentation style MUST be uniform within *records*.
 (It MAY differ between *records*, though.)
 
+A *summary* MAY be associated with an *entry* (see section Summary).
+
 ### Time
 A *time* is a value that represents a point in time throughout a day
 as it would be displayed by a wall clock (which divides a day into
-24 hours and every hour into 60 minutes),
-e.g. `9:00`, `23:18`, `6:30am`, `9:23pm` 
+24 hours and every hour into 60 minutes).
 
-A *time* value MUST consist of both an hour part and a minute part.
-Single-digit hour parts MAY be padded with a `0`.
-The minute part MUST always contain two “digits”.
-
-As default, *times* are to be interpreted as 24-hour clock values.
-An `am` or `pm` suffix MAY be used to denote that the value is
-to be interpreted as 12-hour clock value.
-
-### Range
-A *range* is an *entry* that represents the time span between two points in time.
-
-It MUST consist of two values that denote the start and the end.
-Start and end MUST be written in chronological order.
-They MAY be equal.
-
-There MUST be a `-` between the two values.
-There MAY appear “spaces” on either side of the `-`,
-in which case it is RECOMMENDED to use exactly one “space” on both sides of the dash.
+> Examples: `9:00`, `23:18`, `6:30am`, `9:23pm`, `1:00>`, `1:00am>`, `<23:00`.
 
 *Time* values MAY be *shifted* to the next or to the previous day:
 - To associate the *time* with the day before the *record’s* *date*,
@@ -119,13 +105,35 @@ in which case it is RECOMMENDED to use exactly one “space” on both sides of 
   a `>` suffix MUST be used,
   e.g. `1:30>`.
 
-Examples of *ranges* with *shifted times*:
-`<23:00 - 5:00`, `19:00 - 0:30>`, `<22:25 - <23:59`, `<15:00 - 12:00>`, `0:30> - 4:00>`.
+A *time* value MUST consist of both an hour part and a minute part:
+- The minute part MUST be between 0-59 (inclusive).
+  The minute part MUST always contain two “digits”.
+- The hour part MUST be between 0-23 (inclusive).
+  Single-digit hour parts MAY be padded with a `0`.
+
+As default, *times* are to be interpreted as 24-hour clock values.
+An `am` or `pm` suffix MAY be used to denote that the value is
+to be interpreted as 12-hour clock value.
+
+### Range
+A *range* is an *entry* that represents the time span between two points in time.
+
+> Examples: `8:00 - 9:00`, `11:00am - 1:00pm`, `<23:40 - 3:12`, `0:30> - 4:00>`.
+
+It MUST consist of two values that denote the start and the end.
+Start and end MUST be written in chronological order.
+They MAY be equal.
+
+There MUST be a `-` between the two values.
+There MAY appear “spaces” on either side of the `-`,
+in which case it is RECOMMENDED to use exactly one “space” on both sides of the dash.
 
 ### Open range
 An *open range* is an *entry*
 that can be used to track the start *time* of an activity,
 i.e. the end *time* is not determined yet.
+
+> Examples: `05:17 - ?`, `4:00pm - ?`.
 
 *Open ranges* are formatted in the same way as *ranges*,
 except that the end *time* MUST be replaced by a placeholder.
@@ -138,10 +146,12 @@ The placeholder MUST NOT be *shifted*.
 
 ### Duration
 A *duration* is an *entry* that represents a period of time.
+
+> Examples: `1h`, `5m`, `4h12m`, `-8h30m`.
+
 It contains an amount of hours and/or an amount of minutes.
 (So it MUST either contain one of these two or both.)
 The hour part MUST be written first.
-Examples are: `1h`, `5m`, `4h12m`, `-8h30m`.
 
 The hour part MUST be an “integer”
 which MUST be immediately followed by the character `h`.
