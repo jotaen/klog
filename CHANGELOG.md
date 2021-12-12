@@ -1,6 +1,9 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## Upcoming
+- **[ FEATURE ]** Allow times to be `24:00`, e.g. `22:00 - 24:00`.
+
 ## v3.2
 - **[ BREAKING ]** Don’t allow mixing the indentation style within a
   record. (It might still differ *between* records, though.) For example: if
