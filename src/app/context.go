@@ -55,7 +55,7 @@ type Context interface {
 	ManipulateBookmarks(func(BookmarksCollection) Error) Error
 
 	// OpenInFileBrowser tries to open the file explorer at the location of the file.
-	OpenInFileBrowser(File) Error
+	OpenInFileBrowser(FileOrBookmarkName) Error
 
 	// OpenInEditor tries to open a file or bookmark in the user’s preferred $EDITOR.
 	OpenInEditor(FileOrBookmarkName, func(string)) Error
@@ -282,15 +282,23 @@ func (ctx *context) bookmarkDatabasePath() File {
 	return NewFileOrPanic(ctx.KlogFolder() + "bookmarks.json")
 }
 
-func (ctx *context) OpenInFileBrowser(target File) Error {
-	cmd := exec.Command("open", target.Location())
-	err := cmd.Run()
-	if err != nil {
-		return NewError(
-			"Failed to open file browser",
-			err.Error(),
-			err,
-		)
+func (ctx *context) OpenInFileBrowser(fileArg FileOrBookmarkName) Error {
+	target, rErr := ctx.retrieveTargetFile(fileArg)
+	if rErr != nil {
+		return rErr
+	}
+	for _, fileExplorer := range POTENTIAL_FILE_EXLORERS {
+		cmd := exec.Command(fileExplorer, target.Location())
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		err := cmd.Run()
+		if err != nil {
+			return NewError(
+				"Failed to open file browser",
+				err.Error(),
+				err,
+			)
+		}
 	}
 	return nil
 }
