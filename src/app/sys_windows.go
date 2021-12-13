@@ -3,12 +3,14 @@
 package app
 
 import (
+	"os"
 	"syscall"
+	"unsafe"
 )
 
 var POTENTIAL_EDITORS = []string{"notepad"}
 
-var POTENTIAL_FILE_EXLORERS = []string{"start"}
+var POTENTIAL_FILE_EXLORERS = []string{"cmd.exe /C start"}
 
 func flagAsHidden(path string) {
 	winFileName, err := syscall.UTF16PtrFromString(path)

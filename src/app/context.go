@@ -282,23 +282,32 @@ func (ctx *context) bookmarkDatabasePath() File {
 	return NewFileOrPanic(ctx.KlogFolder() + "bookmarks.json")
 }
 
+func tryCommands(commands []string, additionalArg string) bool {
+	for _, command := range commands {
+		args := strings.Split(command, " ")
+		args = append(args, additionalArg)
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		err := cmd.Run()
+		if err == nil {
+			return true
+		}
+	}
+	return false
+}
+
 func (ctx *context) OpenInFileBrowser(fileArg FileOrBookmarkName) Error {
 	target, rErr := ctx.retrieveTargetFile(fileArg)
 	if rErr != nil {
 		return rErr
 	}
-	for _, fileExplorer := range POTENTIAL_FILE_EXLORERS {
-		cmd := exec.Command(fileExplorer, target.Location())
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		err := cmd.Run()
-		if err != nil {
-			return NewError(
-				"Failed to open file browser",
-				err.Error(),
-				err,
-			)
-		}
+	hasSucceeded := tryCommands(POTENTIAL_FILE_EXLORERS, target.Location())
+	if !hasSucceeded {
+		return NewError(
+			"Failed to open file browser",
+			"Opening a file browser doesn’t seem possible on your system.",
+			nil)
 	}
 	return nil
 }
@@ -310,19 +319,13 @@ func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(stri
 	}
 	hint := "You can specify your preferred editor via the $EDITOR environment variable.\n"
 	preferredEditor := os.Getenv("EDITOR")
-	editors := append([]string{preferredEditor}, POTENTIAL_EDITORS...)
-	for _, editor := range editors {
-		cmd := exec.Command(editor, target.Path())
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		err := cmd.Run()
-		if err == nil {
-			if preferredEditor == "" {
-				// Inform the user that they can configure their editor:
-				printHint(hint)
-			}
-			return nil
+	hasSucceeded := tryCommands(append([]string{preferredEditor}, POTENTIAL_EDITORS...), target.Path())
+	if hasSucceeded {
+		if preferredEditor == "" {
+			// Inform the user that they can configure their editor:
+			printHint(hint)
 		}
+		return nil
 	}
 	return NewError(
 		"Cannot open any editor",

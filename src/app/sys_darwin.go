@@ -2,7 +2,7 @@
 
 package app
 
-var POTENTIAL_EDITORS = []string{"vim", "vi", "nano", "pico"}
+var POTENTIAL_EDITORS = []string{"vim", "vi", "nano", "pico", "open -a TextEdit"}
 
 var POTENTIAL_FILE_EXLORERS = []string{"open"}
 

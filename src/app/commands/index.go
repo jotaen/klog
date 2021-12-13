@@ -24,7 +24,7 @@ type Cli struct {
 
 	// Misc
 	Edit    Edit    `cmd:"" group:"Misc" help:"Opens a file or bookmark in your editor"`
-	Goto    Goto    `cmd:"" group:"Misc" help:"Opens directory of file in your file explorer"`
+	Goto    Goto    `cmd:"" group:"Misc" help:"Opens the file explorer at the given location"`
 	Json    Json    `cmd:"" group:"Misc" help:"Converts records to JSON"`
 	Info    Info    `cmd:"" group:"Misc" default:"withargs" help:"Displays meta info about klog"`
 	Widget  Widget  `cmd:"" group:"Misc" help:"Starts menu bar widget (MacOS only)" hidden:""`
