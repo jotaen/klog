@@ -21,6 +21,7 @@ type Cli struct {
 	Bookmarks Bookmarks `cmd:"" group:"Bookmarks" help:"Named aliases for often-used files"`
 	Bookmark  Bookmarks `cmd:"" group:"Bookmarks" hidden:"" help:"Alias"`
 	Bm        Bookmarks `cmd:"" group:"Bookmarks" hidden:"" help:"Alias"`
+	Bk        Bookmarks `cmd:"" group:"Bookmarks" hidden:"" help:"Alias"`
 
 	// Misc
 	Edit    Edit    `cmd:"" group:"Misc" help:"Opens a file or bookmark in your editor"`

@@ -7,18 +7,18 @@ import (
 )
 
 type Bookmarks struct {
-	List BookmarksList `cmd:"" name:"list" help:"Displays all bookmarks"`
-	Ls   BookmarksList `cmd:"" name:"ls" hidden:"" help:"Alias for 'list'"`
+	List BookmarksList `cmd:"" help:"Displays all bookmarks"`
+	Ls   BookmarksList `cmd:"" hidden:"" help:"Alias for 'list'"`
 
-	Set BookmarksSet `cmd:"" name:"set" help:"Defines a bookmark (or overwrites an existing one)"`
-	New BookmarksSet `cmd:"" name:"new" hidden:"" help:"Alias for 'set'"`
+	Set BookmarksSet `cmd:"" help:"Defines a bookmark (or overwrites an existing one)"`
+	New BookmarksSet `cmd:"" hidden:"" help:"Alias for 'set'"`
 
-	Unset BookmarksUnset `cmd:"" name:"unset" help:"Removes a bookmark from the collection"`
-	Rm    BookmarksUnset `cmd:"" name:"rm" hidden:"" help:"Alias for 'unset'"`
+	Unset BookmarksUnset `cmd:"" help:"Removes a bookmark from the collection"`
+	Rm    BookmarksUnset `cmd:"" hidden:"" help:"Alias for 'unset'"`
 
-	Clear BookmarksClear `cmd:"" name:"clear" help:"Clears entire bookmark collection"`
+	Clear BookmarksClear `cmd:"" help:"Clears entire bookmark collection"`
 
-	Info BookmarksInfo `cmd:"" name:"get" help:"Prints file information for a bookmark"`
+	Info BookmarksInfo `cmd:"" help:"Prints file information for a bookmark"`
 }
 
 func (opt *Bookmarks) Help() string {
