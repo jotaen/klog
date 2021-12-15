@@ -3,6 +3,9 @@
 
 ## Upcoming
 - **[ FEATURE ]** Allow times to be `24:00`, e.g. `22:00 - 24:00`.
+- **[ FEATURE ]** Add `klog goto` command for opening the file explorer
+  at the location of a file or bookmark.
+- **[ FEATURE ]** Add `klog bookmark info` command.
 
 ## v3.2
 - **[ BREAKING ]** Don’t allow mixing the indentation style within a
