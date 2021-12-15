@@ -55,7 +55,7 @@ type Context interface {
 	ManipulateBookmarks(func(BookmarksCollection) Error) Error
 
 	// OpenInFileBrowser tries to open the file explorer at the location of the file.
-	OpenInFileBrowser(File) Error
+	OpenInFileBrowser(FileOrBookmarkName) Error
 
 	// OpenInEditor tries to open a file or bookmark in the user’s preferred $EDITOR.
 	OpenInEditor(FileOrBookmarkName, func(string)) Error
@@ -282,15 +282,32 @@ func (ctx *context) bookmarkDatabasePath() File {
 	return NewFileOrPanic(ctx.KlogFolder() + "bookmarks.json")
 }
 
-func (ctx *context) OpenInFileBrowser(target File) Error {
-	cmd := exec.Command("open", target.Location())
-	err := cmd.Run()
-	if err != nil {
+func tryCommands(commands []string, additionalArg string) bool {
+	for _, command := range commands {
+		args := strings.Split(command, " ")
+		args = append(args, additionalArg)
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		err := cmd.Run()
+		if err == nil {
+			return true
+		}
+	}
+	return false
+}
+
+func (ctx *context) OpenInFileBrowser(fileArg FileOrBookmarkName) Error {
+	target, rErr := ctx.retrieveTargetFile(fileArg)
+	if rErr != nil {
+		return rErr
+	}
+	hasSucceeded := tryCommands(POTENTIAL_FILE_EXLORERS, target.Location())
+	if !hasSucceeded {
 		return NewError(
 			"Failed to open file browser",
-			err.Error(),
-			err,
-		)
+			"Opening a file browser doesn’t seem possible on your system.",
+			nil)
 	}
 	return nil
 }
@@ -302,19 +319,13 @@ func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(stri
 	}
 	hint := "You can specify your preferred editor via the $EDITOR environment variable.\n"
 	preferredEditor := os.Getenv("EDITOR")
-	editors := append([]string{preferredEditor}, POTENTIAL_EDITORS...)
-	for _, editor := range editors {
-		cmd := exec.Command(editor, target.Path())
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		err := cmd.Run()
-		if err == nil {
-			if preferredEditor == "" {
-				// Inform the user that they can configure their editor:
-				printHint(hint)
-			}
-			return nil
+	hasSucceeded := tryCommands(append([]string{preferredEditor}, POTENTIAL_EDITORS...), target.Path())
+	if hasSucceeded {
+		if preferredEditor == "" {
+			// Inform the user that they can configure their editor:
+			printHint(hint)
 		}
+		return nil
 	}
 	return NewError(
 		"Cannot open any editor",

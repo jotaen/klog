@@ -17,6 +17,8 @@ type Bookmarks struct {
 	Rm    BookmarksUnset `cmd:"" name:"rm" hidden:"" help:"Alias for 'unset'"`
 
 	Clear BookmarksClear `cmd:"" name:"clear" help:"Clears entire bookmark collection"`
+
+	Info BookmarksInfo `cmd:"" name:"get" help:"Prints file information for a bookmark"`
 }
 
 func (opt *Bookmarks) Help() string {
@@ -41,6 +43,36 @@ func (opt *BookmarksList) Run(ctx app.Context) error {
 	}
 	for _, b := range bc.All() {
 		ctx.Print(b.Name().ValuePretty() + " -> " + b.Target().Path() + "\n")
+	}
+	return nil
+}
+
+type BookmarksInfo struct {
+	Dir  bool   `name:"dir" type:"string" help:"Display the directory"`
+	File bool   `name:"file" type:"string" help:"Display the file name"`
+	Name string `arg:"" name:"bookmark" type:"string" help:"The path of the bookmark"`
+}
+
+func (opt *BookmarksInfo) Run(ctx app.Context) error {
+	bc, err := ctx.ReadBookmarks()
+	if err != nil {
+		return err
+	}
+	bookmark := bc.Get(app.NewName(opt.Name))
+	if bookmark == nil {
+		return app.NewErrorWithCode(
+			app.NO_SUCH_BOOKMARK_ERROR,
+			"No such bookmark",
+			"There is no bookmark with that alias",
+			nil,
+		)
+	}
+	if opt.Dir {
+		ctx.Print(bookmark.Target().Location() + "\n")
+	} else if opt.File {
+		ctx.Print(bookmark.Target().Name() + "\n")
+	} else {
+		ctx.Print(bookmark.Target().Path() + "\n")
 	}
 	return nil
 }
