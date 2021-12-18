@@ -36,7 +36,6 @@ func (opt *Start) Run(ctx app.Context) error {
 			},
 		},
 
-		// Start new open range at that date.
 		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
 			return reconciler.StartOpenRange(time, opt.Summary)
 		},

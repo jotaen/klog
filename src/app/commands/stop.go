@@ -27,6 +27,7 @@ func (opt *Stop) Run(ctx app.Context) error {
 	time := opt.AtTime(ctx.Now())
 	return ctx.ReconcileFile(
 		opt.OutputFileArgs.File,
+
 		[]reconciling.Creator{
 			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
 				return reconciling.NewReconcilerAtRecord(parsedRecords, date)
@@ -39,6 +40,7 @@ func (opt *Stop) Run(ctx app.Context) error {
 				return reconciling.NewReconcilerAtRecord(parsedRecords, date.PlusDays(-1))
 			},
 		},
+
 		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
 			return reconciler.CloseOpenRange(time, opt.Summary)
 		},

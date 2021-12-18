@@ -36,11 +36,14 @@ type Time interface {
 	// ToString serialises the time, e.g. `8:00` or `23:00>`
 	ToString() string
 
+	// ToStringWithFormat serialises the date according to the given format.
 	ToStringWithFormat(TimeFormat) string
 
+	// Format returns the current formatting.
 	Format() TimeFormat
 }
 
+// TimeFormat contains the formatting options for the Time.
 type TimeFormat struct {
 	Is24HourClock bool
 }

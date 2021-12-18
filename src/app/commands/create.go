@@ -25,11 +25,13 @@ func (opt *Create) Run(ctx app.Context) error {
 	date := opt.AtDate(ctx.Now())
 	return ctx.ReconcileFile(
 		opt.OutputFileArgs.File,
+
 		[]reconciling.Creator{
 			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
 				return reconciling.NewReconcilerAtNewRecord(parsedRecords, date, opt.ShouldTotal)
 			},
 		},
+
 		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
 			return reconciler.MakeResult()
 		},

@@ -6,8 +6,10 @@ import (
 	"github.com/jotaen/klog/src/parser/engine"
 )
 
+// Creator is a function interface for creating a new reconciler.
 type Creator func(parsedRecords []parser.ParsedRecord) *Reconciler
 
+// NewReconcilerAtNewRecord creates a reconciler for a new record at a given date.
 func NewReconcilerAtNewRecord(parsedRecords []parser.ParsedRecord, newDate Date, shouldTotal ShouldTotal) *Reconciler {
 	insertPointer, newRecordIndex, shallPrepend := func() (int, int, bool) {
 		if len(parsedRecords) == 0 {
@@ -57,6 +59,7 @@ func NewReconcilerAtNewRecord(parsedRecords []parser.ParsedRecord, newDate Date,
 	return reconciler
 }
 
+// NewReconcilerAtRecord creates a reconciler for an existing record at a given date.
 func NewReconcilerAtRecord(parsedRecords []parser.ParsedRecord, atDate Date) *Reconciler {
 	index := -1
 	for i, r := range parsedRecords {

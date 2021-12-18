@@ -43,11 +43,14 @@ type Date interface {
 	// ToString serialises the date, e.g. `2017-04-23`.
 	ToString() string
 
+	// ToStringWithFormat serialises the date according to the given format.
 	ToStringWithFormat(DateFormat) string
 
+	// Format returns the current formatting.
 	Format() DateFormat
 }
 
+// DateFormat contains the formatting options for the Date.
 type DateFormat struct {
 	UseDashes bool
 }

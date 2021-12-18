@@ -16,6 +16,7 @@ import (
 	"regexp"
 )
 
+// Reconciler is a mechanism to manipulate record data in a file.
 type Reconciler struct {
 	record          Record
 	style           *parser.Style
@@ -24,20 +25,22 @@ type Reconciler struct {
 	recordPointer   int
 }
 
+// Result is the result of an applied reconciler.
 type Result struct {
 	Record        Record
 	AllSerialised string
 }
 
+// Reconcile is a function interface for applying a reconciler.
 type Reconcile func(*Reconciler) (*Result, error)
 
-// AppendEntry tries to find the matching record and append a new entry to it.
+// AppendEntry adds a new entry to the end of the record.
 func (r *Reconciler) AppendEntry(newEntry string) (*Result, error) {
 	r.insert(r.lastLinePointer, []insertableText{{newEntry, 1}})
 	return r.MakeResult()
 }
 
-// CloseOpenRange tries to find the matching record and closes its open time range.
+// CloseOpenRange tries to close the open time range.
 func (r *Reconciler) CloseOpenRange(endTime Time, additionalSummary string) (*Result, error) {
 	openRangeEntryIndex := -1
 	for i, e := range r.record.Entries() {
@@ -91,13 +94,14 @@ func (r *Reconciler) StartOpenRange(startTime Time, entrySummary string) (*Resul
 	return r.AppendEntry(newEntryLine)
 }
 
+// MakeResult returns the reconciled data.
 func (r *Reconciler) MakeResult() (*Result, error) {
 	text := ""
 	for _, l := range r.lines {
 		text += l.Original()
 	}
 
-	// As a safe guard, make sure the result is parseable.
+	// As a safeguard, make sure the result is parseable.
 	newRecords, errs := parser.Parse(text)
 	if errs != nil {
 		return nil, errors.New("This operation wouldn’t result in a valid record")
@@ -111,8 +115,6 @@ func (r *Reconciler) MakeResult() (*Result, error) {
 
 var blankLine = insertableText{"", 0}
 
-// insertableText is for inserting lines of text into a list of Line’s,
-// without needing to know anything about indentation or line ending style.
 type insertableText struct {
 	text        string
 	indentation int

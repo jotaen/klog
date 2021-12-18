@@ -40,7 +40,6 @@ func (opt *Track) Run(ctx app.Context) error {
 			},
 		},
 
-		// Append entry.
 		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
 			return reconciler.AppendEntry(value)
 		},
@@ -49,7 +48,7 @@ func (opt *Track) Run(ctx app.Context) error {
 
 func sanitiseQuotedLeadingDash(text string) string {
 	// When passing entries like `-45m` the leading dash must be escaped
-	// otherwise it’s treated like a flag. Therefore we have to remove
+	// otherwise it’s treated like a flag. Therefore, we have to remove
 	// the potential escaping backslash.
 	return strings.TrimPrefix(text, "\\")
 }
