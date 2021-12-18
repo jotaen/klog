@@ -24,26 +24,40 @@ type AtDateArgs struct {
 	Date      Date `name:"date" short:"d" help:"The date of the record"`
 }
 
-func (args *AtDateArgs) AtDate(now gotime.Time) Date {
+func (args *AtDateArgs) AtDate(now gotime.Time) (Date, bool) {
 	if args.Date != nil {
-		return args.Date
+		return args.Date, false
 	}
 	today := NewDateFromTime(now)
 	if args.Yesterday {
-		return today.PlusDays(-1)
+		return today.PlusDays(-1), false
 	}
-	return today
+	return today, true
 }
 
-type AtTimeArgs struct {
+type AtDateAndTimeArgs struct {
+	AtDateArgs
 	Time Time `name:"time" short:"t" help:"Specify the time (defaults to now)"`
 }
 
-func (args *AtTimeArgs) AtTime(now gotime.Time) Time {
+func (args *AtDateAndTimeArgs) AtTime(now gotime.Time) (Time, bool, app.Error) {
 	if args.Time != nil {
-		return args.Time
+		return args.Time, false, nil
 	}
-	return NewTimeFromTime(now)
+	date, _ := args.AtDate(now)
+	today := NewDateFromTime(now)
+	if today.IsEqualTo(date) {
+		return NewTimeFromTime(now), true, nil
+	} else if today.PlusDays(-1).IsEqualTo(date) {
+		shiftedTime, _ := NewTimeFromTime(now).Add(NewDuration(24, 0))
+		return shiftedTime, true, nil
+	}
+	return nil, false, app.NewErrorWithCode(
+		app.LOGICAL_ERROR,
+		"Missing time parameter",
+		"Please specify a time value for dates in the past",
+		nil,
+	)
 }
 
 type DiffArgs struct {

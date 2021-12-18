@@ -113,6 +113,10 @@ func (r *Reconciler) MakeResult() (*Result, error) {
 	}, nil
 }
 
+func (r *Reconciler) Date() Date {
+	return r.record.Date()
+}
+
 var blankLine = insertableText{"", 0}
 
 type insertableText struct {

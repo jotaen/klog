@@ -8,8 +8,7 @@ import (
 )
 
 type Start struct {
-	lib.AtTimeArgs
-	lib.AtDateArgs
+	lib.AtDateAndTimeArgs
 	Summary string `name:"summary" short:"s" help:"Summary text for this entry"`
 	lib.NoStyleArgs
 	lib.OutputFileArgs
@@ -22,8 +21,12 @@ The start time is the current time (or whatever is specified by --time).`
 
 func (opt *Start) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
-	date := opt.AtDate(ctx.Now())
-	time := opt.AtTime(ctx.Now())
+	now := ctx.Now()
+	date, _ := opt.AtDate(now)
+	time, _, err := opt.AtTime(now)
+	if err != nil {
+		return err
+	}
 	return ctx.ReconcileFile(
 		opt.OutputFileArgs.File,
 

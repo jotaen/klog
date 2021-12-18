@@ -26,7 +26,7 @@ and to avoid the text being processed by your shell.`
 
 func (opt *Track) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
-	date := opt.AtDate(ctx.Now())
+	date, _ := opt.AtDate(ctx.Now())
 	value := sanitiseQuotedLeadingDash(opt.Entry)
 	return ctx.ReconcileFile(
 		opt.OutputFileArgs.File,

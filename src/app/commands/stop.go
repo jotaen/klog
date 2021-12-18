@@ -9,8 +9,7 @@ import (
 )
 
 type Stop struct {
-	lib.AtTimeArgs
-	lib.AtDateArgs
+	lib.AtDateAndTimeArgs
 	Summary string `name:"summary" short:"s" help:"Text to append to the entry summary"`
 	lib.NoStyleArgs
 	lib.OutputFileArgs
@@ -23,8 +22,12 @@ will replace the end placeholder with the current time (or the one specified via
 
 func (opt *Stop) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
-	date := opt.AtDate(ctx.Now())
-	time := opt.AtTime(ctx.Now())
+	now := ctx.Now()
+	date, isAutoDate := opt.AtDate(now)
+	time, isAutoTime, err := opt.AtTime(now)
+	if err != nil {
+		return err
+	}
 	return ctx.ReconcileFile(
 		opt.OutputFileArgs.File,
 
@@ -33,11 +36,13 @@ func (opt *Stop) Run(ctx app.Context) error {
 				return reconciling.NewReconcilerAtRecord(parsedRecords, date)
 			},
 			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
-				adjustedTime, err := time.Add(NewDuration(24, 0))
-				if err == nil {
-					time = adjustedTime
+				if isAutoDate && isAutoTime {
+					// Only fall back to yesterday if no explicit date has been given.
+					// Otherwise, it wouldn’t make sense to decrement the day.
+					time, _ = time.Add(NewDuration(24, 0))
+					return reconciling.NewReconcilerAtRecord(parsedRecords, date.PlusDays(-1))
 				}
-				return reconciling.NewReconcilerAtRecord(parsedRecords, date.PlusDays(-1))
+				return nil
 			},
 		},
 

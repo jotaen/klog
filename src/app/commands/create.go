@@ -22,7 +22,7 @@ func (opt *Create) Help() string {
 
 func (opt *Create) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
-	date := opt.AtDate(ctx.Now())
+	date, _ := opt.AtDate(ctx.Now())
 	return ctx.ReconcileFile(
 		opt.OutputFileArgs.File,
 
