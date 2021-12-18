@@ -27,7 +27,7 @@ func NewReconcilerAtNewRecord(parsedRecords []parser.ParsedRecord, newDate Date,
 	}()
 	style := parser.DefaultStyle()
 	if len(parsedRecords) > 0 {
-		style = parsedRecords[0].Style
+		style = parsedRecords[len(parsedRecords)-1].Style
 	}
 	reconciler := &Reconciler{
 		record:          NewRecord(newDate),

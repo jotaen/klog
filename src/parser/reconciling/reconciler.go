@@ -70,7 +70,7 @@ func (r *Reconciler) CloseOpenRange(endTime Time, additionalSummary string) (*Re
 }
 
 // StartOpenRange appends a new open range entry in a record.
-func (r *Reconciler) StartOpenRange(atDate Date, startTime Time, entrySummary string) (*Result, error) {
+func (r *Reconciler) StartOpenRange(startTime Time, entrySummary string) (*Result, error) {
 	openRangeEntryIndex := -1
 	for i, e := range r.record.Entries() {
 		e.Unbox(
@@ -85,7 +85,12 @@ func (r *Reconciler) StartOpenRange(atDate Date, startTime Time, entrySummary st
 	if openRangeEntryIndex != -1 {
 		return nil, errors.New("There is already an open range in this record.")
 	}
-	newEntryLine := startTime.ToString() + " - ?"
+	timeFormat := TimeFormat{Is24HourClock: r.style.Uses24HourClock}
+	dashSpacing := " "
+	if !r.style.UsesSpaceInRange {
+		dashSpacing = ""
+	}
+	newEntryLine := startTime.ToStringWithFormat(timeFormat) + dashSpacing + "-" + dashSpacing + "?"
 	if len(entrySummary) > 0 {
 		newEntryLine += " " + entrySummary
 	}

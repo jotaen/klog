@@ -110,6 +110,58 @@ func TestReconcilerRejectsInvalidEntry(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestReconcilerStartsOpenRange(t *testing.T) {
+	original := `
+2018-01-01
+	5h22m
+`
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
+	require.NotNil(t, reconciler)
+	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), "")
+	require.Nil(t, err)
+	assert.Equal(t, `
+2018-01-01
+	5h22m
+	8:03 - ?
+`, result.AllSerialised)
+}
+
+func TestReconcilerStartsOpenRangeWithNewSummary(t *testing.T) {
+	original := `
+2018-01-01
+	5h22m
+`
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
+	require.NotNil(t, reconciler)
+	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), "Started!")
+	require.Nil(t, err)
+	assert.Equal(t, `
+2018-01-01
+	5h22m
+	8:03 - ? Started!
+`, result.AllSerialised)
+}
+
+func TestReconcilerStartsOpenRangeWithStyle(t *testing.T) {
+	original := `
+2018-01-01
+	2:00am-3:00am
+`
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
+	require.NotNil(t, reconciler)
+	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), "")
+	require.Nil(t, err)
+	// Conforms to both am/pm and spaces around dash
+	assert.Equal(t, `
+2018-01-01
+	2:00am-3:00am
+	8:03am-?
+`, result.AllSerialised)
+}
+
 func TestReconcilerClosesOpenRangeWithNewSummary(t *testing.T) {
 	original := `
 2018-01-01
@@ -123,6 +175,22 @@ func TestReconcilerClosesOpenRangeWithNewSummary(t *testing.T) {
 	assert.Equal(t, `
 2018-01-01
     15:00 - 15:22 Finished.
+`, result.AllSerialised)
+}
+
+func TestReconcilerClosesOpenRangeWithStyle(t *testing.T) {
+	original := `
+2010-04-27
+    3:00pm - ??
+`
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2010, 4, 27))
+	require.NotNil(t, reconciler)
+	result, err := reconciler.CloseOpenRange(Ɀ_Time_(15, 30), "")
+	require.Nil(t, err)
+	assert.Equal(t, `
+2010-04-27
+    3:00pm - 3:30pm
 `, result.AllSerialised)
 }
 
@@ -247,4 +315,20 @@ func TestReconcileAddRecordWithShouldTotal(t *testing.T) {
 
 2018-01-02 (5h31m!)
 `, result.AllSerialised)
+}
+
+func TestReconcileRespectsExistingStylePref(t *testing.T) {
+	for _, x := range []struct {
+		original string
+		expected string
+	}{
+		{"3145/06/15\n", "3145/06/15\n\n3145/06/16\n"},
+		{"3145/06/15\n\n3145-06-15\n", "3145/06/15\n\n3145-06-15\n\n3145-06-16\n"},
+	} {
+		rs, _ := parser.Parse(x.original)
+		reconciler := NewReconcilerAtNewRecord(rs, Ɀ_Date_(3145, 6, 16), nil)
+		result, err := reconciler.MakeResult()
+		require.Nil(t, err)
+		assert.Equal(t, x.expected, result.AllSerialised)
+	}
 }
