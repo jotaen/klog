@@ -60,11 +60,10 @@ func (r *Reconciler) CloseOpenRange(endTime Time, additionalSummary string) (*Re
 		// existing summary text.
 		additionalSummary = " " + additionalSummary
 	}
-	timeFormat := TimeFormat{Is24HourClock: r.style.Uses24HourClock}
 	r.lines[openRangeLineIndex].Text = regexp.MustCompile(`^(.*?)\?+(.*)$`).
 		ReplaceAllString(
 			r.lines[openRangeLineIndex].Text,
-			"${1}"+endTime.ToStringWithFormat(timeFormat)+"${2}"+additionalSummary,
+			"${1}"+endTime.ToStringWithFormat(r.style.TimeFormat)+"${2}"+additionalSummary,
 		)
 	return r.MakeResult()
 }
@@ -85,12 +84,7 @@ func (r *Reconciler) StartOpenRange(startTime Time, entrySummary string) (*Resul
 	if openRangeEntryIndex != -1 {
 		return nil, errors.New("There is already an open range in this record.")
 	}
-	timeFormat := TimeFormat{Is24HourClock: r.style.Uses24HourClock}
-	dashSpacing := " "
-	if !r.style.UsesSpaceInRange {
-		dashSpacing = ""
-	}
-	newEntryLine := startTime.ToStringWithFormat(timeFormat) + dashSpacing + "-" + dashSpacing + "?"
+	newEntryLine := startTime.ToStringWithFormat(r.style.TimeFormat) + r.style.SpacingInRange + "-" + r.style.SpacingInRange + "?"
 	if len(entrySummary) > 0 {
 		newEntryLine += " " + entrySummary
 	}

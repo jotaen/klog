@@ -37,6 +37,8 @@ type Time interface {
 	ToString() string
 
 	ToStringWithFormat(TimeFormat) string
+
+	Format() TimeFormat
 }
 
 type TimeFormat struct {
@@ -214,4 +216,8 @@ func (t *time) ToStringWithFormat(f TimeFormat) string {
 	c := *t
 	c.format = f
 	return c.ToString()
+}
+
+func (t *time) Format() TimeFormat {
+	return t.format
 }

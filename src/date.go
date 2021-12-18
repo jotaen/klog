@@ -44,6 +44,8 @@ type Date interface {
 	ToString() string
 
 	ToStringWithFormat(DateFormat) string
+
+	Format() DateFormat
 }
 
 type DateFormat struct {
@@ -181,4 +183,8 @@ func (d *date) ToStringWithFormat(f DateFormat) string {
 	nDate := *d
 	nDate.format = f
 	return nDate.ToString()
+}
+
+func (d *date) Format() DateFormat {
+	return d.format
 }

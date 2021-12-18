@@ -6,7 +6,6 @@ package parser
 import (
 	. "github.com/jotaen/klog/src"
 	. "github.com/jotaen/klog/src/parser/engine"
-	"strings"
 )
 
 // ParsedRecord is a record along with some meta information which is
@@ -74,7 +73,7 @@ func parseRecord(lines []Line) (Record, Style, []Error) {
 		headline.Advance(dateText.Length())
 		headline.SkipWhile(IsSpaceOrTab)
 		r := NewRecord(rDate)
-		style.UsesDashesInDate = strings.Contains(rDate.ToString(), "-")
+		style.DateFormat = rDate.Format()
 
 		// Check if there is a should-total set, and if so, parse it.
 		if headline.Peek() == '(' {
@@ -185,12 +184,12 @@ func parseRecord(lines []Line) (Record, Style, []Error) {
 			}
 			entryStartPosition := startCandidate.PointerPosition
 			entry.Advance(startCandidate.Length())
-			style.Uses24HourClock = !(strings.HasSuffix(start.ToString(), "am") || strings.HasSuffix(start.ToString(), "pm"))
+			style.TimeFormat = start.Format()
 
 			entryStartPositionEnds := entry.PointerPosition
 			entry.SkipWhile(Is(' '))
 			if entryStartPositionEnds == entry.PointerPosition {
-				style.UsesSpaceInRange = false
+				style.SpacingInRange = ""
 			}
 
 			if entry.Peek() != '-' {

@@ -19,7 +19,7 @@ func TestStart(t *testing.T) {
 	assert.Equal(t, `
 1920-02-02
 	9:00-12:00
-	15:24 - ?
+	15:24-?
 `, state.writtenFileContents)
 }
 
@@ -46,19 +46,19 @@ func TestStartWithSummary(t *testing.T) {
 	assert.Equal(t, `
 1920-02-02
 	9:00-12:00
-	15:24 - ? Started something
+	15:24-? Started something
 `, state.writtenFileContents)
 }
 
 func TestStartAtUnknownDateCreatesNewRecord(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`1623-12-13
-	09:23-???
+	09:23 - ???
 `)._SetNow(1623, 12, 11, 12, 49)._Run((&Start{}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `1623-12-11
 	12:49 - ?
 
 1623-12-13
-	09:23-???
+	09:23 - ???
 `, state.writtenFileContents)
 }
