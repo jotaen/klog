@@ -222,11 +222,21 @@ func ApplyReconciler(parsedRecords []parser.ParsedRecord, creators []reconciling
 		return nil
 	}()
 	if reconciler == nil {
-		return nil, NewErrorWithCode(GENERAL_ERROR, "Boom", "", nil) // TODO
+		return nil, NewErrorWithCode(
+			LOGICAL_ERROR,
+			"No such record",
+			"Please create or specify a record for this operation",
+			nil,
+		)
 	}
 	result, rErr := reconcile(reconciler)
 	if rErr != nil {
-		return nil, NewErrorWithCode(GENERAL_ERROR, "Caboom", "", rErr) // TODO
+		return nil, NewErrorWithCode(
+			LOGICAL_ERROR,
+			"Manipulation failed",
+			rErr.Error(),
+			rErr,
+		)
 	}
 	return result, nil
 }

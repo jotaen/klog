@@ -2,6 +2,7 @@ package commands
 
 import (
 	"github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -49,15 +50,27 @@ func TestStopWithExtendingSummary(t *testing.T) {
 `, state.writtenFileContents)
 }
 
+func TestStopFailsIfNoRecentRecord(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+1623-12-12
+	15:00-?
+`)._Run((&Stop{
+		AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1624, 02, 1)},
+	}).Run)
+	require.Error(t, err)
+	assert.Equal(t, err.Error(), "No such record")
+	assert.Equal(t, state.writtenFileContents, "")
+}
+
 func TestStopFailsIfNoOpenRange(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 1623-12-12
-
-1623-12-13
-	12:23-13:01
+	15:00-16:00
 `)._Run((&Stop{
-		AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1623, 12, 13)},
+		AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1623, 12, 12)},
 	}).Run)
 	require.Error(t, err)
+	assert.Equal(t, "Manipulation failed", err.(app.Error).Error())
+	assert.Equal(t, "No open time range", err.(app.Error).Details())
 	assert.Equal(t, state.writtenFileContents, "")
 }

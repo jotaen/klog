@@ -51,7 +51,7 @@ func (r *Reconciler) CloseOpenRange(endTime Time, additionalSummary string) (*Re
 		)
 	}
 	if openRangeEntryIndex == -1 {
-		return nil, errors.New("No open time range found")
+		return nil, errors.New("No open time range")
 	}
 	openRangeLineIndex := r.lastLinePointer - len(r.record.Entries()) + openRangeEntryIndex
 	if len(additionalSummary) > 0 {
@@ -82,7 +82,7 @@ func (r *Reconciler) StartOpenRange(startTime Time, entrySummary string) (*Resul
 		)
 	}
 	if openRangeEntryIndex != -1 {
-		return nil, errors.New("There is already an open range in this record.")
+		return nil, errors.New("There is already an open range in this record")
 	}
 	newEntryLine := startTime.ToStringWithFormat(r.style.TimeFormat) + r.style.SpacingInRange + "-" + r.style.SpacingInRange + "?"
 	if len(entrySummary) > 0 {

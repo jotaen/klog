@@ -2,6 +2,7 @@ package commands
 
 import (
 	"github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -31,6 +32,7 @@ func TestStartFailsIfAlreadyStarted(t *testing.T) {
 		AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
 	}).Run)
 	require.Error(t, err)
+	assert.Equal(t, "There is already an open range in this record", err.(app.Error).Details())
 	assert.Equal(t, state.writtenFileContents, "")
 }
 

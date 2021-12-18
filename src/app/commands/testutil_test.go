@@ -96,7 +96,7 @@ func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, ap
 func (ctx *TestingContext) ReconcileFile(_ app.FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) app.Error {
 	result, err := app.ApplyReconciler(ctx.parsedRecords, creators, reconcile)
 	if err != nil {
-		return app.NewError(err.Error(), err.Error(), err)
+		return err
 	}
 	ctx.writtenFileContents = result.AllSerialised
 	return nil
