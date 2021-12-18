@@ -1,6 +1,6 @@
 package parser
 
-import klog "github.com/jotaen/klog/src"
+import . "github.com/jotaen/klog/src"
 
 // Style describes the general styling and formatting preferences of a record.
 type Style struct {
@@ -13,10 +13,10 @@ type Style struct {
 	SpacingInRange    string // Example: 8:00 - 9:00
 	spacingInRangeSet bool
 
-	DateFormat    klog.DateFormat
+	DateFormat    DateFormat
 	dateFormatSet bool
 
-	TimeFormat    klog.TimeFormat
+	TimeFormat    TimeFormat
 	timeFormatSet bool
 }
 
@@ -35,12 +35,12 @@ func (s *Style) SetSpacingInRange(x string) {
 	s.spacingInRangeSet = true
 }
 
-func (s *Style) SetDateFormat(x klog.DateFormat) {
+func (s *Style) SetDateFormat(x DateFormat) {
 	s.DateFormat = x
 	s.dateFormatSet = true
 }
 
-func (s *Style) SetTimeFormat(x klog.TimeFormat) {
+func (s *Style) SetTimeFormat(x TimeFormat) {
 	s.TimeFormat = x
 	s.timeFormatSet = true
 }
@@ -52,8 +52,8 @@ func DefaultStyle() *Style {
 		LineEnding:     "\n",
 		Indentation:    "    ",
 		SpacingInRange: " ",
-		DateFormat:     klog.DateFormat{UseDashes: true},
-		TimeFormat:     klog.TimeFormat{Is24HourClock: true},
+		DateFormat:     DateFormat{UseDashes: true},
+		TimeFormat:     TimeFormat{Is24HourClock: true},
 	}
 }
 
@@ -64,9 +64,9 @@ func Elect(defaults Style, parsedRecords []ParsedRecord) *Style {
 	indentationMax := 0
 	spacingInRange := make(map[string]int)
 	spacingInRangeMax := 0
-	dateFormat := make(map[klog.DateFormat]int)
+	dateFormat := make(map[DateFormat]int)
 	dateFormatMax := 0
-	timeFormat := make(map[klog.TimeFormat]int)
+	timeFormat := make(map[TimeFormat]int)
 	timeFormatMax := 0
 	for _, r := range parsedRecords {
 		if r.Style.lineEndingSet {

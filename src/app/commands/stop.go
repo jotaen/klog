@@ -1,7 +1,7 @@
 package commands
 
 import (
-	klog "github.com/jotaen/klog/src"
+	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
 	"github.com/jotaen/klog/src/parser"
@@ -32,7 +32,7 @@ func (opt *Stop) Run(ctx app.Context) error {
 				return reconciling.NewReconcilerAtRecord(parsedRecords, date)
 			},
 			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
-				adjustedTime, err := time.Add(klog.NewDuration(24, 0))
+				adjustedTime, err := time.Add(NewDuration(24, 0))
 				if err == nil {
 					time = adjustedTime
 				}

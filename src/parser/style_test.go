@@ -1,7 +1,7 @@
 package parser
 
 import (
-	klog "github.com/jotaen/klog/src"
+	. "github.com/jotaen/klog/src"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
@@ -11,8 +11,8 @@ func TestDefaultStyle(t *testing.T) {
 	assert.Equal(t, &Style{
 		LineEnding:     "\n",
 		Indentation:    "    ",
-		DateFormat:     klog.DateFormat{UseDashes: true},
-		TimeFormat:     klog.TimeFormat{Is24HourClock: true},
+		DateFormat:     DateFormat{UseDashes: true},
+		TimeFormat:     TimeFormat{Is24HourClock: true},
 		SpacingInRange: " ",
 	}, DefaultStyle())
 }
@@ -22,9 +22,9 @@ func TestDetectsStyleFromMinimalFile(t *testing.T) {
 	assert.Equal(t, &Style{
 		LineEnding:     "\n",
 		Indentation:    "    ",
-		DateFormat:     klog.DateFormat{UseDashes: true},
+		DateFormat:     DateFormat{UseDashes: true},
 		dateFormatSet:  true,
-		TimeFormat:     klog.TimeFormat{Is24HourClock: true},
+		TimeFormat:     TimeFormat{Is24HourClock: true},
 		SpacingInRange: " ",
 	}, rs[0].Style)
 }
@@ -38,9 +38,9 @@ func TestDetectCanonicalStyle(t *testing.T) {
 		indentationSet:    true,
 		SpacingInRange:    " ",
 		spacingInRangeSet: true,
-		DateFormat:        klog.DateFormat{UseDashes: true},
+		DateFormat:        DateFormat{UseDashes: true},
 		dateFormatSet:     true,
-		TimeFormat:        klog.TimeFormat{Is24HourClock: true},
+		TimeFormat:        TimeFormat{Is24HourClock: true},
 		timeFormatSet:     true,
 	}, rs[0].Style)
 }
@@ -54,9 +54,9 @@ func TestDetectsCustomStyle(t *testing.T) {
 		indentationSet:    true,
 		SpacingInRange:    "",
 		spacingInRangeSet: true,
-		DateFormat:        klog.DateFormat{UseDashes: false},
+		DateFormat:        DateFormat{UseDashes: false},
 		dateFormatSet:     true,
-		TimeFormat:        klog.TimeFormat{Is24HourClock: false},
+		TimeFormat:        TimeFormat{Is24HourClock: false},
 		timeFormatSet:     true,
 	}, rs[0].Style)
 }
@@ -77,9 +77,9 @@ func TestElectStyle(t *testing.T) {
 		indentationSet:    true,
 		SpacingInRange:    "",
 		spacingInRangeSet: true,
-		DateFormat:        klog.DateFormat{UseDashes: true},
+		DateFormat:        DateFormat{UseDashes: true},
 		dateFormatSet:     true,
-		TimeFormat:        klog.TimeFormat{Is24HourClock: false},
+		TimeFormat:        TimeFormat{Is24HourClock: false},
 		timeFormatSet:     true,
 	}, result)
 }
@@ -100,9 +100,9 @@ func TestElectStyleDoesNotOverrideSetPreferences(t *testing.T) {
 		indentationSet:    true,
 		SpacingInRange:    " ",
 		spacingInRangeSet: true,
-		DateFormat:        klog.DateFormat{UseDashes: false},
+		DateFormat:        DateFormat{UseDashes: false},
 		dateFormatSet:     true,
-		TimeFormat:        klog.TimeFormat{Is24HourClock: true},
+		TimeFormat:        TimeFormat{Is24HourClock: true},
 		timeFormatSet:     true,
 	}, result)
 }
