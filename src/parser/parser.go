@@ -6,6 +6,7 @@ package parser
 import (
 	. "github.com/jotaen/klog/src"
 	. "github.com/jotaen/klog/src/parser/engine"
+	"strings"
 )
 
 // ParsedRecord is a record along with some meta information which is
@@ -17,7 +18,7 @@ type ParsedRecord struct {
 	Block Block
 
 	// Style contains the original styling preferences.
-	Style Style
+	Style *Style
 }
 
 // Parse parses a text into a list of Record datastructures. On success, it returns
@@ -33,7 +34,7 @@ func Parse(recordsAsText string) ([]ParsedRecord, []Error) {
 			continue
 		}
 		if block[0].LineEnding != "" {
-			style.LineEnding = block[0].LineEnding
+			style.SetLineEnding(block[0].LineEnding)
 		}
 		results = append(results, ParsedRecord{
 			Record: record,
@@ -49,7 +50,7 @@ func Parse(recordsAsText string) ([]ParsedRecord, []Error) {
 
 var allowedIndentationStyles = []string{"    ", "   ", "  ", "\t"}
 
-func parseRecord(lines []Line) (Record, Style, []Error) {
+func parseRecord(lines []Line) (Record, *Style, []Error) {
 	var errs []Error
 	style := DefaultStyle()
 
@@ -73,7 +74,7 @@ func parseRecord(lines []Line) (Record, Style, []Error) {
 		headline.Advance(dateText.Length())
 		headline.SkipWhile(IsSpaceOrTab)
 		r := NewRecord(rDate)
-		style.DateFormat = rDate.Format()
+		style.SetDateFormat(rDate.Format())
 
 		// Check if there is a should-total set, and if so, parse it.
 		if headline.Peek() == '(' {
@@ -150,7 +151,7 @@ func parseRecord(lines []Line) (Record, Style, []Error) {
 			// We should never make it here if the indentation could not be determined.
 			panic("Could not detect indentation")
 		}
-		style.Indentation = indentator.Style()
+		style.SetIndentation(indentator.Style())
 		eErr := func() Error {
 			// Check for correct indentation.
 			entry := indentator.NewIndentedParseable(l, 1)
@@ -184,12 +185,14 @@ func parseRecord(lines []Line) (Record, Style, []Error) {
 			}
 			entryStartPosition := startCandidate.PointerPosition
 			entry.Advance(startCandidate.Length())
-			style.TimeFormat = start.Format()
+			style.SetTimeFormat(start.Format())
 
 			entryStartPositionEnds := entry.PointerPosition
 			entry.SkipWhile(Is(' '))
-			if entryStartPositionEnds == entry.PointerPosition {
-				style.SpacingInRange = ""
+			if entryStartPositionEnds != entry.PointerPosition {
+				style.SetSpacingInRange(strings.Repeat(" ", entry.PointerPosition-entryStartPositionEnds))
+			} else {
+				style.SetSpacingInRange("")
 			}
 
 			if entry.Peek() != '-' {
@@ -246,7 +249,7 @@ func parseRecord(lines []Line) (Record, Style, []Error) {
 	}
 
 	if len(errs) > 0 {
-		return nil, Style{}, errs
+		return nil, nil, errs
 	}
 	return record, style, nil
 }

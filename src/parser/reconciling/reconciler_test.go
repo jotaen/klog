@@ -162,6 +162,28 @@ func TestReconcilerStartsOpenRangeWithStyle(t *testing.T) {
 `, result.AllSerialised)
 }
 
+func TestReconcilerStartsOpenRangeWithStyleFromOtherRecord(t *testing.T) {
+	original := `
+2018-01-01
+  2:00am-3:00am
+
+2018-01-02
+`
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 2))
+	require.NotNil(t, reconciler)
+	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), "")
+	require.Nil(t, err)
+	// Conforms to both am/pm and spaces around dash
+	assert.Equal(t, `
+2018-01-01
+  2:00am-3:00am
+
+2018-01-02
+  8:03am-?
+`, result.AllSerialised)
+}
+
 func TestReconcilerClosesOpenRangeWithNewSummary(t *testing.T) {
 	original := `
 2018-01-01

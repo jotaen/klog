@@ -18,7 +18,7 @@ import (
 
 type Reconciler struct {
 	record          Record
-	style           parser.Style
+	style           *parser.Style
 	lastLinePointer int // Line index of the last entry
 	lines           []engine.Line
 	recordPointer   int
@@ -100,7 +100,6 @@ func (r *Reconciler) MakeResult() (*Result, error) {
 	// As a safe guard, make sure the result is parseable.
 	newRecords, errs := parser.Parse(text)
 	if errs != nil {
-		// TODO panic!
 		return nil, errors.New("This operation wouldn’t result in a valid record")
 	}
 

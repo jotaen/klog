@@ -70,7 +70,7 @@ func NewReconcilerAtRecord(parsedRecords []parser.ParsedRecord, atDate Date) *Re
 	}
 	return &Reconciler{
 		record:          parsedRecords[index],
-		style:           parsedRecords[index].Style,
+		style:           parser.Elect(*parsedRecords[index].Style, parsedRecords),
 		lastLinePointer: lastLine(parsedRecords[index].Block.SignificantLines()).LineNumber,
 		recordPointer:   index,
 		lines:           flatten(parsedRecords),

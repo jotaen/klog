@@ -8,7 +8,16 @@ import (
 	"testing"
 )
 
-func TestTrackEntry(t *testing.T) {
+func TestTrackEntryInEmptyFile(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords("")._Run((&Track{
+		Entry:      "2h",
+		AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1855, 4, 25)},
+	}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, "1855-04-25\n    2h\n", state.writtenFileContents)
+}
+
+func TestTrackEntryInExistingFile(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 1855-04-25
 	1h

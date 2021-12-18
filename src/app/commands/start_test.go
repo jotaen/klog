@@ -62,3 +62,20 @@ func TestStartAtUnknownDateCreatesNewRecord(t *testing.T) {
 	09:23 - ???
 `, state.writtenFileContents)
 }
+
+func TestStartTakesOverStyle(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+1920/02/02
+  9:00am-1:00pm
+  3h
+`)._SetNow(1920, 2, 3, 8, 12)._Run((&Start{}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+1920/02/02
+  9:00am-1:00pm
+  3h
+
+1920/02/03
+  8:12am-?
+`, state.writtenFileContents)
+}
