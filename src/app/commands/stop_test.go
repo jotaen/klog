@@ -22,20 +22,6 @@ func TestStop(t *testing.T) {
 `, state.writtenFileContents)
 }
 
-func TestStopConformsToStyle(t *testing.T) {
-	state, err := NewTestingContext()._SetRecords(`
-1920-02-02
-	11:22am - ?
-`)._SetNow(1920, 2, 2, 15, 24)._Run((&Stop{
-		AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
-	}).Run)
-	require.Nil(t, err)
-	assert.Equal(t, `
-1920-02-02
-	11:22am - 3:24pm
-`, state.writtenFileContents)
-}
-
 func TestStopFallsBackToYesterday(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 1920-02-02

@@ -1,9 +1,10 @@
 package commands
 
 import (
-	. "github.com/jotaen/klog/src"
+	klog "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
+	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/parser/reconciling"
 )
 
@@ -26,24 +27,20 @@ func (opt *Stop) Run(ctx app.Context) error {
 	time := opt.AtTime(ctx.Now())
 	return ctx.ReconcileFile(
 		opt.OutputFileArgs.File,
-		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
-			return reconciler.CloseOpenRange(
-				func(r Record) bool { return r.Date().IsEqualTo(date) },
-				func(r Record) (Time, EntrySummary) { return time, NewEntrySummary(opt.Summary) },
-			)
-		},
-		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
-			adjustedTime := func() Time {
-				if time.IsTomorrow() {
-					return time
+		[]reconciling.Creator{
+			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
+				return reconciling.NewReconcilerAtRecord(parsedRecords, date)
+			},
+			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
+				adjustedTime, err := time.Add(klog.NewDuration(24, 0))
+				if err == nil {
+					time = adjustedTime
 				}
-				timeTomorrow, _ := time.Add(NewDuration(24, 0))
-				return timeTomorrow
-			}()
-			return reconciler.CloseOpenRange(
-				func(r Record) bool { return r.Date().IsEqualTo(date.PlusDays(-1)) },
-				func(r Record) (Time, EntrySummary) { return adjustedTime, NewEntrySummary(opt.Summary) },
-			)
+				return reconciling.NewReconcilerAtRecord(parsedRecords, date.PlusDays(-1))
+			},
+		},
+		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
+			return reconciler.CloseOpenRange(time, opt.Summary)
 		},
 	)
 }

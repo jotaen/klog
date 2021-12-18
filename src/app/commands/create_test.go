@@ -28,30 +28,6 @@ func TestCreate(t *testing.T) {
 `, state.writtenFileContents)
 }
 
-func TestCreateFromEmpty(t *testing.T) {
-	state, err := NewTestingContext()._SetRecords("").
-		_SetNow(1999, 10, 4, 0, 1).
-		_Run((&Create{}).Run)
-	require.Nil(t, err)
-	assert.Equal(t, "1999-10-04\n", state.writtenFileContents)
-}
-
-func TestCreateFromBlank(t *testing.T) {
-	state, err := NewTestingContext()._SetRecords("\n\n\n\n").
-		_SetNow(1999, 10, 4, 0, 1).
-		_Run((&Create{}).Run)
-	require.Nil(t, err)
-	assert.Equal(t, "1999-10-04\n", state.writtenFileContents)
-}
-
-func TestCreateConformsToStyle(t *testing.T) {
-	state, err := NewTestingContext()._SetRecords("2020/01/28").
-		_SetNow(2020, 1, 29, 0, 1).
-		_Run((&Create{}).Run)
-	require.Nil(t, err)
-	assert.Equal(t, "2020/01/28\n\n2020/01/29", state.writtenFileContents)
-}
-
 func TestCreateWithValues(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 1975-12-31
@@ -63,7 +39,7 @@ func TestCreateWithValues(t *testing.T) {
 	1h
 `)._Run((&Create{
 		AtDateArgs:  lib.AtDateArgs{Date: klog.Ɀ_Date_(1976, 1, 2)},
-		ShouldTotal: klog.NewDuration(5, 55),
+		ShouldTotal: klog.NewShouldTotal(5, 55),
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `

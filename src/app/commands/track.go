@@ -1,9 +1,9 @@
 package commands
 
 import (
-	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
+	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/parser/reconciling"
 	"strings"
 )
@@ -30,18 +30,19 @@ func (opt *Track) Run(ctx app.Context) error {
 	value := sanitiseQuotedLeadingDash(opt.Entry)
 	return ctx.ReconcileFile(
 		opt.OutputFileArgs.File,
-		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
-			return reconciler.AppendEntry(
-				func(r Record) bool { return r.Date().IsEqualTo(date) },
-				func(r Record) (string, error) { return value, nil })
+
+		[]reconciling.Creator{
+			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
+				return reconciling.NewReconcilerAtRecord(parsedRecords, date)
+			},
+			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
+				return reconciling.NewReconcilerAtNewRecord(parsedRecords, date, nil)
+			},
 		},
-		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
-			headline := opt.AtDate(ctx.Now()).ToString()
-			lines := []reconciling.InsertableText{
-				{Text: headline, Indentation: 0},
-				{Text: value, Indentation: 1},
-			}
-			return reconciler.InsertRecord(date, lines)
+
+		// Append entry.
+		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
+			return reconciler.AppendEntry(value)
 		},
 	)
 }

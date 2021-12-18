@@ -35,13 +35,19 @@ type Time interface {
 
 	// ToString serialises the time, e.g. `8:00` or `23:00>`
 	ToString() string
+
+	ToStringWithFormat(TimeFormat) string
+}
+
+type TimeFormat struct {
+	Is24HourClock bool
 }
 
 type time struct {
-	hour          int
-	minute        int
-	dayShift      int
-	is24HourClock bool
+	hour     int
+	minute   int
+	dayShift int
+	format   TimeFormat
 }
 
 func newTime(hour int, minute int, dayShift int, is24HourClock bool) (Time, error) {
@@ -57,10 +63,10 @@ func newTime(hour int, minute int, dayShift int, is24HourClock bool) (Time, erro
 		return nil, errors.New("INVALID_TIME")
 	}
 	return &time{
-		hour:          ct.Hour,
-		minute:        ct.Minute,
-		dayShift:      dayShift,
-		is24HourClock: is24HourClock,
+		hour:     ct.Hour,
+		minute:   ct.Minute,
+		dayShift: dayShift,
+		format:   TimeFormat{Is24HourClock: is24HourClock},
 	}, nil
 }
 
@@ -169,10 +175,10 @@ func (t *time) Add(d Duration) (Time, error) {
 		mins = mins - ONE_DAY
 	}
 	result := &time{
-		hour:          mins / 60,
-		minute:        mins % 60,
-		dayShift:      dayShift,
-		is24HourClock: t.is24HourClock,
+		hour:     mins / 60,
+		minute:   mins % 60,
+		dayShift: dayShift,
+		format:   t.format,
 	}
 	return result, nil
 }
@@ -187,7 +193,7 @@ func (t *time) ToString() string {
 		tomorrowSuffix = ">"
 	}
 	hour, amPmSuffix := func() (int, string) {
-		if t.is24HourClock {
+		if t.format.Is24HourClock {
 			return t.hour, ""
 		}
 		if t.hour == 12 {
@@ -202,4 +208,10 @@ func (t *time) ToString() string {
 		return t.hour, "am"
 	}()
 	return fmt.Sprintf("%s%d:%02d%s%s", yesterdayPrefix, hour, t.minute, amPmSuffix, tomorrowSuffix)
+}
+
+func (t *time) ToStringWithFormat(f TimeFormat) string {
+	c := *t
+	c.format = f
+	return c.ToString()
 }

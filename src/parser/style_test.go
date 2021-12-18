@@ -35,3 +35,7 @@ func TestDetectsCustomStyle(t *testing.T) {
 		UsesSpaceInRange: false,
 	}, pRecord[0].Style)
 }
+
+func TestCondense(t *testing.T) {
+
+}
