@@ -8,6 +8,7 @@
 - **[ FEATURE ]** Add `klog bookmark info` command.
 - **[ FEATURE ]** When using the manipulation commands (`klog track`, etc.),
   conform to style preferences encountered in the file.
+- **[ FEATURE ]** Add `--tomorrow` as shorthand flag for the next day’s date.
 
 ## v3.2
 - **[ BREAKING ]** Don’t allow mixing the indentation style within a
