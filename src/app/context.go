@@ -43,7 +43,7 @@ type Context interface {
 	ReadInputs(...FileOrBookmarkName) ([]Record, Error)
 
 	// ReconcileFile applies one or more reconcile handlers to a file and saves it.
-	ReconcileFile(FileOrBookmarkName, ...reconciling.Handler) Error
+	ReconcileFile(FileOrBookmarkName, []reconciling.Creator, reconciling.Reconcile) Error
 
 	// Now returns the current timestamp.
 	Now() gotime.Time
@@ -163,7 +163,9 @@ func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, Error)
 		if parserErrors != nil {
 			return nil, NewParserErrors(parserErrors)
 		}
-		allRecords = append(allRecords, parser.ToRecords(parsedRecords)...)
+		for _, r := range parsedRecords {
+			allRecords = append(allRecords, r)
+		}
 	}
 	return allRecords, nil
 }
@@ -188,7 +190,7 @@ func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithCont
 	return inputs[0], nil
 }
 
-func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, handler ...reconciling.Handler) Error {
+func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) Error {
 	target, err := ctx.retrieveTargetFile(fileArg)
 	if err != nil {
 		return err
@@ -197,22 +199,46 @@ func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, handler ...reconci
 	if parserErrors != nil {
 		return NewParserErrors(parserErrors)
 	}
-	baseReconciler := reconciling.NewReconciler(parsedRecords)
-	result, rErr := reconciling.Chain(baseReconciler, handler...)
-	if rErr != nil {
-		return NewErrorWithCode(
-			LOGICAL_ERROR,
-			"Cannot alter record",
-			rErr.Error(),
-			err,
-		)
+	result, aErr := ApplyReconciler(parsedRecords, creators, reconcile)
+	if aErr != nil {
+		return aErr
 	}
-	wErr := WriteToFile(target, result.FileContents())
+	wErr := WriteToFile(target, result.AllSerialised)
 	if wErr != nil {
 		return wErr
 	}
-	ctx.Print("\n" + ctx.Serialiser().SerialiseRecords(result.Record()) + "\n")
+	ctx.Print("\n" + ctx.Serialiser().SerialiseRecords(result.Record) + "\n")
 	return nil
+}
+
+func ApplyReconciler(parsedRecords []parser.ParsedRecord, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, Error) {
+	reconciler := func() *reconciling.Reconciler {
+		for _, createReconciler := range creators {
+			r := createReconciler(parsedRecords)
+			if r != nil {
+				return r
+			}
+		}
+		return nil
+	}()
+	if reconciler == nil {
+		return nil, NewErrorWithCode(
+			LOGICAL_ERROR,
+			"No such record",
+			"Please create or specify a record for this operation",
+			nil,
+		)
+	}
+	result, rErr := reconcile(reconciler)
+	if rErr != nil {
+		return nil, NewErrorWithCode(
+			LOGICAL_ERROR,
+			"Manipulation failed",
+			rErr.Error(),
+			rErr,
+		)
+	}
+	return result, nil
 }
 
 func (ctx *context) Now() gotime.Time {

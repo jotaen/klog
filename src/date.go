@@ -42,13 +42,24 @@ type Date interface {
 
 	// ToString serialises the date, e.g. `2017-04-23`.
 	ToString() string
+
+	// ToStringWithFormat serialises the date according to the given format.
+	ToStringWithFormat(DateFormat) string
+
+	// Format returns the current formatting.
+	Format() DateFormat
+}
+
+// DateFormat contains the formatting options for the Date.
+type DateFormat struct {
+	UseDashes bool
 }
 
 type date struct {
-	year             int
-	month            int
-	day              int
-	formatWithDashes bool
+	year   int
+	month  int
+	day    int
+	format DateFormat
 }
 
 var datePattern = regexp.MustCompile(`^(\d{4})[-/](\d{2})[-/](\d{2})$`)
@@ -59,7 +70,7 @@ func NewDate(year int, month int, day int) (Date, error) {
 		Month: gotime.Month(month),
 		Day:   day,
 	}
-	return civil2Date(cd, true)
+	return civil2Date(cd, DateFormat{UseDashes: true})
 }
 
 func NewDateFromString(yyyymmdd string) (Date, error) {
@@ -74,7 +85,7 @@ func NewDateFromString(yyyymmdd string) (Date, error) {
 	if err != nil || !cd.IsValid() {
 		return nil, errors.New("UNREPRESENTABLE_DATE")
 	}
-	return civil2Date(cd, strings.Contains(yyyymmdd, "-"))
+	return civil2Date(cd, DateFormat{UseDashes: strings.Contains(yyyymmdd, "-")})
 }
 
 func NewDateFromTime(t gotime.Time) Date {
@@ -86,7 +97,7 @@ func NewDateFromTime(t gotime.Time) Date {
 	return d
 }
 
-func civil2Date(cd civil.Date, formatWithDashes bool) (Date, error) {
+func civil2Date(cd civil.Date, format DateFormat) (Date, error) {
 	if !cd.IsValid() {
 		return nil, errors.New("UNREPRESENTABLE_DATE")
 	}
@@ -95,10 +106,10 @@ func civil2Date(cd civil.Date, formatWithDashes bool) (Date, error) {
 		return nil, errors.New("UNREPRESENTABLE_DATE")
 	}
 	return &date{
-		year:             cd.Year,
-		month:            int(cd.Month),
-		day:              cd.Day,
-		formatWithDashes: formatWithDashes,
+		year:   cd.Year,
+		month:  int(cd.Month),
+		day:    cd.Day,
+		format: format,
 	}, nil
 }
 
@@ -112,7 +123,7 @@ func date2Civil(d *date) civil.Date {
 
 func (d *date) ToString() string {
 	separator := "-"
-	if !d.formatWithDashes {
+	if !d.format.UseDashes {
 		separator = "/"
 	}
 	return fmt.Sprintf("%04d%s%02d%s%02d", d.year, separator, d.month, separator, d.day)
@@ -164,9 +175,19 @@ func (d *date) IsAfterOrEqual(otherDate Date) bool {
 
 func (d *date) PlusDays(dayIncrement int) Date {
 	cd := date2Civil(d).AddDays(dayIncrement)
-	newDate, err := civil2Date(cd, true)
+	newDate, err := civil2Date(cd, d.format)
 	if err != nil {
 		panic(err)
 	}
 	return newDate
+}
+
+func (d *date) ToStringWithFormat(f DateFormat) string {
+	nDate := *d
+	nDate.format = f
+	return nDate.ToString()
+}
+
+func (d *date) Format() DateFormat {
+	return d.format
 }

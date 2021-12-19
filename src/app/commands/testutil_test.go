@@ -86,15 +86,19 @@ func (ctx *TestingContext) Meta() app.Meta {
 }
 
 func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, app.Error) {
-	return parser.ToRecords(ctx.parsedRecords), nil
+	var allRecords []Record
+	for _, r := range ctx.parsedRecords {
+		allRecords = append(allRecords, r)
+	}
+	return allRecords, nil
 }
 
-func (ctx *TestingContext) ReconcileFile(_ app.FileOrBookmarkName, handler ...reconciling.Handler) app.Error {
-	result, err := reconciling.Chain(reconciling.NewReconciler(ctx.parsedRecords), handler...)
+func (ctx *TestingContext) ReconcileFile(_ app.FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) app.Error {
+	result, err := app.ApplyReconciler(ctx.parsedRecords, creators, reconcile)
 	if err != nil {
-		return app.NewError(err.Error(), err.Error(), err)
+		return err
 	}
-	ctx.writtenFileContents = result.FileContents()
+	ctx.writtenFileContents = result.AllSerialised
 	return nil
 }
 

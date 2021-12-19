@@ -4,11 +4,12 @@ import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
+	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/parser/reconciling"
 )
 
 type Create struct {
-	ShouldTotal Duration `name:"should" help:"The should-total of the record"`
+	ShouldTotal ShouldTotal `name:"should" help:"The should-total of the record"`
 	lib.AtDateArgs
 	lib.NoStyleArgs
 	lib.OutputFileArgs
@@ -21,23 +22,18 @@ func (opt *Create) Help() string {
 
 func (opt *Create) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
-	date := opt.AtDate(ctx.Now())
-	lines, err := func() ([]reconciling.InsertableText, error) {
-		headline := opt.AtDate(ctx.Now()).ToString()
-		if opt.ShouldTotal != nil {
-			headline += " (" + opt.ShouldTotal.ToString() + "!)"
-		}
-		return []reconciling.InsertableText{
-			{Text: headline, Indentation: 0},
-		}, nil
-	}()
-	if err != nil {
-		return err
-	}
+	date, _ := opt.AtDate(ctx.Now())
 	return ctx.ReconcileFile(
 		opt.OutputFileArgs.File,
-		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
-			return reconciler.InsertRecord(date, lines)
+
+		[]reconciling.Creator{
+			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
+				return reconciling.NewReconcilerAtNewRecord(parsedRecords, date, opt.ShouldTotal)
+			},
+		},
+
+		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
+			return reconciler.MakeResult()
 		},
 	)
 }
