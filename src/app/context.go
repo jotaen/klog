@@ -43,7 +43,7 @@ type Context interface {
 	ReadInputs(...FileOrBookmarkName) ([]Record, Error)
 
 	// ReconcileFile applies one or more reconcile handlers to a file and saves it.
-	ReconcileFile(FileOrBookmarkName, []reconciling.Creator, reconciling.Reconcile) Error
+	ReconcileFile(FileOrBookmarkName, []reconciling.Creator, reconciling.Reconcile) (*reconciling.Result, Error)
 
 	// Now returns the current timestamp.
 	Now() gotime.Time
@@ -190,25 +190,24 @@ func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithCont
 	return inputs[0], nil
 }
 
-func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) Error {
+func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, Error) {
 	target, err := ctx.retrieveTargetFile(fileArg)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	parsedRecords, parserErrors := parser.Parse(target.Contents())
 	if parserErrors != nil {
-		return NewParserErrors(parserErrors)
+		return nil, NewParserErrors(parserErrors)
 	}
 	result, aErr := ApplyReconciler(parsedRecords, creators, reconcile)
 	if aErr != nil {
-		return aErr
+		return nil, aErr
 	}
 	wErr := WriteToFile(target, result.AllSerialised)
 	if wErr != nil {
-		return wErr
+		return nil, wErr
 	}
-	ctx.Print("\n" + ctx.Serialiser().SerialiseRecords(result.Record) + "\n")
-	return nil
+	return result, nil
 }
 
 func ApplyReconciler(parsedRecords []parser.ParsedRecord, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, Error) {

@@ -12,6 +12,7 @@ type Start struct {
 	Summary string `name:"summary" short:"s" help:"Summary text for this entry"`
 	lib.NoStyleArgs
 	lib.OutputFileArgs
+	lib.WarnArgs
 }
 
 func (opt *Start) Help() string {
@@ -27,9 +28,7 @@ func (opt *Start) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
-	return ctx.ReconcileFile(
-		opt.OutputFileArgs.File,
-
+	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
 				return reconciling.NewReconcilerAtRecord(parsedRecords, date)

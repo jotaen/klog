@@ -28,10 +28,10 @@ type Time interface {
 	IsEqualTo(Time) bool
 	IsAfterOrEqual(Time) bool
 
-	// Add returns a time, where the specified duration was added. It doesn’t modify
+	// Plus returns a time, where the specified duration was added. It doesn’t modify
 	// the original object. If the resulting time would be shifted by more than one
 	// day, it returns an error.
-	Add(Duration) (Time, error)
+	Plus(Duration) (Time, error)
 
 	// ToString serialises the time, e.g. `8:00` or `23:00>`
 	ToString() string
@@ -117,7 +117,7 @@ func NewTimeFromString(hhmm string) (Time, error) {
 	return newTime(hour, minute, dayShift, is24HourClock)
 }
 
-func NewTimeFromTime(t gotime.Time) Time {
+func NewTimeFromGo(t gotime.Time) Time {
 	time, err := NewTime(t.Hour(), t.Minute())
 	if err != nil {
 		// This can/should never occur
@@ -165,7 +165,7 @@ func (t *time) IsAfterOrEqual(otherTime Time) bool {
 	return first.InMinutes() >= second.InMinutes()
 }
 
-func (t *time) Add(d Duration) (Time, error) {
+func (t *time) Plus(d Duration) (Time, error) {
 	ONE_DAY := 24 * 60
 	mins := t.MidnightOffset().Plus(d).InMinutes()
 	if mins >= 2*ONE_DAY || mins < ONE_DAY*-1 {
