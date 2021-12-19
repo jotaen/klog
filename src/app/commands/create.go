@@ -13,6 +13,7 @@ type Create struct {
 	lib.AtDateArgs
 	lib.NoStyleArgs
 	lib.OutputFileArgs
+	lib.WarnArgs
 }
 
 func (opt *Create) Help() string {
@@ -23,9 +24,7 @@ func (opt *Create) Help() string {
 func (opt *Create) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	date, _ := opt.AtDate(ctx.Now())
-	return ctx.ReconcileFile(
-		opt.OutputFileArgs.File,
-
+	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
 				return reconciling.NewReconcilerAtNewRecord(parsedRecords, date, opt.ShouldTotal)

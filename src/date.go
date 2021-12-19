@@ -88,7 +88,7 @@ func NewDateFromString(yyyymmdd string) (Date, error) {
 	return civil2Date(cd, DateFormat{UseDashes: strings.Contains(yyyymmdd, "-")})
 }
 
-func NewDateFromTime(t gotime.Time) Date {
+func NewDateFromGo(t gotime.Time) Date {
 	d, err := NewDate(t.Year(), int(t.Month()), t.Day())
 	if err != nil {
 		// This can/should never occur

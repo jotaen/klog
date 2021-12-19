@@ -19,17 +19,17 @@ type OutputFileArgs struct {
 }
 
 type AtDateArgs struct {
+	Date      Date `name:"date" short:"d" help:"The date of the record"`
 	Today     bool `name:"today" help:"Use today’s date (default)"`
 	Yesterday bool `name:"yesterday" help:"Use yesterday’s date"`
 	Tomorrow  bool `name:"tomorrow" help:"Use tomorrow’s date"`
-	Date      Date `name:"date" short:"d" help:"The date of the record"`
 }
 
 func (args *AtDateArgs) AtDate(now gotime.Time) (Date, bool) {
 	if args.Date != nil {
 		return args.Date, false
 	}
-	today := NewDateFromTime(now) // That’s effectively/implicitly `--today`
+	today := NewDateFromGo(now) // That’s effectively/implicitly `--today`
 	if args.Yesterday {
 		return today.PlusDays(-1), false
 	} else if args.Tomorrow {
@@ -48,14 +48,14 @@ func (args *AtDateAndTimeArgs) AtTime(now gotime.Time) (Time, bool, app.Error) {
 		return args.Time, false, nil
 	}
 	date, _ := args.AtDate(now)
-	today := NewDateFromTime(now)
+	today := NewDateFromGo(now)
 	if today.IsEqualTo(date) {
-		return NewTimeFromTime(now), true, nil
+		return NewTimeFromGo(now), true, nil
 	} else if today.PlusDays(-1).IsEqualTo(date) {
-		shiftedTime, _ := NewTimeFromTime(now).Add(NewDuration(24, 0))
+		shiftedTime, _ := NewTimeFromGo(now).Plus(NewDuration(24, 0))
 		return shiftedTime, true, nil
 	} else if today.PlusDays(1).IsEqualTo(date) {
-		shiftedTime, _ := NewTimeFromTime(now).Add(NewDuration(-24, 0))
+		shiftedTime, _ := NewTimeFromGo(now).Plus(NewDuration(-24, 0))
 		return shiftedTime, true, nil
 	}
 	return nil, false, app.NewErrorWithCode(
@@ -112,10 +112,10 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
 		qry.BeforeOrEqual = args.Before.PlusDays(-1)
 	}
 	if args.Today {
-		qry.Dates = append(qry.Dates, NewDateFromTime(now))
+		qry.Dates = append(qry.Dates, NewDateFromGo(now))
 	}
 	if args.Yesterday {
-		qry.Dates = append(qry.Dates, NewDateFromTime(now.AddDate(0, 0, -1)))
+		qry.Dates = append(qry.Dates, NewDateFromGo(now.AddDate(0, 0, -1)))
 	}
 	return service.Filter(rs, qry)
 }

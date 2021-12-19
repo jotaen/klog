@@ -13,6 +13,7 @@ type Stop struct {
 	Summary string `name:"summary" short:"s" help:"Text to append to the entry summary"`
 	lib.NoStyleArgs
 	lib.OutputFileArgs
+	lib.WarnArgs
 }
 
 func (opt *Stop) Help() string {
@@ -28,9 +29,7 @@ func (opt *Stop) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
-	return ctx.ReconcileFile(
-		opt.OutputFileArgs.File,
-
+	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
 				return reconciling.NewReconcilerAtRecord(parsedRecords, date)
@@ -39,7 +38,7 @@ func (opt *Stop) Run(ctx app.Context) error {
 				if isAutoDate && isAutoTime {
 					// Only fall back to yesterday if no explicit date has been given.
 					// Otherwise, it wouldn’t make sense to decrement the day.
-					time, _ = time.Add(NewDuration(24, 0))
+					time, _ = time.Plus(NewDuration(24, 0))
 					return reconciling.NewReconcilerAtRecord(parsedRecords, date.PlusDays(-1))
 				}
 				return nil

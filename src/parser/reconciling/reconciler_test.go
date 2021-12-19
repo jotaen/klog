@@ -350,7 +350,7 @@ func TestReconcileRespectsExistingStylePref(t *testing.T) {
 		expected string
 	}{
 		{"3145/06/15\n", "3145/06/15\n\n3145/06/16\n"},
-		{"3145/06/15\n\n3145-06-15\n", "3145/06/15\n\n3145-06-15\n\n3145/06/16\n"},
+		{"3145/06/14\n\n3145/06/15\n\n3145-06-15\n", "3145/06/14\n\n3145/06/15\n\n3145-06-15\n\n3145/06/16\n"},
 	} {
 		rs, _ := parser.Parse(x.original)
 		reconciler := NewReconcilerAtNewRecord(rs, Ɀ_Date_(3145, 6, 16), nil)

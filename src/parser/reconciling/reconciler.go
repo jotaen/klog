@@ -28,6 +28,7 @@ type Reconciler struct {
 // Result is the result of an applied reconciler.
 type Result struct {
 	Record        Record
+	AllRecords    []parser.ParsedRecord
 	AllSerialised string
 }
 
@@ -109,6 +110,7 @@ func (r *Reconciler) MakeResult() (*Result, error) {
 
 	return &Result{
 		Record:        newRecords[r.recordPointer],
+		AllRecords:    newRecords,
 		AllSerialised: text,
 	}, nil
 }

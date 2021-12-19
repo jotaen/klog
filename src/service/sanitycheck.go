@@ -6,6 +6,7 @@ import (
 	gotime "time"
 )
 
+// Warning contains information for helping locate an issue.
 type Warning struct {
 	Date    Date
 	Message string
@@ -15,14 +16,15 @@ type checker interface {
 	Warn(Record) *Warning
 }
 
-// SanityCheck checks records for potential user errors.
+// SanityCheck checks records for potential user errors. It’s not meant as strict validation,
+// but the main purpose is to help users spot accidental mistakes they might have made.
 func SanityCheck(reference gotime.Time, rs []Record) []Warning {
-	today := NewDateFromTime(reference)
+	now := NewDateTimeFromGo(reference)
 	sortedRs := Sort(rs, false)
 	var ws []Warning
 	checkers := []checker{
-		&unclosedOpenRangeChecker{today: today},
-		&futureEntriesChecker{today: today},
+		&unclosedOpenRangeChecker{today: now.Date},
+		&futureEntriesChecker{now: now, gracePeriod: NewDuration(0, 31)},
 		&overlappingTimeRangesChecker{},
 		&moreThan24HoursChecker{},
 	}
@@ -66,19 +68,54 @@ func (c *unclosedOpenRangeChecker) Warn(record Record) *Warning {
 }
 
 type futureEntriesChecker struct {
-	today Date
+	now         DateTime
+	gracePeriod Duration
 }
 
 // Warn returns warnings if there are entries at future dates. It doesn’t
 // return warnings if there are future records that don’t contain entries.
 func (c *futureEntriesChecker) Warn(record Record) *Warning {
-	if record.Date().IsAfterOrEqual(c.today.PlusDays(1)) && len(record.Entries()) > 0 {
-		return &Warning{
-			Date:    record.Date(),
-			Message: "Entry in future record",
+	if len(record.Entries()) == 0 {
+		return nil
+	}
+	if c.now.Date.PlusDays(-2).IsAfterOrEqual(record.Date()) {
+		return nil
+	}
+	if c.now.Date.PlusDays(-1).IsEqualTo(record.Date()) || c.now.Date.IsEqualTo(record.Date()) || c.now.Date.PlusDays(1).IsEqualTo(record.Date()) {
+		countEntriesWithFutureTimes := 0
+		fuzzyNow := func() DateTime {
+			incTime, err := c.now.Time.Plus(c.gracePeriod)
+			if err != nil {
+				return c.now
+			}
+			return NewDateTime(c.now.Date, incTime)
+		}()
+		for _, e := range record.Entries() {
+			countEntriesWithFutureTimes += e.Unbox(func(r Range) interface{} {
+				if NewDateTime(record.Date(), r.Start()).IsAfterOrEqual(fuzzyNow) || NewDateTime(record.Date(), r.End()).IsAfterOrEqual(fuzzyNow) {
+					return 1
+				}
+				return 0
+			}, func(Duration) interface{} {
+				if record.Date().IsAfterOrEqual(c.now.Date.PlusDays(1)) {
+					return 1
+				}
+				return 0
+			}, func(or OpenRange) interface{} {
+				if NewDateTime(record.Date(), or.Start()).IsAfterOrEqual(fuzzyNow) {
+					return 1
+				}
+				return 0
+			}).(int)
+		}
+		if countEntriesWithFutureTimes == 0 {
+			return nil
 		}
 	}
-	return nil
+	return &Warning{
+		Date:    record.Date(),
+		Message: "Entry in the future",
+	}
 }
 
 type overlappingTimeRangesChecker struct{}
@@ -94,7 +131,19 @@ func (c *overlappingTimeRangesChecker) Warn(record Record) *Warning {
 				return nil
 			},
 			func(Duration) interface{} { return nil },
-			func(OpenRange) interface{} { return nil },
+			func(or OpenRange) interface{} {
+				// As best guess, assume open ranges to be closed at the end of the day.
+				end, tErr := NewTime(23, 59)
+				if tErr != nil {
+					return nil
+				}
+				tr, rErr := NewRange(or.Start(), end)
+				if rErr != nil {
+					return nil
+				}
+				orderedRanges = append(orderedRanges, tr)
+				return nil
+			},
 		)
 	}
 	sort.Slice(orderedRanges, func(i, j int) bool {

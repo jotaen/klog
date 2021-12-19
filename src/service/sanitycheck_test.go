@@ -8,36 +8,12 @@ import (
 	gotime "time"
 )
 
-func TestNoWarningWhenAllGood(t *testing.T) {
-	timestamp := gotime.Now()
-	today := NewDateFromTime(timestamp)
-	now := NewTimeFromTime(timestamp)
-	rs := []Record{
-		func() Record {
-			// OK: Record in the future but without entries
-			r := NewRecord(today.PlusDays(1))
-			return r
-		}(), func() Record {
-			// OK: Open range today
-			r := NewRecord(today)
-			r.StartOpenRange(now, nil)
-			return r
-		}(), func() Record {
-			// OK: Just a regular record in the past
-			r := NewRecord(today.PlusDays(-1))
-			r.AddDuration(NewDuration(1, 2), nil)
-			return r
-		}(),
-	}
-	ws := SanityCheck(timestamp, rs)
-	require.Nil(t, ws)
-}
+func TestNoWarnForOpenRanges(t *testing.T) {
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
+	today := NewDateFromGo(timestamp)
+	now := NewTimeFromGo(timestamp)
 
-func TestNoOpenRangeWarningWhenYesterdayAndNoRecordToday(t *testing.T) {
-	timestamp := gotime.Now()
-	today := NewDateFromTime(timestamp)
-	now := NewTimeFromTime(timestamp)
-	rs := []Record{
+	rs1 := []Record{
 		func() Record {
 			// This open range is okay, because there is no record at today’s date
 			r := NewRecord(today.PlusDays(-1))
@@ -48,14 +24,24 @@ func TestNoOpenRangeWarningWhenYesterdayAndNoRecordToday(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := SanityCheck(timestamp, rs)
-	require.Nil(t, ws)
+	ws1 := SanityCheck(timestamp, rs1)
+	require.Nil(t, ws1)
+
+	rs2 := []Record{
+		func() Record {
+			r := NewRecord(today)
+			r.StartOpenRange(now, nil)
+			return r
+		}(),
+	}
+	ws2 := SanityCheck(timestamp, rs2)
+	require.Nil(t, ws2)
 }
 
 func TestOpenRangeWarningWhenUnclosedOpenRangeBeforeTodayRegardlessOfOrder(t *testing.T) {
-	timestamp := gotime.Now()
-	today := NewDateFromTime(timestamp)
-	now := NewTimeFromTime(timestamp)
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
+	today := NewDateFromGo(timestamp)
+	now := NewTimeFromGo(timestamp)
 	// The warnings must work reliably even when the records are not ordered by date initially
 	rs := []Record{
 		func() Record {
@@ -76,49 +62,102 @@ func TestOpenRangeWarningWhenUnclosedOpenRangeBeforeTodayRegardlessOfOrder(t *te
 	ws := SanityCheck(timestamp, rs)
 	require.NotNil(t, ws)
 	require.Len(t, ws, 2)
-	assert.Equal(t, today.PlusDays(-1), ws[0].Date)
-	assert.Equal(t, today.PlusDays(-2), ws[1].Date)
 	for _, w := range ws {
 		assert.Equal(t, "Unclosed open range", w.Message)
 	}
+	assert.Equal(t, today.PlusDays(-1), ws[0].Date)
+	assert.Equal(t, today.PlusDays(-2), ws[1].Date)
+}
+
+func TestNoWarningForFutureEntries(t *testing.T) {
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
+	today := NewDateFromGo(timestamp)
+	rs := []Record{
+		func() Record {
+			// Future entry okay if it doesn’t contain entries
+			r := NewRecord(today.PlusDays(1))
+			return r
+		}(),
+		func() Record {
+			r := NewRecord(today.PlusDays(-1))
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(0, 0), Ɀ_Time_(12, 30)), nil)
+			r.AddDuration(NewDuration(2, 0), nil)
+			return r
+		}(),
+		func() Record {
+			r := NewRecord(today.PlusDays(1))
+			// Times shifted to yesterday
+			r.AddRange(Ɀ_Range_(Ɀ_TimeYesterday_(11, 0), Ɀ_TimeYesterday_(12, 30)), nil)
+			return r
+		}(),
+		func() Record {
+			r := NewRecord(today)
+			// Has grace period of 30 minutes.
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(0, 0), Ɀ_Time_(12, 30)), nil)
+			// If the total time exceeds “now”, that’s okay. (0:00-12:30 + 2h would be 14:30)
+			r.AddDuration(NewDuration(2, 0), nil)
+			return r
+		}(),
+	}
+	ws := SanityCheck(timestamp, rs)
+	require.Nil(t, ws)
 }
 
 func TestFutureEntriesWarning(t *testing.T) {
-	timestamp := gotime.Now()
-	today := NewDateFromTime(timestamp)
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
+	today := NewDateFromGo(timestamp)
 	rs := []Record{
 		func() Record {
 			r := NewRecord(today.PlusDays(1))
 			r.AddDuration(NewDuration(2, 0), nil)
 			return r
-		}(), func() Record {
+		}(),
+		func() Record {
+			r := NewRecord(today.PlusDays(4))
+			r.AddDuration(NewDuration(2, 0), nil)
+			return r
+		}(),
+		func() Record {
+			r := NewRecord(today.PlusDays(1))
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(2, 0), Ɀ_Time_(10, 0)), nil)
+			return r
+		}(),
+		func() Record {
 			r := NewRecord(today)
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(11, 00), Ɀ_Time_(12, 31)), nil)
+			return r
+		}(),
+		func() Record {
+			r := NewRecord(today)
+			// Times shifted to next day
+			r.AddRange(Ɀ_Range_(Ɀ_TimeTomorrow_(1, 00), Ɀ_TimeTomorrow_(3, 0)), nil)
+			return r
+		}(),
+		func() Record {
+			r := NewRecord(today.PlusDays(1))
+			// Times shifted to yesterday, but there is also a duration
+			r.AddRange(Ɀ_Range_(Ɀ_TimeYesterday_(11, 0), Ɀ_TimeYesterday_(12, 30)), nil)
+			r.AddDuration(NewDuration(2, 0), nil)
+			return r
+		}(),
+		func() Record {
+			r := NewRecord(today)
+			r.StartOpenRange(Ɀ_Time_(12, 31), nil)
 			return r
 		}(),
 	}
 	ws := SanityCheck(timestamp, rs)
 	require.NotNil(t, ws)
-	require.Len(t, ws, 1)
-	assert.Equal(t, today.PlusDays(1), ws[0].Date)
+	require.Len(t, ws, len(rs))
 	for _, w := range ws {
-		assert.Equal(t, "Entry in future record", w.Message)
+		assert.Equal(t, "Entry in the future", w.Message)
 	}
 }
 
-func TestMoreThan24HoursPerRecord(t *testing.T) {
-	timestamp := gotime.Now()
-	today := NewDateFromTime(timestamp)
+func TestNoWarnForMoreThan24HoursPerRecord(t *testing.T) {
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
+	today := NewDateFromGo(timestamp)
 	rs := []Record{
-		func() Record {
-			r := NewRecord(today.PlusDays(-1))
-			r.AddDuration(NewDuration(24, 1), nil)
-			return r
-		}(), func() Record {
-			r := NewRecord(today)
-			r.AddRange(Ɀ_Range_(Ɀ_Time_(0, 0), Ɀ_Time_(23, 0)), nil)
-			r.AddDuration(NewDuration(2, 0), nil)
-			return r
-		}(),
 		func() Record {
 			r := NewRecord(today.PlusDays(-3))
 			r.AddDuration(NewDuration(24, 0), nil)
@@ -126,29 +165,61 @@ func TestMoreThan24HoursPerRecord(t *testing.T) {
 		}(),
 	}
 	ws := SanityCheck(timestamp, rs)
+	require.Nil(t, ws)
+}
+
+func TestMoreThan24HoursPerRecord(t *testing.T) {
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
+	today := NewDateFromGo(timestamp)
+	rs := []Record{
+		func() Record {
+			r := NewRecord(today.PlusDays(-1))
+			r.AddDuration(NewDuration(24, 1), nil)
+			return r
+		}(), func() Record {
+			r := NewRecord(today)
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(0, 0), Ɀ_Time_(12, 0)), nil)
+			r.AddDuration(NewDuration(13, 0), nil)
+			return r
+		}(),
+	}
+	ws := SanityCheck(timestamp, rs)
 	require.NotNil(t, ws)
-	require.Len(t, ws, 2)
-	assert.Equal(t, today, ws[0].Date)
-	assert.Equal(t, today.PlusDays(-1), ws[1].Date)
+	require.Len(t, ws, len(rs))
 	for _, w := range ws {
 		assert.Equal(t, "Total time exceeds 24 hours", w.Message)
 	}
 }
 
-func TestOverlappingTimeRanges(t *testing.T) {
-	timestamp := gotime.Now()
-	today := NewDateFromTime(timestamp)
+func TestNoWarnForOverlappingTimeRanges(t *testing.T) {
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
+	today := NewDateFromGo(timestamp)
 	rs := []Record{
 		func() Record {
 			// No overlap
-			r := NewRecord(today)
+			r := NewRecord(today.PlusDays(-9999))
 			r.AddDuration(NewDuration(5, 0), nil)
 			r.AddRange(Ɀ_Range_(Ɀ_Time_(4, 0), Ɀ_Time_(4, 59)), nil)
 			r.AddRange(Ɀ_Range_(Ɀ_Time_(0, 0), Ɀ_Time_(2, 0)), nil)
 			r.AddRange(Ɀ_Range_(Ɀ_Time_(2, 0), Ɀ_Time_(4, 0)), nil)
 			r.AddRange(Ɀ_Range_(Ɀ_Time_(4, 0), Ɀ_Time_(4, 0)), nil) // point in time range
 			r.AddRange(Ɀ_Range_(Ɀ_Time_(5, 0), Ɀ_Time_(6, 0)), nil)
-			r.StartOpenRange(Ɀ_Time_(0, 44), nil)
+			return r
+		}(),
+	}
+	ws := SanityCheck(timestamp, rs)
+	require.Nil(t, ws)
+}
+
+func TestOverlappingTimeRanges(t *testing.T) {
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
+	today := NewDateFromGo(timestamp)
+	rs := []Record{
+		func() Record {
+			// Overlap with started time
+			r := NewRecord(today)
+			r.AddRange(Ɀ_Range_(Ɀ_Time_(1, 30), Ɀ_Time_(5, 45)), nil)
+			r.StartOpenRange(Ɀ_Time_(3, 0), nil)
 			return r
 		}(), func() Record {
 			// Overlap with sorted entries
@@ -169,9 +240,7 @@ func TestOverlappingTimeRanges(t *testing.T) {
 	}
 	ws := SanityCheck(timestamp, rs)
 	require.NotNil(t, ws)
-	require.Len(t, ws, 2)
-	assert.Equal(t, today.PlusDays(-1), ws[0].Date)
-	assert.Equal(t, today.PlusDays(-2), ws[1].Date)
+	require.Len(t, ws, len(rs))
 	for _, w := range ws {
 		assert.Equal(t, "Overlapping time ranges", w.Message)
 	}

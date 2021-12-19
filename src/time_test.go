@@ -221,7 +221,7 @@ func TestAddDuration(t *testing.T) {
 		{Ɀ_TimeTomorrow_(18, 38), NewDuration(-1, -1), Ɀ_TimeTomorrow_(17, 37)},
 		{Ɀ_TimeTomorrow_(23, 58), NewDuration(0, 1), Ɀ_TimeTomorrow_(23, 59)},
 	} {
-		result, err := x.initial.Add(x.increment)
+		result, err := x.initial.Plus(x.increment)
 		require.Nil(t, err)
 		assert.Equal(t, x.expect, result, x.initial)
 	}
@@ -237,7 +237,7 @@ func TestAddDurationImpossible(t *testing.T) {
 		{Ɀ_TimeYesterday_(0, 0), NewDuration(0, -1)},
 		{Ɀ_TimeTomorrow_(23, 59), NewDuration(0, 1)},
 	} {
-		result, err := x.initial.Add(x.increment)
+		result, err := x.initial.Plus(x.increment)
 		require.Nil(t, result)
 		assert.Error(t, err)
 	}

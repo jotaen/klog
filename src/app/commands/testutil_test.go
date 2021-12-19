@@ -93,13 +93,13 @@ func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]Record, ap
 	return allRecords, nil
 }
 
-func (ctx *TestingContext) ReconcileFile(_ app.FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) app.Error {
+func (ctx *TestingContext) ReconcileFile(_ app.FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, app.Error) {
 	result, err := app.ApplyReconciler(ctx.parsedRecords, creators, reconcile)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	ctx.writtenFileContents = result.AllSerialised
-	return nil
+	return result, nil
 }
 
 func (ctx *TestingContext) WriteFile(_ app.File, contents string) app.Error {
