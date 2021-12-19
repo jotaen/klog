@@ -9,7 +9,7 @@ import (
 )
 
 type Create struct {
-	ShouldTotal Duration `name:"should" help:"The should-total of the record"`
+	ShouldTotal ShouldTotal `name:"should" help:"The should-total of the record"`
 	lib.AtDateArgs
 	lib.NoStyleArgs
 	lib.OutputFileArgs
