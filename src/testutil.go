@@ -43,7 +43,7 @@ func Ɀ_IsAmPm_(t Time) Time {
 	if !canCast {
 		panic("Operation failed!")
 	}
-	tm.format.Is24HourClock = false
+	tm.format.Use24HourClock = false
 	return tm
 }
 

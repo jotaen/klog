@@ -3,6 +3,7 @@ package reconciling
 import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/parser"
+	"github.com/jotaen/klog/src/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -28,6 +29,7 @@ Hello World
 	require.Nil(t, err)
 	require.NotNil(t, result)
 	require.Equal(t, 150, result.Record.Entries()[2].Duration().InMinutes())
+	require.Equal(t, 315, service.Total(result.Record).InMinutes())
 	assert.Equal(t, `
 2018-01-01
     1h
@@ -242,6 +244,7 @@ func TestReconcileAddRecordIfOriginalIsEmpty(t *testing.T) {
 	result, err := reconciler.MakeResult()
 	require.Nil(t, err)
 	assert.Equal(t, "2000-05-05\n", result.AllSerialised)
+	assert.Equal(t, "2000-05-05", result.Record.Date().ToString())
 }
 
 func TestReconcileAddRecordIfOriginalContainsOneRecord(t *testing.T) {
@@ -250,6 +253,7 @@ func TestReconcileAddRecordIfOriginalContainsOneRecord(t *testing.T) {
 	result, err := reconciler.MakeResult()
 	require.Nil(t, err)
 	assert.Equal(t, "1999-12-31\n\n2000-02-01\n", result.AllSerialised)
+	assert.Equal(t, "2000-02-01", result.Record.Date().ToString())
 }
 
 func TestReconcileNewRecordFromEmptyFile(t *testing.T) {
@@ -337,6 +341,7 @@ func TestReconcileAddRecordWithShouldTotal(t *testing.T) {
 
 2018-01-02 (5h31m!)
 `, result.AllSerialised)
+	assert.Equal(t, NewShouldTotal(5, 31), result.Record.ShouldTotal())
 }
 
 func TestReconcileRespectsExistingStylePref(t *testing.T) {
@@ -345,7 +350,7 @@ func TestReconcileRespectsExistingStylePref(t *testing.T) {
 		expected string
 	}{
 		{"3145/06/15\n", "3145/06/15\n\n3145/06/16\n"},
-		{"3145/06/15\n\n3145-06-15\n", "3145/06/15\n\n3145-06-15\n\n3145-06-16\n"},
+		{"3145/06/15\n\n3145-06-15\n", "3145/06/15\n\n3145-06-15\n\n3145/06/16\n"},
 	} {
 		rs, _ := parser.Parse(x.original)
 		reconciler := NewReconcilerAtNewRecord(rs, Ɀ_Date_(3145, 6, 16), nil)

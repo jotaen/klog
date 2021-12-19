@@ -76,8 +76,8 @@ func TestDetectsInvalidTimes(t *testing.T) {
 func TestSerialiseTime(t *testing.T) {
 	tm := Ɀ_Time_(13, 45)
 	assert.Equal(t, "13:45", tm.ToString())
-	assert.Equal(t, "13:45", tm.ToStringWithFormat(TimeFormat{Is24HourClock: true}))
-	assert.Equal(t, "1:45pm", tm.ToStringWithFormat(TimeFormat{Is24HourClock: false}))
+	assert.Equal(t, "13:45", tm.ToStringWithFormat(TimeFormat{Use24HourClock: true}))
+	assert.Equal(t, "1:45pm", tm.ToStringWithFormat(TimeFormat{Use24HourClock: false}))
 }
 
 func TestSerialiseTimeWithoutLeadingZeros(t *testing.T) {
@@ -100,7 +100,7 @@ func TestParseTime24Hours(t *testing.T) {
 	require.Nil(t, err)
 	should := Ɀ_Time_(9, 42)
 	assert.Equal(t, should, tm)
-	assert.Equal(t, TimeFormat{Is24HourClock: true}, tm.Format())
+	assert.Equal(t, TimeFormat{Use24HourClock: true}, tm.Format())
 }
 
 func TestParseTime12Hours(t *testing.T) {
@@ -119,7 +119,7 @@ func TestParseTime12Hours(t *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, tm)
 		assert.True(t, s.exp.IsEqualTo(tm), s.val)
-		assert.Equal(t, TimeFormat{Is24HourClock: false}, tm.Format())
+		assert.Equal(t, TimeFormat{Use24HourClock: false}, tm.Format())
 		assert.Equal(t, s.val, tm.ToString())
 	}
 }

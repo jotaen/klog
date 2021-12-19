@@ -9,38 +9,38 @@ import (
 
 func TestDefaultStyle(t *testing.T) {
 	assert.Equal(t, &Style{
-		LineEnding:     "\n",
-		Indentation:    "    ",
-		DateFormat:     DateFormat{UseDashes: true},
-		TimeFormat:     TimeFormat{Is24HourClock: true},
-		SpacingInRange: " ",
+		lineEnding:     "\n",
+		indentation:    "    ",
+		dateFormat:     DateFormat{UseDashes: true},
+		timeFormat:     TimeFormat{Use24HourClock: true},
+		spacingInRange: " ",
 	}, DefaultStyle())
 }
 
 func TestDetectsStyleFromMinimalFile(t *testing.T) {
 	rs := parseOrPanic("2000-01-01")
 	assert.Equal(t, &Style{
-		LineEnding:     "\n",
-		Indentation:    "    ",
-		DateFormat:     DateFormat{UseDashes: true},
+		lineEnding:     "\n",
+		indentation:    "    ",
+		dateFormat:     DateFormat{UseDashes: true},
 		dateFormatSet:  true,
-		TimeFormat:     TimeFormat{Is24HourClock: true},
-		SpacingInRange: " ",
+		timeFormat:     TimeFormat{Use24HourClock: true},
+		spacingInRange: " ",
 	}, rs[0].Style)
 }
 
 func TestDetectCanonicalStyle(t *testing.T) {
 	rs := parseOrPanic("2000-01-01\nTest\n    8:00 - 9:00\n")
 	assert.Equal(t, &Style{
-		LineEnding:        "\n",
+		lineEnding:        "\n",
 		lineEndingSet:     true,
-		Indentation:       "    ",
+		indentation:       "    ",
 		indentationSet:    true,
-		SpacingInRange:    " ",
+		spacingInRange:    " ",
 		spacingInRangeSet: true,
-		DateFormat:        DateFormat{UseDashes: true},
+		dateFormat:        DateFormat{UseDashes: true},
 		dateFormatSet:     true,
-		TimeFormat:        TimeFormat{Is24HourClock: true},
+		timeFormat:        TimeFormat{Use24HourClock: true},
 		timeFormatSet:     true,
 	}, rs[0].Style)
 }
@@ -48,15 +48,15 @@ func TestDetectCanonicalStyle(t *testing.T) {
 func TestDetectsCustomStyle(t *testing.T) {
 	rs := parseOrPanic("2000/01/01\r\nTest\r\n\t8:00am-9:00am\r\n")
 	assert.Equal(t, &Style{
-		LineEnding:        "\r\n",
+		lineEnding:        "\r\n",
 		lineEndingSet:     true,
-		Indentation:       "\t",
+		indentation:       "\t",
 		indentationSet:    true,
-		SpacingInRange:    "",
+		spacingInRange:    "",
 		spacingInRangeSet: true,
-		DateFormat:        DateFormat{UseDashes: false},
+		dateFormat:        DateFormat{UseDashes: false},
 		dateFormatSet:     true,
-		TimeFormat:        TimeFormat{Is24HourClock: false},
+		timeFormat:        TimeFormat{Use24HourClock: false},
 		timeFormatSet:     true,
 	}, rs[0].Style)
 }
@@ -71,15 +71,15 @@ func TestElectStyle(t *testing.T) {
 	)
 	result := Elect(*DefaultStyle(), rs)
 	assert.Equal(t, &Style{
-		LineEnding:        "\r\n",
+		lineEnding:        "\r\n",
 		lineEndingSet:     true,
-		Indentation:       "  ",
+		indentation:       "  ",
 		indentationSet:    true,
-		SpacingInRange:    "",
+		spacingInRange:    "",
 		spacingInRangeSet: true,
-		DateFormat:        DateFormat{UseDashes: true},
+		dateFormat:        DateFormat{UseDashes: true},
 		dateFormatSet:     true,
-		TimeFormat:        TimeFormat{Is24HourClock: false},
+		timeFormat:        TimeFormat{Use24HourClock: false},
 		timeFormatSet:     true,
 	}, result)
 }
@@ -94,15 +94,15 @@ func TestElectStyleDoesNotOverrideSetPreferences(t *testing.T) {
 	)
 	result := Elect(*parseOrPanic("2018/01/01\n\t8:00 - 9:00")[0].Style, rs)
 	assert.Equal(t, &Style{
-		LineEnding:        "\n",
+		lineEnding:        "\n",
 		lineEndingSet:     true,
-		Indentation:       "\t",
+		indentation:       "\t",
 		indentationSet:    true,
-		SpacingInRange:    " ",
+		spacingInRange:    " ",
 		spacingInRangeSet: true,
-		DateFormat:        DateFormat{UseDashes: false},
+		dateFormat:        DateFormat{UseDashes: false},
 		dateFormatSet:     true,
-		TimeFormat:        TimeFormat{Is24HourClock: true},
+		timeFormat:        TimeFormat{Use24HourClock: true},
 		timeFormatSet:     true,
 	}, result)
 }

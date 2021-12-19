@@ -4,121 +4,144 @@ import . "github.com/jotaen/klog/src"
 
 // Style describes the general styling and formatting preferences of a record.
 type Style struct {
-	LineEnding    string
+	lineEnding    string
 	lineEndingSet bool
 
-	Indentation    string
+	indentation    string
 	indentationSet bool
 
-	SpacingInRange    string // Example: 8:00 - 9:00
+	spacingInRange    string // Example: `8:00 - 9:00` vs. `8:00-9:00`
 	spacingInRangeSet bool
 
-	DateFormat    DateFormat
+	dateFormat    DateFormat
 	dateFormatSet bool
 
-	TimeFormat    TimeFormat
+	timeFormat    TimeFormat
 	timeFormatSet bool
 }
 
 func (s *Style) SetLineEnding(x string) {
-	s.LineEnding = x
+	s.lineEnding = x
 	s.lineEndingSet = true
 }
 
+func (s *Style) LineEnding() string {
+	return s.lineEnding
+}
+
 func (s *Style) SetIndentation(x string) {
-	s.Indentation = x
+	s.indentation = x
 	s.indentationSet = true
 }
 
+func (s *Style) Indentation() string {
+	return s.indentation
+}
+
 func (s *Style) SetSpacingInRange(x string) {
-	s.SpacingInRange = x
+	s.spacingInRange = x
 	s.spacingInRangeSet = true
 }
 
+func (s *Style) SpacingInRange() string {
+	return s.spacingInRange
+}
+
 func (s *Style) SetDateFormat(x DateFormat) {
-	s.DateFormat = x
+	s.dateFormat = x
 	s.dateFormatSet = true
 }
 
+func (s *Style) DateFormat() DateFormat {
+	return s.dateFormat
+}
+
 func (s *Style) SetTimeFormat(x TimeFormat) {
-	s.TimeFormat = x
+	s.timeFormat = x
 	s.timeFormatSet = true
+}
+
+func (s *Style) TimeFormat() TimeFormat {
+	return s.timeFormat
 }
 
 // DefaultStyle returns the canonical style preferences as recommended
 // by the file format specification.
 func DefaultStyle() *Style {
 	return &Style{
-		LineEnding:     "\n",
-		Indentation:    "    ",
-		SpacingInRange: " ",
-		DateFormat:     DateFormat{UseDashes: true},
-		TimeFormat:     TimeFormat{Is24HourClock: true},
+		lineEnding:     "\n",
+		indentation:    "    ",
+		spacingInRange: " ",
+		dateFormat:     DateFormat{UseDashes: true},
+		timeFormat:     TimeFormat{Use24HourClock: true},
 	}
 }
 
+// Elect fills all unset fields of the `defaults` style with that value
+// which was encountered most often in the parsed records. Fields of
+// `defaults` that had been set explicitly take precedence.
 func Elect(defaults Style, parsedRecords []ParsedRecord) *Style {
-	lineEnding := make(map[string]int)
-	lineEndingMax := 0
-	indentation := make(map[string]int)
-	indentationMax := 0
-	spacingInRange := make(map[string]int)
-	spacingInRangeMax := 0
-	dateFormat := make(map[DateFormat]int)
-	dateFormatMax := 0
-	timeFormat := make(map[TimeFormat]int)
-	timeFormatMax := 0
+	lineEndingVotes := make(map[string]int)
+	indentationVotes := make(map[string]int)
+	spacingInRangeVotes := make(map[string]int)
+	dateFormatVotes := make(map[DateFormat]int)
+	timeFormatVotes := make(map[TimeFormat]int)
 	for _, r := range parsedRecords {
 		if r.Style.lineEndingSet {
-			lineEnding[r.Style.LineEnding] += 1
+			lineEndingVotes[r.Style.lineEnding] += 1
 		}
 		if r.Style.indentationSet {
-			indentation[r.Style.Indentation] += 1
+			indentationVotes[r.Style.indentation] += 1
 		}
 		if r.Style.spacingInRangeSet {
-			spacingInRange[r.Style.SpacingInRange] += 1
+			spacingInRangeVotes[r.Style.spacingInRange] += 1
 		}
 		if r.Style.dateFormatSet {
-			dateFormat[r.Style.DateFormat] += 1
+			dateFormatVotes[r.Style.dateFormat] += 1
 		}
 		if r.Style.timeFormatSet {
-			timeFormat[r.Style.TimeFormat] += 1
+			timeFormatVotes[r.Style.timeFormat] += 1
 		}
 	}
+	lineEndingMax := 0
 	if !defaults.lineEndingSet {
-		for x, v := range lineEnding {
+		for x, v := range lineEndingVotes {
 			if v > lineEndingMax {
 				lineEndingMax = v
 				defaults.SetLineEnding(x)
 			}
 		}
 	}
+	indentationMax := 0
 	if !defaults.indentationSet {
-		for x, v := range indentation {
+		for x, v := range indentationVotes {
 			if v > indentationMax {
 				indentationMax = v
 				defaults.SetIndentation(x)
 			}
 		}
 	}
+	spacingInRangeMax := 0
 	if !defaults.spacingInRangeSet {
-		for x, v := range spacingInRange {
+		for x, v := range spacingInRangeVotes {
 			if v > spacingInRangeMax {
 				spacingInRangeMax = v
 				defaults.SetSpacingInRange(x)
 			}
 		}
 	}
+	dateFormatMax := 0
 	if !defaults.dateFormatSet {
-		for x, v := range dateFormat {
+		for x, v := range dateFormatVotes {
 			if v > dateFormatMax {
 				dateFormatMax = v
 				defaults.SetDateFormat(x)
 			}
 		}
 	}
+	timeFormatMax := 0
 	if !defaults.timeFormatSet {
-		for x, v := range timeFormat {
+		for x, v := range timeFormatVotes {
 			if v > timeFormatMax {
 				timeFormatMax = v
 				defaults.SetTimeFormat(x)

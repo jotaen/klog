@@ -45,7 +45,7 @@ type Time interface {
 
 // TimeFormat contains the formatting options for the Time.
 type TimeFormat struct {
-	Is24HourClock bool
+	Use24HourClock bool
 }
 
 type time struct {
@@ -71,7 +71,7 @@ func newTime(hour int, minute int, dayShift int, is24HourClock bool) (Time, erro
 		hour:     ct.Hour,
 		minute:   ct.Minute,
 		dayShift: dayShift,
-		format:   TimeFormat{Is24HourClock: is24HourClock},
+		format:   TimeFormat{Use24HourClock: is24HourClock},
 	}, nil
 }
 
@@ -198,7 +198,7 @@ func (t *time) ToString() string {
 		tomorrowSuffix = ">"
 	}
 	hour, amPmSuffix := func() (int, string) {
-		if t.format.Is24HourClock {
+		if t.format.Use24HourClock {
 			return t.hour, ""
 		}
 		if t.hour == 12 {

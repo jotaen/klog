@@ -11,51 +11,48 @@ type Creator func(parsedRecords []parser.ParsedRecord) *Reconciler
 
 // NewReconcilerAtNewRecord creates a reconciler for a new record at a given date.
 func NewReconcilerAtNewRecord(parsedRecords []parser.ParsedRecord, newDate Date, shouldTotal ShouldTotal) *Reconciler {
-	insertPointer, newRecordIndex, shallPrepend := func() (int, int, bool) {
-		if len(parsedRecords) == 0 {
-			return 0, 0, true
-		}
-		for i, r := range parsedRecords {
-			if i == 0 && !newDate.IsAfterOrEqual(r.Date()) {
-				// The new record is dated prior to the first one.
-				return 0, 0, true
-			}
-			if len(parsedRecords)-1 == i || (newDate.IsAfterOrEqual(r.Date()) && !newDate.IsAfterOrEqual(parsedRecords[i+1].Date())) {
-				return lastLine(parsedRecords[i].Block.SignificantLines()).LineNumber, i, false
-			}
-		}
-		// The new record is dated after the last one.
-		return lastLine(parsedRecords[len(parsedRecords)-1].Block.SignificantLines()).LineNumber, len(parsedRecords), false
-	}()
-	style := parser.DefaultStyle()
-	if len(parsedRecords) > 0 {
-		style = parsedRecords[len(parsedRecords)-1].Style
+	record := NewRecord(newDate)
+	if shouldTotal != nil {
+		record.SetShouldTotal(shouldTotal)
 	}
 	reconciler := &Reconciler{
-		record:          NewRecord(newDate),
-		recordPointer:   newRecordIndex,
+		record:          record,
+		recordPointer:   -1,
 		lastLinePointer: -1,
-		style:           style,
+		style:           parser.Elect(*parser.DefaultStyle(), parsedRecords),
 		lines:           flatten(parsedRecords),
 	}
 	headline := func() insertableText {
-		result := newDate.ToStringWithFormat(reconciler.style.DateFormat)
+		result := newDate.ToStringWithFormat(reconciler.style.DateFormat())
 		if shouldTotal != nil {
 			result += " (" + shouldTotal.ToString() + ")"
 		}
 		return insertableText{result, 0}
 	}()
-	newRecordLines, lastLineOffset := func() ([]insertableText, int) {
+	newRecordLines, insertPointer, lastLineOffset, newRecordIndex := func() ([]insertableText, int, int, int) {
 		if len(parsedRecords) == 0 {
-			return []insertableText{headline}, 1
+			return []insertableText{headline}, 0, 1, 0
 		}
-		if shallPrepend {
-			return []insertableText{headline, blankLine}, 1
+		i := 0
+		for _, r := range parsedRecords {
+			if i == 0 && !newDate.IsAfterOrEqual(r.Date()) {
+				// The new record is dated prior to the first one.
+				return []insertableText{headline, blankLine}, 0, 1, 0
+			}
+			if len(parsedRecords)-1 == i || (newDate.IsAfterOrEqual(r.Date()) && !newDate.IsAfterOrEqual(parsedRecords[i+1].Date())) {
+				// The record is in between.
+				break
+			}
+			i++
 		}
-		return []insertableText{blankLine, headline}, 2
+		// The new record is dated after the last one.
+		return []insertableText{blankLine, headline}, lastLine(parsedRecords[i].Block.SignificantLines()).LineNumber, 2, i + 1
 	}()
-	reconciler.lastLinePointer = insertPointer + lastLineOffset
+
+	// Insert record and adjust pointers accordingly.
 	reconciler.insert(insertPointer, newRecordLines)
+	reconciler.lastLinePointer = insertPointer + lastLineOffset
+	reconciler.recordPointer = newRecordIndex
 	return reconciler
 }
 

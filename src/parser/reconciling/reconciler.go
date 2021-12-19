@@ -66,7 +66,7 @@ func (r *Reconciler) CloseOpenRange(endTime Time, additionalSummary string) (*Re
 	r.lines[openRangeLineIndex].Text = regexp.MustCompile(`^(.*?)\?+(.*)$`).
 		ReplaceAllString(
 			r.lines[openRangeLineIndex].Text,
-			"${1}"+endTime.ToStringWithFormat(r.style.TimeFormat)+"${2}"+additionalSummary,
+			"${1}"+endTime.ToStringWithFormat(r.style.TimeFormat())+"${2}"+additionalSummary,
 		)
 	return r.MakeResult()
 }
@@ -87,7 +87,7 @@ func (r *Reconciler) StartOpenRange(startTime Time, entrySummary string) (*Resul
 	if openRangeEntryIndex != -1 {
 		return nil, errors.New("There is already an open range in this record")
 	}
-	newEntryLine := startTime.ToStringWithFormat(r.style.TimeFormat) + r.style.SpacingInRange + "-" + r.style.SpacingInRange + "?"
+	newEntryLine := startTime.ToStringWithFormat(r.style.TimeFormat()) + r.style.SpacingInRange() + "-" + r.style.SpacingInRange() + "?"
 	if len(entrySummary) > 0 {
 		newEntryLine += " " + entrySummary
 	}
@@ -113,10 +113,6 @@ func (r *Reconciler) MakeResult() (*Result, error) {
 	}, nil
 }
 
-func (r *Reconciler) Date() Date {
-	return r.record.Date()
-}
-
 var blankLine = insertableText{"", 0}
 
 type insertableText struct {
@@ -131,9 +127,9 @@ func (r *Reconciler) insert(lineIndex int, texts []insertableText) {
 		if i >= lineIndex && offset < len(texts) {
 			line := ""
 			if texts[offset].indentation > 0 {
-				line += r.style.Indentation
+				line += r.style.Indentation()
 			}
-			line += texts[offset].text + r.style.LineEnding
+			line += texts[offset].text + r.style.LineEnding()
 			result[i] = engine.NewLineFromString(line, -1)
 			offset++
 		} else {
@@ -142,7 +138,7 @@ func (r *Reconciler) insert(lineIndex int, texts []insertableText) {
 		result[i].LineNumber = i + 1
 	}
 	if lineIndex > 0 && result[lineIndex-1].LineEnding == "" {
-		result[lineIndex-1].LineEnding = r.style.LineEnding
+		result[lineIndex-1].LineEnding = r.style.LineEnding()
 	}
 	r.lines = result
 }
