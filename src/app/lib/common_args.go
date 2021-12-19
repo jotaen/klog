@@ -21,6 +21,7 @@ type OutputFileArgs struct {
 type AtDateArgs struct {
 	Today     bool `name:"today" help:"Use today’s date (default)"`
 	Yesterday bool `name:"yesterday" help:"Use yesterday’s date"`
+	Tomorrow  bool `name:"tomorrow" help:"Use tomorrow’s date"`
 	Date      Date `name:"date" short:"d" help:"The date of the record"`
 }
 
@@ -28,9 +29,11 @@ func (args *AtDateArgs) AtDate(now gotime.Time) (Date, bool) {
 	if args.Date != nil {
 		return args.Date, false
 	}
-	today := NewDateFromTime(now)
+	today := NewDateFromTime(now) // That’s effectively/implicitly `--today`
 	if args.Yesterday {
 		return today.PlusDays(-1), false
+	} else if args.Tomorrow {
+		return today.PlusDays(1), false
 	}
 	return today, true
 }
@@ -50,6 +53,9 @@ func (args *AtDateAndTimeArgs) AtTime(now gotime.Time) (Time, bool, app.Error) {
 		return NewTimeFromTime(now), true, nil
 	} else if today.PlusDays(-1).IsEqualTo(date) {
 		shiftedTime, _ := NewTimeFromTime(now).Add(NewDuration(24, 0))
+		return shiftedTime, true, nil
+	} else if today.PlusDays(1).IsEqualTo(date) {
+		shiftedTime, _ := NewTimeFromTime(now).Add(NewDuration(-24, 0))
 		return shiftedTime, true, nil
 	}
 	return nil, false, app.NewErrorWithCode(
