@@ -9,6 +9,7 @@
 - **[ FEATURE ]** When using the manipulation commands (`klog track`, etc.),
   conform to style preferences encountered in the file.
 - **[ FEATURE ]** Add `--tomorrow` as shorthand flag for the next day’s date.
+- **[ FEATURE ]** Improve warnings (which are shown for potential data problems).
 
 ## v3.2
 - **[ BREAKING ]** Don’t allow mixing the indentation style within a
