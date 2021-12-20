@@ -100,8 +100,13 @@ as it would be displayed by a wall clock (which divides a day into
 A *time* value MUST consist of both an hour part and a minute part:
 - The minute part MUST be between 0-59 (inclusive).
   Single-figure minute parts MUST be padded with a `0`.
-- The hour part MUST be between 0-23 (inclusive).
+- The hour part MUST be between 0-24 (inclusive).
   Single-figure hour parts MAY be padded with a `0`.
+  If the hour part is `24`,
+  then the minute part MUST be `00`;
+  `<24:00` MUST be interpreted as `0:00`,
+  `24:00` MUST be interpreted as `0:00>`,
+  `24:00>` MUST NOT appear.
 
 As default, *times* are to be interpreted as 24-hour clock values.
 An `am` or `pm` suffix MAY be used to denote that the value is
