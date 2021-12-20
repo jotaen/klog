@@ -97,6 +97,16 @@ as it would be displayed by a wall clock (which divides a day into
 
 > Examples: `9:00`, `23:18`, `6:30am`, `9:23pm`, `1:00>`, `1:00am>`, `<23:00`.
 
+A *time* value MUST consist of both an hour part and a minute part:
+- The minute part MUST be between 0-59 (inclusive).
+  Single-figure minute parts MUST be padded with a `0`.
+- The hour part MUST be between 0-23 (inclusive).
+  Single-figure hour parts MAY be padded with a `0`.
+
+As default, *times* are to be interpreted as 24-hour clock values.
+An `am` or `pm` suffix MAY be used to denote that the value is
+to be interpreted as 12-hour clock value.
+
 *Time* values MAY be *shifted* to the next or to the previous day:
 - To associate the *time* with the day before the *record’s* *date*,
   a `<` prefix MUST be used,
@@ -104,16 +114,6 @@ as it would be displayed by a wall clock (which divides a day into
 - To associate the *time* with the day after the *record’s* *date*,
   a `>` suffix MUST be used,
   e.g. `1:30>`.
-
-A *time* value MUST consist of both an hour part and a minute part:
-- The minute part MUST be between 0-59 (inclusive).
-  The minute part MUST always contain two “digits”.
-- The hour part MUST be between 0-23 (inclusive).
-  Single-digit hour parts MAY be padded with a `0`.
-
-As default, *times* are to be interpreted as 24-hour clock values.
-An `am` or `pm` suffix MAY be used to denote that the value is
-to be interpreted as 12-hour clock value.
 
 ### Range
 A *range* is an *entry* that represents the time span between two points in time.
