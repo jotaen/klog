@@ -15,6 +15,8 @@ Whenever a word has special meaning in klog, it is formatted in *italics*.
 
 Other technical terms are surrounded by “quotes”. These are defined in the appendix.
 
+Character sequences that are wrapped in `backticks` are meant to be read exactly (character by character).
+
 ## I. Records
 
 A *record* is a self-contained data structure that contains time-tracking information.
