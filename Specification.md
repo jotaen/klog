@@ -48,7 +48,7 @@ A *should-total* denotes the targeted total time of a *record*.
 
 > Examples: `(8h!)`, `(5h15m!)`, `(-3h30m!)`
 
-*Should-totals* MUST be a *duration* value
+A *should-total* MUST be a *duration* value
 followed by a `!`
 and wrapped in “parentheses”.
 
