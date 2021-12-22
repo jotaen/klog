@@ -97,15 +97,20 @@ as it would be displayed by a wall clock (which divides a day into
 
 > Examples: `9:00`, `23:18`, `6:30am`, `9:23pm`, `1:00>`, `1:00am>`, `<23:00`.
 
-A *time* value MUST consist of both an hour part and a minute part:
-- The minute part MUST be between 0-59 (inclusive).
-  Single-figure minute parts MUST be padded with a `0`.
-- The hour part MUST be between 0-23 (inclusive).
-  Single-figure hour parts MAY be padded with a `0`.
+*Time* values MUST consist of an hour part and a minute part,
+separated by a `:` in between.
+The hour part MUST be written first.
 
 As default, *times* are to be interpreted as 24-hour clock values.
 An `am` or `pm` suffix MAY be used to denote that the value is
 to be interpreted as 12-hour clock value.
+
+The minute part MUST be between 0-59 (inclusive).
+Single-figure minute parts MUST be padded with a `0`.
+
+The hour part MUST either be between 0-23 (inclusive) when using the 24-hour clock,
+or between 1-12 (inclusive) when using the 12-hour clock.
+Single-figure hour parts MAY be padded with a `0`.
 
 *Time* values MAY be *shifted* to the next or to the previous day:
 - To associate the *time* with the day before the *record’s* *date*,
