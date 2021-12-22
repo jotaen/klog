@@ -156,19 +156,19 @@ A *duration* is an *entry* that represents a period of time.
 
 > Examples: `1h`, `5m`, `4h12m`, `-8h30m`
 
-*Durations* contain an amount of hours and/or an amount of minutes.
+*Durations* MUST contain an amount of hours and/or an amount of minutes.
 (So they MUST either contain one of these two or both.)
 The hour part MUST be written first.
 
 The hour part MUST be an “integer”
-which MUST be immediately followed by the character `h`.
+which MUST be followed by the character `h`.
 It MAY be `0h`.
 It MAY be greater than `24h`,
 e.g. `50h`.
 If the hour part is missing, a value of `0h` is assumed.
 
 The minute part MUST be an “integer”
-which MUST be immediately followed by the character `m`.
+which MUST be followed by the character `m`.
 It MAY be `0m`.
 When the hour part is present,
 the minute part MUST NOT be greater than `59m`,
