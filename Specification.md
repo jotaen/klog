@@ -15,6 +15,8 @@ Whenever a word has special meaning in klog, it is formatted in *italics*.
 
 Other technical terms are surrounded by “quotes”. These are defined in the appendix.
 
+Character sequences that are wrapped in `backticks` are meant to be read exactly (character by character).
+
 ## I. Records
 
 A *record* is a self-contained data structure that contains time-tracking information.
@@ -35,7 +37,7 @@ A *date* is a day that is representable in the Gregorian calendar.
 
 > Examples: `2020-01-01`, `1984-08-30`, `2004/12/24`.
 
-It MUST be formatted according to one of the following patterns:
+*Dates* MUST be formatted according to one of the following patterns:
 - `YYYY-MM-DD` (RECOMMENDED),
 - `YYYY/MM/DD`
 
@@ -46,7 +48,7 @@ A *should-total* denotes the targeted total time of a *record*.
 
 > Examples: `(8h!)`, `(5h15m!)`, `(-3h30m!)`.
 
-A *should-total* MUST be a *duration* value
+*Should-totals* MUST be a *duration* value
 followed by a `!`
 and wrapped in “parentheses”.
 
@@ -97,20 +99,26 @@ as it would be displayed by a wall clock (which divides a day into
 
 > Examples: `9:00`, `23:18`, `6:30am`, `9:23pm`, `1:00>`, `1:00am>`, `<23:00`.
 
-A *time* value MUST consist of both an hour part and a minute part:
-- The minute part MUST be between 0-59 (inclusive).
-  Single-figure minute parts MUST be padded with a `0`.
-- The hour part MUST be between 0-24 (inclusive).
-  Single-figure hour parts MAY be padded with a `0`.
-  If the hour part is `24`,
-  then the minute part MUST be `00`;
-  `<24:00` MUST be interpreted as `0:00`,
-  `24:00` MUST be interpreted as `0:00>`,
-  `24:00>` MUST NOT appear.
+*Time* values MUST consist of an hour part and a minute part,
+separated by a `:` in between.
+The hour part MUST be written first.
 
 As default, *times* are to be interpreted as 24-hour clock values.
 An `am` or `pm` suffix MAY be used to denote that the value is
 to be interpreted as 12-hour clock value.
+
+The minute part MUST be between 0-59 (inclusive).
+Single-figure minute parts MUST be padded with a `0`.
+
+The hour part MUST either be between 0-24 (inclusive) when using the 24-hour clock,
+or between 1-12 (inclusive) when using the 12-hour clock.
+Single-figure hour parts MAY be padded with a `0`.
+
+When using the 24-hour clock, if the hour part is `24`,
+then the minute part MUST be `00`;
+`<24:00` MUST be interpreted as `0:00`,
+`24:00` MUST be interpreted as `0:00>`,
+`24:00>` MUST NOT appear.
 
 *Time* values MAY be *shifted* to the next or to the previous day:
 - To associate the *time* with the day before the *record’s* *date*,
@@ -125,7 +133,7 @@ A *range* is an *entry* that represents the time span between two points in time
 
 > Examples: `8:00 - 9:00`, `11:00am - 1:00pm`, `<23:40 - 3:12`, `0:30> - 4:00>`.
 
-It MUST consist of two values that denote the start and the end.
+*Ranges* MUST consist of two values that denote the start and the end.
 Start and end MUST be written in chronological order.
 They MAY be equal.
 
@@ -154,8 +162,8 @@ A *duration* is an *entry* that represents a period of time.
 
 > Examples: `1h`, `5m`, `4h12m`, `-8h30m`.
 
-It contains an amount of hours and/or an amount of minutes.
-(So it MUST either contain one of these two or both.)
+*Durations* contain an amount of hours and/or an amount of minutes.
+(So they MUST either contain one of these two or both.)
 The hour part MUST be written first.
 
 The hour part MUST be an “integer”
