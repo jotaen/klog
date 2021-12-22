@@ -35,7 +35,7 @@ A *date* is a day that is representable in the Gregorian calendar.
 
 > Examples: `2020-01-01`, `1984-08-30`, `2004/12/24`.
 
-It MUST be formatted according to one of the following patterns:
+*Dates* MUST be formatted according to one of the following patterns:
 - `YYYY-MM-DD` (RECOMMENDED),
 - `YYYY/MM/DD`
 
@@ -46,7 +46,7 @@ A *should-total* denotes the targeted total time of a *record*.
 
 > Examples: `(8h!)`, `(5h15m!)`, `(-3h30m!)`.
 
-A *should-total* MUST be a *duration* value
+*Should-totals* MUST be a *duration* value
 followed by a `!`
 and wrapped in “parentheses”.
 
@@ -120,7 +120,7 @@ A *range* is an *entry* that represents the time span between two points in time
 
 > Examples: `8:00 - 9:00`, `11:00am - 1:00pm`, `<23:40 - 3:12`, `0:30> - 4:00>`.
 
-It MUST consist of two values that denote the start and the end.
+*Ranges* MUST consist of two values that denote the start and the end.
 Start and end MUST be written in chronological order.
 They MAY be equal.
 
@@ -149,8 +149,8 @@ A *duration* is an *entry* that represents a period of time.
 
 > Examples: `1h`, `5m`, `4h12m`, `-8h30m`.
 
-It contains an amount of hours and/or an amount of minutes.
-(So it MUST either contain one of these two or both.)
+*Durations* contain an amount of hours and/or an amount of minutes.
+(So they MUST either contain one of these two or both.)
 The hour part MUST be written first.
 
 The hour part MUST be an “integer”
