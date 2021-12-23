@@ -45,8 +45,6 @@ or a `/`.
 The year part MUST be written first, then the month, then the day.
 
 The combination of year, month and day MUST be representable by the Gregorian calendar.
-The *date* MUST be later or equal than `0000-01-01`,
-and it MUST be earlier or equal than `9999-12-31`.
 
 ### Should-Total
 A *should-total* denotes the targeted total time of a *record*.
