@@ -84,7 +84,7 @@ preceded by a single `#` character.
 *Entry* is an abstract term for time-related data.
 *Durations*, *ranges* and *open ranges* are instances of *entries*.
 
-> Examples (indentation omitted): `5h`, `5h Gardening`, `11:00 - 14:15`, `8:00 - 15:00 Long day at #school`
+> Examples (indentation omitted): `2h30m`, `-1h Lunch break`, `11:00 - 14:15`, `8:00am - 2:00pm Long day at #school`
 
 Each *entry* MUST appear on its own line and
 MUST be indented in one of the following ways:
@@ -102,9 +102,9 @@ A *time* is a value that represents a point in time throughout a day
 as it would be displayed by a wall clock (which divides a day into
 24 hours and every hour into 60 minutes).
 
-> Examples: `9:00`, `23:18`, `6:30am`, `9:23pm`, `1:00>`, `1:00am>`, `<23:00`
+> Examples: `14:18`, `6:30am`, `01:00>`, `<23:00am`
 
-*Time* values MUST consist of an hour part and a minute part,
+*Time* values MUST contain an hour part and a minute part,
 separated by a `:` in between.
 The hour part MUST be written first.
 
@@ -132,8 +132,8 @@ A *range* is an *entry* that represents the time span between two points in time
 
 > Examples: `8:00 - 9:00`, `11:00am - 1:00pm`, `<23:40 - 3:12`, `0:30> - 4:00>`
 
-*Ranges* MUST consist of two values that denote the start and the end.
-Start and end MUST be written in chronological order.
+*Ranges* MUST contain two *time* values that denote the start and the end.
+Start *time* and end *time* MUST be written in chronological order.
 They MAY be equal.
 
 There MUST be a `-` between the two values.
