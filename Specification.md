@@ -33,15 +33,20 @@ A *summary* MAY appear on the subsequent lines.
 Any amount of *entries* MAY appear afterwards.
 
 ### Date
-A *date* is a day that is representable in the Gregorian calendar.
+A *date* is a day in the calendar.
 
 > Examples: `2020-01-01`, `1984-08-30`, `2004/12/24`
 
-*Dates* MUST be formatted according to one of the following patterns:
-- `YYYY-MM-DD` (RECOMMENDED),
-- `YYYY/MM/DD`
+*Dates* MUST contain 4 “digits” that denote the year,
+2 “digits” that denote the month,
+and 2 “digits” that denote the day.
+The parts MUST be separated by either a `-` (RECOMMENDED)
+or a `/`.
+The year part MUST be written first, then the month, then the day.
 
-(Where `Y` is a “digit” to denote the year, `M` the month, `D` the day.)
+The combination of year, month and day MUST be representable by the Gregorian calendar.
+The *date* MUST be later or equal than `0000-01-01`,
+and it MUST be earlier or equal than `9999-12-31`.
 
 ### Should-Total
 A *should-total* denotes the targeted total time of a *record*.
