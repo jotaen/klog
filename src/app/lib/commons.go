@@ -22,7 +22,7 @@ func Reconcile(ctx app.Context, opts ReconcileOpts, creators []reconciling.Creat
 		return err
 	}
 	ctx.Print("\n" + ctx.Serialiser().SerialiseRecords(result.Record) + "\n")
-	ctx.Print(opts.WarnArgs.ToString(ctx.Now(), ToRecords(result.AllRecords)))
+	opts.WarnArgs.PrintWarnings(ctx, ToRecords(result.AllRecords))
 	return nil
 }
 

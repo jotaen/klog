@@ -102,7 +102,7 @@ func PrettifyWarnings(ws []service.Warning) string {
 	for _, w := range ws {
 		result += Style{Background: "227", Color: "000"}.Format(" WARNING ")
 		result += " "
-		result += Style{Color: "227"}.Format(w.Date.ToString() + ": " + w.Message)
+		result += Style{Color: "227"}.Format(w.Date().ToString() + ": " + w.Warning())
 		result += "\n"
 	}
 	return result

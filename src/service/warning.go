@@ -8,17 +8,30 @@ import (
 
 // Warning contains information for helping locate an issue.
 type Warning struct {
-	Date    Date
-	Message string
+	date   Date
+	origin checker
+}
+
+// Date is the date of the record that the warning refers to.
+func (w Warning) Date() Date {
+	return w.date
+}
+
+// Warning is a short description of the problem.
+func (w Warning) Warning() string {
+	return w.origin.Message()
 }
 
 type checker interface {
-	Warn(Record) *Warning
+	Warn(Record) Date
+	Message() string
 }
 
-// SanityCheck checks records for potential user errors. It’s not meant as strict validation,
+// CheckForWarnings checks records for potential user errors. It’s not meant as strict validation,
 // but the main purpose is to help users spot accidental mistakes they might have made.
-func SanityCheck(reference gotime.Time, rs []Record) []Warning {
+// The checks are mostly limited to record-level, because otherwise it would need to make
+// assumptions on how records are organised within or across files.
+func CheckForWarnings(reference gotime.Time, rs []Record) []Warning {
 	now := NewDateTimeFromGo(reference)
 	sortedRs := Sort(rs, false)
 	var ws []Warning
@@ -30,9 +43,12 @@ func SanityCheck(reference gotime.Time, rs []Record) []Warning {
 	}
 	for _, r := range sortedRs {
 		for _, c := range checkers {
-			w := c.Warn(r)
-			if w != nil {
-				ws = append(ws, *w)
+			d := c.Warn(r)
+			if d != nil {
+				ws = append(ws, Warning{
+					date:   d,
+					origin: c,
+				})
 			}
 		}
 	}
@@ -47,7 +63,7 @@ type unclosedOpenRangeChecker struct {
 // Warn returns warnings for all open ranges before yesterday, as these
 // cannot be closed anymore via a shifted time. It also returns a warning
 // if there is an open range yesterday, when there is a record today already.
-func (c *unclosedOpenRangeChecker) Warn(record Record) *Warning {
+func (c *unclosedOpenRangeChecker) Warn(record Record) Date {
 	if record.Date().IsEqualTo(c.today) {
 		// Open ranges at today’s date are always okay
 		c.encounteredRecordAtToday = true
@@ -59,12 +75,13 @@ func (c *unclosedOpenRangeChecker) Warn(record Record) *Warning {
 	}
 	if record.OpenRange() != nil {
 		// Any other case is most likely a mistake
-		return &Warning{
-			Date:    record.Date(),
-			Message: "Unclosed open range",
-		}
+		return record.Date()
 	}
 	return nil
+}
+
+func (c *unclosedOpenRangeChecker) Message() string {
+	return "Unclosed open range"
 }
 
 type futureEntriesChecker struct {
@@ -74,7 +91,7 @@ type futureEntriesChecker struct {
 
 // Warn returns warnings if there are entries at future dates. It doesn’t
 // return warnings if there are future records that don’t contain entries.
-func (c *futureEntriesChecker) Warn(record Record) *Warning {
+func (c *futureEntriesChecker) Warn(record Record) Date {
 	if len(record.Entries()) == 0 {
 		return nil
 	}
@@ -112,17 +129,18 @@ func (c *futureEntriesChecker) Warn(record Record) *Warning {
 			return nil
 		}
 	}
-	return &Warning{
-		Date:    record.Date(),
-		Message: "Entry in the future",
-	}
+	return record.Date()
+}
+
+func (c *futureEntriesChecker) Message() string {
+	return "Entry in the future"
 }
 
 type overlappingTimeRangesChecker struct{}
 
 // Warn returns warnings if there are entries with overlapping time ranges.
 // E.g. `8:00-9:00` and `8:30-9:30`.
-func (c *overlappingTimeRangesChecker) Warn(record Record) *Warning {
+func (c *overlappingTimeRangesChecker) Warn(record Record) Date {
 	var orderedRanges []Range
 	for _, e := range record.Entries() {
 		e.Unbox(
@@ -159,24 +177,26 @@ func (c *overlappingTimeRangesChecker) Warn(record Record) *Warning {
 		}
 		prev := orderedRanges[i-1]
 		if !curr.Start().IsAfterOrEqual(prev.End()) {
-			return &Warning{
-				Date:    record.Date(),
-				Message: "Overlapping time ranges",
-			}
+			return record.Date()
 		}
 	}
 	return nil
 }
 
+func (c *overlappingTimeRangesChecker) Message() string {
+	return "Overlapping time ranges"
+}
+
 type moreThan24HoursChecker struct{}
 
 // Warn returns warnings if there are records with a total time of more than 24h.
-func (c *moreThan24HoursChecker) Warn(record Record) *Warning {
+func (c *moreThan24HoursChecker) Warn(record Record) Date {
 	if Total(record).InMinutes() > 24*60 {
-		return &Warning{
-			Date:    record.Date(),
-			Message: "Total time exceeds 24 hours",
-		}
+		return record.Date()
 	}
 	return nil
+}
+
+func (c *moreThan24HoursChecker) Message() string {
+	return "Total time exceeds 24 hours"
 }

@@ -124,12 +124,12 @@ type WarnArgs struct {
 	NoWarn bool `name:"no-warn" help:"Suppress warnings about potential mistakes"`
 }
 
-func (args *WarnArgs) ToString(now gotime.Time, records []Record) string {
+func (args *WarnArgs) PrintWarnings(ctx app.Context, records []Record) {
 	if args.NoWarn {
-		return ""
+		return
 	}
-	ws := service.SanityCheck(now, records)
-	return PrettifyWarnings(ws)
+	ws := service.CheckForWarnings(ctx.Now(), records)
+	ctx.Print(PrettifyWarnings(ws))
 }
 
 type NoStyleArgs struct {
