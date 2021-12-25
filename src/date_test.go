@@ -15,6 +15,14 @@ func TestRecognisesValidDate(t *testing.T) {
 	assert.Equal(t, 15, d.WeekNumber())
 }
 
+func TestBoundaries(t *testing.T) {
+	_, firstErr := NewDate(0000, 01, 01)
+	assert.Nil(t, firstErr)
+
+	_, lastErr := NewDate(9999, 12, 31)
+	assert.Nil(t, lastErr)
+}
+
 func TestReconWithDate(t *testing.T) {
 	d, _ := NewDate(2005, 12, 31)
 	assert.Equal(t, Ɀ_Date_(2006, 1, 1), d.PlusDays(1))
