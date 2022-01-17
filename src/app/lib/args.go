@@ -19,31 +19,51 @@ type OutputFileArgs struct {
 }
 
 type AtDateArgs struct {
+	Date      Date `name:"date" short:"d" help:"The date of the record"`
 	Today     bool `name:"today" help:"Use today’s date (default)"`
 	Yesterday bool `name:"yesterday" help:"Use yesterday’s date"`
-	Date      Date `name:"date" short:"d" help:"The date of the record"`
+	Tomorrow  bool `name:"tomorrow" help:"Use tomorrow’s date"`
 }
 
-func (args *AtDateArgs) AtDate(now gotime.Time) Date {
+func (args *AtDateArgs) AtDate(now gotime.Time) (Date, bool) {
 	if args.Date != nil {
-		return args.Date
+		return args.Date, false
 	}
-	today := NewDateFromTime(now)
+	today := NewDateFromGo(now) // That’s effectively/implicitly `--today`
 	if args.Yesterday {
-		return today.PlusDays(-1)
+		return today.PlusDays(-1), false
+	} else if args.Tomorrow {
+		return today.PlusDays(1), false
 	}
-	return today
+	return today, true
 }
 
-type AtTimeArgs struct {
+type AtDateAndTimeArgs struct {
+	AtDateArgs
 	Time Time `name:"time" short:"t" help:"Specify the time (defaults to now)"`
 }
 
-func (args *AtTimeArgs) AtTime(now gotime.Time) Time {
+func (args *AtDateAndTimeArgs) AtTime(now gotime.Time) (Time, bool, app.Error) {
 	if args.Time != nil {
-		return args.Time
+		return args.Time, false, nil
 	}
-	return NewTimeFromTime(now)
+	date, _ := args.AtDate(now)
+	today := NewDateFromGo(now)
+	if today.IsEqualTo(date) {
+		return NewTimeFromGo(now), true, nil
+	} else if today.PlusDays(-1).IsEqualTo(date) {
+		shiftedTime, _ := NewTimeFromGo(now).Plus(NewDuration(24, 0))
+		return shiftedTime, true, nil
+	} else if today.PlusDays(1).IsEqualTo(date) {
+		shiftedTime, _ := NewTimeFromGo(now).Plus(NewDuration(-24, 0))
+		return shiftedTime, true, nil
+	}
+	return nil, false, app.NewErrorWithCode(
+		app.LOGICAL_ERROR,
+		"Missing time parameter",
+		"Please specify a time value for dates in the past",
+		nil,
+	)
 }
 
 type DiffArgs struct {
@@ -92,10 +112,10 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
 		qry.BeforeOrEqual = args.Before.PlusDays(-1)
 	}
 	if args.Today {
-		qry.Dates = append(qry.Dates, NewDateFromTime(now))
+		qry.Dates = append(qry.Dates, NewDateFromGo(now))
 	}
 	if args.Yesterday {
-		qry.Dates = append(qry.Dates, NewDateFromTime(now.AddDate(0, 0, -1)))
+		qry.Dates = append(qry.Dates, NewDateFromGo(now.AddDate(0, 0, -1)))
 	}
 	return service.Filter(rs, qry)
 }
@@ -104,12 +124,12 @@ type WarnArgs struct {
 	NoWarn bool `name:"no-warn" help:"Suppress warnings about potential mistakes"`
 }
 
-func (args *WarnArgs) ToString(now gotime.Time, records []Record) string {
+func (args *WarnArgs) PrintWarnings(ctx app.Context, records []Record) {
 	if args.NoWarn {
-		return ""
+		return
 	}
-	ws := service.SanityCheck(now, records)
-	return PrettifyWarnings(ws)
+	ws := service.CheckForWarnings(ctx.Now(), records)
+	ctx.Print(PrettifyWarnings(ws))
 }
 
 type NoStyleArgs struct {
@@ -127,7 +147,7 @@ type QuietArgs struct {
 }
 
 type SortArgs struct {
-	Sort string `name:"sort" help:"Sort output by date (ASC or DESC)" enum:"ASC,DESC,asc,desc," default:"asc"`
+	Sort string `name:"sort" help:"Sort output by date (asc or desc)" enum:"asc,desc,ASC,DESC," default:""`
 }
 
 func (args *SortArgs) ApplySort(rs []Record) []Record {

@@ -43,7 +43,7 @@ type Context interface {
 	ReadInputs(...FileOrBookmarkName) ([]Record, Error)
 
 	// ReconcileFile applies one or more reconcile handlers to a file and saves it.
-	ReconcileFile(FileOrBookmarkName, ...reconciling.Handler) Error
+	ReconcileFile(FileOrBookmarkName, []reconciling.Creator, reconciling.Reconcile) (*reconciling.Result, Error)
 
 	// Now returns the current timestamp.
 	Now() gotime.Time
@@ -55,7 +55,7 @@ type Context interface {
 	ManipulateBookmarks(func(BookmarksCollection) Error) Error
 
 	// OpenInFileBrowser tries to open the file explorer at the location of the file.
-	OpenInFileBrowser(File) Error
+	OpenInFileBrowser(FileOrBookmarkName) Error
 
 	// OpenInEditor tries to open a file or bookmark in the user’s preferred $EDITOR.
 	OpenInEditor(FileOrBookmarkName, func(string)) Error
@@ -159,11 +159,13 @@ func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]Record, Error)
 	}
 	var allRecords []Record
 	for _, f := range files {
-		records, _, parserErrors := parser.Parse(f.Contents())
+		parsedRecords, parserErrors := parser.Parse(f.Contents())
 		if parserErrors != nil {
 			return nil, NewParserErrors(parserErrors)
 		}
-		allRecords = append(allRecords, records...)
+		for _, r := range parsedRecords {
+			allRecords = append(allRecords, r)
+		}
 	}
 	return allRecords, nil
 }
@@ -188,31 +190,54 @@ func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithCont
 	return inputs[0], nil
 }
 
-func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, handler ...reconciling.Handler) Error {
+func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, Error) {
 	target, err := ctx.retrieveTargetFile(fileArg)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	records, blocks, parserErrors := parser.Parse(target.Contents())
+	parsedRecords, parserErrors := parser.Parse(target.Contents())
 	if parserErrors != nil {
-		return NewParserErrors(parserErrors)
+		return nil, NewParserErrors(parserErrors)
 	}
-	baseReconciler := reconciling.NewReconciler(records, blocks)
-	result, rErr := reconciling.Chain(baseReconciler, handler...)
-	if rErr != nil {
-		return NewErrorWithCode(
+	result, aErr := ApplyReconciler(parsedRecords, creators, reconcile)
+	if aErr != nil {
+		return nil, aErr
+	}
+	wErr := WriteToFile(target, result.AllSerialised)
+	if wErr != nil {
+		return nil, wErr
+	}
+	return result, nil
+}
+
+func ApplyReconciler(parsedRecords []parser.ParsedRecord, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, Error) {
+	reconciler := func() *reconciling.Reconciler {
+		for _, createReconciler := range creators {
+			r := createReconciler(parsedRecords)
+			if r != nil {
+				return r
+			}
+		}
+		return nil
+	}()
+	if reconciler == nil {
+		return nil, NewErrorWithCode(
 			LOGICAL_ERROR,
-			"Cannot alter record",
-			rErr.Error(),
-			err,
+			"No such record",
+			"Please create or specify a record for this operation",
+			nil,
 		)
 	}
-	wErr := WriteToFile(target, result.FileContents())
-	if wErr != nil {
-		return wErr
+	result, rErr := reconcile(reconciler)
+	if rErr != nil {
+		return nil, NewErrorWithCode(
+			LOGICAL_ERROR,
+			"Manipulation failed",
+			rErr.Error(),
+			rErr,
+		)
 	}
-	ctx.Print("\n" + ctx.Serialiser().SerialiseRecords(result.Record()) + "\n")
-	return nil
+	return result, nil
 }
 
 func (ctx *context) Now() gotime.Time {
@@ -282,15 +307,32 @@ func (ctx *context) bookmarkDatabasePath() File {
 	return NewFileOrPanic(ctx.KlogFolder() + "bookmarks.json")
 }
 
-func (ctx *context) OpenInFileBrowser(target File) Error {
-	cmd := exec.Command("open", target.Location())
-	err := cmd.Run()
-	if err != nil {
+func tryCommands(commands []string, additionalArg string) bool {
+	for _, command := range commands {
+		args := strings.Split(command, " ")
+		args = append(args, additionalArg)
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		err := cmd.Run()
+		if err == nil {
+			return true
+		}
+	}
+	return false
+}
+
+func (ctx *context) OpenInFileBrowser(fileArg FileOrBookmarkName) Error {
+	target, rErr := ctx.retrieveTargetFile(fileArg)
+	if rErr != nil {
+		return rErr
+	}
+	hasSucceeded := tryCommands(POTENTIAL_FILE_EXLORERS, target.Location())
+	if !hasSucceeded {
 		return NewError(
 			"Failed to open file browser",
-			err.Error(),
-			err,
-		)
+			"Opening a file browser doesn’t seem possible on your system.",
+			nil)
 	}
 	return nil
 }
@@ -302,19 +344,13 @@ func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(stri
 	}
 	hint := "You can specify your preferred editor via the $EDITOR environment variable.\n"
 	preferredEditor := os.Getenv("EDITOR")
-	editors := append([]string{preferredEditor}, POTENTIAL_EDITORS...)
-	for _, editor := range editors {
-		cmd := exec.Command(editor, target.Path())
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		err := cmd.Run()
-		if err == nil {
-			if preferredEditor == "" {
-				// Inform the user that they can configure their editor:
-				printHint(hint)
-			}
-			return nil
+	hasSucceeded := tryCommands(append([]string{preferredEditor}, POTENTIAL_EDITORS...), target.Path())
+	if hasSucceeded {
+		if preferredEditor == "" {
+			// Inform the user that they can configure their editor:
+			printHint(hint)
 		}
+		return nil
 	}
 	return NewError(
 		"Cannot open any editor",

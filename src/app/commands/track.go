@@ -1,9 +1,9 @@
 package commands
 
 import (
-	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
+	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/parser/reconciling"
 	"strings"
 )
@@ -13,6 +13,7 @@ type Track struct {
 	Entry string `arg:"" required:"" help:"The new entry to add"`
 	lib.NoStyleArgs
 	lib.OutputFileArgs
+	lib.WarnArgs
 }
 
 func (opt *Track) Help() string {
@@ -26,29 +27,28 @@ and to avoid the text being processed by your shell.`
 
 func (opt *Track) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
-	date := opt.AtDate(ctx.Now())
+	now := ctx.Now()
+	date, _ := opt.AtDate(now)
 	value := sanitiseQuotedLeadingDash(opt.Entry)
-	return ctx.ReconcileFile(
-		opt.OutputFileArgs.File,
-		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
-			return reconciler.AppendEntry(
-				func(r Record) bool { return r.Date().IsEqualTo(date) },
-				func(r Record) (string, error) { return value, nil })
+	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
+		[]reconciling.Creator{
+			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
+				return reconciling.NewReconcilerAtRecord(parsedRecords, date)
+			},
+			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
+				return reconciling.NewReconcilerAtNewRecord(parsedRecords, date, nil)
+			},
 		},
-		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
-			headline := opt.AtDate(ctx.Now()).ToString()
-			lines := []reconciling.InsertableText{
-				{Text: headline, Indentation: 0},
-				{Text: value, Indentation: 1},
-			}
-			return reconciler.InsertRecord(date, lines)
+
+		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
+			return reconciler.AppendEntry(value)
 		},
 	)
 }
 
 func sanitiseQuotedLeadingDash(text string) string {
 	// When passing entries like `-45m` the leading dash must be escaped
-	// otherwise it’s treated like a flag. Therefore we have to remove
+	// otherwise it’s treated like a flag. Therefore, we have to remove
 	// the potential escaping backslash.
 	return strings.TrimPrefix(text, "\\")
 }

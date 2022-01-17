@@ -18,12 +18,14 @@ type Cli struct {
 	Create Create `cmd:"" group:"Manipulate" help:"Creates a new record"`
 
 	// Bookmarks
-	Bookmarks Bookmarks `cmd:"" group:"Bookmarks" help:"Named aliases for often-used files"`
+	Bookmarks Bookmarks `cmd:"" group:"Bookmarks (bk)" help:"Named aliases for often-used files"`
 	Bookmark  Bookmarks `cmd:"" group:"Bookmarks" hidden:"" help:"Alias"`
 	Bm        Bookmarks `cmd:"" group:"Bookmarks" hidden:"" help:"Alias"`
+	Bk        Bookmarks `cmd:"" group:"Bookmarks" hidden:"" help:"Alias"`
 
 	// Misc
 	Edit    Edit    `cmd:"" group:"Misc" help:"Opens a file or bookmark in your editor"`
+	Goto    Goto    `cmd:"" group:"Misc" help:"Opens the file explorer at the given location"`
 	Json    Json    `cmd:"" group:"Misc" help:"Converts records to JSON"`
 	Info    Info    `cmd:"" group:"Misc" default:"withargs" help:"Displays meta info about klog"`
 	Widget  Widget  `cmd:"" group:"Misc" help:"Starts menu bar widget (MacOS only)" hidden:""`

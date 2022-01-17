@@ -1,19 +1,18 @@
 package commands
 
 import (
-	"errors"
-	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/lib"
+	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/parser/reconciling"
 )
 
 type Start struct {
-	lib.AtTimeArgs
-	lib.AtDateArgs
+	lib.AtDateAndTimeArgs
 	Summary string `name:"summary" short:"s" help:"Summary text for this entry"`
 	lib.NoStyleArgs
 	lib.OutputFileArgs
+	lib.WarnArgs
 }
 
 func (opt *Start) Help() string {
@@ -23,35 +22,24 @@ The start time is the current time (or whatever is specified by --time).`
 
 func (opt *Start) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
-	date := opt.AtDate(ctx.Now())
-	time := opt.AtTime(ctx.Now())
-	entry := func() string {
-		summary := ""
-		if opt.Summary != "" {
-			summary += " " + opt.Summary
-		}
-		return time.ToString() + " - ?" + summary
-	}()
-	return ctx.ReconcileFile(
-		opt.OutputFileArgs.File,
-		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
-			return reconciler.AppendEntry(
-				func(r Record) bool { return r.Date().IsEqualTo(date) },
-				func(r Record) (string, error) {
-					if r.OpenRange() != nil {
-						return "", errors.New("There is already an open range")
-					}
-					return entry, nil
-				},
-			)
+	now := ctx.Now()
+	date, _ := opt.AtDate(now)
+	time, _, err := opt.AtTime(now)
+	if err != nil {
+		return err
+	}
+	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
+		[]reconciling.Creator{
+			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
+				return reconciling.NewReconcilerAtRecord(parsedRecords, date)
+			},
+			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
+				return reconciling.NewReconcilerAtNewRecord(parsedRecords, date, nil)
+			},
 		},
-		func(reconciler reconciling.Reconciler) (*reconciling.Result, error) {
-			headline := opt.AtDate(ctx.Now()).ToString()
-			lines := []reconciling.InsertableText{
-				{Text: headline, Indentation: 0},
-				{Text: entry, Indentation: 1},
-			}
-			return reconciler.InsertRecord(date, lines)
+
+		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
+			return reconciler.StartOpenRange(time, opt.Summary)
 		},
 	)
 }

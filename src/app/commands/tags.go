@@ -37,7 +37,7 @@ func (opt *Tags) Run(ctx app.Context) error {
 			CellL(ctx.Serialiser().Duration(service.TotalEntries(es...)))
 	}
 	table.Collect(ctx.Print)
-	ctx.Print(opt.WarnArgs.ToString(now, records))
+	opt.WarnArgs.PrintWarnings(ctx, records)
 	return nil
 }
 

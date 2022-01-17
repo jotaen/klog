@@ -60,14 +60,14 @@ func handle(opt *Today, ctx app.Context) error {
 	hasCurrentRecords := len(currentRecords) > 0
 
 	currentTotal, currentShouldTotal, currentDiff := opt.evaluate(now, currentRecords)
-	currentEndTime, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(currentDiff))
+	currentEndTime, _ := NewTimeFromGo(now).Plus(NewDuration(0, 0).Minus(currentDiff))
 
 	otherTotal, otherShouldTotal, otherDiff := opt.evaluate(now, otherRecords)
 
 	grandTotal := currentTotal.Plus(otherTotal)
 	grandShouldTotal := NewShouldTotal(0, currentShouldTotal.Plus(otherShouldTotal).InMinutes())
 	grandDiff := service.Diff(grandShouldTotal, grandTotal)
-	grandEndTime, _ := NewTimeFromTime(now).Add(NewDuration(0, 0).Minus(grandDiff))
+	grandEndTime, _ := NewTimeFromGo(now).Plus(NewDuration(0, 0).Minus(grandDiff))
 
 	numberOfValueColumns := func() int {
 		if opt.Diff {
@@ -163,7 +163,7 @@ func handle(opt *Today, ctx app.Context) error {
 		}
 	}
 	table.Collect(ctx.Print)
-	ctx.Print(opt.WarnArgs.ToString(now, records))
+	opt.WarnArgs.PrintWarnings(ctx, records)
 	return nil
 }
 
@@ -183,7 +183,7 @@ func splitIntoCurrentAndOther(now gotime.Time, records []Record) ([]Record, []Re
 	var todaysRecords []Record
 	var yesterdaysRecords []Record
 	var otherRecords []Record
-	today := NewDateFromTime(now)
+	today := NewDateFromGo(now)
 	yesterday := today.PlusDays(-1)
 	for _, r := range records {
 		if r.Date().IsEqualTo(today) {

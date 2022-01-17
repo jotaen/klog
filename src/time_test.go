@@ -16,7 +16,7 @@ func TestOnlyConstructsValidTimes(t *testing.T) {
 	assert.Equal(t, tm.IsTomorrow(), false)
 }
 
-func TestHandle2400Time(t *testing.T) {
+func TestHandle2400SpecialCase(t *testing.T) {
 	{
 		tm, err := NewTime(24, 00)
 		require.Nil(t, err)
@@ -76,28 +76,44 @@ func TestDetectsInvalidTimes(t *testing.T) {
 func TestSerialiseTime(t *testing.T) {
 	tm := Ɀ_Time_(13, 45)
 	assert.Equal(t, "13:45", tm.ToString())
+	assert.Equal(t, "13:45", tm.ToStringWithFormat(TimeFormat{Use24HourClock: true}))
+	assert.Equal(t, "1:45pm", tm.ToStringWithFormat(TimeFormat{Use24HourClock: false}))
 }
 
 func TestSerialiseTimeWithoutLeadingZeros(t *testing.T) {
 	tm := Ɀ_Time_(8, 5)
 	assert.Equal(t, "8:05", tm.ToString())
+	assert.Equal(t, "8:05am", Ɀ_IsAmPm_(tm).ToString())
 }
 
 func TestSerialiseTimeYesterday(t *testing.T) {
 	tm := Ɀ_TimeYesterday_(23, 0)
 	assert.Equal(t, "<23:00", tm.ToString())
+	assert.Equal(t, "<11:00pm", Ɀ_IsAmPm_(tm).ToString())
 }
 
 func TestSerialiseTimeTomorrow(t *testing.T) {
 	tm := Ɀ_TimeTomorrow_(0, 2)
 	assert.Equal(t, "0:02>", tm.ToString())
+	assert.Equal(t, "12:02am>", Ɀ_IsAmPm_(tm).ToString())
 }
 
 func TestParseTime24Hours(t *testing.T) {
-	tm, err := NewTimeFromString("9:42")
-	require.Nil(t, err)
-	should := Ɀ_Time_(9, 42)
-	assert.Equal(t, should, tm)
+	for _, s := range []struct {
+		val string
+		exp Time
+	}{
+		{"9:42", Ɀ_Time_(9, 42)},
+		{"09:42", Ɀ_Time_(9, 42)},
+		{"16:01", Ɀ_Time_(16, 01)},
+	} {
+		tm, err := NewTimeFromString(s.val)
+		require.Nil(t, err)
+		require.NotNil(t, tm)
+		assert.Equal(t, s.exp, tm)
+		assert.True(t, s.exp.IsEqualTo(tm), s.val)
+		assert.Equal(t, TimeFormat{Use24HourClock: true}, tm.Format())
+	}
 }
 
 func TestParseTime12Hours(t *testing.T) {
@@ -105,9 +121,11 @@ func TestParseTime12Hours(t *testing.T) {
 		val string
 		exp Time
 	}{
+		{"12:00am", Ɀ_Time_(0, 00)},
 		{"12:37am", Ɀ_Time_(0, 37)},
 		{"1:00am", Ɀ_Time_(1, 0)},
 		{"1:00am", Ɀ_Time_(1, 0)},
+		{"12:00pm", Ɀ_Time_(12, 00)},
 		{"12:22pm", Ɀ_Time_(12, 22)},
 		{"1:59pm", Ɀ_Time_(13, 59)},
 		{"7:33pm", Ɀ_Time_(19, 33)},
@@ -115,41 +133,76 @@ func TestParseTime12Hours(t *testing.T) {
 		tm, err := NewTimeFromString(s.val)
 		require.Nil(t, err)
 		require.NotNil(t, tm)
+		assert.Equal(t, Ɀ_IsAmPm_(s.exp), tm)
 		assert.True(t, s.exp.IsEqualTo(tm), s.val)
-		assert.Equal(t, s.val, tm.ToString())
+		assert.Equal(t, TimeFormat{Use24HourClock: false}, tm.Format())
 	}
 }
 
 func TestParseTimeYesterday(t *testing.T) {
-	tm, err := NewTimeFromString("<22:43")
-	require.Nil(t, err)
-	should := Ɀ_TimeYesterday_(22, 43)
-	assert.Equal(t, should, tm)
-	assert.Equal(t, false, tm.IsToday())
-	assert.Equal(t, true, tm.IsYesterday())
-	assert.Equal(t, false, tm.IsTomorrow())
+	for _, s := range []struct {
+		val string
+		exp Time
+	}{
+		{"<3:43", Ɀ_TimeYesterday_(3, 43)},
+		{"<03:43", Ɀ_TimeYesterday_(3, 43)},
+		{"<03:43am", Ɀ_IsAmPm_(Ɀ_TimeYesterday_(3, 43))},
+		{"<3:43pm", Ɀ_IsAmPm_(Ɀ_TimeYesterday_(15, 43))},
+	} {
+		tm, err := NewTimeFromString(s.val)
+		require.Nil(t, err)
+		assert.Equal(t, s.exp, tm)
+		assert.Equal(t, false, tm.IsToday())
+		assert.Equal(t, true, tm.IsYesterday())
+		assert.Equal(t, false, tm.IsTomorrow())
+	}
 }
 
 func TestParseTimeTomorrow(t *testing.T) {
-	tm, err := NewTimeFromString("02:12>")
-	require.Nil(t, err)
-	should := Ɀ_TimeTomorrow_(2, 12)
-	assert.Equal(t, should, tm)
-	assert.Equal(t, false, tm.IsToday())
-	assert.Equal(t, false, tm.IsYesterday())
-	assert.Equal(t, true, tm.IsTomorrow())
+	for _, s := range []struct {
+		val string
+		exp Time
+	}{
+		{"2:12>", Ɀ_TimeTomorrow_(2, 12)},
+		{"02:12>", Ɀ_TimeTomorrow_(2, 12)},
+		{"2:12am>", Ɀ_IsAmPm_(Ɀ_TimeTomorrow_(2, 12))},
+		{"02:12pm>", Ɀ_IsAmPm_(Ɀ_TimeTomorrow_(14, 12))},
+	} {
+		tm, err := NewTimeFromString(s.val)
+		require.Nil(t, err)
+		assert.Equal(t, s.exp, tm)
+		assert.Equal(t, false, tm.IsToday())
+		assert.Equal(t, false, tm.IsYesterday())
+		assert.Equal(t, true, tm.IsTomorrow())
+	}
+}
+
+func TestParseTime2400SpecialCase(t *testing.T) {
+	for _, s := range []struct {
+		val string
+		exp Time
+	}{
+		{"<24:00", Ɀ_Time_(0, 0)},
+		{"24:00", Ɀ_TimeTomorrow_(0, 0)},
+	} {
+		tm, err := NewTimeFromString(s.val)
+		require.Nil(t, err)
+		require.NotNil(t, tm)
+		assert.True(t, s.exp.IsEqualTo(tm), s.val)
+	}
 }
 
 func TestParseMalformedTimesFail(t *testing.T) {
 	for _, s := range []string{
 		"009:42", // Hours cannot have infinite leading 0s
 		"09:042", // Minutes cannot have infinite leading 0s
-		"<2:15>", // Markers cannot appear on both sides
+		"<2:15>", // Shift-markers cannot appear on both sides
 		"asdf",
 		"12",
+		"12am",   // Minutes missing
 		"13:3",   // Minutes must have 2 digits
-		"-14:12", // Cannot be negative
-		"14:-12", // Cannot be negative
+		"-14:12", // Hours cannot be negative
+		"14:-12", // Minutes cannot be negative
 	} {
 		tm, err := NewTimeFromString(s)
 		require.Nil(t, tm, s)
@@ -159,11 +212,16 @@ func TestParseMalformedTimesFail(t *testing.T) {
 
 func TestParseUnrepresentableTimesFail(t *testing.T) {
 	for _, s := range []string{
-		"25:12",
-		"3:87",
-		"00:00pm",
+		"49:12",  // Invalid hours
+		"25:12",  // Invalid hours
+		"3:60",   // Invalid minutes
+		"3:87",   // Invalid minutes
+		"24:00>", // This would require shifting twice
+		"24:01",  // The 24-hour special case can’t have minutes
 		"13:00am",
 		"13:00pm",
+		"0:00am", // There is no `0` hour when using am/pm
+		"0:00pm", // There is no `0` hour when using am/pm
 	} {
 		tm, err := NewTimeFromString(s)
 		require.Nil(t, tm, s)
@@ -190,15 +248,17 @@ func TestCalculateMinutesSinceMidnight(t *testing.T) {
 }
 
 func TestTimeComparison(t *testing.T) {
-	today1 := Ɀ_Time_(12, 30)
-	today2 := Ɀ_Time_(12, 31)
+	midnight := Ɀ_Time_(0, 0)
+	midnight2 := Ɀ_Time_(0, 0)
+	noon := Ɀ_Time_(12, 30)
+	noon2 := Ɀ_Time_(12, 31)
 	yesterday := Ɀ_TimeYesterday_(22, 43)
 	tomorrow := Ɀ_TimeTomorrow_(9, 50)
-
-	assert.True(t, today1.IsAfterOrEqual(today1))
-	assert.True(t, today2.IsAfterOrEqual(today1))
-	assert.True(t, today1.IsAfterOrEqual(yesterday))
-	assert.True(t, tomorrow.IsAfterOrEqual(today1))
+	assert.True(t, midnight2.IsAfterOrEqual(midnight))
+	assert.True(t, noon.IsAfterOrEqual(noon))
+	assert.True(t, noon2.IsAfterOrEqual(noon))
+	assert.True(t, noon.IsAfterOrEqual(yesterday))
+	assert.True(t, tomorrow.IsAfterOrEqual(noon))
 }
 
 func TestAddDuration(t *testing.T) {
@@ -217,7 +277,7 @@ func TestAddDuration(t *testing.T) {
 		{Ɀ_TimeTomorrow_(18, 38), NewDuration(-1, -1), Ɀ_TimeTomorrow_(17, 37)},
 		{Ɀ_TimeTomorrow_(23, 58), NewDuration(0, 1), Ɀ_TimeTomorrow_(23, 59)},
 	} {
-		result, err := x.initial.Add(x.increment)
+		result, err := x.initial.Plus(x.increment)
 		require.Nil(t, err)
 		assert.Equal(t, x.expect, result, x.initial)
 	}
@@ -233,7 +293,7 @@ func TestAddDurationImpossible(t *testing.T) {
 		{Ɀ_TimeYesterday_(0, 0), NewDuration(0, -1)},
 		{Ɀ_TimeTomorrow_(23, 59), NewDuration(0, 1)},
 	} {
-		result, err := x.initial.Add(x.increment)
+		result, err := x.initial.Plus(x.increment)
 		require.Nil(t, result)
 		assert.Error(t, err)
 	}

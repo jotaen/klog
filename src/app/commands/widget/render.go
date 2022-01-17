@@ -73,7 +73,7 @@ func render(ctx app.Context, agent *launchAgent) []menuet.MenuItem {
 func renderRecords(ctx app.Context, records []klog.Record, file app.File) []menuet.MenuItem {
 	var items []menuet.MenuItem
 
-	today := service.Filter(records, service.FilterQry{Dates: []klog.Date{klog.NewDateFromTime(ctx.Now())}})
+	today := service.Filter(records, service.FilterQry{Dates: []klog.Date{klog.NewDateFromGo(ctx.Now())}})
 	if today != nil {
 		total, isOngoing := service.HypotheticalTotal(ctx.Now(), today...)
 		indicator := ""
@@ -99,7 +99,7 @@ func renderRecords(ctx app.Context, records []klog.Record, file app.File) []menu
 				{
 					Text: "Show in Finder...",
 					Clicked: func() {
-						_ = ctx.OpenInFileBrowser(file)
+						_ = ctx.OpenInFileBrowser(app.FileOrBookmarkName(file.Path()))
 					},
 				},
 				{Type: menuet.Separator},

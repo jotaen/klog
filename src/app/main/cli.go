@@ -29,8 +29,8 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error
 			return kong.TypeMapper(reflect.TypeOf(&timePrototype).Elem(), timeDecoder())
 		}(),
 		func() kong.Option {
-			durationPrototype := klog.NewDuration(0, 0)
-			return kong.TypeMapper(reflect.TypeOf(&durationPrototype).Elem(), durationDecoder())
+			shouldTotalPrototype := klog.NewShouldTotal(0, 0)
+			return kong.TypeMapper(reflect.TypeOf(&shouldTotalPrototype).Elem(), shouldTotalDecoder())
 		}(),
 		func() kong.Option {
 			period := lib.Period{}
@@ -98,21 +98,22 @@ func timeDecoder() kong.MapperFunc {
 	}
 }
 
-func durationDecoder() kong.MapperFunc {
+func shouldTotalDecoder() kong.MapperFunc {
 	return func(ctx *kong.DecodeContext, target reflect.Value) error {
 		var value string
-		if err := ctx.Scan.PopValueInto("duration", &value); err != nil {
+		if err := ctx.Scan.PopValueInto("should", &value); err != nil {
 			return err
 		}
 		if value == "" {
-			return errors.New("Please provide a valid duration")
+			return errors.New("Please provide a valid should-total duration")
 		}
-		value = strings.TrimSuffix(value, "!")
-		d, err := klog.NewDurationFromString(value)
+		valueAsDuration := strings.TrimSuffix(value, "!")
+		duration, err := klog.NewDurationFromString(valueAsDuration)
 		if err != nil {
-			return errors.New("`" + value + "` is not a valid duration")
+			return errors.New("`" + value + "` is not a valid should total")
 		}
-		target.Set(reflect.ValueOf(d))
+		shouldTotal := klog.NewShouldTotal(0, duration.InMinutes())
+		target.Set(reflect.ValueOf(shouldTotal))
 		return nil
 	}
 }

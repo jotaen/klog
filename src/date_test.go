@@ -15,6 +15,14 @@ func TestRecognisesValidDate(t *testing.T) {
 	assert.Equal(t, 15, d.WeekNumber())
 }
 
+func TestBoundaries(t *testing.T) {
+	_, firstErr := NewDate(0000, 01, 01)
+	assert.Nil(t, firstErr)
+
+	_, lastErr := NewDate(9999, 12, 31)
+	assert.Nil(t, lastErr)
+}
+
 func TestReconWithDate(t *testing.T) {
 	d, _ := NewDate(2005, 12, 31)
 	assert.Equal(t, Ɀ_Date_(2006, 1, 1), d.PlusDays(1))
@@ -48,6 +56,9 @@ func TestDetectsUnrepresentableDates(t *testing.T) {
 func TestSerialiseDate(t *testing.T) {
 	d := Ɀ_Date_(2005, 12, 31)
 	assert.Equal(t, "2005-12-31", d.ToString())
+	assert.Equal(t, DateFormat{UseDashes: true}, d.Format())
+	assert.Equal(t, "2005-12-31", d.ToStringWithFormat(DateFormat{UseDashes: true}))
+	assert.Equal(t, "2005/12/31", d.ToStringWithFormat(DateFormat{UseDashes: false}))
 }
 
 func TestSerialiseDatePadsLeadingZeros(t *testing.T) {
@@ -60,6 +71,7 @@ func TestParseDateWithDashes(t *testing.T) {
 	assert.Nil(t, err)
 	should, _ := NewDate(1856, 10, 22)
 	assert.Equal(t, d, should)
+	assert.Equal(t, DateFormat{UseDashes: true}, should.Format())
 }
 
 func TestEquality(t *testing.T) {
@@ -90,6 +102,7 @@ func TestParseDateWithSlashes(t *testing.T) {
 	should, _ := NewDate(1856, 10, 22)
 	assert.True(t, should.IsEqualTo(d))
 	assert.Equal(t, original, d.ToString())
+	assert.Equal(t, DateFormat{UseDashes: false}, d.Format())
 }
 
 func TestParseDateFailsIfMalformed(t *testing.T) {

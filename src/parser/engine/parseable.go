@@ -56,7 +56,7 @@ func (p *Parseable) Advance(increment int) {
 
 // SkipWhile consumes all upcoming characters that match the predicate.
 func (p *Parseable) SkipWhile(isMatch func(rune) bool) {
-	for IsSpaceOrTab(p.Peek()) {
+	for isMatch(p.Peek()) {
 		p.Advance(1)
 	}
 }

@@ -28,20 +28,31 @@ type Time interface {
 	IsEqualTo(Time) bool
 	IsAfterOrEqual(Time) bool
 
-	// Add returns a time, where the specified duration was added. It doesn’t modify
+	// Plus returns a time, where the specified duration was added. It doesn’t modify
 	// the original object. If the resulting time would be shifted by more than one
 	// day, it returns an error.
-	Add(Duration) (Time, error)
+	Plus(Duration) (Time, error)
 
 	// ToString serialises the time, e.g. `8:00` or `23:00>`
 	ToString() string
+
+	// ToStringWithFormat serialises the date according to the given format.
+	ToStringWithFormat(TimeFormat) string
+
+	// Format returns the current formatting.
+	Format() TimeFormat
+}
+
+// TimeFormat contains the formatting options for the Time.
+type TimeFormat struct {
+	Use24HourClock bool
 }
 
 type time struct {
-	hour          int
-	minute        int
-	dayShift      int
-	is24HourClock bool
+	hour     int
+	minute   int
+	dayShift int
+	format   TimeFormat
 }
 
 func newTime(hour int, minute int, dayShift int, is24HourClock bool) (Time, error) {
@@ -57,10 +68,10 @@ func newTime(hour int, minute int, dayShift int, is24HourClock bool) (Time, erro
 		return nil, errors.New("INVALID_TIME")
 	}
 	return &time{
-		hour:          ct.Hour,
-		minute:        ct.Minute,
-		dayShift:      dayShift,
-		is24HourClock: is24HourClock,
+		hour:     ct.Hour,
+		minute:   ct.Minute,
+		dayShift: dayShift,
+		format:   TimeFormat{Use24HourClock: is24HourClock},
 	}, nil
 }
 
@@ -106,7 +117,7 @@ func NewTimeFromString(hhmm string) (Time, error) {
 	return newTime(hour, minute, dayShift, is24HourClock)
 }
 
-func NewTimeFromTime(t gotime.Time) Time {
+func NewTimeFromGo(t gotime.Time) Time {
 	time, err := NewTime(t.Hour(), t.Minute())
 	if err != nil {
 		// This can/should never occur
@@ -154,7 +165,7 @@ func (t *time) IsAfterOrEqual(otherTime Time) bool {
 	return first.InMinutes() >= second.InMinutes()
 }
 
-func (t *time) Add(d Duration) (Time, error) {
+func (t *time) Plus(d Duration) (Time, error) {
 	ONE_DAY := 24 * 60
 	mins := t.MidnightOffset().Plus(d).InMinutes()
 	if mins >= 2*ONE_DAY || mins < ONE_DAY*-1 {
@@ -169,10 +180,10 @@ func (t *time) Add(d Duration) (Time, error) {
 		mins = mins - ONE_DAY
 	}
 	result := &time{
-		hour:          mins / 60,
-		minute:        mins % 60,
-		dayShift:      dayShift,
-		is24HourClock: t.is24HourClock,
+		hour:     mins / 60,
+		minute:   mins % 60,
+		dayShift: dayShift,
+		format:   t.format,
 	}
 	return result, nil
 }
@@ -187,7 +198,7 @@ func (t *time) ToString() string {
 		tomorrowSuffix = ">"
 	}
 	hour, amPmSuffix := func() (int, string) {
-		if t.is24HourClock {
+		if t.format.Use24HourClock {
 			return t.hour, ""
 		}
 		if t.hour == 12 {
@@ -202,4 +213,14 @@ func (t *time) ToString() string {
 		return t.hour, "am"
 	}()
 	return fmt.Sprintf("%s%d:%02d%s%s", yesterdayPrefix, hour, t.minute, amPmSuffix, tomorrowSuffix)
+}
+
+func (t *time) ToStringWithFormat(f TimeFormat) string {
+	c := *t
+	c.format = f
+	return c.ToString()
+}
+
+func (t *time) Format() TimeFormat {
+	return t.format
 }

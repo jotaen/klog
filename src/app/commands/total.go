@@ -47,6 +47,6 @@ func (opt *Total) Run(ctx app.Context) error {
 		return "s"
 	}()))
 
-	ctx.Print(opt.WarnArgs.ToString(now, records))
+	opt.WarnArgs.PrintWarnings(ctx, records)
 	return nil
 }

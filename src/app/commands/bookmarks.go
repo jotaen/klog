@@ -7,16 +7,18 @@ import (
 )
 
 type Bookmarks struct {
-	List BookmarksList `cmd:"" name:"list" help:"Displays all bookmarks"`
-	Ls   BookmarksList `cmd:"" name:"ls" hidden:"" help:"Alias for 'list'"`
+	List BookmarksList `cmd:"" help:"Displays all bookmarks"`
+	Ls   BookmarksList `cmd:"" hidden:"" help:"Alias for 'list'"`
 
-	Set BookmarksSet `cmd:"" name:"set" help:"Defines a bookmark (or overwrites an existing one)"`
-	New BookmarksSet `cmd:"" name:"new" hidden:"" help:"Alias for 'set'"`
+	Set BookmarksSet `cmd:"" help:"Defines a bookmark (or overwrites an existing one)"`
+	New BookmarksSet `cmd:"" hidden:"" help:"Alias for 'set'"`
 
-	Unset BookmarksUnset `cmd:"" name:"unset" help:"Removes a bookmark from the collection"`
-	Rm    BookmarksUnset `cmd:"" name:"rm" hidden:"" help:"Alias for 'unset'"`
+	Unset BookmarksUnset `cmd:"" help:"Removes a bookmark from the collection"`
+	Rm    BookmarksUnset `cmd:"" hidden:"" help:"Alias for 'unset'"`
 
-	Clear BookmarksClear `cmd:"" name:"clear" help:"Clears entire bookmark collection"`
+	Clear BookmarksClear `cmd:"" help:"Clears entire bookmark collection"`
+
+	Info BookmarksInfo `cmd:"" help:"Prints file information for a bookmark"`
 }
 
 func (opt *Bookmarks) Help() string {
@@ -41,6 +43,36 @@ func (opt *BookmarksList) Run(ctx app.Context) error {
 	}
 	for _, b := range bc.All() {
 		ctx.Print(b.Name().ValuePretty() + " -> " + b.Target().Path() + "\n")
+	}
+	return nil
+}
+
+type BookmarksInfo struct {
+	Dir  bool   `name:"dir" type:"string" help:"Display the directory"`
+	File bool   `name:"file" type:"string" help:"Display the file name"`
+	Name string `arg:"" name:"bookmark" type:"string" help:"The path of the bookmark"`
+}
+
+func (opt *BookmarksInfo) Run(ctx app.Context) error {
+	bc, err := ctx.ReadBookmarks()
+	if err != nil {
+		return err
+	}
+	bookmark := bc.Get(app.NewName(opt.Name))
+	if bookmark == nil {
+		return app.NewErrorWithCode(
+			app.NO_SUCH_BOOKMARK_ERROR,
+			"No such bookmark",
+			"There is no bookmark with that alias",
+			nil,
+		)
+	}
+	if opt.Dir {
+		ctx.Print(bookmark.Target().Location() + "\n")
+	} else if opt.File {
+		ctx.Print(bookmark.Target().Name() + "\n")
+	} else {
+		ctx.Print(bookmark.Target().Path() + "\n")
 	}
 	return nil
 }
