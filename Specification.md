@@ -1,6 +1,6 @@
 # klog – File Format Specification
 
-**Version 1.1**
+**Version 1.2**
 
 klog is a file format for tracking time.
 
@@ -250,6 +250,9 @@ and MUST NOT be combined into a single *record*.
 - “integer”: An unsigned number without fractional component
 
 ## V. Changelog
+
+## Version 1.2
+- Minor restructuring for enhanced clarity; no functional changes made.
 
 ## Version 1.1
 - Add a constraint regarding the indentation that requires the indentation style
