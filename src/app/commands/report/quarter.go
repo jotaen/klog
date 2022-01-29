@@ -4,7 +4,7 @@ import (
 	"fmt"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app/lib/terminalformat"
-	"github.com/jotaen/klog/src/service"
+	"github.com/jotaen/klog/src/service/period"
 )
 
 type quarterAggregator struct {
@@ -19,8 +19,8 @@ func (a *quarterAggregator) NumberOfPrefixColumns() int {
 	return 2
 }
 
-func (a *quarterAggregator) DateHash(date Date) service.Hash {
-	return service.Hash(service.NewQuarterHash(date))
+func (a *quarterAggregator) DateHash(date Date) period.Hash {
+	return period.Hash(period.NewQuarterFromDate(date).Hash())
 }
 
 func (a *quarterAggregator) OnHeaderPrefix(table *terminalformat.Table) {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app/lib/terminalformat"
-	"github.com/jotaen/klog/src/service"
+	"github.com/jotaen/klog/src/service/period"
 )
 
 type weekAggregator struct {
@@ -19,8 +19,8 @@ func (a *weekAggregator) NumberOfPrefixColumns() int {
 	return 2
 }
 
-func (a *weekAggregator) DateHash(date Date) service.Hash {
-	return service.Hash(service.NewWeekHash(date))
+func (a *weekAggregator) DateHash(date Date) period.Hash {
+	return period.Hash(period.NewWeekFromDate(date).Hash())
 }
 
 func (a *weekAggregator) OnHeaderPrefix(table *terminalformat.Table) {

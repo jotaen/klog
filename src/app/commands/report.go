@@ -7,6 +7,7 @@ import (
 	"github.com/jotaen/klog/src/app/lib"
 	"github.com/jotaen/klog/src/app/lib/terminalformat"
 	"github.com/jotaen/klog/src/service"
+	"github.com/jotaen/klog/src/service/period"
 	"strings"
 )
 
@@ -59,7 +60,7 @@ func (opt *Report) Run(ctx app.Context) error {
 	}
 
 	// Rows
-	hashesAlreadyProcessed := make(map[service.Hash]bool)
+	hashesAlreadyProcessed := make(map[period.Hash]bool)
 	for _, date := range dates {
 		hash := aggregator.DateHash(date)
 		if hashesAlreadyProcessed[hash] {
@@ -139,8 +140,8 @@ func allDatesRange(from Date, to Date) []Date {
 	return result
 }
 
-func groupByDate(hashProvider func(Date) service.Hash, rs []Record) (map[service.Hash][]Record, []Date) {
-	days := make(map[service.Hash][]Record, len(rs))
+func groupByDate(hashProvider func(Date) period.Hash, rs []Record) (map[period.Hash][]Record, []Date) {
+	days := make(map[period.Hash][]Record, len(rs))
 	var order []Date
 	for _, r := range rs {
 		h := hashProvider(r.Date())

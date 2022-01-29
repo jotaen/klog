@@ -2,6 +2,7 @@ package service
 
 import (
 	. "github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/service/period"
 	gosort "sort"
 )
 
@@ -19,7 +20,7 @@ func Filter(rs []Record, o FilterQry) []Record {
 	dates := newDateSet(o.Dates)
 	var records []Record
 	for _, r := range rs {
-		if len(dates) > 0 && !dates[NewDayHash(r.Date())] {
+		if len(dates) > 0 && !dates[period.NewDayFromDate(r.Date()).Hash()] {
 			continue
 		}
 		if o.BeforeOrEqual != nil && !o.BeforeOrEqual.IsAfterOrEqual(r.Date()) {
@@ -100,10 +101,10 @@ func isSubsetOf(queriedTags []string, allTags TagSet) bool {
 	return true
 }
 
-func newDateSet(ds []Date) map[DayHash]bool {
-	dict := make(map[DayHash]bool, len(ds))
+func newDateSet(ds []Date) map[period.DayHash]bool {
+	dict := make(map[period.DayHash]bool, len(ds))
 	for _, d := range ds {
-		dict[NewDayHash(d)] = true
+		dict[period.NewDayFromDate(d).Hash()] = true
 	}
 	return dict
 }
