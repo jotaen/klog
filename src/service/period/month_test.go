@@ -9,22 +9,20 @@ import (
 
 func TestParseValidMonth(t *testing.T) {
 	for _, x := range []struct {
-		text         string
-		expectMonth  Month
-		expectPeriod Period
+		text   string
+		expect Period
 	}{
-		{"0000-01", Month{0, 1}, Period{Ɀ_Date_(0, 1, 1), Ɀ_Date_(0, 01, 31)}},
-		{"0000-12", Month{0, 12}, Period{Ɀ_Date_(0, 12, 1), Ɀ_Date_(0, 12, 31)}},
-		{"0475-05", Month{475, 05}, Period{Ɀ_Date_(475, 5, 1), Ɀ_Date_(475, 5, 31)}},
-		{"2008-11", Month{2008, 11}, Period{Ɀ_Date_(2008, 11, 1), Ɀ_Date_(2008, 11, 30)}},
-		{"8641-04", Month{8641, 4}, Period{Ɀ_Date_(8641, 4, 1), Ɀ_Date_(8641, 4, 30)}},
-		{"9999-12", Month{9999, 12}, Period{Ɀ_Date_(9999, 12, 1), Ɀ_Date_(9999, 12, 31)}},
+		{"0000-01", Period{Ɀ_Date_(0, 1, 1), Ɀ_Date_(0, 01, 31)}},
+		{"0000-12", Period{Ɀ_Date_(0, 12, 1), Ɀ_Date_(0, 12, 31)}},
+		{"0475-05", Period{Ɀ_Date_(475, 5, 1), Ɀ_Date_(475, 5, 31)}},
+		{"2008-11", Period{Ɀ_Date_(2008, 11, 1), Ɀ_Date_(2008, 11, 30)}},
+		{"8641-04", Period{Ɀ_Date_(8641, 4, 1), Ɀ_Date_(8641, 4, 30)}},
+		{"9999-12", Period{Ɀ_Date_(9999, 12, 1), Ɀ_Date_(9999, 12, 31)}},
 	} {
 		month, err := NewMonthFromString(x.text)
 		require.Nil(t, err)
-		assert.Equal(t, x.expectMonth, month)
-		assert.True(t, x.expectPeriod.Since.IsEqualTo(month.Period().Since))
-		assert.True(t, x.expectPeriod.Until.IsEqualTo(month.Period().Until))
+		assert.True(t, x.expect.Since.IsEqualTo(month.Period().Since))
+		assert.True(t, x.expect.Until.IsEqualTo(month.Period().Until))
 	}
 }
 

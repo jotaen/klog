@@ -3,19 +3,22 @@ package period
 import . "github.com/jotaen/klog/src"
 
 type Week struct {
-	year       int
-	weekNumber int
+	date Date
 }
 
 type WeekHash Hash
 
 func NewWeekFromDate(d Date) Week {
-	return Week{year: d.Year(), weekNumber: d.WeekNumber()}
+	return Week{d}
 }
+
+//func (w Week) Previous() Week {
+//
+//}
 
 func (w Week) Hash() WeekHash {
 	hash := newBitMask()
-	hash.populate(uint32(w.weekNumber), 53)
-	hash.populate(uint32(w.year), 10000)
+	hash.populate(uint32(w.date.WeekNumber()), 53)
+	hash.populate(uint32(w.date.Year()), 10000)
 	return WeekHash(hash.Value())
 }

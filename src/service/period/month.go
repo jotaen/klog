@@ -9,8 +9,7 @@ import (
 )
 
 type Month struct {
-	year  int
-	month int
+	date Date
 }
 
 type MonthHash Hash
@@ -18,7 +17,7 @@ type MonthHash Hash
 var monthPattern = regexp.MustCompile(`^\d{4}-\d{2}$`)
 
 func NewMonthFromDate(d Date) Month {
-	return Month{d.Year(), d.Month()}
+	return Month{d}
 }
 
 func NewMonthFromString(yyyymm string) (Month, error) {
@@ -28,16 +27,16 @@ func NewMonthFromString(yyyymm string) (Month, error) {
 	parts := strings.Split(yyyymm, "-")
 	year, _ := strconv.Atoi(parts[0])
 	month, _ := strconv.Atoi(parts[1])
-	_, err := NewDate(year, month, 1)
+	d, err := NewDate(year, month, 1)
 	if err != nil {
 		return Month{}, errors.New("INVALID_MONTH_PERIOD")
 	}
-	return Month{year, month}, nil
+	return Month{d}, nil
 }
 
 func (m Month) Period() Period {
-	since, _ := NewDate(m.year, m.month, 1)
-	until, _ := NewDate(m.year, m.month, 28)
+	since, _ := NewDate(m.date.Year(), m.date.Month(), 1)
+	until, _ := NewDate(m.date.Year(), m.date.Month(), 28)
 	for {
 		if until.Year() == 9999 && until.Month() == 12 && until.Day() == 31 {
 			// 9999-12-31 is the last representable date, so we can’t peak forward from it.
@@ -57,7 +56,7 @@ func (m Month) Period() Period {
 
 func (m Month) Hash() MonthHash {
 	hash := newBitMask()
-	hash.populate(uint32(m.month), 12)
-	hash.populate(uint32(m.year), 10000)
+	hash.populate(uint32(m.date.Month()), 12)
+	hash.populate(uint32(m.date.Year()), 10000)
 	return MonthHash(hash.Value())
 }

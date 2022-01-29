@@ -3,19 +3,18 @@ package period
 import . "github.com/jotaen/klog/src"
 
 type Quarter struct {
-	year    int
-	quarter int
+	date Date
 }
 
 type QuarterHash Hash
 
 func NewQuarterFromDate(d Date) Quarter {
-	return Quarter{d.Year(), d.Quarter()}
+	return Quarter{d}
 }
 
 func (q Quarter) Hash() QuarterHash {
 	hash := newBitMask()
-	hash.populate(uint32(q.quarter), 4)
-	hash.populate(uint32(q.year), 10000)
+	hash.populate(uint32(q.date.Quarter()), 4)
+	hash.populate(uint32(q.date.Year()), 10000)
 	return QuarterHash(hash.Value())
 }

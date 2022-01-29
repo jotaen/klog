@@ -8,7 +8,7 @@ import (
 )
 
 type Year struct {
-	year int
+	date Date
 }
 
 type YearHash Hash
@@ -16,7 +16,7 @@ type YearHash Hash
 var yearPattern = regexp.MustCompile(`^\d{4}$`)
 
 func NewYearFromDate(d Date) Year {
-	return Year{d.Year()}
+	return Year{d}
 }
 
 func NewYearFromString(yyyy string) (Year, error) {
@@ -27,12 +27,16 @@ func NewYearFromString(yyyy string) (Year, error) {
 	if err != nil {
 		return Year{}, errors.New("INVALID_YEAR_PERIOD")
 	}
-	return Year{year}, nil
+	d, dErr := NewDate(year, 1, 1)
+	if dErr != nil {
+		return Year{}, errors.New("INVALID_YEAR_PERIOD")
+	}
+	return Year{d}, nil
 }
 
 func (y Year) Period() Period {
-	since, _ := NewDate(y.year, 1, 1)
-	until, _ := NewDate(y.year, 12, 31)
+	since, _ := NewDate(y.date.Year(), 1, 1)
+	until, _ := NewDate(y.date.Year(), 12, 31)
 	return Period{
 		Since: since,
 		Until: until,
@@ -41,6 +45,6 @@ func (y Year) Period() Period {
 
 func (y Year) Hash() YearHash {
 	hash := newBitMask()
-	hash.populate(uint32(y.year), 10000)
+	hash.populate(uint32(y.date.Year()), 10000)
 	return YearHash(hash.Value())
 }
