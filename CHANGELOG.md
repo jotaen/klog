@@ -10,6 +10,7 @@
   conform to style preferences encountered in the file.
 - **[ FEATURE ]** Add `--tomorrow` as shorthand flag for the next day’s date.
 - **[ FEATURE ]** Improve warnings (which are shown for potential data problems).
+- **[ FIX ]** Fix bug in week-based aggregation of `klog report --aggregate week`.
 
 ## v3.2
 - **[ BREAKING ]** Don’t allow mixing the indentation style within a
