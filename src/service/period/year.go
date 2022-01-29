@@ -43,6 +43,14 @@ func (y Year) Period() Period {
 	}
 }
 
+func (y Year) Previous() Year {
+	lastYear, err := NewDate(y.date.Year()-1, 1, 1)
+	if err != nil {
+		panic("Invalid year")
+	}
+	return Year{lastYear}
+}
+
 func (y Year) Hash() YearHash {
 	hash := newBitMask()
 	hash.populate(uint32(y.date.Year()), 10000)

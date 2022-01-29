@@ -82,3 +82,43 @@ func TestRejectsMalformedMonth(t *testing.T) {
 		require.Error(t, err)
 	}
 }
+
+func TestMonthPeriod(t *testing.T) {
+	for _, x := range []struct {
+		actual   Period
+		expected Period
+	}{
+		// Range in same year
+		{NewMonthFromDate(Ɀ_Date_(1987, 5, 19)).Period(), Period{Ɀ_Date_(1987, 5, 1), Ɀ_Date_(1987, 5, 31)}},
+		{NewMonthFromDate(Ɀ_Date_(2004, 11, 16)).Period(), Period{Ɀ_Date_(2004, 11, 1), Ɀ_Date_(2004, 11, 30)}},
+
+		// Since is same as original date
+		{NewMonthFromDate(Ɀ_Date_(1998, 10, 1)).Period(), Period{Ɀ_Date_(1998, 10, 1), Ɀ_Date_(1998, 10, 31)}},
+
+		// Until is same as original date
+		{NewMonthFromDate(Ɀ_Date_(1998, 2, 28)).Period(), Period{Ɀ_Date_(1998, 2, 1), Ɀ_Date_(1998, 2, 28)}},
+
+		// Leap year
+		{NewMonthFromDate(Ɀ_Date_(2000, 2, 4)).Period(), Period{Ɀ_Date_(2000, 2, 1), Ɀ_Date_(2000, 2, 29)}},
+	} {
+		assert.Equal(t, x.expected, x.actual)
+	}
+}
+
+func TestMonthPreviousMonth(t *testing.T) {
+	for _, x := range []struct {
+		initial  Month
+		expected Period
+	}{
+		// In same year
+		{NewMonthFromDate(Ɀ_Date_(1987, 5, 19)), Period{Ɀ_Date_(1987, 4, 1), Ɀ_Date_(1987, 4, 30)}},
+		{NewMonthFromDate(Ɀ_Date_(1987, 3, 31)), Period{Ɀ_Date_(1987, 2, 1), Ɀ_Date_(1987, 2, 28)}},
+		{NewMonthFromDate(Ɀ_Date_(1987, 3, 1)), Period{Ɀ_Date_(1987, 2, 1), Ɀ_Date_(1987, 2, 28)}},
+
+		// In last year
+		{NewMonthFromDate(Ɀ_Date_(1987, 1, 19)), Period{Ɀ_Date_(1986, 12, 1), Ɀ_Date_(1986, 12, 31)}},
+	} {
+		previous := x.initial.Previous().Period()
+		assert.Equal(t, x.expected, previous)
+	}
+}

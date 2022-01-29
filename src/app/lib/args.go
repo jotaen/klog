@@ -117,6 +117,7 @@ type FilterArgs struct {
 }
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
+	today := NewDateFromGo(now)
 	qry := service.FilterQry{
 		BeforeOrEqual: args.Until,
 		AfterOrEqual:  args.Since,
@@ -134,13 +135,53 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
 		qry.BeforeOrEqual = args.Before.PlusDays(-1)
 	}
 	if args.Today {
-		qry.Dates = append(qry.Dates, NewDateFromGo(now))
+		qry.Dates = append(qry.Dates, today)
 	}
 	if args.Yesterday {
-		qry.Dates = append(qry.Dates, NewDateFromGo(now.AddDate(0, 0, -1)))
+		qry.Dates = append(qry.Dates, today.PlusDays(-1))
 	}
 	if args.Tomorrow {
-		qry.Dates = append(qry.Dates, NewDateFromGo(now.AddDate(0, 0, +1)))
+		qry.Dates = append(qry.Dates, today.PlusDays(+1))
+	}
+	if args.ThisWeek || args.ThisWeekAlias {
+		week := period.NewWeekFromDate(today).Period()
+		qry.AfterOrEqual = week.Since
+		qry.BeforeOrEqual = week.Until
+	}
+	if args.LastWeek || args.LastWeekAlias {
+		week := period.NewWeekFromDate(today).Previous().Period()
+		qry.AfterOrEqual = week.Since
+		qry.BeforeOrEqual = week.Until
+	}
+	if args.ThisMonth || args.ThisMonthAlias {
+		week := period.NewMonthFromDate(today).Period()
+		qry.AfterOrEqual = week.Since
+		qry.BeforeOrEqual = week.Until
+	}
+	if args.LastMonth || args.LastMonthAlias {
+		week := period.NewMonthFromDate(today).Previous().Period()
+		qry.AfterOrEqual = week.Since
+		qry.BeforeOrEqual = week.Until
+	}
+	if args.ThisQuarter || args.ThisQuarterAlias {
+		week := period.NewQuarterFromDate(today).Period()
+		qry.AfterOrEqual = week.Since
+		qry.BeforeOrEqual = week.Until
+	}
+	if args.LastQuarter || args.LastQuarterAlias {
+		week := period.NewQuarterFromDate(today).Previous().Period()
+		qry.AfterOrEqual = week.Since
+		qry.BeforeOrEqual = week.Until
+	}
+	if args.ThisYear || args.ThisYearAlias {
+		week := period.NewYearFromDate(today).Period()
+		qry.AfterOrEqual = week.Since
+		qry.BeforeOrEqual = week.Until
+	}
+	if args.LastYear || args.LastYearAlias {
+		week := period.NewYearFromDate(today).Previous().Period()
+		qry.AfterOrEqual = week.Since
+		qry.BeforeOrEqual = week.Until
 	}
 	return service.Filter(rs, qry)
 }

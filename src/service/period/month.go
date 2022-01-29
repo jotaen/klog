@@ -54,6 +54,16 @@ func (m Month) Period() Period {
 	}
 }
 
+func (m Month) Previous() Month {
+	result := m.date
+	for {
+		result = result.PlusDays(-25)
+		if result.Month() != m.date.Month() {
+			return Month{result}
+		}
+	}
+}
+
 func (m Month) Hash() MonthHash {
 	hash := newBitMask()
 	hash.populate(uint32(m.date.Month()), 12)
