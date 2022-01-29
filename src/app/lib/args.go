@@ -5,6 +5,7 @@ import (
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/service"
+	"github.com/jotaen/klog/src/service/period"
 	"os"
 	"strings"
 	gotime "time"
@@ -83,15 +84,15 @@ func (args *NowArgs) Total(reference gotime.Time, rs ...Record) Duration {
 }
 
 type FilterArgs struct {
-	Tags      []string `name:"tag" group:"Filter" help:"Only records (or particular entries) that match this tag"`
-	Date      []Date   `name:"date" group:"Filter" help:"Only records at this date"`
-	Today     bool     `name:"today" group:"Filter" help:"Only records at today’s date"`
-	Yesterday bool     `name:"yesterday" group:"Filter" help:"Only records at yesterday’s date"`
-	Since     Date     `name:"since" group:"Filter" help:"Only records since this date (inclusive)"`
-	Until     Date     `name:"until" group:"Filter" help:"Only records until this date (inclusive)"`
-	After     Date     `name:"after" group:"Filter" help:"Only records after this date (exclusive)"`
-	Before    Date     `name:"before" group:"Filter" help:"Only records before this date (exclusive)"`
-	Period    Period   `name:"period" group:"Filter" help:"Only records in this period (YYYY-MM or YYYY)"`
+	Tags      []string      `name:"tag" group:"Filter" help:"Only records (or particular entries) that match this tag"`
+	Date      []Date        `name:"date" group:"Filter" help:"Only records at this date"`
+	Today     bool          `name:"today" group:"Filter" help:"Only records at today’s date"`
+	Yesterday bool          `name:"yesterday" group:"Filter" help:"Only records at yesterday’s date"`
+	Since     Date          `name:"since" group:"Filter" help:"Only records since this date (inclusive)"`
+	Until     Date          `name:"until" group:"Filter" help:"Only records until this date (inclusive)"`
+	After     Date          `name:"after" group:"Filter" help:"Only records after this date (exclusive)"`
+	Before    Date          `name:"before" group:"Filter" help:"Only records before this date (exclusive)"`
+	Period    period.Period `name:"period" group:"Filter" help:"Only records in this period (YYYY-MM or YYYY)"`
 }
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
@@ -124,12 +125,12 @@ type WarnArgs struct {
 	NoWarn bool `name:"no-warn" help:"Suppress warnings about potential mistakes"`
 }
 
-func (args *WarnArgs) ToString(now gotime.Time, records []Record) string {
+func (args *WarnArgs) PrintWarnings(ctx app.Context, records []Record) {
 	if args.NoWarn {
-		return ""
+		return
 	}
-	ws := service.SanityCheck(now, records)
-	return PrettifyWarnings(ws)
+	ws := service.CheckForWarnings(ctx.Now(), records)
+	ctx.Print(PrettifyWarnings(ws))
 }
 
 type NoStyleArgs struct {

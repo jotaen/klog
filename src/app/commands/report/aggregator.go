@@ -6,12 +6,12 @@ package report
 import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app/lib/terminalformat"
-	"github.com/jotaen/klog/src/service"
+	"github.com/jotaen/klog/src/service/period"
 )
 
 type Aggregator interface {
 	NumberOfPrefixColumns() int
-	DateHash(Date) service.Hash
+	DateHash(Date) period.Hash
 	OnHeaderPrefix(*terminalformat.Table)
 	OnRowPrefix(*terminalformat.Table, Date)
 }

@@ -55,3 +55,65 @@ func TestWriteToFile(t *testing.T) {
 	assert.True(t, strings.Contains(out[1], "1h30m"), out)
 	assert.True(t, strings.Contains(out[1], "1 record"), out)
 }
+
+func TestDecodesDate(t *testing.T) {
+	klog := &Env{
+		files: map[string]string{
+			"test.klg": "2020-01-01\nSome stuff\n\t1h7m\n",
+		},
+	}
+	out := klog.run(
+		[]string{"total", "--date", "2020-1-1", "test.klg"},
+		[]string{"total", "--date", "2020-01-01", "test.klg"},
+	)
+	assert.True(t, strings.Contains(out[0], "`2020-1-1` is not a valid date"), out)
+	assert.True(t, strings.Contains(out[1], "1h7m"), out)
+}
+
+func TestDecodesTime(t *testing.T) {
+	klog := &Env{
+		files: map[string]string{
+			"test.klg": "2020-01-01\n\t9:00-?\n",
+		},
+	}
+	out := klog.run(
+		[]string{"stop", "--date", "2020-01-01", "--time", "1:0", "test.klg"},
+		[]string{"stop", "--date", "2020-01-01", "--time", "10:00", "test.klg"},
+		[]string{"total", "test.klg"},
+	)
+	assert.True(t, strings.Contains(out[0], "`1:0` is not a valid time"), out)
+	assert.True(t, strings.Contains(out[1], "9:00 - 10:00"), out)
+	assert.True(t, strings.Contains(out[2], "1h"), out)
+}
+
+func TestDecodesShouldTotal(t *testing.T) {
+	klog := &Env{
+		files: map[string]string{
+			"test.klg": "",
+		},
+	}
+	out := klog.run(
+		[]string{"create", "--date", "2020-01-01", "--should", "asdf", "test.klg"},
+		[]string{"create", "--date", "2020-01-01", "--should", "5h1m!", "test.klg"},
+		[]string{"total", "--diff", "test.klg"},
+	)
+	assert.True(t, strings.Contains(out[0], "`asdf` is not a valid should total"), out)
+	assert.True(t, strings.Contains(out[1], "5h1m!"), out)
+	assert.True(t, strings.Contains(out[2], "5h1m!"), out)
+}
+
+func TestDecodesPeriod(t *testing.T) {
+	klog := &Env{
+		files: map[string]string{
+			"test.klg": "2000-01-05\n\t1h\n\n2000-05-24\n\t1h\n",
+		},
+	}
+	out := klog.run(
+		[]string{"total", "--period", "2000", "test.klg"},
+		[]string{"total", "--period", "2000-01", "test.klg"},
+		[]string{"total", "--period", "foo", "test.klg"},
+	)
+	assert.True(t, strings.Contains(out[0], "2h"), out)
+	assert.True(t, strings.Contains(out[1], "1h"), out)
+	assert.True(t, strings.Contains(out[2], "`foo` is not a valid period"), out)
+}

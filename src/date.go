@@ -27,8 +27,9 @@ type Date interface {
 	// Quarter returns the quarter that the date is in, e.g. `2` for `2010-04-15`.
 	Quarter() int
 
-	// WeekNumber returns the number of the week in the calendar year.
-	WeekNumber() int
+	// WeekNumber returns the number of the week and the year that the number refers to.
+	// Note: the year of the week number might be different from the year of the Date!
+	WeekNumber() (int, int)
 
 	// IsEqualTo checks whether two dates are the same.
 	IsEqualTo(Date) bool
@@ -154,9 +155,8 @@ func (d *date) Quarter() int {
 	return int(quarter)
 }
 
-func (d *date) WeekNumber() int {
-	_, week := date2Civil(d).In(gotime.UTC).ISOWeek()
-	return week
+func (d *date) WeekNumber() (int, int) {
+	return date2Civil(d).In(gotime.UTC).ISOWeek()
 }
 
 func (d *date) IsEqualTo(otherDate Date) bool {

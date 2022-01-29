@@ -163,7 +163,7 @@ func handle(opt *Today, ctx app.Context) error {
 		}
 	}
 	table.Collect(ctx.Print)
-	ctx.Print(opt.WarnArgs.ToString(now, records))
+	opt.WarnArgs.PrintWarnings(ctx, records)
 	return nil
 }
 

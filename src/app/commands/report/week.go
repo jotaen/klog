@@ -4,7 +4,7 @@ import (
 	"fmt"
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app/lib/terminalformat"
-	"github.com/jotaen/klog/src/service"
+	"github.com/jotaen/klog/src/service/period"
 )
 
 type weekAggregator struct {
@@ -19,8 +19,8 @@ func (a *weekAggregator) NumberOfPrefixColumns() int {
 	return 2
 }
 
-func (a *weekAggregator) DateHash(date Date) service.Hash {
-	return service.Hash(service.NewWeekHash(date))
+func (a *weekAggregator) DateHash(date Date) period.Hash {
+	return period.Hash(period.NewWeekFromDate(date).Hash())
 }
 
 func (a *weekAggregator) OnHeaderPrefix(table *terminalformat.Table) {
@@ -30,14 +30,14 @@ func (a *weekAggregator) OnHeaderPrefix(table *terminalformat.Table) {
 }
 
 func (a *weekAggregator) OnRowPrefix(table *terminalformat.Table, date Date) {
-	// Year
-	if date.Year() != a.y {
-		table.CellR(fmt.Sprint(date.Year()))
-		a.y = date.Year()
+	year, week := date.WeekNumber()
+
+	if year != a.y {
+		table.CellR(fmt.Sprint(year))
+		a.y = year
 	} else {
 		table.Skip(1)
 	}
 
-	// Week
-	table.CellR(fmt.Sprintf("Week %2v", date.WeekNumber()))
+	table.CellR(fmt.Sprintf("Week %2v", week))
 }

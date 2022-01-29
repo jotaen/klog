@@ -10,6 +10,7 @@ import (
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/commands"
 	"github.com/jotaen/klog/src/app/lib"
+	"github.com/jotaen/klog/src/service/period"
 	"reflect"
 	"strings"
 )
@@ -33,8 +34,8 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error
 			return kong.TypeMapper(reflect.TypeOf(&shouldTotalPrototype).Elem(), shouldTotalDecoder())
 		}(),
 		func() kong.Option {
-			period := lib.Period{}
-			return kong.TypeMapper(reflect.TypeOf(&period).Elem(), periodDecoder())
+			p := period.Period{}
+			return kong.TypeMapper(reflect.TypeOf(&p).Elem(), periodDecoder())
 		}(),
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact: true,
@@ -124,9 +125,22 @@ func periodDecoder() kong.MapperFunc {
 		if err := ctx.Scan.PopValueInto("period", &value); err != nil {
 			return err
 		}
-		p, err := lib.NewPeriodFromString(value)
-		if err != nil {
-			return err
+		if value == "" {
+			return errors.New("Please provide a valid period")
+		}
+		p, hasMatch := func() (period.Period, bool) {
+			yearPeriod, yErr := period.NewYearFromString(value)
+			if yErr == nil {
+				return yearPeriod.Period(), true
+			}
+			monthPeriod, mErr := period.NewMonthFromString(value)
+			if mErr == nil {
+				return monthPeriod.Period(), true
+			}
+			return period.Period{}, false
+		}()
+		if !hasMatch {
+			return errors.New("`" + value + "` is not a valid period")
 		}
 		target.Set(reflect.ValueOf(p))
 		return nil

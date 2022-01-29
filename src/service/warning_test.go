@@ -3,10 +3,19 @@ package service
 import (
 	. "github.com/jotaen/klog/src"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"testing"
 	gotime "time"
 )
+
+func CountWarningsOfKind(c checker, ws []Warning) int {
+	count := 0
+	for _, w := range ws {
+		if w.Warning() == c.Message() {
+			count++
+		}
+	}
+	return count
+}
 
 func TestNoWarnForOpenRanges(t *testing.T) {
 	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
@@ -24,8 +33,8 @@ func TestNoWarnForOpenRanges(t *testing.T) {
 			return r
 		}(),
 	}
-	ws1 := SanityCheck(timestamp, rs1)
-	require.Nil(t, ws1)
+	ws1 := CheckForWarnings(timestamp, rs1)
+	assert.Equal(t, 0, CountWarningsOfKind(&unclosedOpenRangeChecker{}, ws1))
 
 	rs2 := []Record{
 		func() Record {
@@ -34,8 +43,8 @@ func TestNoWarnForOpenRanges(t *testing.T) {
 			return r
 		}(),
 	}
-	ws2 := SanityCheck(timestamp, rs2)
-	require.Nil(t, ws2)
+	ws2 := CheckForWarnings(timestamp, rs2)
+	assert.Equal(t, 0, CountWarningsOfKind(&unclosedOpenRangeChecker{}, ws2))
 }
 
 func TestOpenRangeWarningWhenUnclosedOpenRangeBeforeTodayRegardlessOfOrder(t *testing.T) {
@@ -59,14 +68,10 @@ func TestOpenRangeWarningWhenUnclosedOpenRangeBeforeTodayRegardlessOfOrder(t *te
 			return r
 		}(),
 	}
-	ws := SanityCheck(timestamp, rs)
-	require.NotNil(t, ws)
-	require.Len(t, ws, 2)
-	for _, w := range ws {
-		assert.Equal(t, "Unclosed open range", w.Message)
-	}
-	assert.Equal(t, today.PlusDays(-1), ws[0].Date)
-	assert.Equal(t, today.PlusDays(-2), ws[1].Date)
+	ws := CheckForWarnings(timestamp, rs)
+	assert.Equal(t, 2, CountWarningsOfKind(&unclosedOpenRangeChecker{}, ws))
+	assert.Equal(t, today.PlusDays(-1), ws[0].Date())
+	assert.Equal(t, today.PlusDays(-2), ws[1].Date())
 }
 
 func TestNoWarningForFutureEntries(t *testing.T) {
@@ -99,8 +104,8 @@ func TestNoWarningForFutureEntries(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := SanityCheck(timestamp, rs)
-	require.Nil(t, ws)
+	ws := CheckForWarnings(timestamp, rs)
+	assert.Equal(t, 0, CountWarningsOfKind(&futureEntriesChecker{}, ws))
 }
 
 func TestFutureEntriesWarning(t *testing.T) {
@@ -146,12 +151,8 @@ func TestFutureEntriesWarning(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := SanityCheck(timestamp, rs)
-	require.NotNil(t, ws)
-	require.Len(t, ws, len(rs))
-	for _, w := range ws {
-		assert.Equal(t, "Entry in the future", w.Message)
-	}
+	ws := CheckForWarnings(timestamp, rs)
+	assert.Equal(t, len(rs), CountWarningsOfKind(&futureEntriesChecker{}, ws))
 }
 
 func TestNoWarnForMoreThan24HoursPerRecord(t *testing.T) {
@@ -164,8 +165,8 @@ func TestNoWarnForMoreThan24HoursPerRecord(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := SanityCheck(timestamp, rs)
-	require.Nil(t, ws)
+	ws := CheckForWarnings(timestamp, rs)
+	assert.Equal(t, 0, CountWarningsOfKind(&moreThan24HoursChecker{}, ws))
 }
 
 func TestMoreThan24HoursPerRecord(t *testing.T) {
@@ -183,12 +184,8 @@ func TestMoreThan24HoursPerRecord(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := SanityCheck(timestamp, rs)
-	require.NotNil(t, ws)
-	require.Len(t, ws, len(rs))
-	for _, w := range ws {
-		assert.Equal(t, "Total time exceeds 24 hours", w.Message)
-	}
+	ws := CheckForWarnings(timestamp, rs)
+	assert.Equal(t, len(rs), CountWarningsOfKind(&moreThan24HoursChecker{}, ws))
 }
 
 func TestNoWarnForOverlappingTimeRanges(t *testing.T) {
@@ -207,8 +204,8 @@ func TestNoWarnForOverlappingTimeRanges(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := SanityCheck(timestamp, rs)
-	require.Nil(t, ws)
+	ws := CheckForWarnings(timestamp, rs)
+	assert.Equal(t, 0, CountWarningsOfKind(&overlappingTimeRangesChecker{}, ws))
 }
 
 func TestOverlappingTimeRanges(t *testing.T) {
@@ -238,10 +235,6 @@ func TestOverlappingTimeRanges(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := SanityCheck(timestamp, rs)
-	require.NotNil(t, ws)
-	require.Len(t, ws, len(rs))
-	for _, w := range ws {
-		assert.Equal(t, "Overlapping time ranges", w.Message)
-	}
+	ws := CheckForWarnings(timestamp, rs)
+	assert.Equal(t, len(rs), CountWarningsOfKind(&overlappingTimeRangesChecker{}, ws))
 }

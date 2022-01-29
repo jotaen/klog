@@ -31,6 +31,6 @@ func (opt *Print) Run(ctx app.Context) error {
 	records = opt.ApplySort(records)
 	ctx.Print("\n" + ctx.Serialiser().SerialiseRecords(records...) + "\n")
 
-	ctx.Print(opt.WarnArgs.ToString(now, records))
+	opt.WarnArgs.PrintWarnings(ctx, records)
 	return nil
 }

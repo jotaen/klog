@@ -1,4 +1,4 @@
-package service
+package period
 
 import (
 	. "github.com/jotaen/klog/src"
@@ -17,15 +17,15 @@ func TestHashYieldsDistinctValues(t *testing.T) {
 	initialDate := Ɀ_Date_(1000, 1, 1)
 	for i := 0; i < 1000; i++ {
 		d := initialDate.PlusDays(i)
-		dayHashes[NewDayHash(d)] = true
-		weekHashes[NewWeekHash(d)] = true
-		monthHashes[NewMonthHash(d)] = true
-		quarterHashes[NewQuarterHash(d)] = true
-		yearHashes[NewYearHash(d)] = true
+		dayHashes[NewDayFromDate(d).Hash()] = true
+		weekHashes[NewWeekFromDate(d).Hash()] = true
+		monthHashes[NewMonthFromDate(d).Hash()] = true
+		quarterHashes[NewQuarterFromDate(d).Hash()] = true
+		yearHashes[NewYearFromDate(d).Hash()] = true
 	}
 
 	assert.Len(t, dayHashes, 1000)
-	assert.Len(t, weekHashes, 145)
+	assert.Len(t, weekHashes, 144)
 	assert.Len(t, monthHashes, 33)
 	assert.Len(t, quarterHashes, 11)
 	assert.Len(t, yearHashes, 3)
