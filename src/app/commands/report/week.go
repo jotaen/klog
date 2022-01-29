@@ -30,14 +30,14 @@ func (a *weekAggregator) OnHeaderPrefix(table *terminalformat.Table) {
 }
 
 func (a *weekAggregator) OnRowPrefix(table *terminalformat.Table, date Date) {
-	// Year
-	if date.Year() != a.y {
-		table.CellR(fmt.Sprint(date.Year()))
-		a.y = date.Year()
+	year, week := date.WeekNumber()
+
+	if year != a.y {
+		table.CellR(fmt.Sprint(year))
+		a.y = year
 	} else {
 		table.Skip(1)
 	}
 
-	// Week
-	table.CellR(fmt.Sprintf("Week %2v", date.WeekNumber()))
+	table.CellR(fmt.Sprintf("Week %2v", week))
 }

@@ -25,7 +25,7 @@ func TestHashYieldsDistinctValues(t *testing.T) {
 	}
 
 	assert.Len(t, dayHashes, 1000)
-	assert.Len(t, weekHashes, 145)
+	assert.Len(t, weekHashes, 144)
 	assert.Len(t, monthHashes, 33)
 	assert.Len(t, quarterHashes, 11)
 	assert.Len(t, yearHashes, 3)

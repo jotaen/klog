@@ -18,7 +18,8 @@ func NewWeekFromDate(d Date) Week {
 
 func (w Week) Hash() WeekHash {
 	hash := newBitMask()
-	hash.populate(uint32(w.date.WeekNumber()), 53)
-	hash.populate(uint32(w.date.Year()), 10000)
+	year, week := w.date.WeekNumber()
+	hash.populate(uint32(week), 53)
+	hash.populate(uint32(year), 10000)
 	return WeekHash(hash.Value())
 }

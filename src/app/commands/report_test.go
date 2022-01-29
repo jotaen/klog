@@ -107,27 +107,56 @@ func TestDayReportWithDiff(t *testing.T) {
 
 func TestWeekReport(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
-2018-03-02 (8h!)
+2016-01-03
+  1h
+
+2016-01-04
+  1h
+
+2016-12-31
+  1h
+
+2017-01-01
+  1h
+`)._Run((&Report{AggregateBy: "week"}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+                 Total
+2015  Week 53       1h
+2016  Week  1       1h
+      Week 52       2h
+              ========
+                    4h
+`, state.printBuffer)
+}
+
+func TestWeekReportWithFillAndDiff(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+2018-12-09 (8h!)
 	8h
 
-2018-03-10 (5h30m!)
+2018-12-26 (1h30m!)
 	2h
 
-2018-03-23 (2h!)
-	5h20m
+2018-12-31 (30m!)
+	15m
 
-2018-04-01 (19m!)
+2019-01-02 (2h!)
+	3h
+
+2019-01-08 (19m!)
 `)._Run((&Report{AggregateBy: "week", DiffArgs: lib.DiffArgs{Diff: true}, Fill: true}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
                  Total    Should     Diff
-2018  Week  9       8h       8h!       0m
-      Week 10       2h    5h30m!   -3h30m
-      Week 11                            
-      Week 12    5h20m       2h!   +3h20m
-      Week 13       0m      19m!     -19m
+2018  Week 49       8h       8h!       0m
+      Week 50                            
+      Week 51                            
+      Week 52       2h    1h30m!     +30m
+2019  Week  1    3h15m    2h30m!     +45m
+      Week  2       0m      19m!     -19m
               ======== ========= ========
-                15h20m   15h49m!     -29m
+                13h15m   12h19m!     +56m
 `, state.printBuffer)
 }
 
