@@ -84,6 +84,7 @@ func (args *NowArgs) Total(reference gotime.Time, rs ...Record) Duration {
 }
 
 type FilterArgs struct {
+	// General filters
 	Tags   []string      `name:"tag" group:"Filter" help:"Records (or entries) that match this tag"`
 	Date   []Date        `name:"date" group:"Filter" help:"Records at this date"`
 	Since  Date          `name:"since" group:"Filter" help:"Records since this date (inclusive)"`
@@ -92,28 +93,29 @@ type FilterArgs struct {
 	Before Date          `name:"before" group:"Filter" help:"Records before this date (exclusive)"`
 	Period period.Period `name:"period" group:"Filter" help:"Records in this period (YYYY-MM or YYYY)"`
 
-	Today     bool `name:"today" group:"Filter (shortcuts)" help:"Records at today’s date"`
-	Yesterday bool `name:"yesterday" group:"Filter (shortcuts)" help:"Records at yesterday’s date"`
-	Tomorrow  bool `name:"tomorrow" group:"Filter (shortcuts)" help:"Records at tomorrow’s date"`
-
+	// Shortcut filters
+	// The `XXX` ones are dummy entries just for the help output
+	Today            bool `name:"today" group:"Filter (shortcuts)" help:"Records at today’s date"`
+	Yesterday        bool `name:"yesterday" group:"Filter (shortcuts)" help:"Records at yesterday’s date"`
+	Tomorrow         bool `name:"tomorrow" group:"Filter (shortcuts)" help:"Records at tomorrow’s date"`
 	ThisXXX          bool `name:"this-***" group:"Filter (shortcuts)" help:"Records of the current week/quarter/month/year (e.g. --this-year)"`
 	LastXXX          bool `name:"last-***" group:"Filter (shortcuts)" help:"Records of the previous week/quarter/month/year (e.g. --last-month)"`
-	ThisWeek         bool `name:"this-week" group:"Filter (shortcuts)" hidden:""`
-	ThisWeekAlias    bool `name:"thisweek" group:"Filter (shortcuts)" hidden:""`
-	LastWeek         bool `name:"last-week" group:"Filter (shortcuts)" hidden:""`
-	LastWeekAlias    bool `name:"lastweek" group:"Filter (shortcuts)" hidden:""`
-	ThisMonth        bool `name:"this-month" group:"Filter (shortcuts)" hidden:""`
-	ThisMonthAlias   bool `name:"thismonth" group:"Filter (shortcuts)" hidden:""`
-	LastMonth        bool `name:"last-month" group:"Filter (shortcuts)" hidden:""`
-	LastMonthAlias   bool `name:"lastmonth" group:"Filter (shortcuts)" hidden:""`
-	ThisQuarter      bool `name:"this-quarter" group:"Filter (shortcuts)" hidden:""`
-	ThisQuarterAlias bool `name:"thisquarter" group:"Filter (shortcuts)" hidden:""`
-	LastQuarter      bool `name:"last-quarter" group:"Filter (shortcuts)" hidden:""`
-	LastQuarterAlias bool `name:"lastquarter" group:"Filter (shortcuts)" hidden:""`
-	ThisYear         bool `name:"this-year" group:"Filter (shortcuts)" hidden:""`
-	ThisYearAlias    bool `name:"thisyear" group:"Filter (shortcuts)" hidden:""`
-	LastYear         bool `name:"last-year" group:"Filter (shortcuts)" hidden:""`
-	LastYearAlias    bool `name:"lastyear" group:"Filter (shortcuts)" hidden:""`
+	ThisWeek         bool `name:"this-week" hidden:""`
+	ThisWeekAlias    bool `name:"thisweek" hidden:""`
+	LastWeek         bool `name:"last-week" hidden:""`
+	LastWeekAlias    bool `name:"lastweek" hidden:""`
+	ThisMonth        bool `name:"this-month" hidden:""`
+	ThisMonthAlias   bool `name:"thismonth" hidden:""`
+	LastMonth        bool `name:"last-month" hidden:""`
+	LastMonthAlias   bool `name:"lastmonth" hidden:""`
+	ThisQuarter      bool `name:"this-quarter" hidden:""`
+	ThisQuarterAlias bool `name:"thisquarter" hidden:""`
+	LastQuarter      bool `name:"last-quarter" hidden:""`
+	LastQuarterAlias bool `name:"lastquarter" hidden:""`
+	ThisYear         bool `name:"this-year" hidden:""`
+	ThisYearAlias    bool `name:"thisyear" hidden:""`
+	LastYear         bool `name:"last-year" hidden:""`
+	LastYearAlias    bool `name:"lastyear" hidden:""`
 }
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {

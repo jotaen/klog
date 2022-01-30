@@ -11,7 +11,7 @@ func TestWeekPeriod(t *testing.T) {
 		actual   Period
 		expected Period
 	}{
-		// Range in same Month
+		// Range in same month
 		{NewWeekFromDate(Ɀ_Date_(1987, 5, 19)).Period(), NewPeriod(Ɀ_Date_(1987, 5, 18), Ɀ_Date_(1987, 5, 24))},
 		{NewWeekFromDate(Ɀ_Date_(2004, 12, 16)).Period(), NewPeriod(Ɀ_Date_(2004, 12, 13), Ɀ_Date_(2004, 12, 19))},
 
