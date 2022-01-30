@@ -113,9 +113,15 @@ to be interpreted as 12-hour clock value.
 The minute part MUST be between 0-59 (inclusive).
 Single-figure minute parts MUST be padded with a `0`.
 
-The hour part MUST either be between 0-23 (inclusive) when using the 24-hour clock,
+The hour part MUST either be between 0-24 (inclusive) when using the 24-hour clock,
 or between 1-12 (inclusive) when using the 12-hour clock.
 Single-figure hour parts MAY be padded with a `0`.
+
+When using the 24-hour clock, if the hour part is `24`,
+then the minute part MUST be `00`;
+`<24:00` MUST be interpreted as `0:00`,
+`24:00` MUST be interpreted as `0:00>`,
+`24:00>` MUST NOT appear.
 
 *Time* values MAY be *shifted* to the next or to the previous day:
 - To associate the *time* with the day before the *record’s* *date*,
