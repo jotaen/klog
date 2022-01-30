@@ -34,7 +34,9 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error
 			return kong.TypeMapper(reflect.TypeOf(&shouldTotalPrototype).Elem(), shouldTotalDecoder())
 		}(),
 		func() kong.Option {
-			p := period.Period{}
+			someSinceDate, _ := klog.NewDate(1, 1, 1)
+			someUntilDate, _ := klog.NewDate(2, 2, 2)
+			p := period.NewPeriod(someSinceDate, someUntilDate)
 			return kong.TypeMapper(reflect.TypeOf(&p).Elem(), periodDecoder())
 		}(),
 		kong.ConfigureHelp(kong.HelpOptions{
@@ -128,18 +130,18 @@ func periodDecoder() kong.MapperFunc {
 		if value == "" {
 			return errors.New("Please provide a valid period")
 		}
-		p, hasMatch := func() (period.Period, bool) {
+		p := func() period.Period {
 			yearPeriod, yErr := period.NewYearFromString(value)
 			if yErr == nil {
-				return yearPeriod.Period(), true
+				return yearPeriod.Period()
 			}
 			monthPeriod, mErr := period.NewMonthFromString(value)
 			if mErr == nil {
-				return monthPeriod.Period(), true
+				return monthPeriod.Period()
 			}
-			return period.Period{}, false
+			return nil
 		}()
-		if !hasMatch {
+		if p == nil {
 			return errors.New("`" + value + "` is not a valid period")
 		}
 		target.Set(reflect.ValueOf(p))

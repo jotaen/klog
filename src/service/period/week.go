@@ -27,7 +27,7 @@ func (w Week) Period() Period {
 		}
 		until = until.PlusDays(1)
 	}
-	return Period{since, until}
+	return NewPeriod(since, until)
 }
 
 func (w Week) Previous() Week {

@@ -6,9 +6,26 @@ import (
 )
 
 // Period is an inclusive date range.
-type Period struct {
-	Since Date
-	Until Date
+type Period interface {
+	Since() Date
+	Until() Date
+}
+
+type periodData struct {
+	since Date
+	until Date
+}
+
+func NewPeriod(since Date, until Date) Period {
+	return &periodData{since, until}
+}
+
+func (p *periodData) Since() Date {
+	return p.since
+}
+
+func (p *periodData) Until() Date {
+	return p.until
 }
 
 // Hash is a super type for date-related hashes. Such a hash is

@@ -48,10 +48,7 @@ func (m Month) Period() Period {
 		}
 		until = next
 	}
-	return Period{
-		Since: since,
-		Until: until,
-	}
+	return NewPeriod(since, until)
 }
 
 func (m Month) Previous() Month {

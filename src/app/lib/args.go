@@ -124,9 +124,9 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
 		Tags:          args.Tags,
 		Dates:         args.Date,
 	}
-	if args.Period.Since != nil {
-		qry.BeforeOrEqual = args.Period.Until
-		qry.AfterOrEqual = args.Period.Since
+	if args.Period != nil {
+		qry.BeforeOrEqual = args.Period.Until()
+		qry.AfterOrEqual = args.Period.Since()
 	}
 	if args.After != nil {
 		qry.AfterOrEqual = args.After.PlusDays(1)
@@ -143,45 +143,36 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
 	if args.Tomorrow {
 		qry.Dates = append(qry.Dates, today.PlusDays(+1))
 	}
-	if args.ThisWeek || args.ThisWeekAlias {
-		week := period.NewWeekFromDate(today).Period()
-		qry.AfterOrEqual = week.Since
-		qry.BeforeOrEqual = week.Until
-	}
-	if args.LastWeek || args.LastWeekAlias {
-		week := period.NewWeekFromDate(today).Previous().Period()
-		qry.AfterOrEqual = week.Since
-		qry.BeforeOrEqual = week.Until
-	}
-	if args.ThisMonth || args.ThisMonthAlias {
-		week := period.NewMonthFromDate(today).Period()
-		qry.AfterOrEqual = week.Since
-		qry.BeforeOrEqual = week.Until
-	}
-	if args.LastMonth || args.LastMonthAlias {
-		week := period.NewMonthFromDate(today).Previous().Period()
-		qry.AfterOrEqual = week.Since
-		qry.BeforeOrEqual = week.Until
-	}
-	if args.ThisQuarter || args.ThisQuarterAlias {
-		week := period.NewQuarterFromDate(today).Period()
-		qry.AfterOrEqual = week.Since
-		qry.BeforeOrEqual = week.Until
-	}
-	if args.LastQuarter || args.LastQuarterAlias {
-		week := period.NewQuarterFromDate(today).Previous().Period()
-		qry.AfterOrEqual = week.Since
-		qry.BeforeOrEqual = week.Until
-	}
-	if args.ThisYear || args.ThisYearAlias {
-		week := period.NewYearFromDate(today).Period()
-		qry.AfterOrEqual = week.Since
-		qry.BeforeOrEqual = week.Until
-	}
-	if args.LastYear || args.LastYearAlias {
-		week := period.NewYearFromDate(today).Previous().Period()
-		qry.AfterOrEqual = week.Since
-		qry.BeforeOrEqual = week.Until
+	shortcutPeriod := func() period.Period {
+		if args.ThisWeek || args.ThisWeekAlias {
+			return period.NewWeekFromDate(today).Period()
+		}
+		if args.LastWeek || args.LastWeekAlias {
+			return period.NewWeekFromDate(today).Previous().Period()
+		}
+		if args.ThisMonth || args.ThisMonthAlias {
+			return period.NewMonthFromDate(today).Period()
+		}
+		if args.LastMonth || args.LastMonthAlias {
+			return period.NewMonthFromDate(today).Previous().Period()
+		}
+		if args.ThisQuarter || args.ThisQuarterAlias {
+			return period.NewQuarterFromDate(today).Period()
+		}
+		if args.LastQuarter || args.LastQuarterAlias {
+			return period.NewQuarterFromDate(today).Previous().Period()
+		}
+		if args.ThisYear || args.ThisYearAlias {
+			return period.NewYearFromDate(today).Period()
+		}
+		if args.LastYear || args.LastYearAlias {
+			return period.NewYearFromDate(today).Previous().Period()
+		}
+		return nil
+	}()
+	if shortcutPeriod != nil {
+		qry.AfterOrEqual = shortcutPeriod.Since()
+		qry.BeforeOrEqual = shortcutPeriod.Until()
 	}
 	return service.Filter(rs, qry)
 }
