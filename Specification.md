@@ -258,7 +258,8 @@ and MUST NOT be combined into a single *record*.
 ## V. Changelog
 
 ## Version 1.2
-- Minor restructuring for enhanced clarity; no functional changes made.
+- Allow times to be `24:00`.
+- Some minor restructurings for enhanced clarity.
 
 ## Version 1.1
 - Add a constraint regarding the indentation that requires the indentation style
