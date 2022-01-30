@@ -1,6 +1,17 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## v3.3
+- **[ FEATURE ]** Allow times to be `24:00`, e.g. `22:00 - 24:00`.
+- **[ FEATURE ]** Add `klog goto` command for opening the file explorer
+  at the location of a file or bookmark.
+- **[ FEATURE ]** Add `klog bookmark info` command.
+- **[ FEATURE ]** When using the manipulation commands (`klog track`, etc.),
+  conform to style preferences encountered in the file.
+- **[ FEATURE ]** Add `--tomorrow` as shorthand flag for the next day’s date.
+- **[ FEATURE ]** Improve warnings (which are shown for potential data problems).
+- **[ FIX ]** Fix bug in week-based aggregation of `klog report --aggregate week`.
+
 ## v3.2
 - **[ BREAKING ]** Don’t allow mixing the indentation style within a
   record. (It might still differ *between* records, though.) For example: if
