@@ -84,15 +84,17 @@ func (args *NowArgs) Total(reference gotime.Time, rs ...Record) Duration {
 }
 
 type FilterArgs struct {
-	Tags      []string      `name:"tag" group:"Filter" help:"Only records (or particular entries) that match this tag"`
-	Date      []Date        `name:"date" group:"Filter" help:"Only records at this date"`
-	Today     bool          `name:"today" group:"Filter" help:"Only records at today’s date"`
-	Yesterday bool          `name:"yesterday" group:"Filter" help:"Only records at yesterday’s date"`
-	Since     Date          `name:"since" group:"Filter" help:"Only records since this date (inclusive)"`
-	Until     Date          `name:"until" group:"Filter" help:"Only records until this date (inclusive)"`
-	After     Date          `name:"after" group:"Filter" help:"Only records after this date (exclusive)"`
-	Before    Date          `name:"before" group:"Filter" help:"Only records before this date (exclusive)"`
-	Period    period.Period `name:"period" group:"Filter" help:"Only records in this period (YYYY-MM or YYYY)"`
+	Tags   []string      `name:"tag" group:"Filter" help:"Records (or entries) that match this tag"`
+	Date   []Date        `name:"date" group:"Filter" help:"Records at this date"`
+	Since  Date          `name:"since" group:"Filter" help:"Records since this date (inclusive)"`
+	Until  Date          `name:"until" group:"Filter" help:"Records until this date (inclusive)"`
+	After  Date          `name:"after" group:"Filter" help:"Records after this date (exclusive)"`
+	Before Date          `name:"before" group:"Filter" help:"Records before this date (exclusive)"`
+	Period period.Period `name:"period" group:"Filter" help:"Records in this period (YYYY-MM or YYYY)"`
+
+	Today     bool `name:"today" group:"Filter (shortcuts)" help:"Records at today’s date"`
+	Yesterday bool `name:"yesterday" group:"Filter (shortcuts)" help:"Records at yesterday’s date"`
+	Tomorrow  bool `name:"tomorrow" group:"Filter (shortcuts)" help:"Records at tomorrow’s date"`
 }
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
@@ -117,6 +119,9 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
 	}
 	if args.Yesterday {
 		qry.Dates = append(qry.Dates, NewDateFromGo(now.AddDate(0, 0, -1)))
+	}
+	if args.Tomorrow {
+		qry.Dates = append(qry.Dates, NewDateFromGo(now.AddDate(0, 0, +1)))
 	}
 	return service.Filter(rs, qry)
 }
