@@ -84,6 +84,7 @@ func (args *NowArgs) Total(reference gotime.Time, rs ...Record) Duration {
 }
 
 type FilterArgs struct {
+	// General filters
 	Tags   []string      `name:"tag" group:"Filter" help:"Records (or entries) that match this tag"`
 	Date   []Date        `name:"date" group:"Filter" help:"Records at this date"`
 	Since  Date          `name:"since" group:"Filter" help:"Records since this date (inclusive)"`
@@ -92,21 +93,42 @@ type FilterArgs struct {
 	Before Date          `name:"before" group:"Filter" help:"Records before this date (exclusive)"`
 	Period period.Period `name:"period" group:"Filter" help:"Records in this period (YYYY-MM or YYYY)"`
 
-	Today     bool `name:"today" group:"Filter (shortcuts)" help:"Records at today’s date"`
-	Yesterday bool `name:"yesterday" group:"Filter (shortcuts)" help:"Records at yesterday’s date"`
-	Tomorrow  bool `name:"tomorrow" group:"Filter (shortcuts)" help:"Records at tomorrow’s date"`
+	// Shortcut filters
+	// The `XXX` ones are dummy entries just for the help output
+	Today            bool `name:"today" group:"Filter (shortcuts)" help:"Records at today’s date"`
+	Yesterday        bool `name:"yesterday" group:"Filter (shortcuts)" help:"Records at yesterday’s date"`
+	Tomorrow         bool `name:"tomorrow" group:"Filter (shortcuts)" help:"Records at tomorrow’s date"`
+	ThisXXX          bool `name:"this-***" group:"Filter (shortcuts)" help:"Records of the current week/quarter/month/year (e.g. --this-year)"`
+	LastXXX          bool `name:"last-***" group:"Filter (shortcuts)" help:"Records of the previous week/quarter/month/year (e.g. --last-month)"`
+	ThisWeek         bool `name:"this-week" hidden:""`
+	ThisWeekAlias    bool `name:"thisweek" hidden:""`
+	LastWeek         bool `name:"last-week" hidden:""`
+	LastWeekAlias    bool `name:"lastweek" hidden:""`
+	ThisMonth        bool `name:"this-month" hidden:""`
+	ThisMonthAlias   bool `name:"thismonth" hidden:""`
+	LastMonth        bool `name:"last-month" hidden:""`
+	LastMonthAlias   bool `name:"lastmonth" hidden:""`
+	ThisQuarter      bool `name:"this-quarter" hidden:""`
+	ThisQuarterAlias bool `name:"thisquarter" hidden:""`
+	LastQuarter      bool `name:"last-quarter" hidden:""`
+	LastQuarterAlias bool `name:"lastquarter" hidden:""`
+	ThisYear         bool `name:"this-year" hidden:""`
+	ThisYearAlias    bool `name:"thisyear" hidden:""`
+	LastYear         bool `name:"last-year" hidden:""`
+	LastYearAlias    bool `name:"lastyear" hidden:""`
 }
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
+	today := NewDateFromGo(now)
 	qry := service.FilterQry{
 		BeforeOrEqual: args.Until,
 		AfterOrEqual:  args.Since,
 		Tags:          args.Tags,
 		Dates:         args.Date,
 	}
-	if args.Period.Since != nil {
-		qry.BeforeOrEqual = args.Period.Until
-		qry.AfterOrEqual = args.Period.Since
+	if args.Period != nil {
+		qry.BeforeOrEqual = args.Period.Until()
+		qry.AfterOrEqual = args.Period.Since()
 	}
 	if args.After != nil {
 		qry.AfterOrEqual = args.After.PlusDays(1)
@@ -115,13 +137,44 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
 		qry.BeforeOrEqual = args.Before.PlusDays(-1)
 	}
 	if args.Today {
-		qry.Dates = append(qry.Dates, NewDateFromGo(now))
+		qry.Dates = append(qry.Dates, today)
 	}
 	if args.Yesterday {
-		qry.Dates = append(qry.Dates, NewDateFromGo(now.AddDate(0, 0, -1)))
+		qry.Dates = append(qry.Dates, today.PlusDays(-1))
 	}
 	if args.Tomorrow {
-		qry.Dates = append(qry.Dates, NewDateFromGo(now.AddDate(0, 0, +1)))
+		qry.Dates = append(qry.Dates, today.PlusDays(+1))
+	}
+	shortcutPeriod := func() period.Period {
+		if args.ThisWeek || args.ThisWeekAlias {
+			return period.NewWeekFromDate(today).Period()
+		}
+		if args.LastWeek || args.LastWeekAlias {
+			return period.NewWeekFromDate(today).Previous().Period()
+		}
+		if args.ThisMonth || args.ThisMonthAlias {
+			return period.NewMonthFromDate(today).Period()
+		}
+		if args.LastMonth || args.LastMonthAlias {
+			return period.NewMonthFromDate(today).Previous().Period()
+		}
+		if args.ThisQuarter || args.ThisQuarterAlias {
+			return period.NewQuarterFromDate(today).Period()
+		}
+		if args.LastQuarter || args.LastQuarterAlias {
+			return period.NewQuarterFromDate(today).Previous().Period()
+		}
+		if args.ThisYear || args.ThisYearAlias {
+			return period.NewYearFromDate(today).Period()
+		}
+		if args.LastYear || args.LastYearAlias {
+			return period.NewYearFromDate(today).Previous().Period()
+		}
+		return nil
+	}()
+	if shortcutPeriod != nil {
+		qry.AfterOrEqual = shortcutPeriod.Since()
+		qry.BeforeOrEqual = shortcutPeriod.Until()
 	}
 	return service.Filter(rs, qry)
 }

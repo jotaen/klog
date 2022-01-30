@@ -12,9 +12,27 @@ func NewWeekFromDate(d Date) Week {
 	return Week{d}
 }
 
-//func (w Week) Previous() Week {
-//
-//}
+func (w Week) Period() Period {
+	since := w.date
+	until := w.date
+	for {
+		if since.Weekday() == 1 {
+			break
+		}
+		since = since.PlusDays(-1)
+	}
+	for {
+		if until.Weekday() == 7 {
+			break
+		}
+		until = until.PlusDays(1)
+	}
+	return NewPeriod(since, until)
+}
+
+func (w Week) Previous() Week {
+	return NewWeekFromDate(w.date.PlusDays(-7))
+}
 
 func (w Week) Hash() WeekHash {
 	hash := newBitMask()

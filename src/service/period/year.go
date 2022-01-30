@@ -37,10 +37,15 @@ func NewYearFromString(yyyy string) (Year, error) {
 func (y Year) Period() Period {
 	since, _ := NewDate(y.date.Year(), 1, 1)
 	until, _ := NewDate(y.date.Year(), 12, 31)
-	return Period{
-		Since: since,
-		Until: until,
+	return NewPeriod(since, until)
+}
+
+func (y Year) Previous() Year {
+	lastYear, err := NewDate(y.date.Year()-1, 1, 1)
+	if err != nil {
+		panic("Invalid year")
 	}
+	return Year{lastYear}
 }
 
 func (y Year) Hash() YearHash {
