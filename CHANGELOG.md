@@ -1,7 +1,7 @@
 # Changelog
 **Summary of changes of the command line tool**
 
-## Upcoming
+## v3.3
 - **[ FEATURE ]** Allow times to be `24:00`, e.g. `22:00 - 24:00`.
 - **[ FEATURE ]** Add `klog goto` command for opening the file explorer
   at the location of a file or bookmark.
