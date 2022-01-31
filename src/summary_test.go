@@ -7,48 +7,65 @@ import (
 )
 
 func TestCreatesEmptySummary(t *testing.T) {
-	recordSummary, err := NewRecordSummary()
-	require.Nil(t, err)
+	recordSummary, rErr := NewRecordSummary()
+	require.Nil(t, rErr)
 	assert.Nil(t, recordSummary.Lines())
-	assert.True(t, recordSummary.IsEmpty())
 	assert.Empty(t, recordSummary.Tags())
 
-	entrySummary := NewEntrySummary("")
+	entrySummary, eErr := NewEntrySummary()
+	require.Nil(t, eErr)
 	assert.Nil(t, entrySummary.Lines())
-	assert.True(t, entrySummary.IsEmpty())
 	assert.Empty(t, entrySummary.Tags())
+
+	entrySummaryBlank, ebErr := NewEntrySummary("")
+	require.Nil(t, ebErr)
+	assert.Nil(t, entrySummaryBlank.Lines())
+	assert.Empty(t, entrySummaryBlank.Tags())
 }
 
-func TestCreatesValidSummary(t *testing.T) {
-	recordSummary, err := NewRecordSummary("First line", "Second line")
-	require.Nil(t, err)
-	assert.Equal(t, []string{"First line", "Second line"}, recordSummary.Lines())
-	assert.False(t, recordSummary.IsEmpty())
+func TestCreatesValidSingleLineSummary(t *testing.T) {
+	recordSummary, rErr := NewRecordSummary("First line")
+	require.Nil(t, rErr)
+	assert.Equal(t, []string{"First line"}, recordSummary.Lines())
 	assert.Empty(t, recordSummary.Tags())
 
-	entrySummary := NewEntrySummary("First line")
+	entrySummary, eErr := NewEntrySummary("First line")
+	require.Nil(t, eErr)
 	assert.Equal(t, []string{"First line"}, entrySummary.Lines())
-	assert.False(t, entrySummary.IsEmpty())
 	assert.Empty(t, entrySummary.Tags())
 }
 
-func TestSummaryCannotContainBlankLines(t *testing.T) {
+func TestCreatesValidMultilineSummary(t *testing.T) {
+	recordSummary, rErr := NewRecordSummary("First line", "Second line")
+	require.Nil(t, rErr)
+	assert.Equal(t, []string{"First line", "Second line"}, recordSummary.Lines())
+	assert.Empty(t, recordSummary.Tags())
+
+	entrySummary, eErr := NewEntrySummary("First line", "Second line")
+	require.Nil(t, eErr)
+	assert.Equal(t, []string{"First line", "Second line"}, entrySummary.Lines())
+	assert.Empty(t, entrySummary.Tags())
+}
+
+func TestRecordSummaryCannotContainBlankLines(t *testing.T) {
 	for _, l := range [][]string{
 		{""},
 		{"     "},
 		{"\u00a0\u00a0\u00a0\u00a0"},
+		{"Foo", "\u00a0\u00a0\u00a0\u00a0"},
 		{"\t\t"},
 		{"Hello", "     ", "Foo"},
+		{"Hello", "\t", "Foo"},
 		{"Hello", "", "Foo"},
 		{"Hello", "Foo", ""},
 	} {
-		summary, err := NewRecordSummary(l...)
+		recordSummary, err := NewRecordSummary(l...)
 		require.Error(t, err)
-		require.Nil(t, summary)
+		require.Nil(t, recordSummary)
 	}
 }
 
-func TestSummaryCannotContainWhitespaceAtBeginningOfLine(t *testing.T) {
+func TestRecordSummaryCannotContainWhitespaceAtBeginningOfLine(t *testing.T) {
 	for _, l := range [][]string{
 		{" Hello"},
 		{"\u00a0Hello"},
@@ -65,6 +82,37 @@ func TestSummaryCannotContainWhitespaceAtBeginningOfLine(t *testing.T) {
 	}
 }
 
+func TestEntrySummaryCanStartWithBlankOrEmptyLine(t *testing.T) {
+	for _, l := range [][]string{
+		{"", "Foo"},
+		{" ", "Foo", "Bar"},
+		{"\t", " Foo"},
+		{"\u00a0", "\tFoo     "},
+		{"\u00a0\t     \t ", "   Foo", "\u00a0Baz \t"},
+	} {
+		entrySummary, err := NewEntrySummary(l...)
+		require.Nil(t, err)
+		require.NotNil(t, entrySummary)
+	}
+}
+
+func TestEntrySummaryCannotContainSubsequentBlankLines(t *testing.T) {
+	for _, l := range [][]string{
+		{"Foo", ""},
+		{"Foo", "     "},
+		{"Foo", "\u00a0\u00a0\u00a0\u00a0"},
+		{"Foo", "\t\t"},
+		{"Hello", "     ", "Foo"},
+		{"Hello", "\t", "Foo"},
+		{"Hello", "", "Foo"},
+		{"Hello", "Foo", ""},
+	} {
+		entrySummary, err := NewEntrySummary(l...)
+		require.Error(t, err)
+		require.Nil(t, entrySummary)
+	}
+}
+
 func TestRecognisesAllTags(t *testing.T) {
 	recordSummary, _ := NewRecordSummary("Hello #world, I feel", "#GREAT-ish today #123_test!")
 	assert.Equal(t, recordSummary.Tags().ToStrings(), []string{"#123_test", "#great", "#world"})
@@ -72,7 +120,7 @@ func TestRecognisesAllTags(t *testing.T) {
 	assert.True(t, recordSummary.Tags().Contains("great"))
 	assert.True(t, recordSummary.Tags().Contains("world"))
 
-	entrySummary := NewEntrySummary("Hello #world, I feel #great #TODAY")
+	entrySummary, _ := NewEntrySummary("Hello #world, I feel #great #TODAY")
 	assert.Equal(t, entrySummary.Tags().ToStrings(), []string{"#great", "#today", "#world"})
 }
 

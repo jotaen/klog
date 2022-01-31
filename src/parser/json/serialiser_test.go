@@ -48,16 +48,16 @@ func TestSerialiseMinimalRecord(t *testing.T) {
 func TestSerialiseFullBlownRecord(t *testing.T) {
 	json := ToJson(func() []Record {
 		r := NewRecord(Ɀ_Date_(2000, 12, 31))
-		r.SetSummary(Ɀ_RecordSummary_("Hello #World"))
+		r.SetSummary(Ɀ_RecordSummary_("Hello #World", "What’s up?"))
 		r.SetShouldTotal(NewDuration(7, 30))
-		r.AddDuration(NewDuration(2, 3), NewEntrySummary("#some #thing"))
+		r.AddDuration(NewDuration(2, 3), Ɀ_EntrySummary_("#some #thing"))
 		r.AddRange(Ɀ_Range_(Ɀ_TimeYesterday_(23, 44), Ɀ_Time_(5, 23)), nil)
-		r.StartOpenRange(Ɀ_TimeTomorrow_(0, 28), NewEntrySummary("Started #todo"))
+		r.StartOpenRange(Ɀ_TimeTomorrow_(0, 28), Ɀ_EntrySummary_("Started #todo", "still on it"))
 		return []Record{r}
 	}(), nil, false)
 	assert.Equal(t, `{"records":[{`+
 		`"date":"2000-12-31",`+
-		`"summary":"Hello #World",`+
+		`"summary":"Hello #World\nWhat’s up?",`+
 		`"total":"7h42m",`+
 		`"total_mins":462,`+
 		`"should_total":"7h30m!",`+
@@ -83,7 +83,7 @@ func TestSerialiseFullBlownRecord(t *testing.T) {
 		`"end_mins":323`+
 		`},{`+
 		`"type":"open_range",`+
-		`"summary":"Started #todo",`+
+		`"summary":"Started #todo\nstill on it",`+
 		`"tags":["#todo"],`+
 		`"total":"0m",`+
 		`"total_mins":0,`+
