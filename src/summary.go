@@ -30,9 +30,6 @@ func NewRecordSummary(line ...string) (RecordSummary, error) {
 // NewEntrySummary creates an EntrySummary from individual lines of text.
 // Except for the first line, none of the lines can be empty or blank.
 func NewEntrySummary(line ...string) (EntrySummary, error) {
-	if len(line) == 1 && line[0] == "" {
-		return nil, nil
-	}
 	for i, l := range line {
 		if i == 0 {
 			continue

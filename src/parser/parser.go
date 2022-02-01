@@ -146,32 +146,32 @@ func parseRecord(lines []Line) (Record, *Style, []Error) {
 	}
 
 	// ========== ENTRIES ==========
-	for _, l := range lines {
+	for len(lines) > 0 {
+		l := lines[0]
 		if indentator == nil {
 			// We should never make it here if the indentation could not be determined.
 			panic("Could not detect indentation")
 		}
 		style.SetIndentation(indentator.Style())
-		eErr := func() Error {
-			// Check for correct indentation.
-			entry := indentator.NewIndentedParseable(l, 1)
-			if entry == nil || IsSpaceOrTab(entry.Peek()) {
-				return ErrorIllegalIndentation().New(l, 0, len(l.Text))
-			}
+		// Check for correct indentation.
+		entry := indentator.NewIndentedParseable(l, 1)
+		if entry == nil || IsSpaceOrTab(entry.Peek()) {
+			errs = append(errs, ErrorIllegalIndentation().New(l, 0, len(l.Text)))
+			break
+		}
+		lines = lines[1:]
 
+		// Parse entry value.
+		createEntry, evErr := func() (func(EntrySummary) Error, Error) {
 			// Try to interpret the entry value as duration.
 			durationCandidate, _ := entry.PeekUntil(IsSpaceOrTab)
 			duration, dErr := NewDurationFromString(durationCandidate.ToString())
 			if dErr == nil {
 				entry.Advance(durationCandidate.Length())
-				var entrySummary EntrySummary
-				if IsSpaceOrTab(entry.Peek()) {
-					entry.Advance(1)
-					summaryText, _ := entry.PeekUntil(Is(END_OF_TEXT))
-					entrySummary = newEntrySummaryOrNil(summaryText)
-				}
-				record.AddDuration(duration, entrySummary)
-				return nil
+				return func(s EntrySummary) Error {
+					record.AddDuration(duration, s)
+					return nil
+				}, nil
 			}
 
 			// If the entry value isn’t a duration, it must be the start time of a range.
@@ -179,11 +179,11 @@ func parseRecord(lines []Line) (Record, *Style, []Error) {
 			if startCandidate.Length() == 0 {
 				// Handle case where `-` appears right at the beginning of the line.
 				firstToken, _ := entry.PeekUntil(IsSpaceOrTab)
-				return ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, firstToken.Length())
+				return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, firstToken.Length())
 			}
 			start, t1Err := NewTimeFromString(startCandidate.ToString())
 			if t1Err != nil {
-				return ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, startCandidate.Length())
+				return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, startCandidate.Length())
 			}
 			entryStartPosition := startCandidate.PointerPosition
 			entry.Advance(startCandidate.Length())
@@ -198,12 +198,12 @@ func parseRecord(lines []Line) (Record, *Style, []Error) {
 			}
 
 			if entry.Peek() != '-' {
-				return ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, 1)
+				return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, 1)
 			}
 			entry.Advance(1) // '-'
 			entry.SkipWhile(Is(' '))
 
-			// Check whether the range is a regular or an open-ended one.
+			// Check whether the range is open-ended.
 			if entry.Peek() == '?' {
 				entry.Advance(1)
 				placeholder, _ := entry.PeekUntil(IsSpaceOrTab)
@@ -211,44 +211,90 @@ func parseRecord(lines []Line) (Record, *Style, []Error) {
 				// The placeholder can appear multiple times.
 				for _, p := range placeholder.Chars {
 					if p != '?' {
-						return ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, placeholder.Length())
+						return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, placeholder.Length())
 					}
 				}
 				entry.Advance(placeholder.Length())
-				var entrySummary EntrySummary
-				if IsSpaceOrTab(entry.Peek()) {
-					entry.Advance(1)
-					summaryText, _ := entry.PeekUntil(Is(END_OF_TEXT))
-					entrySummary = newEntrySummaryOrNil(summaryText)
-				}
-				sErr := record.StartOpenRange(start, entrySummary)
-				if sErr != nil {
-					return ErrorDuplicateOpenRange().New(entry.Line, entryStartPosition, entry.PointerPosition-entryStartPosition)
-				}
-			} else {
-				endCandidate, _ := entry.PeekUntil(IsSpaceOrTab)
-				if endCandidate.Length() == 0 {
-					return ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, 1)
-				}
-				end, t2Err := NewTimeFromString(endCandidate.ToString())
-				if t2Err != nil {
-					return ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, endCandidate.Length())
-				}
-				entry.Advance(endCandidate.Length())
-				timeRange, rErr := NewRange(start, end)
-				if rErr != nil {
-					return ErrorIllegalRange().New(entry.Line, entryStartPosition, entry.PointerPosition-entryStartPosition)
-				}
-				var entrySummary EntrySummary
-				if IsSpaceOrTab(entry.Peek()) {
-					entry.Advance(1)
-					summaryText, _ := entry.PeekUntil(Is(END_OF_TEXT))
-					entrySummary = newEntrySummaryOrNil(summaryText)
-				}
-				record.AddRange(timeRange, entrySummary)
+				return func(s EntrySummary) Error {
+					sErr := record.StartOpenRange(start, s)
+					if sErr != nil {
+						return ErrorDuplicateOpenRange().New(entry.Line, entryStartPosition, entry.PointerPosition-entryStartPosition)
+					}
+					return nil
+				}, nil
 			}
-			return nil
+
+			// Ultimately, the entry can only be a regular range.
+			endCandidate, _ := entry.PeekUntil(IsSpaceOrTab)
+			if endCandidate.Length() == 0 {
+				return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, 1)
+			}
+			end, t2Err := NewTimeFromString(endCandidate.ToString())
+			if t2Err != nil {
+				return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, endCandidate.Length())
+			}
+			entry.Advance(endCandidate.Length())
+			timeRange, rErr := NewRange(start, end)
+			if rErr != nil {
+				return nil, ErrorIllegalRange().New(entry.Line, entryStartPosition, entry.PointerPosition-entryStartPosition)
+			}
+			return func(s EntrySummary) Error {
+				record.AddRange(timeRange, s)
+				return nil
+			}, nil
 		}()
+
+		// Check for error while parsing the entry value.
+		if evErr != nil {
+			errs = append(errs, evErr)
+			continue
+		}
+
+		// Parse entry summary.
+		entrySummary, esErr := func() (EntrySummary, Error) {
+			var result EntrySummary
+
+			// Parse first line of entry summary.
+			if IsSpaceOrTab(entry.Peek()) {
+				entry.Advance(1)
+				summaryText, _ := entry.PeekUntil(Is(END_OF_TEXT))
+				firstLine, sErr := NewEntrySummary(summaryText.ToString())
+				if sErr != nil {
+					return nil, ErrorMalformedSummary().New(summaryText.Line, 0, summaryText.Length())
+				}
+				result = firstLine
+			} else {
+				result, _ = NewEntrySummary("")
+			}
+
+			// Parse subsequent lines of multiline entry summary.
+			for len(lines) > 0 {
+				nextEntrySummaryLine := indentator.NewIndentedParseable(lines[0], 2)
+				if nextEntrySummaryLine == nil {
+					break
+				}
+				lines = lines[1:]
+				additionalText, _ := nextEntrySummaryLine.PeekUntil(func(_ rune) bool {
+					return false // Move forward until end of line
+				})
+				newEntrySummary, sErr := NewEntrySummary(append(result, additionalText.ToString())...)
+				if sErr != nil {
+					return nil, ErrorMalformedSummary().New(nextEntrySummaryLine.Line, 0, nextEntrySummaryLine.Length())
+				}
+				result = newEntrySummary
+			}
+
+			return result, nil
+		}()
+
+		// Check for error while parsing the entry summary.
+		if esErr != nil {
+			errs = append(errs, esErr)
+			continue
+		}
+
+		// Check for error when eventually applying the entry.
+		eErr := createEntry(entrySummary)
 		if eErr != nil {
 			errs = append(errs, eErr)
 		}
@@ -258,13 +304,4 @@ func parseRecord(lines []Line) (Record, *Style, []Error) {
 		return nil, nil, errs
 	}
 	return record, style, nil
-}
-
-func newEntrySummaryOrNil(singleLineText Parseable) EntrySummary {
-	s, err := NewEntrySummary(singleLineText.ToString())
-	if err != nil {
-		// This can’t happen yet with single-line entry summaries.
-		panic("Illegal entry summary")
-	}
-	return s
 }

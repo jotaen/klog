@@ -16,11 +16,6 @@ func TestCreatesEmptySummary(t *testing.T) {
 	require.Nil(t, eErr)
 	assert.Nil(t, entrySummary.Lines())
 	assert.Empty(t, entrySummary.Tags())
-
-	entrySummaryBlank, ebErr := NewEntrySummary("")
-	require.Nil(t, ebErr)
-	assert.Nil(t, entrySummaryBlank.Lines())
-	assert.Empty(t, entrySummaryBlank.Tags())
 }
 
 func TestCreatesValidSingleLineSummary(t *testing.T) {

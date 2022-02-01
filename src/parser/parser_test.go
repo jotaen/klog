@@ -19,21 +19,68 @@ func TestParseMultipleRecords(t *testing.T) {
 	text := `
 1999-05-31
 
-1999-06-03 (8h15m!)
-Empty
+1999-06-03
+  1h
 `
 	rs, errs := Parse(text)
 	require.Nil(t, errs)
 	require.Len(t, rs, 2)
 
 	assert.Equal(t, Ɀ_Date_(1999, 5, 31), rs[0].Date())
-	assert.Equal(t, Ɀ_RecordSummary_(), rs[0].Summary())
 	assert.Len(t, rs[0].Entries(), 0)
 
 	assert.Equal(t, Ɀ_Date_(1999, 6, 3), rs[1].Date())
-	assert.Equal(t, Ɀ_RecordSummary_("Empty"), rs[1].Summary())
-	assert.Equal(t, NewDuration(8, 15).InMinutes(), rs[1].ShouldTotal().InMinutes())
-	assert.Len(t, rs[1].Entries(), 0)
+	assert.Len(t, rs[1].Entries(), 1)
+}
+
+func TestParseCompleteRecord(t *testing.T) {
+	text := `
+1970-08-29 (8h15m!)
+Record summary with
+multiple lines of text
+    1h
+    1h1m Duration with summary
+    1h2m Duration with
+        multiline summary
+    8:00-9:30
+    9:00-10:31 Range with summary
+    10:00-11:32 Range with multiple
+        lines of
+          summary text
+    11:00-?
+        Open range
+`
+	rs, errs := Parse(text)
+	require.Nil(t, errs)
+	require.Len(t, rs, 1)
+
+	r := rs[0]
+	assert.Equal(t, Ɀ_Date_(1970, 8, 29), r.Date())
+	assert.Equal(t, Ɀ_RecordSummary_("Record summary with", "multiple lines of text"), r.Summary())
+	assert.Equal(t, NewDuration(8, 15).InMinutes(), r.ShouldTotal().InMinutes())
+
+	assert.Len(t, r.Entries(), 7)
+
+	assert.Equal(t, NewDuration(1, 0).InMinutes(), r.Entries()[0].Duration().InMinutes())
+	assert.Equal(t, Ɀ_EntrySummary_(""), r.Entries()[0].Summary())
+
+	assert.Equal(t, NewDuration(1, 1).InMinutes(), r.Entries()[1].Duration().InMinutes())
+	assert.Equal(t, Ɀ_EntrySummary_("Duration with summary"), r.Entries()[1].Summary())
+
+	assert.Equal(t, NewDuration(1, 2).InMinutes(), r.Entries()[2].Duration().InMinutes())
+	assert.Equal(t, Ɀ_EntrySummary_("Duration with", "multiline summary"), r.Entries()[2].Summary())
+
+	assert.Equal(t, NewDuration(1, 30).InMinutes(), r.Entries()[3].Duration().InMinutes())
+	assert.Equal(t, Ɀ_EntrySummary_(""), r.Entries()[3].Summary())
+
+	assert.Equal(t, NewDuration(1, 31).InMinutes(), r.Entries()[4].Duration().InMinutes())
+	assert.Equal(t, Ɀ_EntrySummary_("Range with summary"), r.Entries()[4].Summary())
+
+	assert.Equal(t, NewDuration(1, 32).InMinutes(), r.Entries()[5].Duration().InMinutes())
+	assert.Equal(t, Ɀ_EntrySummary_("Range with multiple", "lines of", "  summary text"), r.Entries()[5].Summary())
+
+	assert.Equal(t, NewDuration(0, 0).InMinutes(), r.Entries()[6].Duration().InMinutes())
+	assert.Equal(t, Ɀ_EntrySummary_("", "Open range"), r.Entries()[6].Summary())
 }
 
 func TestParseEmptyOrBlankDocument(t *testing.T) {
@@ -57,10 +104,10 @@ func TestParseWindowsAndUnixLineEndings(t *testing.T) {
 }
 
 func TestParseMultipleRecordsWhenBlankLineContainsWhitespace(t *testing.T) {
-	text := "2018-01-01\n    1h\n" + "    \n" + "2019-01-01\n"
+	text := "2018-01-01\n    1h\n" + "    \n" + "2019-01-01\n     \n2019-01-02"
 	rs, errs := Parse(text)
 	require.Nil(t, errs)
-	require.Len(t, rs, 2)
+	require.Len(t, rs, 3)
 }
 
 func TestParseAlternativeFormatting(t *testing.T) {
@@ -97,46 +144,94 @@ func TestAcceptTabOrSpacesAsIndentation(t *testing.T) {
 	}
 }
 
-func TestParseDocumentSucceedsWithCorrectEntries(t *testing.T) {
+func TestParseDocumentSucceedsWithCorrectEntryValues(t *testing.T) {
+	for _, test := range []struct {
+		text        string
+		expectEntry interface{}
+	}{
+		// Durations
+		{"1234-12-12\n\t5h", NewDuration(5, 0)},
+		{"1234-12-12\n\t2m", NewDuration(0, 2)},
+		{"1234-12-12\n\t2h30m", NewDuration(2, 30)},
+
+		// Durations with sign
+		{"1234-12-12\n\t+5h", NewDuration(5, 0)},
+		{"1234-12-12\n\t+2h30m", NewDuration(2, 30)},
+		{"1234-12-12\n\t+2m", NewDuration(0, 2)},
+		{"1234-12-12\n\t-5h", NewDuration(-5, -0)},
+		{"1234-12-12\n\t-2h30m", NewDuration(-2, -30)},
+		{"1234-12-12\n\t-2m", NewDuration(-0, -2)},
+
+		// Ranges
+		{"1234-12-12\n\t3:05 - 11:59", Ɀ_Range_(Ɀ_Time_(3, 5), Ɀ_Time_(11, 59))},
+		{"1234-12-12\n\t22:00 - 24:00", Ɀ_Range_(Ɀ_Time_(22, 0), Ɀ_TimeTomorrow_(0, 0))},
+		{"1234-12-12\n\t9:00am - 1:43pm", Ɀ_Range_(Ɀ_IsAmPm_(Ɀ_Time_(9, 00)), Ɀ_IsAmPm_(Ɀ_Time_(13, 43)))},
+		{"1234-12-12\n\t9:00am-1:43pm", Ɀ_Range_(Ɀ_IsAmPm_(Ɀ_Time_(9, 00)), Ɀ_IsAmPm_(Ɀ_Time_(13, 43)))},
+		{"1234-12-12\n\t9:00am-9:05", Ɀ_Range_(Ɀ_IsAmPm_(Ɀ_Time_(9, 00)), Ɀ_Time_(9, 05))},
+
+		// Ranges with shifted times
+		{"1234-12-12\n\t9:00am-8:12am>", Ɀ_Range_(Ɀ_IsAmPm_(Ɀ_Time_(9, 00)), Ɀ_IsAmPm_(Ɀ_TimeTomorrow_(8, 12)))},
+		{"1234-12-12\n\t<22:00 - <24:00", Ɀ_Range_(Ɀ_TimeYesterday_(22, 0), Ɀ_Time_(0, 0))},
+		{"1234-12-12\n\t<23:30 - 0:10", Ɀ_Range_(Ɀ_TimeYesterday_(23, 30), Ɀ_Time_(0, 10))},
+		{"1234-12-12\n\t22:17 - 1:00>", Ɀ_Range_(Ɀ_Time_(22, 17), Ɀ_TimeTomorrow_(1, 00))},
+		{"1234-12-12\n\t<23:00-1:00>", Ɀ_Range_(Ɀ_TimeYesterday_(23, 00), Ɀ_TimeTomorrow_(1, 00))},
+		{"1234-12-12\n\t<23:00-<23:10", Ɀ_Range_(Ɀ_TimeYesterday_(23, 00), Ɀ_TimeYesterday_(23, 10))},
+		{"1234-12-12\n\t12:01>-13:59>", Ɀ_Range_(Ɀ_TimeTomorrow_(12, 01), Ɀ_TimeTomorrow_(13, 59))},
+
+		// Open ranges
+		{"1234-12-12\n\t12:01 - ?", NewOpenRange(Ɀ_Time_(12, 1))},
+		{"1234-12-12\n\t6:45pm - ?", NewOpenRange(Ɀ_IsAmPm_(Ɀ_Time_(18, 45)))},
+		{"1234-12-12\n\t18:45 - ???", NewOpenRange(Ɀ_Time_(18, 45))},
+		{"1234-12-12\n\t<3:12-??????", NewOpenRange(Ɀ_TimeYesterday_(3, 12))},
+	} {
+		rs, errs := Parse(test.text)
+		require.Nil(t, errs, test.text)
+		require.Len(t, rs, 1, test.text)
+		require.Len(t, rs[0].Entries(), 1, test.text)
+		value := rs[0].Entries()[0].Unbox(
+			func(r Range) interface{} { return r },
+			func(d Duration) interface{} { return d },
+			func(o OpenRange) interface{} { return o },
+		)
+		assert.Equal(t, test.expectEntry, value, test.text)
+	}
+}
+
+func TestParsesDocumentsWithEntrySummaries(t *testing.T) {
 	for _, test := range []struct {
 		text          string
 		expectEntry   interface{}
 		expectSummary EntrySummary
 	}{
+		// Single line entries
 		{"1234-12-12\n\t5h Some remark", NewDuration(5, 0), Ɀ_EntrySummary_("Some remark")},
+		{"1234-12-12\n\t3:05 - 11:59 Did this and that", Ɀ_Range_(Ɀ_Time_(3, 5), Ɀ_Time_(11, 59)), Ɀ_EntrySummary_("Did this and that")},
+		{"1234-12-12\n\t9:00am-8:12am> Things", Ɀ_Range_(Ɀ_IsAmPm_(Ɀ_Time_(9, 00)), Ɀ_IsAmPm_(Ɀ_TimeTomorrow_(8, 12))), Ɀ_EntrySummary_("Things")},
+		{"1234-12-12\n\t18:45 - ? Just started something", NewOpenRange(Ɀ_Time_(18, 45)), Ɀ_EntrySummary_("Just started something")},
 		{"1234-12-12\n\t5h    Some remark", NewDuration(5, 0), Ɀ_EntrySummary_("   Some remark")},
 		{"1234-12-12\n\t5h\tSome remark", NewDuration(5, 0), Ɀ_EntrySummary_("Some remark")},
-		{"1234-12-12\n\t2h30m", NewDuration(2, 30), nil},
-		{"1234-12-12\n\t2h30m ", NewDuration(2, 30), nil},
-		{"1234-12-12\n\t2m", NewDuration(0, 2), nil},
-		{"1234-12-12\n\t+5h", NewDuration(5, 0), nil},
-		{"1234-12-12\n\t+2h30m", NewDuration(2, 30), nil},
-		{"1234-12-12\n\t+2m", NewDuration(0, 2), nil},
-		{"1234-12-12\n\t-5h", NewDuration(-5, -0), nil},
-		{"1234-12-12\n\t-2h30m", NewDuration(-2, -30), nil},
-		{"1234-12-12\n\t-2m", NewDuration(-0, -2), nil},
-		{"1234-12-12\n\t3:05 - 11:59", Ɀ_Range_(Ɀ_Time_(3, 5), Ɀ_Time_(11, 59)), nil},
-		{"1234-12-12\n\t3:05 - 11:59 ", Ɀ_Range_(Ɀ_Time_(3, 5), Ɀ_Time_(11, 59)), nil},
-		{"1234-12-12\n\t3:05 - 11:59 Did this and that", Ɀ_Range_(Ɀ_Time_(3, 5), Ɀ_Time_(11, 59)), Ɀ_EntrySummary_("Did this and that")},
-		{"1234-12-12\n\t3:05 - 11:59   Foo", Ɀ_Range_(Ɀ_Time_(3, 5), Ɀ_Time_(11, 59)), Ɀ_EntrySummary_("  Foo")},
-		{"1234-12-12\n\t3:05 - 11:59\tFoo", Ɀ_Range_(Ɀ_Time_(3, 5), Ɀ_Time_(11, 59)), Ɀ_EntrySummary_("Foo")},
-		{"1234-12-12\n\t22:00 - 24:00\tFoo", Ɀ_Range_(Ɀ_Time_(22, 0), Ɀ_TimeTomorrow_(0, 0)), Ɀ_EntrySummary_("Foo")},
-		{"1234-12-12\n\t<22:00 - <24:00\tFoo", Ɀ_Range_(Ɀ_TimeYesterday_(22, 0), Ɀ_Time_(0, 0)), Ɀ_EntrySummary_("Foo")},
-		{"1234-12-12\n\t9:00am - 1:43pm", Ɀ_Range_(Ɀ_IsAmPm_(Ɀ_Time_(9, 00)), Ɀ_IsAmPm_(Ɀ_Time_(13, 43))), nil},
-		{"1234-12-12\n\t9:00am-1:43pm", Ɀ_Range_(Ɀ_IsAmPm_(Ɀ_Time_(9, 00)), Ɀ_IsAmPm_(Ɀ_Time_(13, 43))), nil},
-		{"1234-12-12\n\t9:00am-8:12am> Things", Ɀ_Range_(Ɀ_IsAmPm_(Ɀ_Time_(9, 00)), Ɀ_IsAmPm_(Ɀ_TimeTomorrow_(8, 12))), Ɀ_EntrySummary_("Things")},
 		{"1234-12-12\n\t9:00am-9:05 Mixed styles", Ɀ_Range_(Ɀ_IsAmPm_(Ɀ_Time_(9, 00)), Ɀ_Time_(9, 05)), Ɀ_EntrySummary_("Mixed styles")},
-		{"1234-12-12\n\t<23:30 - 0:10", Ɀ_Range_(Ɀ_TimeYesterday_(23, 30), Ɀ_Time_(0, 10)), nil},
-		{"1234-12-12\n\t22:17 - 1:00>", Ɀ_Range_(Ɀ_Time_(22, 17), Ɀ_TimeTomorrow_(1, 00)), nil},
-		{"1234-12-12\n\t<23:00-1:00>", Ɀ_Range_(Ɀ_TimeYesterday_(23, 00), Ɀ_TimeTomorrow_(1, 00)), nil},
-		{"1234-12-12\n\t<23:00-<23:10", Ɀ_Range_(Ɀ_TimeYesterday_(23, 00), Ɀ_TimeYesterday_(23, 10)), nil},
-		{"1234-12-12\n\t12:01>-13:59>", Ɀ_Range_(Ɀ_TimeTomorrow_(12, 01), Ɀ_TimeTomorrow_(13, 59)), nil},
-		{"1234-12-12\n\t12:01 - ?", NewOpenRange(Ɀ_Time_(12, 1)), nil},
-		{"1234-12-12\n\t12:01 - ? ", NewOpenRange(Ɀ_Time_(12, 1)), nil},
-		{"1234-12-12\n\t18:45 - ? Just started something", NewOpenRange(Ɀ_Time_(18, 45)), Ɀ_EntrySummary_("Just started something")},
-		{"1234-12-12\n\t18:45 - ?\tFoo", NewOpenRange(Ɀ_Time_(18, 45)), Ɀ_EntrySummary_("Foo")},
+		{"1234-12-12\n\t3:05 - 11:59\tFoo", Ɀ_Range_(Ɀ_Time_(3, 5), Ɀ_Time_(11, 59)), Ɀ_EntrySummary_("Foo")},
+		{"1234-12-12\n\t<22:00 - <24:00\tFoo", Ɀ_Range_(Ɀ_TimeYesterday_(22, 0), Ɀ_Time_(0, 0)), Ɀ_EntrySummary_("Foo")},
+		{"1234-12-12\n\t22:00 - 24:00\tFoo", Ɀ_Range_(Ɀ_Time_(22, 0), Ɀ_TimeTomorrow_(0, 0)), Ɀ_EntrySummary_("Foo")},
 		{"1234-12-12\n\t18:45 - ???       ASDF", NewOpenRange(Ɀ_Time_(18, 45)), Ɀ_EntrySummary_("      ASDF")},
-		{"1234-12-12\n\t<3:12-??????", NewOpenRange(Ɀ_TimeYesterday_(3, 12)), nil},
+		{"1234-12-12\n\t18:45 - ?\tFoo", NewOpenRange(Ɀ_Time_(18, 45)), Ɀ_EntrySummary_("Foo")},
+
+		// Multiline-summary entries
+		{"1234-12-12\n\t5h Some remark\n\t\twith more text", NewDuration(5, 0), Ɀ_EntrySummary_("Some remark", "with more text")},
+		{"1234-12-12\n\t8:00-9:00 Some remark\n\t\twith more text", Ɀ_Range_(Ɀ_Time_(8, 00), Ɀ_Time_(9, 00)), Ɀ_EntrySummary_("Some remark", "with more text")},
+		{"1234-12-12\n\t5h Some remark\n\t\twith\n\t\tmore\n\t\ttext", NewDuration(5, 0), Ɀ_EntrySummary_("Some remark", "with", "more", "text")},
+		{"1234-12-12\n  5h Some remark\n    with more text", NewDuration(5, 0), Ɀ_EntrySummary_("Some remark", "with more text")},
+		{"1234-12-12\n   5h Some remark\n      with more text", NewDuration(5, 0), Ɀ_EntrySummary_("Some remark", "with more text")},
+		{"1234-12-12\n    5h Some remark\n        with more text", NewDuration(5, 0), Ɀ_EntrySummary_("Some remark", "with more text")},
+		{"1234-12-12\n    5h Some remark\n        with\n        more\n        text", NewDuration(5, 0), Ɀ_EntrySummary_("Some remark", "with", "more", "text")},
+
+		// Multiline-summary entries where first summary line is empty
+		{"1234-12-12\n\t5h\n\t\twith more text", NewDuration(5, 0), Ɀ_EntrySummary_("", "with more text")},
+		{"1234-12-12\n\t5h \n\t\twith more text", NewDuration(5, 0), Ɀ_EntrySummary_("", "with more text")},
+		{"1234-12-12\n\t5h  \n\t\twith more text", NewDuration(5, 0), Ɀ_EntrySummary_(" ", "with more text")},
+		{"1234-12-12\n\t5h\n\t\t with more text", NewDuration(5, 0), Ɀ_EntrySummary_("", " with more text")},
+		{"1234-12-12\n\t5h\n\t\t\twith more text", NewDuration(5, 0), Ɀ_EntrySummary_("", "\twith more text")},
 	} {
 		rs, errs := Parse(test.text)
 		require.Nil(t, errs, test.text)
@@ -225,15 +320,22 @@ func TestReportErrorsIfIndentationIsIncorrect(t *testing.T) {
 		{"2020-01-01\n\t\t8h", ErrorIllegalIndentation().toErrData(2, 0, 4)},
 		{"2020-01-01\n     8h", ErrorIllegalIndentation().toErrData(2, 0, 7)},
 
-		// Mixed styles within one record:
+		// Mixed styles for entries within one record:
 		{"2020-01-01\n    8h\n\t2h", ErrorIllegalIndentation().toErrData(3, 0, 3)},
 		{"2020-01-01\n  8h\n\t2h", ErrorIllegalIndentation().toErrData(3, 0, 3)},
 		{"2020-01-01\n\t8h\n    2h", ErrorIllegalIndentation().toErrData(3, 0, 6)},
 		{"2020-01-01\n\t8h\n  2h", ErrorIllegalIndentation().toErrData(3, 0, 4)},
-		{"2020-01-01\n  8h\n    2h", ErrorIllegalIndentation().toErrData(3, 0, 6)},
 		{"2020-01-01\n    8h\n  2h", ErrorIllegalIndentation().toErrData(3, 0, 4)},
 		{"2020-01-01\n  8h\n   2h", ErrorIllegalIndentation().toErrData(3, 0, 5)},
-		{"2020-01-01\n  8h\n  2h\n\t1h2m", ErrorIllegalIndentation().toErrData(4, 0, 5)},
+
+		// Mixed styles for entry summaries within one record:
+		{"2020-01-01\n  8h Foo\n\tbar baz", ErrorIllegalIndentation().toErrData(3, 0, 8)},
+		{"2020-01-01\n    8h Foo\n       bar baz", ErrorIllegalIndentation().toErrData(3, 0, 14)},
+		{"2020-01-01\n    8h Foo\n      bar baz", ErrorIllegalIndentation().toErrData(3, 0, 13)},
+		{"2020-01-01\n    8h Foo\n    \tbar baz", ErrorIllegalIndentation().toErrData(3, 0, 12)},
+		{"2020-01-01\n   8h Foo\n     bar baz", ErrorIllegalIndentation().toErrData(3, 0, 12)},
+		{"2020-01-01\n  8h Foo\n   bar baz", ErrorIllegalIndentation().toErrData(3, 0, 10)},
+		{"2020-01-01\n  8h\n  8h Foo\n   bar baz", ErrorIllegalIndentation().toErrData(4, 0, 10)},
 	} {
 		rs, errs := Parse(test.text)
 		require.Nil(t, rs, test.text)
@@ -243,7 +345,7 @@ func TestReportErrorsIfIndentationIsIncorrect(t *testing.T) {
 	}
 }
 
-func TestAcceptMixingIndentationStylesAcrossRecords(t *testing.T) {
+func TestAcceptMixingIndentationStylesAcrossDifferentRecords(t *testing.T) {
 	text := `
 2020-01-01
   4h This is two spaces
