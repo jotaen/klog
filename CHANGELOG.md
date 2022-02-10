@@ -4,6 +4,7 @@
 ## Upcoming
 - **[ FEATURE ]** Add more shortcut filters, e.g. `--this-week`,
   `--last-month`, etc.
+- **[ BREAKING ]** Remove embedded macOS systray widget
 
 ## v3.3
 - **[ FEATURE ]** Allow times to be `24:00`, e.g. `22:00 - 24:00`.
