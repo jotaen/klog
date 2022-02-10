@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"github.com/jotaen/klog/src/app"
-	"github.com/jotaen/klog/src/app/main"
+	klog "github.com/jotaen/klog/src/app/cli/main"
 	"os"
 	"os/user"
 )
