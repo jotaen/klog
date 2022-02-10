@@ -29,6 +29,15 @@ func Ɀ_RecordSummary_(line ...string) RecordSummary {
 }
 
 // Deprecated
+func Ɀ_EntrySummary_(line ...string) EntrySummary {
+	summary, err := NewEntrySummary(line...)
+	if err != nil {
+		panic("Operation failed!")
+	}
+	return summary
+}
+
+// Deprecated
 func Ɀ_Time_(hour int, minute int) Time {
 	time, err := NewTime(hour, minute)
 	if err != nil {

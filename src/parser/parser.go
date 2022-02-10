@@ -164,11 +164,13 @@ func parseRecord(lines []Line) (Record, *Style, []Error) {
 			duration, dErr := NewDurationFromString(durationCandidate.ToString())
 			if dErr == nil {
 				entry.Advance(durationCandidate.Length())
+				var entrySummary EntrySummary
 				if IsSpaceOrTab(entry.Peek()) {
 					entry.Advance(1)
+					summaryText, _ := entry.PeekUntil(Is(END_OF_TEXT))
+					entrySummary = newEntrySummaryOrNil(summaryText)
 				}
-				summaryText, _ := entry.PeekUntil(Is(END_OF_TEXT))
-				record.AddDuration(duration, NewEntrySummary(summaryText.ToString()))
+				record.AddDuration(duration, entrySummary)
 				return nil
 			}
 
@@ -213,11 +215,13 @@ func parseRecord(lines []Line) (Record, *Style, []Error) {
 					}
 				}
 				entry.Advance(placeholder.Length())
+				var entrySummary EntrySummary
 				if IsSpaceOrTab(entry.Peek()) {
 					entry.Advance(1)
+					summaryText, _ := entry.PeekUntil(Is(END_OF_TEXT))
+					entrySummary = newEntrySummaryOrNil(summaryText)
 				}
-				summaryText, _ := entry.PeekUntil(Is(END_OF_TEXT))
-				sErr := record.StartOpenRange(start, NewEntrySummary(summaryText.ToString()))
+				sErr := record.StartOpenRange(start, entrySummary)
 				if sErr != nil {
 					return ErrorDuplicateOpenRange().New(entry.Line, entryStartPosition, entry.PointerPosition-entryStartPosition)
 				}
@@ -235,11 +239,13 @@ func parseRecord(lines []Line) (Record, *Style, []Error) {
 				if rErr != nil {
 					return ErrorIllegalRange().New(entry.Line, entryStartPosition, entry.PointerPosition-entryStartPosition)
 				}
+				var entrySummary EntrySummary
 				if IsSpaceOrTab(entry.Peek()) {
 					entry.Advance(1)
+					summaryText, _ := entry.PeekUntil(Is(END_OF_TEXT))
+					entrySummary = newEntrySummaryOrNil(summaryText)
 				}
-				summaryText, _ := entry.PeekUntil(Is(END_OF_TEXT))
-				record.AddRange(timeRange, NewEntrySummary(summaryText.ToString()))
+				record.AddRange(timeRange, entrySummary)
 			}
 			return nil
 		}()
@@ -252,4 +258,13 @@ func parseRecord(lines []Line) (Record, *Style, []Error) {
 		return nil, nil, errs
 	}
 	return record, style, nil
+}
+
+func newEntrySummaryOrNil(singleLineText Parseable) EntrySummary {
+	s, err := NewEntrySummary(singleLineText.ToString())
+	if err != nil {
+		// This can’t happen yet with single-line entry summaries.
+		panic("Illegal entry summary")
+	}
+	return s
 }

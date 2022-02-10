@@ -17,25 +17,31 @@ type EntrySummary []string
 
 // NewRecordSummary creates a new RecordSummary from individual lines of text.
 // None of the lines can start with blank characters, and none of the lines
-// can be empty.
+// can be empty or blank.
 func NewRecordSummary(line ...string) (RecordSummary, error) {
 	for _, l := range line {
-		if len(l) == 0 {
-			return nil, errors.New("MALFORMED_SUMMARY")
-		}
-		if regexp.MustCompile(`^[\p{Zs}\t]`).MatchString(l) {
+		if len(l) == 0 || regexp.MustCompile(`^[\p{Zs}\t]`).MatchString(l) {
 			return nil, errors.New("MALFORMED_SUMMARY")
 		}
 	}
 	return line, nil
 }
 
-// NewEntrySummary creates an EntrySummary from a single line of text.
-func NewEntrySummary(text string) EntrySummary {
-	if text == "" {
-		return nil
+// NewEntrySummary creates an EntrySummary from individual lines of text.
+// Except for the first line, none of the lines can be empty or blank.
+func NewEntrySummary(line ...string) (EntrySummary, error) {
+	if len(line) == 1 && line[0] == "" {
+		return nil, nil
 	}
-	return []string{text}
+	for i, l := range line {
+		if i == 0 {
+			continue
+		}
+		if len(l) == 0 || regexp.MustCompile(`^[\p{Zs}\t]*$`).MatchString(l) {
+			return nil, errors.New("MALFORMED_SUMMARY")
+		}
+	}
+	return line, nil
 }
 
 func (s RecordSummary) Lines() []string {
@@ -44,14 +50,6 @@ func (s RecordSummary) Lines() []string {
 
 func (s EntrySummary) Lines() []string {
 	return RecordSummary(s).Lines()
-}
-
-func (s RecordSummary) IsEmpty() bool {
-	return len(s) == 0
-}
-
-func (s EntrySummary) IsEmpty() bool {
-	return RecordSummary(s).IsEmpty()
 }
 
 func (s RecordSummary) Tags() TagSet {
