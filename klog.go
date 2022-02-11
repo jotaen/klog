@@ -15,6 +15,9 @@ var specification string
 //go:embed LICENSE.txt
 var license string
 
+//go:embed CHANGELOG.md
+var changelog string
+
 var BinaryVersion string   // Set via build flag
 var BinaryBuildHash string // Set via build flag
 
@@ -35,6 +38,7 @@ func main() {
 	exitCode, runErr := klog.Run(homeDir.HomeDir, app.Meta{
 		Specification: specification,
 		License:       license,
+		Changelog:     changelog,
 		Version:       BinaryVersion,
 		BuildHash:     BinaryBuildHash,
 	}, isDebug, os.Args[1:])
