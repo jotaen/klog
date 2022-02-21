@@ -82,13 +82,12 @@ An *entry summary* MAY appear behind an *entry*.
 It is considered to be referring to that particular *entry*.
 
 The *entry summary* MAY span multiple lines.
-All lines following the *entry* line MUST be indented twice.
-It MUST either start on the same line as the *entry*,
+All lines following the *entry* line MUST be indented twice;
+they also MUST NOT only consist of “blank characters”.
+
+The *entry summary* MUST either start on the same line as the *entry*,
 separated from it by one “space”;
 or, it MUST start on the subsequent line.
-
-Except for the line where the *entry* is,
-none of the other lines of the *entry summary* MUST only consist of “blank characters”.
 
 #### Tags
 The purpose of *tags* is to help categorise *records* and *entries*.
