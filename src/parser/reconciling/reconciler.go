@@ -47,6 +47,10 @@ func (r *Reconciler) CloseOpenRange(endTime Time, additionalSummary string) (*Re
 	if openRangeEntryIndex == -1 {
 		return nil, errors.New("No open time range")
 	}
+	eErr := r.record.EndOpenRange(endTime)
+	if eErr != nil {
+		return nil, errors.New("Start and end time must be in chronological order")
+	}
 
 	// Replace question mark with end time.
 	openRangeValueLineIndex := r.lastLinePointer - countLines(r.record.Entries()[openRangeEntryIndex:])
