@@ -272,6 +272,9 @@ and MUST NOT be combined into a single *record*.
 
 ## V. Changelog
 
+## Version 1.3
+- Specify additional rules for multiline entry summaries.
+
 ## Version 1.2
 - Allow times to be `24:00`.
 - Some minor restructurings for enhanced clarity.
