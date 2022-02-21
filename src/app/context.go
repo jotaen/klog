@@ -76,6 +76,9 @@ type Meta struct {
 	// License contains the license text.
 	License string
 
+	// Changelog contains the history of all changes.
+	Changelog string
+
 	// Version contains the build version.
 	Version string
 

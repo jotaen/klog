@@ -17,7 +17,8 @@ func TestReconcilerAddsNewEntry(t *testing.T) {
 2018-01-02
 Hello World
     1h
-    1h45m
+    1h45m Multiline...
+        ....entry summary
 
 2018-01-03
     5h
@@ -37,7 +38,8 @@ Hello World
 2018-01-02
 Hello World
     1h
-    1h45m
+    1h45m Multiline...
+        ....entry summary
     2h30m
 
 2018-01-03
@@ -221,8 +223,10 @@ func TestReconcilerClosesOpenRangeWithStyle(t *testing.T) {
 func TestReconcilerClosesOpenRangeWithExtendingSummary(t *testing.T) {
 	original := `
 2018-01-01
-    1h
-    15:00-??? Will this close? I hope so!?!?
+    1h Multiline...
+        ...entry summary
+    15:00-??? Will this close?
+        I hope so.
     2m
 `
 	rs, _ := parser.Parse(original)
@@ -232,8 +236,10 @@ func TestReconcilerClosesOpenRangeWithExtendingSummary(t *testing.T) {
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01
-    1h
-    15:00-16:42 Will this close? I hope so!?!? Yes!
+    1h Multiline...
+        ...entry summary
+    15:00-16:42 Will this close?
+        I hope so. Yes!
     2m
 `, result.AllSerialised)
 }

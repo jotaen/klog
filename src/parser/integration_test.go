@@ -12,6 +12,10 @@ lines and contains a #tag as well.
     5h30m This and that
     -2h Something else
     <18:00 - 4:00 Foo
+        Bar
+    19:00 - 20:00
+                            Baz
+                          Bar
     19:00 - 20:00
     20:01 - 0:15>
     1:00am - 3:12pm

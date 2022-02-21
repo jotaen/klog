@@ -43,49 +43,40 @@ func (r *Reconciler) AppendEntry(newEntry string) (*Result, error) {
 
 // CloseOpenRange tries to close the open time range.
 func (r *Reconciler) CloseOpenRange(endTime Time, additionalSummary string) (*Result, error) {
-	openRangeEntryIndex := -1
-	for i, e := range r.record.Entries() {
-		e.Unbox(
-			func(Range) interface{} { return nil },
-			func(Duration) interface{} { return nil },
-			func(OpenRange) interface{} {
-				openRangeEntryIndex = i
-				return nil
-			},
-		)
-	}
+	openRangeEntryIndex := r.findOpenRangeIndex()
 	if openRangeEntryIndex == -1 {
 		return nil, errors.New("No open time range")
 	}
-	openRangeLineIndex := r.lastLinePointer - len(r.record.Entries()) + openRangeEntryIndex
+	eErr := r.record.EndOpenRange(endTime)
+	if eErr != nil {
+		return nil, errors.New("Start and end time must be in chronological order")
+	}
+
+	// Replace question mark with end time.
+	openRangeValueLineIndex := r.lastLinePointer - countLines(r.record.Entries()[openRangeEntryIndex:])
+	r.lines[openRangeValueLineIndex].Text = regexp.MustCompile(`^(.*?)\?+(.*)$`).
+		ReplaceAllString(
+			r.lines[openRangeValueLineIndex].Text,
+			"${1}"+endTime.ToStringWithFormat(r.style.TimeFormat())+"${2}",
+		)
+
+	// Append additional summary text. Due to multiline entry summaries, that might
+	// not be the same line as the time value.
+	openRangeLastSummaryLineIndex := openRangeValueLineIndex + countLines([]Entry{r.record.Entries()[openRangeEntryIndex]}) - 1
 	if len(additionalSummary) > 0 {
 		// If there is additional summary text, always prepend a space to delimit
 		// the additional summary from either the time value or from an already
 		// existing summary text.
 		additionalSummary = " " + additionalSummary
 	}
-	r.lines[openRangeLineIndex].Text = regexp.MustCompile(`^(.*?)\?+(.*)$`).
-		ReplaceAllString(
-			r.lines[openRangeLineIndex].Text,
-			"${1}"+endTime.ToStringWithFormat(r.style.TimeFormat())+"${2}"+additionalSummary,
-		)
+	r.lines[openRangeLastSummaryLineIndex].Text += additionalSummary
+
 	return r.MakeResult()
 }
 
 // StartOpenRange appends a new open range entry in a record.
 func (r *Reconciler) StartOpenRange(startTime Time, entrySummary string) (*Result, error) {
-	openRangeEntryIndex := -1
-	for i, e := range r.record.Entries() {
-		e.Unbox(
-			func(Range) interface{} { return nil },
-			func(Duration) interface{} { return nil },
-			func(OpenRange) interface{} {
-				openRangeEntryIndex = i
-				return nil
-			},
-		)
-	}
-	if openRangeEntryIndex != -1 {
+	if r.findOpenRangeIndex() != -1 {
 		return nil, errors.New("There is already an open range in this record")
 	}
 	newEntryLine := startTime.ToStringWithFormat(r.style.TimeFormat()) + r.style.SpacingInRange() + "-" + r.style.SpacingInRange() + "?"
@@ -93,6 +84,14 @@ func (r *Reconciler) StartOpenRange(startTime Time, entrySummary string) (*Resul
 		newEntryLine += " " + entrySummary
 	}
 	return r.AppendEntry(newEntryLine)
+}
+
+func countLines(es []Entry) int {
+	result := 0
+	for _, e := range es {
+		result += len(e.Summary())
+	}
+	return result
 }
 
 // MakeResult returns the reconciled data.
@@ -113,6 +112,22 @@ func (r *Reconciler) MakeResult() (*Result, error) {
 		AllRecords:    newRecords,
 		AllSerialised: text,
 	}, nil
+}
+
+// findOpenRangeIndex returns the index of the open range entry, or -1 if no open range.
+func (r *Reconciler) findOpenRangeIndex() int {
+	openRangeEntryIndex := -1
+	for i, e := range r.record.Entries() {
+		e.Unbox(
+			func(Range) interface{} { return nil },
+			func(Duration) interface{} { return nil },
+			func(OpenRange) interface{} {
+				openRangeEntryIndex = i
+				return nil
+			},
+		)
+	}
+	return openRangeEntryIndex
 }
 
 var blankLine = insertableText{"", 0}

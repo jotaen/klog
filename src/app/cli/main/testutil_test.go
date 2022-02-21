@@ -37,6 +37,7 @@ func (e *Env) run(invocation ...[]string) []string {
 		code, runErr := Run(tmpDir, app.Meta{
 			Specification: "[Specification text]",
 			License:       "[License text]",
+			Changelog:     "[Changelog text]",
 			Version:       "v0.0",
 			BuildHash:     "1234567",
 		}, false, args)
