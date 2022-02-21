@@ -2,6 +2,17 @@
 **Summary of changes of the command line tool**
 
 ## Upcoming
+- **[ FEATURE ]** Allow summaries behind entries to be continued on
+  the next line (with increased indentation level), e.g.:
+  ```
+  2020-01-01
+  Both of the following is fine:
+      15:00-16:00 This is a very long text, so
+          it can be continued on the next line.
+      16:00-17:00
+          Or, you can just start the entry summary
+          on the next line, if you like.
+  ```
 - **[ FEATURE ]** Add more shortcut filters, e.g. `--this-week`,
   `--last-month`, etc.
 - **[ BREAKING ]** Remove embedded macOS systray widget
