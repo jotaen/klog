@@ -30,7 +30,8 @@ which MUST be separated by one “space” from the *date*
 (additional “spaces” MAY appear).
 
 A *record summary* MAY appear on the subsequent lines.
-Any amount of *entries* (along with *entry summaries*) MAY appear afterwards.
+Any amount of *entries* MAY appear afterwards,
+where each MAY have an *entry summary*.
 
 In order to indent a line, it MUST start with one of the following sequences:
 - Four “spaces” (RECOMMENDED)
@@ -68,26 +69,25 @@ and wrapped in “parentheses”.
 
 ### Summary
 A *summary* is user-provided text for capturing arbitrary information
-about a *record* or an *entry*.
+about a *record* or an *entry*. *Summaries* are optional.
 
 #### Record Summary
-The *record summary* MAY appear underneath the *date*.
-It is considered to be associated with the entire *record*.
+The *record summary* is considered to be associated with the entire *record*.
 
-The *record summary* MAY span multiple lines.
+It MUST appear underneath the *date*,
+and it MAY span multiple lines.
 Each of its lines MUST NOT start with “blank characters”.
 
 #### Entry Summary
-An *entry summary* MAY appear behind an *entry*.
-It is considered to be referring to that particular *entry*.
+The *entry summary* is considered to be referring to one particular *entry*.
+
+It MUST either start on the same line as the *entry*,
+separated from it by one “space”;
+or it MUST start on the subsequent line.
 
 The *entry summary* MAY span multiple lines.
 All lines following the *entry* line MUST be indented twice;
 they also MUST NOT only consist of “blank characters”.
-
-The *entry summary* MUST either start on the same line as the *entry*,
-separated from it by one “space”;
-or, it MUST start on the subsequent line.
 
 #### Tag
 The purpose of *tags* is to help categorise *records* and *entries*.
