@@ -17,7 +17,7 @@ Other technical terms are surrounded by “quotes”. These are defined in the a
 
 Character sequences that are wrapped in `backticks` are meant to be read exactly (character by character).
 
-## I. Records
+## I. Record
 
 A *record* is a self-contained data structure that contains time-tracking information.
 
@@ -66,7 +66,7 @@ A *should-total* MUST be a *duration* value
 followed by a `!`
 and wrapped in “parentheses”.
 
-### Summaries
+### Summary
 A *summary* is user-provided text for capturing arbitrary information
 about a *record* or an *entry*.
 
@@ -89,7 +89,7 @@ The *entry summary* MUST either start on the same line as the *entry*,
 separated from it by one “space”;
 or, it MUST start on the subsequent line.
 
-#### Tags
+#### Tag
 The purpose of *tags* is to help categorise *records* and *entries*.
 
 > Examples: `#gym`, `#24hours`, `#home_office`, `#読む`
