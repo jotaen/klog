@@ -64,6 +64,26 @@ func (s EntrySummary) Tags() TagSet {
 	return RecordSummary(s).Tags()
 }
 
+func (s RecordSummary) Equals(summary RecordSummary) bool {
+	if len(s) != len(summary) {
+		return false
+	}
+	for i, l := range s {
+		if l != summary[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func (s EntrySummary) Equals(summary EntrySummary) bool {
+	if len(s) == 1 && s[0] == "" && summary == nil {
+		// In the case of entry summary, an empty one matches nil.
+		return true
+	}
+	return RecordSummary(s).Equals(RecordSummary(summary))
+}
+
 var HashTagPattern = regexp.MustCompile(`#([\p{L}\d_]+)`)
 
 type Tag string

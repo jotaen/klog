@@ -30,9 +30,9 @@ If there are no records today, it falls back to yesterday.`
 func (opt *Today) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	if opt.Follow {
-		return lib.WithRepeat(ctx, func(secondsCounter int64) error {
+		return lib.WithRepeat(ctx.Print, 1*gotime.Second, func(counter int64) error {
 			err := handle(opt, ctx)
-			if secondsCounter < 7 {
+			if counter < 7 {
 				// Display exit hint for a couple of seconds.
 				ctx.Print("\n")
 				ctx.Print("Press ^C to exit")

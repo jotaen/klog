@@ -11,7 +11,7 @@ func TestInitialiseRecord(t *testing.T) {
 	r := NewRecord(date)
 	assert.Equal(t, r.Date(), date)
 	assert.Equal(t, NewDuration(0, 0).InMinutes(), r.ShouldTotal().InMinutes())
-	assert.Equal(t, Ɀ_RecordSummary_(), r.Summary())
+	assert.Nil(t, r.Summary())
 	assert.Len(t, r.Entries(), 0)
 }
 

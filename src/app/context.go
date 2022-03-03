@@ -43,7 +43,9 @@ type Context interface {
 	ReadInputs(...FileOrBookmarkName) ([]Record, Error)
 
 	// ReconcileFile applies one or more reconcile handlers to a file and saves it.
-	ReconcileFile(FileOrBookmarkName, []reconciling.Creator, reconciling.Reconcile) (*reconciling.Result, Error)
+	// The boolean argument specifies whether the result shall be written into the file (true),
+	// or whether it should only perform a dry-run (false).
+	ReconcileFile(bool, FileOrBookmarkName, []reconciling.Creator, reconciling.Reconcile) (*reconciling.Result, Error)
 
 	// Now returns the current timestamp.
 	Now() gotime.Time
@@ -65,6 +67,9 @@ type Context interface {
 
 	// SetSerialiser sets the current serialiser.
 	SetSerialiser(*parser.Serialiser)
+
+	// Debug takes a void function that is only executed in debug mode.
+	Debug(func())
 }
 
 // Meta holds miscellaneous information about the klog binary.
@@ -87,7 +92,7 @@ type Meta struct {
 }
 
 // NewContext creates a new Context object.
-func NewContext(homeDir string, meta Meta, serialiser *parser.Serialiser) Context {
+func NewContext(homeDir string, meta Meta, serialiser *parser.Serialiser, isDebug bool) Context {
 	if meta.Version == "" {
 		meta.Version = "v?.?"
 	}
@@ -98,6 +103,7 @@ func NewContext(homeDir string, meta Meta, serialiser *parser.Serialiser) Contex
 		homeDir,
 		serialiser,
 		meta,
+		isDebug,
 	}
 }
 
@@ -105,6 +111,7 @@ type context struct {
 	homeDir    string
 	serialiser *parser.Serialiser
 	meta       Meta
+	isDebug    bool
 }
 
 func (ctx *context) Print(text string) {
@@ -193,7 +200,7 @@ func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithCont
 	return inputs[0], nil
 }
 
-func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, Error) {
+func (ctx *context) ReconcileFile(doWrite bool, fileArg FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, Error) {
 	target, err := ctx.retrieveTargetFile(fileArg)
 	if err != nil {
 		return nil, err
@@ -206,9 +213,11 @@ func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, creators []reconci
 	if aErr != nil {
 		return nil, aErr
 	}
-	wErr := WriteToFile(target, result.AllSerialised)
-	if wErr != nil {
-		return nil, wErr
+	if doWrite {
+		wErr := WriteToFile(target, result.AllSerialised)
+		if wErr != nil {
+			return nil, wErr
+		}
 	}
 	return result, nil
 }
@@ -371,4 +380,10 @@ func (ctx *context) SetSerialiser(serialiser *parser.Serialiser) {
 		panic("Serialiser cannot be nil")
 	}
 	ctx.serialiser = serialiser
+}
+
+func (ctx *context) Debug(task func()) {
+	if ctx.isDebug {
+		task()
+	}
 }
