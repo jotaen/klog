@@ -4,15 +4,14 @@ Package klog is the entry point of the command line tool.
 package klog
 
 import (
-	"errors"
 	"github.com/alecthomas/kong"
 	"github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/cli"
 	"github.com/jotaen/klog/src/app/cli/lib"
+	"github.com/jotaen/klog/src/service"
 	"github.com/jotaen/klog/src/service/period"
 	"reflect"
-	"strings"
 )
 
 func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error) {
@@ -38,6 +37,10 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error
 			someUntilDate, _ := klog.NewDate(2, 2, 2)
 			p := period.NewPeriod(someSinceDate, someUntilDate)
 			return kong.TypeMapper(reflect.TypeOf(&p).Elem(), periodDecoder())
+		}(),
+		func() kong.Option {
+			f, _ := service.NewRounding(30)
+			return kong.TypeMapper(reflect.TypeOf(&f).Elem(), roundingDecoder())
 		}(),
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact: true,

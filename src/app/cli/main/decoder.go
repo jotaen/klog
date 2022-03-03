@@ -94,20 +94,20 @@ func periodDecoder() kong.MapperFunc {
 	}
 }
 
-func fractionDecoder() kong.MapperFunc {
+func roundingDecoder() kong.MapperFunc {
 	return func(ctx *kong.DecodeContext, target reflect.Value) error {
 		var value string
 		if err := ctx.Scan.PopValueInto("rounder", &value); err != nil {
 			return err
 		}
 		if value == "" {
-			return errors.New("Please provide a valid rounding number")
+			return errors.New("Please provide a valid rounding value")
 		}
-		fraction, err := service.NewMinuteFractionFromString(value)
+		r, err := service.NewRoundingFromString(value)
 		if err != nil {
-			return errors.New("`" + value + "` is not a valid rounding number")
+			return errors.New("`" + value + "` is not a valid rounding value")
 		}
-		target.Set(reflect.ValueOf(fraction))
+		target.Set(reflect.ValueOf(r))
 		return nil
 	}
 }

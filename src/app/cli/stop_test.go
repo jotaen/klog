@@ -4,6 +4,7 @@ import (
 	"github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/cli/lib"
+	"github.com/jotaen/klog/src/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -123,4 +124,19 @@ func TestStopFailsIfNoOpenRange(t *testing.T) {
 	assert.Equal(t, "Manipulation failed", err.(app.Error).Error())
 	assert.Equal(t, "No open time range", err.(app.Error).Details())
 	assert.Equal(t, "", state.writtenFileContents)
+}
+
+func TestStopWithRounding(t *testing.T) {
+	r15, _ := service.NewRounding(15)
+	state, err := NewTestingContext()._SetRecords(`
+2005-05-05
+    8:10 - ?
+`)._SetNow(2005, 5, 5, 11, 24)._Run((&Stop{
+		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{Round: r15},
+	}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+2005-05-05
+    8:10 - 11:30
+`, state.writtenFileContents)
 }
