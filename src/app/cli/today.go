@@ -6,9 +6,6 @@ import (
 	"github.com/jotaen/klog/src/app/cli/lib"
 	"github.com/jotaen/klog/src/app/cli/lib/terminalformat"
 	"github.com/jotaen/klog/src/service"
-	"os"
-	"os/signal"
-	"syscall"
 	gotime "time"
 )
 
@@ -32,11 +29,19 @@ If there are no records today, it falls back to yesterday.`
 
 func (opt *Today) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
-	h := func() error { return handle(opt, ctx) }
 	if opt.Follow {
-		return withRepeat(ctx, h)
+		return lib.WithRepeat(ctx, func(secondsCounter int64) error {
+			err := handle(opt, ctx)
+			if secondsCounter < 7 {
+				// Display exit hint for a couple of seconds.
+				ctx.Print("\n")
+				ctx.Print("Press ^C to exit")
+				ctx.Print("\n")
+			}
+			return err
+		})
 	}
-	return h()
+	return handle(opt, ctx)
 }
 
 var (
@@ -201,33 +206,4 @@ func splitIntoCurrentAndOther(now gotime.Time, records []Record) ([]Record, []Re
 		return yesterdaysRecords, otherRecords, true
 	}
 	return nil, otherRecords, false
-}
-
-func withRepeat(ctx app.Context, fn func() error) error {
-	// Handle ^C gracefully, as it’s the only way to exit
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		os.Exit(0)
-	}()
-
-	// Call handler function repetitively
-	ctx.Print("\033[2J") // Initial screen clearing
-	ticker := gotime.NewTicker(1 * gotime.Second)
-	defer ticker.Stop()
-	i := 5 // seconds to display help text (how to exit)
-	for ; true; <-ticker.C {
-		ctx.Print("\033[H\033[J") // Cursor reset
-		err := fn()
-		ctx.Print("\n")
-		if i > 0 {
-			ctx.Print("Press ^C to exit")
-			i--
-		}
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
