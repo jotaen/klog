@@ -117,3 +117,17 @@ func TestDecodesPeriod(t *testing.T) {
 	assert.True(t, strings.Contains(out[1], "1h"), out)
 	assert.True(t, strings.Contains(out[2], "`foo` is not a valid period"), out)
 }
+
+func TestDecodesRounding(t *testing.T) {
+	klog := &Env{
+		files: map[string]string{
+			"test.klg": "2020-01-01",
+		},
+	}
+	out := klog.run(
+		[]string{"start", "--round", "asdf", "test.klg"},
+		[]string{"start", "--round", "30m", "test.klg"},
+	)
+	assert.True(t, strings.Contains(out[0], "`asdf` is not a valid rounding value"), out)
+	assert.True(t, strings.Contains(out[1], "- ?"), out)
+}

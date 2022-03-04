@@ -267,9 +267,11 @@ func TestAddDuration(t *testing.T) {
 		increment Duration
 		expect    Time
 	}{
+		{Ɀ_Time_(11, 30), NewDuration(0, 00), Ɀ_Time_(11, 30)},
 		{Ɀ_Time_(11, 30), NewDuration(0, 30), Ɀ_Time_(12, 00)},
 		{Ɀ_Time_(18, 00), NewDuration(-6, 0), Ɀ_Time_(12, 00)},
 		{Ɀ_Time_(3, 59), NewDuration(8, 1), Ɀ_Time_(12, 00)},
+		{Ɀ_Time_(23, 59), NewDuration(0, 1), Ɀ_TimeTomorrow_(0, 00)},
 		{Ɀ_TimeYesterday_(23, 45), NewDuration(12, 15), Ɀ_Time_(12, 00)},
 		{Ɀ_TimeYesterday_(12, 12), NewDuration(1, 19), Ɀ_TimeYesterday_(13, 31)},
 		{Ɀ_TimeYesterday_(0, 1), NewDuration(0, -1), Ɀ_TimeYesterday_(0, 0)},
@@ -281,6 +283,14 @@ func TestAddDuration(t *testing.T) {
 		require.Nil(t, err)
 		assert.Equal(t, x.expect, result, x.initial)
 	}
+}
+
+func TestAddDurationPreservesFormat(t *testing.T) {
+	hour24, _ := Ɀ_Time_(11, 30).Plus(NewDuration(0, 1))
+	assert.Equal(t, hour24.Format().Use24HourClock, true)
+
+	hour12, _ := Ɀ_IsAmPm_(Ɀ_Time_(11, 30)).Plus(NewDuration(0, 1))
+	assert.Equal(t, hour12.Format().Use24HourClock, false)
 }
 
 func TestAddDurationImpossible(t *testing.T) {

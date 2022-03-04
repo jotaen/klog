@@ -179,13 +179,7 @@ func (t *time) Plus(d Duration) (Time, error) {
 		dayShift = 1
 		mins = mins - ONE_DAY
 	}
-	result := &time{
-		hour:     mins / 60,
-		minute:   mins % 60,
-		dayShift: dayShift,
-		format:   t.format,
-	}
-	return result, nil
+	return newTime(mins/60, mins%60, dayShift, t.format.Use24HourClock)
 }
 
 func (t *time) ToString() string {
