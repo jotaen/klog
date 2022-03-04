@@ -13,6 +13,9 @@
           Or, you can just start the entry summary
           on the next line, if you like.
   ```
+- **[ FEATURE ]** Provide rounding option for `klog start` and
+  `klog stop`, which rounds times to the nearest multiple of
+  5m, 10m, 15m, 30m, or 60m. E.g. for `--round=15m`: `8:03` -> `8:00`.
 - **[ FEATURE ]** Add more shortcut filters, e.g. `--this-week`,
   `--last-month`, etc.
 - **[ BREAKING ]** Remove embedded macOS systray widget
