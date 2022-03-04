@@ -41,7 +41,8 @@ func (args *AtDateArgs) AtDate(now gotime.Time) (Date, bool) {
 
 type AtDateAndTimeArgs struct {
 	AtDateArgs
-	Time Time `name:"time" short:"t" help:"Specify the time (defaults to now)"`
+	Time  Time             `name:"time" short:"t" help:"Specify the time (defaults to now)"`
+	Round service.Rounding `name:"round" short:"r" help:"Round time to nearest multiple of 5m, 10m, 15m, 30m, or 60m / 1h"`
 }
 
 func (args *AtDateAndTimeArgs) AtTime(now gotime.Time) (Time, bool, app.Error) {
@@ -50,13 +51,17 @@ func (args *AtDateAndTimeArgs) AtTime(now gotime.Time) (Time, bool, app.Error) {
 	}
 	date, _ := args.AtDate(now)
 	today := NewDateFromGo(now)
+	time := NewTimeFromGo(now)
+	if args.Round != nil {
+		time = service.RoundToNearest(time, args.Round)
+	}
 	if today.IsEqualTo(date) {
-		return NewTimeFromGo(now), true, nil
+		return time, true, nil
 	} else if today.PlusDays(-1).IsEqualTo(date) {
-		shiftedTime, _ := NewTimeFromGo(now).Plus(NewDuration(24, 0))
+		shiftedTime, _ := time.Plus(NewDuration(24, 0))
 		return shiftedTime, true, nil
 	} else if today.PlusDays(1).IsEqualTo(date) {
-		shiftedTime, _ := NewTimeFromGo(now).Plus(NewDuration(-24, 0))
+		shiftedTime, _ := time.Plus(NewDuration(-24, 0))
 		return shiftedTime, true, nil
 	}
 	return nil, false, app.NewErrorWithCode(

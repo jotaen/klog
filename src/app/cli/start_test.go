@@ -4,6 +4,7 @@ import (
 	"github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/cli/lib"
+	"github.com/jotaen/klog/src/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -148,5 +149,19 @@ func TestStartTakesOverStyle(t *testing.T) {
 
 1920/02/03
   8:12am-?
+`, state.writtenFileContents)
+}
+
+func TestStartWithRounding(t *testing.T) {
+	r5, _ := service.NewRounding(5)
+	state, err := NewTestingContext()._SetRecords(`
+2005-05-05
+`)._SetNow(2005, 5, 5, 8, 12)._Run((&Start{
+		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{Round: r5},
+	}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+2005-05-05
+    8:10 - ?
 `, state.writtenFileContents)
 }
