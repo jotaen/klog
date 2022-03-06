@@ -27,7 +27,7 @@ func (opt *Create) Run(ctx app.Context) error {
 	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
-				return reconciling.NewReconcilerAtNewRecord(parsedRecords, date, opt.ShouldTotal)
+				return reconciling.NewReconcilerForNewRecord(parsedRecords, date, opt.ShouldTotal)
 			},
 		},
 

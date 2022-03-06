@@ -9,8 +9,8 @@ import (
 // Creator is a function interface for creating a new reconciler.
 type Creator func(parsedRecords []parser.ParsedRecord) *Reconciler
 
-// NewReconcilerAtNewRecord creates a reconciler for a new record at a given date.
-func NewReconcilerAtNewRecord(parsedRecords []parser.ParsedRecord, newDate Date, shouldTotal ShouldTotal) *Reconciler {
+// NewReconcilerForNewRecord creates a reconciler for a new record at a given date.
+func NewReconcilerForNewRecord(parsedRecords []parser.ParsedRecord, newDate Date, shouldTotal ShouldTotal) *Reconciler {
 	record := NewRecord(newDate)
 	if shouldTotal != nil {
 		record.SetShouldTotal(shouldTotal)
