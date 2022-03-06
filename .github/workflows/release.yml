@@ -41,26 +41,22 @@ jobs:
       matrix:
         include:
           - name: linux
-            runner_os: ubuntu-latest
             go_os: linux
             go_arch: amd64
             binary_name: klog
           - name: mac-intel
-            runner_os: macos-latest
             go_os: darwin
             go_arch: amd64
             binary_name: klog
           - name: mac-arm
-            runner_os: macos-latest
             go_os: darwin
             go_arch: arm64
             binary_name: klog
           - name: windows
-            runner_os: ubuntu-latest # Run on Linux for portability of workflow
             go_os: windows
             go_arch: amd64
             binary_name: klog.exe
-    runs-on: ${{ matrix.runner_os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
@@ -78,7 +74,7 @@ jobs:
           source ./run.sh
           run_build ${{ github.event.inputs.release_id }} ${{ github.sha }}
       - name: Smoke test
-        if: ${{ matrix.name == 'linux' }} # Only run smoke test on Linux: it’s too much hassle to port the test itself.
+        if: ${{ matrix.name == 'linux' }}
         env:
           EXPECTED_VERSION: ${{ github.event.inputs.release_id }}
           EXPECTED_BUILD_HASH: ${{ github.sha }}
