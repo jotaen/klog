@@ -20,6 +20,8 @@
   5m, 10m, 15m, 30m, or 60m. E.g. for `--round=15m`: `8:03` -> `8:00`.
 - **[ FEATURE ]** Add more shortcut filters, e.g. `--this-week`,
   `--last-month`, etc.
+- **[ FEATURE ]** Embed the most recent part of the changelog for
+  convenience, via `klog --changelog`.
 - **[ BREAKING ]** Remove embedded macOS systray widget
 
 ## v3.3
