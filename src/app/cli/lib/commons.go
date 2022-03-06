@@ -14,6 +14,7 @@ type ReconcileOpts struct {
 
 func Reconcile(ctx app.Context, opts ReconcileOpts, creators []reconciling.Creator, reconcile reconciling.Reconcile) error {
 	result, err := ctx.ReconcileFile(
+		true,
 		opts.OutputFileArgs.File,
 		creators,
 		reconcile,

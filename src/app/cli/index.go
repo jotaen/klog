@@ -1,5 +1,5 @@
 /*
-Package commands contains handlers for all available commands.
+Package cli contains handlers for all available commands.
 */
 package cli
 
@@ -13,8 +13,9 @@ type Cli struct {
 
 	// Manipulate
 	Track  Track  `cmd:"" group:"Manipulate" help:"Adds a new entry to a record"`
-	Start  Start  `cmd:"" group:"Manipulate" aliases:"in" help:"Starts open time range"`
-	Stop   Stop   `cmd:"" group:"Manipulate" aliases:"out" help:"Closes open time range"`
+	Start  Start  `cmd:"" group:"Manipulate" aliases:"in" help:"Starts a new open time range"`
+	Stop   Stop   `cmd:"" group:"Manipulate" aliases:"out" help:"Closes the open time range"`
+	Pause  Pause  `cmd:"" group:"Manipulate" help:"Pauses the open time range"`
 	Create Create `cmd:"" group:"Manipulate" help:"Creates a new record"`
 
 	// Bookmarks

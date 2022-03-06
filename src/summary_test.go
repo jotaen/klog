@@ -108,6 +108,58 @@ func TestEntrySummaryCannotContainSubsequentBlankLines(t *testing.T) {
 	}
 }
 
+func TestDetectsSummaryEquality(t *testing.T) {
+	for _, x := range [][]string{
+		nil,
+		{""},
+		{"a"},
+		{"a", "b"},
+	} {
+		entrySummary1, _ := NewEntrySummary(x...)
+		entrySummary2, _ := NewEntrySummary(x...)
+		assert.True(t, entrySummary1.Equals(entrySummary2))
+		assert.True(t, entrySummary2.Equals(entrySummary1))
+
+		recordSummary1, _ := NewRecordSummary(x...)
+		recordSummary2, _ := NewRecordSummary(x...)
+		assert.True(t, recordSummary1.Equals(recordSummary2))
+		assert.True(t, recordSummary2.Equals(recordSummary1))
+	}
+}
+
+func TestEqualityOfEmptyEntrySummary(t *testing.T) {
+	emptyEntrySummary, _ := NewEntrySummary()
+	assert.True(t, emptyEntrySummary.Equals(nil))
+
+	blankEntrySummary, _ := NewEntrySummary("")
+	assert.True(t, blankEntrySummary.Equals(nil))
+}
+
+func TestDetectsSummaryInequality(t *testing.T) {
+	for _, x := range []struct {
+		ls1 []string
+		ls2 []string
+	}{
+		{[]string{"a"}, nil},
+		{[]string{"a"}, []string{"b"}},
+		{[]string{"a"}, []string{"a", "b"}},
+		{[]string{"a"}, []string{"a", ""}},
+	} {
+		{
+			entrySummary1, _ := NewEntrySummary(x.ls1...)
+			entrySummary2, _ := NewEntrySummary(x.ls2...)
+			assert.False(t, entrySummary1.Equals(entrySummary2))
+			assert.False(t, entrySummary2.Equals(entrySummary1))
+		}
+		{
+			recordSummary1, _ := NewRecordSummary(x.ls1...)
+			recordSummary2, _ := NewRecordSummary(x.ls2...)
+			assert.False(t, recordSummary1.Equals(recordSummary2))
+			assert.False(t, recordSummary2.Equals(recordSummary1))
+		}
+	}
+}
+
 func TestRecognisesAllTags(t *testing.T) {
 	recordSummary, _ := NewRecordSummary("Hello #world, I feel", "#GREAT-ish today #123_test!")
 	assert.Equal(t, recordSummary.Tags().ToStrings(), []string{"#123_test", "#great", "#world"})
