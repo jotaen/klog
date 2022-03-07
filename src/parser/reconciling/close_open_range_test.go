@@ -63,3 +63,20 @@ func TestReconcilerClosesOpenRangeWithNewSummary(t *testing.T) {
     15:00 - 15:22 Finished.
 `, result.AllSerialised)
 }
+
+func TestReconcilerClosesOpenRangeWithNewMultilineSummary(t *testing.T) {
+	original := `
+2018-01-01
+    15:00 - ?
+`
+	rs, _ := parser.Parse(original)
+	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
+	require.NotNil(t, reconciler)
+	result, err := reconciler.CloseOpenRange(Ɀ_Time_(15, 22), "\nFinished.")
+	require.Nil(t, err)
+	assert.Equal(t, `
+2018-01-01
+    15:00 - 15:22
+        Finished.
+`, result.AllSerialised)
+}
