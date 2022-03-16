@@ -4,149 +4,98 @@ import . "github.com/jotaen/klog/src"
 
 // Style describes the general styling and formatting preferences of a record.
 type Style struct {
-	lineEnding    string
-	lineEndingSet bool
-
-	indentation    string
-	indentationSet bool
-
-	spacingInRange    string // Example: `8:00 - 9:00` vs. `8:00-9:00`
-	spacingInRangeSet bool
-
-	dateFormat    DateFormat
-	dateFormatSet bool
-
-	timeFormat    TimeFormat
-	timeFormatSet bool
+	LineEnding     styleProp[string]
+	Indentation    styleProp[string]
+	DateFormat     styleProp[DateFormat]
+	TimeFormat     styleProp[TimeFormat]
+	SpacingInRange styleProp[string] // Example: `8:00 - 9:00` vs. `8:00-9:00`
 }
 
-func (s *Style) SetLineEnding(x string) {
-	s.lineEnding = x
-	s.lineEndingSet = true
+type styleProp[T any] struct {
+	value      T
+	isExplicit bool
 }
 
-func (s *Style) LineEnding() string {
-	return s.lineEnding
+func (p *styleProp[T]) Set(value T) {
+	p.value = value
+	p.isExplicit = true
 }
 
-func (s *Style) SetIndentation(x string) {
-	s.indentation = x
-	s.indentationSet = true
-}
-
-func (s *Style) Indentation() string {
-	return s.indentation
-}
-
-func (s *Style) SetSpacingInRange(x string) {
-	s.spacingInRange = x
-	s.spacingInRangeSet = true
-}
-
-func (s *Style) SpacingInRange() string {
-	return s.spacingInRange
-}
-
-func (s *Style) SetDateFormat(x DateFormat) {
-	s.dateFormat = x
-	s.dateFormatSet = true
-}
-
-func (s *Style) DateFormat() DateFormat {
-	return s.dateFormat
-}
-
-func (s *Style) SetTimeFormat(x TimeFormat) {
-	s.timeFormat = x
-	s.timeFormatSet = true
-}
-
-func (s *Style) TimeFormat() TimeFormat {
-	return s.timeFormat
+func (p *styleProp[T]) Get() T {
+	return p.value
 }
 
 // DefaultStyle returns the canonical style preferences as recommended
 // by the file format specification.
 func DefaultStyle() *Style {
 	return &Style{
-		lineEnding:     "\n",
-		indentation:    "    ",
-		spacingInRange: " ",
-		dateFormat:     DateFormat{UseDashes: true},
-		timeFormat:     TimeFormat{Use24HourClock: true},
+		LineEnding:     styleProp[string]{"\n", false},
+		Indentation:    styleProp[string]{"    ", false},
+		DateFormat:     styleProp[DateFormat]{DateFormat{UseDashes: true}, false},
+		TimeFormat:     styleProp[TimeFormat]{TimeFormat{Use24HourClock: true}, false},
+		SpacingInRange: styleProp[string]{" ", false},
 	}
 }
 
+type election[T comparable] struct {
+	votes map[T]int
+}
+
+func newElection[T comparable]() election[T] {
+	return election[T]{make(map[T]int)}
+}
+
+// vote casts a vote for the style, but only if it’s explicit.
+func (e *election[T]) vote(style styleProp[T]) {
+	if !style.isExplicit {
+		return
+	}
+	e.votes[style.value] += 1
+}
+
+// tallyUp returns the style that’s most voted for.
+func (e *election[T]) tallyUp(defaultValue T) T {
+	max := 0
+	result := defaultValue
+	for value, count := range e.votes {
+		if count > max {
+			max = count
+			result = value
+		}
+	}
+	return result
+}
+
+// ascertain finds the prevailing style, which is either the explicit default style,
+// or the tallied-up election.
+func ascertain[T comparable](e *election[T], defaultStyle styleProp[T]) styleProp[T] {
+	if defaultStyle.isExplicit {
+		return defaultStyle
+	}
+	return styleProp[T]{e.tallyUp(defaultStyle.Get()), true}
+}
+
 // Elect fills all unset fields of the `defaults` style with that value
-// which was encountered most often in the parsed records. Fields of
-// `defaults` that had been set explicitly take precedence.
-func Elect(defaults Style, parsedRecords []ParsedRecord) *Style {
-	lineEndingVotes := make(map[string]int)
-	indentationVotes := make(map[string]int)
-	spacingInRangeVotes := make(map[string]int)
-	dateFormatVotes := make(map[DateFormat]int)
-	timeFormatVotes := make(map[TimeFormat]int)
+// which was encountered most often in the parsed records. Fields of the
+// `base` style that had been set explicitly take precedence.
+func Elect(base Style, parsedRecords []ParsedRecord) *Style {
+	lineEndingElection := newElection[string]()
+	indentationElection := newElection[string]()
+	dateFormatElection := newElection[DateFormat]()
+	timeFormatElection := newElection[TimeFormat]()
+	spacingInRangeElection := newElection[string]()
 	for _, r := range parsedRecords {
-		if r.Style.lineEndingSet {
-			lineEndingVotes[r.Style.lineEnding] += 1
-		}
-		if r.Style.indentationSet {
-			indentationVotes[r.Style.indentation] += 1
-		}
-		if r.Style.spacingInRangeSet {
-			spacingInRangeVotes[r.Style.spacingInRange] += 1
-		}
-		if r.Style.dateFormatSet {
-			dateFormatVotes[r.Style.dateFormat] += 1
-		}
-		if r.Style.timeFormatSet {
-			timeFormatVotes[r.Style.timeFormat] += 1
-		}
+		lineEndingElection.vote(r.Style.LineEnding)
+		indentationElection.vote(r.Style.Indentation)
+		dateFormatElection.vote(r.Style.DateFormat)
+		timeFormatElection.vote(r.Style.TimeFormat)
+		spacingInRangeElection.vote(r.Style.SpacingInRange)
 	}
-	lineEndingMax := 0
-	if !defaults.lineEndingSet {
-		for x, v := range lineEndingVotes {
-			if v > lineEndingMax {
-				lineEndingMax = v
-				defaults.SetLineEnding(x)
-			}
-		}
+	return &Style{
+		ascertain[string](&lineEndingElection, base.LineEnding),
+		ascertain[string](&indentationElection, base.Indentation),
+		ascertain[DateFormat](&dateFormatElection, base.DateFormat),
+		ascertain[TimeFormat](&timeFormatElection, base.TimeFormat),
+		ascertain[string](&spacingInRangeElection, base.SpacingInRange),
 	}
-	indentationMax := 0
-	if !defaults.indentationSet {
-		for x, v := range indentationVotes {
-			if v > indentationMax {
-				indentationMax = v
-				defaults.SetIndentation(x)
-			}
-		}
-	}
-	spacingInRangeMax := 0
-	if !defaults.spacingInRangeSet {
-		for x, v := range spacingInRangeVotes {
-			if v > spacingInRangeMax {
-				spacingInRangeMax = v
-				defaults.SetSpacingInRange(x)
-			}
-		}
-	}
-	dateFormatMax := 0
-	if !defaults.dateFormatSet {
-		for x, v := range dateFormatVotes {
-			if v > dateFormatMax {
-				dateFormatMax = v
-				defaults.SetDateFormat(x)
-			}
-		}
-	}
-	timeFormatMax := 0
-	if !defaults.timeFormatSet {
-		for x, v := range timeFormatVotes {
-			if v > timeFormatMax {
-				timeFormatMax = v
-				defaults.SetTimeFormat(x)
-			}
-		}
-	}
-	return &defaults
 }
