@@ -44,7 +44,7 @@ func TestReconcilerStartsOpenRangeWithSummary(t *testing.T) {
 `, result.AllSerialised)
 }
 
-func TestReconcilerStartsOpenRangeWithNewSummary(t *testing.T) {
+func TestReconcilerStartsOpenRangeWithNewMultilineSummary(t *testing.T) {
 	original := `
 2018-01-01
 	5h22m
@@ -52,13 +52,14 @@ func TestReconcilerStartsOpenRangeWithNewSummary(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), "\nStarted!")
+	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), "\nStarted...\nsomething!")
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01
 	5h22m
 	8:03 - ?
-		Started!
+		Started...
+		something!
 `, result.AllSerialised)
 }
 
