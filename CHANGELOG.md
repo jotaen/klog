@@ -13,6 +13,8 @@
           Or, you can just start the entry summary
           on the next line, if you like.
   ```
+  The CLI also handles this automatically when it encounters
+  line breaks (`\n`), e.g. in the `--summary` flag value.
 - **[ FEATURE ]** Add new command `klog pause` that “pauses”
   open-ended time ranges by adding a subsequent pause entry.
 - **[ FEATURE ]** Provide rounding option for `klog start` and
