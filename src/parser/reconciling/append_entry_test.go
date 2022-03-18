@@ -62,6 +62,38 @@ func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 `, result.AllSerialised)
 }
 
+func TestReconcilerSplitsUpSummaryText(t *testing.T) {
+	original := "\n2018-01-01\n    1h"
+	rs, _ := parser.Parse(original)
+
+	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
+	require.NotNil(t, reconciler)
+	result, err := reconciler.AppendEntry("2h This is a\nmultiline summary")
+	require.Nil(t, err)
+	assert.Equal(t, `
+2018-01-01
+    1h
+    2h This is a
+        multiline summary
+`, result.AllSerialised)
+}
+
+func TestReconcilerStartsSummaryTextOnNextLine(t *testing.T) {
+	original := "\n2018-01-01\n    1h"
+	rs, _ := parser.Parse(original)
+
+	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
+	require.NotNil(t, reconciler)
+	result, err := reconciler.AppendEntry("2h\nSome activity")
+	require.Nil(t, err)
+	assert.Equal(t, `
+2018-01-01
+    1h
+    2h
+        Some activity
+`, result.AllSerialised)
+}
+
 func TestReconcilerRejectsInvalidEntry(t *testing.T) {
 	original := "2018-01-01\n"
 	rs, _ := parser.Parse(original)
