@@ -22,7 +22,7 @@ func (r *Reconciler) CloseOpenRange(endTime Time, additionalSummary string) (*Re
 	r.lines[openRangeValueLineIndex].Text = regexp.MustCompile(`^(.*?)\?+(.*)$`).
 		ReplaceAllString(
 			r.lines[openRangeValueLineIndex].Text,
-			"${1}"+endTime.ToStringWithFormat(r.style.TimeFormat())+"${2}",
+			"${1}"+endTime.ToStringWithFormat(r.style.TimeFormat.Get())+"${2}",
 		)
 
 	// Append additional summary text. Due to multiline entry summaries, that might

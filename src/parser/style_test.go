@@ -9,55 +9,44 @@ import (
 
 func TestDefaultStyle(t *testing.T) {
 	assert.Equal(t, &Style{
-		lineEnding:     "\n",
-		indentation:    "    ",
-		dateFormat:     DateFormat{UseDashes: true},
-		timeFormat:     TimeFormat{Use24HourClock: true},
-		spacingInRange: " ",
+		LineEnding:     styleProp[string]{"\n", false},
+		Indentation:    styleProp[string]{"    ", false},
+		DateFormat:     styleProp[DateFormat]{DateFormat{UseDashes: true}, false},
+		TimeFormat:     styleProp[TimeFormat]{TimeFormat{Use24HourClock: true}, false},
+		SpacingInRange: styleProp[string]{" ", false},
 	}, DefaultStyle())
 }
 
 func TestDetectsStyleFromMinimalFile(t *testing.T) {
 	rs := parseOrPanic("2000-01-01")
 	assert.Equal(t, &Style{
-		lineEnding:     "\n",
-		indentation:    "    ",
-		dateFormat:     DateFormat{UseDashes: true},
-		dateFormatSet:  true,
-		timeFormat:     TimeFormat{Use24HourClock: true},
-		spacingInRange: " ",
+		LineEnding:     styleProp[string]{"\n", false},
+		Indentation:    styleProp[string]{"    ", false},
+		DateFormat:     styleProp[DateFormat]{DateFormat{UseDashes: true}, true},
+		TimeFormat:     styleProp[TimeFormat]{TimeFormat{Use24HourClock: true}, false},
+		SpacingInRange: styleProp[string]{" ", false},
 	}, rs[0].Style)
 }
 
 func TestDetectCanonicalStyle(t *testing.T) {
 	rs := parseOrPanic("2000-01-01\nTest\n    8:00 - 9:00\n")
 	assert.Equal(t, &Style{
-		lineEnding:        "\n",
-		lineEndingSet:     true,
-		indentation:       "    ",
-		indentationSet:    true,
-		spacingInRange:    " ",
-		spacingInRangeSet: true,
-		dateFormat:        DateFormat{UseDashes: true},
-		dateFormatSet:     true,
-		timeFormat:        TimeFormat{Use24HourClock: true},
-		timeFormatSet:     true,
+		LineEnding:     styleProp[string]{"\n", true},
+		Indentation:    styleProp[string]{"    ", true},
+		DateFormat:     styleProp[DateFormat]{DateFormat{UseDashes: true}, true},
+		TimeFormat:     styleProp[TimeFormat]{TimeFormat{Use24HourClock: true}, true},
+		SpacingInRange: styleProp[string]{" ", true},
 	}, rs[0].Style)
 }
 
 func TestDetectsCustomStyle(t *testing.T) {
 	rs := parseOrPanic("2000/01/01\r\nTest\r\n\t8:00am-9:00am\r\n")
 	assert.Equal(t, &Style{
-		lineEnding:        "\r\n",
-		lineEndingSet:     true,
-		indentation:       "\t",
-		indentationSet:    true,
-		spacingInRange:    "",
-		spacingInRangeSet: true,
-		dateFormat:        DateFormat{UseDashes: false},
-		dateFormatSet:     true,
-		timeFormat:        TimeFormat{Use24HourClock: false},
-		timeFormatSet:     true,
+		LineEnding:     styleProp[string]{"\r\n", true},
+		Indentation:    styleProp[string]{"\t", true},
+		DateFormat:     styleProp[DateFormat]{DateFormat{UseDashes: false}, true},
+		TimeFormat:     styleProp[TimeFormat]{TimeFormat{Use24HourClock: false}, true},
+		SpacingInRange: styleProp[string]{"", true},
 	}, rs[0].Style)
 }
 
@@ -71,16 +60,11 @@ func TestElectStyle(t *testing.T) {
 	)
 	result := Elect(*DefaultStyle(), rs)
 	assert.Equal(t, &Style{
-		lineEnding:        "\r\n",
-		lineEndingSet:     true,
-		indentation:       "  ",
-		indentationSet:    true,
-		spacingInRange:    "",
-		spacingInRangeSet: true,
-		dateFormat:        DateFormat{UseDashes: true},
-		dateFormatSet:     true,
-		timeFormat:        TimeFormat{Use24HourClock: false},
-		timeFormatSet:     true,
+		LineEnding:     styleProp[string]{"\r\n", true},
+		Indentation:    styleProp[string]{"  ", true},
+		DateFormat:     styleProp[DateFormat]{DateFormat{UseDashes: true}, true},
+		TimeFormat:     styleProp[TimeFormat]{TimeFormat{Use24HourClock: false}, true},
+		SpacingInRange: styleProp[string]{"", true},
 	}, result)
 }
 
@@ -94,16 +78,11 @@ func TestElectStyleDoesNotOverrideSetPreferences(t *testing.T) {
 	)
 	result := Elect(*parseOrPanic("2018/01/01\n\t8:00 - 9:00")[0].Style, rs)
 	assert.Equal(t, &Style{
-		lineEnding:        "\n",
-		lineEndingSet:     true,
-		indentation:       "\t",
-		indentationSet:    true,
-		spacingInRange:    " ",
-		spacingInRangeSet: true,
-		dateFormat:        DateFormat{UseDashes: false},
-		dateFormatSet:     true,
-		timeFormat:        TimeFormat{Use24HourClock: true},
-		timeFormatSet:     true,
+		LineEnding:     styleProp[string]{"\n", true},
+		Indentation:    styleProp[string]{"\t", true},
+		DateFormat:     styleProp[DateFormat]{DateFormat{UseDashes: false}, true},
+		TimeFormat:     styleProp[TimeFormat]{TimeFormat{Use24HourClock: true}, true},
+		SpacingInRange: styleProp[string]{" ", true},
 	}, result)
 }
 

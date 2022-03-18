@@ -108,22 +108,23 @@ func (c *futureEntriesChecker) Warn(record Record) Date {
 			return NewDateTime(c.now.Date, incTime)
 		}()
 		for _, e := range record.Entries() {
-			countEntriesWithFutureTimes += e.Unbox(func(r Range) interface{} {
-				if NewDateTime(record.Date(), r.Start()).IsAfterOrEqual(fuzzyNow) || NewDateTime(record.Date(), r.End()).IsAfterOrEqual(fuzzyNow) {
-					return 1
-				}
-				return 0
-			}, func(Duration) interface{} {
-				if record.Date().IsAfterOrEqual(c.now.Date.PlusDays(1)) {
-					return 1
-				}
-				return 0
-			}, func(or OpenRange) interface{} {
-				if NewDateTime(record.Date(), or.Start()).IsAfterOrEqual(fuzzyNow) {
-					return 1
-				}
-				return 0
-			}).(int)
+			countEntriesWithFutureTimes += Unbox[int](&e,
+				func(r Range) int {
+					if NewDateTime(record.Date(), r.Start()).IsAfterOrEqual(fuzzyNow) || NewDateTime(record.Date(), r.End()).IsAfterOrEqual(fuzzyNow) {
+						return 1
+					}
+					return 0
+				}, func(Duration) int {
+					if record.Date().IsAfterOrEqual(c.now.Date.PlusDays(1)) {
+						return 1
+					}
+					return 0
+				}, func(or OpenRange) int {
+					if NewDateTime(record.Date(), or.Start()).IsAfterOrEqual(fuzzyNow) {
+						return 1
+					}
+					return 0
+				})
 		}
 		if countEntriesWithFutureTimes == 0 {
 			return nil
@@ -143,13 +144,13 @@ type overlappingTimeRangesChecker struct{}
 func (c *overlappingTimeRangesChecker) Warn(record Record) Date {
 	var orderedRanges []Range
 	for _, e := range record.Entries() {
-		e.Unbox(
-			func(r Range) interface{} {
+		Unbox(&e,
+			func(r Range) any {
 				orderedRanges = append(orderedRanges, r)
 				return nil
 			},
-			func(Duration) interface{} { return nil },
-			func(or OpenRange) interface{} {
+			func(Duration) any { return nil },
+			func(or OpenRange) any {
 				// As best guess, assume open ranges to be closed at the end of the day.
 				end, tErr := NewTime(23, 59)
 				if tErr != nil {

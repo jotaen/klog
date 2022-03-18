@@ -66,10 +66,10 @@ func (r *Reconciler) MakeResult() (*Result, error) {
 func (r *Reconciler) findOpenRangeIndex() int {
 	openRangeEntryIndex := -1
 	for i, e := range r.record.Entries() {
-		e.Unbox(
-			func(Range) interface{} { return nil },
-			func(Duration) interface{} { return nil },
-			func(OpenRange) interface{} {
+		Unbox(&e,
+			func(Range) any { return nil },
+			func(Duration) any { return nil },
+			func(OpenRange) any {
 				openRangeEntryIndex = i
 				return nil
 			},
@@ -92,9 +92,9 @@ func (r *Reconciler) insert(lineIndex int, texts []insertableText) {
 		if i >= lineIndex && offset < len(texts) {
 			line := ""
 			if texts[offset].indentation > 0 {
-				line += r.style.Indentation()
+				line += r.style.Indentation.Get()
 			}
-			line += texts[offset].text + r.style.LineEnding()
+			line += texts[offset].text + r.style.LineEnding.Get()
 			result[i] = engine.NewLineFromString(line, -1)
 			offset++
 		} else {
@@ -103,7 +103,7 @@ func (r *Reconciler) insert(lineIndex int, texts []insertableText) {
 		result[i].LineNumber = i + 1
 	}
 	if lineIndex > 0 && result[lineIndex-1].LineEnding == "" {
-		result[lineIndex-1].LineEnding = r.style.LineEnding()
+		result[lineIndex-1].LineEnding = r.style.LineEnding.Get()
 	}
 	r.lines = result
 }

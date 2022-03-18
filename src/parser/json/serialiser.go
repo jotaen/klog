@@ -73,8 +73,8 @@ func toTagViews(ts TagSet) []string {
 	return result
 }
 
-func toEntryViews(es []Entry) []interface{} {
-	views := []interface{}{}
+func toEntryViews(es []Entry) []any {
+	views := []any{}
 	for _, e := range es {
 		base := EntryView{
 			Summary:   parser.SummaryText(e.Summary()).ToString(),
@@ -82,7 +82,7 @@ func toEntryViews(es []Entry) []interface{} {
 			Total:     e.Duration().ToString(),
 			TotalMins: e.Duration().InMinutes(),
 		}
-		view := e.Unbox(func(r Range) interface{} {
+		view := Unbox(&e, func(r Range) any {
 			base.Type = "range"
 			return RangeView{
 				OpenRangeView: OpenRangeView{
@@ -93,10 +93,10 @@ func toEntryViews(es []Entry) []interface{} {
 				End:     r.End().ToString(),
 				EndMins: r.End().MidnightOffset().InMinutes(),
 			}
-		}, func(d Duration) interface{} {
+		}, func(d Duration) any {
 			base.Type = "duration"
 			return base
-		}, func(o OpenRange) interface{} {
+		}, func(o OpenRange) any {
 			base.Type = "open_range"
 			return OpenRangeView{
 				EntryView: base,

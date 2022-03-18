@@ -90,11 +90,11 @@ func (r *record) SetEntries(es []Entry) {
 }
 
 func (r *record) AddDuration(d Duration, s EntrySummary) {
-	r.entries = append(r.entries, NewEntry(d, s))
+	r.entries = append(r.entries, NewEntryFromDuration(d, s))
 }
 
 func (r *record) AddRange(tr Range, s EntrySummary) {
-	r.entries = append(r.entries, NewEntry(tr, s))
+	r.entries = append(r.entries, NewEntryFromRange(tr, s))
 }
 
 func (r *record) OpenRange() OpenRange {
@@ -111,7 +111,7 @@ func (r *record) StartOpenRange(t Time, s EntrySummary) error {
 	if r.OpenRange() != nil {
 		return errors.New("DUPLICATE_OPEN_RANGE")
 	}
-	r.entries = append(r.entries, NewEntry(NewOpenRange(t), s))
+	r.entries = append(r.entries, NewEntryFromOpenRange(NewOpenRange(t), s))
 	return nil
 }
 
@@ -123,7 +123,7 @@ func (r *record) EndOpenRange(end Time) error {
 			if err != nil {
 				return err
 			}
-			r.entries[i] = NewEntry(tr, e.summary)
+			r.entries[i] = NewEntryFromRange(tr, e.summary)
 			return nil
 		}
 	}

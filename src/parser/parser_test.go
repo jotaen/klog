@@ -127,18 +127,15 @@ func TestParseAlternativeFormatting(t *testing.T) {
 }
 
 func TestAcceptTabOrSpacesAsIndentation(t *testing.T) {
-	for _, test := range []struct {
-		text   string
-		expect interface{}
-	}{
-		{"2000-01-01\n\t8h", nil},
-		{"2000-01-01\n\t8h\n\t15m", nil},
-		{"2000-05-31\n  6h", nil},
-		{"2000-05-31\n  6h\n  20m", nil},
-		{"2000-05-31\n   6h", nil},
-		{"2000-05-31\n    6h", nil},
+	for _, x := range []string{
+		"2000-01-01\n\t8h",
+		"2000-01-01\n\t8h\n\t15m",
+		"2000-05-31\n  6h",
+		"2000-05-31\n  6h\n  20m",
+		"2000-05-31\n   6h",
+		"2000-05-31\n    6h",
 	} {
-		rs, errs := Parse(test.text)
+		rs, errs := Parse(x)
 		require.Nil(t, errs)
 		require.Len(t, rs, 1)
 	}
@@ -147,7 +144,7 @@ func TestAcceptTabOrSpacesAsIndentation(t *testing.T) {
 func TestParseDocumentSucceedsWithCorrectEntryValues(t *testing.T) {
 	for _, test := range []struct {
 		text        string
-		expectEntry interface{}
+		expectEntry any
 	}{
 		// Durations
 		{"1234-12-12\n\t5h", NewDuration(5, 0)},
@@ -188,10 +185,10 @@ func TestParseDocumentSucceedsWithCorrectEntryValues(t *testing.T) {
 		require.Nil(t, errs, test.text)
 		require.Len(t, rs, 1, test.text)
 		require.Len(t, rs[0].Entries(), 1, test.text)
-		value := rs[0].Entries()[0].Unbox(
-			func(r Range) interface{} { return r },
-			func(d Duration) interface{} { return d },
-			func(o OpenRange) interface{} { return o },
+		value := Unbox(&rs[0].Entries()[0],
+			func(r Range) any { return r },
+			func(d Duration) any { return d },
+			func(o OpenRange) any { return o },
 		)
 		assert.Equal(t, test.expectEntry, value, test.text)
 	}
@@ -200,7 +197,7 @@ func TestParseDocumentSucceedsWithCorrectEntryValues(t *testing.T) {
 func TestParsesDocumentsWithEntrySummaries(t *testing.T) {
 	for _, test := range []struct {
 		text          string
-		expectEntry   interface{}
+		expectEntry   any
 		expectSummary EntrySummary
 	}{
 		// Single line entries
@@ -237,10 +234,10 @@ func TestParsesDocumentsWithEntrySummaries(t *testing.T) {
 		require.Nil(t, errs, test.text)
 		require.Len(t, rs, 1, test.text)
 		require.Len(t, rs[0].Entries(), 1, test.text)
-		value := rs[0].Entries()[0].Unbox(
-			func(r Range) interface{} { return r },
-			func(d Duration) interface{} { return d },
-			func(o OpenRange) interface{} { return o },
+		value := Unbox(&rs[0].Entries()[0],
+			func(r Range) any { return r },
+			func(d Duration) any { return d },
+			func(o OpenRange) any { return o },
 		)
 		assert.Equal(t, test.expectEntry, value, test.text)
 		assert.Equal(t, test.expectSummary, rs[0].Entries()[0].Summary(), test.text)
