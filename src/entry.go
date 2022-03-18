@@ -3,11 +3,19 @@ package klog
 // Entry is a time value and an associated entry summary.
 // A time value can be a Range, a Duration, or an OpenRange.
 type Entry struct {
-	value   interface{}
+	value   any
 	summary EntrySummary
 }
 
-func NewEntry(value interface{}, summary EntrySummary) Entry {
+func NewEntryFromDuration(value Duration, summary EntrySummary) Entry {
+	return Entry{value, summary}
+}
+
+func NewEntryFromRange(value Range, summary EntrySummary) Entry {
+	return Entry{value, summary}
+}
+
+func NewEntryFromOpenRange(value OpenRange, summary EntrySummary) Entry {
 	return Entry{value, summary}
 }
 
@@ -15,9 +23,8 @@ func (e *Entry) Summary() EntrySummary {
 	return e.summary
 }
 
-// Unbox makes the underlying time value accessible through callback functions.
-// It returns whatever the callback returns.
-func (e *Entry) Unbox(r func(Range) interface{}, d func(Duration) interface{}, o func(OpenRange) interface{}) interface{} {
+// Unbox converts the underlying time value.
+func Unbox[TargetT any](e *Entry, r func(Range) TargetT, d func(Duration) TargetT, o func(OpenRange) TargetT) TargetT {
 	switch x := e.value.(type) {
 	case Range:
 		return r(x)
@@ -31,9 +38,9 @@ func (e *Entry) Unbox(r func(Range) interface{}, d func(Duration) interface{}, o
 
 // Duration returns the duration value of the underlying time value.
 func (e *Entry) Duration() Duration {
-	return (e.Unbox(
-		func(r Range) interface{} { return r.Duration() },
-		func(d Duration) interface{} { return d },
-		func(o OpenRange) interface{} { return NewDuration(0, 0) },
-	)).(Duration)
+	return Unbox[Duration](e,
+		func(r Range) Duration { return r.Duration() },
+		func(d Duration) Duration { return d },
+		func(o OpenRange) Duration { return NewDuration(0, 0) },
+	)
 }

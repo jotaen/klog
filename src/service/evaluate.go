@@ -36,10 +36,10 @@ func HypotheticalTotal(until gotime.Time, rs ...Record) (Duration, bool) {
 	theDayBefore := thisDay.PlusDays(-1)
 	for _, r := range rs {
 		for _, e := range r.Entries() {
-			t := (e.Unbox(
-				func(r Range) interface{} { return r.Duration() },
-				func(d Duration) interface{} { return d },
-				func(o OpenRange) interface{} {
+			t := Unbox[Duration](&e,
+				func(r Range) Duration { return r.Duration() },
+				func(d Duration) Duration { return d },
+				func(o OpenRange) Duration {
 					if !(r.Date().IsEqualTo(thisDay) || r.Date().IsEqualTo(theDayBefore)) {
 						return NewDuration(0, 0)
 					}
@@ -53,7 +53,7 @@ func HypotheticalTotal(until gotime.Time, rs ...Record) (Duration, bool) {
 						return tr.Duration()
 					}
 					return NewDuration(0, 0)
-				})).(Duration)
+				})
 			total = total.Plus(t)
 		}
 	}

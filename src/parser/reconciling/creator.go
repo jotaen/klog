@@ -23,7 +23,7 @@ func NewReconcilerForNewRecord(parsedRecords []parser.ParsedRecord, newDate Date
 		lines:           flatten(parsedRecords),
 	}
 	headline := func() insertableText {
-		result := newDate.ToStringWithFormat(reconciler.style.DateFormat())
+		result := newDate.ToStringWithFormat(reconciler.style.DateFormat.Get())
 		if shouldTotal != nil {
 			result += " (" + shouldTotal.ToString() + ")"
 		}

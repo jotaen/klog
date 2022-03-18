@@ -13,6 +13,7 @@ import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/parser/engine"
+	"strings"
 )
 
 // Reconciler is a mechanism to manipulate record data in a file.
@@ -66,10 +67,10 @@ func (r *Reconciler) MakeResult() (*Result, error) {
 func (r *Reconciler) findOpenRangeIndex() int {
 	openRangeEntryIndex := -1
 	for i, e := range r.record.Entries() {
-		e.Unbox(
-			func(Range) interface{} { return nil },
-			func(Duration) interface{} { return nil },
-			func(OpenRange) interface{} {
+		Unbox(&e,
+			func(Range) any { return nil },
+			func(Duration) any { return nil },
+			func(OpenRange) any {
 				openRangeEntryIndex = i
 				return nil
 			},
@@ -90,11 +91,8 @@ func (r *Reconciler) insert(lineIndex int, texts []insertableText) {
 	offset := 0
 	for i := range result {
 		if i >= lineIndex && offset < len(texts) {
-			line := ""
-			if texts[offset].indentation > 0 {
-				line += r.style.Indentation()
-			}
-			line += texts[offset].text + r.style.LineEnding()
+			line := strings.Repeat(r.style.Indentation.Get(), texts[offset].indentation)
+			line += texts[offset].text + r.style.LineEnding.Get()
 			result[i] = engine.NewLineFromString(line, -1)
 			offset++
 		} else {
@@ -103,7 +101,29 @@ func (r *Reconciler) insert(lineIndex int, texts []insertableText) {
 		result[i].LineNumber = i + 1
 	}
 	if lineIndex > 0 && result[lineIndex-1].LineEnding == "" {
-		result[lineIndex-1].LineEnding = r.style.LineEnding()
+		result[lineIndex-1].LineEnding = r.style.LineEnding.Get()
 	}
 	r.lines = result
+}
+
+func toMultilineEntryTexts(entryValue string, entrySummary string) []insertableText {
+	var result []insertableText
+	// Normalize potentially redundant escaping.
+	entrySummary = strings.ReplaceAll(entrySummary, "\\n", "\n")
+	for i, summaryLine := range strings.Split(entrySummary, "\n") {
+		indent := 1
+		if i > 0 {
+			indent = 2
+		}
+		text := ""
+		if i == 0 {
+			text += entryValue
+			if text != "" && summaryLine != "" {
+				text += " "
+			}
+		}
+		text += summaryLine
+		result = append(result, insertableText{text, indent})
+	}
+	return result
 }

@@ -10,16 +10,16 @@ type Envelop struct {
 // RecordView is the JSON representation of a record.
 // It also contains some evaluation data, such as the total time.
 type RecordView struct {
-	Date            string        `json:"date"`
-	Summary         string        `json:"summary"`
-	Total           string        `json:"total"`
-	TotalMins       int           `json:"total_mins"`
-	ShouldTotal     string        `json:"should_total"`
-	ShouldTotalMins int           `json:"should_total_mins"`
-	Diff            string        `json:"diff"`
-	DiffMins        int           `json:"diff_mins"`
-	Tags            []string      `json:"tags"`
-	Entries         []interface{} `json:"entries"`
+	Date            string   `json:"date"`
+	Summary         string   `json:"summary"`
+	Total           string   `json:"total"`
+	TotalMins       int      `json:"total_mins"`
+	ShouldTotal     string   `json:"should_total"`
+	ShouldTotalMins int      `json:"should_total_mins"`
+	Diff            string   `json:"diff"`
+	DiffMins        int      `json:"diff_mins"`
+	Tags            []string `json:"tags"`
+	Entries         []any    `json:"entries"`
 }
 
 // EntryView is the JSON representation of an entry.

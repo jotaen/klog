@@ -36,11 +36,11 @@ func (r *Reconciler) PauseOpenRange(pause Duration, summary string) (*Result, er
 			return nil
 		}
 		// Find next duration entry.
-		pauseCandidate := nextEntry.Unbox(
-			func(r Range) interface{} { return nil },
-			func(d Duration) interface{} { return d },
-			func(or OpenRange) interface{} { return nil },
-		).(Duration)
+		pauseCandidate := Unbox[Duration](&nextEntry,
+			func(r Range) Duration { return nil },
+			func(d Duration) Duration { return d },
+			func(or OpenRange) Duration { return nil },
+		)
 		// Only return it if it’s negative.
 		if pauseCandidate.InMinutes() < 0 {
 			return pauseCandidate
@@ -51,11 +51,7 @@ func (r *Reconciler) PauseOpenRange(pause Duration, summary string) (*Result, er
 	// If there is no existing pause that matches, create a new entry underneath
 	// the open range entry.
 	if existingPause == nil {
-		entryLine := pause.ToString()
-		if summary != "" {
-			entryLine += " " + summary
-		}
-		r.insert(openRangeEntryLastLineIndex+1, []insertableText{{entryLine, 1}})
+		r.insert(openRangeEntryLastLineIndex+1, toMultilineEntryTexts(pause.ToString(), summary))
 		return r.MakeResult()
 	}
 
