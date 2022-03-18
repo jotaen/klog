@@ -33,10 +33,10 @@ jobs:
           if [[ "${dirty_files}" != "" ]]; then $(exit 1); fi
       - name: Run vet
         run: go vet ./...
-#      - name: Run staticcheck
-#        uses: dominikh/staticcheck-action@v1.1.0
-#        with:
-#          version: "2021.1.2"
+      - name: Run staticcheck
+        uses: dominikh/staticcheck-action@v1.1.0
+        with:
+          version: "2021.1.2"
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
