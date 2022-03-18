@@ -34,7 +34,7 @@ func Parse(recordsAsText string) ([]ParsedRecord, []Error) {
 			continue
 		}
 		if block[0].LineEnding != "" {
-			style.SetLineEnding(block[0].LineEnding)
+			style.LineEnding.Set(block[0].LineEnding)
 		}
 		results = append(results, ParsedRecord{
 			Record: record,
@@ -74,7 +74,7 @@ func parseRecord(lines []Line) (Record, *Style, []Error) {
 		headline.Advance(dateText.Length())
 		headline.SkipWhile(IsSpaceOrTab)
 		r := NewRecord(rDate)
-		style.SetDateFormat(rDate.Format())
+		style.DateFormat.Set(rDate.Format())
 
 		// Check if there is a should-total set, and if so, parse it.
 		if headline.Peek() == '(' {
@@ -152,7 +152,7 @@ func parseRecord(lines []Line) (Record, *Style, []Error) {
 			// We should never make it here if the indentation could not be determined.
 			panic("Could not detect indentation")
 		}
-		style.SetIndentation(indentator.Style())
+		style.Indentation.Set(indentator.Style())
 		// Check for correct indentation.
 		entry := indentator.NewIndentedParseable(l, 1)
 		if entry == nil || IsSpaceOrTab(entry.Peek()) {
@@ -187,14 +187,14 @@ func parseRecord(lines []Line) (Record, *Style, []Error) {
 			}
 			entryStartPosition := startCandidate.PointerPosition
 			entry.Advance(startCandidate.Length())
-			style.SetTimeFormat(start.Format())
+			style.TimeFormat.Set(start.Format())
 
 			entryStartPositionEnds := entry.PointerPosition
 			entry.SkipWhile(Is(' '))
 			if entryStartPositionEnds != entry.PointerPosition {
-				style.SetSpacingInRange(strings.Repeat(" ", entry.PointerPosition-entryStartPositionEnds))
+				style.SpacingInRange.Set(strings.Repeat(" ", entry.PointerPosition-entryStartPositionEnds))
 			} else {
-				style.SetSpacingInRange("")
+				style.SpacingInRange.Set("")
 			}
 
 			if entry.Peek() != '-' {

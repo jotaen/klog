@@ -10,7 +10,7 @@ func (r *Reconciler) StartOpenRange(startTime Time, entrySummary string) (*Resul
 	if r.findOpenRangeIndex() != -1 {
 		return nil, errors.New("There is already an open range in this record")
 	}
-	entryValue := startTime.ToStringWithFormat(r.style.TimeFormat()) + r.style.SpacingInRange() + "-" + r.style.SpacingInRange() + "?"
+	entryValue := startTime.ToStringWithFormat(r.style.TimeFormat.Get()) + r.style.SpacingInRange.Get() + "-" + r.style.SpacingInRange.Get() + "?"
 	r.insert(r.lastLinePointer, toMultilineEntryTexts(entryValue, entrySummary))
 	return r.MakeResult()
 }
