@@ -1,6 +1,6 @@
 # klog – File Format Specification
 
-**Version 1.2**
+**Version 1.3**
 
 klog is a file format for tracking time.
 
