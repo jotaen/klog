@@ -17,7 +17,7 @@ Other technical terms are surrounded by “quotes”. These are defined in the a
 
 Character sequences that are wrapped in `backticks` are meant to be read exactly (character by character).
 
-## I. Records
+## I. Record
 
 A *record* is a self-contained data structure that contains time-tracking information.
 
@@ -29,8 +29,20 @@ On the same line there MAY follow a *should-total*,
 which MUST be separated by one “space” from the *date*
 (additional “spaces” MAY appear).
 
-A *summary* MAY appear on the subsequent lines.
-Any amount of *entries* MAY appear afterwards.
+A *record summary* MAY appear on the subsequent lines.
+Any amount of *entries* MAY appear afterwards,
+where each MAY have an *entry summary*.
+
+In order to indent a line, it MUST start with one of the following sequences:
+- Four “spaces” (RECOMMENDED)
+- Two or three “spaces”
+- One “tab”
+
+To signify the second level of indentation,
+the indentation sequence MUST appear twice.
+
+The indentation style MUST be uniform within *records*.
+(It MAY differ between *records*, though.)
 
 ### Date
 A *date* is a day in the calendar.
@@ -56,20 +68,28 @@ followed by a `!`
 and wrapped in “parentheses”.
 
 ### Summary
-A *summary* is user-provided text for holding arbitrary information.
+A *summary* is user-provided text for capturing arbitrary information
+about a *record* or an *entry*. *Summaries* are optional.
 
-There are two places where *summary* text MAY appear in *records*:
-- Underneath the *date*:
-  In this case the *summary* is considered to be associated with the entire *record*.
-  The *summary* MAY span multiple lines.
-  Each of its lines MUST NOT start with “blank characters”.
-- Behind *entries*:
-  In this case the *summary* is only considered to be referring to the corresponding *entry*.
-  The *summary* text follows the *entry* on the same line,
-  and it ends at the end of that line.
-  It MUST be separated from the *entry* by one “space”.
+#### Record Summary
+The *record summary* is considered to be associated with the entire *record*.
 
-### Tags
+It MUST appear underneath the *date*,
+and it MAY span multiple lines.
+Each of its lines MUST NOT start with “blank characters”.
+
+#### Entry Summary
+The *entry summary* is considered to be referring to one particular *entry*.
+
+It MUST either start on the same line as the *entry*,
+separated from it by one “space”;
+or it MUST start on the subsequent line.
+
+The *entry summary* MAY span multiple lines.
+All lines following the *entry* line MUST be indented twice;
+they also MUST NOT only consist of “blank characters”.
+
+#### Tag
 The purpose of *tags* is to help categorise *records* and *entries*.
 
 > Examples: `#gym`, `#24hours`, `#home_office`, `#読む`
@@ -85,13 +105,7 @@ preceded by a single `#` character.
 > Examples (indentation omitted): `2h30m`, `-1h Lunch break`, `11:00 - 14:15`, `8:00am - 2:00pm Long day at #school`
 
 Each *entry* MUST appear on its own line and
-MUST be indented in one of the following ways:
-- by four “spaces” (RECOMMENDED)
-- by two or three “spaces”
-- by one “tab”
-
-The indentation style MUST be uniform within *records*.
-(It MAY differ between *records*, though.)
+MUST be indented once.
 
 A *summary* MAY be associated with an *entry* (see section Summary).
 
@@ -256,6 +270,9 @@ and MUST NOT be combined into a single *record*.
 - “integer”: An unsigned number without fractional component
 
 ## V. Changelog
+
+## Version 1.3
+- Specify additional rules for multiline entry summaries.
 
 ## Version 1.2
 - Allow times to be `24:00`.
