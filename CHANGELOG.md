@@ -1,6 +1,31 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## v4.0
+- **[ FEATURE ]** Allow summaries behind entries to be continued on
+  the next line (with increased indentation level), e.g.:
+  ```
+  2020-01-01
+  Both of the following is fine:
+      15:00-16:00 This is a very long text, so
+          it can be continued on the next line.
+      16:00-17:00
+          Or, you can just start the entry summary
+          on the next line, if you like.
+  ```
+  The CLI also handles this automatically when it encounters
+  line breaks (`\n`), e.g. in the `--summary` flag value.
+- **[ FEATURE ]** Add new command `klog pause` that “pauses”
+  open-ended time ranges by adding a subsequent pause entry.
+- **[ FEATURE ]** Provide rounding option for `klog start` and
+  `klog stop`, which rounds times to the nearest multiple of
+  5m, 10m, 15m, 30m, or 60m. E.g. for `--round=15m`: `8:03` -> `8:00`.
+- **[ FEATURE ]** Add more shortcut filters, e.g. `--this-week`,
+  `--last-month`, etc.
+- **[ FEATURE ]** Embed the most recent part of the changelog for
+  convenience, via `klog --changelog`.
+- **[ BREAKING ]** Remove embedded macOS systray widget
+
 ## v3.3
 - **[ FEATURE ]** Allow times to be `24:00`, e.g. `22:00 - 24:00`.
 - **[ FEATURE ]** Add `klog goto` command for opening the file explorer
