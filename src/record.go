@@ -11,7 +11,7 @@ import (
 
 // SPEC_VERSION contains the version number of the file format
 // specification which this implementation is based on.
-const SPEC_VERSION = "1.2"
+const SPEC_VERSION = "1.3"
 
 // Record is a self-contained data container that holds the time tracking
 // information associated with a certain date.
