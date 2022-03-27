@@ -84,7 +84,7 @@ func (s EntrySummary) Equals(summary EntrySummary) bool {
 	return RecordSummary(s).Equals(RecordSummary(summary))
 }
 
-var HashTagPattern = regexp.MustCompile(`#([\p{L}\d_]+)`)
+var HashTagPattern = regexp.MustCompile(`#([\p{L}\d_-]+)`)
 
 type Tag string
 

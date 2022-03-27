@@ -161,20 +161,49 @@ func TestDetectsSummaryInequality(t *testing.T) {
 }
 
 func TestRecognisesAllTags(t *testing.T) {
-	recordSummary, _ := NewRecordSummary("Hello #world, I feel", "#GREAT-ish today #123_test!")
-	assert.Equal(t, recordSummary.Tags().ToStrings(), []string{"#123_test", "#great", "#world"})
-	assert.True(t, recordSummary.Tags().Contains("#123_test"))
+	recordSummary, _ := NewRecordSummary(
+		"Hello #world, I feel",
+		"(super #GREAT) today #123_test: #234-foo!",
+		"#太陽 #λουλούδι #पहाड #мир #Léift",
+	)
+
+	assert.Equal(t, recordSummary.Tags().ToStrings(), []string{
+		"#123_test", "#234-foo", "#great", "#léift", "#world", "#λουλούδι", "#мир", "#पह", "#太陽",
+	})
+
+	assert.True(t, recordSummary.Tags().Contains("123_test"))
+	assert.True(t, recordSummary.Tags().Contains("234-foo"))
+	assert.True(t, recordSummary.Tags().Contains("太陽"))
+	assert.True(t, recordSummary.Tags().Contains("λουλούδι"))
 	assert.True(t, recordSummary.Tags().Contains("great"))
-	assert.True(t, recordSummary.Tags().Contains("world"))
+	assert.True(t, recordSummary.Tags().Contains("#world")) // Leading `#` or not doesn’t matter
+
+	assert.False(t, recordSummary.Tags().Contains("foo"))
+	assert.False(t, recordSummary.Tags().Contains("test"))
+	assert.False(t, recordSummary.Tags().Contains("test"))
+	assert.False(t, recordSummary.Tags().Contains("ടെലിഫോണ്"))
+	assert.False(t, recordSummary.Tags().Contains("123"))
+	assert.False(t, recordSummary.Tags().Contains("wor"))
+	assert.False(t, recordSummary.Tags().Contains("super"))
+	assert.False(t, recordSummary.Tags().Contains("маркуч"))
+	assert.False(t, recordSummary.Tags().Contains("grea"))
+	assert.False(t, recordSummary.Tags().Contains("blabla"))
 
 	entrySummary, _ := NewEntrySummary("Hello #world, I feel #great #TODAY")
 	assert.Equal(t, entrySummary.Tags().ToStrings(), []string{"#great", "#today", "#world"})
 }
 
 func TestPerformsFuzzyMatching(t *testing.T) {
-	summary, _ := NewRecordSummary("Hello #world, I feel #GREAT-ish today #123_test!")
+	summary, _ := NewRecordSummary("Hello #world, I feel #gReAt today #123_test: #234-foo! #時計")
+
 	assert.True(t, summary.Tags().Contains("#123_..."))
+	assert.True(t, summary.Tags().Contains("#123_test..."))
+	assert.True(t, summary.Tags().Contains("#234-fo..."))
 	assert.True(t, summary.Tags().Contains("GR..."))
 	assert.True(t, summary.Tags().Contains("WoRl..."))
-	assert.False(t, summary.Tags().Contains("worl"))
+	assert.True(t, summary.Tags().Contains("時..."))
+
+	assert.False(t, summary.Tags().Contains("orld..."))
+	assert.False(t, summary.Tags().Contains("gra..."))
+	assert.False(t, summary.Tags().Contains("23-..."))
 }
