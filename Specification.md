@@ -1,6 +1,6 @@
 # klog – File Format Specification
 
-**Version 1.3**
+**Version x.x**
 
 klog is a file format for tracking time.
 
@@ -92,11 +92,12 @@ they also MUST NOT only consist of “blank characters”.
 #### Tag
 The purpose of *tags* is to help categorise *records* and *entries*.
 
-> Examples: `#gym`, `#24hours`, `#home_office`, `#読む`
+> Examples: `#gym`, `#24hours`, `#home-office`, `#読む`, `#ticket_127`
 
 Any amount of *tags* MAY appear anywhere within *summaries*.
-A *tag* MUST be a sequence of “letters”, “digits” or the `_` character,
-preceded by a single `#` character.
+
+A *tag* MUST only contain “letters”, “digits”, or the characters `_` or `-`.
+It MUST be preceded by a single `#` character.
 
 ### Entry
 *Entry* is an abstract term for time-related data.
@@ -270,6 +271,9 @@ and MUST NOT be combined into a single *record*.
 - “integer”: An unsigned number without fractional component
 
 ### Changelog
+
+#### Version x.x
+- Allow hyphens (`-`) to appear in tags.
 
 #### Version 1.3
 - Specify additional rules for multiline entry summaries.
