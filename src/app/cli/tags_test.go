@@ -47,3 +47,18 @@ Was #sick, need to compensate later
 #sports    8h   
 `, state.printBuffer)
 }
+
+func TestPrintTagsOverviewWithValueGrouping(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+1995-03-17
+	3h #ticket=481
+	1h #ticket=105
+	1h
+`)._Run((&Tags{}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+#ticket 4h
+ 105    1h
+ 481    3h
+`, state.printBuffer)
+}

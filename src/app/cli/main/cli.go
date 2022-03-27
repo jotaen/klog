@@ -42,6 +42,10 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error
 			f, _ := service.NewRounding(30)
 			return kong.TypeMapper(reflect.TypeOf(&f).Elem(), roundingDecoder())
 		}(),
+		func() kong.Option {
+			t := klog.NewTagOrPanic("test", "")
+			return kong.TypeMapper(reflect.TypeOf(&t).Elem(), tagDecoder())
+		}(),
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact: true,
 		}),
