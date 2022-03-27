@@ -1,6 +1,9 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## vx.x
+- **[ FEATURE / BREAKING ]** Allow hyphens (`-`) to appear in tags.
+
 ## v4.0
 - **[ FEATURE ]** Allow summaries behind entries to be continued on
   the next line (with increased indentation level), e.g.:
