@@ -212,8 +212,6 @@ If the *duration* is supposed to be negative, it MUST be preceded by a `-` chara
 ## II. Organising records in files
 
 A file MAY hold any amount of *records*.
-Apart from that it MUST NOT contain anything
-but what is allowed by this specification.
 
 There MUST appear one “blank line” between subsequent *records*;
 additional “blank lines” MAY appear.
@@ -221,6 +219,9 @@ additional “blank lines” MAY appear.
 *Records* MAY appear in any order in the file.
 
 There MAY exist multiple *records* with the same *date*.
+
+A file MUST NOT contain anything but what is allowed by this specification.
+Otherwise, it SHOULD be treated as invalid altogether.
 
 The file extension SHOULD be `.klg`, e.g. `times.klg`.
 The file encoding MUST be UTF-8.
