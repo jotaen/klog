@@ -40,7 +40,7 @@ func (h *Serialiser) serialiseRecord(r Record) string {
 			} else if i >= 1 {
 				text += canonicalStyle.LineEnding.Get() + canonicalStyle.Indentation.Get() + canonicalStyle.Indentation.Get()
 			}
-			text += l
+			text += h.Summary([]string{l})
 		}
 		text += canonicalStyle.LineEnding.Get()
 	}
