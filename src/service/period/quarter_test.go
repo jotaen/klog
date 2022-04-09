@@ -3,6 +3,7 @@ package period
 import (
 	. "github.com/jotaen/klog/src"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
@@ -30,6 +31,41 @@ func TestQuarterPeriod(t *testing.T) {
 		{NewQuarterFromDate(Ɀ_Date_(1998, 9, 30)).Period(), NewPeriod(Ɀ_Date_(1998, 7, 1), Ɀ_Date_(1998, 9, 30))},
 	} {
 		assert.Equal(t, x.expected, x.actual)
+	}
+}
+
+func TestParseValidQuarter(t *testing.T) {
+	for _, x := range []struct {
+		text   string
+		expect Period
+	}{
+		{"0000-Q1", NewPeriod(Ɀ_Date_(0, 1, 1), Ɀ_Date_(0, 3, 31))},
+		{"0475-Q2", NewPeriod(Ɀ_Date_(475, 4, 1), Ɀ_Date_(475, 6, 30))},
+		{"2008-Q3", NewPeriod(Ɀ_Date_(2008, 7, 1), Ɀ_Date_(2008, 9, 30))},
+		{"8641-Q4", NewPeriod(Ɀ_Date_(8641, 10, 1), Ɀ_Date_(8641, 12, 31))},
+	} {
+		quarter, err := NewQuarterFromString(x.text)
+		require.Nil(t, err)
+		assert.True(t, x.expect.Since().IsEqualTo(quarter.Period().Since()))
+		assert.True(t, x.expect.Until().IsEqualTo(quarter.Period().Until()))
+	}
+}
+
+func TestParseRejectsInvalidQuarter(t *testing.T) {
+	for _, x := range []string{
+		"2000-Q5",
+		"2000-Q0",
+		"2000-Q-1",
+		"2000-Q",
+		"2000-q2",
+		"2000-asdf",
+		"2000-Q01",
+		"2000-",
+		"273888-Q2",
+		"Q3",
+	} {
+		_, err := NewQuarterFromString(x)
+		require.Error(t, err)
 	}
 }
 

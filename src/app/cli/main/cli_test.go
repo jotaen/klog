@@ -111,11 +111,15 @@ func TestDecodesPeriod(t *testing.T) {
 	out := klog.run(
 		[]string{"total", "--period", "2000", "test.klg"},
 		[]string{"total", "--period", "2000-01", "test.klg"},
+		[]string{"total", "--period", "2000-Q1", "test.klg"},
+		[]string{"total", "--period", "2000-W21", "test.klg"},
 		[]string{"total", "--period", "foo", "test.klg"},
 	)
 	assert.True(t, strings.Contains(out[0], "2h"), out)
 	assert.True(t, strings.Contains(out[1], "1h"), out)
-	assert.True(t, strings.Contains(out[2], "`foo` is not a valid period"), out)
+	assert.True(t, strings.Contains(out[2], "1h"), out)
+	assert.True(t, strings.Contains(out[3], "1h"), out)
+	assert.True(t, strings.Contains(out[4], "`foo` is not a valid period"), out)
 }
 
 func TestDecodesRounding(t *testing.T) {

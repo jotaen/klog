@@ -96,7 +96,7 @@ type FilterArgs struct {
 	Until  Date          `name:"until" group:"Filter" help:"Records until this date (inclusive)"`
 	After  Date          `name:"after" group:"Filter" help:"Records after this date (exclusive)"`
 	Before Date          `name:"before" group:"Filter" help:"Records before this date (exclusive)"`
-	Period period.Period `name:"period" group:"Filter" help:"Records in this period (YYYY-MM or YYYY)"`
+	Period period.Period `name:"period" group:"Filter" help:"Records in period: YYYY (year), YYYY-MM (month), YYYY-Www (week), or YYYY-Qq (quarter)"`
 
 	// Shortcut filters
 	// The `XXX` ones are dummy entries just for the help output

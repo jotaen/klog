@@ -1,6 +1,12 @@
 package period
 
-import . "github.com/jotaen/klog/src"
+import (
+	"errors"
+	. "github.com/jotaen/klog/src"
+	"regexp"
+	"strconv"
+	"strings"
+)
 
 type Quarter struct {
 	date Date
@@ -8,8 +14,28 @@ type Quarter struct {
 
 type QuarterHash Hash
 
+var quarterPattern = regexp.MustCompile(`^\d{4}-Q\d$`)
+
 func NewQuarterFromDate(d Date) Quarter {
 	return Quarter{d}
+}
+
+func NewQuarterFromString(yyyyQq string) (Quarter, error) {
+	if !quarterPattern.MatchString(yyyyQq) {
+		return Quarter{}, errors.New("INVALID_QUARTER_PERIOD")
+	}
+	parts := strings.Split(yyyyQq, "-")
+	year, _ := strconv.Atoi(parts[0])
+	quarter, _ := strconv.Atoi(strings.TrimPrefix(parts[1], "Q"))
+	if quarter < 1 || quarter > 4 {
+		return Quarter{}, errors.New("INVALID_QUARTER_PERIOD")
+	}
+	month := quarter * 3
+	d, err := NewDate(year, month, 1)
+	if err != nil {
+		return Quarter{}, errors.New("INVALID_QUARTER_PERIOD")
+	}
+	return Quarter{d}, nil
 }
 
 func (q Quarter) Period() Period {
