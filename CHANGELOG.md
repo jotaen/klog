@@ -3,6 +3,8 @@
 
 ## vx.x
 - **[ FEATURE / BREAKING ]** Allow hyphens (`-`) to appear in tags.
+- **[ FEATURE ]** For the `--period` flag, additionally allow filtering
+  by quarter (`YYYY-Qq`, e.g. `2022-Q1`) and week (`YYYY-Www`, e.g. `YYYY-W34`).
 
 ## v4.0
 - **[ FEATURE ]** Allow summaries behind entries to be continued on
