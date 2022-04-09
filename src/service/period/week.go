@@ -1,6 +1,12 @@
 package period
 
-import . "github.com/jotaen/klog/src"
+import (
+	"errors"
+	. "github.com/jotaen/klog/src"
+	"regexp"
+	"strconv"
+	"strings"
+)
 
 type Week struct {
 	date Date
@@ -8,8 +14,42 @@ type Week struct {
 
 type WeekHash Hash
 
+var weekPattern = regexp.MustCompile(`^\d{4}-W\d{1,2}$`)
+
 func NewWeekFromDate(d Date) Week {
 	return Week{d}
+}
+
+func NewWeekFromString(yyyyWww string) (Week, error) {
+	if !weekPattern.MatchString(yyyyWww) {
+		return Week{}, errors.New("INVALID_WEEK_PERIOD")
+	}
+	parts := strings.Split(yyyyWww, "-")
+	year, _ := strconv.Atoi(parts[0])
+	week, _ := strconv.Atoi(strings.TrimPrefix(parts[1], "W"))
+	if week < 1 {
+		return Week{}, errors.New("INVALID_WEEK_PERIOD")
+	}
+	reference, err := func() (Date, error) {
+		ref, yErr := NewDate(year, 7, 1)
+		if yErr != nil {
+			return nil, errors.New("INVALID_WEEK_PERIOD")
+		}
+		for ref.Weekday() != 1 {
+			ref = ref.PlusDays(-1)
+		}
+		_, w := ref.WeekNumber()
+		ref = ref.PlusDays((week - w) * 7)
+		return ref, nil
+	}()
+	if err != nil {
+		return Week{}, err
+	}
+	if _, refWeekNr := reference.WeekNumber(); refWeekNr != week {
+		// Prevent implicit roll over.
+		return Week{}, errors.New("INVALID_WEEK_PERIOD")
+	}
+	return Week{reference}, nil
 }
 
 func (w Week) Period() Period {
