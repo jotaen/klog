@@ -92,7 +92,7 @@ they also MUST NOT only consist of “blank characters”.
 #### Tag
 The purpose of *tags* is to help categorise *records* and *entries*.
 
-> Examples: `#gym`, `#24hours`, `#home-office`, `#読む`, `#ticket=891`, `#song="Yellow Submarine"`
+> Examples: `#gym`, `#home-office`, `#読む`, `#ticket=891`, `#project="22/48.3"`
 
 Any amount of *tags* MAY appear anywhere within *summaries*.
 
@@ -108,7 +108,7 @@ It MUST be interpreted as if it was all lower-case.
 The *tag value* MAY be surrounded by a pair of matching quotes,
 which MUST either be `"` (RECOMMENDED) or `'`.
 - If the *tag value* is quoted, it MAY contain any character
-  except for the quote character itself,
+  except for the respective quote character itself,
   or a “newline”.
   In case no matching closing quote appears on the same line,
   the *tag value* MUST be treated as absent.
