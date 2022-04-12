@@ -221,7 +221,7 @@ additional “blank lines” MAY appear.
 There MAY exist multiple *records* with the same *date*.
 
 A file MUST NOT contain anything but what is allowed by this specification.
-Otherwise, it SHOULD be treated as invalid altogether.
+Otherwise, it SHOULD NOT be evaluated.
 
 The file extension SHOULD be `.klg`, e.g. `times.klg`.
 The file encoding MUST be UTF-8.
