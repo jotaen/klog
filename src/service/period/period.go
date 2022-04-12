@@ -1,6 +1,7 @@
 package period
 
 import (
+	"errors"
 	. "github.com/jotaen/klog/src"
 	"math"
 )
@@ -18,6 +19,22 @@ type periodData struct {
 
 func NewPeriod(since Date, until Date) Period {
 	return &periodData{since, until}
+}
+
+func NewPeriodFromPatternString(pattern string) (Period, error) {
+	type PeriodCreator interface{ Period() Period }
+	for _, create := range []func(string) (PeriodCreator, error){
+		func(s string) (PeriodCreator, error) { return NewYearFromString(s) },
+		func(s string) (PeriodCreator, error) { return NewMonthFromString(s) },
+		func(s string) (PeriodCreator, error) { return NewQuarterFromString(s) },
+		func(s string) (PeriodCreator, error) { return NewWeekFromString(s) },
+	} {
+		p, err := create(pattern)
+		if err == nil {
+			return p.Period(), nil
+		}
+	}
+	return nil, errors.New("INVALID_PERIOD_PATTERN")
 }
 
 func (p *periodData) Since() Date {

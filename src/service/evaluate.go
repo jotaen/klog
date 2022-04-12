@@ -17,16 +17,6 @@ func Total(rs ...Record) Duration {
 	return total
 }
 
-// TotalEntries calculates the overall of entries.
-// It disregards open ranges.
-func TotalEntries(es ...Entry) Duration {
-	total := NewDuration(0, 0)
-	for _, e := range es {
-		total = total.Plus(e.Duration())
-	}
-	return total
-}
-
 // HypotheticalTotal calculates the overall total time of records,
 // assuming all open ranges would be closed at the `until` time.
 func HypotheticalTotal(until gotime.Time, rs ...Record) (Duration, bool) {

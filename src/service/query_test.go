@@ -31,9 +31,9 @@ func sampleRecordsForQuerying() []Record {
 			return r
 		}(), func() Record {
 			r := NewRecord(Ɀ_Date_(2000, 1, 3))
-			r.SetSummary(Ɀ_RecordSummary_("#foo"))
-			r.AddDuration(NewDuration(4, 0), Ɀ_EntrySummary_("test", "foo #bar"))
-			r.AddDuration(NewDuration(4, 0), Ɀ_EntrySummary_("#bar"))
+			r.SetSummary(Ɀ_RecordSummary_("#foo=a"))
+			r.AddDuration(NewDuration(4, 0), Ɀ_EntrySummary_("test", "foo #bar=1"))
+			r.AddDuration(NewDuration(4, 0), Ɀ_EntrySummary_("#bar=2"))
 			return r
 		}(),
 	}
@@ -62,7 +62,7 @@ func TestQueryWithBefore(t *testing.T) {
 }
 
 func TestQueryWithTagOnEntries(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []string{"bar"}})
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []Tag{NewTagOrPanic("bar", "")}})
 	require.Len(t, rs, 3)
 	assert.Equal(t, 31, rs[0].Date().Day())
 	assert.Equal(t, 1, rs[1].Date().Day())
@@ -71,7 +71,7 @@ func TestQueryWithTagOnEntries(t *testing.T) {
 }
 
 func TestQueryWithTagOnOverallSummary(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []string{"foo"}})
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []Tag{NewTagOrPanic("foo", "")}})
 	require.Len(t, rs, 4)
 	assert.Equal(t, 30, rs[0].Date().Day())
 	assert.Equal(t, 1, rs[1].Date().Day())
@@ -81,20 +81,30 @@ func TestQueryWithTagOnOverallSummary(t *testing.T) {
 }
 
 func TestQueryWithTagOnEntriesAndInSummary(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []string{"foo", "bar"}})
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []Tag{NewTagOrPanic("foo", ""), NewTagOrPanic("bar", "")}})
 	require.Len(t, rs, 2)
 	assert.Equal(t, 1, rs[0].Date().Day())
 	assert.Equal(t, 3, rs[1].Date().Day())
 	assert.Equal(t, NewDuration(8+6, 0), Total(rs...))
 }
 
-func TestQueryWithFuzzyTags(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []string{"fo..."}})
-	require.Len(t, rs, 4)
-	assert.Equal(t, 30, rs[0].Date().Day())
-	assert.Equal(t, 1, rs[1].Date().Day())
-	assert.Equal(t, 2, rs[2].Date().Day())
-	assert.Equal(t, 3, rs[3].Date().Day())
+func TestQueryWithTagValues(t *testing.T) {
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []Tag{NewTagOrPanic("foo", "a")}})
+	require.Len(t, rs, 1)
+	assert.Equal(t, 3, rs[0].Date().Day())
+	assert.Equal(t, NewDuration(8, 0), Total(rs...))
+}
+
+func TestQueryWithTagValuesInEntries(t *testing.T) {
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []Tag{NewTagOrPanic("bar", "1")}})
+	require.Len(t, rs, 1)
+	assert.Equal(t, 3, rs[0].Date().Day())
+	assert.Equal(t, NewDuration(4, 0), Total(rs...))
+}
+
+func TestQueryWithTagNonMatchingValues(t *testing.T) {
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []Tag{NewTagOrPanic("bar", "3")}})
+	require.Len(t, rs, 0)
 }
 
 func TestQueryWithSorting(t *testing.T) {
