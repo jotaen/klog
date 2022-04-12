@@ -2,6 +2,8 @@
 **Summary of changes of the command line tool**
 
 ## vx.x
+- **[ META ]** Release the file format specification into the public domain
+  (under the CC0/OWFa dual license).
 - **[ FEATURE ]** Allow tags to (optionally) have values assigned to them,
   e.g. `#ticket=1764` or `#type=work`. The values can be quoted if
   they contain special characters: `#ticket="github #148"`.
