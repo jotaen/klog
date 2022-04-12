@@ -2,11 +2,12 @@
 **Summary of changes of the command line tool**
 
 ## v5.0
-- **[ META ]** Release the file format specification into the public domain
+- **[ META ]** Release the klog file format specification into the public domain
   (under the CC0/OWFa dual license).
+  Read it here: https://github.com/jotaen/klog/blob/main/Specification.md
 - **[ FEATURE ]** Allow tags to (optionally) have values assigned to them,
   e.g. `#ticket=1764` or `#type=work`. The values can be quoted if
-  they contain special characters: `#ticket="github #148"`.
+  they contain special characters: `#project="22/48.3"`.
 - **[ FEATURE / BREAKING ]** Allow hyphens (`-`) to appear in tags, e.g. `#home-office`.
 - **[ FEATURE ]** For the `--period` flag, additionally allow filtering
   by quarter (`YYYY-Qq`, e.g. `2022-Q1`) and week (`YYYY-Www`, e.g. `YYYY-W34`).
