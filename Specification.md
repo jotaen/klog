@@ -97,25 +97,26 @@ The purpose of *tags* is to help categorise *records* and *entries*.
 Any amount of *tags* MAY appear anywhere within *summaries*.
 
 A *tag* MUST consist of a *tag name*,
-and MAY additionally consist of a *tag value*.
+which MUST be preceded by a single `#` character.
+The *tag name* MAY be followed by a `=` character
+and a *tag value*.
 
-The *tag name* MUST be preceded by a `#` character.
-It MUST only contain “letters”, “digits”, or the characters `_` or `-`.
-The *tag name* MUST be interpreted as if it was all lower-case.
+The *tag name* MUST only contain
+“letters”, “digits”, or the characters `_` or `-`.
+It MUST be interpreted as if it was all lower-case.
 
-The *tag value* MUST be separated by a `=` character from the *tag name*.
-It MAY be surrounded by a pair of matching quotes,
+The *tag value* MAY be surrounded by a pair of matching quotes,
 which MUST either be `"` (RECOMMENDED) or `'`.
 - If the *tag value* is quoted, it MAY contain any character
   except for the quote character itself,
   or a “newline”.
   In case no matching closing quote appears on the same line,
-  the *tag value* MUST be treated as absent altogether.
+  the *tag value* MUST be treated as absent.
 - If the *tag value* is not quoted, it MUST only contain
   “letters”, “digits”, or the characters `_` or `-`.
 
-An empty *tag value* (e.g. `#tag=`, or `#tag=""`)
-MUST be treated the same as an absent *tag value* (`#tag`).
+An empty *tag value* (e.g. `#tag=` or `#tag=""`)
+MUST be treated the same as an absent *tag value* (e.g. `#tag`).
 
 ### Entry
 *Entry* is an abstract term for time-related data.
