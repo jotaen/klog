@@ -1,7 +1,7 @@
 # Changelog
 **Summary of changes of the command line tool**
 
-## vx.x
+## v5.0
 - **[ META ]** Release the file format specification into the public domain
   (under the CC0/OWFa dual license).
 - **[ FEATURE ]** Allow tags to (optionally) have values assigned to them,
