@@ -23,11 +23,11 @@ func (opt *Print) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
+	now := ctx.Now()
+	records = opt.ApplyFilter(now, records)
 	if len(records) == 0 {
 		return nil
 	}
-	now := ctx.Now()
-	records = opt.ApplyFilter(now, records)
 	records = opt.ApplySort(records)
 	ctx.Print("\n" + ctx.Serialiser().SerialiseRecords(records...) + "\n")
 

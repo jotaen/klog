@@ -101,3 +101,21 @@ func roundingDecoder() kong.MapperFunc {
 		return nil
 	}
 }
+
+func tagDecoder() kong.MapperFunc {
+	return func(ctx *kong.DecodeContext, target reflect.Value) error {
+		var value string
+		if err := ctx.Scan.PopValueInto("tag", &value); err != nil {
+			return err
+		}
+		if value == "" {
+			return errors.New("Please provide a valid tag")
+		}
+		t, err := klog.NewTagFromString(value)
+		if err != nil {
+			return errors.New("`" + value + "` is not a valid tag")
+		}
+		target.Set(reflect.ValueOf(t))
+		return nil
+	}
+}
