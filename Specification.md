@@ -279,6 +279,7 @@ and MUST NOT be combined into a single *record*.
 ### Changelog
 
 #### Version x.x
+- Release the specification document under the CC0/OWFa license.
 - Allow hyphens (`-`) to appear in tags.
 
 #### Version 1.3
