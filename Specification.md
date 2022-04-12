@@ -1,6 +1,6 @@
 # klog – File Format Specification
 
-**Version x.x**
+**Version 1.4**
 
 klog is a file format for tracking time.
 
@@ -299,7 +299,7 @@ and MUST NOT be combined into a single *record*.
 
 ### Changelog
 
-#### Version x.x
+#### Version 1.4
 - Release the specification document under the CC0/OWFa license.
 - Support for tags to (optionally) have values assigned to them.
 - Allow hyphens (`-`) to appear in tags.
