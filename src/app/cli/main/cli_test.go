@@ -135,3 +135,23 @@ func TestDecodesRounding(t *testing.T) {
 	assert.True(t, strings.Contains(out[0], "`asdf` is not a valid rounding value"), out)
 	assert.True(t, strings.Contains(out[1], "- ?"), out)
 }
+
+func TestDecodesTags(t *testing.T) {
+	klog := &Env{
+		files: map[string]string{
+			"test.klg": "2020-01-01\n#foo\n\n2020-01-02\n\t1h #bar=1",
+		},
+	}
+	out := klog.run(
+		[]string{"print", "--tag", "asdf=asdf=asdf", "test.klg"},
+		[]string{"print", "--tag", "foo&bar", "test.klg"},
+		[]string{"print", "--tag", "foo", "test.klg"},
+		[]string{"print", "--tag", "bar=1", "test.klg"},
+		[]string{"print", "--tag", "#bar='1'", "test.klg"},
+	)
+	assert.True(t, strings.Contains(out[0], "`asdf=asdf=asdf` is not a valid tag"), out)
+	assert.True(t, strings.Contains(out[1], "`foo&bar` is not a valid tag"), out)
+	assert.True(t, strings.Contains(out[2], "#foo"), out)
+	assert.True(t, strings.Contains(out[3], "#bar=1"), out)
+	assert.True(t, strings.Contains(out[4], "#bar=1"), out)
+}

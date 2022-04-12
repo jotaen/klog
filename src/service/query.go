@@ -8,7 +8,7 @@ import (
 
 // FilterQry represents the filter clauses of a query.
 type FilterQry struct {
-	Tags          []string
+	Tags          []Tag
 	BeforeOrEqual Date
 	AfterOrEqual  Date
 	Dates         []Date
@@ -54,34 +54,14 @@ func Sort(rs []Record, startWithOldest bool) []Record {
 	return sorted
 }
 
-// EntryTagLookup returns a map for looking up matching entries for a given tag.
-func EntryTagLookup(rs ...Record) map[Tag][]Entry {
-	entriesByTag := make(map[Tag][]Entry)
-	for _, r := range rs {
-		alreadyAdded := make(map[Tag]bool)
-		for t := range r.Summary().Tags() {
-			entriesByTag[t] = append(entriesByTag[t], r.Entries()...)
-			alreadyAdded[t] = true
-		}
-		for _, e := range r.Entries() {
-			for t := range e.Summary().Tags() {
-				if alreadyAdded[t] {
-					continue
-				}
-				entriesByTag[t] = append(entriesByTag[t], e)
-			}
-		}
-	}
-	return entriesByTag
-}
-
-func reduceRecordToMatchingTags(queriedTags []string, r Record) (Record, bool) {
+func reduceRecordToMatchingTags(queriedTags []Tag, r Record) (Record, bool) {
 	if isSubsetOf(queriedTags, r.Summary().Tags()) {
 		return r, true
 	}
 	var matchingEntries []Entry
 	for _, e := range r.Entries() {
-		if isSubsetOf(queriedTags, Merge(r.Summary().Tags(), e.Summary().Tags())) {
+		allTags := Merge(r.Summary().Tags(), e.Summary().Tags())
+		if isSubsetOf(queriedTags, allTags) {
 			matchingEntries = append(matchingEntries, e)
 		}
 	}
@@ -92,7 +72,7 @@ func reduceRecordToMatchingTags(queriedTags []string, r Record) (Record, bool) {
 	return r, true
 }
 
-func isSubsetOf(queriedTags []string, allTags TagSet) bool {
+func isSubsetOf(queriedTags []Tag, allTags TagSet) bool {
 	for _, t := range queriedTags {
 		if !allTags.Contains(t) {
 			return false
