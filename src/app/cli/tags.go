@@ -8,6 +8,7 @@ import (
 )
 
 type Tags struct {
+	Values bool `name:"values" short:"v" help:"Display breakdown of tag values"`
 	lib.FilterArgs
 	lib.WarnArgs
 	lib.NoStyleArgs
@@ -26,14 +27,26 @@ func (opt *Tags) Run(ctx app.Context) error {
 	if len(totalByTag) == 0 {
 		return nil
 	}
-	table := terminalformat.NewTable(2, " ")
+	numberOfColumns := 2
+	if opt.Values {
+		numberOfColumns = 3
+	}
+	table := terminalformat.NewTable(numberOfColumns, " ")
 	for _, t := range totalByTag {
+		totalString := ctx.Serialiser().Duration(t.Total)
 		if t.Tag.Value() == "" {
 			table.CellL("#" + t.Tag.Name())
+			table.CellL(totalString)
 		} else {
-			table.CellL(" " + t.Tag.Value())
+			if opt.Values {
+				table.CellL(" " + t.Tag.Value())
+				table.Skip(1)
+				table.CellL(totalString)
+			}
 		}
-		table.CellL(ctx.Serialiser().Duration(t.Total))
+		if t.Tag.Value() == "" && opt.Values {
+			table.Skip(1)
+		}
 	}
 	table.Collect(ctx.Print)
 	opt.WarnArgs.PrintWarnings(ctx, records)

@@ -54,11 +54,24 @@ func TestPrintTagsOverviewWithValueGrouping(t *testing.T) {
 	3h #ticket=481
 	1h #ticket=105
 	1h
+`)._Run((&Tags{Values: true}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+#ticket 4h   
+ 105       1h
+ 481       3h
+`, state.printBuffer)
+}
+
+func TestPrintTagsOverviewWithoutValueGrouping(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+1995-03-17
+	3h #ticket=481
+	1h #ticket=105
+	1h
 `)._Run((&Tags{}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
 #ticket 4h
- 105    1h
- 481    3h
 `, state.printBuffer)
 }
