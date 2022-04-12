@@ -300,6 +300,7 @@ and MUST NOT be combined into a single *record*.
 
 #### Version x.x
 - Release the specification document under the CC0/OWFa license.
+- Support for tags to (optionally) have values assigned to them.
 - Allow hyphens (`-`) to appear in tags.
 
 #### Version 1.3
