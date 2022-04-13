@@ -25,4 +25,7 @@ version numbers of both are independent of each other.
 
 ## About
 
-klog is free and open-source software distributed under the [MIT license](LICENSE.txt).
+klog is free and open-source software.
+
+- The command line tool is distributed under the [MIT license](LICENSE.txt).
+- The file specification is available under the [CC0/OWFa](Specification.md#License) dual license.
