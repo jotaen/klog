@@ -122,6 +122,7 @@ which MUST either be `"` (RECOMMENDED) or `'`.
   or a “newline”.
   In case no matching closing quote appears on the same line,
   the *tag value* MUST be treated as absent.
+  [^qutvl]
 - If the *tag value* is not quoted, it MUST only contain
   “letters”, “digits”, or the characters `_` or `-`.
 
@@ -277,7 +278,7 @@ it MAY be negative;
 it MAY be greater than 24 hours.
 
 Overlapping *ranges* MUST be counted individually
-and MUST NOT be offset against each other.
+and MUST each be counted fully.
 E.g., the two *entries* `12:00 - 13:00` and `12:30 - 13:30` result in *total time* of `2h`.
 
 *Ranges* with *shifted times* MUST be fully counted towards
@@ -310,7 +311,7 @@ and MUST NOT be combined into a single *record*.
 - Release the specification document under the CC0/OWFa license.
 - Support for tags to (optionally) have values assigned to them.
 - Allow hyphens (`-`) to appear in tags.
-- Annotate rules with context information.
+- Add footnotes to make context information explicit.
 
 #### Version 1.3
 - Specify additional rules for multiline entry summaries.
@@ -333,20 +334,24 @@ Their purpose is to preserve contextual info that would otherwise be left implic
 [^indst]: The indentation must be uniform, otherwise the levels can’t be determined
     unambiguously. E.g., if 4 spaces are encountered at the beginning of the line, it would
     be unclear whether that is 2 * 2 spaces or 1 * 4 spaces.
-[^resui]: This is mainly to avoid ambiguity with the indented entries. There is no strict
-    technical reason that would forbid that.
+[^resui]: A line in the record summary can’t start with blank characters, so that they can’t
+    be visually confused with the (indented) entries. There is no strict technical reason for
+    this, though.
 [^iwses]: In contrast to record summaries, entry summaries can start with whitespace.
-    That is for allowing the user to vertically align the text of all the lines.
-    A by-effect of this rule is that there can’t be a third indentation level.
+    That is for allowing the user to vertically align the summary text on all entry lines.
+    A by-effect of this rule is that there can never be a third indentation level.
 [^csitn]: The character set that a tag is allowed to consist of is deliberately limited,
-    so that tags can appear naturally in the flow of a sentence. E.g.:
-    Went to the #office, then to the #gym!
-[^plrep]: The `?` placeholder can be repeated, to allow users to visually align it with
-    other entries. E.g. `8:00-?????` has the same width as `8:00-9:00`.
-[^oasor]: This is an arbitrary constraint, but it’s important for making interactions with
-    tools easier. Otherwise, when doing `klog stop` on the CLI, it would be ambiguous
-    which of the open ranges it should apply to.
-[^fcocr]: By allowing a file only to contain records and nothing else, the file effectively
-    becomes an ordered collection of records. That makes it easy to automatically
-    process files, because e.g. they can just be concatenated without having to regard
-    any potential previous context.
+    so that tags can appear as natural words in the flow of a sentence. E.g.:
+    `Went to the #office, then to the #gym!`. That’s also why tag names should be interpreted
+    as case-insensitive. (Tag values, on the other hand, are always to be interpreted literally.)
+[^qutvl]: The main use-case for quoted tag values is for literal references, such as a project id,
+    or a name: `#project="2022/7.2"` or `#call="Liz Jones"`. That’s also why tag values
+    are always to be interpreted as case-sensitive (in contrast to tag names).
+[^plrep]: The `?` placeholder in open ranges can be repeated, to allow users to visually
+    align it with other entries. E.g. `8:00-?????` has the same width as `8:00-9:00`.
+[^oasor]: Open ranges to be only allowed to appear once per record has a mere practical motivation.
+    It’s important for making interactions with tools easier. Otherwise, when stopping activities
+    via a tool, it might be ambiguous which of the open ranges it should apply to.
+[^fcocr]: By allowing a file to only contain records and nothing else, a klog file can effectively
+    be treated as a plain-text database. That makes it easy to process files programmatically,
+    because every record acts as a self-contained unit of data.
