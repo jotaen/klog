@@ -42,7 +42,8 @@ To signify the second level of indentation,
 the indentation sequence MUST appear twice.
 
 The indentation style MUST be uniform within *records*.
-(It MAY differ between *records*, though.)[^1]
+(It MAY differ between *records*, though.)
+[^indst]
 
 ### Date
 A *date* is a day in the calendar.
@@ -76,7 +77,8 @@ The *record summary* is considered to be associated with the entire *record*.
 
 It MUST appear underneath the *date*,
 and it MAY span multiple lines.
-Each of its lines MUST NOT start with “blank characters”.[^2]
+Each of its lines MUST NOT start with “blank characters”.
+[^resui]
 
 #### Entry Summary
 The *entry summary* is considered to be referring to one particular *entry*.
@@ -87,7 +89,8 @@ or it MUST start on the subsequent line.
 
 The *entry summary* MAY span multiple lines.
 All lines following the *entry* line MUST be indented twice;
-they also MUST NOT only consist of “blank characters”.[^3]
+they also MUST NOT only consist of “blank characters”.
+[^iwses]
 
 #### Tag
 The purpose of *tags* is to help categorise *records* and *entries*.
@@ -95,8 +98,9 @@ The purpose of *tags* is to help categorise *records* and *entries*.
 > Examples: `#gym`, `#24hours`, `#home_office`, `#読む`
 
 Any amount of *tags* MAY appear anywhere within *summaries*.
-A *tag* MUST be a sequence of “letters”, “digits” or the `_` character[^4],
+A *tag* MUST be a sequence of “letters”, “digits” or the `_` character,
 preceded by a single `#` character.
+[^csitn]
 
 ### Entry
 *Entry* is an abstract term for time-related data.
@@ -169,10 +173,12 @@ i.e. the end *time* is not determined yet.
 except that the end *time* MUST be replaced by a placeholder.
 The placeholder MUST be denoted by the character `?`,
 e.g. `9:00 - ?`. 
-The `?` MAY be repeated, e.g. `9:00 - ???`.[^5]
+The `?` MAY be repeated, e.g. `9:00 - ???`.
+[^plrep]
 The placeholder MUST NOT be *shifted*.
 
-*Open ranges* MUST NOT appear more than once per *record*.[^6]
+*Open ranges* MUST NOT appear more than once per *record*.
+[^oasor]
 
 ### Duration
 A *duration* is an *entry* that represents a period of time.
@@ -213,7 +219,8 @@ If the *duration* is supposed to be negative, it MUST be preceded by a `-` chara
 
 A file MAY hold any amount of *records*.
 Apart from that it MUST NOT contain anything
-but what is allowed by this specification.[^7]
+but what is allowed by this specification.
+[^fcocr]
 
 There MUST appear one “blank line” between subsequent *records*;
 additional “blank lines” MAY appear.
@@ -286,26 +293,26 @@ and MUST NOT be combined into a single *record*.
 
 ## V. Footnotes
 
-These footnotes are purely informational.
-Their purpose is to preserve contextual background info that would otherwise be left implicit.
+The following footnotes are purely informational.
+Their purpose is to preserve contextual info that would otherwise be left implicit.
 
-[^1]: The indentation must be uniform, otherwise the levels can’t be determined
-      unambiguously. E.g., if 4 spaces are encountered at the beginning of the line,
-      it would be unclear whether that is 2 * 2 spaces or 1 * 4 spaces.
-[^2]: This is mainly to avoid ambiguity with the indented entries. There is no strict
-      technical reason that would forbid that.
-[^3]: In contrast to record summaries, entry summaries can start with whitespace.
-      That is for allowing the user to vertically align the text of all the lines.
-      A by-effect of this rule is that there can’t be a third indentation level.
-[^4]: The character set that a tag is allowed to consist of is deliberately limited,
-      so that tags can appear naturally in the flow of a sentence. E.g.:
-      Went to the #office, then to the #gym!
-[^5]: The `?` placeholder can be repeated, to allow users to visually align it with
-      other entries. E.g. `8:00-?????` has the same width as `8:00-9:00`.
-[^6]: This is an arbitrary constraint, but it’s important for making interactions with
-      tools easier. Otherwise, when doing `klog stop` on the CLI, it would be ambiguous
-      which of the open ranges it should apply to.
-[^7]: By allowing a file only to contain records and nothing else, the file effectively
-      becomes an ordered collection of records. That makes it easy to automatically
-      process files, because e.g. they can just be concatenated without having to regard
-      any potential previous context.
+[^indst]: The indentation must be uniform, otherwise the levels can’t be determined
+    unambiguously. E.g., if 4 spaces are encountered at the beginning of the line, it would
+    be unclear whether that is 2 * 2 spaces or 1 * 4 spaces.
+[^resui]: This is mainly to avoid ambiguity with the indented entries. There is no strict
+    technical reason that would forbid that.
+[^iwses]: In contrast to record summaries, entry summaries can start with whitespace.
+    That is for allowing the user to vertically align the text of all the lines.
+    A by-effect of this rule is that there can’t be a third indentation level.
+[^csitn]: The character set that a tag is allowed to consist of is deliberately limited,
+    so that tags can appear naturally in the flow of a sentence. E.g.:
+    Went to the #office, then to the #gym!
+[^plrep]: The `?` placeholder can be repeated, to allow users to visually align it with
+    other entries. E.g. `8:00-?????` has the same width as `8:00-9:00`.
+[^oasor]: This is an arbitrary constraint, but it’s important for making interactions with
+    tools easier. Otherwise, when doing `klog stop` on the CLI, it would be ambiguous
+    which of the open ranges it should apply to.
+[^fcocr]: By allowing a file only to contain records and nothing else, the file effectively
+    becomes an ordered collection of records. That makes it easy to automatically
+    process files, because e.g. they can just be concatenated without having to regard
+    any potential previous context.
