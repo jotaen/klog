@@ -1,10 +1,16 @@
 # klog – File Format Specification
 
-**Version x.x**
+**Version 1.4**
 
 klog is a file format for tracking time.
 
-It is free and open-source software distributed under the MIT-License.
+## License
+
+Per [Creative Commons CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/),
+to the extent possible under law, the editors have waived all copyright and related or
+neighbouring rights to this work.
+In addition, as of March 2022, the editors have made this specification available under the
+[Open Web Foundation Agreement 1.0](https://www.openwebfoundation.org/the-agreements/the-owf-1-0-agreements-granted-claims/owfa-1-0).
 
 ## Preface
 
@@ -95,12 +101,32 @@ they also MUST NOT only consist of “blank characters”.
 #### Tag
 The purpose of *tags* is to help categorise *records* and *entries*.
 
-> Examples: `#gym`, `#24hours`, `#home_office`, `#読む`
+> Examples: `#gym`, `#home-office`, `#読む`, `#ticket=891`, `#project="22/48.3"`
 
 Any amount of *tags* MAY appear anywhere within *summaries*.
-A *tag* MUST be a sequence of “letters”, “digits” or the `_` character,
-preceded by a single `#` character.
+
+A *tag* MUST consist of a *tag name*,
+which MUST be preceded by a single `#` character.
+The *tag name* MAY be followed by a `=` character
+and a *tag value*.
+
+The *tag name* MUST only contain
+“letters”, “digits”, or the characters `_` or `-`.
+It MUST be interpreted as if it was all lower-case.
 [^csitn]
+
+The *tag value* MAY be surrounded by a pair of matching quotes,
+which MUST either be `"` (RECOMMENDED) or `'`.
+- If the *tag value* is quoted, it MAY contain any character
+  except for the respective quote character itself,
+  or a “newline”.
+  In case no matching closing quote appears on the same line,
+  the *tag value* MUST be treated as absent.
+- If the *tag value* is not quoted, it MUST only contain
+  “letters”, “digits”, or the characters `_` or `-`.
+
+An empty *tag value* (e.g. `#tag=` or `#tag=""`)
+MUST be treated the same as an absent *tag value* (e.g. `#tag`).
 
 ### Entry
 *Entry* is an abstract term for time-related data.
@@ -218,9 +244,6 @@ If the *duration* is supposed to be negative, it MUST be preceded by a `-` chara
 ## II. Organising records in files
 
 A file MAY hold any amount of *records*.
-Apart from that it MUST NOT contain anything
-but what is allowed by this specification.
-[^fcocr]
 
 There MUST appear one “blank line” between subsequent *records*;
 additional “blank lines” MAY appear.
@@ -229,15 +252,19 @@ additional “blank lines” MAY appear.
 
 There MAY exist multiple *records* with the same *date*.
 
+A file MUST NOT contain anything but what is allowed by this specification.
+Otherwise, it SHOULD NOT be evaluated.
+[^fcocr]
+
 The file extension SHOULD be `.klg`, e.g. `times.klg`.
 The file encoding MUST be UTF-8.
 
-Newlines MUST be encoded with either the
+“Newlines” MUST be encoded with either the
 linefeed character (LF, escape sequence `\n`),
 or carriage return and linefeed character (CRLF, escape sequences `\r\n`).
 These two styles SHOULD NOT be mixed within the same file.
 
-There SHOULD be a newline at the end of the file.
+There SHOULD be a “newline” at the end of the file.
 
 ## III. Evaluating data
 
@@ -268,15 +295,22 @@ and MUST NOT be combined into a single *record*.
 ### Glossary of technical terms
 
 - “space”: The character ` ` (U+0020)
-- “tab”: The tab character (U+0009), escape sequence `\t`
+- “tab”: The tab character (U+0009, escape sequence `\t`)
 - “blank character”: A “tab”, or a character as defined by the Unicode Space Separator category (Zs)
 - “blank line”: A line that only contains “blank characters”
 - “parenthesis”: The opening and closing parentheses `(` and `)` (U+0028 and U+0029)
 - “letter”: A character as defined by the Unicode Letter category (L)
 - “digit”: Any of 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 - “integer”: An unsigned number without fractional component
+- “newline”: Either a linefeed (U+0010, escape sequence `\n`), or a carriage return and linefeed (U+0013 and U+0010, escape sequence `\r\n`)
 
 ### Changelog
+
+#### Version 1.4
+- Release the specification document under the CC0/OWFa license.
+- Support for tags to (optionally) have values assigned to them.
+- Allow hyphens (`-`) to appear in tags.
+- Annotate rules with context information.
 
 #### Version 1.3
 - Specify additional rules for multiline entry summaries.
