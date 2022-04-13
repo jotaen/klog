@@ -327,30 +327,30 @@ and MUST NOT be combined into a single *record*.
 
 ## V. Footnotes
 
-The following footnotes are purely informational.
-Their purpose is to preserve contextual info that would otherwise be left implicit.
+The following footnotes are purely informational,
+to make contextual background information explicit.
 
 [^indst]: The indentation must be uniform, otherwise the levels can’t be determined
     unambiguously. E.g., if 4 spaces are encountered at the beginning of the line, it would
     be unclear whether that is 2 * 2 spaces or 1 * 4 spaces.
-[^resui]: A line in the record summary can’t start with blank characters, so that they can’t
-    be visually confused with the (indented) entries. There is no strict technical reason for
-    this, though.
-[^iwses]: In contrast to record summaries, entry summaries can start with whitespace.
-    That is for allowing the user to vertically align the summary text on all entry lines.
-    A by-effect of this rule is that there can never be a third indentation level.
+[^resui]: Lines in the record summary can’t start with blank characters, to avoid that they
+    might be visually confused with the (indented) entries. There is no strict technical
+    reason for this, though.
+[^iwses]: In contrast to record summaries, lines in entry summaries can start with blank
+    characters. That is for allowing the user to vertically align the summary text on all
+    entry lines. A by-effect of this rule is that there can never be a third indentation level.
 [^csitn]: The character set that a tag is allowed to consist of is deliberately limited,
     so that tags can appear as natural words in the flow of a sentence. E.g.:
-    `Went to the #office, then to the #gym!`. That’s also why tag names should be interpreted
+    `#Office day (#coding, #meetings)`. That’s also why tag names are to be interpreted
     as case-insensitive. (Tag values, on the other hand, are always to be interpreted literally.)
 [^qutvl]: The main use-case for quoted tag values is for literal references, such as a project id,
     or a name: `#project="2022/7.2"` or `#call="Liz Jones"`. That’s also why tag values
     are always to be interpreted as case-sensitive (in contrast to tag names).
 [^plrep]: The `?` placeholder in open ranges can be repeated, to allow users to visually
     align it with other entries. E.g. `8:00-?????` has the same width as `8:00-9:00`.
-[^oasor]: Open ranges to be only allowed to appear once per record has a mere practical motivation.
-    It’s important for making interactions with tools easier. Otherwise, when stopping activities
-    via a tool, it might be ambiguous which of the open ranges it should apply to.
+[^oasor]: Open ranges only being allowed to appear once per record has a mere practical motivation:
+    it’s important for making interactions with tools easier. Otherwise, when stopping activities
+    via a tool, it might be ambiguous which of the open ranges is meant.
 [^fcocr]: By allowing a file to only contain records and nothing else, a klog file can effectively
-    be treated as a plain-text database. That makes it easy to process files programmatically,
-    because every record acts as a self-contained unit of data.
+    be perceived as a text-based database. That makes it easy to process files programmatically,
+    because every record is a self-contained and strictly structured unit of data.
