@@ -6,7 +6,7 @@ klog is a file format for tracking time.
 
 ## License
 
-Per [Creative Commons CC0 1.0 Universal](http://creativecommons.org/publicdomain/zero/1.0/),
+Per [Creative Commons CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/),
 to the extent possible under law, the editors have waived all copyright and related or
 neighbouring rights to this work.
 In addition, as of March 2022, the editors have made this specification available under the
