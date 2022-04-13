@@ -27,8 +27,8 @@ func TestCreatesNewTag(t *testing.T) {
 
 func TestTagMatching(t *testing.T) {
 	for _, x := range []struct {
-		tag   string
-		query string
+		tag1 string
+		tag2 string
 	}{
 		// Identity
 		{`#tag`, `#tag`},
@@ -52,22 +52,19 @@ func TestTagMatching(t *testing.T) {
 		{`#tag=value`, `#tag="value"`},
 		{`#tag=value`, `#tag='value'`},
 		{`#tag="value"`, `#tag='value'`},
-
-		// Name-only tag matches tag with value
-		{`#tag=value`, `#tag`},
 	} {
-		first, err1 := NewTagFromString(x.tag)
+		first, err1 := NewTagFromString(x.tag1)
 		require.Nil(t, err1)
-		second, err2 := NewTagFromString(x.query)
+		second, err2 := NewTagFromString(x.tag2)
 		require.Nil(t, err2)
-		assert.True(t, first.Matches(second))
+		assert.Equal(t, first, second)
 	}
 }
 
 func TestTagIsNotMatching(t *testing.T) {
 	for _, x := range []struct {
-		tag   string
-		query string
+		tag1 string
+		tag2 string
 	}{
 		// Name is different
 		{`#tag`, `#t-a-g`},
@@ -82,11 +79,11 @@ func TestTagIsNotMatching(t *testing.T) {
 		{`#tag='V A L U E'`, `#tag='v a l u e'`},
 		{`#tag=''`, `#tag=' '`},
 	} {
-		first, err1 := NewTagFromString(x.tag)
+		first, err1 := NewTagFromString(x.tag1)
 		require.Nil(t, err1)
-		second, err2 := NewTagFromString(x.query)
+		second, err2 := NewTagFromString(x.tag2)
 		require.Nil(t, err2)
-		assert.False(t, first.Matches(second))
+		assert.NotEqual(t, first, second)
 	}
 }
 
