@@ -278,7 +278,7 @@ it MAY be negative;
 it MAY be greater than 24 hours.
 
 Overlapping *ranges* MUST each be counted fully.
-E.g., the two *entries* `12:00 - 13:00` and `12:30 - 13:30` result in *total time* of `2h`.
+E.g., the two *entries* `12:00 - 13:00` and `12:30 - 13:30` result in a *total time* of `2h`.
 
 *Ranges* with *shifted times* MUST be fully counted towards
 the *date* at which they appear in the *record*.
