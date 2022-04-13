@@ -60,16 +60,6 @@ func (t Tag) Value() string {
 	return t.value
 }
 
-func (t Tag) Matches(queryTag Tag) bool {
-	if t.Name() != queryTag.Name() {
-		return false
-	}
-	if queryTag.Value() != "" {
-		return t.Value() == queryTag.Value()
-	}
-	return true
-}
-
 func (t Tag) ToString() string {
 	result := "#" + t.name
 	if t.value != "" {
