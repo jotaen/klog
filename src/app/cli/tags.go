@@ -1,15 +1,14 @@
 package cli
 
 import (
-	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/cli/lib"
 	"github.com/jotaen/klog/src/app/cli/lib/terminalformat"
 	"github.com/jotaen/klog/src/service"
-	"sort"
 )
 
 type Tags struct {
+	Values bool `name:"values" short:"v" help:"Display breakdown of tag values"`
 	lib.FilterArgs
 	lib.WarnArgs
 	lib.NoStyleArgs
@@ -24,30 +23,32 @@ func (opt *Tags) Run(ctx app.Context) error {
 	}
 	now := ctx.Now()
 	records = opt.ApplyFilter(now, records)
-	entriesByTag := service.EntryTagLookup(records...)
-	tagsOrdered := sortTags(entriesByTag)
-	if len(tagsOrdered) == 0 {
+	totalByTag := service.AggregateTotalsByTags(records...)
+	if len(totalByTag) == 0 {
 		return nil
 	}
-	table := terminalformat.NewTable(2, " ")
-	for _, t := range tagsOrdered {
-		es := entriesByTag[t]
-		table.
-			CellL(t.ToString()).
-			CellL(ctx.Serialiser().Duration(service.TotalEntries(es...)))
+	numberOfColumns := 2
+	if opt.Values {
+		numberOfColumns = 3
+	}
+	table := terminalformat.NewTable(numberOfColumns, " ")
+	for _, t := range totalByTag {
+		totalString := ctx.Serialiser().Duration(t.Total)
+		if t.Tag.Value() == "" {
+			table.CellL("#" + t.Tag.Name())
+			table.CellL(totalString)
+		} else {
+			if opt.Values {
+				table.CellL(" " + t.Tag.Value())
+				table.Skip(1)
+				table.CellL(totalString)
+			}
+		}
+		if t.Tag.Value() == "" && opt.Values {
+			table.Skip(1)
+		}
 	}
 	table.Collect(ctx.Print)
 	opt.WarnArgs.PrintWarnings(ctx, records)
 	return nil
-}
-
-func sortTags(ts map[Tag][]Entry) []Tag {
-	var result []Tag
-	for t := range ts {
-		result = append(result, t)
-	}
-	sort.Slice(result, func(i int, j int) bool {
-		return result[i] < result[j]
-	})
-	return result
 }

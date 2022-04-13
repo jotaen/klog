@@ -3,8 +3,6 @@ package klog
 import (
 	"errors"
 	"regexp"
-	"sort"
-	"strings"
 )
 
 // RecordSummary contains the summary lines of the overall summary that
@@ -50,16 +48,17 @@ func (s EntrySummary) Lines() []string {
 }
 
 func (s RecordSummary) Tags() TagSet {
-	tags := NewTagSet()
+	tags := NewEmptyTagSet()
 	for _, l := range s {
 		for _, m := range HashTagPattern.FindAllStringSubmatch(l, -1) {
-			tag := NewTag(m[1])
-			tags[tag] = true
+			tag, _ := NewTagFromString(m[0])
+			tags.Put(tag)
 		}
 	}
 	return tags
 }
 
+// Tags returns the tags that the entry summary contains.
 func (s EntrySummary) Tags() TagSet {
 	return RecordSummary(s).Tags()
 }
@@ -82,67 +81,4 @@ func (s EntrySummary) Equals(summary EntrySummary) bool {
 		return true
 	}
 	return RecordSummary(s).Equals(RecordSummary(summary))
-}
-
-var HashTagPattern = regexp.MustCompile(`#([\p{L}\d_]+)`)
-
-type Tag string
-
-func (t Tag) ToString() string {
-	return "#" + string(t)
-}
-
-func (ts TagSet) ToStrings() []string {
-	var tags []string
-	for t := range ts {
-		tags = append(tags, t.ToString())
-	}
-	sort.Slice(tags, func(i, j int) bool {
-		return tags[i] < tags[j]
-	})
-	return tags
-}
-
-func (ts TagSet) Contains(queryTag string) bool {
-	if !strings.HasSuffix(queryTag, "...") {
-		return ts[NewTag(queryTag)]
-	}
-	queryBaseTag := NewTag(strings.TrimSuffix(queryTag, "..."))
-	for t := range ts {
-		if strings.HasPrefix(t.ToString(), queryBaseTag.ToString()) {
-			return true
-		}
-	}
-	return false
-}
-
-type TagSet map[Tag]bool
-
-func NewTag(value string) Tag {
-	if value[0] == '#' {
-		value = value[1:]
-	}
-	return Tag(strings.ToLower(value))
-}
-
-func NewTagSet(tags ...string) TagSet {
-	result := make(map[Tag]bool, len(tags))
-	for _, v := range tags {
-		if len(v) == 0 {
-			continue
-		}
-		tag := NewTag(v)
-		result[tag] = true
-	}
-	return result
-}
-
-func Merge(tagSets ...TagSet) TagSet {
-	result := NewTagSet()
-	for _, ts := range tagSets {
-		for t := range ts {
-			result[t] = true
-		}
-	}
-	return result
 }

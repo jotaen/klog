@@ -6,6 +6,25 @@ import (
 	"testing"
 )
 
+func TestDeserialisePattern(t *testing.T) {
+	for _, x := range []string{
+		"2022",
+		"2022-05",
+		"2022-Q2",
+		"2022-W18",
+	} {
+		period, err := NewPeriodFromPatternString(x)
+		assert.Nil(t, err)
+		assert.IsType(t, NewPeriod(Ɀ_Date_(1, 1, 1), Ɀ_Date_(1, 1, 1)), period)
+	}
+}
+
+func TestDeserialisePatternFails(t *testing.T) {
+	period, err := NewPeriodFromPatternString("x")
+	assert.Error(t, err)
+	assert.Nil(t, period)
+}
+
 func TestHashYieldsDistinctValues(t *testing.T) {
 	dayHashes := make(map[DayHash]bool)
 	weekHashes := make(map[WeekHash]bool)

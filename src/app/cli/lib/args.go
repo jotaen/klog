@@ -90,13 +90,13 @@ func (args *NowArgs) Total(reference gotime.Time, rs ...Record) Duration {
 
 type FilterArgs struct {
 	// General filters
-	Tags   []string      `name:"tag" group:"Filter" help:"Records (or entries) that match this tag"`
+	Tags   []Tag         `name:"tag" group:"Filter" help:"Records (or entries) that match this tag"`
 	Date   []Date        `name:"date" group:"Filter" help:"Records at this date"`
 	Since  Date          `name:"since" group:"Filter" help:"Records since this date (inclusive)"`
 	Until  Date          `name:"until" group:"Filter" help:"Records until this date (inclusive)"`
 	After  Date          `name:"after" group:"Filter" help:"Records after this date (exclusive)"`
 	Before Date          `name:"before" group:"Filter" help:"Records before this date (exclusive)"`
-	Period period.Period `name:"period" group:"Filter" help:"Records in this period (YYYY-MM or YYYY)"`
+	Period period.Period `name:"period" group:"Filter" help:"Records in period: YYYY (year), YYYY-MM (month), YYYY-Www (week), or YYYY-Qq (quarter)"`
 
 	// Shortcut filters
 	// The `XXX` ones are dummy entries just for the help output

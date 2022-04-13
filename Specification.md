@@ -269,25 +269,22 @@ and MUST NOT be combined into a single *record*.
 - “digit”: Any of 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 - “integer”: An unsigned number without fractional component
 
-## V. Changelog
+### Changelog
 
-## Version x.x
-- Add footnotes for preserving background info.
-
-## Version 1.3
+#### Version 1.3
 - Specify additional rules for multiline entry summaries.
 
-## Version 1.2
+#### Version 1.2
 - Allow times to be `24:00`.
 - Some minor restructurings for enhanced clarity.
 
-## Version 1.1
+#### Version 1.1
 - Add a constraint regarding the indentation that requires the indentation style
   to be uniform within a record.
 - Remove technical term “whitespace”, since its meaning is ambiguous and the definition lacked clarity.
   Replace it with “blank character” and base the definition on the Unicode category.
 
-## VI. Footnotes
+## V. Footnotes
 
 These footnotes are purely informational.
 Their purpose is to preserve contextual background info that would otherwise be left implicit.

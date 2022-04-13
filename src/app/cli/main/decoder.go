@@ -75,18 +75,8 @@ func periodDecoder() kong.MapperFunc {
 		if value == "" {
 			return errors.New("Please provide a valid period")
 		}
-		p := func() period.Period {
-			yearPeriod, yErr := period.NewYearFromString(value)
-			if yErr == nil {
-				return yearPeriod.Period()
-			}
-			monthPeriod, mErr := period.NewMonthFromString(value)
-			if mErr == nil {
-				return monthPeriod.Period()
-			}
-			return nil
-		}()
-		if p == nil {
+		p, err := period.NewPeriodFromPatternString(value)
+		if err != nil {
 			return errors.New("`" + value + "` is not a valid period")
 		}
 		target.Set(reflect.ValueOf(p))
@@ -108,6 +98,24 @@ func roundingDecoder() kong.MapperFunc {
 			return errors.New("`" + value + "` is not a valid rounding value")
 		}
 		target.Set(reflect.ValueOf(r))
+		return nil
+	}
+}
+
+func tagDecoder() kong.MapperFunc {
+	return func(ctx *kong.DecodeContext, target reflect.Value) error {
+		var value string
+		if err := ctx.Scan.PopValueInto("tag", &value); err != nil {
+			return err
+		}
+		if value == "" {
+			return errors.New("Please provide a valid tag")
+		}
+		t, err := klog.NewTagFromString(value)
+		if err != nil {
+			return errors.New("`" + value + "` is not a valid tag")
+		}
+		target.Set(reflect.ValueOf(t))
 		return nil
 	}
 }
