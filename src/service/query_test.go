@@ -45,6 +45,12 @@ func TestQueryWithNoClauses(t *testing.T) {
 	assert.Equal(t, NewDuration(5+6+7+8, -30+15), Total(rs...))
 }
 
+func TestQueryWithAtDate(t *testing.T) {
+	rs := Filter(sampleRecordsForQuerying(), FilterQry{AtDate: Ɀ_Date_(2000, 1, 2)})
+	require.Len(t, rs, 1)
+	assert.Equal(t, NewDuration(7, 0), Total(rs...))
+}
+
 func TestQueryWithAfter(t *testing.T) {
 	rs := Filter(sampleRecordsForQuerying(), FilterQry{AfterOrEqual: Ɀ_Date_(2000, 1, 1)})
 	require.Len(t, rs, 3)
