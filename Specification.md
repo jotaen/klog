@@ -49,6 +49,7 @@ the indentation sequence MUST appear twice.
 
 The indentation style MUST be uniform within *records*.
 (It MAY differ between *records*, though.)
+[^indst]
 
 ### Date
 A *date* is a day in the calendar.
@@ -83,6 +84,7 @@ The *record summary* is considered to be associated with the entire *record*.
 It MUST appear underneath the *date*,
 and it MAY span multiple lines.
 Each of its lines MUST NOT start with “blank characters”.
+[^resui]
 
 #### Entry Summary
 The *entry summary* is considered to be referring to one particular *entry*.
@@ -94,6 +96,7 @@ or it MUST start on the subsequent line.
 The *entry summary* MAY span multiple lines.
 All lines following the *entry* line MUST be indented twice;
 they also MUST NOT only consist of “blank characters”.
+[^iwses]
 
 #### Tag
 The purpose of *tags* is to help categorise *records* and *entries*.
@@ -110,6 +113,7 @@ and a *tag value*.
 The *tag name* MUST only contain
 “letters”, “digits”, or the characters `_` or `-`.
 It MUST be interpreted as if it was all lower-case.
+[^csitn]
 
 The *tag value* MAY be surrounded by a pair of matching quotes,
 which MUST either be `"` (RECOMMENDED) or `'`.
@@ -118,6 +122,7 @@ which MUST either be `"` (RECOMMENDED) or `'`.
   or a “newline”.
   In case no matching closing quote appears on the same line,
   the *tag value* MUST be treated as absent.
+  [^qutvl]
 - If the *tag value* is not quoted, it MUST only contain
   “letters”, “digits”, or the characters `_` or `-`.
 
@@ -196,9 +201,11 @@ except that the end *time* MUST be replaced by a placeholder.
 The placeholder MUST be denoted by the character `?`,
 e.g. `9:00 - ?`. 
 The `?` MAY be repeated, e.g. `9:00 - ???`.
+[^plrep]
 The placeholder MUST NOT be *shifted*.
 
 *Open ranges* MUST NOT appear more than once per *record*.
+[^oasor]
 
 ### Duration
 A *duration* is an *entry* that represents a period of time.
@@ -248,6 +255,7 @@ There MAY exist multiple *records* with the same *date*.
 
 A file MUST NOT contain anything but what is allowed by this specification.
 Otherwise, it SHOULD NOT be evaluated.
+[^fcocr]
 
 The file extension SHOULD be `.klg`, e.g. `times.klg`.
 The file encoding MUST be UTF-8.
@@ -269,8 +277,7 @@ The resulting *total time* MAY be 0;
 it MAY be negative;
 it MAY be greater than 24 hours.
 
-Overlapping *ranges* MUST be counted individually
-and MUST NOT be offset against each other.
+Overlapping *ranges* MUST each be counted fully.
 E.g., the two *entries* `12:00 - 13:00` and `12:30 - 13:30` result in *total time* of `2h`.
 
 *Ranges* with *shifted times* MUST be fully counted towards
@@ -303,6 +310,7 @@ and MUST NOT be combined into a single *record*.
 - Release the specification document under the CC0/OWFa license.
 - Support for tags to (optionally) have values assigned to them.
 - Allow hyphens (`-`) to appear in tags.
+- Add footnotes to make context information explicit.
 
 #### Version 1.3
 - Specify additional rules for multiline entry summaries.
@@ -316,3 +324,33 @@ and MUST NOT be combined into a single *record*.
   to be uniform within a record.
 - Remove technical term “whitespace”, since its meaning is ambiguous and the definition lacked clarity.
   Replace it with “blank character” and base the definition on the Unicode category.
+
+## V. Footnotes
+
+The following footnotes are purely informational,
+to make contextual background information explicit.
+
+[^indst]: The indentation must be uniform, otherwise the levels can’t be determined
+    unambiguously. E.g., if 4 spaces are encountered at the beginning of the line, it would
+    be unclear whether that is 2 * 2 spaces or 1 * 4 spaces.
+[^resui]: Lines in the record summary can’t start with blank characters, to avoid that they
+    might be visually confused with the (indented) entries. There is no strict technical
+    reason for this, though.
+[^iwses]: In contrast to record summaries, lines in entry summaries can start with blank
+    characters. That is for allowing the user to vertically align the summary text on all
+    entry lines. A by-effect of this rule is that there can never be a third indentation level.
+[^csitn]: The character set that a tag is allowed to consist of is deliberately limited,
+    so that tags can appear as natural words in the flow of a sentence. E.g.:
+    `#Office day (#coding, #meetings)`. That’s also why tag names are to be interpreted
+    as case-insensitive. (Tag values, on the other hand, are always to be interpreted literally.)
+[^qutvl]: The main use-case for quoted tag values is for literal references, such as a project id,
+    or a name: `#project="2022/7.2"` or `#call="Liz Jones"`. That’s also why tag values
+    are always to be interpreted as case-sensitive (in contrast to tag names).
+[^plrep]: The `?` placeholder in open ranges can be repeated, to allow users to visually
+    align it with other entries. E.g. `8:00-?????` has the same width as `8:00-9:00`.
+[^oasor]: Open ranges only being allowed to appear once per record has a mere practical motivation:
+    it’s important for making interactions with tools easier. Otherwise, when stopping activities
+    via a tool, it might be ambiguous which of the open ranges is meant.
+[^fcocr]: By allowing a file to only contain records and nothing else, a klog file can effectively
+    be perceived as a text-based database. That makes it easy to process files programmatically,
+    because every record is a self-contained and strictly structured unit of data.
