@@ -2,7 +2,6 @@ package service
 
 import (
 	. "github.com/jotaen/klog/src"
-	"github.com/jotaen/klog/src/service/period"
 	gosort "sort"
 )
 
@@ -11,16 +10,15 @@ type FilterQry struct {
 	Tags          []Tag
 	BeforeOrEqual Date
 	AfterOrEqual  Date
-	Dates         []Date
+	AtDate        Date
 }
 
 // Filter returns all records the matches the query.
 // A matching record must satisfy *all* query clauses.
 func Filter(rs []Record, o FilterQry) []Record {
-	dates := newDateSet(o.Dates)
 	var records []Record
 	for _, r := range rs {
-		if len(dates) > 0 && !dates[period.NewDayFromDate(r.Date()).Hash()] {
+		if o.AtDate != nil && !o.AtDate.IsEqualTo(r.Date()) {
 			continue
 		}
 		if o.BeforeOrEqual != nil && !o.BeforeOrEqual.IsAfterOrEqual(r.Date()) {
@@ -79,12 +77,4 @@ func isSubsetOf(queriedTags []Tag, allTags TagSet) bool {
 		}
 	}
 	return true
-}
-
-func newDateSet(ds []Date) map[period.DayHash]bool {
-	dict := make(map[period.DayHash]bool, len(ds))
-	for _, d := range ds {
-		dict[period.NewDayFromDate(d).Hash()] = true
-	}
-	return dict
 }

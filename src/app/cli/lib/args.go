@@ -90,8 +90,8 @@ func (args *NowArgs) Total(reference gotime.Time, rs ...Record) Duration {
 
 type FilterArgs struct {
 	// General filters
-	Tags   []Tag         `name:"tag" group:"Filter" help:"Records (or entries) that match this tag"`
-	Date   []Date        `name:"date" group:"Filter" help:"Records at this date"`
+	Tags   []Tag         `name:"tag" group:"Filter" help:"Records (or entries) that match these tags"`
+	Date   Date          `name:"date" group:"Filter" help:"Records at this date"`
 	Since  Date          `name:"since" group:"Filter" help:"Records since this date (inclusive)"`
 	Until  Date          `name:"until" group:"Filter" help:"Records until this date (inclusive)"`
 	After  Date          `name:"after" group:"Filter" help:"Records after this date (exclusive)"`
@@ -129,7 +129,7 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
 		BeforeOrEqual: args.Until,
 		AfterOrEqual:  args.Since,
 		Tags:          args.Tags,
-		Dates:         args.Date,
+		AtDate:        args.Date,
 	}
 	if args.Period != nil {
 		qry.BeforeOrEqual = args.Period.Until()
@@ -142,13 +142,13 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
 		qry.BeforeOrEqual = args.Before.PlusDays(-1)
 	}
 	if args.Today {
-		qry.Dates = append(qry.Dates, today)
+		qry.AtDate = today
 	}
 	if args.Yesterday {
-		qry.Dates = append(qry.Dates, today.PlusDays(-1))
+		qry.AtDate = today.PlusDays(-1)
 	}
 	if args.Tomorrow {
-		qry.Dates = append(qry.Dates, today.PlusDays(+1))
+		qry.AtDate = today.PlusDays(+1)
 	}
 	shortcutPeriod := func() period.Period {
 		if args.ThisWeek || args.ThisWeekAlias {
