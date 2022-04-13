@@ -325,7 +325,7 @@ and MUST NOT be combined into a single *record*.
 - Remove technical term “whitespace”, since its meaning is ambiguous and the definition lacked clarity.
   Replace it with “blank character” and base the definition on the Unicode category.
 
-## V. Footnotes
+### Footnotes
 
 The following footnotes are purely informational,
 to make contextual background information explicit.
