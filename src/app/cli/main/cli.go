@@ -11,6 +11,7 @@ import (
 	"github.com/jotaen/klog/src/app/cli/lib"
 	"github.com/jotaen/klog/src/service"
 	"github.com/jotaen/klog/src/service/period"
+	"github.com/willabides/kongplete"
 	"reflect"
 )
 
@@ -53,6 +54,12 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error
 	if nErr != nil {
 		return -1, nErr
 	}
+
+	// When klog is invoked by shell completion (specifically, when the
+	// bash-specific COMP_LINE environment variable is set), the
+	// kongplete.Complete function generates a list of possible completions,
+	// prints them one per line to stdout, and then exits the program early.
+	kongplete.Complete(kongApp)
 
 	kongCtx, cErr := kongApp.Parse(args)
 	if cErr != nil {

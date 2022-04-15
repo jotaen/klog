@@ -3,6 +3,10 @@ Package cli contains handlers for all available commands.
 */
 package cli
 
+import (
+	"github.com/willabides/kongplete"
+)
+
 type Cli struct {
 	// Evaluate
 	Print  Print  `cmd:"" group:"Evaluate" help:"Pretty-prints records"`
@@ -25,9 +29,10 @@ type Cli struct {
 	Bk        Bookmarks `cmd:"" group:"Bookmarks" hidden:"" help:"Alias"`
 
 	// Misc
-	Edit    Edit    `cmd:"" group:"Misc" help:"Opens a file or bookmark in your editor"`
-	Goto    Goto    `cmd:"" group:"Misc" help:"Opens the file explorer at the given location"`
-	Json    Json    `cmd:"" group:"Misc" help:"Converts records to JSON"`
-	Info    Info    `cmd:"" group:"Misc" default:"withargs" help:"Displays meta info about klog"`
-	Version Version `cmd:"" group:"Misc" help:"Prints version info and check for updates"`
+	Completion kongplete.InstallCompletions `cmd:"" group:"Misc" help:"Output code to define a completion specification for klog in the current shell"`
+	Edit       Edit                         `cmd:"" group:"Misc" help:"Opens a file or bookmark in your editor"`
+	Goto       Goto                         `cmd:"" group:"Misc" help:"Opens the file explorer at the given location"`
+	Json       Json                         `cmd:"" group:"Misc" help:"Converts records to JSON"`
+	Info       Info                         `cmd:"" group:"Misc" default:"withargs" help:"Displays meta info about klog"`
+	Version    Version                      `cmd:"" group:"Misc" help:"Prints version info and check for updates"`
 }
