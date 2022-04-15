@@ -22,6 +22,8 @@ func PredictBookmarks(ctx app.Context) complete.Predictor {
 
 func Predictors(ctx app.Context) map[string]complete.Predictor {
 	return map[string]complete.Predictor{
+		"file":             complete.PredictFiles("*.klg"),
+		"bookmark":         PredictBookmarks(ctx),
 		"file or bookmark": complete.PredictOr(complete.PredictFiles("*.klg"), PredictBookmarks(ctx)),
 	}
 }
