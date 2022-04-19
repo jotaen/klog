@@ -60,7 +60,7 @@ func (tr *timeRange) Duration() Duration {
 }
 
 func (tr *timeRange) ToString() string {
-	return tr.Start().ToString() + " - " + tr.End().ToString()
+	return tr.Start().ToString() + " - " + tr.End().ToString() + " [" + tr.Duration().ToString() + "]"
 }
 
 func (or *openRange) Start() Time {
