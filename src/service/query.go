@@ -13,6 +13,71 @@ type FilterQry struct {
 	AtDate        Date
 }
 
+type Matcher func(Record) Record
+
+func DateMatcher(d Date) Matcher {
+	return func(r Record) Record {
+		if r.Date().IsEqualTo(d) {
+			return r
+		}
+		return nil
+	}
+}
+
+func TagMatcher(t Tag) Matcher {
+	return func(r Record) Record {
+		reducedR, hasMatched := reduceRecordToMatchingTags([]Tag{t}, r)
+		if !hasMatched {
+			return nil
+		}
+		return reducedR
+	}
+}
+
+func AndMatcher(m1 Matcher, m2 Matcher) Matcher {
+	return func(r Record) Record {
+		r1 := m1(r)
+		if r1 == nil {
+			return nil
+		}
+		return m2(r1)
+	}
+}
+
+func OrMatcher(m1 Matcher, m2 Matcher) Matcher {
+	return func(r Record) Record {
+		r1 := m1(r)
+		if r1 != nil {
+			return r1
+		}
+		return m2(r)
+	}
+}
+
+func NotMatcher(m Matcher) Matcher {
+	return func(r Record) Record {
+		if m(r) == nil {
+			return r
+		}
+		return nil
+	}
+}
+
+func IdentityMatcher(r Record) Record {
+	return r
+}
+
+func ForthFilter(matches Matcher, rs []Record) []Record {
+	var records []Record
+	for _, r := range rs {
+		reducedRecord := matches(r)
+		if reducedRecord != nil {
+			records = append(records, reducedRecord)
+		}
+	}
+	return records
+}
+
 // Filter returns all records the matches the query.
 // A matching record must satisfy *all* query clauses.
 func Filter(rs []Record, o FilterQry) []Record {

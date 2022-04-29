@@ -121,10 +121,72 @@ type FilterArgs struct {
 	ThisYearAlias    bool `name:"thisyear" hidden:""`
 	LastYear         bool `name:"last-year" hidden:""`
 	LastYearAlias    bool `name:"lastyear" hidden:""`
+
+	Forth bool `name:"forth" group:"Forth filters"` // TODO write help text
+	And   bool `name:"and" group:"Forth filters"`
+	Or    bool `name:"or" group:"Forth filters"`
+	Not   bool `name:"not" group:"Forth filters"`
+}
+
+func flagWithValue(args []string) (string, string) {
+	if len(args) == 0 {
+		return "", ""
+	}
+	if len(args) == 1 {
+		return args[0], ""
+	}
+	return args[0], args[1]
+}
+
+func applyForthFilter(now gotime.Time, rs []Record) []Record {
+	var stack []service.Matcher
+	args := os.Args[3:]
+
+	for len(args) > 0 {
+		flag, value := flagWithValue(args)
+		switch flag {
+		case "--date":
+			date, _ := NewDateFromString(value)
+			matcher := service.DateMatcher(date)
+			stack = append(stack, matcher)
+			args = args[2:]
+		case "--tag":
+			tag, _ := NewTagFromString(value)
+			matcher := service.TagMatcher(tag)
+			stack = append(stack, matcher)
+			args = args[2:]
+		case "--and":
+			if len(stack) >= 2 {
+				stack = append(stack[0:len(stack)-2], service.AndMatcher(stack[len(stack)-2], stack[len(stack)-1]))
+			}
+			args = args[1:]
+		case "--or":
+			if len(stack) >= 2 {
+				stack = append(stack[0:len(stack)-2], service.OrMatcher(stack[len(stack)-2], stack[len(stack)-1]))
+			}
+			args = args[1:]
+		case "--not":
+			if len(stack) >= 1 {
+				stack = append(stack[0:len(stack)-1], service.NotMatcher(stack[len(stack)-1]))
+			}
+			args = args[1:]
+		default:
+			args = args[1:]
+		}
+	}
+
+	matcher := service.IdentityMatcher
+	if len(stack) == 1 {
+		matcher = stack[0]
+	}
+	return service.ForthFilter(matcher, rs)
 }
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
 	today := NewDateFromGo(now)
+	if args.Forth {
+		return applyForthFilter(now, rs)
+	}
 	qry := service.FilterQry{
 		BeforeOrEqual: args.Until,
 		AfterOrEqual:  args.Since,
