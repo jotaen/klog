@@ -73,7 +73,7 @@ func TestQueryWithBefore(t *testing.T) {
 }
 
 func TestQueryInPeriod(t *testing.T) {
-	qry := Query{InPeriod: period.NewPeriod(Ɀ_Date_(2000, 1, 1), Ɀ_Date_(2000, 1, 31))}
+	qry := Query{InPeriod: []period.Period{period.NewPeriod(Ɀ_Date_(2000, 1, 1), Ɀ_Date_(2000, 1, 31))}}
 	rs := Filter(qry.ToMatcher(), sampleRecordsForQuerying())
 	require.Len(t, rs, 3)
 	assert.Equal(t, 1, rs[0].Date().Day())

@@ -129,8 +129,11 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
 		AtDate:   args.Date,
 		UpToDate: args.Until,
 		FromDate: args.Since,
-		InPeriod: args.Period,
+		InPeriod: nil,
 		WithTags: args.Tags,
+	}
+	if args.Period != nil {
+		qry.InPeriod = append(qry.InPeriod, args.Period)
 	}
 	if args.Before != nil {
 		qry.UpToDate = args.Before.PlusDays(-1)
@@ -147,36 +150,29 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
 	if args.Tomorrow {
 		qry.AtDate = today.PlusDays(+1)
 	}
-	shortcutPeriod := func() period.Period {
-		if args.ThisWeek || args.ThisWeekAlias {
-			return period.NewWeekFromDate(today).Period()
-		}
-		if args.LastWeek || args.LastWeekAlias {
-			return period.NewWeekFromDate(today).Previous().Period()
-		}
-		if args.ThisMonth || args.ThisMonthAlias {
-			return period.NewMonthFromDate(today).Period()
-		}
-		if args.LastMonth || args.LastMonthAlias {
-			return period.NewMonthFromDate(today).Previous().Period()
-		}
-		if args.ThisQuarter || args.ThisQuarterAlias {
-			return period.NewQuarterFromDate(today).Period()
-		}
-		if args.LastQuarter || args.LastQuarterAlias {
-			return period.NewQuarterFromDate(today).Previous().Period()
-		}
-		if args.ThisYear || args.ThisYearAlias {
-			return period.NewYearFromDate(today).Period()
-		}
-		if args.LastYear || args.LastYearAlias {
-			return period.NewYearFromDate(today).Previous().Period()
-		}
-		return nil
-	}()
-	if shortcutPeriod != nil {
-		qry.UpToDate = shortcutPeriod.Until()
-		qry.FromDate = shortcutPeriod.Since()
+	if args.ThisWeek || args.ThisWeekAlias {
+		qry.InPeriod = append(qry.InPeriod, period.NewWeekFromDate(today).Period())
+	}
+	if args.LastWeek || args.LastWeekAlias {
+		qry.InPeriod = append(qry.InPeriod, period.NewWeekFromDate(today).Previous().Period())
+	}
+	if args.ThisMonth || args.ThisMonthAlias {
+		qry.InPeriod = append(qry.InPeriod, period.NewMonthFromDate(today).Period())
+	}
+	if args.LastMonth || args.LastMonthAlias {
+		qry.InPeriod = append(qry.InPeriod, period.NewMonthFromDate(today).Previous().Period())
+	}
+	if args.ThisQuarter || args.ThisQuarterAlias {
+		qry.InPeriod = append(qry.InPeriod, period.NewQuarterFromDate(today).Period())
+	}
+	if args.LastQuarter || args.LastQuarterAlias {
+		qry.InPeriod = append(qry.InPeriod, period.NewQuarterFromDate(today).Previous().Period())
+	}
+	if args.ThisYear || args.ThisYearAlias {
+		qry.InPeriod = append(qry.InPeriod, period.NewYearFromDate(today).Period())
+	}
+	if args.LastYear || args.LastYearAlias {
+		qry.InPeriod = append(qry.InPeriod, period.NewYearFromDate(today).Previous().Period())
 	}
 	return service.Filter(qry.ToMatcher(), rs)
 }

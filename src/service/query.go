@@ -22,7 +22,7 @@ type Query struct {
 	AtDate   Date
 	UpToDate Date
 	FromDate Date
-	InPeriod period.Period
+	InPeriod []period.Period
 	WithTags []Tag
 }
 
@@ -37,8 +37,8 @@ func (q *Query) ToMatcher() Matcher {
 	if q.FromDate != nil {
 		result = &andMatcher{result, &fromDateMatcher{q.FromDate}}
 	}
-	if q.InPeriod != nil {
-		result = &andMatcher{result, &inPeriodMatcher{q.InPeriod}}
+	for _, p := range q.InPeriod {
+		result = &andMatcher{result, &inPeriodMatcher{p}}
 	}
 	for _, t := range q.WithTags {
 		result = &andMatcher{result, &tagMatcher{t}}
