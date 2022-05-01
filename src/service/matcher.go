@@ -105,6 +105,7 @@ func (m *andMatcher) Apply(r Record) Record {
 	return m.right.Apply(r1)
 }
 
+//lint:ignore U1000 Ignore unused code
 type orMatcher struct {
 	left  Matcher
 	right Matcher
@@ -118,6 +119,7 @@ func (m *orMatcher) Apply(r Record) Record {
 	return m.right.Apply(r)
 }
 
+//lint:ignore U1000 Ignore unused code
 type notMatcher struct {
 	matcher Matcher
 }

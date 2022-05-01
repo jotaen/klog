@@ -123,67 +123,6 @@ type FilterArgs struct {
 	LastYearAlias    bool `name:"lastyear" hidden:""`
 }
 
-func flagWithValue(args []string) (string, string) {
-	if len(args) == 0 {
-		return "", ""
-	}
-	if len(args) == 1 {
-		return args[0], ""
-	}
-	return args[0], args[1]
-}
-
-//func applyRPNFilter(now gotime.Time, rs []Record) []Record {
-//	var stack []service.Matcher
-//	args := os.Args[2:]
-//
-//	kong.Scan(os.Args[2:]...)
-//
-//	for len(args) > 0 {
-//		flag, value := flagWithValue(args)
-//		switch flag {
-//		// TODO error messages if number of expected operands is invalid
-//		case "--date":
-//			date, _ := NewDateFromString(value)
-//			matcher := service.NewDateMatcher(date)
-//			stack = append(stack, matcher)
-//			args = args[2:]
-//		case "--tag":
-//			tag, _ := NewTagFromString(value)
-//			matcher := service.NewTagMatcher(tag)
-//			stack = append(stack, matcher)
-//			args = args[2:]
-//		case "--and":
-//			if len(stack) >= 2 {
-//				stack = append(stack[0:len(stack)-2], service.NewAndMatcher(stack[len(stack)-2], stack[len(stack)-1]))
-//			}
-//			args = args[1:]
-//		case "--or":
-//			if len(stack) >= 2 {
-//				stack = append(stack[0:len(stack)-2], service.NewOrMatcher(stack[len(stack)-2], stack[len(stack)-1]))
-//			}
-//			args = args[1:]
-//		case "--not":
-//			if len(stack) >= 1 {
-//				stack = append(stack[0:len(stack)-1], service.NewNotMatcher(stack[len(stack)-1]))
-//			}
-//			args = args[1:]
-//		default:
-//			args = args[1:]
-//		}
-//	}
-//
-//	matcher := service.NewIdentityMatcher()
-//	for len(stack) > 1 {
-//		stack = append(stack[0:len(stack)-2], service.NewAndMatcher(stack[len(stack)-2], stack[len(stack)-1]))
-//	}
-//	if len(stack) == 1 {
-//		matcher = stack[0]
-//	}
-//	fmt.Println(matcher.Explain())
-//	return service.Filter(matcher, rs)
-//}
-
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {
 	today := NewDateFromGo(now)
 	qry := service.Query{
