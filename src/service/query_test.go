@@ -2,6 +2,7 @@ package service
 
 import (
 	. "github.com/jotaen/klog/src"
+	"github.com/jotaen/klog/src/service/period"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -40,19 +41,22 @@ func sampleRecordsForQuerying() []Record {
 }
 
 func TestQueryWithNoClauses(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{})
+	qry := Query{}
+	rs := Filter(qry.ToMatcher(), sampleRecordsForQuerying())
 	require.Len(t, rs, 5)
 	assert.Equal(t, NewDuration(5+6+7+8, -30+15), Total(rs...))
 }
 
 func TestQueryWithAtDate(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{AtDate: Ɀ_Date_(2000, 1, 2)})
+	qry := Query{AtDate: Ɀ_Date_(2000, 1, 2)}
+	rs := Filter(qry.ToMatcher(), sampleRecordsForQuerying())
 	require.Len(t, rs, 1)
 	assert.Equal(t, NewDuration(7, 0), Total(rs...))
 }
 
 func TestQueryWithAfter(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{AfterOrEqual: Ɀ_Date_(2000, 1, 1)})
+	qry := Query{FromDate: Ɀ_Date_(2000, 1, 1)}
+	rs := Filter(qry.ToMatcher(), sampleRecordsForQuerying())
 	require.Len(t, rs, 3)
 	assert.Equal(t, 1, rs[0].Date().Day())
 	assert.Equal(t, 2, rs[1].Date().Day())
@@ -60,15 +64,26 @@ func TestQueryWithAfter(t *testing.T) {
 }
 
 func TestQueryWithBefore(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{BeforeOrEqual: Ɀ_Date_(2000, 1, 1)})
+	qry := Query{UpToDate: Ɀ_Date_(2000, 1, 1)}
+	rs := Filter(qry.ToMatcher(), sampleRecordsForQuerying())
 	require.Len(t, rs, 3)
 	assert.Equal(t, 30, rs[0].Date().Day())
 	assert.Equal(t, 31, rs[1].Date().Day())
 	assert.Equal(t, 1, rs[2].Date().Day())
 }
 
+func TestQueryInPeriod(t *testing.T) {
+	qry := Query{InPeriod: period.NewPeriod(Ɀ_Date_(2000, 1, 1), Ɀ_Date_(2000, 1, 31))}
+	rs := Filter(qry.ToMatcher(), sampleRecordsForQuerying())
+	require.Len(t, rs, 3)
+	assert.Equal(t, 1, rs[0].Date().Day())
+	assert.Equal(t, 2, rs[1].Date().Day())
+	assert.Equal(t, 3, rs[2].Date().Day())
+}
+
 func TestQueryWithTagOnEntries(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []Tag{NewTagOrPanic("bar", "")}})
+	qry := Query{WithTags: []Tag{NewTagOrPanic("bar", "")}}
+	rs := Filter(qry.ToMatcher(), sampleRecordsForQuerying())
 	require.Len(t, rs, 3)
 	assert.Equal(t, 31, rs[0].Date().Day())
 	assert.Equal(t, 1, rs[1].Date().Day())
@@ -77,7 +92,8 @@ func TestQueryWithTagOnEntries(t *testing.T) {
 }
 
 func TestQueryWithTagOnOverallSummary(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []Tag{NewTagOrPanic("foo", "")}})
+	qry := Query{WithTags: []Tag{NewTagOrPanic("foo", "")}}
+	rs := Filter(qry.ToMatcher(), sampleRecordsForQuerying())
 	require.Len(t, rs, 4)
 	assert.Equal(t, 30, rs[0].Date().Day())
 	assert.Equal(t, 1, rs[1].Date().Day())
@@ -87,7 +103,8 @@ func TestQueryWithTagOnOverallSummary(t *testing.T) {
 }
 
 func TestQueryWithTagOnEntriesAndInSummary(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []Tag{NewTagOrPanic("foo", ""), NewTagOrPanic("bar", "")}})
+	qry := Query{WithTags: []Tag{NewTagOrPanic("foo", ""), NewTagOrPanic("bar", "")}}
+	rs := Filter(qry.ToMatcher(), sampleRecordsForQuerying())
 	require.Len(t, rs, 2)
 	assert.Equal(t, 1, rs[0].Date().Day())
 	assert.Equal(t, 3, rs[1].Date().Day())
@@ -95,35 +112,23 @@ func TestQueryWithTagOnEntriesAndInSummary(t *testing.T) {
 }
 
 func TestQueryWithTagValues(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []Tag{NewTagOrPanic("foo", "a")}})
+	qry := Query{WithTags: []Tag{NewTagOrPanic("foo", "a")}}
+	rs := Filter(qry.ToMatcher(), sampleRecordsForQuerying())
 	require.Len(t, rs, 1)
 	assert.Equal(t, 3, rs[0].Date().Day())
 	assert.Equal(t, NewDuration(8, 0), Total(rs...))
 }
 
 func TestQueryWithTagValuesInEntries(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []Tag{NewTagOrPanic("bar", "1")}})
+	qry := Query{WithTags: []Tag{NewTagOrPanic("bar", "1")}}
+	rs := Filter(qry.ToMatcher(), sampleRecordsForQuerying())
 	require.Len(t, rs, 1)
 	assert.Equal(t, 3, rs[0].Date().Day())
 	assert.Equal(t, NewDuration(4, 0), Total(rs...))
 }
 
 func TestQueryWithTagNonMatchingValues(t *testing.T) {
-	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []Tag{NewTagOrPanic("bar", "3")}})
+	qry := Query{WithTags: []Tag{NewTagOrPanic("bar", "3")}}
+	rs := Filter(qry.ToMatcher(), sampleRecordsForQuerying())
 	require.Len(t, rs, 0)
-}
-
-func TestQueryWithSorting(t *testing.T) {
-	ss := sampleRecordsForQuerying()
-	for _, x := range []struct{ rs []Record }{
-		{ss},
-		{[]Record{ss[3], ss[1], ss[2], ss[0], ss[4]}},
-		{[]Record{ss[1], ss[4], ss[0], ss[3], ss[2]}},
-	} {
-		ascending := Sort(x.rs, true)
-		assert.Equal(t, []Record{ss[0], ss[1], ss[2], ss[3], ss[4]}, ascending)
-
-		descending := Sort(x.rs, false)
-		assert.Equal(t, []Record{ss[4], ss[3], ss[2], ss[1], ss[0]}, descending)
-	}
 }
