@@ -106,7 +106,9 @@ func (opt *BookmarksSet) Run(ctx app.Context) error {
 		}
 		return app.NewBookmark(opt.Name, file)
 	})()
+	didBookmarkAlreadyExist := false
 	mErr := ctx.ManipulateBookmarks(func(bc app.BookmarksCollection) app.Error {
+		didBookmarkAlreadyExist = bc.Get(bookmark.Name()) != nil
 		bc.Set(bookmark)
 		return nil
 	})
@@ -114,7 +116,11 @@ func (opt *BookmarksSet) Run(ctx app.Context) error {
 		return mErr
 	}
 	if !opt.Quiet {
-		ctx.Print("Created new bookmark:\n")
+		if didBookmarkAlreadyExist {
+			ctx.Print("Changed bookmark:\n")
+		} else {
+			ctx.Print("Created new bookmark:\n")
+		}
 	}
 	ctx.Print(bookmark.Name().ValuePretty() + " -> " + bookmark.Target().Path() + "\n")
 	return nil
