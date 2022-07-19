@@ -65,6 +65,9 @@ type Context interface {
 	// Serialiser returns the current serialiser.
 	Serialiser() parser.Serialiser
 
+	// SetSerialiser sets a new serialiser.
+	SetSerialiser(parser.Serialiser)
+
 	// Debug takes a void function that is only executed in debug mode.
 	Debug(func())
 }
@@ -370,6 +373,10 @@ func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(stri
 
 func (ctx *context) Serialiser() parser.Serialiser {
 	return ctx.serialiser
+}
+
+func (ctx *context) SetSerialiser(s parser.Serialiser) {
+	ctx.serialiser = s
 }
 
 func (ctx *context) Debug(task func()) {

@@ -8,6 +8,7 @@ import (
 	. "github.com/jotaen/klog/src/app/cli/lib/terminalformat"
 	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/service"
+	"strconv"
 	"strings"
 )
 
@@ -16,12 +17,29 @@ type CliFormatter struct {
 	Decimal  bool
 }
 
+func (cs CliFormatter) format(s Style, t string) string {
+	if cs.Unstyled {
+		return t
+	}
+	return s.Format(t)
+}
+
+func (cs CliFormatter) duration(d Duration, withSign bool) string {
+	if cs.Decimal {
+		return strconv.Itoa(d.InMinutes())
+	}
+	if withSign {
+		return d.ToStringWithSign()
+	}
+	return d.ToString()
+}
+
 func (cs CliFormatter) Date(d Date) string {
-	return Style{Color: "015", IsUnderlined: true}.Format(d.ToString())
+	return cs.format(Style{Color: "015", IsUnderlined: true}, d.ToString())
 }
 
 func (cs CliFormatter) ShouldTotal(d Duration) string {
-	return Style{Color: "213"}.Format(d.ToString())
+	return cs.format(Style{Color: "213"}, cs.duration(d, false))
 }
 
 func (cs CliFormatter) Summary(s parser.SummaryText) string {
@@ -31,15 +49,15 @@ func (cs CliFormatter) Summary(s parser.SummaryText) string {
 	txt = HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
 		return hashStyle.FormatAndRestore(h, style)
 	})
-	return style.Format(txt)
+	return cs.format(style, txt)
 }
 
 func (cs CliFormatter) Range(r Range) string {
-	return Style{Color: "117"}.Format(r.ToString())
+	return cs.format(Style{Color: "117"}, r.ToString())
 }
 
 func (cs CliFormatter) OpenRange(or OpenRange) string {
-	return Style{Color: "027"}.Format(or.ToString())
+	return cs.format(Style{Color: "027"}, or.ToString())
 }
 
 func (cs CliFormatter) Duration(d Duration) string {
@@ -47,7 +65,7 @@ func (cs CliFormatter) Duration(d Duration) string {
 	if d.InMinutes() < 0 {
 		f.Color = "167"
 	}
-	return f.Format(d.ToString())
+	return cs.format(f, cs.duration(d, false))
 }
 
 func (cs CliFormatter) SignedDuration(d Duration) string {
@@ -55,11 +73,11 @@ func (cs CliFormatter) SignedDuration(d Duration) string {
 	if d.InMinutes() < 0 {
 		f.Color = "167"
 	}
-	return f.Format(d.ToStringWithSign())
+	return cs.format(f, cs.duration(d, true))
 }
 
 func (cs CliFormatter) Time(t Time) string {
-	return Style{Color: "027"}.Format(t.ToString())
+	return cs.format(Style{Color: "027"}, t.ToString())
 }
 
 // PrettifyError turns an error into a coloured and well-structured form.

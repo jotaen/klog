@@ -133,4 +133,8 @@ func (ctx *TestingContext) Serialiser() parser.Serialiser {
 	return ctx.serialiser
 }
 
+func (ctx *TestingContext) SetSerialiser(s parser.Serialiser) {
+	ctx.serialiser = s
+}
+
 func (ctx *TestingContext) Debug(_ func()) {}

@@ -209,8 +209,9 @@ type NoStyleArgs struct {
 
 func (args *NoStyleArgs) Apply(ctx *app.Context) {
 	if args.NoStyle || os.Getenv("NO_COLOR") != "" {
-		if f, ok := (*ctx).Serialiser().(CliFormatter); ok {
-			f.Unstyled = true
+		if s, ok := (*ctx).Serialiser().(CliFormatter); ok {
+			s.Unstyled = true
+			(*ctx).SetSerialiser(s)
 		}
 	}
 }
@@ -232,4 +233,17 @@ func (args *SortArgs) ApplySort(rs []Record) []Record {
 		startWithOldest = true
 	}
 	return service.Sort(rs, startWithOldest)
+}
+
+type DecimalArgs struct {
+	Decimal bool `name:"decimal" help:"Display result as decimal values (in minutes)"`
+}
+
+func (args *DecimalArgs) Apply(ctx *app.Context) {
+	if args.Decimal {
+		if s, ok := (*ctx).Serialiser().(CliFormatter); ok {
+			s.Decimal = true
+			(*ctx).SetSerialiser(s)
+		}
+	}
 }
