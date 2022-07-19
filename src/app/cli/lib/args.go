@@ -82,7 +82,16 @@ type NowArgs struct {
 
 func (args *NowArgs) ApplyNow(reference gotime.Time, rs ...Record) ([]Record, error) {
 	if args.Now {
-		return service.CloseOpenRanges(reference, rs...)
+		rs, err := service.CloseOpenRanges(reference, rs...)
+		if err != nil {
+			return nil, app.NewErrorWithCode(
+				app.LOGICAL_ERROR,
+				"Cannot apply --now flag",
+				"There are records with uncloseable time ranges",
+				err,
+			)
+		}
+		return rs, nil
 	}
 	return rs, nil
 }
