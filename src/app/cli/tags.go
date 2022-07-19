@@ -12,11 +12,13 @@ type Tags struct {
 	lib.FilterArgs
 	lib.WarnArgs
 	lib.NowArgs
+	lib.DecimalArgs
 	lib.NoStyleArgs
 	lib.InputFilesArgs
 }
 
 func (opt *Tags) Run(ctx app.Context) error {
+	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {

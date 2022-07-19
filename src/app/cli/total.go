@@ -26,8 +26,8 @@ which treats all open-ended time ranges as if they were closed right now.`
 }
 
 func (opt *Total) Run(ctx app.Context) error {
-	opt.NoStyleArgs.Apply(&ctx)
 	opt.DecimalArgs.Apply(&ctx)
+	opt.NoStyleArgs.Apply(&ctx)
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err

@@ -236,7 +236,7 @@ func (args *SortArgs) ApplySort(rs []Record) []Record {
 }
 
 type DecimalArgs struct {
-	Decimal bool `name:"decimal" help:"Display result as decimal values (in minutes)"`
+	Decimal bool `name:"decimal" help:"Display totals as decimal values (in minutes)"`
 }
 
 func (args *DecimalArgs) Apply(ctx *app.Context) {

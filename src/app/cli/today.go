@@ -13,8 +13,9 @@ type Today struct {
 	lib.DiffArgs
 	lib.NowArgs
 	Follow bool `name:"follow" short:"f" help:"Keep shell open and follow changes"`
-	lib.WarnArgs
+	lib.DecimalArgs
 	lib.NoStyleArgs
+	lib.WarnArgs
 	lib.InputFilesArgs
 }
 
@@ -28,6 +29,7 @@ If there are no records today, it falls back to yesterday.`
 }
 
 func (opt *Today) Run(ctx app.Context) error {
+	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)
 	if opt.Follow {
 		return lib.WithRepeat(ctx.Print, 1*gotime.Second, func(counter int64) error {
