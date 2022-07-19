@@ -12,19 +12,19 @@ import (
 	"strings"
 )
 
-type CliFormatter struct {
-	Unstyled bool
-	Decimal  bool
+type CliSerialiser struct {
+	Unstyled bool // -> No colouring/styling
+	Decimal  bool // -> Decimal values rather than the canonical totals
 }
 
-func (cs CliFormatter) format(s Style, t string) string {
+func (cs CliSerialiser) format(s Style, t string) string {
 	if cs.Unstyled {
 		return t
 	}
 	return s.Format(t)
 }
 
-func (cs CliFormatter) duration(d Duration, withSign bool) string {
+func (cs CliSerialiser) duration(d Duration, withSign bool) string {
 	if cs.Decimal {
 		return strconv.Itoa(d.InMinutes())
 	}
@@ -34,15 +34,15 @@ func (cs CliFormatter) duration(d Duration, withSign bool) string {
 	return d.ToString()
 }
 
-func (cs CliFormatter) Date(d Date) string {
+func (cs CliSerialiser) Date(d Date) string {
 	return cs.format(Style{Color: "015", IsUnderlined: true}, d.ToString())
 }
 
-func (cs CliFormatter) ShouldTotal(d Duration) string {
+func (cs CliSerialiser) ShouldTotal(d Duration) string {
 	return cs.format(Style{Color: "213"}, cs.duration(d, false))
 }
 
-func (cs CliFormatter) Summary(s parser.SummaryText) string {
+func (cs CliSerialiser) Summary(s parser.SummaryText) string {
 	txt := s.ToString()
 	style := Style{Color: "249"}
 	hashStyle := style.ChangedBold(true).ChangedColor("251")
@@ -52,15 +52,15 @@ func (cs CliFormatter) Summary(s parser.SummaryText) string {
 	return cs.format(style, txt)
 }
 
-func (cs CliFormatter) Range(r Range) string {
+func (cs CliSerialiser) Range(r Range) string {
 	return cs.format(Style{Color: "117"}, r.ToString())
 }
 
-func (cs CliFormatter) OpenRange(or OpenRange) string {
+func (cs CliSerialiser) OpenRange(or OpenRange) string {
 	return cs.format(Style{Color: "027"}, or.ToString())
 }
 
-func (cs CliFormatter) Duration(d Duration) string {
+func (cs CliSerialiser) Duration(d Duration) string {
 	f := Style{Color: "120"}
 	if d.InMinutes() < 0 {
 		f.Color = "167"
@@ -68,7 +68,7 @@ func (cs CliFormatter) Duration(d Duration) string {
 	return cs.format(f, cs.duration(d, false))
 }
 
-func (cs CliFormatter) SignedDuration(d Duration) string {
+func (cs CliSerialiser) SignedDuration(d Duration) string {
 	f := Style{Color: "120"}
 	if d.InMinutes() < 0 {
 		f.Color = "167"
@@ -76,7 +76,7 @@ func (cs CliFormatter) SignedDuration(d Duration) string {
 	return cs.format(f, cs.duration(d, true))
 }
 
-func (cs CliFormatter) Time(t Time) string {
+func (cs CliSerialiser) Time(t Time) string {
 	return cs.format(Style{Color: "027"}, t.ToString())
 }
 

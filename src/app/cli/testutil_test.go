@@ -19,7 +19,7 @@ func NewTestingContext() TestingContext {
 		},
 		now:           gotime.Now(),
 		parsedRecords: nil,
-		serialiser:    lib.CliFormatter{},
+		serialiser:    lib.CliSerialiser{},
 		bookmarks:     bc,
 	}
 }

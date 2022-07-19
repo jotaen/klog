@@ -209,7 +209,7 @@ type NoStyleArgs struct {
 
 func (args *NoStyleArgs) Apply(ctx *app.Context) {
 	if args.NoStyle || os.Getenv("NO_COLOR") != "" {
-		if s, ok := (*ctx).Serialiser().(CliFormatter); ok {
+		if s, ok := (*ctx).Serialiser().(CliSerialiser); ok {
 			s.Unstyled = true
 			(*ctx).SetSerialiser(s)
 		}
@@ -241,7 +241,7 @@ type DecimalArgs struct {
 
 func (args *DecimalArgs) Apply(ctx *app.Context) {
 	if args.Decimal {
-		if s, ok := (*ctx).Serialiser().(CliFormatter); ok {
+		if s, ok := (*ctx).Serialiser().(CliSerialiser); ok {
 			s.Decimal = true
 			(*ctx).SetSerialiser(s)
 		}
