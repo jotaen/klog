@@ -11,49 +11,55 @@ import (
 	"strings"
 )
 
-// NewCliSerialiser creates a serialiser that can print on a terminal.
-// It supports coloured output via ANSI escape sequences.
-func NewCliSerialiser() *parser.Serialiser {
-	return &parser.Serialiser{
-		Date: func(d Date) string {
-			return Style{Color: "015", IsUnderlined: true}.Format(d.ToString())
-		},
-		ShouldTotal: func(d Duration) string {
-			return Style{Color: "213"}.Format(d.ToString())
-		},
-		Summary: func(s parser.SummaryText) string {
-			txt := s.ToString()
-			style := Style{Color: "249"}
-			hashStyle := style.ChangedBold(true).ChangedColor("251")
-			txt = HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
-				return hashStyle.FormatAndRestore(h, style)
-			})
-			return style.Format(txt)
-		},
-		Range: func(r Range) string {
-			return Style{Color: "117"}.Format(r.ToString())
-		},
-		OpenRange: func(or OpenRange) string {
-			return Style{Color: "027"}.Format(or.ToString())
-		},
-		Duration: func(d Duration) string {
-			f := Style{Color: "120"}
-			if d.InMinutes() < 0 {
-				f.Color = "167"
-			}
-			return f.Format(d.ToString())
-		},
-		SignedDuration: func(d Duration) string {
-			f := Style{Color: "120"}
-			if d.InMinutes() < 0 {
-				f.Color = "167"
-			}
-			return f.Format(d.ToStringWithSign())
-		},
-		Time: func(t Time) string {
-			return Style{Color: "027"}.Format(t.ToString())
-		},
+type CliFormatter struct {
+	Unstyled bool
+	Decimal  bool
+}
+
+func (cs CliFormatter) Date(d Date) string {
+	return Style{Color: "015", IsUnderlined: true}.Format(d.ToString())
+}
+
+func (cs CliFormatter) ShouldTotal(d Duration) string {
+	return Style{Color: "213"}.Format(d.ToString())
+}
+
+func (cs CliFormatter) Summary(s parser.SummaryText) string {
+	txt := s.ToString()
+	style := Style{Color: "249"}
+	hashStyle := style.ChangedBold(true).ChangedColor("251")
+	txt = HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
+		return hashStyle.FormatAndRestore(h, style)
+	})
+	return style.Format(txt)
+}
+
+func (cs CliFormatter) Range(r Range) string {
+	return Style{Color: "117"}.Format(r.ToString())
+}
+
+func (cs CliFormatter) OpenRange(or OpenRange) string {
+	return Style{Color: "027"}.Format(or.ToString())
+}
+
+func (cs CliFormatter) Duration(d Duration) string {
+	f := Style{Color: "120"}
+	if d.InMinutes() < 0 {
+		f.Color = "167"
 	}
+	return f.Format(d.ToString())
+}
+
+func (cs CliFormatter) SignedDuration(d Duration) string {
+	f := Style{Color: "120"}
+	if d.InMinutes() < 0 {
+		f.Color = "167"
+	}
+	return f.Format(d.ToStringWithSign())
+}
+
+func (cs CliFormatter) Time(t Time) string {
+	return Style{Color: "027"}.Format(t.ToString())
 }
 
 // PrettifyError turns an error into a coloured and well-structured form.

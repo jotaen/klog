@@ -19,7 +19,7 @@ func NewTestingContext() TestingContext {
 		},
 		now:           gotime.Now(),
 		parsedRecords: nil,
-		serialiser:    lib.NewCliSerialiser(),
+		serialiser:    lib.CliFormatter{},
 		bookmarks:     bc,
 	}
 }
@@ -56,7 +56,7 @@ type TestingContext struct {
 	State
 	now           gotime.Time
 	parsedRecords []parser.ParsedRecord
-	serialiser    *parser.Serialiser
+	serialiser    parser.Serialiser
 	bookmarks     app.BookmarksCollection
 }
 
@@ -129,15 +129,8 @@ func (ctx *TestingContext) OpenInEditor(_ app.FileOrBookmarkName, _ func(string)
 	return nil
 }
 
-func (ctx *TestingContext) Serialiser() *parser.Serialiser {
+func (ctx *TestingContext) Serialiser() parser.Serialiser {
 	return ctx.serialiser
-}
-
-func (ctx *TestingContext) SetSerialiser(serialiser *parser.Serialiser) {
-	if serialiser == nil {
-		panic("Serialiser cannot be nil")
-	}
-	ctx.serialiser = serialiser
 }
 
 func (ctx *TestingContext) Debug(_ func()) {}

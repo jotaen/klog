@@ -6,19 +6,30 @@ import (
 	"testing"
 )
 
+type plainSerialiser struct{}
+
+func (ps plainSerialiser) Date(x Date) string               { return x.ToString() }
+func (ps plainSerialiser) ShouldTotal(x Duration) string    { return x.ToString() }
+func (ps plainSerialiser) Summary(x SummaryText) string     { return x.ToString() }
+func (ps plainSerialiser) Range(x Range) string             { return x.ToString() }
+func (ps plainSerialiser) OpenRange(x OpenRange) string     { return x.ToString() }
+func (ps plainSerialiser) Duration(x Duration) string       { return x.ToString() }
+func (ps plainSerialiser) SignedDuration(x Duration) string { return x.ToString() }
+func (ps plainSerialiser) Time(x Time) string               { return x.ToString() }
+
 func TestSerialiseNoRecordsToEmptyString(t *testing.T) {
-	text := PlainSerialiser.SerialiseRecords([]Record{}...)
+	text := SerialiseRecords(plainSerialiser{}, []Record{}...)
 	assert.Equal(t, "", text)
 }
 
 func TestSerialiseEndsWithNewlineIfContainsContent(t *testing.T) {
-	text := PlainSerialiser.SerialiseRecords(NewRecord(Ɀ_Date_(2020, 01, 15)))
+	text := SerialiseRecords(plainSerialiser{}, NewRecord(Ɀ_Date_(2020, 01, 15)))
 	lastChar := []rune(text)[len(text)-1]
 	assert.Equal(t, '\n', lastChar)
 }
 
 func TestSerialiseRecordWithMinimalRecord(t *testing.T) {
-	text := PlainSerialiser.SerialiseRecords(NewRecord(Ɀ_Date_(2020, 01, 15)))
+	text := SerialiseRecords(plainSerialiser{}, NewRecord(Ɀ_Date_(2020, 01, 15)))
 	assert.Equal(t, `2020-01-15
 `, text)
 }
@@ -34,7 +45,7 @@ func TestSerialiseRecordWithCompleteRecord(t *testing.T) {
 	r.AddDuration(NewDuration(-1, -51), nil)
 	r.AddRange(Ɀ_Range_(Ɀ_TimeYesterday_(23, 23), Ɀ_Time_(4, 3)), nil)
 	r.AddRange(Ɀ_Range_(Ɀ_Time_(22, 0), Ɀ_TimeTomorrow_(0, 1)), nil)
-	text := PlainSerialiser.SerialiseRecords(r)
+	text := SerialiseRecords(plainSerialiser{}, r)
 	assert.Equal(t, `2020-01-15 (7h30m!)
 This is a
 multiline summary
@@ -53,7 +64,7 @@ multiline summary
 }
 
 func TestSerialiseMultipleRecords(t *testing.T) {
-	text := PlainSerialiser.SerialiseRecords([]Record{
+	text := SerialiseRecords(plainSerialiser{}, []Record{
 		NewRecord(Ɀ_Date_(2020, 01, 15)),
 		NewRecord(Ɀ_Date_(2020, 01, 20)),
 	}...)

@@ -3,7 +3,6 @@ package lib
 import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
-	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/service"
 	"github.com/jotaen/klog/src/service/period"
 	"os"
@@ -210,7 +209,9 @@ type NoStyleArgs struct {
 
 func (args *NoStyleArgs) Apply(ctx *app.Context) {
 	if args.NoStyle || os.Getenv("NO_COLOR") != "" {
-		(*ctx).SetSerialiser(&parser.PlainSerialiser)
+		if f, ok := (*ctx).Serialiser().(CliFormatter); ok {
+			f.Unstyled = true
+		}
 	}
 }
 
