@@ -40,6 +40,7 @@ func TestCreateWithValues(t *testing.T) {
 `)._Run((&Create{
 		AtDateArgs:  lib.AtDateArgs{Date: klog.Ɀ_Date_(1976, 1, 2)},
 		ShouldTotal: klog.NewShouldTotal(5, 55),
+		Summary:     klog.Ɀ_RecordSummary_("This is a", "new record!"),
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -52,5 +53,7 @@ func TestCreateWithValues(t *testing.T) {
 	1h
 
 1976-01-02 (5h55m!)
+This is a
+new record!
 `, state.writtenFileContents)
 }

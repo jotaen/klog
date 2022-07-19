@@ -9,7 +9,8 @@ import (
 )
 
 type Create struct {
-	ShouldTotal ShouldTotal `name:"should" help:"The should-total of the record"`
+	ShouldTotal ShouldTotal   `name:"should" help:"The should-total of the record"`
+	Summary     RecordSummary `name:"summary" short:"s" help:"Summary text for the new record"`
 	lib.AtDateArgs
 	lib.NoStyleArgs
 	lib.OutputFileArgs
@@ -27,7 +28,10 @@ func (opt *Create) Run(ctx app.Context) error {
 	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
-				return reconciling.NewReconcilerForNewRecord(parsedRecords, date, opt.ShouldTotal)
+				return reconciling.NewReconcilerForNewRecord(
+					parsedRecords,
+					reconciling.RecordParams{Date: date, ShouldTotal: opt.ShouldTotal, Summary: opt.Summary},
+				)
 			},
 		},
 

@@ -36,7 +36,7 @@ func (opt *Track) Run(ctx app.Context) error {
 				return reconciling.NewReconcilerAtRecord(parsedRecords, date)
 			},
 			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
-				return reconciling.NewReconcilerForNewRecord(parsedRecords, date, nil)
+				return reconciling.NewReconcilerForNewRecord(parsedRecords, reconciling.RecordParams{Date: date})
 			},
 		},
 

@@ -46,6 +46,10 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error
 			t := klog.NewTagOrPanic("test", "")
 			return kong.TypeMapper(reflect.TypeOf(&t).Elem(), tagDecoder())
 		}(),
+		func() kong.Option {
+			s, _ := klog.NewRecordSummary("test")
+			return kong.TypeMapper(reflect.TypeOf(&s).Elem(), recordSummaryDecoder())
+		}(),
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact: true,
 		}),
