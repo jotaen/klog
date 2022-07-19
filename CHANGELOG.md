@@ -1,6 +1,13 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## Not released yet
+- **[ FEATURE ]** Optionally print out totals as decimal values (in minutes)
+  via the `--decimal` flag; e.g. `150` instead of `2h30m`.
+- **[ FEATURE ]** Support `--now` on `klog tags` as well.
+- **[ FEATURE ]** Allow setting a record summary via the `--summary` flag
+  when using `klog create`.
+
 ## v5.0
 - **[ META ]** Release the klog file format specification into the public domain
   (under the CC0/OWFa dual license).
