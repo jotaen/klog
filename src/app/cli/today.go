@@ -55,19 +55,23 @@ var (
 )
 
 func handle(opt *Today, ctx app.Context) error {
-	now := ctx.Now()
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err
+	}
+	now := ctx.Now()
+	records, nErr := opt.ApplyNow(now, records...)
+	if nErr != nil {
+		return nil
 	}
 
 	currentRecords, otherRecords, isYesterday := splitIntoCurrentAndOther(now, records)
 	hasCurrentRecords := len(currentRecords) > 0
 
-	currentTotal, currentShouldTotal, currentDiff := opt.evaluate(now, currentRecords)
+	currentTotal, currentShouldTotal, currentDiff := opt.evaluate(currentRecords)
 	currentEndTime, _ := NewTimeFromGo(now).Plus(NewDuration(0, 0).Minus(currentDiff))
 
-	otherTotal, otherShouldTotal, otherDiff := opt.evaluate(now, otherRecords)
+	otherTotal, otherShouldTotal, otherDiff := opt.evaluate(otherRecords)
 
 	grandTotal := currentTotal.Plus(otherTotal)
 	grandShouldTotal := NewShouldTotal(0, currentShouldTotal.Plus(otherShouldTotal).InMinutes())
@@ -172,13 +176,8 @@ func handle(opt *Today, ctx app.Context) error {
 	return nil
 }
 
-func (opt *Today) evaluate(now gotime.Time, records []Record) (Duration, Duration, Duration) {
-	total := func() Duration {
-		if opt.Now {
-			return service.HypotheticalTotal(now, records...)
-		}
-		return service.Total(records...)
-	}()
+func (opt *Today) evaluate(records []Record) (Duration, Duration, Duration) {
+	total := service.Total(records...)
 	shouldTotal := service.ShouldTotalSum(records...)
 	diff := service.Diff(shouldTotal, total)
 	return total, shouldTotal, diff

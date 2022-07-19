@@ -2,7 +2,6 @@ package service
 
 import (
 	. "github.com/jotaen/klog/src"
-	gotime "time"
 )
 
 // Total calculates the overall time spent in records.
@@ -12,37 +11,6 @@ func Total(rs ...Record) Duration {
 	for _, r := range rs {
 		for _, e := range r.Entries() {
 			total = total.Plus(e.Duration())
-		}
-	}
-	return total
-}
-
-// HypotheticalTotal calculates the overall total time of records,
-// assuming all open ranges would be closed at the `until` time.
-func HypotheticalTotal(until gotime.Time, rs ...Record) Duration {
-	total := NewDuration(0, 0)
-	thisDay := NewDateFromGo(until)
-	theDayBefore := thisDay.PlusDays(-1)
-	for _, r := range rs {
-		for _, e := range r.Entries() {
-			t := Unbox[Duration](&e,
-				func(r Range) Duration { return r.Duration() },
-				func(d Duration) Duration { return d },
-				func(o OpenRange) Duration {
-					if !(r.Date().IsEqualTo(thisDay) || r.Date().IsEqualTo(theDayBefore)) {
-						return NewDuration(0, 0)
-					}
-					end := NewTimeFromGo(until)
-					if r.Date().IsEqualTo(theDayBefore) {
-						end, _ = NewTimeTomorrow(end.Hour(), end.Minute())
-					}
-					tr, err := NewRange(o.Start(), end)
-					if err == nil {
-						return tr.Duration()
-					}
-					return NewDuration(0, 0)
-				})
-			total = total.Plus(t)
 		}
 	}
 	return total

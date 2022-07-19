@@ -80,11 +80,11 @@ type NowArgs struct {
 	Now bool `name:"now" short:"n" help:"Assume open ranges to be closed at this moment"`
 }
 
-func (args *NowArgs) Total(reference gotime.Time, rs ...Record) Duration {
+func (args *NowArgs) ApplyNow(reference gotime.Time, rs ...Record) ([]Record, error) {
 	if args.Now {
-		return service.HypotheticalTotal(reference, rs...)
+		return service.CloseOpenRanges(reference, rs...)
 	}
-	return service.Total(rs...)
+	return rs, nil
 }
 
 type FilterArgs struct {
