@@ -9,11 +9,18 @@ import (
 // Creator is a function interface for creating a new reconciler.
 type Creator func(parsedRecords []parser.ParsedRecord) *Reconciler
 
-// NewReconcilerForNewRecord creates a reconciler for a new record at a given date.
-func NewReconcilerForNewRecord(parsedRecords []parser.ParsedRecord, newDate Date, shouldTotal ShouldTotal) *Reconciler {
-	record := NewRecord(newDate)
-	if shouldTotal != nil {
-		record.SetShouldTotal(shouldTotal)
+type RecordParams struct {
+	Date        Date
+	ShouldTotal ShouldTotal
+	Summary     RecordSummary
+}
+
+// NewReconcilerForNewRecord creates a reconciler for a new record at a given date and
+// with the given parameters.
+func NewReconcilerForNewRecord(parsedRecords []parser.ParsedRecord, params RecordParams) *Reconciler {
+	record := NewRecord(params.Date)
+	if params.ShouldTotal != nil {
+		record.SetShouldTotal(params.ShouldTotal)
 	}
 	reconciler := &Reconciler{
 		record:          record,
@@ -23,9 +30,9 @@ func NewReconcilerForNewRecord(parsedRecords []parser.ParsedRecord, newDate Date
 		lines:           flatten(parsedRecords),
 	}
 	headline := func() insertableText {
-		result := newDate.ToStringWithFormat(reconciler.style.DateFormat.Get())
-		if shouldTotal != nil {
-			result += " (" + shouldTotal.ToString() + ")"
+		result := params.Date.ToStringWithFormat(reconciler.style.DateFormat.Get())
+		if params.ShouldTotal != nil {
+			result += " (" + params.ShouldTotal.ToString() + ")"
 		}
 		return insertableText{result, 0}
 	}()
@@ -35,11 +42,11 @@ func NewReconcilerForNewRecord(parsedRecords []parser.ParsedRecord, newDate Date
 		}
 		i := 0
 		for _, r := range parsedRecords {
-			if i == 0 && !newDate.IsAfterOrEqual(r.Date()) {
+			if i == 0 && !params.Date.IsAfterOrEqual(r.Date()) {
 				// The new record is dated prior to the first one.
 				return []insertableText{headline, blankLine}, 0, 1, 0
 			}
-			if len(parsedRecords)-1 == i || (newDate.IsAfterOrEqual(r.Date()) && !newDate.IsAfterOrEqual(parsedRecords[i+1].Date())) {
+			if len(parsedRecords)-1 == i || (params.Date.IsAfterOrEqual(r.Date()) && !params.Date.IsAfterOrEqual(parsedRecords[i+1].Date())) {
 				// The record is in between.
 				break
 			}
