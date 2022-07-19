@@ -3,7 +3,6 @@ package lib
 import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
-	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/service"
 	"github.com/jotaen/klog/src/service/period"
 	"os"
@@ -210,7 +209,10 @@ type NoStyleArgs struct {
 
 func (args *NoStyleArgs) Apply(ctx *app.Context) {
 	if args.NoStyle || os.Getenv("NO_COLOR") != "" {
-		(*ctx).SetSerialiser(&parser.PlainSerialiser)
+		if s, ok := (*ctx).Serialiser().(CliSerialiser); ok {
+			s.Unstyled = true
+			(*ctx).SetSerialiser(s)
+		}
 	}
 }
 
@@ -231,4 +233,17 @@ func (args *SortArgs) ApplySort(rs []Record) []Record {
 		startWithOldest = true
 	}
 	return service.Sort(rs, startWithOldest)
+}
+
+type DecimalArgs struct {
+	Decimal bool `name:"decimal" help:"Display totals as decimal values (in minutes)"`
+}
+
+func (args *DecimalArgs) Apply(ctx *app.Context) {
+	if args.Decimal {
+		if s, ok := (*ctx).Serialiser().(CliSerialiser); ok {
+			s.Decimal = true
+			(*ctx).SetSerialiser(s)
+		}
+	}
 }

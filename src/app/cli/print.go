@@ -3,6 +3,7 @@ package cli
 import (
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/cli/lib"
+	"github.com/jotaen/klog/src/parser"
 )
 
 type Print struct {
@@ -29,7 +30,7 @@ func (opt *Print) Run(ctx app.Context) error {
 		return nil
 	}
 	records = opt.ApplySort(records)
-	ctx.Print("\n" + ctx.Serialiser().SerialiseRecords(records...) + "\n")
+	ctx.Print("\n" + parser.SerialiseRecords(ctx.Serialiser(), records...) + "\n")
 
 	opt.WarnArgs.PrintWarnings(ctx, records)
 	return nil

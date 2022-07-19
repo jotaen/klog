@@ -15,7 +15,7 @@ import (
 )
 
 func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error) {
-	ctx := app.NewContext(homeDir, meta, lib.NewCliSerialiser(), isDebug)
+	ctx := app.NewContext(homeDir, meta, lib.CliSerialiser{}, isDebug)
 	kongApp, nErr := kong.New(
 		&cli.Cli{},
 		kong.Name("klog"),

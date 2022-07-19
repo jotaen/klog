@@ -12,6 +12,7 @@ type Total struct {
 	lib.DiffArgs
 	lib.WarnArgs
 	lib.NowArgs
+	lib.DecimalArgs
 	lib.NoStyleArgs
 	lib.InputFilesArgs
 }
@@ -25,6 +26,7 @@ which treats all open-ended time ranges as if they were closed right now.`
 }
 
 func (opt *Total) Run(ctx app.Context) error {
+	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {

@@ -63,3 +63,12 @@ func TestTotalWithNowUncloseable(t *testing.T) {
 `)._SetNow(2018, 13, 9, 8, 30)._Run((&Total{NowArgs: lib.NowArgs{Now: true}}).Run)
 	require.Error(t, err)
 }
+
+func TestTotalAsDecimal(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+2018-11-08 (8h!)
+	8h30m
+`)._SetNow(2018, 11, 9, 8, 30)._Run((&Total{DecimalArgs: lib.DecimalArgs{Decimal: true}}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, "\nTotal: 510\n(In 1 record)\n", state.printBuffer)
+}
