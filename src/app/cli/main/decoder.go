@@ -119,3 +119,21 @@ func tagDecoder() kong.MapperFunc {
 		return nil
 	}
 }
+
+func recordSummaryDecoder() kong.MapperFunc {
+	return func(ctx *kong.DecodeContext, target reflect.Value) error {
+		var value string
+		if err := ctx.Scan.PopValueInto("recordSummary", &value); err != nil {
+			return err
+		}
+		if value == "" {
+			return errors.New("Please provide a valid record summary")
+		}
+		summary, sErr := klog.NewRecordSummary(strings.Split(value, "\n")...)
+		if sErr != nil {
+			return errors.New("A record summary cannot contain blank lines, and none of its lines can start with whitespace characters")
+		}
+		target.Set(reflect.ValueOf(summary))
+		return nil
+	}
+}

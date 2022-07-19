@@ -22,6 +22,9 @@ func NewReconcilerForNewRecord(parsedRecords []parser.ParsedRecord, params Recor
 	if params.ShouldTotal != nil {
 		record.SetShouldTotal(params.ShouldTotal)
 	}
+	if params.Summary != nil {
+		record.SetSummary(params.Summary)
+	}
 	reconciler := &Reconciler{
 		record:          record,
 		recordPointer:   -1,
@@ -29,22 +32,26 @@ func NewReconcilerForNewRecord(parsedRecords []parser.ParsedRecord, params Recor
 		style:           parser.Elect(*parser.DefaultStyle(), parsedRecords),
 		lines:           flatten(parsedRecords),
 	}
-	headline := func() insertableText {
+	recordText := func() []insertableText {
 		result := params.Date.ToStringWithFormat(reconciler.style.DateFormat.Get())
 		if params.ShouldTotal != nil {
 			result += " (" + params.ShouldTotal.ToString() + ")"
 		}
-		return insertableText{result, 0}
+		return []insertableText{{result, 0}}
 	}()
+	for _, s := range params.Summary {
+		recordText = append(recordText, insertableText{s, 0})
+	}
 	newRecordLines, insertPointer, lastLineOffset, newRecordIndex := func() ([]insertableText, int, int, int) {
 		if len(parsedRecords) == 0 {
-			return []insertableText{headline}, 0, 1, 0
+			return recordText, 0, 1, 0
 		}
 		i := 0
 		for _, r := range parsedRecords {
 			if i == 0 && !params.Date.IsAfterOrEqual(r.Date()) {
-				// The new record is dated prior to the first one.
-				return []insertableText{headline, blankLine}, 0, 1, 0
+				// The new record is dated prior to the first one, so we have to append a blank line.
+				recordText = append(recordText, blankLine)
+				return recordText, 0, 1, 0
 			}
 			if len(parsedRecords)-1 == i || (params.Date.IsAfterOrEqual(r.Date()) && !params.Date.IsAfterOrEqual(parsedRecords[i+1].Date())) {
 				// The record is in between.
@@ -52,8 +59,9 @@ func NewReconcilerForNewRecord(parsedRecords []parser.ParsedRecord, params Recor
 			}
 			i++
 		}
-		// The new record is dated after the last one.
-		return []insertableText{blankLine, headline}, lastLine(parsedRecords[i].Block.SignificantLines()).LineNumber, 2, i + 1
+		// The new record is dated after the last one, so we have to prepend a blank line.
+		recordText = append([]insertableText{blankLine}, recordText...)
+		return recordText, lastLine(parsedRecords[i].Block.SignificantLines()).LineNumber, 2, i + 1
 	}()
 
 	// Insert record and adjust pointers accordingly.

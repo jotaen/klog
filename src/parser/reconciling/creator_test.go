@@ -156,6 +156,26 @@ func TestReconcileAddRecordWithShouldTotal(t *testing.T) {
 	assert.Equal(t, NewShouldTotal(5, 31), result.Record.ShouldTotal())
 }
 
+func TestReconcileAddRecordWithSummary(t *testing.T) {
+	original := `
+2018-01-01
+    1h`
+	rs, _ := parser.Parse(original)
+	summary := Ɀ_RecordSummary_("This is a new record.", "It has a summary.")
+	reconciler := NewReconcilerForNewRecord(rs, RecordParams{Date: Ɀ_Date_(2018, 1, 2), Summary: summary})
+	result, err := reconciler.MakeResult()
+	require.Nil(t, err)
+	assert.Equal(t, `
+2018-01-01
+    1h
+
+2018-01-02
+This is a new record.
+It has a summary.
+`, result.AllSerialised)
+	assert.Equal(t, result.Record.Summary(), summary)
+}
+
 func TestReconcileRespectsExistingStylePref(t *testing.T) {
 	for _, x := range []struct {
 		original string
