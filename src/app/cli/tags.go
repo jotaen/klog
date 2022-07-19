@@ -11,6 +11,7 @@ type Tags struct {
 	Values bool `name:"values" short:"v" help:"Display breakdown of tag values"`
 	lib.FilterArgs
 	lib.WarnArgs
+	lib.NowArgs
 	lib.NoStyleArgs
 	lib.InputFilesArgs
 }
@@ -23,6 +24,10 @@ func (opt *Tags) Run(ctx app.Context) error {
 	}
 	now := ctx.Now()
 	records = opt.ApplyFilter(now, records)
+	records, nErr := opt.ApplyNow(now, records...)
+	if nErr != nil {
+		return nErr
+	}
 	totalByTag := service.AggregateTotalsByTags(records...)
 	if len(totalByTag) == 0 {
 		return nil

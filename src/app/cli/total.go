@@ -32,7 +32,11 @@ func (opt *Total) Run(ctx app.Context) error {
 	}
 	now := ctx.Now()
 	records = opt.ApplyFilter(now, records)
-	total := opt.NowArgs.Total(now, records...)
+	records, nErr := opt.ApplyNow(now, records...)
+	if nErr != nil {
+		return nErr
+	}
+	total := service.Total(records...)
 	ctx.Print(fmt.Sprintf("Total: %s\n", ctx.Serialiser().Duration(total)))
 	if opt.Diff {
 		should := service.ShouldTotalSum(records...)

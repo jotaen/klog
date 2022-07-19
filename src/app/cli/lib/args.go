@@ -80,12 +80,20 @@ type NowArgs struct {
 	Now bool `name:"now" short:"n" help:"Assume open ranges to be closed at this moment"`
 }
 
-func (args *NowArgs) Total(reference gotime.Time, rs ...Record) Duration {
+func (args *NowArgs) ApplyNow(reference gotime.Time, rs ...Record) ([]Record, error) {
 	if args.Now {
-		d, _ := service.HypotheticalTotal(reference, rs...)
-		return d
+		rs, err := service.CloseOpenRanges(reference, rs...)
+		if err != nil {
+			return nil, app.NewErrorWithCode(
+				app.LOGICAL_ERROR,
+				"Cannot apply --now flag",
+				"There are records with uncloseable time ranges",
+				err,
+			)
+		}
+		return rs, nil
 	}
-	return service.Total(rs...)
+	return rs, nil
 }
 
 type FilterArgs struct {
