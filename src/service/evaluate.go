@@ -19,9 +19,8 @@ func Total(rs ...Record) Duration {
 
 // HypotheticalTotal calculates the overall total time of records,
 // assuming all open ranges would be closed at the `until` time.
-func HypotheticalTotal(until gotime.Time, rs ...Record) (Duration, bool) {
+func HypotheticalTotal(until gotime.Time, rs ...Record) Duration {
 	total := NewDuration(0, 0)
-	isCurrent := false
 	thisDay := NewDateFromGo(until)
 	theDayBefore := thisDay.PlusDays(-1)
 	for _, r := range rs {
@@ -39,7 +38,6 @@ func HypotheticalTotal(until gotime.Time, rs ...Record) (Duration, bool) {
 					}
 					tr, err := NewRange(o.Start(), end)
 					if err == nil {
-						isCurrent = true
 						return tr.Duration()
 					}
 					return NewDuration(0, 0)
@@ -47,7 +45,7 @@ func HypotheticalTotal(until gotime.Time, rs ...Record) (Duration, bool) {
 			total = total.Plus(t)
 		}
 	}
-	return total, isCurrent
+	return total
 }
 
 // ShouldTotalSum calculates the overall should-total time of records.

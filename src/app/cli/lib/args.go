@@ -82,8 +82,7 @@ type NowArgs struct {
 
 func (args *NowArgs) Total(reference gotime.Time, rs ...Record) Duration {
 	if args.Now {
-		d, _ := service.HypotheticalTotal(reference, rs...)
-		return d
+		return service.HypotheticalTotal(reference, rs...)
 	}
 	return service.Total(rs...)
 }

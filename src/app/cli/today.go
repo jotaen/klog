@@ -173,11 +173,11 @@ func handle(opt *Today, ctx app.Context) error {
 }
 
 func (opt *Today) evaluate(now gotime.Time, records []Record) (Duration, Duration, Duration) {
-	total, _ := func() (Duration, bool) {
+	total := func() Duration {
 		if opt.Now {
 			return service.HypotheticalTotal(now, records...)
 		}
-		return service.Total(records...), false
+		return service.Total(records...)
 	}()
 	shouldTotal := service.ShouldTotalSum(records...)
 	diff := service.Diff(shouldTotal, total)

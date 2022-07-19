@@ -31,17 +31,14 @@ func TestSumUpHypotheticalTotalAtGivenTime(t *testing.T) {
 	_ = r.StartOpenRange(Ɀ_Time_(5, 7), nil)
 
 	time1, _ := gotime.Parse("2006-01-02T15:04:05-0700", "2020-01-01T05:06:59-0000")
-	ht1, isOngoing1 := HypotheticalTotal(time1, r)
-	assert.False(t, isOngoing1)
+	ht1 := HypotheticalTotal(time1, r)
 	assert.Equal(t, NewDuration(2+(1+4), 14), ht1)
 
 	time2, _ := gotime.Parse("2006-01-02T15:04:05-0700", "2020-01-01T10:48:13-0000")
-	ht2, isOngoing2 := HypotheticalTotal(time2, r)
-	assert.True(t, isOngoing2)
+	ht2 := HypotheticalTotal(time2, r)
 	assert.Equal(t, NewDuration(2+(1+4)+4, 14+53+48), ht2)
 
 	time3, _ := gotime.Parse("2006-01-02T15:04:05-0700", "2020-01-02T03:01:29-0000")
-	ht3, isOngoing3 := HypotheticalTotal(time3, r)
-	assert.True(t, isOngoing3)
+	ht3 := HypotheticalTotal(time3, r)
 	assert.Equal(t, NewDuration(2+(1+4)+18+3, 14+53+1), ht3)
 }
