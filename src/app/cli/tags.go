@@ -10,9 +10,9 @@ import (
 type Tags struct {
 	Values bool `name:"values" short:"v" help:"Display breakdown of tag values"`
 	lib.FilterArgs
-	lib.WarnArgs
 	lib.NowArgs
 	lib.DecimalArgs
+	lib.WarnArgs
 	lib.NoStyleArgs
 	lib.InputFilesArgs
 }
