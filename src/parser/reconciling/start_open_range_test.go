@@ -16,7 +16,7 @@ func TestReconcilerStartsOpenRange(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), "")
+	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), nil)
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01
@@ -34,7 +34,7 @@ func TestReconcilerStartsOpenRangeWithSummary(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), "Test")
+	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), Ɀ_EntrySummary_("Test"))
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01
@@ -52,7 +52,7 @@ func TestReconcilerStartsOpenRangeWithNewMultilineSummary(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), "\nStarted...\nsomething!")
+	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), Ɀ_EntrySummary_("", "Started...", "something!"))
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01
@@ -71,7 +71,7 @@ func TestReconcilerStartsOpenRangeWithStyle(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), "")
+	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), nil)
 	require.Nil(t, err)
 	// Conforms to both am/pm and spaces around dash
 	assert.Equal(t, `
@@ -91,7 +91,7 @@ func TestReconcilerStartsOpenRangeWithStyleFromOtherRecord(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 2))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), "")
+	result, err := reconciler.StartOpenRange(Ɀ_Time_(8, 3), nil)
 	require.Nil(t, err)
 	// Conforms to both am/pm and spaces around dash
 	assert.Equal(t, `
