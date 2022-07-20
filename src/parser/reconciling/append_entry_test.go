@@ -26,7 +26,7 @@ Hello World
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 2))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.AppendEntry("2h30m")
+	result, err := reconciler.AppendEntry(Ɀ_EntrySummary_("2h30m"))
 	require.Nil(t, err)
 	require.NotNil(t, result)
 	require.Equal(t, 150, result.Record.Entries()[2].Duration().InMinutes())
@@ -53,7 +53,7 @@ func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.AppendEntry("16:00-17:00")
+	result, err := reconciler.AppendEntry(Ɀ_EntrySummary_("16:00-17:00"))
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01
@@ -68,7 +68,7 @@ func TestReconcilerSplitsUpSummaryText(t *testing.T) {
 
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.AppendEntry("2h This is a\nmultiline summary")
+	result, err := reconciler.AppendEntry(Ɀ_EntrySummary_("2h This is a", "multiline summary"))
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01
@@ -84,7 +84,7 @@ func TestReconcilerStartsSummaryTextOnNextLine(t *testing.T) {
 
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.AppendEntry("2h\nSome activity")
+	result, err := reconciler.AppendEntry(Ɀ_EntrySummary_("2h", "Some activity"))
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01
@@ -99,7 +99,7 @@ func TestReconcilerRejectsInvalidEntry(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.AppendEntry("this is not valid entry text")
+	result, err := reconciler.AppendEntry(Ɀ_EntrySummary_("this is not valid entry text"))
 	require.Nil(t, result)
 	assert.Error(t, err)
 }

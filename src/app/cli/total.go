@@ -10,9 +10,9 @@ import (
 type Total struct {
 	lib.FilterArgs
 	lib.DiffArgs
-	lib.WarnArgs
 	lib.NowArgs
 	lib.DecimalArgs
+	lib.WarnArgs
 	lib.NoStyleArgs
 	lib.InputFilesArgs
 }

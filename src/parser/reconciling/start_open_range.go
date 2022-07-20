@@ -6,7 +6,7 @@ import (
 )
 
 // StartOpenRange appends a new open range entry in a record.
-func (r *Reconciler) StartOpenRange(startTime Time, entrySummary string) (*Result, error) {
+func (r *Reconciler) StartOpenRange(startTime Time, entrySummary EntrySummary) (*Result, error) {
 	if r.findOpenRangeIndex() != -1 {
 		return nil, errors.New("There is already an open range in this record")
 	}
