@@ -1,15 +1,15 @@
 package cli
 
 import (
+	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/cli/lib"
 	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/parser/reconciling"
-	"strings"
 )
 
 type Track struct {
-	Entry string `arg:"" required:"" help:"The new entry to add"`
+	Entry EntrySummary `arg:"" required:"" placeholder:"ENTRY" help:"The new entry to add"`
 	lib.AtDateArgs
 	lib.NoStyleArgs
 	lib.OutputFileArgs
@@ -29,7 +29,6 @@ func (opt *Track) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	now := ctx.Now()
 	date, _ := opt.AtDate(now)
-	value := sanitiseQuotedLeadingDash(opt.Entry)
 	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
@@ -41,14 +40,7 @@ func (opt *Track) Run(ctx app.Context) error {
 		},
 
 		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
-			return reconciler.AppendEntry(value)
+			return reconciler.AppendEntry(opt.Entry)
 		},
 	)
-}
-
-func sanitiseQuotedLeadingDash(text string) string {
-	// When passing entries like `-45m` the leading dash must be escaped
-	// otherwise it’s treated like a flag. Therefore, we have to remove
-	// the potential escaping backslash.
-	return strings.TrimPrefix(text, "\\")
 }

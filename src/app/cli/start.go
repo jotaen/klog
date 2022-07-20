@@ -1,6 +1,7 @@
 package cli
 
 import (
+	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/cli/lib"
 	"github.com/jotaen/klog/src/parser"
@@ -8,7 +9,7 @@ import (
 )
 
 type Start struct {
-	Summary string `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for this entry"`
+	Summary EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for this entry"`
 	lib.AtDateAndTimeArgs
 	lib.NoStyleArgs
 	lib.OutputFileArgs

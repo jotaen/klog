@@ -106,11 +106,9 @@ func (r *Reconciler) insert(lineIndex int, texts []insertableText) {
 	r.lines = result
 }
 
-func toMultilineEntryTexts(entryValue string, entrySummary string) []insertableText {
+func toMultilineEntryTexts(entryValue string, entrySummary EntrySummary) []insertableText {
 	var result []insertableText
-	// Normalize potentially redundant escaping.
-	entrySummary = strings.ReplaceAll(entrySummary, "\\n", "\n")
-	for i, summaryLine := range strings.Split(entrySummary, "\n") {
+	for i, summaryLine := range entrySummary.Lines() {
 		indent := 1
 		if i > 0 {
 			indent = 2
