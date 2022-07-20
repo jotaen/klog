@@ -129,6 +129,8 @@ func recordSummaryDecoder() kong.MapperFunc {
 		if value == "" {
 			return errors.New("Please provide a valid record summary")
 		}
+		// Normalize potential double-escaping (from CLI)
+		value = strings.ReplaceAll(value, "\\n", "\n")
 		summary, sErr := klog.NewRecordSummary(strings.Split(value, "\n")...)
 		if sErr != nil {
 			return errors.New("A record summary cannot contain blank lines, and none of its lines can start with whitespace characters")
