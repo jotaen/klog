@@ -1,7 +1,7 @@
 # Changelog
 **Summary of changes of the command line tool**
 
-## Not released yet
+## v5.1
 - **[ FEATURE ]** Optionally print out totals as decimal values (in minutes)
   via the `--decimal` flag; e.g. `150` instead of `2h30m`.
 - **[ FEATURE ]** Support `--now` on `klog tags` as well.
