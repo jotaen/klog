@@ -9,8 +9,8 @@ import (
 )
 
 type Stop struct {
+	Summary string `name:"summary" short:"s" placeholder:"TEXT" help:"Text to append to the entry summary"`
 	lib.AtDateAndTimeArgs
-	Summary string `name:"summary" short:"s" help:"Text to append to the entry summary"`
 	lib.NoStyleArgs
 	lib.OutputFileArgs
 	lib.WarnArgs

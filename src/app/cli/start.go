@@ -8,8 +8,8 @@ import (
 )
 
 type Start struct {
+	Summary string `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for this entry"`
 	lib.AtDateAndTimeArgs
-	Summary string `name:"summary" short:"s" help:"Summary text for this entry"`
 	lib.NoStyleArgs
 	lib.OutputFileArgs
 	lib.WarnArgs

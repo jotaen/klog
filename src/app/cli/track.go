@@ -9,8 +9,8 @@ import (
 )
 
 type Track struct {
-	lib.AtDateArgs
 	Entry string `arg:"" required:"" help:"The new entry to add"`
+	lib.AtDateArgs
 	lib.NoStyleArgs
 	lib.OutputFileArgs
 	lib.WarnArgs

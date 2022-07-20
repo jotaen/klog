@@ -11,7 +11,7 @@ import (
 )
 
 type Pause struct {
-	Summary string `name:"summary" short:"s" help:"Summary text for the pause entry"`
+	Summary string `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the pause entry"`
 	lib.OutputFileArgs
 	lib.WarnArgs
 }
