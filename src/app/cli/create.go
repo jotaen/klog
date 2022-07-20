@@ -10,7 +10,7 @@ import (
 
 type Create struct {
 	ShouldTotal ShouldTotal   `name:"should" help:"The should-total of the record"`
-	Summary     RecordSummary `name:"summary" short:"s" help:"Summary text for the new record"`
+	Summary     RecordSummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the new record"`
 	lib.AtDateArgs
 	lib.NoStyleArgs
 	lib.OutputFileArgs

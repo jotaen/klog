@@ -16,7 +16,7 @@ func TestReconcilerClosesOpenRangeWithStyle(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2010, 4, 27))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.CloseOpenRange(Ɀ_Time_(15, 30), "")
+	result, err := reconciler.CloseOpenRange(Ɀ_Time_(15, 30), nil)
 	require.Nil(t, err)
 	assert.Equal(t, `
 2010-04-27
@@ -32,7 +32,7 @@ func TestReconcilerClosesOpenRangeWithNewSummary(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.CloseOpenRange(Ɀ_Time_(15, 22), "Finished.")
+	result, err := reconciler.CloseOpenRange(Ɀ_Time_(15, 22), Ɀ_EntrySummary_("Finished."))
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01
@@ -48,7 +48,7 @@ func TestReconcilerClosesOpenRangeWithNewMultilineSummary(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.CloseOpenRange(Ɀ_Time_(15, 22), "\nFinished.")
+	result, err := reconciler.CloseOpenRange(Ɀ_Time_(15, 22), Ɀ_EntrySummary_("", "Finished."))
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01
@@ -69,7 +69,7 @@ func TestReconcilerClosesOpenRangeWithExtendingSummary(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.CloseOpenRange(Ɀ_Time_(16, 42), "Yes!")
+	result, err := reconciler.CloseOpenRange(Ɀ_Time_(16, 42), Ɀ_EntrySummary_("Yes!"))
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01
@@ -90,7 +90,7 @@ func TestReconcilerClosesOpenRangeWithExtendingSummaryOnNextLine(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.CloseOpenRange(Ɀ_Time_(18, 01), "\nStopped.")
+	result, err := reconciler.CloseOpenRange(Ɀ_Time_(18, 01), Ɀ_EntrySummary_("", "Stopped."))
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01

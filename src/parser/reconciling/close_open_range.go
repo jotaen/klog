@@ -4,11 +4,10 @@ import (
 	"errors"
 	. "github.com/jotaen/klog/src"
 	"regexp"
-	"strings"
 )
 
 // CloseOpenRange tries to close the open time range.
-func (r *Reconciler) CloseOpenRange(endTime Time, additionalSummary string) (*Result, error) {
+func (r *Reconciler) CloseOpenRange(endTime Time, additionalSummary EntrySummary) (*Result, error) {
 	openRangeEntryIndex := r.findOpenRangeIndex()
 	if openRangeEntryIndex == -1 {
 		return nil, errors.New("No open time range")
@@ -26,24 +25,22 @@ func (r *Reconciler) CloseOpenRange(endTime Time, additionalSummary string) (*Re
 			"${1}"+endTime.ToStringWithFormat(r.style.TimeFormat.Get())+"${2}",
 		)
 
-	additionalSummary = strings.ReplaceAll(additionalSummary, "\\n", "\n")
-	summaryLines := strings.Split(additionalSummary, "\n")
-
 	// Append additional summary text. Due to multiline entry summaries, that might
 	// not be the same line as the time value.
 	openRangeLastSummaryLineIndex := openRangeValueLineIndex + countLines([]Entry{r.record.Entries()[openRangeEntryIndex]}) - 1
-	firstSummaryLine := summaryLines[0] // Index `0` will always exist
-	if len(firstSummaryLine) > 0 {
-		// If there is additional summary text, always prepend a space to delimit
-		// the additional summary from either the time value or from an already
-		// existing summary text.
-		r.lines[openRangeLastSummaryLineIndex].Text += " "
+	if len(additionalSummary) > 0 {
+		if len(additionalSummary[0]) > 0 {
+			// If there is additional summary text, always prepend a space to delimit
+			// the additional summary from either the time value or from an already
+			// existing summary text.
+			r.lines[openRangeLastSummaryLineIndex].Text += " "
+		}
+		r.lines[openRangeLastSummaryLineIndex].Text += additionalSummary[0]
 	}
-	r.lines[openRangeLastSummaryLineIndex].Text += firstSummaryLine
 
-	if len(summaryLines) > 1 {
+	if len(additionalSummary) > 1 {
 		var subsequentSummaryLines []insertableText
-		for _, nextLine := range summaryLines[1:] {
+		for _, nextLine := range additionalSummary[1:] {
 			subsequentSummaryLines = append(subsequentSummaryLines, insertableText{nextLine, 2})
 		}
 		r.insert(openRangeLastSummaryLineIndex+1, subsequentSummaryLines)

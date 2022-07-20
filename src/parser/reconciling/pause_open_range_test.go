@@ -16,7 +16,7 @@ func TestReconcilerAddsNewPauseEntry(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2010, 4, 27))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.PauseOpenRange(NewDuration(0, -12), "")
+	result, err := reconciler.PauseOpenRange(NewDuration(0, -12), nil)
 	require.Nil(t, err)
 	assert.Equal(t, `
 2010-04-27
@@ -33,7 +33,7 @@ func TestReconcilerFailsIfPauseIsPositiveValue(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2010, 4, 27))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.PauseOpenRange(NewDuration(0, 12), "")
+	result, err := reconciler.PauseOpenRange(NewDuration(0, 12), nil)
 	require.Error(t, err)
 	assert.Nil(t, result)
 }
@@ -46,7 +46,7 @@ func TestReconcilerFailsIfThereIsNoOpenRange(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2010, 4, 27))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.PauseOpenRange(NewDuration(0, -12), "")
+	result, err := reconciler.PauseOpenRange(NewDuration(0, -12), nil)
 	require.Error(t, err)
 	assert.Nil(t, result)
 }
@@ -62,7 +62,7 @@ Foo
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2010, 4, 27))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.PauseOpenRange(NewDuration(0, -3), "")
+	result, err := reconciler.PauseOpenRange(NewDuration(0, -3), nil)
 	require.Nil(t, err)
 	assert.Equal(t, `
 2010-04-27
@@ -84,7 +84,7 @@ Foo
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2010, 4, 27))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.PauseOpenRange(NewDuration(-1, -30), "Lunch break")
+	result, err := reconciler.PauseOpenRange(NewDuration(-1, -30), Ɀ_EntrySummary_("Lunch break"))
 	require.Nil(t, err)
 	assert.Equal(t, `
 2010-04-27
@@ -105,7 +105,7 @@ func TestReconcilerDoesNotExtendNonNegativeDurations(t *testing.T) {
 	rs, _ := parser.Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, Ɀ_Date_(2010, 4, 27))
 	require.NotNil(t, reconciler)
-	result, err := reconciler.PauseOpenRange(NewDuration(0, -10), "")
+	result, err := reconciler.PauseOpenRange(NewDuration(0, -10), nil)
 	require.Nil(t, err)
 	assert.Equal(t, `
 2010-04-27

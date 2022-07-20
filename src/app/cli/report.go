@@ -16,9 +16,9 @@ type Report struct {
 	Fill        bool   `name:"fill" short:"f" help:"Fill the gaps and show a consecutive stream"`
 	lib.DiffArgs
 	lib.FilterArgs
-	lib.WarnArgs
 	lib.NowArgs
 	lib.DecimalArgs
+	lib.WarnArgs
 	lib.NoStyleArgs
 	lib.InputFilesArgs
 }

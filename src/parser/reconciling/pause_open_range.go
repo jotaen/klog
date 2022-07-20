@@ -11,7 +11,7 @@ import (
 // If the next entry is a negative duration and has the same summary, its
 // value is extended. Otherwise, a new entry is created.
 // The pause duration must be negative and can’t be 0.
-func (r *Reconciler) PauseOpenRange(pause Duration, summary string) (*Result, error) {
+func (r *Reconciler) PauseOpenRange(pause Duration, summary EntrySummary) (*Result, error) {
 	if pause.InMinutes() > 0 {
 		return nil, errors.New("Invalid pause duration")
 	}
@@ -20,10 +20,6 @@ func (r *Reconciler) PauseOpenRange(pause Duration, summary string) (*Result, er
 		return nil, errors.New("No open time range")
 	}
 	openRangeEntryLastLineIndex := r.lastLinePointer - countLines(r.record.Entries()[openRangeEntryIndex:])
-	entrySummary, eErr := NewEntrySummary(summary)
-	if eErr != nil {
-		return nil, eErr
-	}
 
 	existingPause := func() Duration {
 		// The open range is the last entry.
@@ -31,7 +27,7 @@ func (r *Reconciler) PauseOpenRange(pause Duration, summary string) (*Result, er
 			return nil
 		}
 		nextEntry := r.record.Entries()[openRangeEntryIndex+1]
-		if !nextEntry.Summary().Equals(entrySummary) {
+		if !nextEntry.Summary().Equals(summary) {
 			// Summaries don’t match.
 			return nil
 		}

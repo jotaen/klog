@@ -50,6 +50,10 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error
 			s, _ := klog.NewRecordSummary("test")
 			return kong.TypeMapper(reflect.TypeOf(&s).Elem(), recordSummaryDecoder())
 		}(),
+		func() kong.Option {
+			s, _ := klog.NewEntrySummary("test")
+			return kong.TypeMapper(reflect.TypeOf(&s).Elem(), entrySummaryDecoder())
+		}(),
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact: true,
 		}),

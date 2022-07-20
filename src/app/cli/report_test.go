@@ -105,6 +105,30 @@ func TestDayReportWithDiff(t *testing.T) {
 `, state.printBuffer)
 }
 
+func TestDayReportWithDecimal(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+2018-07-07 (8h!)
+	8h
+
+2018-07-08 (5h30m!)
+	2h
+
+2018-07-09 (2h!)
+	5h20m
+
+2018-07-09 (19m!)
+`)._Run((&Report{DiffArgs: lib.DiffArgs{Diff: true}, DecimalArgs: lib.DecimalArgs{Decimal: true}}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+                       Total    Should     Diff
+2018 Jul    Sat  7.      480       480        0
+            Sun  8.      120       330     -210
+            Mon  9.      320       139      181
+                    ======== ========= ========
+                         920       949      -29
+`, state.printBuffer)
+}
+
 func TestWeekReport(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 2016-01-03

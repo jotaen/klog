@@ -14,8 +14,8 @@ type Today struct {
 	lib.NowArgs
 	Follow bool `name:"follow" short:"f" help:"Keep shell open and follow changes"`
 	lib.DecimalArgs
-	lib.NoStyleArgs
 	lib.WarnArgs
+	lib.NoStyleArgs
 	lib.InputFilesArgs
 }
 
