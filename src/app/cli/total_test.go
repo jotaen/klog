@@ -40,3 +40,35 @@ func TestTotalWithDiffing(t *testing.T) {
 	require.Nil(t, err)
 	assert.Equal(t, "\nTotal: 16h30m\nShould: 15h45m!\nDiff: +45m\n(In 2 records)\n", state.printBuffer)
 }
+
+func TestTotalWithNow(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+2018-11-08 (8h!)
+	8h30m
+
+2018-11-09 (7h45m!)
+	8:00 - ?
+`)._SetNow(2018, 11, 9, 8, 30)._Run((&Total{NowArgs: lib.NowArgs{Now: true}}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, "\nTotal: 9h\n(In 2 records)\n", state.printBuffer)
+}
+
+func TestTotalWithNowUncloseable(t *testing.T) {
+	_, err := NewTestingContext()._SetRecords(`
+2018-11-08 (8h!)
+	8h30m
+
+2018-11-09 (7h45m!)
+	8:00 - ?
+`)._SetNow(2018, 13, 9, 8, 30)._Run((&Total{NowArgs: lib.NowArgs{Now: true}}).Run)
+	require.Error(t, err)
+}
+
+func TestTotalAsDecimal(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+2018-11-08 (8h!)
+	8h30m
+`)._SetNow(2018, 11, 9, 8, 30)._Run((&Total{DecimalArgs: lib.DecimalArgs{Decimal: true}}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, "\nTotal: 510\n(In 1 record)\n", state.printBuffer)
+}

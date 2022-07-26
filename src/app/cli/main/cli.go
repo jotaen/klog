@@ -16,7 +16,7 @@ import (
 )
 
 func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error) {
-	ctx := app.NewContext(homeDir, meta, lib.NewCliSerialiser(), isDebug)
+	ctx := app.NewContext(homeDir, meta, lib.CliSerialiser{}, isDebug)
 	kongApp, nErr := kong.New(
 		&cli.Cli{},
 		kong.Name("klog"),
@@ -46,6 +46,14 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error
 		func() kong.Option {
 			t := klog.NewTagOrPanic("test", "")
 			return kong.TypeMapper(reflect.TypeOf(&t).Elem(), tagDecoder())
+		}(),
+		func() kong.Option {
+			s, _ := klog.NewRecordSummary("test")
+			return kong.TypeMapper(reflect.TypeOf(&s).Elem(), recordSummaryDecoder())
+		}(),
+		func() kong.Option {
+			s, _ := klog.NewEntrySummary("test")
+			return kong.TypeMapper(reflect.TypeOf(&s).Elem(), entrySummaryDecoder())
 		}(),
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact: true,

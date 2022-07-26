@@ -106,24 +106,25 @@ func (r *Reconciler) insert(lineIndex int, texts []insertableText) {
 	r.lines = result
 }
 
-func toMultilineEntryTexts(entryValue string, entrySummary string) []insertableText {
+func toMultilineEntryTexts(entryValue string, entrySummary EntrySummary) []insertableText {
 	var result []insertableText
-	// Normalize potentially redundant escaping.
-	entrySummary = strings.ReplaceAll(entrySummary, "\\n", "\n")
-	for i, summaryLine := range strings.Split(entrySummary, "\n") {
-		indent := 1
-		if i > 0 {
-			indent = 2
-		}
-		text := ""
-		if i == 0 {
-			text += entryValue
-			if text != "" && summaryLine != "" {
+	firstLine := func() string {
+		text := entryValue
+		// Make sure that there is a space between entry value and the subsequent
+		// summary text. However, there shouldn’t be dangling spaces, in case either
+		// value would be absent.
+		if len(entrySummary) > 0 {
+			if len(text) > 0 && len(entrySummary[0]) > 0 {
 				text += " "
 			}
+			text += entrySummary[0]
+			entrySummary = entrySummary[1:]
 		}
-		text += summaryLine
-		result = append(result, insertableText{text, indent})
+		return text
+	}()
+	result = append(result, insertableText{firstLine, 1})
+	for _, s := range entrySummary {
+		result = append(result, insertableText{s, 2})
 	}
 	return result
 }

@@ -3,7 +3,6 @@ package lib
 import (
 	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
-	"github.com/jotaen/klog/src/parser"
 	"github.com/jotaen/klog/src/service"
 	"github.com/jotaen/klog/src/service/period"
 	"os"
@@ -80,12 +79,20 @@ type NowArgs struct {
 	Now bool `name:"now" short:"n" help:"Assume open ranges to be closed at this moment"`
 }
 
-func (args *NowArgs) Total(reference gotime.Time, rs ...Record) Duration {
+func (args *NowArgs) ApplyNow(reference gotime.Time, rs ...Record) ([]Record, error) {
 	if args.Now {
-		d, _ := service.HypotheticalTotal(reference, rs...)
-		return d
+		rs, err := service.CloseOpenRanges(reference, rs...)
+		if err != nil {
+			return nil, app.NewErrorWithCode(
+				app.LOGICAL_ERROR,
+				"Cannot apply --now flag",
+				"There are records with uncloseable time ranges",
+				err,
+			)
+		}
+		return rs, nil
 	}
-	return service.Total(rs...)
+	return rs, nil
 }
 
 type FilterArgs struct {
@@ -202,7 +209,10 @@ type NoStyleArgs struct {
 
 func (args *NoStyleArgs) Apply(ctx *app.Context) {
 	if args.NoStyle || os.Getenv("NO_COLOR") != "" {
-		(*ctx).SetSerialiser(&parser.PlainSerialiser)
+		if s, ok := (*ctx).Serialiser().(CliSerialiser); ok {
+			s.Unstyled = true
+			(*ctx).SetSerialiser(s)
+		}
 	}
 }
 
@@ -223,4 +233,17 @@ func (args *SortArgs) ApplySort(rs []Record) []Record {
 		startWithOldest = true
 	}
 	return service.Sort(rs, startWithOldest)
+}
+
+type DecimalArgs struct {
+	Decimal bool `name:"decimal" help:"Display totals as decimal values (in minutes)"`
+}
+
+func (args *DecimalArgs) Apply(ctx *app.Context) {
+	if args.Decimal {
+		if s, ok := (*ctx).Serialiser().(CliSerialiser); ok {
+			s.Decimal = true
+			(*ctx).SetSerialiser(s)
+		}
+	}
 }

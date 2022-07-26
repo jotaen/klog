@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"github.com/jotaen/klog/src"
+	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/cli/lib"
 	"github.com/jotaen/klog/src/service"
@@ -29,7 +29,7 @@ func TestStartWithExplicitDateAndAutoTimeYesterday(t *testing.T) {
 	9:00-12:00
 `)._SetNow(1920, 2, 3, 23, 35)._Run((&Start{
 		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
-			AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
+			AtDateArgs: lib.AtDateArgs{Date: Ɀ_Date_(1920, 2, 2)},
 		},
 	}).Run)
 	require.Nil(t, err)
@@ -46,7 +46,7 @@ func TestStartWithExplicitTime(t *testing.T) {
 	9:00-12:00
 `)._SetNow(1920, 2, 2, 23, 0)._Run((&Start{
 		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
-			Time: klog.Ɀ_Time_(15, 24),
+			Time: Ɀ_Time_(15, 24),
 		},
 	}).Run)
 	require.Nil(t, err)
@@ -63,8 +63,8 @@ func TestStartWithExplicitDateAndTime(t *testing.T) {
 	9:00-12:00
 `)._SetNow(1920, 9, 28, 12, 16)._Run((&Start{
 		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
-			AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
-			Time:       klog.Ɀ_Time_(15, 24),
+			AtDateArgs: lib.AtDateArgs{Date: Ɀ_Date_(1920, 2, 2)},
+			Time:       Ɀ_Time_(15, 24),
 		},
 	}).Run)
 	require.Nil(t, err)
@@ -81,7 +81,7 @@ func TestStartFailsIfDateIsInPastAndNoTimeIsGiven(t *testing.T) {
 	9:00-???
 `)._SetNow(1920, 9, 28, 12, 15)._Run((&Start{
 		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
-			AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
+			AtDateArgs: lib.AtDateArgs{Date: Ɀ_Date_(1920, 2, 2)},
 		},
 	}).Run)
 	require.Error(t, err)
@@ -95,8 +95,8 @@ func TestStartFailsIfAlreadyStarted(t *testing.T) {
 	9:00-???
 `)._Run((&Start{
 		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
-			AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
-			Time:       klog.Ɀ_Time_(12, 35),
+			AtDateArgs: lib.AtDateArgs{Date: Ɀ_Date_(1920, 2, 2)},
+			Time:       Ɀ_Time_(12, 35),
 		},
 	}).Run)
 	require.Error(t, err)
@@ -110,9 +110,9 @@ func TestStartWithSummary(t *testing.T) {
 	9:00-12:00
 `)._SetNow(1920, 2, 2, 15, 24)._Run((&Start{
 		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
-			AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
+			AtDateArgs: lib.AtDateArgs{Date: Ɀ_Date_(1920, 2, 2)},
 		},
-		Summary: "Started something",
+		Summary: Ɀ_EntrySummary_("Started something"),
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `

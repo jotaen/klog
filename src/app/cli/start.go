@@ -1,6 +1,7 @@
 package cli
 
 import (
+	. "github.com/jotaen/klog/src"
 	"github.com/jotaen/klog/src/app"
 	"github.com/jotaen/klog/src/app/cli/lib"
 	"github.com/jotaen/klog/src/parser"
@@ -8,8 +9,8 @@ import (
 )
 
 type Start struct {
+	Summary EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for this entry"`
 	lib.AtDateAndTimeArgs
-	Summary string `name:"summary" short:"s" help:"Summary text for this entry"`
 	lib.NoStyleArgs
 	lib.OutputFileArgs
 	lib.WarnArgs
@@ -34,7 +35,7 @@ func (opt *Start) Run(ctx app.Context) error {
 				return reconciling.NewReconcilerAtRecord(parsedRecords, date)
 			},
 			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
-				return reconciling.NewReconcilerForNewRecord(parsedRecords, date, nil)
+				return reconciling.NewReconcilerForNewRecord(parsedRecords, reconciling.RecordParams{Date: date})
 			},
 		},
 

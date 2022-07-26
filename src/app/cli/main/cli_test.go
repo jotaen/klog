@@ -31,14 +31,21 @@ func TestBookmarkFile(t *testing.T) {
 	}
 	out := klog.run(
 		[]string{"bookmarks", "set", "test.klg", "tst"},
+		[]string{"bookmarks", "set", "test.klg", "tst"},
 		[]string{"bookmarks", "list"},
 		[]string{"total", "@tst"},
 	)
-	// Out 1 like: `@tst -> /tmp/.../test.klg`
+	// Out 0 like: `Created new bookmark`, `@tst -> /tmp/.../test.klg`
+	assert.True(t, strings.Contains(out[0], "Created new bookmark"), out)
+	assert.True(t, strings.Contains(out[0], "@tst"), out)
+	assert.True(t, strings.Contains(out[0], "test.klg"), out)
+	// Out 1 like: `Changed bookmark`, `@tst -> /tmp/.../test.klg`
+	assert.True(t, strings.Contains(out[1], "Changed bookmark"), out)
 	assert.True(t, strings.Contains(out[1], "@tst"), out)
-	assert.True(t, strings.Contains(out[1], "test.klg"), out)
-	// Out 2 like: `Total: 1h7m`
-	assert.True(t, strings.Contains(out[2], "1h7m"), out)
+	// Out 2 like: `@tst -> /tmp/.../test.klg`
+	assert.True(t, strings.Contains(out[2], "@tst"), out)
+	// Out 3 like: `Total: 1h7m`
+	assert.True(t, strings.Contains(out[3], "1h7m"), out)
 }
 
 func TestWriteToFile(t *testing.T) {
@@ -154,4 +161,22 @@ func TestDecodesTags(t *testing.T) {
 	assert.True(t, strings.Contains(out[2], "#foo"), out)
 	assert.True(t, strings.Contains(out[3], "#bar=1"), out)
 	assert.True(t, strings.Contains(out[4], "#bar=1"), out)
+}
+
+func TestDecodesRecordSummary(t *testing.T) {
+	klog := &Env{
+		files: map[string]string{
+			"test.klg": "2020-01-01\nTest.",
+		},
+	}
+	out := klog.run(
+		[]string{"create", "--summary", "Foo", "test.klg"},
+		[]string{"create", "--summary", "Foo\nBar", "test.klg"},
+		[]string{"create", "--summary", "Foo\n\nBar", "test.klg"},
+		[]string{"create", "--summary", "Foo\n Bar", "test.klg"},
+	)
+	assert.True(t, strings.Contains(out[0], "Foo"), out)
+	assert.True(t, strings.Contains(out[1], "Foo\nBar"), out)
+	assert.True(t, strings.Contains(out[2], "A record summary cannot contain blank lines"), out)
+	assert.True(t, strings.Contains(out[3], "A record summary cannot contain blank lines"), out)
 }

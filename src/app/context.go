@@ -63,10 +63,10 @@ type Context interface {
 	OpenInEditor(FileOrBookmarkName, func(string)) Error
 
 	// Serialiser returns the current serialiser.
-	Serialiser() *parser.Serialiser
+	Serialiser() parser.Serialiser
 
-	// SetSerialiser sets the current serialiser.
-	SetSerialiser(*parser.Serialiser)
+	// SetSerialiser sets a new serialiser.
+	SetSerialiser(parser.Serialiser)
 
 	// Debug takes a void function that is only executed in debug mode.
 	Debug(func())
@@ -92,7 +92,7 @@ type Meta struct {
 }
 
 // NewContext creates a new Context object.
-func NewContext(homeDir string, meta Meta, serialiser *parser.Serialiser, isDebug bool) Context {
+func NewContext(homeDir string, meta Meta, serialiser parser.Serialiser, isDebug bool) Context {
 	if meta.Version == "" {
 		meta.Version = "v?.?"
 	}
@@ -109,7 +109,7 @@ func NewContext(homeDir string, meta Meta, serialiser *parser.Serialiser, isDebu
 
 type context struct {
 	homeDir    string
-	serialiser *parser.Serialiser
+	serialiser parser.Serialiser
 	meta       Meta
 	isDebug    bool
 }
@@ -371,15 +371,12 @@ func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(stri
 	)
 }
 
-func (ctx *context) Serialiser() *parser.Serialiser {
+func (ctx *context) Serialiser() parser.Serialiser {
 	return ctx.serialiser
 }
 
-func (ctx *context) SetSerialiser(serialiser *parser.Serialiser) {
-	if serialiser == nil {
-		panic("Serialiser cannot be nil")
-	}
-	ctx.serialiser = serialiser
+func (ctx *context) SetSerialiser(s parser.Serialiser) {
+	ctx.serialiser = s
 }
 
 func (ctx *context) Debug(task func()) {

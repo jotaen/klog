@@ -72,7 +72,7 @@ func TestStopWithExtendingSummary(t *testing.T) {
 		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
 			AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
 		},
-		Summary: "Done!",
+		Summary: klog.Ɀ_EntrySummary_("Done!"),
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `

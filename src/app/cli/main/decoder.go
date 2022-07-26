@@ -119,3 +119,53 @@ func tagDecoder() kong.MapperFunc {
 		return nil
 	}
 }
+
+func recordSummaryDecoder() kong.MapperFunc {
+	return func(ctx *kong.DecodeContext, target reflect.Value) error {
+		var value string
+		if err := ctx.Scan.PopValueInto("recordSummary", &value); err != nil {
+			return err
+		}
+		if value == "" {
+			return errors.New("Please provide a valid record summary")
+		}
+		// Normalize potential double-escaping (from CLI)
+		value = strings.ReplaceAll(value, "\\n", "\n")
+		summary, sErr := klog.NewRecordSummary(strings.Split(value, "\n")...)
+		if sErr != nil {
+			return errors.New("A record summary cannot contain blank lines, and none of its lines can start with whitespace characters")
+		}
+		target.Set(reflect.ValueOf(summary))
+		return nil
+	}
+}
+
+func entrySummaryDecoder() kong.MapperFunc {
+	return func(ctx *kong.DecodeContext, target reflect.Value) error {
+		var value string
+		if err := ctx.Scan.PopValueInto("entrySummary", &value); err != nil {
+			return err
+		}
+		if value == "" {
+			return errors.New("Please provide a valid record summary")
+		}
+		// Normalize potential double-escaping (from CLI)
+		value = strings.ReplaceAll(value, "\\n", "\n")
+		// When passing entries like `-45m` the leading dash must be escaped
+		// by the user, otherwise it would be treated like a flag. Therefore, we
+		// have to remove the potential escaping backslash. Examples:
+		// - `\\-45m` (unquoted, with double-escape)
+		// - `'\-45m'` (quoted, with single-escape)
+		if strings.HasPrefix(value, "\\-") {
+			value = strings.TrimPrefix(value, "\\")
+		} else if strings.HasPrefix(value, "\\\\-") {
+			value = strings.TrimPrefix(value, "\\\\")
+		}
+		summary, sErr := klog.NewEntrySummary(strings.Split(value, "\n")...)
+		if sErr != nil {
+			return errors.New("An entry summary cannot contain blank lines")
+		}
+		target.Set(reflect.ValueOf(summary))
+		return nil
+	}
+}

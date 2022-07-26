@@ -10,8 +10,9 @@ import (
 type Total struct {
 	lib.FilterArgs
 	lib.DiffArgs
-	lib.WarnArgs
 	lib.NowArgs
+	lib.DecimalArgs
+	lib.WarnArgs
 	lib.NoStyleArgs
 	lib.InputFilesArgs
 }
@@ -25,6 +26,7 @@ which treats all open-ended time ranges as if they were closed right now.`
 }
 
 func (opt *Total) Run(ctx app.Context) error {
+	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
@@ -32,7 +34,11 @@ func (opt *Total) Run(ctx app.Context) error {
 	}
 	now := ctx.Now()
 	records = opt.ApplyFilter(now, records)
-	total := opt.NowArgs.Total(now, records...)
+	records, nErr := opt.ApplyNow(now, records...)
+	if nErr != nil {
+		return nErr
+	}
+	total := service.Total(records...)
 	ctx.Print(fmt.Sprintf("Total: %s\n", ctx.Serialiser().Duration(total)))
 	if opt.Diff {
 		should := service.ShouldTotalSum(records...)

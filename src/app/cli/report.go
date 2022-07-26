@@ -16,13 +16,15 @@ type Report struct {
 	Fill        bool   `name:"fill" short:"f" help:"Fill the gaps and show a consecutive stream"`
 	lib.DiffArgs
 	lib.FilterArgs
-	lib.WarnArgs
 	lib.NowArgs
+	lib.DecimalArgs
+	lib.WarnArgs
 	lib.NoStyleArgs
 	lib.InputFilesArgs
 }
 
 func (opt *Report) Run(ctx app.Context) error {
+	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
@@ -33,6 +35,10 @@ func (opt *Report) Run(ctx app.Context) error {
 	}
 	now := ctx.Now()
 	records = opt.ApplyFilter(now, records)
+	records, nErr := opt.ApplyNow(now, records...)
+	if nErr != nil {
+		return nErr
+	}
 	records = service.Sort(records, true)
 	aggregator := opt.findAggregator()
 	recordGroups, dates := groupByDate(aggregator.DateHash, records)
@@ -74,7 +80,7 @@ func (opt *Report) Run(ctx app.Context) error {
 			continue
 		}
 
-		total := opt.NowArgs.Total(now, rs...)
+		total := service.Total(rs...)
 		table.CellR(ctx.Serialiser().Duration(total))
 
 		if opt.Diff {
@@ -90,7 +96,7 @@ func (opt *Report) Run(ctx app.Context) error {
 		table.Fill("=").Fill("=")
 	}
 	ctx.Print("\n")
-	grandTotal := opt.NowArgs.Total(now, records...)
+	grandTotal := service.Total(records...)
 
 	// Footer
 	table.Skip(aggregator.NumberOfPrefixColumns())
