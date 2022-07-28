@@ -20,4 +20,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
-replace github.com/willabides/kongplete v0.3.0 => github.com/jotaen/kongplete v0.3.1-0.20220726180719-d16c46fbcd8f
+replace github.com/willabides/kongplete v0.3.0 => github.com/jotaen/kongplete v0.3.1-0.20220728081706-d7fdeab9b894
