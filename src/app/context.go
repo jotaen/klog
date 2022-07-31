@@ -355,6 +355,8 @@ func tryCommands(commands []string, additionalArg string) bool {
 		err := cmd.Run()
 		if err == nil {
 			return true
+		} else {
+			fmt.Println(err)
 		}
 	}
 	return false
