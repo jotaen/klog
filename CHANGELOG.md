@@ -1,6 +1,10 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## Next Up
+- **[ FIX ]** `klog edit` now correctly recognises when `$EDITOR`
+  contains spaces. When `$EDITOR` is incorrect, it fails directly.
+
 ## v5.1
 - **[ FEATURE ]** Optionally print out totals as decimal values (in minutes)
   via the `--decimal` flag; e.g. `150` instead of `2h30m`.
