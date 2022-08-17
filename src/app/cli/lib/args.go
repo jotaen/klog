@@ -11,11 +11,11 @@ import (
 )
 
 type InputFilesArgs struct {
-	File []app.FileOrBookmarkName `arg:"" optional:"" type:"string" predictor:"file or bookmark" name:"file or bookmark" help:".klg source file(s) (if empty the bookmark is used)"`
+	File []app.FileOrBookmarkName `arg:"" optional:"" type:"string" predictor:"file_or_bookmark" name:"file or bookmark" help:".klg source file(s) (if empty the bookmark is used)"`
 }
 
 type OutputFileArgs struct {
-	File app.FileOrBookmarkName `arg:"" optional:"" type:"string" predictor:"file or bookmark" name:"file or bookmark" help:".klg source file (if empty the bookmark is used)"`
+	File app.FileOrBookmarkName `arg:"" optional:"" type:"string" predictor:"file_or_bookmark" name:"file or bookmark" help:".klg source file (if empty the bookmark is used)"`
 }
 
 type AtDateArgs struct {
@@ -110,24 +110,22 @@ type FilterArgs struct {
 	Today            bool `name:"today" group:"Filter (shortcuts)" help:"Records at today’s date"`
 	Yesterday        bool `name:"yesterday" group:"Filter (shortcuts)" help:"Records at yesterday’s date"`
 	Tomorrow         bool `name:"tomorrow" group:"Filter (shortcuts)" help:"Records at tomorrow’s date"`
-	ThisXXX          bool `name:"this-***" group:"Filter (shortcuts)" help:"Records of the current week/quarter/month/year (e.g. --this-year)"`
-	LastXXX          bool `name:"last-***" group:"Filter (shortcuts)" help:"Records of the previous week/quarter/month/year (e.g. --last-month)"`
-	ThisWeek         bool `name:"this-week" hidden:""`
-	ThisWeekAlias    bool `name:"thisweek" hidden:""`
-	LastWeek         bool `name:"last-week" hidden:""`
-	LastWeekAlias    bool `name:"lastweek" hidden:""`
-	ThisMonth        bool `name:"this-month" hidden:""`
-	ThisMonthAlias   bool `name:"thismonth" hidden:""`
-	LastMonth        bool `name:"last-month" hidden:""`
-	LastMonthAlias   bool `name:"lastmonth" hidden:""`
-	ThisQuarter      bool `name:"this-quarter" hidden:""`
-	ThisQuarterAlias bool `name:"thisquarter" hidden:""`
-	LastQuarter      bool `name:"last-quarter" hidden:""`
-	LastQuarterAlias bool `name:"lastquarter" hidden:""`
-	ThisYear         bool `name:"this-year" hidden:""`
-	ThisYearAlias    bool `name:"thisyear" hidden:""`
-	LastYear         bool `name:"last-year" hidden:""`
-	LastYearAlias    bool `name:"lastyear" hidden:""`
+	ThisWeek         bool `name:"this-week" group:"Filter (shortcuts)" help:"Records of the current week"`
+	ThisWeekAlias    bool `name:"thisweek" group:"Filter (shortcuts)" hidden:""`
+	LastWeek         bool `name:"last-week" group:"Filter (shortcuts)" help:"Records of the last week"`
+	LastWeekAlias    bool `name:"lastweek" group:"Filter (shortcuts)" hidden:""`
+	ThisMonth        bool `name:"this-month" group:"Filter (shortcuts)" help:"Records of the current month"`
+	ThisMonthAlias   bool `name:"thismonth" group:"Filter (shortcuts)" hidden:""`
+	LastMonth        bool `name:"last-month" group:"Filter (shortcuts)" help:"Records of the last month"`
+	LastMonthAlias   bool `name:"lastmonth" group:"Filter (shortcuts)" hidden:""`
+	ThisQuarter      bool `name:"this-quarter" group:"Filter (shortcuts)" help:"Records of the current quarter"`
+	ThisQuarterAlias bool `name:"thisquarter" group:"Filter (shortcuts)" hidden:""`
+	LastQuarter      bool `name:"last-quarter" group:"Filter (shortcuts)" help:"Records of the last quarter"`
+	LastQuarterAlias bool `name:"lastquarter" group:"Filter (shortcuts)" hidden:""`
+	ThisYear         bool `name:"this-year" group:"Filter (shortcuts)" help:"Records of the current year"`
+	ThisYearAlias    bool `name:"thisyear" group:"Filter (shortcuts)" hidden:""`
+	LastYear         bool `name:"last-year" group:"Filter (shortcuts)" help:"Records of the last year"`
+	LastYearAlias    bool `name:"lastyear" group:"Filter (shortcuts)" hidden:""`
 }
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []Record) []Record {

@@ -5,7 +5,7 @@ import (
 	"github.com/posener/complete"
 )
 
-func PredictBookmarks(ctx app.Context) complete.Predictor {
+func predictBookmarks(ctx app.Context) complete.Predictor {
 	thunk := func() []string {
 		names := make([]string, 0)
 		bookmarksCollection, err := ctx.ReadBookmarks()
@@ -20,10 +20,10 @@ func PredictBookmarks(ctx app.Context) complete.Predictor {
 	return complete.PredictFunc(func(a complete.Args) []string { return thunk() })
 }
 
-func Predictors(ctx app.Context) map[string]complete.Predictor {
+func CompletionPredictors(ctx app.Context) map[string]complete.Predictor {
 	return map[string]complete.Predictor{
 		"file":             complete.PredictFiles("*.klg"),
-		"bookmark":         PredictBookmarks(ctx),
-		"file or bookmark": complete.PredictOr(complete.PredictFiles("*.klg"), PredictBookmarks(ctx)),
+		"bookmark":         predictBookmarks(ctx),
+		"file_or_bookmark": complete.PredictOr(complete.PredictFiles("*.klg"), predictBookmarks(ctx)),
 	}
 }
