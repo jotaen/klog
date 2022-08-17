@@ -3,8 +3,8 @@ package main
 import (
 	_ "embed"
 	"fmt"
-	"github.com/jotaen/klog/src/app"
-	klog "github.com/jotaen/klog/src/app/cli/main"
+	"github.com/jotaen/klog/klog/app"
+	"github.com/jotaen/klog/klog/app/cli/main"
 	"os"
 	"os/user"
 )
