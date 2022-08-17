@@ -2,6 +2,7 @@
 **Summary of changes of the command line tool**
 
 ## Next Up
+- **[ FEATURE ]** Support tab completions of flags and arguments.
 - **[ FIX ]** `klog edit` now correctly recognises when `$EDITOR`
   contains spaces. When `$EDITOR` is incorrect, it fails directly.
 
