@@ -15,7 +15,6 @@ import (
 	"os/exec"
 	"strings"
 	gotime "time"
-	"unicode"
 )
 
 // FileOrBookmarkName is either a file name or a bookmark name
@@ -320,43 +319,18 @@ func (ctx *context) bookmarkDatabasePath() File {
 	return NewFileOrPanic(ctx.KlogFolder() + "bookmarks.json")
 }
 
-func splitCommand(command string) []string {
-	quote := rune(0)
-	split := func(r rune) bool {
-		if unicode.In(r, unicode.Quotation_Mark) {
-			if quote == rune(0) {
-				quote = r
-			} else if quote == r {
-				quote = rune(0)
-			}
-
-			return false
-		}
-
-		return quote == rune(0) && unicode.IsSpace(r)
-	}
-
-	args := strings.FieldsFunc(command, split)
-
-	if len(args) > 0 {
-		args[0] = strings.Trim(args[0], "\"")
-	}
-
-	return args
-}
-
-func tryCommands(commands []string, additionalArg string) bool {
+// tryCommands tries to execute the given commands one after the other.
+// Returns `true` upon first successful execution; `false` otherwise.
+func tryCommands(commands [][]string, pathArg string) bool {
 	for _, command := range commands {
-		args := splitCommand(command)
-		args = append(args, additionalArg)
-		cmd := exec.Command(args[0], args[1:]...)
+		bin := command[0]
+		binArgs := command[1:]
+		cmd := exec.Command(bin, append(binArgs, pathArg)...)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		err := cmd.Run()
 		if err == nil {
 			return true
-		} else {
-			fmt.Println(err)
 		}
 	}
 	return false
@@ -384,7 +358,7 @@ func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(stri
 	}
 	hint := "You can specify your preferred editor via the $EDITOR environment variable.\n"
 	preferredEditor := os.Getenv("EDITOR")
-	hasSucceeded := tryCommands(append([]string{preferredEditor}, POTENTIAL_EDITORS...), target.Path())
+	hasSucceeded := tryCommands(append([][]string{{preferredEditor}}, POTENTIAL_EDITORS...), target.Path())
 	if hasSucceeded {
 		if preferredEditor == "" {
 			// Inform the user that they can configure their editor:
