@@ -356,14 +356,27 @@ func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(stri
 	if err != nil {
 		return err
 	}
-	hint := "You can specify your preferred editor via the $EDITOR environment variable.\n"
+
+	// If $EDITOR is specified, try to open it.
 	preferredEditor := os.Getenv("EDITOR")
-	hasSucceeded := tryCommands(append([][]string{{preferredEditor}}, POTENTIAL_EDITORS...), target.Path())
-	if hasSucceeded {
-		if preferredEditor == "" {
-			// Inform the user that they can configure their editor:
-			printHint(hint)
+	if preferredEditor != "" {
+		hasSucceeded := tryCommands([][]string{{preferredEditor}}, target.Path())
+		if hasSucceeded {
+			return nil
 		}
+		return NewError(
+			"Cannot open preferred editor",
+			"$EDITOR variable was: "+preferredEditor,
+			nil,
+		)
+	}
+
+	// If no $EDITOR is specified, fall back to trying the pre-configured options.
+	hasSucceeded := tryCommands(POTENTIAL_EDITORS, target.Path())
+	hint := "You can specify your preferred editor via the $EDITOR environment variable."
+	if hasSucceeded {
+		// Inform the user that they can configure their editor:
+		printHint(hint)
 		return nil
 	}
 	return NewError(
