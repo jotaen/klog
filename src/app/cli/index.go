@@ -25,10 +25,11 @@ type Cli struct {
 	Bk        Bookmarks `cmd:"" group:"Bookmarks" hidden:"" help:"Alias"`
 
 	// Misc
-	Edit       Edit       `cmd:"" group:"Misc" help:"Opens a file or bookmark in your editor"`
-	Goto       Goto       `cmd:"" group:"Misc" help:"Opens the file explorer at the given location"`
-	Json       Json       `cmd:"" group:"Misc" help:"Converts records to JSON"`
-	Info       Info       `cmd:"" group:"Misc" default:"withargs" help:"Displays meta info about klog"`
-	Version    Version    `cmd:"" group:"Misc" help:"Prints version info and check for updates"`
-	Completion Completion `cmd:"" group:"Misc" help:"Output shell code for initialising shell completions for klog"`
+	Edit        Edit       `cmd:"" group:"Misc" help:"Opens a file or bookmark in your editor"`
+	Goto        Goto       `cmd:"" group:"Misc" help:"Opens the file explorer at the given location"`
+	Json        Json       `cmd:"" group:"Misc" help:"Converts records to JSON"`
+	Info        Info       `cmd:"" group:"Misc" default:"withargs" help:"Displays meta info about klog"`
+	Version     Version    `cmd:"" group:"Misc" help:"Prints version info and check for updates"`
+	Completion  Completion `cmd:"" group:"Misc" help:"Output shell code for initialising shell completions for klog"`
+	Completions Completion `cmd:"" group:"Misc" hidden:"" help:"Alias"`
 }
