@@ -7,7 +7,7 @@ jobs:
     name: Statistics
     runs-on: ubuntu-latest
     env:
-      TARGET: src/
+      TARGET: klog/
       TEST_FILE_PATTERN: .*_test\.go
       IMAGE_NAME: aldanial/cloc
     steps:
