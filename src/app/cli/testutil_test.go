@@ -137,4 +137,8 @@ func (ctx *TestingContext) SetSerialiser(s parser.Serialiser) {
 	ctx.serialiser = s
 }
 
+func (ctx *TestingContext) Completion() (string, app.Error) {
+	return "", nil
+}
+
 func (ctx *TestingContext) Debug(_ func()) {}
