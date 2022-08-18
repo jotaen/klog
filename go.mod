@@ -5,9 +5,9 @@ go 1.18
 require (
 	cloud.google.com/go v0.97.0
 	github.com/alecthomas/kong v0.2.22
+	github.com/jotaen/kong-completion v1.0.1
 	github.com/posener/complete v1.2.3
 	github.com/stretchr/testify v1.7.0
-	github.com/willabides/kongplete v0.3.0
 )
 
 require (
@@ -19,5 +19,3 @@ require (
 	github.com/riywo/loginshell v0.0.0-20200815045211-7d26008be1ab // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
-
-replace github.com/willabides/kongplete v0.3.0 => github.com/jotaen/kongplete v0.3.1-0.20220728081706-d7fdeab9b894

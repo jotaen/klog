@@ -68,9 +68,6 @@ type Context interface {
 	// SetSerialiser sets a new serialiser.
 	SetSerialiser(parser.Serialiser)
 
-	// Completion returns the shell initialization code for CLI completions.
-	Completion() (string, Error)
-
 	// Debug takes a void function that is only executed in debug mode.
 	Debug(func())
 }
@@ -95,7 +92,7 @@ type Meta struct {
 }
 
 // NewContext creates a new Context object.
-func NewContext(homeDir string, meta Meta, serialiser parser.Serialiser, isDebug bool, completion func() (string, error)) Context {
+func NewContext(homeDir string, meta Meta, serialiser parser.Serialiser, isDebug bool) Context {
 	if meta.Version == "" {
 		meta.Version = "v?.?"
 	}
@@ -107,7 +104,6 @@ func NewContext(homeDir string, meta Meta, serialiser parser.Serialiser, isDebug
 		serialiser,
 		meta,
 		isDebug,
-		completion,
 	}
 }
 
@@ -116,7 +112,6 @@ type context struct {
 	serialiser parser.Serialiser
 	meta       Meta
 	isDebug    bool
-	completion func() (string, error)
 }
 
 func (ctx *context) Print(text string) {
@@ -397,19 +392,6 @@ func (ctx *context) Serialiser() parser.Serialiser {
 
 func (ctx *context) SetSerialiser(s parser.Serialiser) {
 	ctx.serialiser = s
-}
-
-func (ctx *context) Completion() (string, Error) {
-	c, err := ctx.completion()
-	if err != nil {
-		return "", NewErrorWithCode(
-			GENERAL_ERROR,
-			"Cannot determine completion initialization",
-			"The only supported shells are zsh, bash and fish.",
-			err,
-		)
-	}
-	return c, nil
 }
 
 func (ctx *context) Debug(task func()) {

@@ -11,7 +11,7 @@ import (
 	"github.com/jotaen/klog/klog/app/cli/lib"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
-	"github.com/willabides/kongplete"
+	kongcompletion "github.com/jotaen/kong-completion"
 	"reflect"
 )
 
@@ -67,17 +67,13 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error
 		return -1, cErr
 	}
 
-	completion := func() (string, error) {
-		return kongplete.GetCompletionFromContext(kongCtx)
-	}
-
-	ctx := app.NewContext(homeDir, meta, lib.CliSerialiser{}, isDebug, completion)
+	ctx := app.NewContext(homeDir, meta, lib.CliSerialiser{}, isDebug)
 
 	// When klog is invoked by shell completion (specifically, when the
 	// bash-specific COMP_LINE environment variable is set), the
 	// kongplete.Complete function generates a list of possible completions,
 	// prints them one per line to stdout, and then exits the program early.
-	kongplete.Complete(kongApp, kongplete.WithPredictors(CompletionPredictors(ctx)))
+	kongcompletion.Configure(kongApp, kongcompletion.WithPredictors(CompletionPredictors(ctx)))
 
 	kongCtx.BindTo(ctx, (*app.Context)(nil))
 
