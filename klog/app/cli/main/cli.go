@@ -62,19 +62,17 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error
 		return -1, nErr
 	}
 
-	kongCtx, cErr := kongApp.Parse(args)
-	if cErr != nil {
-		return -1, cErr
-	}
-
 	ctx := app.NewContext(homeDir, meta, lib.CliSerialiser{}, isDebug)
 
 	// When klog is invoked by shell completion (specifically, when the
 	// bash-specific COMP_LINE environment variable is set), the
 	// kongplete.Complete function generates a list of possible completions,
 	// prints them one per line to stdout, and then exits the program early.
-	kongcompletion.Configure(kongApp, kongcompletion.WithPredictors(CompletionPredictors(ctx)))
-
+	kongcompletion.Register(kongApp, kongcompletion.WithPredictors(CompletionPredictors(ctx)))
+	kongCtx, cErr := kongApp.Parse(args)
+	if cErr != nil {
+		return -1, cErr
+	}
 	kongCtx.BindTo(ctx, (*app.Context)(nil))
 
 	rErr := kongCtx.Run()
