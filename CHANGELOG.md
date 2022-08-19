@@ -1,10 +1,11 @@
 # Changelog
 **Summary of changes of the command line tool**
 
-## Next Up
-- **[ FEATURE ]** Support tab completions of flags and arguments.
-- **[ FIX ]** `klog edit` now correctly recognises when `$EDITOR`
-  contains spaces. When `$EDITOR` is incorrect, it fails directly.
+## v5.2
+- **[ FEATURE ]** Provide tab completion functionality for bash, zsh
+  and fish shell. Run `klog completion` for setup instructions.
+- **[ FIX ]** `klog edit` handles when the `$EDITOR` variable contains
+   spaces, and it also fails when `$EDITOR` is invalid.
 
 ## v5.1
 - **[ FEATURE ]** Optionally print out totals as decimal values (in minutes)
