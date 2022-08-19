@@ -5,7 +5,7 @@ go 1.18
 require (
 	cloud.google.com/go v0.97.0
 	github.com/alecthomas/kong v0.2.22
-	github.com/jotaen/kong-completion v0.0.1
+	github.com/jotaen/kong-completion v0.0.3
 	github.com/posener/complete v1.2.3
 	github.com/stretchr/testify v1.7.0
 )
