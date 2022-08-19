@@ -1,6 +1,12 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## v5.2
+- **[ FEATURE ]** Provide tab completion functionality for bash, zsh
+  and fish shell. Run `klog completion` for setup instructions.
+- **[ FIX ]** `klog edit` handles when the `$EDITOR` variable contains
+   spaces, and it also fails when `$EDITOR` is invalid.
+
 ## v5.1
 - **[ FEATURE ]** Optionally print out totals as decimal values (in minutes)
   via the `--decimal` flag; e.g. `150` instead of `2h30m`.
