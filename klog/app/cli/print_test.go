@@ -8,9 +8,18 @@ import (
 )
 
 func TestPrintOutEmptyInput(t *testing.T) {
-	state, err := NewTestingContext()._SetRecords(``)._Run((&Print{}).Run)
-	require.Nil(t, err)
-	assert.Equal(t, "", state.printBuffer)
+	{
+		state, err := NewTestingContext()._SetRecords(``)._Run((&Print{}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, "", state.printBuffer)
+	}
+	{
+		state, err := NewTestingContext()._SetRecords(``)._Run((&Print{
+			WithTotals: true,
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, "", state.printBuffer)
+	}
 }
 
 func TestPrintOutRecord(t *testing.T) {
