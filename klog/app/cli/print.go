@@ -10,7 +10,7 @@ import (
 )
 
 type Print struct {
-	WithTotals bool `name:"with-totals" help:"Display durations inline"`
+	WithTotals bool `name:"with-totals" help:"Amend output with evaluated total times"`
 	lib.FilterArgs
 	lib.SortArgs
 	lib.WarnArgs
