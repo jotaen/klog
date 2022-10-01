@@ -30,7 +30,7 @@ func (opt *Print) Run(ctx app.Context) error {
 		return nil
 	}
 	records = opt.ApplySort(records)
-	ctx.Print("\n" + parser.SerialiseRecords(ctx.Serialiser(), records...) + "\n")
+	ctx.Print("\n" + parser.SerialiseRecords(ctx.Serialiser(), records...).ToString() + "\n")
 
 	opt.WarnArgs.PrintWarnings(ctx, records)
 	return nil
