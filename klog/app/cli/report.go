@@ -95,7 +95,6 @@ func (opt *Report) Run(ctx app.Context) error {
 	if opt.Diff {
 		table.Fill("=").Fill("=")
 	}
-	ctx.Print("\n")
 	grandTotal := service.Total(records...)
 
 	// Footer
