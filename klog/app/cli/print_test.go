@@ -8,9 +8,18 @@ import (
 )
 
 func TestPrintOutEmptyInput(t *testing.T) {
-	state, err := NewTestingContext()._SetRecords(``)._Run((&Print{}).Run)
-	require.Nil(t, err)
-	assert.Equal(t, "", state.printBuffer)
+	{
+		state, err := NewTestingContext()._SetRecords(``)._Run((&Print{}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, "", state.printBuffer)
+	}
+	{
+		state, err := NewTestingContext()._SetRecords(``)._Run((&Print{
+			WithTotals: true,
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, "", state.printBuffer)
+	}
 }
 
 func TestPrintOutRecord(t *testing.T) {
@@ -68,4 +77,42 @@ func TestPrintOutRecordsInChronologicalOrder(t *testing.T) {
 		_SetRecords(original).
 		_Run((&Print{SortArgs: lib.SortArgs{Sort: "desc"}}).Run)
 	assert.Equal(t, "\n2018-02-01\n\n2018-01-31\n\n2018-01-30\n\n", stateSortedDesc.printBuffer)
+}
+
+func TestPrintRecordsWithDurations(t *testing.T) {
+	state, err := NewTestingContext()._SetNow(2018, 02, 07, 19, 00)._SetRecords(`
+2018-01-31
+Hello #world
+	1h
+
+2018-02-04
+	15:00 - 17:22
+	-1h1m
+
+2018-02-07
+	35m
+		Foo
+	18:00 - ? I just
+		started something
+`)._Run((&Print{
+		WithTotals: true,
+	}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+------+-------+ 
+   1h |       | 2018-01-31
+      |       | Hello #world
+      |    1h |     1h
+------+-------+ 
+1h21m |       | 2018-02-04
+      | 2h22m |     15:00 - 17:22
+      | -1h1m |     -1h1m
+------+-------+ 
+  35m |       | 2018-02-07
+      |   35m |     35m
+      |       |         Foo
+      |    0m |     18:00 - ? I just
+      |       |         started something
+------+-------+ 
+`, state.printBuffer)
 }

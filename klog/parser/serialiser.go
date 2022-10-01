@@ -17,46 +17,62 @@ type Serialiser interface {
 	Time(klog.Time) string
 }
 
-// SerialiseRecords serialises records into the canonical string representation.
-// (So it doesn’t and cannot restore the original formatting!)
-func SerialiseRecords(s Serialiser, rs ...klog.Record) string {
-	var text []string
-	for _, r := range rs {
-		text = append(text, serialiseRecord(s, r))
-	}
-	return strings.Join(text, "\n")
+type Line struct {
+	Text   string
+	Record klog.Record
+	EntryI int
 }
 
-var canonicalStyle = DefaultStyle()
+type Lines []Line
 
-func serialiseRecord(s Serialiser, r klog.Record) string {
-	text := ""
-	text += s.Date(r.Date())
+func (ls Lines) ToString() string {
+	result := ""
+	for _, l := range ls {
+		result += l.Text + canonicalStyle.LineEnding.Get()
+	}
+	return result
+}
+
+// SerialiseRecords serialises records into the canonical string representation.
+// (So it doesn’t and cannot restore the original formatting!)
+func SerialiseRecords(s Serialiser, rs ...klog.Record) Lines {
+	var lines []Line
+	for i, r := range rs {
+		lines = append(lines, serialiseRecord(s, r)...)
+		if i < len(rs)-1 {
+			lines = append(lines, Line{"", nil, -1})
+		}
+	}
+	return lines
+}
+
+func serialiseRecord(s Serialiser, r klog.Record) []Line {
+	var lines []Line
+	headline := s.Date(r.Date())
 	if r.ShouldTotal().InMinutes() != 0 {
-		text += " (" + s.ShouldTotal(r.ShouldTotal()) + ")"
+		headline += " (" + s.ShouldTotal(r.ShouldTotal()) + ")"
 	}
-	text += canonicalStyle.LineEnding.Get()
+	lines = append(lines, Line{headline, r, -1})
 	if r.Summary() != nil {
-		text += s.Summary(SummaryText(r.Summary())) + canonicalStyle.LineEnding.Get()
+		lines = append(lines, Line{s.Summary(SummaryText(r.Summary())), r, -1})
 	}
-	for _, e := range r.Entries() {
-		text += canonicalStyle.Indentation.Get()
-		text += klog.Unbox[string](&e,
+	for entryI, e := range r.Entries() {
+		entryValue := klog.Unbox[string](&e,
 			func(r klog.Range) string { return s.Range(r) },
 			func(d klog.Duration) string { return s.Duration(d) },
 			func(o klog.OpenRange) string { return s.OpenRange(o) },
 		)
+		lines = append(lines, Line{canonicalStyle.Indentation.Get() + entryValue, r, entryI})
 		for i, l := range e.Summary().Lines() {
+			summaryText := s.Summary([]string{l})
 			if i == 0 && l != "" {
-				text += " " // separator
+				lines[len(lines)-1].Text += " " + summaryText
 			} else if i >= 1 {
-				text += canonicalStyle.LineEnding.Get() + canonicalStyle.Indentation.Get() + canonicalStyle.Indentation.Get()
+				lines = append(lines, Line{canonicalStyle.Indentation.Get() + canonicalStyle.Indentation.Get() + summaryText, r, entryI})
 			}
-			text += s.Summary([]string{l})
 		}
-		text += canonicalStyle.LineEnding.Get()
 	}
-	return text
+	return lines
 }
 
 type SummaryText []string
@@ -64,3 +80,5 @@ type SummaryText []string
 func (s SummaryText) ToString() string {
 	return strings.Join(s, canonicalStyle.LineEnding.Get())
 }
+
+var canonicalStyle = DefaultStyle()
