@@ -20,7 +20,7 @@ type Serialiser interface {
 type Line struct {
 	Text   string
 	Record klog.Record
-	Entry  *klog.Entry
+	EntryI int
 }
 
 type Lines []Line
@@ -40,7 +40,7 @@ func SerialiseRecords(s Serialiser, rs ...klog.Record) Lines {
 	for i, r := range rs {
 		lines = append(lines, serialiseRecord(s, r)...)
 		if i < len(rs)-1 {
-			lines = append(lines, Line{"", nil, nil})
+			lines = append(lines, Line{"", nil, -1})
 		}
 	}
 	return lines
@@ -52,23 +52,23 @@ func serialiseRecord(s Serialiser, r klog.Record) []Line {
 	if r.ShouldTotal().InMinutes() != 0 {
 		headline += " (" + s.ShouldTotal(r.ShouldTotal()) + ")"
 	}
-	lines = append(lines, Line{headline, r, nil})
+	lines = append(lines, Line{headline, r, -1})
 	if r.Summary() != nil {
-		lines = append(lines, Line{s.Summary(SummaryText(r.Summary())), r, nil})
+		lines = append(lines, Line{s.Summary(SummaryText(r.Summary())), r, -1})
 	}
-	for _, e := range r.Entries() {
+	for entryI, e := range r.Entries() {
 		entryValue := klog.Unbox[string](&e,
 			func(r klog.Range) string { return s.Range(r) },
 			func(d klog.Duration) string { return s.Duration(d) },
 			func(o klog.OpenRange) string { return s.OpenRange(o) },
 		)
-		lines = append(lines, Line{canonicalStyle.Indentation.Get() + entryValue, r, &e})
+		lines = append(lines, Line{canonicalStyle.Indentation.Get() + entryValue, r, entryI})
 		for i, l := range e.Summary().Lines() {
 			summaryText := s.Summary([]string{l})
 			if i == 0 && l != "" {
 				lines[len(lines)-1].Text += " " + summaryText
 			} else if i >= 1 {
-				lines = append(lines, Line{canonicalStyle.Indentation.Get() + canonicalStyle.Indentation.Get() + summaryText, r, &e})
+				lines = append(lines, Line{canonicalStyle.Indentation.Get() + canonicalStyle.Indentation.Get() + summaryText, r, entryI})
 			}
 		}
 	}
