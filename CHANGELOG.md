@@ -1,6 +1,10 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## Next
+- **[ FEATURE ]** Optionally amend `klog print` output with total
+  values via the `--with-totals` flag.
+
 ## v5.2
 - **[ FEATURE ]** Provide tab completion functionality for bash, zsh
   and fish shell. Run `klog completion` for setup instructions.
