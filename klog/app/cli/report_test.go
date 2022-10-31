@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app/cli/lib"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -9,6 +10,18 @@ import (
 
 func TestReportOfEmptyInput(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(``)._Run((&Report{}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, "", state.printBuffer)
+}
+
+func TestReportOfEmptyFilteredData(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+2022-10-30
+	8h
+`)._Run((&Report{
+		FilterArgs: lib.FilterArgs{Date: klog.Ɀ_Date_(2022, 10, 31)},
+		Fill:       true,
+	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, "", state.printBuffer)
 }
