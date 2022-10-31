@@ -30,11 +30,11 @@ func (opt *Report) Run(ctx app.Context) error {
 	if err != nil {
 		return err
 	}
+	now := ctx.Now()
+	records = opt.ApplyFilter(now, records)
 	if len(records) == 0 {
 		return nil
 	}
-	now := ctx.Now()
-	records = opt.ApplyFilter(now, records)
 	records, nErr := opt.ApplyNow(now, records...)
 	if nErr != nil {
 		return nErr
