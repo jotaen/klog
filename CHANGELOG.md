@@ -1,6 +1,11 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## v5.3
+- **[ FEATURE ]** Optionally amend `klog print` output with total
+  values via the `--with-totals` flag.
+- **[ FIX ]** Fix unhandled error edge-case in `klog report` command.
+
 ## v5.2
 - **[ FEATURE ]** Provide tab completion functionality for bash, zsh
   and fish shell. Run `klog completion` for setup instructions.
