@@ -1,4 +1,4 @@
-package engine2
+package engine
 
 type SerialParser[In any, Out any, Err error] struct{}
 

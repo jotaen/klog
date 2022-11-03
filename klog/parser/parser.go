@@ -5,7 +5,7 @@ package parser
 
 import (
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/parser/engine2"
+	"github.com/jotaen/klog/klog/parser/engine"
 	"github.com/jotaen/klog/klog/parser/txt"
 	"strings"
 )
@@ -30,7 +30,7 @@ type Engine interface {
 // the parsed records. Otherwise, it returns all encountered parser errors.
 func Parse(recordsAsText string) ([]ParsedRecord, []txt.Error) {
 	blocks := txt.GroupIntoBlocks(recordsAsText)
-	return engine2.SerialParser[txt.Block, ParsedRecord, txt.Error]{}.ParseAll(blocks, func(block txt.Block) (ParsedRecord, []txt.Error) {
+	return engine.SerialParser[txt.Block, ParsedRecord, txt.Error]{}.ParseAll(blocks, func(block txt.Block) (ParsedRecord, []txt.Error) {
 		record, style, errs := parseRecord(block.SignificantLines())
 		if errs != nil {
 			return ParsedRecord{}, errs
