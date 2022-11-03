@@ -18,6 +18,20 @@ jobs:
         run: docker run --rm -v $(pwd):/wdir:ro -w /wdir "${IMAGE_NAME}" --not-match-f="${TEST_FILE_PATTERN}" "${TARGET}"
       - name: LOC of test files
         run: docker run --rm -v $(pwd):/wdir:ro -w /wdir "${IMAGE_NAME}" --match-f="${TEST_FILE_PATTERN}" "${TARGET}"
+  benchmark:
+    name: Benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Build
+        run: |
+          source ./run.sh && run_build
+          mv out/klog /usr/local/bin/klog
+      - name: Benchmark
+        run: cd .github/ && ./benchmark.sh
   format:
     name: Static analysis
     runs-on: ubuntu-latest
