@@ -12,7 +12,7 @@ import (
 	"errors"
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/parser"
-	"github.com/jotaen/klog/klog/parser/engine"
+	"github.com/jotaen/klog/klog/parser/txt"
 	"strings"
 )
 
@@ -21,7 +21,7 @@ type Reconciler struct {
 	record          klog.Record
 	style           *parser.Style
 	lastLinePointer int // Line index of the last entry
-	lines           []engine.Line
+	lines           []txt.Line
 	recordPointer   int
 }
 
@@ -87,13 +87,13 @@ type insertableText struct {
 }
 
 func (r *Reconciler) insert(lineIndex int, texts []insertableText) {
-	result := make([]engine.Line, len(r.lines)+len(texts))
+	result := make([]txt.Line, len(r.lines)+len(texts))
 	offset := 0
 	for i := range result {
 		if i >= lineIndex && offset < len(texts) {
 			line := strings.Repeat(r.style.Indentation.Get(), texts[offset].indentation)
 			line += texts[offset].text + r.style.LineEnding.Get()
-			result[i] = engine.NewLineFromString(line, -1)
+			result[i] = txt.NewLineFromString(line, -1)
 			offset++
 		} else {
 			result[i] = r.lines[i-offset]

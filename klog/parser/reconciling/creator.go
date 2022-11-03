@@ -3,7 +3,7 @@ package reconciling
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/parser"
-	"github.com/jotaen/klog/klog/parser/engine"
+	"github.com/jotaen/klog/klog/parser/txt"
 )
 
 // Creator is a function interface for creating a new reconciler.
@@ -92,14 +92,14 @@ func NewReconcilerAtRecord(parsedRecords []parser.ParsedRecord, atDate klog.Date
 	}
 }
 
-func flatten(parsedRecords []parser.ParsedRecord) []engine.Line {
-	var result []engine.Line
+func flatten(parsedRecords []parser.ParsedRecord) []txt.Line {
+	var result []txt.Line
 	for _, r := range parsedRecords {
 		result = append(result, r.Block...)
 	}
 	return result
 }
 
-func lastLine(block engine.Block) engine.Line {
+func lastLine(block txt.Block) txt.Line {
 	return block[len(block)-1]
 }

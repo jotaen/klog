@@ -5,8 +5,8 @@ package parser
 
 import (
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/parser/engine"
 	"github.com/jotaen/klog/klog/parser/engine2"
+	"github.com/jotaen/klog/klog/parser/txt"
 	"strings"
 )
 
@@ -16,21 +16,21 @@ type ParsedRecord struct {
 	klog.Record
 
 	// Block contains the original lines of text.
-	Block engine.Block
+	Block txt.Block
 
 	// Style contains the original styling preferences.
 	Style *Style
 }
 
 type Engine interface {
-	ParseAll([]engine.Block, func(block engine.Block) (ParsedRecord, []engine.Error)) ([]ParsedRecord, []engine.Error)
+	ParseAll([]txt.Block, func(block txt.Block) (ParsedRecord, []txt.Error)) ([]ParsedRecord, []txt.Error)
 }
 
 // Parse parses a text into a list of Record datastructures. On success, it returns
 // the parsed records. Otherwise, it returns all encountered parser errors.
-func Parse(recordsAsText string) ([]ParsedRecord, []engine.Error) {
-	blocks := engine.GroupIntoBlocks(recordsAsText)
-	return engine2.SerialParser[engine.Block, ParsedRecord, engine.Error]{}.ParseAll(blocks, func(block engine.Block) (ParsedRecord, []engine.Error) {
+func Parse(recordsAsText string) ([]ParsedRecord, []txt.Error) {
+	blocks := txt.GroupIntoBlocks(recordsAsText)
+	return engine2.SerialParser[txt.Block, ParsedRecord, txt.Error]{}.ParseAll(blocks, func(block txt.Block) (ParsedRecord, []txt.Error) {
 		record, style, errs := parseRecord(block.SignificantLines())
 		if errs != nil {
 			return ParsedRecord{}, errs
@@ -48,37 +48,37 @@ func Parse(recordsAsText string) ([]ParsedRecord, []engine.Error) {
 
 var allowedIndentationStyles = []string{"    ", "   ", "  ", "\t"}
 
-func parseRecord(lines []engine.Line) (klog.Record, *Style, []engine.Error) {
-	var errs []engine.Error
+func parseRecord(lines []txt.Line) (klog.Record, *Style, []txt.Error) {
+	var errs []txt.Error
 	style := DefaultStyle()
 
 	// ========== HEADLINE ==========
 	record := func() klog.Record {
-		headline := engine.NewParseable(lines[0], 0)
+		headline := txt.NewParseable(lines[0], 0)
 
 		// There is no leading whitespace allowed in the headline.
-		if engine.IsSpaceOrTab(headline.Peek()) {
+		if txt.IsSpaceOrTab(headline.Peek()) {
 			errs = append(errs, ErrorIllegalIndentation().New(headline.Line, 0, headline.Length()))
 			return nil
 		}
 
 		// Parse the date.
-		dateText, _ := headline.PeekUntil(engine.IsSpaceOrTab)
+		dateText, _ := headline.PeekUntil(txt.IsSpaceOrTab)
 		rDate, dErr := klog.NewDateFromString(dateText.ToString())
 		if dErr != nil {
 			errs = append(errs, ErrorInvalidDate().New(headline.Line, headline.PointerPosition, dateText.Length()))
 			return nil
 		}
 		headline.Advance(dateText.Length())
-		headline.SkipWhile(engine.IsSpaceOrTab)
+		headline.SkipWhile(txt.IsSpaceOrTab)
 		r := klog.NewRecord(rDate)
 		style.DateFormat.Set(rDate.Format())
 
 		// Check if there is a should-total set, and if so, parse it.
 		if headline.Peek() == '(' {
 			headline.Advance(1) // '('
-			headline.SkipWhile(engine.IsSpaceOrTab)
-			allPropsText, hasClosingParenthesis := headline.PeekUntil(engine.Is(')'))
+			headline.SkipWhile(txt.IsSpaceOrTab)
+			allPropsText, hasClosingParenthesis := headline.PeekUntil(txt.Is(')'))
 			if !hasClosingParenthesis {
 				errs = append(errs, ErrorMalformedPropertiesSyntax().New(headline.Line, headline.Length(), 1))
 				return r
@@ -87,7 +87,7 @@ func parseRecord(lines []engine.Line) (klog.Record, *Style, []engine.Error) {
 				errs = append(errs, ErrorMalformedPropertiesSyntax().New(headline.Line, headline.PointerPosition, 1))
 				return r
 			}
-			shouldTotalText, hasExclamationMark := headline.PeekUntil(engine.Is('!'))
+			shouldTotalText, hasExclamationMark := headline.PeekUntil(txt.Is('!'))
 			if !hasExclamationMark {
 				errs = append(errs, ErrorUnrecognisedProperty().New(headline.Line, headline.PointerPosition, shouldTotalText.Length()-1))
 				return r
@@ -100,7 +100,7 @@ func parseRecord(lines []engine.Line) (klog.Record, *Style, []engine.Error) {
 			r.SetShouldTotal(shouldTotal)
 			headline.Advance(shouldTotalText.Length())
 			headline.Advance(1) // '!'
-			headline.SkipWhile(engine.IsSpaceOrTab)
+			headline.SkipWhile(txt.IsSpaceOrTab)
 
 			// Make sure there is no other text between the braces.
 			if headline.Peek() != ')' {
@@ -111,7 +111,7 @@ func parseRecord(lines []engine.Line) (klog.Record, *Style, []engine.Error) {
 		}
 
 		// Make sure there is no other text left in the headline.
-		headline.SkipWhile(engine.IsSpaceOrTab)
+		headline.SkipWhile(txt.IsSpaceOrTab)
 		if headline.RemainingLength() > 0 {
 			errs = append(errs, ErrorUnrecognisedTextInHeadline().New(headline.Line, headline.PointerPosition, headline.RemainingLength()))
 		}
@@ -126,15 +126,15 @@ func parseRecord(lines []engine.Line) (klog.Record, *Style, []engine.Error) {
 		record = klog.NewRecord(dummyDate)
 	}
 
-	var indentator *engine.Indentator
+	var indentator *txt.Indentator
 
 	// ========== SUMMARY LINES ==========
 	for _, l := range lines {
-		indentator = engine.NewIndentator(allowedIndentationStyles, lines[0])
+		indentator = txt.NewIndentator(allowedIndentationStyles, lines[0])
 		if indentator != nil {
 			break
 		}
-		summary := engine.NewParseable(l, 0)
+		summary := txt.NewParseable(l, 0)
 		newSummary, sErr := klog.NewRecordSummary(append(record.Summary(), summary.ToString())...)
 		if sErr != nil {
 			errs = append(errs, ErrorMalformedSummary().New(summary.Line, 0, summary.Length()))
@@ -153,30 +153,30 @@ func parseRecord(lines []engine.Line) (klog.Record, *Style, []engine.Error) {
 		style.Indentation.Set(indentator.Style())
 		// Check for correct indentation.
 		entry := indentator.NewIndentedParseable(l, 1)
-		if entry == nil || engine.IsSpaceOrTab(entry.Peek()) {
+		if entry == nil || txt.IsSpaceOrTab(entry.Peek()) {
 			errs = append(errs, ErrorIllegalIndentation().New(l, 0, len(l.Text)))
 			break
 		}
 		lines = lines[1:]
 
 		// Parse entry value.
-		createEntry, evErr := func() (func(klog.EntrySummary) engine.Error, engine.Error) {
+		createEntry, evErr := func() (func(klog.EntrySummary) txt.Error, txt.Error) {
 			// Try to interpret the entry value as duration.
-			durationCandidate, _ := entry.PeekUntil(engine.IsSpaceOrTab)
+			durationCandidate, _ := entry.PeekUntil(txt.IsSpaceOrTab)
 			duration, dErr := klog.NewDurationFromString(durationCandidate.ToString())
 			if dErr == nil {
 				entry.Advance(durationCandidate.Length())
-				return func(s klog.EntrySummary) engine.Error {
+				return func(s klog.EntrySummary) txt.Error {
 					record.AddDuration(duration, s)
 					return nil
 				}, nil
 			}
 
 			// If the entry value isn’t a duration, it must be the start time of a range.
-			startCandidate, _ := entry.PeekUntil(engine.Is('-', ' '))
+			startCandidate, _ := entry.PeekUntil(txt.Is('-', ' '))
 			if startCandidate.Length() == 0 {
 				// Handle case where `-` appears right at the beginning of the line.
-				firstToken, _ := entry.PeekUntil(engine.IsSpaceOrTab)
+				firstToken, _ := entry.PeekUntil(txt.IsSpaceOrTab)
 				return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, firstToken.Length())
 			}
 			start, t1Err := klog.NewTimeFromString(startCandidate.ToString())
@@ -188,7 +188,7 @@ func parseRecord(lines []engine.Line) (klog.Record, *Style, []engine.Error) {
 			style.TimeFormat.Set(start.Format())
 
 			entryStartPositionEnds := entry.PointerPosition
-			entry.SkipWhile(engine.Is(' '))
+			entry.SkipWhile(txt.Is(' '))
 			if entryStartPositionEnds != entry.PointerPosition {
 				style.SpacingInRange.Set(strings.Repeat(" ", entry.PointerPosition-entryStartPositionEnds))
 			} else {
@@ -199,12 +199,12 @@ func parseRecord(lines []engine.Line) (klog.Record, *Style, []engine.Error) {
 				return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, 1)
 			}
 			entry.Advance(1) // '-'
-			entry.SkipWhile(engine.Is(' '))
+			entry.SkipWhile(txt.Is(' '))
 
 			// Check whether the range is open-ended.
 			if entry.Peek() == '?' {
 				entry.Advance(1)
-				placeholder, _ := entry.PeekUntil(engine.IsSpaceOrTab)
+				placeholder, _ := entry.PeekUntil(txt.IsSpaceOrTab)
 
 				// The placeholder can appear multiple times.
 				for _, p := range placeholder.Chars {
@@ -213,7 +213,7 @@ func parseRecord(lines []engine.Line) (klog.Record, *Style, []engine.Error) {
 					}
 				}
 				entry.Advance(placeholder.Length())
-				return func(s klog.EntrySummary) engine.Error {
+				return func(s klog.EntrySummary) txt.Error {
 					sErr := record.StartOpenRange(start, s)
 					if sErr != nil {
 						return ErrorDuplicateOpenRange().New(entry.Line, entryStartPosition, entry.PointerPosition-entryStartPosition)
@@ -223,7 +223,7 @@ func parseRecord(lines []engine.Line) (klog.Record, *Style, []engine.Error) {
 			}
 
 			// Ultimately, the entry can only be a regular range.
-			endCandidate, _ := entry.PeekUntil(engine.IsSpaceOrTab)
+			endCandidate, _ := entry.PeekUntil(txt.IsSpaceOrTab)
 			if endCandidate.Length() == 0 {
 				return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, 1)
 			}
@@ -236,7 +236,7 @@ func parseRecord(lines []engine.Line) (klog.Record, *Style, []engine.Error) {
 			if rErr != nil {
 				return nil, ErrorIllegalRange().New(entry.Line, entryStartPosition, entry.PointerPosition-entryStartPosition)
 			}
-			return func(s klog.EntrySummary) engine.Error {
+			return func(s klog.EntrySummary) txt.Error {
 				record.AddRange(timeRange, s)
 				return nil
 			}, nil
@@ -249,13 +249,13 @@ func parseRecord(lines []engine.Line) (klog.Record, *Style, []engine.Error) {
 		}
 
 		// Parse entry summary.
-		entrySummary, esErr := func() (klog.EntrySummary, engine.Error) {
+		entrySummary, esErr := func() (klog.EntrySummary, txt.Error) {
 			var result klog.EntrySummary
 
 			// Parse first line of entry summary.
-			if engine.IsSpaceOrTab(entry.Peek()) {
+			if txt.IsSpaceOrTab(entry.Peek()) {
 				entry.Advance(1)
-				summaryText, _ := entry.PeekUntil(engine.Is(engine.END_OF_TEXT))
+				summaryText, _ := entry.PeekUntil(txt.Is(txt.END_OF_TEXT))
 				firstLine, sErr := klog.NewEntrySummary(summaryText.ToString())
 				if sErr != nil {
 					return nil, ErrorMalformedSummary().New(summaryText.Line, 0, summaryText.Length())

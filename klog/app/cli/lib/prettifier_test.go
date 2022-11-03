@@ -4,15 +4,15 @@ import (
 	"errors"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
-	"github.com/jotaen/klog/klog/parser/engine"
+	"github.com/jotaen/klog/klog/parser/txt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestFormatParserError(t *testing.T) {
-	err := app.NewParserErrors([]engine.Error{
-		engine.NewError(engine.NewLineFromString("Some malformed text", 39), 0, 4, "CODE", "Error", "Short explanation."),
-		engine.NewError(engine.NewLineFromString("Another issue!", 134), 8, 5, "CODE", "Problem", "More info."),
+	err := app.NewParserErrors([]txt.Error{
+		txt.NewError(txt.NewLineFromString("Some malformed text", 39), 0, 4, "CODE", "Error", "Short explanation."),
+		txt.NewError(txt.NewLineFromString("Another issue!", 134), 8, 5, "CODE", "Problem", "More info."),
 	})
 	text := PrettifyError(err, false).Error()
 	assert.Equal(t, ` ERROR in line 39: 
@@ -29,8 +29,8 @@ func TestFormatParserError(t *testing.T) {
 }
 
 func TestReflowsLongMessages(t *testing.T) {
-	err := app.NewParserErrors([]engine.Error{
-		engine.NewError(engine.NewLineFromString("Foo bar", 2), 4, 3, "CODE", "Some Title", "A verbose description with details, potentially spanning multiple lines with a comprehensive text and tremendously helpful information.\nBut it respects newlines."),
+	err := app.NewParserErrors([]txt.Error{
+		txt.NewError(txt.NewLineFromString("Foo bar", 2), 4, 3, "CODE", "Some Title", "A verbose description with details, potentially spanning multiple lines with a comprehensive text and tremendously helpful information.\nBut it respects newlines."),
 	})
 	text := PrettifyError(err, false).Error()
 	assert.Equal(t, ` ERROR in line 2: 
@@ -45,8 +45,8 @@ func TestReflowsLongMessages(t *testing.T) {
 }
 
 func TestConvertsTabToSpaces(t *testing.T) {
-	err := app.NewParserErrors([]engine.Error{
-		engine.NewError(engine.NewLineFromString("\tFoo\tbar", 14), 0, 8, "CODE", "Error title", "Error details"),
+	err := app.NewParserErrors([]txt.Error{
+		txt.NewError(txt.NewLineFromString("\tFoo\tbar", 14), 0, 8, "CODE", "Error title", "Error details"),
 	})
 	text := PrettifyError(err, false).Error()
 	assert.Equal(t, ` ERROR in line 14: 

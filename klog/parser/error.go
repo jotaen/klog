@@ -1,6 +1,6 @@
 package parser
 
-import "github.com/jotaen/klog/klog/parser/engine"
+import "github.com/jotaen/klog/klog/parser/txt"
 
 type HumanError struct {
 	code    string
@@ -8,8 +8,8 @@ type HumanError struct {
 	details string
 }
 
-func (e HumanError) New(t engine.Line, start int, length int) engine.Error {
-	return engine.NewError(t, start, length, e.code, e.title, e.details)
+func (e HumanError) New(t txt.Line, start int, length int) txt.Error {
+	return txt.NewError(t, start, length, e.code, e.title, e.details)
 }
 
 func ErrorInvalidDate() HumanError {
