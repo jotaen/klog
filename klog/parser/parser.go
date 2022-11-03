@@ -6,9 +6,8 @@ package parser
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/parser/engine"
-	"runtime"
+	"github.com/jotaen/klog/klog/parser/engine2"
 	"strings"
-	"sync"
 )
 
 // ParsedRecord is a record along with some meta information which is
@@ -21,85 +20,30 @@ type ParsedRecord struct {
 
 	// Style contains the original styling preferences.
 	Style *Style
-
-	i int
 }
 
-type In struct {
-	engine.Block
-	i int
-}
-
-type Out struct {
-	pr   *ParsedRecord
-	errs []engine.Error
-	i    int
+type Engine interface {
+	ParseAll([]engine.Block, func(block engine.Block) (ParsedRecord, []engine.Error)) ([]ParsedRecord, []engine.Error)
 }
 
 // Parse parses a text into a list of Record datastructures. On success, it returns
 // the parsed records. Otherwise, it returns all encountered parser errors.
 func Parse(recordsAsText string) ([]ParsedRecord, []engine.Error) {
 	blocks := engine.GroupIntoBlocks(recordsAsText)
-	records := make([]ParsedRecord, len(blocks))
-	var allErrs []engine.Error
-
-	// Set up channels.
-	inChannel := make(chan *In)
-	outChannel := make(chan *Out)
-
-	// Dispatch work.
-	wg := &sync.WaitGroup{}
-	wg.Add(len(blocks))
-	go func() {
-		for i, block := range blocks {
-			inChannel <- &In{block, i}
+	return engine2.SerialParser[engine.Block, ParsedRecord, engine.Error]{}.ParseAll(blocks, func(block engine.Block) (ParsedRecord, []engine.Error) {
+		record, style, errs := parseRecord(block.SignificantLines())
+		if errs != nil {
+			return ParsedRecord{}, errs
 		}
-		close(inChannel)
-	}()
-
-	// Spawn workers.
-	numWorkers := runtime.NumCPU()
-	for i := 0; i < numWorkers; i++ {
-		go func() {
-			for block := range inChannel {
-				record, style, errs := parseRecord(block.SignificantLines())
-				out := Out{i: block.i}
-				if len(errs) > 0 {
-					out.errs = errs
-				} else {
-					if block.Block[0].LineEnding != "" {
-						style.LineEnding.Set(block.Block[0].LineEnding)
-					}
-					out.pr = &ParsedRecord{
-						Record: record,
-						Block:  block.Block,
-						Style:  style,
-						i:      block.i,
-					}
-				}
-				outChannel <- &out
-				wg.Done()
-			}
-		}()
-	}
-
-	go func() {
-		wg.Wait()
-		close(outChannel)
-	}()
-
-	for out := range outChannel {
-		if out.errs == nil {
-			records[out.i] = *out.pr
-		} else {
-			allErrs = append(allErrs, out.errs...)
+		if block[0].LineEnding != "" {
+			style.LineEnding.Set(block[0].LineEnding)
 		}
-	}
-
-	if len(allErrs) > 0 {
-		return nil, allErrs
-	}
-	return records, nil
+		return ParsedRecord{
+			Record: record,
+			Block:  block,
+			Style:  style,
+		}, nil
+	})
 }
 
 var allowedIndentationStyles = []string{"    ", "   ", "  ", "\t"}
