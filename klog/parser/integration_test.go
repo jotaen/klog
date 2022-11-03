@@ -22,6 +22,6 @@ lines and contains a #tag as well.
     7:00 - ?
 `
 	rs, _ := Parse(text)
-	s := SerialiseRecords(plainSerialiser{}, rs[0]).ToString()
+	s := SerialiseRecords(PlainSerialiser{}, rs[0]).ToString()
 	assert.Equal(t, text, s)
 }
