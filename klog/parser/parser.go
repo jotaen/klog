@@ -24,10 +24,10 @@ type ParsedRecord struct {
 // Parse parses a text into a list of Record datastructures. On success, it returns
 // the parsed records. Otherwise, it returns all encountered parser errors.
 func Parse(recordsAsText string) ([]ParsedRecord, []engine.Error) {
-	var results []ParsedRecord
-	var allErrs []engine.Error
 	blocks := engine.GroupIntoBlocks(engine.Split(recordsAsText))
-	for _, block := range blocks {
+	records := make([]ParsedRecord, len(blocks))
+	var allErrs []engine.Error
+	for i, block := range blocks {
 		record, style, errs := parseRecord(block.SignificantLines())
 		if len(errs) > 0 {
 			allErrs = append(allErrs, errs...)
@@ -36,16 +36,16 @@ func Parse(recordsAsText string) ([]ParsedRecord, []engine.Error) {
 		if block[0].LineEnding != "" {
 			style.LineEnding.Set(block[0].LineEnding)
 		}
-		results = append(results, ParsedRecord{
+		records[i] = ParsedRecord{
 			Record: record,
 			Block:  block,
 			Style:  style,
-		})
+		}
 	}
 	if len(allErrs) > 0 {
 		return nil, allErrs
 	}
-	return results, nil
+	return records, nil
 }
 
 var allowedIndentationStyles = []string{"    ", "   ", "  ", "\t"}
