@@ -8,14 +8,14 @@ import (
 	"encoding/json"
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/parser"
-	"github.com/jotaen/klog/klog/parser/engine"
+	"github.com/jotaen/klog/klog/parser/txt"
 	"github.com/jotaen/klog/klog/service"
 	"strings"
 )
 
 // ToJson serialises records into their JSON representation. The output
 // structure is RecordView at the top level.
-func ToJson(rs []klog.Record, errs []engine.Error, prettyPrint bool) string {
+func ToJson(rs []klog.Record, errs []txt.Error, prettyPrint bool) string {
 	envelop := func() Envelop {
 		if errs == nil {
 			return Envelop{
@@ -109,7 +109,7 @@ func toEntryViews(es []klog.Entry) []any {
 	return views
 }
 
-func toErrorViews(errs []engine.Error) []ErrorView {
+func toErrorViews(errs []txt.Error) []ErrorView {
 	var result []ErrorView
 	for _, e := range errs {
 		result = append(result, ErrorView{

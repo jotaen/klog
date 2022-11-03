@@ -2,7 +2,7 @@ package app
 
 import (
 	"fmt"
-	"github.com/jotaen/klog/klog/parser/engine"
+	"github.com/jotaen/klog/klog/parser/txt"
 )
 
 type Code int
@@ -86,14 +86,14 @@ func (e AppError) Code() Code {
 
 type ParserErrors interface {
 	Error
-	All() []engine.Error
+	All() []txt.Error
 }
 
 type parserErrors struct {
-	errors []engine.Error
+	errors []txt.Error
 }
 
-func NewParserErrors(errs []engine.Error) ParserErrors {
+func NewParserErrors(errs []txt.Error) ParserErrors {
 	return parserErrors{errs}
 }
 
@@ -113,6 +113,6 @@ func (pe parserErrors) Code() Code {
 	return LOGICAL_ERROR
 }
 
-func (pe parserErrors) All() []engine.Error {
+func (pe parserErrors) All() []txt.Error {
 	return pe.errors
 }

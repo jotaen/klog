@@ -1,4 +1,4 @@
-package engine
+package txt
 
 // Error contains infos about a parsing error in a Line.
 type Error interface {
