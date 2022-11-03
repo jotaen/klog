@@ -32,23 +32,6 @@ func (l *Line) Original() string {
 	return l.Text + l.LineEnding
 }
 
-// Split breaks up text into a list of Line’s. The text must use `\n` as
-// line delimiters.
-func Split(text string) []Line {
-	var result []Line
-	var currentLine string
-	lineNumber := 1
-	for i, char := range text {
-		currentLine += string(char)
-		if char == '\n' || i+1 == len(text) {
-			result = append(result, NewLineFromString(currentLine, lineNumber))
-			currentLine = ""
-			lineNumber++
-		}
-	}
-	return result
-}
-
 var lineEndingPatterns = []string{"\r\n", "\n"}
 
 func splitOffLineEnding(text string) (string, string) {

@@ -39,7 +39,7 @@ type Out struct {
 // Parse parses a text into a list of Record datastructures. On success, it returns
 // the parsed records. Otherwise, it returns all encountered parser errors.
 func Parse(recordsAsText string) ([]ParsedRecord, []engine.Error) {
-	blocks := engine.GroupIntoBlocks(engine.Split(recordsAsText))
+	blocks := engine.GroupIntoBlocks(recordsAsText)
 	records := make([]ParsedRecord, len(blocks))
 	var allErrs []engine.Error
 
