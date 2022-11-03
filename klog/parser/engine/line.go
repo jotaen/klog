@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"regexp"
 	"strings"
 )
 
@@ -17,8 +16,6 @@ type Line struct {
 	// Note that for the last line in a file, there might be no line ending.
 	LineEnding string
 }
-
-var lineDelimiterPattern = regexp.MustCompile(`^.*\n?`)
 
 // NewLineFromString turns data into a Line object.
 func NewLineFromString(rawLineText string, lineNumber int) Line {
@@ -39,13 +36,15 @@ func (l *Line) Original() string {
 // line delimiters.
 func Split(text string) []Line {
 	var result []Line
-	remainder := text
-	lineNumber := 0
-	for len(remainder) > 0 {
-		lineNumber += 1
-		original := lineDelimiterPattern.FindString(remainder)
-		result = append(result, NewLineFromString(original, lineNumber))
-		remainder = remainder[len(original):]
+	var currentLine string
+	lineNumber := 1
+	for i, char := range text {
+		currentLine += string(char)
+		if char == '\n' || i+1 == len(text) {
+			result = append(result, NewLineFromString(currentLine, lineNumber))
+			currentLine = ""
+			lineNumber++
+		}
 	}
 	return result
 }
