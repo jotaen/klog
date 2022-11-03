@@ -13,17 +13,21 @@ type RecordSummary []string
 // of an entry.
 type EntrySummary []string
 
+var recordSummaryLinePattern = regexp.MustCompile(`^[\p{Zs}\t]`)
+
 // NewRecordSummary creates a new RecordSummary from individual lines of text.
 // None of the lines can start with blank characters, and none of the lines
 // can be empty or blank.
 func NewRecordSummary(line ...string) (RecordSummary, error) {
 	for _, l := range line {
-		if len(l) == 0 || regexp.MustCompile(`^[\p{Zs}\t]`).MatchString(l) {
+		if len(l) == 0 || recordSummaryLinePattern.MatchString(l) {
 			return nil, errors.New("MALFORMED_SUMMARY")
 		}
 	}
 	return line, nil
 }
+
+var entrySummaryLinePattern = regexp.MustCompile("^[\\p{Zs}\t]*$")
 
 // NewEntrySummary creates an EntrySummary from individual lines of text.
 // Except for the first line, none of the lines can be empty or blank.
@@ -32,7 +36,7 @@ func NewEntrySummary(line ...string) (EntrySummary, error) {
 		if i == 0 {
 			continue
 		}
-		if len(l) == 0 || regexp.MustCompile(`^[\p{Zs}\t]*$`).MatchString(l) {
+		if len(l) == 0 || entrySummaryLinePattern.MatchString(l) {
 			return nil, errors.New("MALFORMED_SUMMARY")
 		}
 	}
