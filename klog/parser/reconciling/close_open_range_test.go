@@ -13,7 +13,7 @@ func TestReconcilerClosesOpenRangeWithStyle(t *testing.T) {
 2010-04-27
     3:00pm - ??
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2010, 4, 27))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.CloseOpenRange(klog.Ɀ_Time_(15, 30), nil)
@@ -29,7 +29,7 @@ func TestReconcilerClosesOpenRangeWithNewSummary(t *testing.T) {
 2018-01-01
     15:00 - ?
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.CloseOpenRange(klog.Ɀ_Time_(15, 22), klog.Ɀ_EntrySummary_("Finished."))
@@ -45,7 +45,7 @@ func TestReconcilerClosesOpenRangeWithNewMultilineSummary(t *testing.T) {
 2018-01-01
     15:00 - ?
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.CloseOpenRange(klog.Ɀ_Time_(15, 22), klog.Ɀ_EntrySummary_("", "Finished."))
@@ -66,7 +66,7 @@ func TestReconcilerClosesOpenRangeWithExtendingSummary(t *testing.T) {
         I hope so.
     2m
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.CloseOpenRange(klog.Ɀ_Time_(16, 42), klog.Ɀ_EntrySummary_("Yes!"))
@@ -87,7 +87,7 @@ func TestReconcilerClosesOpenRangeWithExtendingSummaryOnNextLine(t *testing.T) {
     16:00-? Started...
     -45m break
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.CloseOpenRange(klog.Ɀ_Time_(18, 01), klog.Ɀ_EntrySummary_("", "Stopped."))

@@ -23,7 +23,7 @@ Hello World
 2018-01-03
     5h
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 2))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.AppendEntry(klog.Ɀ_EntrySummary_("2h30m"))
@@ -49,7 +49,7 @@ Hello World
 
 func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 	original := "\n2018-01-01\n    1h"
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
@@ -64,7 +64,7 @@ func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
 
 func TestReconcilerSplitsUpSummaryText(t *testing.T) {
 	original := "\n2018-01-01\n    1h"
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
@@ -80,7 +80,7 @@ func TestReconcilerSplitsUpSummaryText(t *testing.T) {
 
 func TestReconcilerStartsSummaryTextOnNextLine(t *testing.T) {
 	original := "\n2018-01-01\n    1h"
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
@@ -96,7 +96,7 @@ func TestReconcilerStartsSummaryTextOnNextLine(t *testing.T) {
 
 func TestReconcilerRejectsInvalidEntry(t *testing.T) {
 	original := "2018-01-01\n"
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.AppendEntry(klog.Ɀ_EntrySummary_("this is not valid entry text"))

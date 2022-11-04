@@ -1,7 +1,6 @@
 package txt
 
 import (
-	"regexp"
 	"strings"
 )
 
@@ -18,8 +17,6 @@ type Line struct {
 	LineEnding string
 }
 
-var lineDelimiterPattern = regexp.MustCompile(`^.*\n?`)
-
 // NewLineFromString turns data into a Line object.
 func NewLineFromString(rawLineText string, lineNumber int) Line {
 	text, lineEnding := splitOffLineEnding(rawLineText)
@@ -33,21 +30,6 @@ func NewLineFromString(rawLineText string, lineNumber int) Line {
 // Original returns the (byte-wise) identical line of text as it appeared in the file.
 func (l *Line) Original() string {
 	return l.Text + l.LineEnding
-}
-
-// Split breaks up text into a list of Line’s. The text must use `\n` as
-// line delimiters.
-func Split(text string) []Line {
-	var result []Line
-	remainder := text
-	lineNumber := 0
-	for len(remainder) > 0 {
-		lineNumber += 1
-		original := lineDelimiterPattern.FindString(remainder)
-		result = append(result, NewLineFromString(original, lineNumber))
-		remainder = remainder[len(original):]
-	}
-	return result
 }
 
 var lineEndingPatterns = []string{"\r\n", "\n"}

@@ -25,7 +25,7 @@ func NewTestingContext() TestingContext {
 }
 
 func (ctx TestingContext) _SetRecords(recordsText string) TestingContext {
-	records, err := parser.Parse(recordsText)
+	records, err := parser.NewSerialParser().Parse(recordsText)
 	if err != nil {
 		panic("Invalid records")
 	}

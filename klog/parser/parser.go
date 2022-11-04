@@ -21,36 +21,20 @@ type ParsedRecord struct {
 	Style *Style
 }
 
-// Parse parses a text into a list of Record datastructures. On success, it returns
+// Parser parses a text into a list of Record datastructures. On success, it returns
 // the parsed records. Otherwise, it returns all encountered parser errors.
-func Parse(recordsAsText string) ([]ParsedRecord, []txt.Error) {
-	var results []ParsedRecord
-	var allErrs []txt.Error
-	blocks := txt.GroupIntoBlocks(txt.Split(recordsAsText))
-	for _, block := range blocks {
-		record, style, errs := parseRecord(block.SignificantLines())
-		if len(errs) > 0 {
-			allErrs = append(allErrs, errs...)
-			continue
-		}
-		if block[0].LineEnding != "" {
-			style.LineEnding.Set(block[0].LineEnding)
-		}
-		results = append(results, ParsedRecord{
-			Record: record,
-			Block:  block,
-			Style:  style,
-		})
-	}
-	if len(allErrs) > 0 {
-		return nil, allErrs
-	}
-	return results, nil
+type Parser interface {
+	Parse(string) ([]ParsedRecord, []txt.Error)
 }
 
 var allowedIndentationStyles = []string{"    ", "   ", "  ", "\t"}
 
-func parseRecord(lines []txt.Line) (klog.Record, *Style, []txt.Error) {
+func preProcess(text string) []txt.Block {
+	return txt.GroupIntoBlocks(text)
+}
+
+func parse(block txt.Block) (ParsedRecord, []txt.Error) {
+	lines := block.SignificantLines()
 	var errs []txt.Error
 	style := DefaultStyle()
 
@@ -301,7 +285,14 @@ func parseRecord(lines []txt.Line) (klog.Record, *Style, []txt.Error) {
 	}
 
 	if len(errs) > 0 {
-		return nil, nil, errs
+		return ParsedRecord{}, errs
 	}
-	return record, style, nil
+	if block[0].LineEnding != "" {
+		style.LineEnding.Set(block[0].LineEnding)
+	}
+	return ParsedRecord{
+		Record: record,
+		Block:  block,
+		Style:  style,
+	}, nil
 }

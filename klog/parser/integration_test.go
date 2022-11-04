@@ -21,7 +21,7 @@ lines and contains a #tag as well.
     1:00am - 3:12pm
     7:00 - ?
 `
-	rs, _ := Parse(text)
+	rs, _ := NewSerialParser().Parse(text)
 	s := SerialiseRecords(PlainSerialiser{}, rs[0]).ToString()
 	assert.Equal(t, text, s)
 }

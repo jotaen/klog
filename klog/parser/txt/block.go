@@ -16,39 +16,56 @@ func (b Block) SignificantLines() []Line {
 	return linesWithContent
 }
 
-// GroupIntoBlocks splits up lines into Block’s.
-func GroupIntoBlocks(lines []Line) []Block {
+// GroupIntoBlocks splits up a text into Block’s of Line’s.
+func GroupIntoBlocks(text string) []Block {
 	const (
 		MODE_PRECEDING_BLANK_LINES = iota
 		MODE_SIGNIFICANT_LINES
 		MODE_TRAILING_BLANK_LINES
 	)
+
 	var blocks []Block
 	var currentBlock Block
+	var currentLine string
+	currentLineNumber := 1
 	currentMode := MODE_PRECEDING_BLANK_LINES
-	for _, l := range lines {
+
+	// Parse text.
+	for i, char := range text {
+		currentLine += string(char)
+		if char != '\n' && i+1 != len(text) {
+			continue
+		}
+
+		// Commit line.
+		line := NewLineFromString(currentLine, currentLineNumber)
+		currentLine = ""
+		currentLineNumber++
+
 		switch currentMode {
 		case MODE_PRECEDING_BLANK_LINES:
-			if !isBlank(l) {
+			if !isBlank(line) {
 				currentMode = MODE_SIGNIFICANT_LINES
 			}
 		case MODE_SIGNIFICANT_LINES:
-			if isBlank(l) {
+			if isBlank(line) {
 				currentMode = MODE_TRAILING_BLANK_LINES
 			}
 		case MODE_TRAILING_BLANK_LINES:
-			if !isBlank(l) {
+			if !isBlank(line) {
 				blocks = append(blocks, currentBlock)
 				currentBlock = nil
 				currentMode = MODE_SIGNIFICANT_LINES
 			}
 		}
-		currentBlock = append(currentBlock, l)
+		currentBlock = append(currentBlock, line)
 	}
+
 	if len(blocks) == 0 && currentMode == MODE_PRECEDING_BLANK_LINES {
 		// If the file only contained blank lines, act as if the file was empty altogether.
 		return nil
 	}
+
 	// Commit the latest ongoing currentBlock.
 	return append(blocks, currentBlock)
 }

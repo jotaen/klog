@@ -9,10 +9,12 @@ import (
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli"
 	"github.com/jotaen/klog/klog/app/cli/lib"
+	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
 	kongcompletion "github.com/jotaen/kong-completion"
 	"reflect"
+	"runtime"
 )
 
 func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error) {
@@ -62,7 +64,13 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error
 		return -1, nErr
 	}
 
-	ctx := app.NewContext(homeDir, meta, lib.CliSerialiser{}, isDebug)
+	ctx := app.NewContext(
+		homeDir,
+		meta,
+		parser.NewParallelParser(runtime.NumCPU()),
+		lib.CliSerialiser{},
+		isDebug,
+	)
 
 	// When klog is invoked by shell completion (specifically, when the
 	// bash-specific COMP_LINE environment variable is set), the

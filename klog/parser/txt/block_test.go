@@ -7,10 +7,9 @@ import (
 )
 
 func TestGroupEmptyInput(t *testing.T) {
-	for _, ls := range [][]Line{
-		{},
-		{{Text: ""}},
-		{{Text: ""}, {Text: "  "}, {Text: "\t\t"}},
+	for _, ls := range []string{
+		``,
+		"\n \n\t\t\n  ",
 	} {
 		blocks := GroupIntoBlocks(ls)
 		require.Nil(t, blocks)
@@ -18,35 +17,45 @@ func TestGroupEmptyInput(t *testing.T) {
 }
 
 func TestGroupLinesOfSingleBlock(t *testing.T) {
-	for _, ls := range [][]Line{
-		{{Text: "a1"}},
-		{{Text: ""}, {Text: "a1"}},
-		{{Text: "   "}, {Text: "a1"}},
-		{{Text: ""}, {Text: "a1"}, {Text: ""}},
-		{{Text: "\t"}, {Text: "a1"}, {Text: "\t \t "}},
-		{{Text: ""}, {Text: ""}, {Text: "a1"}, {Text: ""}, {Text: ""}},
+	for _, x := range []struct {
+		text string
+		ls   int
+	}{
+		{"a1", 1},
+		{"\na1", 2},
+		{"\na1\n", 2},
+		{"   \na1", 2},
+		{"   \na1\n", 2},
+		{"\t\na1\n\t \t ", 3},
+		{"\n\na1\n\n", 4},
 	} {
-		blocks := GroupIntoBlocks(ls)
+		blocks := GroupIntoBlocks(x.text)
 		require.Len(t, blocks, 1)
 
-		require.Len(t, blocks[0], len(ls))
+		require.Len(t, blocks[0], x.ls)
 		require.Len(t, blocks[0].SignificantLines(), 1)
 		assert.Equal(t, blocks[0].SignificantLines()[0].Text, "a1")
 	}
 }
 
 func TestGroupLinesOfSingleBlockWithMultipleLines(t *testing.T) {
-	for _, ls := range [][]Line{
-		{{Text: "a1"}, {Text: "a2"}},
-		{{Text: ""}, {Text: "a1"}, {Text: "a2"}},
-		{{Text: "    \t"}, {Text: "a1"}, {Text: "a2"}},
-		{{Text: " \t \t"}, {Text: "a1"}, {Text: "a2"}, {Text: "\t"}},
-		{{Text: " "}, {Text: "\t"}, {Text: "a1"}, {Text: "a2"}, {Text: ""}, {Text: ""}},
+	for _, x := range []struct {
+		text string
+		ls   int
+	}{
+		{"a1\na2", 2},
+		{"\na1\na2", 3},
+		{"\na1\na2\n", 3},
+		{"\n    \t\na1\na2", 4},
+		{"\n    \t\na1\na2\n", 4},
+		{"\n    \t\na1\na2\n\n", 5},
+		{" \t \t\na1\na2\n\t", 4},
+		{" \n\t\na1\na2\n\n", 5},
 	} {
-		blocks := GroupIntoBlocks(ls)
+		blocks := GroupIntoBlocks(x.text)
 		require.Len(t, blocks, 1)
 
-		require.Len(t, blocks[0], len(ls))
+		require.Len(t, blocks[0], x.ls)
 		require.Len(t, blocks[0].SignificantLines(), 2)
 		assert.Equal(t, blocks[0].SignificantLines()[0].Text, "a1")
 		assert.Equal(t, blocks[0].SignificantLines()[1].Text, "a2")
@@ -54,18 +63,17 @@ func TestGroupLinesOfSingleBlockWithMultipleLines(t *testing.T) {
 }
 
 func TestGroupLinesOfMultipleBlocks(t *testing.T) {
-	blocks := GroupIntoBlocks([]Line{
-		{Text: ""},
-		{Text: "  "},
-		{Text: "a1"},
-		{Text: "a2"},
-		{Text: ""},
-		{Text: "b1"},
-		{Text: "    "},
-		{Text: "\t"},
-		{Text: "c1"},
-		{Text: ""},
-	})
+	blocks := GroupIntoBlocks(`
+  
+a1
+a2
+
+b1
+        
+	
+c1
+
+`)
 	require.Len(t, blocks, 3)
 
 	require.Len(t, blocks[0], 5)
@@ -83,11 +91,12 @@ func TestGroupLinesOfMultipleBlocks(t *testing.T) {
 }
 
 func TestDisregardLinesAllEmpty(t *testing.T) {
-	blocks := GroupIntoBlocks([]Line{
-		{Text: ""},
-		{Text: "  "},
-		{Text: "\t"},
-		{Text: ""},
-	})
+	blocks := GroupIntoBlocks(`
+
+ 
+	
+ 
+
+`)
 	require.Nil(t, blocks)
 }
