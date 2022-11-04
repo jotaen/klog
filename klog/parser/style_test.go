@@ -87,7 +87,7 @@ func TestElectStyleDoesNotOverrideSetPreferences(t *testing.T) {
 }
 
 func parseOrPanic(recordsAsText ...string) []ParsedRecord {
-	rs, err := Parse(strings.Join(recordsAsText, ""))
+	rs, err := NewSerialParser().Parse(strings.Join(recordsAsText, ""))
 	if err != nil {
 		panic("Invalid data")
 	}

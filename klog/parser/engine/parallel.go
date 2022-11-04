@@ -4,7 +4,8 @@ import (
 	"sync"
 )
 
-type ParallelBatchParser[In any, Out any, Err error] struct {
+type ParallelParser[Txt any, Int any, Out any, Err any] struct {
+	Serialparser    SerialParser[Txt, Int, Out, Err]
 	NumberOfWorkers int
 }
 
@@ -13,18 +14,17 @@ type batchResult[Out any, Err any] struct {
 	errs []Err
 }
 
-func (pp ParallelBatchParser[In, Out, Err]) ParseAll(ins []In, parseOne func(In) (Out, []Err)) ([]Out, []Err) {
-	var parse = SerialParser[In, Out, Err]{}
-
+func (p ParallelParser[Txt, Int, Out, Err]) Parse(txt Txt) ([]Out, []Err) {
+	ints := p.Serialparser.PreProcess(txt)
 	// Batch up and dispatch to workers.
 	wg := &sync.WaitGroup{}
-	batches := batch(ins, pp.NumberOfWorkers)
+	batches := batch(ints, p.NumberOfWorkers)
 	wg.Add(len(batches))
 	resultChannel := make(chan batchResult[Out, Err])
 	for _, b := range batches {
-		go func(ins []In) {
+		go func(ints []Int) {
 			defer wg.Done()
-			outs, errs := parse.ParseAll(ins, parseOne)
+			outs, errs := p.Serialparser.parseAll(ints)
 			resultChannel <- batchResult[Out, Err]{outs, errs}
 		}(b)
 	}
@@ -37,7 +37,7 @@ func (pp ParallelBatchParser[In, Out, Err]) ParseAll(ins []In, parseOne func(In)
 
 	// Collect results.
 	i := 0
-	outs := make([]Out, len(ins))
+	outs := make([]Out, len(ints))
 	var allErrs []Err
 	for result := range resultChannel {
 		if len(result.errs) > 0 {

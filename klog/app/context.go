@@ -92,7 +92,7 @@ type Meta struct {
 }
 
 // NewContext creates a new Context object.
-func NewContext(homeDir string, meta Meta, parserEngine parser.Engine, serialiser parser.Serialiser, isDebug bool) Context {
+func NewContext(homeDir string, meta Meta, parser parser.Parser, serialiser parser.Serialiser, isDebug bool) Context {
 	if meta.Version == "" {
 		meta.Version = "v?.?"
 	}
@@ -101,7 +101,7 @@ func NewContext(homeDir string, meta Meta, parserEngine parser.Engine, serialise
 	}
 	return &context{
 		homeDir,
-		parserEngine,
+		parser,
 		serialiser,
 		meta,
 		isDebug,
@@ -109,11 +109,11 @@ func NewContext(homeDir string, meta Meta, parserEngine parser.Engine, serialise
 }
 
 type context struct {
-	homeDir      string
-	parserEngine parser.Engine
-	serialiser   parser.Serialiser
-	meta         Meta
-	isDebug      bool
+	homeDir    string
+	parser     parser.Parser
+	serialiser parser.Serialiser
+	meta       Meta
+	isDebug    bool
 }
 
 func (ctx *context) Print(text string) {
@@ -171,7 +171,7 @@ func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]klog.Record, E
 	}
 	var allRecords []klog.Record
 	for _, f := range files {
-		parsedRecords, parserErrors := parser.ParseWithEngine(ctx.parserEngine, f.Contents())
+		parsedRecords, parserErrors := ctx.parser.Parse(f.Contents())
 		if parserErrors != nil {
 			return nil, NewParserErrors(parserErrors)
 		}
@@ -207,7 +207,7 @@ func (ctx *context) ReconcileFile(doWrite bool, fileArg FileOrBookmarkName, crea
 	if err != nil {
 		return nil, err
 	}
-	parsedRecords, parserErrors := parser.ParseWithEngine(ctx.parserEngine, target.Contents())
+	parsedRecords, parserErrors := ctx.parser.Parse(target.Contents())
 	if parserErrors != nil {
 		return nil, NewParserErrors(parserErrors)
 	}

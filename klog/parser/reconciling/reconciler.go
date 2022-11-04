@@ -51,7 +51,7 @@ func (r *Reconciler) MakeResult() (*Result, error) {
 	}
 
 	// As a safeguard, make sure the result is parseable.
-	newRecords, errs := parser.Parse(text)
+	newRecords, errs := parser.NewSerialParser().Parse(text)
 	if errs != nil {
 		return nil, errors.New("This operation wouldn’t result in a valid record")
 	}

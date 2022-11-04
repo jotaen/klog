@@ -13,7 +13,7 @@ func TestReconcilerAddsNewPauseEntry(t *testing.T) {
 2010-04-27
     3:00pm - ?
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2010, 4, 27))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.PauseOpenRange(klog.NewDuration(0, -12), nil)
@@ -30,7 +30,7 @@ func TestReconcilerFailsIfPauseIsPositiveValue(t *testing.T) {
 2010-04-27
     3:00 - 4:00
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2010, 4, 27))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.PauseOpenRange(klog.NewDuration(0, 12), nil)
@@ -43,7 +43,7 @@ func TestReconcilerFailsIfThereIsNoOpenRange(t *testing.T) {
 2010-04-27
     3:00 - 4:00
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2010, 4, 27))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.PauseOpenRange(klog.NewDuration(0, -12), nil)
@@ -59,7 +59,7 @@ Foo
         a break!
     -30m
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2010, 4, 27))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.PauseOpenRange(klog.NewDuration(0, -3), nil)
@@ -81,7 +81,7 @@ Foo
     -30m This is a totally unrelated entry,
         that should not be modified!
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2010, 4, 27))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.PauseOpenRange(klog.NewDuration(-1, -30), klog.Ɀ_EntrySummary_("Lunch break"))
@@ -102,7 +102,7 @@ func TestReconcilerDoesNotExtendNonNegativeDurations(t *testing.T) {
     3:00 - ?
     30m
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2010, 4, 27))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.PauseOpenRange(klog.NewDuration(0, -10), nil)

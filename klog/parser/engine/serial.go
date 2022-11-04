@@ -1,12 +1,19 @@
 package engine
 
-type SerialParser[In any, Out any, Err error] struct{}
+type SerialParser[Txt any, Int any, Out any, Err any] struct {
+	PreProcess func(Txt) []Int
+	ParseOne   func(Int) (Out, []Err)
+}
 
-func (p SerialParser[In, Out, Err]) ParseAll(ins []In, parseOne func(In) (Out, []Err)) ([]Out, []Err) {
-	outs := make([]Out, len(ins))
+func (p SerialParser[Txt, Int, Out, Err]) Parse(text Txt) ([]Out, []Err) {
+	return p.parseAll(p.PreProcess(text))
+}
+
+func (p SerialParser[Txt, Int, Out, Err]) parseAll(ints []Int) ([]Out, []Err) {
+	outs := make([]Out, len(ints))
 	var errs []Err
-	for i, in := range ins {
-		out, err := parseOne(in)
+	for i, in := range ints {
+		out, err := p.ParseOne(in)
 		if err != nil {
 			errs = append(errs, err...)
 			continue

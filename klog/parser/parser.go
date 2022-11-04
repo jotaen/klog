@@ -5,7 +5,6 @@ package parser
 
 import (
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/parser/engine"
 	"github.com/jotaen/klog/klog/parser/txt"
 	"strings"
 )
@@ -22,37 +21,20 @@ type ParsedRecord struct {
 	Style *Style
 }
 
-type Engine interface {
-	ParseAll(blocks []txt.Block, parseOne func(txt.Block) (ParsedRecord, []txt.Error)) ([]ParsedRecord, []txt.Error)
-}
-
-// Parse parses a text into a list of Record datastructures. On success, it returns
+// Parser parses a text into a list of Record datastructures. On success, it returns
 // the parsed records. Otherwise, it returns all encountered parser errors.
-func Parse(recordsAsText string) ([]ParsedRecord, []txt.Error) {
-	return ParseWithEngine(engine.SerialParser[txt.Block, ParsedRecord, txt.Error]{}, recordsAsText)
-}
-
-func ParseWithEngine(e Engine, recordsAsText string) ([]ParsedRecord, []txt.Error) {
-	blocks := txt.GroupIntoBlocks(recordsAsText)
-	return e.ParseAll(blocks, func(block txt.Block) (ParsedRecord, []txt.Error) {
-		record, style, errs := parseRecord(block.SignificantLines())
-		if errs != nil {
-			return ParsedRecord{}, errs
-		}
-		if block[0].LineEnding != "" {
-			style.LineEnding.Set(block[0].LineEnding)
-		}
-		return ParsedRecord{
-			Record: record,
-			Block:  block,
-			Style:  style,
-		}, nil
-	})
+type Parser interface {
+	Parse(string) ([]ParsedRecord, []txt.Error)
 }
 
 var allowedIndentationStyles = []string{"    ", "   ", "  ", "\t"}
 
-func parseRecord(lines []txt.Line) (klog.Record, *Style, []txt.Error) {
+func preProcess(text string) []txt.Block {
+	return txt.GroupIntoBlocks(text)
+}
+
+func parse(block txt.Block) (ParsedRecord, []txt.Error) {
+	lines := block.SignificantLines()
 	var errs []txt.Error
 	style := DefaultStyle()
 
@@ -303,7 +285,14 @@ func parseRecord(lines []txt.Line) (klog.Record, *Style, []txt.Error) {
 	}
 
 	if len(errs) > 0 {
-		return nil, nil, errs
+		return ParsedRecord{}, errs
 	}
-	return record, style, nil
+	if block[0].LineEnding != "" {
+		style.LineEnding.Set(block[0].LineEnding)
+	}
+	return ParsedRecord{
+		Record: record,
+		Block:  block,
+		Style:  style,
+	}, nil
 }

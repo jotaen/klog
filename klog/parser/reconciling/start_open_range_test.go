@@ -13,7 +13,7 @@ func TestReconcilerStartsOpenRange(t *testing.T) {
 2018-01-01
 	5h22m
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.StartOpenRange(klog.Ɀ_Time_(8, 3), nil)
@@ -31,7 +31,7 @@ func TestReconcilerStartsOpenRangeWithSummary(t *testing.T) {
 	5h22m
 		Existing entry
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.StartOpenRange(klog.Ɀ_Time_(8, 3), klog.Ɀ_EntrySummary_("Test"))
@@ -49,7 +49,7 @@ func TestReconcilerStartsOpenRangeWithNewMultilineSummary(t *testing.T) {
 2018-01-01
 	5h22m
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.StartOpenRange(klog.Ɀ_Time_(8, 3), klog.Ɀ_EntrySummary_("", "Started...", "something!"))
@@ -68,7 +68,7 @@ func TestReconcilerStartsOpenRangeWithStyle(t *testing.T) {
 2018-01-01
 	2:00am-3:00am
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.StartOpenRange(klog.Ɀ_Time_(8, 3), nil)
@@ -88,7 +88,7 @@ func TestReconcilerStartsOpenRangeWithStyleFromOtherRecord(t *testing.T) {
 
 2018-01-02
 `
-	rs, _ := parser.Parse(original)
+	rs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 2))
 	require.NotNil(t, reconciler)
 	result, err := reconciler.StartOpenRange(klog.Ɀ_Time_(8, 3), nil)
