@@ -7,12 +7,21 @@ import (
 	"testing"
 )
 
+var parsers = []Parser{
+	NewSerialParser(),
+	NewParallelParser(1),
+	NewParallelParser(2),
+	NewParallelParser(4),
+}
+
 func TestParseMinimalDocument(t *testing.T) {
 	text := `2000-01-01`
-	rs, errs := NewSerialParser().Parse(text)
-	require.Nil(t, errs)
-	require.Len(t, rs, 1)
-	assert.Equal(t, klog.Ɀ_Date_(2000, 1, 1), rs[0].Date())
+	for _, p := range parsers {
+		rs, errs := p.Parse(text)
+		require.Nil(t, errs)
+		require.Len(t, rs, 1)
+		assert.Equal(t, klog.Ɀ_Date_(2000, 1, 1), rs[0].Date())
+	}
 }
 
 func TestParseMultipleRecords(t *testing.T) {
@@ -22,15 +31,17 @@ func TestParseMultipleRecords(t *testing.T) {
 1999-06-03
   1h
 `
-	rs, errs := NewSerialParser().Parse(text)
-	require.Nil(t, errs)
-	require.Len(t, rs, 2)
+	for _, p := range parsers {
+		rs, errs := p.Parse(text)
+		require.Nil(t, errs)
+		require.Len(t, rs, 2)
 
-	assert.Equal(t, klog.Ɀ_Date_(1999, 5, 31), rs[0].Date())
-	assert.Len(t, rs[0].Entries(), 0)
+		assert.Equal(t, klog.Ɀ_Date_(1999, 5, 31), rs[0].Date())
+		assert.Len(t, rs[0].Entries(), 0)
 
-	assert.Equal(t, klog.Ɀ_Date_(1999, 6, 3), rs[1].Date())
-	assert.Len(t, rs[1].Entries(), 1)
+		assert.Equal(t, klog.Ɀ_Date_(1999, 6, 3), rs[1].Date())
+		assert.Len(t, rs[1].Entries(), 1)
+	}
 }
 
 func TestParseCompleteRecord(t *testing.T) {
@@ -50,37 +61,39 @@ multiple lines of text
     11:00-?
         Open range
 `
-	rs, errs := NewSerialParser().Parse(text)
-	require.Nil(t, errs)
-	require.Len(t, rs, 1)
+	for _, p := range parsers {
+		rs, errs := p.Parse(text)
+		require.Nil(t, errs)
+		require.Len(t, rs, 1)
 
-	r := rs[0]
-	assert.Equal(t, klog.Ɀ_Date_(1970, 8, 29), r.Date())
-	assert.Equal(t, klog.Ɀ_RecordSummary_("Record summary with", "multiple lines of text"), r.Summary())
-	assert.Equal(t, klog.NewDuration(8, 15).InMinutes(), r.ShouldTotal().InMinutes())
+		r := rs[0]
+		assert.Equal(t, klog.Ɀ_Date_(1970, 8, 29), r.Date())
+		assert.Equal(t, klog.Ɀ_RecordSummary_("Record summary with", "multiple lines of text"), r.Summary())
+		assert.Equal(t, klog.NewDuration(8, 15).InMinutes(), r.ShouldTotal().InMinutes())
 
-	assert.Len(t, r.Entries(), 7)
+		assert.Len(t, r.Entries(), 7)
 
-	assert.Equal(t, klog.NewDuration(1, 0).InMinutes(), r.Entries()[0].Duration().InMinutes())
-	assert.Equal(t, klog.Ɀ_EntrySummary_(""), r.Entries()[0].Summary())
+		assert.Equal(t, klog.NewDuration(1, 0).InMinutes(), r.Entries()[0].Duration().InMinutes())
+		assert.Equal(t, klog.Ɀ_EntrySummary_(""), r.Entries()[0].Summary())
 
-	assert.Equal(t, klog.NewDuration(1, 1).InMinutes(), r.Entries()[1].Duration().InMinutes())
-	assert.Equal(t, klog.Ɀ_EntrySummary_("Duration with summary"), r.Entries()[1].Summary())
+		assert.Equal(t, klog.NewDuration(1, 1).InMinutes(), r.Entries()[1].Duration().InMinutes())
+		assert.Equal(t, klog.Ɀ_EntrySummary_("Duration with summary"), r.Entries()[1].Summary())
 
-	assert.Equal(t, klog.NewDuration(1, 2).InMinutes(), r.Entries()[2].Duration().InMinutes())
-	assert.Equal(t, klog.Ɀ_EntrySummary_("Duration with", "multiline summary"), r.Entries()[2].Summary())
+		assert.Equal(t, klog.NewDuration(1, 2).InMinutes(), r.Entries()[2].Duration().InMinutes())
+		assert.Equal(t, klog.Ɀ_EntrySummary_("Duration with", "multiline summary"), r.Entries()[2].Summary())
 
-	assert.Equal(t, klog.NewDuration(1, 30).InMinutes(), r.Entries()[3].Duration().InMinutes())
-	assert.Equal(t, klog.Ɀ_EntrySummary_(""), r.Entries()[3].Summary())
+		assert.Equal(t, klog.NewDuration(1, 30).InMinutes(), r.Entries()[3].Duration().InMinutes())
+		assert.Equal(t, klog.Ɀ_EntrySummary_(""), r.Entries()[3].Summary())
 
-	assert.Equal(t, klog.NewDuration(1, 31).InMinutes(), r.Entries()[4].Duration().InMinutes())
-	assert.Equal(t, klog.Ɀ_EntrySummary_("Range with summary"), r.Entries()[4].Summary())
+		assert.Equal(t, klog.NewDuration(1, 31).InMinutes(), r.Entries()[4].Duration().InMinutes())
+		assert.Equal(t, klog.Ɀ_EntrySummary_("Range with summary"), r.Entries()[4].Summary())
 
-	assert.Equal(t, klog.NewDuration(1, 32).InMinutes(), r.Entries()[5].Duration().InMinutes())
-	assert.Equal(t, klog.Ɀ_EntrySummary_("Range with multiple", "lines of", "  summary text"), r.Entries()[5].Summary())
+		assert.Equal(t, klog.NewDuration(1, 32).InMinutes(), r.Entries()[5].Duration().InMinutes())
+		assert.Equal(t, klog.Ɀ_EntrySummary_("Range with multiple", "lines of", "  summary text"), r.Entries()[5].Summary())
 
-	assert.Equal(t, klog.NewDuration(0, 0).InMinutes(), r.Entries()[6].Duration().InMinutes())
-	assert.Equal(t, klog.Ɀ_EntrySummary_("", "Open range"), r.Entries()[6].Summary())
+		assert.Equal(t, klog.NewDuration(0, 0).InMinutes(), r.Entries()[6].Duration().InMinutes())
+		assert.Equal(t, klog.Ɀ_EntrySummary_("", "Open range"), r.Entries()[6].Summary())
+	}
 }
 
 func TestParseEmptyOrBlankDocument(t *testing.T) {
@@ -90,24 +103,30 @@ func TestParseEmptyOrBlankDocument(t *testing.T) {
 		"\n\n\n\n\n",
 		"\n\t     \n \n         ",
 	} {
-		rs, errs := NewSerialParser().Parse(text)
-		require.Nil(t, errs)
-		require.Len(t, rs, 0)
+		for _, p := range parsers {
+			rs, errs := p.Parse(text)
+			require.Nil(t, errs)
+			require.Len(t, rs, 0)
+		}
 	}
 }
 
 func TestParseWindowsAndUnixLineEndings(t *testing.T) {
 	text := "2000-01-01\r\n\r\n2000-01-02\n\n2000-01-03"
-	rs, errs := NewSerialParser().Parse(text)
-	require.Nil(t, errs)
-	require.Len(t, rs, 3)
+	for _, p := range parsers {
+		rs, errs := p.Parse(text)
+		require.Nil(t, errs)
+		require.Len(t, rs, 3)
+	}
 }
 
 func TestParseMultipleRecordsWhenBlankLineContainsWhitespace(t *testing.T) {
 	text := "2018-01-01\n    1h\n" + "    \n" + "2019-01-01\n     \n2019-01-02"
-	rs, errs := NewSerialParser().Parse(text)
-	require.Nil(t, errs)
-	require.Len(t, rs, 3)
+	for _, p := range parsers {
+		rs, errs := p.Parse(text)
+		require.Nil(t, errs)
+		require.Len(t, rs, 3)
+	}
 }
 
 func TestParseAlternativeFormatting(t *testing.T) {
@@ -118,12 +137,14 @@ func TestParseAlternativeFormatting(t *testing.T) {
 1999-05-31
 	8:00am-1:00pm
 `
-	rs, errs := NewSerialParser().Parse(text)
-	require.Nil(t, errs)
-	require.Len(t, rs, 2)
+	for _, p := range parsers {
+		rs, errs := p.Parse(text)
+		require.Nil(t, errs)
+		require.Len(t, rs, 2)
 
-	assert.True(t, rs[0].Date().IsEqualTo(rs[1].Date()))
-	assert.Equal(t, rs[0].Entries()[0].Duration(), rs[1].Entries()[0].Duration())
+		assert.True(t, rs[0].Date().IsEqualTo(rs[1].Date()))
+		assert.Equal(t, rs[0].Entries()[0].Duration(), rs[1].Entries()[0].Duration())
+	}
 }
 
 func TestAcceptTabOrSpacesAsIndentation(t *testing.T) {
@@ -135,9 +156,11 @@ func TestAcceptTabOrSpacesAsIndentation(t *testing.T) {
 		"2000-05-31\n   6h",
 		"2000-05-31\n    6h",
 	} {
-		rs, errs := NewSerialParser().Parse(x)
-		require.Nil(t, errs)
-		require.Len(t, rs, 1)
+		for _, p := range parsers {
+			rs, errs := p.Parse(x)
+			require.Nil(t, errs)
+			require.Len(t, rs, 1)
+		}
 	}
 }
 
@@ -181,16 +204,18 @@ func TestParseDocumentSucceedsWithCorrectEntryValues(t *testing.T) {
 		{"1234-12-12\n\t18:45 - ???", klog.NewOpenRange(klog.Ɀ_Time_(18, 45))},
 		{"1234-12-12\n\t<3:12-??????", klog.NewOpenRange(klog.Ɀ_TimeYesterday_(3, 12))},
 	} {
-		rs, errs := NewSerialParser().Parse(test.text)
-		require.Nil(t, errs, test.text)
-		require.Len(t, rs, 1, test.text)
-		require.Len(t, rs[0].Entries(), 1, test.text)
-		value := klog.Unbox(&rs[0].Entries()[0],
-			func(r klog.Range) any { return r },
-			func(d klog.Duration) any { return d },
-			func(o klog.OpenRange) any { return o },
-		)
-		assert.Equal(t, test.expectEntry, value, test.text)
+		for _, p := range parsers {
+			rs, errs := p.Parse(test.text)
+			require.Nil(t, errs, test.text)
+			require.Len(t, rs, 1, test.text)
+			require.Len(t, rs[0].Entries(), 1, test.text)
+			value := klog.Unbox(&rs[0].Entries()[0],
+				func(r klog.Range) any { return r },
+				func(d klog.Duration) any { return d },
+				func(o klog.OpenRange) any { return o },
+			)
+			assert.Equal(t, test.expectEntry, value, test.text)
+		}
 	}
 }
 
@@ -230,17 +255,19 @@ func TestParsesDocumentsWithEntrySummaries(t *testing.T) {
 		{"1234-12-12\n\t5h\n\t\t with more text", klog.NewDuration(5, 0), klog.Ɀ_EntrySummary_("", " with more text")},
 		{"1234-12-12\n\t5h\n\t\t\twith more text", klog.NewDuration(5, 0), klog.Ɀ_EntrySummary_("", "\twith more text")},
 	} {
-		rs, errs := NewSerialParser().Parse(test.text)
-		require.Nil(t, errs, test.text)
-		require.Len(t, rs, 1, test.text)
-		require.Len(t, rs[0].Entries(), 1, test.text)
-		value := klog.Unbox(&rs[0].Entries()[0],
-			func(r klog.Range) any { return r },
-			func(d klog.Duration) any { return d },
-			func(o klog.OpenRange) any { return o },
-		)
-		assert.Equal(t, test.expectEntry, value, test.text)
-		assert.Equal(t, test.expectSummary, rs[0].Entries()[0].Summary(), test.text)
+		for _, p := range parsers {
+			rs, errs := p.Parse(test.text)
+			require.Nil(t, errs, test.text)
+			require.Len(t, rs, 1, test.text)
+			require.Len(t, rs[0].Entries(), 1, test.text)
+			value := klog.Unbox(&rs[0].Entries()[0],
+				func(r klog.Range) any { return r },
+				func(d klog.Duration) any { return d },
+				func(o klog.OpenRange) any { return o },
+			)
+			assert.Equal(t, test.expectEntry, value, test.text)
+			assert.Equal(t, test.expectSummary, rs[0].Entries()[0].Summary(), test.text)
+		}
 	}
 }
 
@@ -250,11 +277,13 @@ func TestMalformedRecord(t *testing.T) {
 	5h30m This and that
 Why is there a summary at the end?
 `
-	rs, errs := NewSerialParser().Parse(text)
-	require.Nil(t, rs)
-	require.NotNil(t, errs)
-	require.Len(t, errs, 1)
-	assert.Equal(t, ErrorIllegalIndentation().toErrData(4, 0, 34), toErrData(errs[0]))
+	for _, p := range parsers {
+		rs, errs := p.Parse(text)
+		require.Nil(t, rs)
+		require.NotNil(t, errs)
+		require.Len(t, errs, 1)
+		assert.Equal(t, ErrorIllegalIndentation().toErrData(4, 0, 34), toErrData(errs[0]))
+	}
 }
 
 func TestReportErrorsInHeadline(t *testing.T) {
@@ -275,11 +304,13 @@ func TestReportErrorsInHeadline(t *testing.T) {
 		{"2020-01-01 (5h! asdf)", ErrorUnrecognisedProperty().toErrData(1, 16, 4)},
 		{"2020-01-01 (5h!!!)", ErrorUnrecognisedProperty().toErrData(1, 15, 2)},
 	} {
-		rs, errs := NewSerialParser().Parse(test.text)
-		require.Nil(t, rs)
-		require.NotNil(t, errs)
-		require.Len(t, errs, 1)
-		assert.Equal(t, test.expect, toErrData(errs[0]), test.text)
+		for _, p := range parsers {
+			rs, errs := p.Parse(test.text)
+			require.Nil(t, rs)
+			require.NotNil(t, errs)
+			require.Len(t, errs, 1)
+			assert.Equal(t, test.expect, toErrData(errs[0]), test.text)
+		}
 	}
 }
 
@@ -294,14 +325,16 @@ That is not allowed.
     
 End.
 `
-	rs, errs := NewSerialParser().Parse(text)
-	require.Nil(t, rs)
-	require.NotNil(t, errs)
-	require.Len(t, errs, 4)
-	assert.Equal(t, ErrorMalformedSummary().toErrData(4, 0, 41), toErrData(errs[0]))
-	assert.Equal(t, ErrorMalformedSummary().toErrData(6, 0, 63), toErrData(errs[1]))
-	assert.Equal(t, ErrorMalformedSummary().toErrData(7, 0, 34), toErrData(errs[2]))
-	assert.Equal(t, ErrorMalformedSummary().toErrData(8, 0, 4), toErrData(errs[3]))
+	for _, p := range parsers {
+		rs, errs := p.Parse(text)
+		require.Nil(t, rs)
+		require.NotNil(t, errs)
+		require.Len(t, errs, 4)
+		assert.Equal(t, ErrorMalformedSummary().toErrData(4, 0, 41), toErrData(errs[0]))
+		assert.Equal(t, ErrorMalformedSummary().toErrData(6, 0, 63), toErrData(errs[1]))
+		assert.Equal(t, ErrorMalformedSummary().toErrData(7, 0, 34), toErrData(errs[2]))
+		assert.Equal(t, ErrorMalformedSummary().toErrData(8, 0, 4), toErrData(errs[3]))
+	}
 }
 
 func TestReportErrorsIfIndentationIsIncorrect(t *testing.T) {
@@ -334,11 +367,13 @@ func TestReportErrorsIfIndentationIsIncorrect(t *testing.T) {
 		{"2020-01-01\n  8h Foo\n   bar baz", ErrorIllegalIndentation().toErrData(3, 0, 10)},
 		{"2020-01-01\n  8h\n  8h Foo\n   bar baz", ErrorIllegalIndentation().toErrData(4, 0, 10)},
 	} {
-		rs, errs := NewSerialParser().Parse(test.text)
-		require.Nil(t, rs, test.text)
-		require.NotNil(t, errs, test.text)
-		require.Len(t, errs, 1, test.text)
-		assert.Equal(t, test.expect, toErrData(errs[0]), test.text)
+		for _, p := range parsers {
+			rs, errs := p.Parse(test.text)
+			require.Nil(t, rs, test.text)
+			require.NotNil(t, errs, test.text)
+			require.Len(t, errs, 1, test.text)
+			assert.Equal(t, test.expect, toErrData(errs[0]), test.text)
+		}
 	}
 }
 
@@ -354,9 +389,11 @@ func TestAcceptMixingIndentationStylesAcrossDifferentRecords(t *testing.T) {
 2020-01-03
 	12m This is a tab
 `
-	rs, errs := NewSerialParser().Parse(text)
-	require.Nil(t, errs)
-	require.Len(t, rs, 3)
+	for _, p := range parsers {
+		rs, errs := p.Parse(text)
+		require.Nil(t, errs)
+		require.Len(t, rs, 3)
+	}
 }
 
 func TestReportErrorsInEntries(t *testing.T) {
@@ -382,10 +419,12 @@ func TestReportErrorsInEntries(t *testing.T) {
 		{"2020-01-01\n\t23:00> - 25:61>", ErrorMalformedEntry().toErrData(2, 10, 6)},
 		{"2020-01-01\n\t12:00> - 24:00>", ErrorMalformedEntry().toErrData(2, 10, 6)},
 	} {
-		rs, errs := NewSerialParser().Parse(test.text)
-		require.Nil(t, rs, test.text)
-		require.NotNil(t, errs, test.text)
-		require.Len(t, errs, 1, test.text)
-		assert.Equal(t, test.expect, toErrData(errs[0]), test.text)
+		for _, p := range parsers {
+			rs, errs := p.Parse(test.text)
+			require.Nil(t, rs, test.text)
+			require.NotNil(t, errs, test.text)
+			require.Len(t, errs, 1, test.text)
+			assert.Equal(t, test.expect, toErrData(errs[0]), test.text)
+		}
 	}
 }
