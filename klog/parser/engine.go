@@ -10,8 +10,8 @@ func NewSerialParser() Parser {
 }
 
 func NewParallelParser(numberOfWorkers int) Parser {
-	return engine.ParallelParser[string, txt.Block, ParsedRecord, txt.Error]{
-		Serialparser:    serialParser,
+	return engine.ParallelBatchParser[string, txt.Block, ParsedRecord, txt.Error]{
+		SerialParser:    serialParser,
 		NumberOfWorkers: numberOfWorkers,
 	}
 }
