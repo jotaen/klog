@@ -4,71 +4,61 @@ import (
 	"sync"
 )
 
-type dataIn[In any] struct {
-	data In
-	i    int
-}
-
-type dataOut[Out any, Err error] struct {
-	data Out
-	errs []Err
-	i    int
-}
-
-type ParallelParser[In any, Out any, Err error] struct {
+type ParallelBatchParser[In any, Out any, Err error] struct {
 	NumberOfWorkers int
 }
 
-func (pp ParallelParser[In, Out, Err]) ParseAll(ins []In, parseOne func(In) (Out, []Err)) ([]Out, []Err) {
-	outs := make([]Out, len(ins))
-	var allErrs []Err
+type batchResult[Out any, Err any] struct {
+	outs []Out
+	errs []Err
+}
 
-	// Set up channels.
-	inChannel := make(chan dataIn[In])
-	outChannel := make(chan dataOut[Out, Err])
+func (pp ParallelBatchParser[In, Out, Err]) ParseAll(ins []In, parseOne func(In) (Out, []Err)) ([]Out, []Err) {
+	var parse = SerialParser[In, Out, Err]{}
 
-	// Dispatch work.
+	// Batch up and dispatch to workers.
 	wg := &sync.WaitGroup{}
-	wg.Add(len(ins))
-	go func() {
-		for i, in := range ins {
-			inChannel <- dataIn[In]{in, i}
-		}
-		close(inChannel)
-	}()
-
-	// Spawn workers.
-	for i := 0; i < pp.NumberOfWorkers; i++ {
-		go func() {
-			for in := range inChannel {
-				data, errs := parseOne(in.data)
-				out := dataOut[Out, Err]{i: in.i}
-				if len(errs) > 0 {
-					out.errs = errs
-				} else {
-					out.data = data
-				}
-				outChannel <- out
-				wg.Done()
-			}
-		}()
+	batches := batch(ins, pp.NumberOfWorkers)
+	wg.Add(len(batches))
+	resultChannel := make(chan batchResult[Out, Err])
+	for _, b := range batches {
+		go func(ins []In) {
+			defer wg.Done()
+			outs, errs := parse.ParseAll(ins, parseOne)
+			resultChannel <- batchResult[Out, Err]{outs, errs}
+		}(b)
 	}
 
+	// Wait for workers to finish.
 	go func() {
 		wg.Wait()
-		close(outChannel)
+		close(resultChannel)
 	}()
 
-	for out := range outChannel {
-		if out.errs == nil {
-			outs[out.i] = out.data
+	// Collect results.
+	i := 0
+	outs := make([]Out, len(ins))
+	var allErrs []Err
+	for result := range resultChannel {
+		if len(result.errs) > 0 {
+			allErrs = append(allErrs, result.errs...)
 		} else {
-			allErrs = append(allErrs, out.errs...)
+			for _, o := range result.outs {
+				outs[i] = o
+				i++
+			}
 		}
 	}
-
 	if len(allErrs) > 0 {
 		return nil, allErrs
 	}
 	return outs, nil
+}
+
+func batch[T any](slice []T, batchSize int) [][]T {
+	batches := make([][]T, 0, (len(slice)+batchSize-1)/batchSize)
+	for batchSize < len(slice) {
+		slice, batches = slice[batchSize:], append(batches, slice[0:batchSize:batchSize])
+	}
+	return append(batches, slice)
 }

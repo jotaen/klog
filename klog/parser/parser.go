@@ -23,14 +23,18 @@ type ParsedRecord struct {
 }
 
 type Engine interface {
-	ParseAll([]txt.Block, func(block txt.Block) (ParsedRecord, []txt.Error)) ([]ParsedRecord, []txt.Error)
+	ParseAll(blocks []txt.Block, parseOne func(txt.Block) (ParsedRecord, []txt.Error)) ([]ParsedRecord, []txt.Error)
 }
 
 // Parse parses a text into a list of Record datastructures. On success, it returns
 // the parsed records. Otherwise, it returns all encountered parser errors.
 func Parse(recordsAsText string) ([]ParsedRecord, []txt.Error) {
+	return ParseWithEngine(engine.SerialParser[txt.Block, ParsedRecord, txt.Error]{}, recordsAsText)
+}
+
+func ParseWithEngine(e Engine, recordsAsText string) ([]ParsedRecord, []txt.Error) {
 	blocks := txt.GroupIntoBlocks(recordsAsText)
-	return engine.SerialParser[txt.Block, ParsedRecord, txt.Error]{}.ParseAll(blocks, func(block txt.Block) (ParsedRecord, []txt.Error) {
+	return e.ParseAll(blocks, func(block txt.Block) (ParsedRecord, []txt.Error) {
 		record, style, errs := parseRecord(block.SignificantLines())
 		if errs != nil {
 			return ParsedRecord{}, errs
