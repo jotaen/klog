@@ -14,10 +14,9 @@ import (
 	"github.com/jotaen/klog/klog/service/period"
 	kongcompletion "github.com/jotaen/kong-completion"
 	"reflect"
-	"runtime"
 )
 
-func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error) {
+func Run(homeDir string, meta app.Meta, prefs app.Preferences, args []string) (int, error) {
 	kongApp, nErr := kong.New(
 		&cli.Cli{},
 		kong.Name("klog"),
@@ -67,9 +66,9 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error
 	ctx := app.NewContext(
 		homeDir,
 		meta,
-		parser.NewParallelParser(runtime.NumCPU()),
+		parser.NewSerialParser(),
 		lib.CliSerialiser{},
-		isDebug,
+		prefs,
 	)
 
 	// When klog is invoked by shell completion (specifically, when the
@@ -85,7 +84,7 @@ func Run(homeDir string, meta app.Meta, isDebug bool, args []string) (int, error
 
 	rErr := kongCtx.Run()
 	if rErr != nil {
-		ctx.Print(lib.PrettifyError(rErr, isDebug).Error() + "\n")
+		ctx.Print(lib.PrettifyError(rErr, prefs.IsDebug).Error() + "\n")
 		if appErr, isAppError := rErr.(app.Error); isAppError {
 			return int(appErr.Code()), nil
 		} else {

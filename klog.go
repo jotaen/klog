@@ -25,10 +25,14 @@ func main() {
 	if len(BinaryBuildHash) > 7 {
 		BinaryBuildHash = BinaryBuildHash[:7]
 	}
-	isDebug := false
+	prefs := app.NewDefaultPreferences()
 	if os.Getenv("KLOG_DEBUG") != "" {
-		isDebug = true
+		prefs.IsDebug = true
 	}
+	if os.Getenv("NO_COLOR") != "" {
+		prefs.NoColour = true
+	}
+	prefs.Editor = os.Getenv("EDITOR")
 	homeDir, err := user.Current()
 	if err != nil {
 		fmt.Println("Failed to initialise application. Error:")
@@ -41,7 +45,7 @@ func main() {
 		Changelog:     changelog,
 		Version:       BinaryVersion,
 		BuildHash:     BinaryBuildHash,
-	}, isDebug, os.Args[1:])
+	}, prefs, os.Args[1:])
 	if runErr != nil {
 		fmt.Println(runErr)
 	}

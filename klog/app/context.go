@@ -70,6 +70,9 @@ type Context interface {
 
 	// Debug takes a void function that is only executed in debug mode.
 	Debug(func())
+
+	// Preferences returns the current preferences.
+	Preferences() Preferences
 }
 
 // Meta holds miscellaneous information about the klog binary.
@@ -91,8 +94,23 @@ type Meta struct {
 	BuildHash string
 }
 
+// Preferences are user-defined configuration.
+type Preferences struct {
+	IsDebug  bool
+	Editor   string
+	NoColour bool
+}
+
+func NewDefaultPreferences() Preferences {
+	return Preferences{
+		IsDebug:  false,
+		Editor:   "",
+		NoColour: false,
+	}
+}
+
 // NewContext creates a new Context object.
-func NewContext(homeDir string, meta Meta, parser parser.Parser, serialiser parser.Serialiser, isDebug bool) Context {
+func NewContext(homeDir string, meta Meta, parser parser.Parser, serialiser parser.Serialiser, prefs Preferences) Context {
 	if meta.Version == "" {
 		meta.Version = "v?.?"
 	}
@@ -104,7 +122,7 @@ func NewContext(homeDir string, meta Meta, parser parser.Parser, serialiser pars
 		parser,
 		serialiser,
 		meta,
-		isDebug,
+		prefs,
 	}
 }
 
@@ -113,7 +131,7 @@ type context struct {
 	parser     parser.Parser
 	serialiser parser.Serialiser
 	meta       Meta
-	isDebug    bool
+	prefs      Preferences
 }
 
 func (ctx *context) Print(text string) {
@@ -360,7 +378,7 @@ func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(stri
 	}
 
 	// If $EDITOR is specified, try to open it.
-	preferredEditor := os.Getenv("EDITOR")
+	preferredEditor := ctx.prefs.Editor
 	if preferredEditor != "" {
 		hasSucceeded := tryCommands([][]string{{preferredEditor}}, target.Path())
 		if hasSucceeded {
@@ -397,7 +415,11 @@ func (ctx *context) SetSerialiser(s parser.Serialiser) {
 }
 
 func (ctx *context) Debug(task func()) {
-	if ctx.isDebug {
+	if ctx.prefs.IsDebug {
 		task()
 	}
+}
+
+func (ctx *context) Preferences() Preferences {
+	return ctx.prefs
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
-	"os"
 	"strings"
 	gotime "time"
 )
@@ -206,7 +205,7 @@ type NoStyleArgs struct {
 }
 
 func (args *NoStyleArgs) Apply(ctx *app.Context) {
-	if args.NoStyle || os.Getenv("NO_COLOR") != "" {
+	if args.NoStyle || (*ctx).Preferences().NoColour {
 		if s, ok := (*ctx).Serialiser().(CliSerialiser); ok {
 			s.Unstyled = true
 			(*ctx).SetSerialiser(s)

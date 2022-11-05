@@ -40,7 +40,7 @@ func (e *Env) run(invocation ...[]string) []string {
 			Changelog:     "[Changelog text]",
 			Version:       "v0.0",
 			BuildHash:     "1234567",
-		}, false, args)
+		}, app.NewDefaultPreferences(), args)
 
 		_ = w.Close()
 		if runErr != nil || code != 0 {
