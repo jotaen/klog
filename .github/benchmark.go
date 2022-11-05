@@ -17,11 +17,11 @@ func main() {
 		panic(err)
 	}
 	rand.Seed(int64(time.Now().Nanosecond()))
-	now := klog.NewDateFromGo(time.Now())
 
 	// Generate records
+	date := klog.Ɀ_Date_(0, 1, 1)
 	for i := 0; i < iterations; i++ {
-		date := now.PlusDays((i + 1) * -1)
+		date = date.PlusDays(1)
 		r := klog.NewRecord(date)
 
 		// Should total

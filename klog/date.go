@@ -102,7 +102,7 @@ func civil2Date(cd civil.Date, format DateFormat) (Date, error) {
 	if !cd.IsValid() {
 		return nil, errors.New("UNREPRESENTABLE_DATE")
 	}
-	if cd.Year > 9999 {
+	if cd.Year < 0 || cd.Year > 9999 {
 		// A year greater than 9999 cannot be serialised according to YYYY-MM-DD.
 		return nil, errors.New("UNREPRESENTABLE_DATE")
 	}
