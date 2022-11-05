@@ -74,26 +74,30 @@ func TestDetectsInvalidTimes(t *testing.T) {
 }
 
 func TestSerialiseTime(t *testing.T) {
-	tm := Ɀ_Time_(13, 45)
+	tm, err := NewTime(13, 45)
+	require.Nil(t, err)
 	assert.Equal(t, "13:45", tm.ToString())
 	assert.Equal(t, "13:45", tm.ToStringWithFormat(TimeFormat{Use24HourClock: true}))
 	assert.Equal(t, "1:45pm", tm.ToStringWithFormat(TimeFormat{Use24HourClock: false}))
 }
 
 func TestSerialiseTimeWithoutLeadingZeros(t *testing.T) {
-	tm := Ɀ_Time_(8, 5)
+	tm, err := NewTime(8, 5)
+	require.Nil(t, err)
 	assert.Equal(t, "8:05", tm.ToString())
 	assert.Equal(t, "8:05am", Ɀ_IsAmPm_(tm).ToString())
 }
 
 func TestSerialiseTimeYesterday(t *testing.T) {
-	tm := Ɀ_TimeYesterday_(23, 0)
+	tm, err := NewTimeYesterday(23, 0)
+	require.Nil(t, err)
 	assert.Equal(t, "<23:00", tm.ToString())
 	assert.Equal(t, "<11:00pm", Ɀ_IsAmPm_(tm).ToString())
 }
 
 func TestSerialiseTimeTomorrow(t *testing.T) {
-	tm := Ɀ_TimeTomorrow_(0, 2)
+	tm, err := NewTimeTomorrow(0, 2)
+	require.Nil(t, err)
 	assert.Equal(t, "0:02>", tm.ToString())
 	assert.Equal(t, "12:02am>", Ɀ_IsAmPm_(tm).ToString())
 }

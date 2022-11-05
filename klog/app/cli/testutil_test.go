@@ -7,6 +7,7 @@ import (
 	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/reconciling"
+	"github.com/jotaen/klog/klog/parser/txt"
 	gotime "time"
 )
 
@@ -17,19 +18,21 @@ func NewTestingContext() TestingContext {
 			printBuffer:         "",
 			writtenFileContents: "",
 		},
-		now:           gotime.Now(),
-		parsedRecords: nil,
-		serialiser:    lib.CliSerialiser{},
-		bookmarks:     bc,
+		now:        gotime.Now(),
+		records:    nil,
+		blocks:     nil,
+		serialiser: lib.CliSerialiser{},
+		bookmarks:  bc,
 	}
 }
 
 func (ctx TestingContext) _SetRecords(recordsText string) TestingContext {
-	records, err := parser.NewSerialParser().Parse(recordsText)
+	records, blocks, err := parser.NewSerialParser().Parse(recordsText)
 	if err != nil {
 		panic("Invalid records")
 	}
-	ctx.parsedRecords = records
+	ctx.records = records
+	ctx.blocks = blocks
 	return ctx
 }
 
@@ -54,10 +57,11 @@ type State struct {
 
 type TestingContext struct {
 	State
-	now           gotime.Time
-	parsedRecords []parser.ParsedRecord
-	serialiser    parser.Serialiser
-	bookmarks     app.BookmarksCollection
+	now        gotime.Time
+	records    []klog.Record
+	blocks     []txt.Block
+	serialiser parser.Serialiser
+	bookmarks  app.BookmarksCollection
 }
 
 func (ctx *TestingContext) Print(s string) {
@@ -86,15 +90,11 @@ func (ctx *TestingContext) Meta() app.Meta {
 }
 
 func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]klog.Record, app.Error) {
-	var allRecords []klog.Record
-	for _, r := range ctx.parsedRecords {
-		allRecords = append(allRecords, r)
-	}
-	return allRecords, nil
+	return ctx.records, nil
 }
 
 func (ctx *TestingContext) ReconcileFile(doWrite bool, _ app.FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, app.Error) {
-	result, err := app.ApplyReconciler(ctx.parsedRecords, creators, reconcile)
+	result, err := app.ApplyReconciler(ctx.records, ctx.blocks, creators, reconcile)
 	if err != nil {
 		return nil, err
 	}

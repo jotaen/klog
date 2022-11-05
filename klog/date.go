@@ -56,6 +56,11 @@ type DateFormat struct {
 	UseDashes bool
 }
 
+// DefaultDateFormat returns the canonical date format, as recommended by the spec.
+func DefaultDateFormat() DateFormat {
+	return DateFormat{UseDashes: true}
+}
+
 type date struct {
 	year   int
 	month  int
@@ -71,7 +76,7 @@ func NewDate(year int, month int, day int) (Date, error) {
 		Month: gotime.Month(month),
 		Day:   day,
 	}
-	return civil2Date(cd, DateFormat{UseDashes: true})
+	return civil2Date(cd, DefaultDateFormat())
 }
 
 func NewDateFromString(yyyymmdd string) (Date, error) {

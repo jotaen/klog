@@ -6,37 +6,11 @@ package parser
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/parser/txt"
-	"strings"
 )
 
-// ParsedRecord is a record along with some meta information which is
-// obtained throughout the parsing process.
-type ParsedRecord struct {
-	klog.Record
-
-	// Block contains the original lines of text.
-	Block txt.Block
-
-	// Style contains the original styling preferences.
-	Style *Style
-}
-
-// Parser parses a text into a list of Record datastructures. On success, it returns
-// the parsed records. Otherwise, it returns all encountered parser errors.
-type Parser interface {
-	Parse(string) ([]ParsedRecord, []txt.Error)
-}
-
-var allowedIndentationStyles = []string{"    ", "   ", "  ", "\t"}
-
-func preProcess(text string) []txt.Block {
-	return txt.GroupIntoBlocks(text)
-}
-
-func parse(block txt.Block) (ParsedRecord, []txt.Error) {
+func parse(block txt.Block) (klog.Record, []txt.Error) {
 	lines := block.SignificantLines()
 	var errs []txt.Error
-	style := DefaultStyle()
 
 	// ========== HEADLINE ==========
 	record := func() klog.Record {
@@ -58,7 +32,6 @@ func parse(block txt.Block) (ParsedRecord, []txt.Error) {
 		headline.Advance(dateText.Length())
 		headline.SkipWhile(txt.IsSpaceOrTab)
 		r := klog.NewRecord(rDate)
-		style.DateFormat.Set(rDate.Format())
 
 		// Check if there is a should-total set, and if so, parse it.
 		if headline.Peek() == '(' {
@@ -116,7 +89,7 @@ func parse(block txt.Block) (ParsedRecord, []txt.Error) {
 
 	// ========== SUMMARY LINES ==========
 	for _, l := range lines {
-		indentator = txt.NewIndentator(allowedIndentationStyles, lines[0])
+		indentator = txt.NewIndentator(txt.Indentations, lines[0])
 		if indentator != nil {
 			break
 		}
@@ -136,7 +109,7 @@ func parse(block txt.Block) (ParsedRecord, []txt.Error) {
 			// We should never make it here if the indentation could not be determined.
 			panic("Could not detect indentation")
 		}
-		style.Indentation.Set(indentator.Style())
+
 		// Check for correct indentation.
 		entry := indentator.NewIndentedParseable(l, 1)
 		if entry == nil || txt.IsSpaceOrTab(entry.Peek()) {
@@ -171,16 +144,12 @@ func parse(block txt.Block) (ParsedRecord, []txt.Error) {
 			}
 			entryStartPosition := startCandidate.PointerPosition
 			entry.Advance(startCandidate.Length())
-			style.TimeFormat.Set(start.Format())
 
 			entryStartPositionEnds := entry.PointerPosition
 			entry.SkipWhile(txt.Is(' '))
 			hasRangeSpacesAroundDash := true
-			if entryStartPositionEnds != entry.PointerPosition {
-				style.SpacingInRange.Set(strings.Repeat(" ", entry.PointerPosition-entryStartPositionEnds))
-			} else {
+			if entryStartPositionEnds == entry.PointerPosition {
 				hasRangeSpacesAroundDash = false
-				style.SpacingInRange.Set("")
 			}
 
 			if entry.Peek() != '-' {
@@ -291,14 +260,7 @@ func parse(block txt.Block) (ParsedRecord, []txt.Error) {
 	}
 
 	if len(errs) > 0 {
-		return ParsedRecord{}, errs
+		return nil, errs
 	}
-	if block[0].LineEnding != "" {
-		style.LineEnding.Set(block[0].LineEnding)
-	}
-	return ParsedRecord{
-		Record: record,
-		Block:  block,
-		Style:  style,
-	}, nil
+	return record, nil
 }

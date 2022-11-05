@@ -4,7 +4,6 @@ import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 )
 
@@ -26,26 +25,28 @@ func (opt *Stop) Run(ctx app.Context) error {
 	now := ctx.Now()
 	date, isAutoDate := opt.AtDate(now)
 	time, isAutoTime, err := opt.AtTime(now)
+	// Only fall back to yesterday if no explicit date has been given.
+	// Otherwise, it wouldn’t make sense to decrement the day.
+	shouldTryYesterday := isAutoDate && isAutoTime
+	yesterday := date.PlusDays(-1)
 	if err != nil {
 		return err
 	}
 	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
-			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
-				return reconciling.NewReconcilerAtRecord(parsedRecords, date)
-			},
-			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
-				if isAutoDate && isAutoTime {
-					// Only fall back to yesterday if no explicit date has been given.
-					// Otherwise, it wouldn’t make sense to decrement the day.
-					time, _ = time.Plus(klog.NewDuration(24, 0))
-					return reconciling.NewReconcilerAtRecord(parsedRecords, date.PlusDays(-1))
+			reconciling.NewReconcilerAtRecord(date),
+			func() reconciling.Creator {
+				if shouldTryYesterday {
+					return reconciling.NewReconcilerAtRecord(yesterday)
 				}
 				return nil
-			},
+			}(),
 		},
 
 		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
+			if shouldTryYesterday && reconciler.Record.Date().IsEqualTo(yesterday) {
+				time, _ = time.Plus(klog.NewDuration(24, 0))
+			}
 			return reconciler.CloseOpenRange(time, opt.Summary)
 		},
 	)

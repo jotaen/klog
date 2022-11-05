@@ -19,14 +19,14 @@ func (r *Reconciler) PauseOpenRange(pause klog.Duration, summary klog.EntrySumma
 	if openRangeEntryIndex == -1 {
 		return nil, errors.New("No open time range")
 	}
-	openRangeEntryLastLineIndex := r.lastLinePointer - countLines(r.record.Entries()[openRangeEntryIndex:])
+	openRangeEntryLastLineIndex := r.lastLinePointer - countLines(r.Record.Entries()[openRangeEntryIndex:])
 
 	existingPause := func() klog.Duration {
 		// The open range is the last entry.
-		if openRangeEntryIndex == len(r.record.Entries())-1 {
+		if openRangeEntryIndex == len(r.Record.Entries())-1 {
 			return nil
 		}
-		nextEntry := r.record.Entries()[openRangeEntryIndex+1]
+		nextEntry := r.Record.Entries()[openRangeEntryIndex+1]
 		if !nextEntry.Summary().Equals(summary) {
 			// Summaries don’t match.
 			return nil
@@ -54,7 +54,7 @@ func (r *Reconciler) PauseOpenRange(pause klog.Duration, summary klog.EntrySumma
 	// If there is an existing pause that matches, replace it’s duration
 	// with the extended value.
 	extendedPause := existingPause.Plus(pause)
-	pauseEntryLineIndex := openRangeEntryLastLineIndex + countLines([]klog.Entry{r.record.Entries()[openRangeEntryIndex]})
+	pauseEntryLineIndex := openRangeEntryLastLineIndex + countLines([]klog.Entry{r.Record.Entries()[openRangeEntryIndex]})
 	durationPattern := regexp.MustCompile(`(-\w+)`)
 	value := durationPattern.FindString(r.lines[pauseEntryLineIndex].Text)
 	if value != "" {

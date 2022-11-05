@@ -29,12 +29,18 @@ type Duration interface {
 	ToStringWithSign() string
 }
 
+// DurationFormat contains the formatting options for a Duration.
 type DurationFormat struct {
 	ForceSign bool
 }
 
+// DefaultDurationFormat returns the canonical duration format, as recommended by the spec.
+func DefaultDurationFormat() DurationFormat {
+	return DurationFormat{ForceSign: false}
+}
+
 func NewDuration(amountHours int, amountMinutes int) Duration {
-	return NewDurationWithFormat(amountHours, amountMinutes, DurationFormat{ForceSign: false})
+	return NewDurationWithFormat(amountHours, amountMinutes, DefaultDurationFormat())
 }
 
 func NewDurationWithFormat(amountHours int, amountMinutes int, format DurationFormat) Duration {

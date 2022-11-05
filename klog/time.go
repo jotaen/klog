@@ -48,6 +48,13 @@ type TimeFormat struct {
 	Use24HourClock bool
 }
 
+// DefaultTimeFormat returns the canonical time format, as recommended by the spec.
+func DefaultTimeFormat() TimeFormat {
+	return TimeFormat{
+		Use24HourClock: true,
+	}
+}
+
 type time struct {
 	hour     int
 	minute   int
@@ -55,7 +62,7 @@ type time struct {
 	format   TimeFormat
 }
 
-func newTime(hour int, minute int, dayShift int, is24HourClock bool) (Time, error) {
+func newTime(hour int, minute int, dayShift int, format TimeFormat) (Time, error) {
 	if hour == 24 && minute == 00 && dayShift <= 0 {
 		// Accept a time of 24:00 (today), and interpret it as 0:00 (tomorrow).
 		// Accept a time of 24:00 (yesterday), and interpret it as 0:00 (today).
@@ -71,20 +78,20 @@ func newTime(hour int, minute int, dayShift int, is24HourClock bool) (Time, erro
 		hour:     ct.Hour,
 		minute:   ct.Minute,
 		dayShift: dayShift,
-		format:   TimeFormat{Use24HourClock: is24HourClock},
+		format:   format,
 	}, nil
 }
 
 func NewTime(hour int, minute int) (Time, error) {
-	return newTime(hour, minute, 0, true)
+	return newTime(hour, minute, 0, DefaultTimeFormat())
 }
 
 func NewTimeYesterday(hour int, minute int) (Time, error) {
-	return newTime(hour, minute, -1, true)
+	return newTime(hour, minute, -1, DefaultTimeFormat())
 }
 
 func NewTimeTomorrow(hour int, minute int) (Time, error) {
-	return newTime(hour, minute, +1, true)
+	return newTime(hour, minute, +1, DefaultTimeFormat())
 }
 
 var timePattern = regexp.MustCompile(`^(<)?(\d{1,2}):(\d{2})(am|pm)?(>)?$`)
@@ -96,12 +103,12 @@ func NewTimeFromString(hhmm string) (Time, error) {
 	}
 	hour, _ := strconv.Atoi(match[2])
 	minute, _ := strconv.Atoi(match[3])
-	is24HourClock := true
+	format := DefaultTimeFormat()
 	if match[4] == "am" || match[4] == "pm" {
 		if hour < 1 || hour > 12 {
 			return nil, errors.New("INVALID_TIME")
 		}
-		is24HourClock = false
+		format.Use24HourClock = false
 		if match[4] == "am" && hour == 12 {
 			hour = 0
 		} else if match[4] == "pm" && hour < 12 {
@@ -114,7 +121,7 @@ func NewTimeFromString(hhmm string) (Time, error) {
 	} else if match[5] == ">" {
 		dayShift = +1
 	}
-	return newTime(hour, minute, dayShift, is24HourClock)
+	return newTime(hour, minute, dayShift, format)
 }
 
 func NewTimeFromGo(t gotime.Time) Time {
@@ -179,7 +186,7 @@ func (t *time) Plus(d Duration) (Time, error) {
 		dayShift = 1
 		mins = mins - ONE_DAY
 	}
-	return newTime(mins/60, mins%60, dayShift, t.format.Use24HourClock)
+	return newTime(mins/60, mins%60, dayShift, t.format)
 }
 
 func (t *time) ToString() string {

@@ -28,7 +28,7 @@ lines and contains a #tag as well.
     <18:00-4:00
     12:00-??????????
 `
-	prs, _ := NewSerialParser().Parse(text)
+	prs, _, _ := NewSerialParser().Parse(text)
 	require.Len(t, prs, 2)
 	rs := make([]klog.Record, len(prs))
 	for i, pr := range prs {

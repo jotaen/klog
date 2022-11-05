@@ -4,7 +4,6 @@ import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 	"strings"
 	gotime "time"
@@ -58,13 +57,8 @@ func (opt *Pause) Run(ctx app.Context) error {
 			!isDryRun,
 			opt.OutputFileArgs.File,
 			[]reconciling.Creator{
-				func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
-					return reconciling.NewReconcilerAtRecord(parsedRecords, today)
-				},
-				func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
-					// Fall back to yesterday, if no record at today’s date.
-					return reconciling.NewReconcilerAtRecord(parsedRecords, today.PlusDays(-1))
-				},
+				reconciling.NewReconcilerAtRecord(today),
+				reconciling.NewReconcilerAtRecord(today.PlusDays(-1)),
 			},
 
 			func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {

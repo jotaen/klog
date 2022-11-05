@@ -11,6 +11,7 @@ import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/reconciling"
+	"github.com/jotaen/klog/klog/parser/txt"
 	"os"
 	"os/exec"
 	"strings"
@@ -189,13 +190,11 @@ func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]klog.Record, E
 	}
 	var allRecords []klog.Record
 	for _, f := range files {
-		parsedRecords, parserErrors := ctx.parser.Parse(f.Contents())
-		if parserErrors != nil {
-			return nil, NewParserErrors(parserErrors)
+		records, _, errs := ctx.parser.Parse(f.Contents())
+		if errs != nil {
+			return nil, NewParserErrors(errs)
 		}
-		for _, r := range parsedRecords {
-			allRecords = append(allRecords, r)
-		}
+		allRecords = append(allRecords, records...)
 	}
 	return allRecords, nil
 }
@@ -225,11 +224,11 @@ func (ctx *context) ReconcileFile(doWrite bool, fileArg FileOrBookmarkName, crea
 	if err != nil {
 		return nil, err
 	}
-	parsedRecords, parserErrors := ctx.parser.Parse(target.Contents())
-	if parserErrors != nil {
-		return nil, NewParserErrors(parserErrors)
+	records, blocks, errs := ctx.parser.Parse(target.Contents())
+	if errs != nil {
+		return nil, NewParserErrors(errs)
 	}
-	result, aErr := ApplyReconciler(parsedRecords, creators, reconcile)
+	result, aErr := ApplyReconciler(records, blocks, creators, reconcile)
 	if aErr != nil {
 		return nil, aErr
 	}
@@ -242,10 +241,15 @@ func (ctx *context) ReconcileFile(doWrite bool, fileArg FileOrBookmarkName, crea
 	return result, nil
 }
 
-func ApplyReconciler(parsedRecords []parser.ParsedRecord, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, Error) {
+func ApplyReconciler(records []klog.Record, blocks []txt.Block, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, Error) {
 	reconciler := func() *reconciling.Reconciler {
 		for _, createReconciler := range creators {
-			r := createReconciler(parsedRecords)
+			// Both the creator and the created reconciler might be nil,
+			// to indicate it’s not eligible.
+			if createReconciler == nil {
+				continue
+			}
+			r := createReconciler(records, blocks)
 			if r != nil {
 				return r
 			}

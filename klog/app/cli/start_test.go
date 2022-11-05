@@ -128,7 +128,7 @@ func TestStartAtUnknownDateCreatesNewRecord(t *testing.T) {
 `)._SetNow(1623, 12, 11, 12, 49)._Run((&Start{}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `1623-12-11
-	12:49 - ?
+	12:49 - ???
 
 1623-12-13
 	09:23 - ???

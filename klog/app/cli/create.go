@@ -4,7 +4,6 @@ import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 )
 
@@ -27,12 +26,9 @@ func (opt *Create) Run(ctx app.Context) error {
 	date, _ := opt.AtDate(ctx.Now())
 	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
-			func(parsedRecords []parser.ParsedRecord) *reconciling.Reconciler {
-				return reconciling.NewReconcilerForNewRecord(
-					parsedRecords,
-					reconciling.RecordParams{Date: date, ShouldTotal: opt.ShouldTotal, Summary: opt.Summary},
-				)
-			},
+			reconciling.NewReconcilerForNewRecord(
+				reconciling.RecordParams{Date: date, ShouldTotal: opt.ShouldTotal, Summary: opt.Summary},
+			),
 		},
 
 		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {

@@ -13,8 +13,8 @@ func TestReconcilerStartsOpenRange(t *testing.T) {
 2018-01-01
 	5h22m
 `
-	rs, _ := parser.NewSerialParser().Parse(original)
-	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
+	rs, bs, _ := parser.NewSerialParser().Parse(original)
+	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2018, 1, 1))(rs, bs)
 	require.NotNil(t, reconciler)
 	result, err := reconciler.StartOpenRange(klog.Ɀ_Time_(8, 3), nil)
 	require.Nil(t, err)
@@ -31,8 +31,8 @@ func TestReconcilerStartsOpenRangeWithSummary(t *testing.T) {
 	5h22m
 		Existing entry
 `
-	rs, _ := parser.NewSerialParser().Parse(original)
-	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
+	rs, bs, _ := parser.NewSerialParser().Parse(original)
+	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2018, 1, 1))(rs, bs)
 	require.NotNil(t, reconciler)
 	result, err := reconciler.StartOpenRange(klog.Ɀ_Time_(8, 3), klog.Ɀ_EntrySummary_("Test"))
 	require.Nil(t, err)
@@ -49,8 +49,8 @@ func TestReconcilerStartsOpenRangeWithNewMultilineSummary(t *testing.T) {
 2018-01-01
 	5h22m
 `
-	rs, _ := parser.NewSerialParser().Parse(original)
-	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
+	rs, bs, _ := parser.NewSerialParser().Parse(original)
+	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2018, 1, 1))(rs, bs)
 	require.NotNil(t, reconciler)
 	result, err := reconciler.StartOpenRange(klog.Ɀ_Time_(8, 3), klog.Ɀ_EntrySummary_("", "Started...", "something!"))
 	require.Nil(t, err)
@@ -68,8 +68,8 @@ func TestReconcilerStartsOpenRangeWithStyle(t *testing.T) {
 2018-01-01
 	2:00am-3:00am
 `
-	rs, _ := parser.NewSerialParser().Parse(original)
-	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 1))
+	rs, bs, _ := parser.NewSerialParser().Parse(original)
+	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2018, 1, 1))(rs, bs)
 	require.NotNil(t, reconciler)
 	result, err := reconciler.StartOpenRange(klog.Ɀ_Time_(8, 3), nil)
 	require.Nil(t, err)
@@ -88,8 +88,8 @@ func TestReconcilerStartsOpenRangeWithStyleFromOtherRecord(t *testing.T) {
 
 2018-01-02
 `
-	rs, _ := parser.NewSerialParser().Parse(original)
-	reconciler := NewReconcilerAtRecord(rs, klog.Ɀ_Date_(2018, 1, 2))
+	rs, bs, _ := parser.NewSerialParser().Parse(original)
+	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2018, 1, 2))(rs, bs)
 	require.NotNil(t, reconciler)
 	result, err := reconciler.StartOpenRange(klog.Ɀ_Time_(8, 3), nil)
 	require.Nil(t, err)

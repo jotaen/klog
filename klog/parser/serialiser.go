@@ -25,10 +25,13 @@ type Line struct {
 
 type Lines []Line
 
+var canonicalLineEnding = "\n"
+var canonicalIndentation = "    "
+
 func (ls Lines) ToString() string {
 	result := ""
 	for _, l := range ls {
-		result += l.Text + canonicalStyle.LineEnding.Get()
+		result += l.Text + canonicalLineEnding
 	}
 	return result
 }
@@ -62,13 +65,13 @@ func serialiseRecord(s Serialiser, r klog.Record) []Line {
 			func(d klog.Duration) string { return s.Duration(d) },
 			func(o klog.OpenRange) string { return s.OpenRange(o) },
 		)
-		lines = append(lines, Line{canonicalStyle.Indentation.Get() + entryValue, r, entryI})
+		lines = append(lines, Line{canonicalIndentation + entryValue, r, entryI})
 		for i, l := range e.Summary().Lines() {
 			summaryText := s.Summary([]string{l})
 			if i == 0 && l != "" {
 				lines[len(lines)-1].Text += " " + summaryText
 			} else if i >= 1 {
-				lines = append(lines, Line{canonicalStyle.Indentation.Get() + canonicalStyle.Indentation.Get() + summaryText, r, entryI})
+				lines = append(lines, Line{canonicalIndentation + canonicalIndentation + summaryText, r, entryI})
 			}
 		}
 	}
@@ -78,10 +81,8 @@ func serialiseRecord(s Serialiser, r klog.Record) []Line {
 type SummaryText []string
 
 func (s SummaryText) ToString() string {
-	return strings.Join(s, canonicalStyle.LineEnding.Get())
+	return strings.Join(s, canonicalLineEnding)
 }
-
-var canonicalStyle = DefaultStyle()
 
 type PlainSerialiser struct{}
 

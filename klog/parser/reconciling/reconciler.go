@@ -18,8 +18,8 @@ import (
 
 // Reconciler is a mechanism to manipulate record data in a file.
 type Reconciler struct {
-	record          klog.Record
-	style           *parser.Style
+	Record          klog.Record
+	style           *style
 	lastLinePointer int // Line index of the last entry
 	lines           []txt.Line
 	recordPointer   int
@@ -28,7 +28,7 @@ type Reconciler struct {
 // Result is the result of an applied reconciler.
 type Result struct {
 	Record        klog.Record
-	AllRecords    []parser.ParsedRecord
+	AllRecords    []klog.Record
 	AllSerialised string
 }
 
@@ -51,7 +51,7 @@ func (r *Reconciler) MakeResult() (*Result, error) {
 	}
 
 	// As a safeguard, make sure the result is parseable.
-	newRecords, errs := parser.NewSerialParser().Parse(text)
+	newRecords, _, errs := parser.NewSerialParser().Parse(text)
 	if errs != nil {
 		return nil, errors.New("This operation wouldn’t result in a valid record")
 	}
@@ -66,7 +66,7 @@ func (r *Reconciler) MakeResult() (*Result, error) {
 // findOpenRangeIndex returns the index of the open range entry, or -1 if no open range.
 func (r *Reconciler) findOpenRangeIndex() int {
 	openRangeEntryIndex := -1
-	for i, e := range r.record.Entries() {
+	for i, e := range r.Record.Entries() {
 		klog.Unbox(&e,
 			func(klog.Range) any { return nil },
 			func(klog.Duration) any { return nil },
@@ -91,8 +91,8 @@ func (r *Reconciler) insert(lineIndex int, texts []insertableText) {
 	offset := 0
 	for i := range result {
 		if i >= lineIndex && offset < len(texts) {
-			line := strings.Repeat(r.style.Indentation.Get(), texts[offset].indentation)
-			line += texts[offset].text + r.style.LineEnding.Get()
+			line := strings.Repeat(r.style.indentation.Get(), texts[offset].indentation)
+			line += texts[offset].text + r.style.lineEnding.Get()
 			result[i] = txt.NewLineFromString(line, -1)
 			offset++
 		} else {
@@ -101,7 +101,7 @@ func (r *Reconciler) insert(lineIndex int, texts []insertableText) {
 		result[i].LineNumber = i + 1
 	}
 	if lineIndex > 0 && result[lineIndex-1].LineEnding == "" {
-		result[lineIndex-1].LineEnding = r.style.LineEnding.Get()
+		result[lineIndex-1].LineEnding = r.style.lineEnding.Get()
 	}
 	r.lines = result
 }

@@ -1,27 +1,25 @@
 package engine
 
-type SerialParser[Txt any, Int any, Out any, Err any] struct {
-	PreProcess func(Txt) []Int
-	ParseOne   func(Int) (Out, []Err)
+import "github.com/jotaen/klog/klog/parser/txt"
+
+type SerialParser[T any] struct {
+	ParseOne func(txt.Block) (T, []txt.Error)
 }
 
-func (p SerialParser[Txt, Int, Out, Err]) Parse(text Txt) ([]Out, []Err) {
-	return p.parseAll(p.PreProcess(text))
-}
-
-func (p SerialParser[Txt, Int, Out, Err]) parseAll(ints []Int) ([]Out, []Err) {
-	outs := make([]Out, len(ints))
-	var errs []Err
-	for i, in := range ints {
+func (p SerialParser[T]) Parse(text string) ([]T, []txt.Block, []txt.Error) {
+	blocks := txt.GroupIntoBlocks(text)
+	result := make([]T, len(blocks))
+	var errs []txt.Error
+	for i, in := range blocks {
 		out, err := p.ParseOne(in)
 		if err != nil {
 			errs = append(errs, err...)
 			continue
 		}
-		outs[i] = out
+		result[i] = out
 	}
 	if errs != nil {
-		return nil, errs
+		return nil, nil, errs
 	}
-	return outs, errs
+	return result, blocks, errs
 }

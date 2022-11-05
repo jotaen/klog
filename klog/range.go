@@ -34,16 +34,29 @@ type RangeFormat struct {
 	UseSpacesAroundDash bool
 }
 
+// DefaultRangeFormat returns the canonical time range format, as recommended by the spec.
+func DefaultRangeFormat() RangeFormat {
+	return RangeFormat{
+		UseSpacesAroundDash: true,
+	}
+}
+
 // OpenRangeFormat contains the formatting options for an OpenRange.
 type OpenRangeFormat struct {
 	UseSpacesAroundDash        bool
 	AdditionalPlaceholderChars int
 }
 
+// DefaultOpenRangeFormat returns the canonical open range format, as recommended by the spec.
+func DefaultOpenRangeFormat() OpenRangeFormat {
+	return OpenRangeFormat{
+		UseSpacesAroundDash:        DefaultRangeFormat().UseSpacesAroundDash,
+		AdditionalPlaceholderChars: 0,
+	}
+}
+
 func NewRange(start Time, end Time) (Range, error) {
-	return NewRangeWithFormat(start, end, RangeFormat{
-		UseSpacesAroundDash: true,
-	})
+	return NewRangeWithFormat(start, end, DefaultRangeFormat())
 }
 
 func NewRangeWithFormat(start Time, end Time, format RangeFormat) (Range, error) {
@@ -58,10 +71,7 @@ func NewRangeWithFormat(start Time, end Time, format RangeFormat) (Range, error)
 }
 
 func NewOpenRange(start Time) OpenRange {
-	return NewOpenRangeWithFormat(start, OpenRangeFormat{
-		UseSpacesAroundDash:        true,
-		AdditionalPlaceholderChars: 0,
-	})
+	return NewOpenRangeWithFormat(start, DefaultOpenRangeFormat())
 }
 
 func NewOpenRangeWithFormat(start Time, format OpenRangeFormat) OpenRange {
