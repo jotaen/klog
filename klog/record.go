@@ -35,9 +35,9 @@ type Record interface {
 	// OpenRange returns the open time range, or `nil` if there is none.
 	OpenRange() OpenRange
 
-	// StartOpenRange starts a new open time range. It returns an error if
-	// there is already an open time range present. (There can only be one.)
-	StartOpenRange(Time, EntrySummary) error
+	// Start starts a new open time range. It returns an error if there is
+	// already an open time range present. (There can only be one per record.)
+	Start(OpenRange, EntrySummary) error
 
 	// EndOpenRange ends the open time range. It returns an error if there is
 	// no open time range present, or if start and end time cannot be converted
@@ -107,11 +107,11 @@ func (r *record) OpenRange() OpenRange {
 	return nil
 }
 
-func (r *record) StartOpenRange(t Time, s EntrySummary) error {
+func (r *record) Start(or OpenRange, s EntrySummary) error {
 	if r.OpenRange() != nil {
 		return errors.New("DUPLICATE_OPEN_RANGE")
 	}
-	r.entries = append(r.entries, NewEntryFromOpenRange(NewOpenRange(t), s))
+	r.entries = append(r.entries, NewEntryFromOpenRange(or, s))
 	return nil
 }
 

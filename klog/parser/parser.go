@@ -175,9 +175,11 @@ func parse(block txt.Block) (ParsedRecord, []txt.Error) {
 
 			entryStartPositionEnds := entry.PointerPosition
 			entry.SkipWhile(txt.Is(' '))
+			hasRangeSpacesAroundDash := true
 			if entryStartPositionEnds != entry.PointerPosition {
 				style.SpacingInRange.Set(strings.Repeat(" ", entry.PointerPosition-entryStartPositionEnds))
 			} else {
+				hasRangeSpacesAroundDash = false
 				style.SpacingInRange.Set("")
 			}
 
@@ -190,17 +192,21 @@ func parse(block txt.Block) (ParsedRecord, []txt.Error) {
 			// Check whether the range is open-ended.
 			if entry.Peek() == '?' {
 				entry.Advance(1)
-				placeholder, _ := entry.PeekUntil(txt.IsSpaceOrTab)
+				placeholderRepetition, _ := entry.PeekUntil(txt.IsSpaceOrTab)
 
 				// The placeholder can appear multiple times.
-				for _, p := range placeholder.Chars {
+				for _, p := range placeholderRepetition.Chars {
 					if p != '?' {
-						return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, placeholder.Length())
+						return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, placeholderRepetition.Length())
 					}
 				}
-				entry.Advance(placeholder.Length())
+				entry.Advance(placeholderRepetition.Length())
 				return func(s klog.EntrySummary) txt.Error {
-					sErr := record.StartOpenRange(start, s)
+					or := klog.NewOpenRangeWithFormat(start, klog.OpenRangeFormat{
+						UseSpacesAroundDash:        hasRangeSpacesAroundDash,
+						AdditionalPlaceholderChars: placeholderRepetition.Length(),
+					})
+					sErr := record.Start(or, s)
 					if sErr != nil {
 						return ErrorDuplicateOpenRange().New(entry.Line, entryStartPosition, entry.PointerPosition-entryStartPosition)
 					}
@@ -218,7 +224,7 @@ func parse(block txt.Block) (ParsedRecord, []txt.Error) {
 				return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, endCandidate.Length())
 			}
 			entry.Advance(endCandidate.Length())
-			timeRange, rErr := klog.NewRange(start, end)
+			timeRange, rErr := klog.NewRangeWithFormat(start, end, klog.RangeFormat{UseSpacesAroundDash: hasRangeSpacesAroundDash})
 			if rErr != nil {
 				return nil, ErrorIllegalRange().New(entry.Line, entryStartPosition, entry.PointerPosition-entryStartPosition)
 			}

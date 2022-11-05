@@ -52,7 +52,7 @@ func TestSerialiseFullBlownRecord(t *testing.T) {
 		r.SetShouldTotal(klog.NewDuration(7, 30))
 		r.AddDuration(klog.NewDuration(2, 3), klog.Ɀ_EntrySummary_("#some #thing"))
 		r.AddRange(klog.Ɀ_Range_(klog.Ɀ_TimeYesterday_(23, 44), klog.Ɀ_Time_(5, 23)), nil)
-		r.StartOpenRange(klog.Ɀ_TimeTomorrow_(0, 28), klog.Ɀ_EntrySummary_("Started #todo", "still on it"))
+		r.Start(klog.NewOpenRange(klog.Ɀ_TimeTomorrow_(0, 28)), klog.Ɀ_EntrySummary_("Started #todo", "still on it"))
 		return []klog.Record{r}
 	}(), nil, false)
 	assert.Equal(t, `{"records":[{`+

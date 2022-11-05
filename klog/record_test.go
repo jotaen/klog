@@ -58,7 +58,7 @@ func TestStartOpenRange(t *testing.T) {
 	time := Ɀ_Time_(11, 23)
 	w := NewRecord(Ɀ_Date_(2020, 1, 1))
 	assert.Equal(t, nil, w.OpenRange())
-	_ = w.StartOpenRange(time, Ɀ_EntrySummary_("Open Range"))
+	_ = w.Start(NewOpenRange(time), Ɀ_EntrySummary_("Open Range"))
 	require.Len(t, w.Entries(), 1)
 	assert.Equal(t, NewOpenRange(time), w.Entries()[0].value)
 	assert.Equal(t, Ɀ_EntrySummary_("Open Range"), w.Entries()[0].Summary())
@@ -68,15 +68,15 @@ func TestCannotStartSecondOpenRange(t *testing.T) {
 	time := Ɀ_Time_(11, 23)
 	w := NewRecord(Ɀ_Date_(2020, 1, 1))
 	assert.Equal(t, nil, w.OpenRange())
-	_ = w.StartOpenRange(time, Ɀ_EntrySummary_("Open Range"))
-	err := w.StartOpenRange(time, Ɀ_EntrySummary_("Open Range"))
+	_ = w.Start(NewOpenRange(time), Ɀ_EntrySummary_("Open Range"))
+	err := w.Start(NewOpenRange(time), Ɀ_EntrySummary_("Open Range"))
 	require.Error(t, err)
 }
 
 func TestCloseOpenRange(t *testing.T) {
 	start := Ɀ_Time_(19, 22)
 	w := NewRecord(Ɀ_Date_(2012, 6, 17))
-	_ = w.StartOpenRange(start, Ɀ_EntrySummary_("Started"))
+	_ = w.Start(NewOpenRange(start), Ɀ_EntrySummary_("Started"))
 	end := Ɀ_Time_(20, 55)
 	err := w.EndOpenRange(end)
 	require.Nil(t, err)
@@ -89,7 +89,7 @@ func TestCloseOpenRange(t *testing.T) {
 func TestCloseOpenRangeFailsIfResultingRangeIsInvalid(t *testing.T) {
 	start := Ɀ_Time_(19, 22)
 	w := NewRecord(Ɀ_Date_(2012, 6, 17))
-	_ = w.StartOpenRange(start, Ɀ_EntrySummary_("Started"))
+	_ = w.Start(NewOpenRange(start), Ɀ_EntrySummary_("Started"))
 	oldEntry := w.OpenRange()
 	end := Ɀ_Time_(1, 30)
 	err := w.EndOpenRange(end)

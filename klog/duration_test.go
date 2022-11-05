@@ -83,7 +83,8 @@ func TestParsingNegativeDuration(t *testing.T) {
 func TestParsingExplicitlyPositiveDuration(t *testing.T) {
 	duration, err := NewDurationFromString("+2h5m")
 	assert.Nil(t, err)
-	assert.Equal(t, NewDuration(2, 5), duration)
+	assert.Equal(t, NewDurationWithFormat(2, 5, DurationFormat{ForceSign: true}), duration)
+	assert.Equal(t, "+2h5m", duration.ToString())
 }
 
 func TestParsingWithLeadingZeros(t *testing.T) {

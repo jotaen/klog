@@ -89,7 +89,7 @@ func TestDecodesTime(t *testing.T) {
 		[]string{"total", "test.klg"},
 	)
 	assert.True(t, strings.Contains(out[0], "`1:0` is not a valid time"), out)
-	assert.True(t, strings.Contains(out[1], "9:00 - 10:00"), out)
+	assert.True(t, strings.Contains(out[1], "9:00-10:00"), out)
 	assert.True(t, strings.Contains(out[2], "1h"), out)
 }
 

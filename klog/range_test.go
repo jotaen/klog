@@ -17,6 +17,13 @@ func TestCreateRange(t *testing.T) {
 	assert.Equal(t, time2, tr.End())
 }
 
+func TestCreateOpenRange(t *testing.T) {
+	time1, _ := NewTime(11, 25)
+	or := NewOpenRange(time1)
+	require.NotNil(t, or)
+	assert.Equal(t, time1, or.Start())
+}
+
 func TestCreateVoidRange(t *testing.T) {
 	time1, _ := NewTime(12, 00)
 	time2, _ := NewTime(12, 00)
@@ -72,4 +79,27 @@ func TestCreationFailsIfStartIsBeforeEnd(t *testing.T) {
 		assert.Nil(t, tr)
 		assert.EqualError(t, err, "ILLEGAL_RANGE")
 	}
+}
+
+func TestDefaultFormatting(t *testing.T) {
+	time1, _ := NewTime(11, 25)
+	time2, _ := NewTime(17, 10)
+	tr, _ := NewRange(time1, time2)
+	assert.Equal(t, "11:25 - 17:10", tr.ToString())
+
+	or := NewOpenRange(time1)
+	assert.Equal(t, "11:25 - ?", or.ToString())
+}
+
+func TestCustomFormatting(t *testing.T) {
+	time1, _ := NewTime(11, 25)
+	time2, _ := NewTime(17, 10)
+	tr, _ := NewRangeWithFormat(time1, time2, RangeFormat{UseSpacesAroundDash: false})
+	assert.Equal(t, "11:25-17:10", tr.ToString())
+
+	or := NewOpenRangeWithFormat(time1, OpenRangeFormat{
+		UseSpacesAroundDash:        false,
+		AdditionalPlaceholderChars: 4,
+	})
+	assert.Equal(t, "11:25-?????", or.ToString())
 }

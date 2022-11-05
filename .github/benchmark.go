@@ -87,7 +87,7 @@ func re() func(r *klog.Record) bool {
 			return true
 		},
 		func(r *klog.Record) bool {
-			err := (*r).StartOpenRange(klog.Ɀ_Time_(ri(0, 23), ri(0, 59)), entrySummary)
+			err := (*r).Start(klog.NewOpenRange(klog.Ɀ_Time_(ri(0, 23), ri(0, 59))), entrySummary)
 			return err == nil
 		},
 	}

@@ -30,7 +30,7 @@ func TestSerialiseRecordWithCompleteRecord(t *testing.T) {
 	r.AddRange(klog.Ɀ_Range_(klog.Ɀ_Time_(8, 00), klog.Ɀ_Time_(12, 15)), klog.Ɀ_EntrySummary_("Foo"))
 	r.AddDuration(klog.NewDuration(2, 15), klog.Ɀ_EntrySummary_("Bar", "asdf"))
 	r.AddDuration(klog.NewDuration(0, 0), klog.Ɀ_EntrySummary_("", "Summary text...", "...more text...", "    ....preceding whitespace is ok"))
-	_ = r.StartOpenRange(klog.Ɀ_Time_(14, 38), klog.Ɀ_EntrySummary_("Baz"))
+	_ = r.Start(klog.NewOpenRange(klog.Ɀ_Time_(14, 38)), klog.Ɀ_EntrySummary_("Baz"))
 	r.AddDuration(klog.NewDuration(-1, -51), nil)
 	r.AddRange(klog.Ɀ_Range_(klog.Ɀ_TimeYesterday_(23, 23), klog.Ɀ_Time_(4, 3)), nil)
 	r.AddRange(klog.Ɀ_Range_(klog.Ɀ_Time_(22, 0), klog.Ɀ_TimeTomorrow_(0, 1)), nil)

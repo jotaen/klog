@@ -38,6 +38,16 @@ func Ɀ_EntrySummary_(line ...string) EntrySummary {
 }
 
 // Deprecated
+func Ɀ_ForceSign_(d Duration) Duration {
+	do, canCast := d.(*duration)
+	if !canCast {
+		panic("Operation failed!")
+	}
+	do.format.ForceSign = true
+	return do
+}
+
+// Deprecated
 func Ɀ_Time_(hour int, minute int) Time {
 	time, err := NewTime(hour, minute)
 	if err != nil {
@@ -81,4 +91,34 @@ func Ɀ_Range_(start Time, end Time) Range {
 		panic("Operation failed!")
 	}
 	return r
+}
+
+// Deprecated
+func Ɀ_NoSpaces_(r Range) Range {
+	tr, canCast := r.(*timeRange)
+	if !canCast {
+		panic("Operation failed!")
+	}
+	tr.format.UseSpacesAroundDash = false
+	return tr
+}
+
+// Deprecated
+func Ɀ_NoSpacesO_(r OpenRange) OpenRange {
+	or, canCast := r.(*openRange)
+	if !canCast {
+		panic("Operation failed!")
+	}
+	or.format.UseSpacesAroundDash = false
+	return or
+}
+
+// Deprecated
+func Ɀ_QuestionMarks_(r OpenRange, additionalQuestionMarks int) OpenRange {
+	or, canCast := r.(*openRange)
+	if !canCast {
+		panic("Operation failed!")
+	}
+	or.format.AdditionalPlaceholderChars = additionalQuestionMarks
+	return or
 }

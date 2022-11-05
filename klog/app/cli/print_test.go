@@ -51,7 +51,7 @@ Hello #world
 	assert.Equal(t, `
 2018-01-31
 Hello #world
-    9:00 - 13:00
+    9:00-13:00
     22:00 - 0:00>
     1h
     2h

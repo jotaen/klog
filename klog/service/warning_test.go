@@ -26,7 +26,7 @@ func TestNoWarnForOpenRanges(t *testing.T) {
 		func() klog.Record {
 			// This open range is okay, because there is no record at today’s date
 			r := klog.NewRecord(today.PlusDays(-1))
-			r.StartOpenRange(now, nil)
+			r.Start(klog.NewOpenRange(now), nil)
 			return r
 		}(), func() klog.Record {
 			r := klog.NewRecord(today.PlusDays(2))
@@ -39,7 +39,7 @@ func TestNoWarnForOpenRanges(t *testing.T) {
 	rs2 := []klog.Record{
 		func() klog.Record {
 			r := klog.NewRecord(today)
-			r.StartOpenRange(now, nil)
+			r.Start(klog.NewOpenRange(now), nil)
 			return r
 		}(),
 	}
@@ -56,7 +56,7 @@ func TestOpenRangeWarningWhenUnclosedOpenRangeBeforeTodayRegardlessOfOrder(t *te
 		func() klog.Record {
 			// NOT OK: There is a record at today’s date
 			r := klog.NewRecord(today.PlusDays(-1))
-			r.StartOpenRange(now, nil)
+			r.Start(klog.NewOpenRange(now), nil)
 			return r
 		}(), func() klog.Record {
 			r := klog.NewRecord(today)
@@ -64,7 +64,7 @@ func TestOpenRangeWarningWhenUnclosedOpenRangeBeforeTodayRegardlessOfOrder(t *te
 		}(), func() klog.Record {
 			// NOT OK: There is a record at today’s date
 			r := klog.NewRecord(today.PlusDays(-2))
-			r.StartOpenRange(now, nil)
+			r.Start(klog.NewOpenRange(now), nil)
 			return r
 		}(),
 	}
@@ -147,7 +147,7 @@ func TestFutureEntriesWarning(t *testing.T) {
 		}(),
 		func() klog.Record {
 			r := klog.NewRecord(today)
-			r.StartOpenRange(klog.Ɀ_Time_(12, 31), nil)
+			r.Start(klog.NewOpenRange(klog.Ɀ_Time_(12, 31)), nil)
 			return r
 		}(),
 	}
@@ -216,7 +216,7 @@ func TestOverlappingTimeRanges(t *testing.T) {
 			// Overlap with started time
 			r := klog.NewRecord(today)
 			r.AddRange(klog.Ɀ_Range_(klog.Ɀ_Time_(1, 30), klog.Ɀ_Time_(5, 45)), nil)
-			r.StartOpenRange(klog.Ɀ_Time_(3, 0), nil)
+			r.Start(klog.NewOpenRange(klog.Ɀ_Time_(3, 0)), nil)
 			return r
 		}(), func() klog.Record {
 			// Overlap with sorted entries

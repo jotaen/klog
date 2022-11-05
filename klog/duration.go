@@ -29,11 +29,22 @@ type Duration interface {
 	ToStringWithSign() string
 }
 
-func NewDuration(amountHours int, amountMinutes int) Duration {
-	return duration(amountHours*60) + duration(amountMinutes)
+type DurationFormat struct {
+	ForceSign bool
 }
 
-type duration int
+func NewDuration(amountHours int, amountMinutes int) Duration {
+	return NewDurationWithFormat(amountHours, amountMinutes, DurationFormat{ForceSign: false})
+}
+
+func NewDurationWithFormat(amountHours int, amountMinutes int, format DurationFormat) Duration {
+	return &duration{minutes: amountHours*60 + amountMinutes, format: format}
+}
+
+type duration struct {
+	minutes int
+	format  DurationFormat
+}
 
 func abs(x int) int {
 	if x < 0 {
@@ -43,7 +54,7 @@ func abs(x int) int {
 }
 
 func (d duration) InMinutes() int {
-	return int(d)
+	return d.minutes
 }
 
 func (d duration) Plus(additional Duration) Duration {
@@ -55,14 +66,16 @@ func (d duration) Minus(deductible Duration) Duration {
 }
 
 func (d duration) ToString() string {
-	if d == 0 {
+	if d.minutes == 0 {
 		return "0m"
 	}
-	hours := abs(int(d) / 60)
-	minutes := abs(int(d) % 60)
+	hours := abs(d.minutes / 60)
+	minutes := abs(d.minutes % 60)
 	result := ""
-	if int(d) < 0 {
+	if d.minutes < 0 {
 		result += "-"
+	} else if d.format.ForceSign {
+		result += "+"
 	}
 	if hours > 0 {
 		result += fmt.Sprintf("%dh", hours)
@@ -75,7 +88,7 @@ func (d duration) ToString() string {
 
 func (d duration) ToStringWithSign() string {
 	s := d.ToString()
-	if d > 0 {
+	if d.minutes > 0 {
 		return "+" + s
 	}
 	return s
@@ -92,6 +105,10 @@ func NewDurationFromString(hhmm string) (Duration, error) {
 	if match[1] == "-" {
 		sign = -1
 	}
+	format := DurationFormat{ForceSign: false}
+	if match[1] == "+" {
+		format.ForceSign = true
+	}
 	if match[3] == "" && match[5] == "" {
 		return nil, errors.New("MALFORMED_DURATION")
 	}
@@ -100,5 +117,5 @@ func NewDurationFromString(hhmm string) (Duration, error) {
 	if amountOfHours != 0 && amountOfMinutes >= 60 {
 		return nil, errors.New("UNREPRESENTABLE_DURATION")
 	}
-	return NewDuration(sign*amountOfHours, sign*amountOfMinutes), nil
+	return NewDurationWithFormat(sign*amountOfHours, sign*amountOfMinutes, format), nil
 }

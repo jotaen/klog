@@ -22,7 +22,7 @@ func TestReturnsRecordsWithClosedOpenRange(t *testing.T) {
 	r := klog.NewRecord(klog.Ɀ_Date_(2020, 1, 1))
 	r.AddDuration(klog.NewDuration(1, 0), nil)
 	r.AddRange(klog.Ɀ_Range_(klog.Ɀ_Time_(1, 0), klog.Ɀ_Time_(2, 0)), nil)
-	r.StartOpenRange(klog.Ɀ_Time_(3, 0), nil)
+	r.Start(klog.NewOpenRange(klog.Ɀ_Time_(3, 0)), nil)
 
 	endTime, _ := gotime.Parse("2006-01-02T15:04:05-0700", "2020-01-01T05:30:00-0000")
 	result, err := CloseOpenRanges(endTime, r)
@@ -34,7 +34,7 @@ func TestReturnsRecordsWithClosedOpenRangeAndShiftedTime(t *testing.T) {
 	r := klog.NewRecord(klog.Ɀ_Date_(2020, 1, 1))
 	r.AddDuration(klog.NewDuration(1, 0), nil)
 	r.AddRange(klog.Ɀ_Range_(klog.Ɀ_Time_(1, 0), klog.Ɀ_Time_(2, 0)), nil)
-	r.StartOpenRange(klog.Ɀ_Time_(3, 0), nil)
+	r.Start(klog.NewOpenRange(klog.Ɀ_Time_(3, 0)), nil)
 
 	endTime, _ := gotime.Parse("2006-01-02T15:04:05-0700", "2020-01-02T05:30:00-0000")
 	result, err := CloseOpenRanges(endTime, r)
@@ -46,7 +46,7 @@ func TestReturnsErrorIfOpenRangeCannotBeClosedAnymore(t *testing.T) {
 	r := klog.NewRecord(klog.Ɀ_Date_(2020, 1, 1))
 	r.AddDuration(klog.NewDuration(1, 0), nil)
 	r.AddRange(klog.Ɀ_Range_(klog.Ɀ_Time_(1, 0), klog.Ɀ_Time_(2, 0)), nil)
-	r.StartOpenRange(klog.Ɀ_Time_(3, 0), nil)
+	r.Start(klog.NewOpenRange(klog.Ɀ_Time_(3, 0)), nil)
 
 	endTime, _ := gotime.Parse("2006-01-02T15:04:05-0700", "2020-01-03T05:30:00-0000")
 	result, err := CloseOpenRanges(endTime, r)
@@ -58,7 +58,7 @@ func TestReturnsErrorIfOpenRangeCannotBeClosedYet(t *testing.T) {
 	r := klog.NewRecord(klog.Ɀ_Date_(2020, 1, 1))
 	r.AddDuration(klog.NewDuration(1, 0), nil)
 	r.AddRange(klog.Ɀ_Range_(klog.Ɀ_Time_(1, 0), klog.Ɀ_Time_(2, 0)), nil)
-	r.StartOpenRange(klog.Ɀ_Time_(3, 0), nil)
+	r.Start(klog.NewOpenRange(klog.Ɀ_Time_(3, 0)), nil)
 
 	endTime, _ := gotime.Parse("2006-01-02T15:04:05-0700", "2020-01-01T01:30:00-0000")
 	result, err := CloseOpenRanges(endTime, r)

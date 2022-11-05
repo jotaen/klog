@@ -4,6 +4,8 @@ import (
 	"sync"
 )
 
+// TODO Once done, re-activate in `parser_test.go`
+
 type ParallelBatchParser[Txt any, Int any, Out any, Err any] struct {
 	SerialParser    SerialParser[Txt, Int, Out, Err]
 	NumberOfWorkers int
