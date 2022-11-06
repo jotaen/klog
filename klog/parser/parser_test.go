@@ -12,6 +12,9 @@ var parsers = []Parser{
 	NewParallelParser(1),
 	NewParallelParser(2),
 	NewParallelParser(4),
+	NewParallelParser(8),
+	NewParallelParser(15),
+	NewParallelParser(50),
 }
 
 func TestParseMinimalDocument(t *testing.T) {
@@ -113,6 +116,30 @@ func TestParseEmptyOrBlankDocument(t *testing.T) {
 
 func TestParseWindowsAndUnixLineEndings(t *testing.T) {
 	text := "2000-01-01\r\n\r\n2000-01-02\n\n2000-01-03"
+	for _, p := range parsers {
+		rs, _, errs := p.Parse(text)
+		require.Nil(t, errs)
+		require.Len(t, rs, 3)
+	}
+}
+
+func TestParseUtf8Document(t *testing.T) {
+	text := `
+2018-01-04
+	1h Домашня робота 🏡...
+	2h Сьогодні я дзвонив
+		Дімі і складав плани
+
+2018-01-05
+मुख्य रूपमा काम
+	10:00-12:30 बगैचा खन्नुहोस्
+	13:00-15:00 कर घोषणा
+
+2018-01-06
+	3h sázet květiny
+	14:00-? jít na procházku, vynést
+		odpadky, přines noviny
+`
 	for _, p := range parsers {
 		rs, _, errs := p.Parse(text)
 		require.Nil(t, errs)

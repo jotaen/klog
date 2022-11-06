@@ -1,11 +1,36 @@
 package engine
 
 import (
+	"github.com/jotaen/klog/klog/parser/txt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestSplitIntoChunks(t *testing.T) {
+var identityParser = ParallelBatchParser[string]{
+	SerialParser: SerialParser[string]{
+		ParseOne: func(b txt.Block) (string, []txt.Error) {
+			original := ""
+			for _, l := range b.Lines() {
+				original += l.Original()
+			}
+			return original, nil
+		},
+	},
+	NumberOfWorkers: 100,
+}
+
+func TestParallelParserDoesNotMessUpBatchOrder(t *testing.T) {
+	// The mock parser has 100 workers, so the batch size will be 1 char per worker.
+	// The serial parser is basically an identity function, so it returns the input
+	// text of the block, i.e. that one char per worker. The parallel parser is now
+	// expected to re-construct the original order of the input after batching.
+	// If it wouldn’t do that, the return text would be messed up, e.g. `7369285014`
+	// instead of `1234567890`.
+	val, _, _ := identityParser.Parse("1234567890")
+	assert.Equal(t, []string{"1234567890"}, val)
+}
+
+func TestParallelParser(t *testing.T) {
 	for _, x := range []struct {
 		txt    string
 		chunks int
@@ -31,5 +56,9 @@ func TestSplitIntoChunks(t *testing.T) {
 	} {
 		chunks := splitIntoChunks(x.txt, x.chunks)
 		assert.Equal(t, x.exp, chunks)
+
+		val, _, errs := identityParser.Parse(x.txt)
+		assert.Nil(t, errs)
+		assert.Equal(t, []string{x.txt}, val)
 	}
 }

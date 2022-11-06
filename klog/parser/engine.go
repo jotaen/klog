@@ -17,12 +17,9 @@ func NewSerialParser() Parser {
 }
 
 func NewParallelParser(numberOfWorkers int) Parser {
-	if numberOfWorkers <= 0 {
-		panic("ILLEGAL_WORKER_SIZE")
-	}
 	return engine.ParallelBatchParser[klog.Record]{
-		NumberOfWorkers: numberOfWorkers,
 		SerialParser:    serialParser,
+		NumberOfWorkers: numberOfWorkers,
 	}
 }
 

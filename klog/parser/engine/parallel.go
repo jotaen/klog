@@ -8,8 +8,8 @@ import (
 )
 
 type ParallelBatchParser[T any] struct {
+	SerialParser[T]
 	NumberOfWorkers int
-	SerialParser    SerialParser[T]
 }
 
 type batchResult[T any] struct {
@@ -22,54 +22,36 @@ type batchResult[T any] struct {
 }
 
 func (p ParallelBatchParser[T]) Parse(text string) ([]T, []txt.Block, []txt.Error) {
-	// Batch up and dispatch to workers.
+	if p.NumberOfWorkers <= 0 {
+		panic("ILLEGAL_WORKER_SIZE")
+	}
 	batches := splitIntoChunks(text, p.NumberOfWorkers)
-	wg := &sync.WaitGroup{}
-	wg.Add(len(batches))
-	resultChannel := make(chan batchResult[T])
-	for i, b := range batches {
-		go func(batchIndex int, batchText string) {
-			defer wg.Done()
-			result := batchResult[T]{batchIndex, "", nil, "", nil, nil}
+	allResults := p.processAsync(batches, func(batchIndex int, batchText string) batchResult[T] {
+		result := batchResult[T]{batchIndex, "", nil, "", nil, nil}
 
-			if len(batchText) == 0 {
-				resultChannel <- result
-				return
-			}
+		if len(batchText) == 0 {
+			return result
+		}
 
-			_, headBytesConsumed := txt.ParseBlock(batchText, 1)
-			result.headText = batchText[:headBytesConsumed]
-			if len(batchText) == headBytesConsumed { // The entire batchText was a single block
-				resultChannel <- result
-				return
-			}
+		_, headBytesConsumed := txt.ParseBlock(batchText, 1)
+		result.headText = batchText[:headBytesConsumed]
+		if len(batchText) == headBytesConsumed { // The entire batchText was a single block
+			return result
+		}
 
-			batchText = batchText[headBytesConsumed:]
-			values, blocks, bytesConsumed, errs, _ := p.SerialParser.parse(batchText)
-			if len(blocks) == 0 { // The remainder was empty or all blank
-				result.tailText = batchText
-			} else { // The remainder was more than one block
-				result.values = values[:len(values)-1]
-				result.blocks = blocks[:len(blocks)-1]
-				result.errs = errs[:len(errs)-1]
-				result.tailText = batchText[bytesConsumed-countBytes(blocks[len(blocks)-1]):]
-			}
+		batchText = batchText[headBytesConsumed:]
+		values, blocks, bytesConsumed, errs, _ := p.SerialParser.parse(batchText)
+		if len(blocks) == 0 { // The remainder was empty or all blank
+			result.tailText = batchText
+		} else { // The remainder was more than one block
+			result.values = values[:len(values)-1]
+			result.blocks = blocks[:len(blocks)-1]
+			result.errs = errs[:len(errs)-1]
+			result.tailText = batchText[bytesConsumed-countBytes(blocks[len(blocks)-1]):]
+		}
 
-			resultChannel <- result
-		}(i, b)
-	}
-
-	// Wait for workers to finish.
-	go func() {
-		wg.Wait()
-		close(resultChannel)
-	}()
-
-	// Collect results.
-	allResults := make([]batchResult[T], len(batches))
-	for result := range resultChannel {
-		allResults[result.index] = result
-	}
+		return result
+	})
 
 	// Process remainders and flatten results.
 	var allValues []T
@@ -107,6 +89,33 @@ func (p ParallelBatchParser[T]) Parse(text string) ([]T, []txt.Block, []txt.Erro
 		return nil, nil, allErrs
 	}
 	return allValues, allBlocks, nil
+}
+
+func (p ParallelBatchParser[T]) processAsync(batches []string, work func(int, string) batchResult[T]) []batchResult[T] {
+	wg := &sync.WaitGroup{}
+	wg.Add(len(batches))
+	resultChannel := make(chan batchResult[T])
+	for i, b := range batches {
+		go func(batchIndex int, batchText string) {
+			defer wg.Done()
+			result := work(batchIndex, batchText)
+			resultChannel <- result
+		}(i, b)
+	}
+
+	// Wait for workers to finish.
+	go func() {
+		wg.Wait()
+		close(resultChannel)
+	}()
+
+	// Collect results.
+	allResults := make([]batchResult[T], len(batches))
+	for result := range resultChannel {
+		allResults[result.index] = result
+	}
+
+	return allResults
 }
 
 // splitIntoChunks divides a string into n substrings of roughly equal byte-size

@@ -1,5 +1,7 @@
 package txt
 
+import "unicode/utf8"
+
 // Block is multiple consecutive lines with text, with no blank lines
 // in between, but possibly one or more blank lines before or after.
 // It’s basically like a paragraph of text, with surrounding whitespace.
@@ -40,11 +42,12 @@ func ParseBlock(text string, precedingLineCount int) (Block, int) {
 	bytesConsumed := 0
 	currentLineStart := 0
 	currentMode := MODE_PRECEDING_BLANK_LINES
+	_, lastRuneSize := utf8.DecodeLastRuneInString(text)
 
 	// Parse text line-wise.
 parsingLoop:
 	for i, char := range text { // Note: char is a UTF-8 rune
-		if char != '\n' && i+1 != len(text) {
+		if char != '\n' && i+lastRuneSize != len(text) {
 			continue
 		}
 
@@ -71,7 +74,6 @@ parsingLoop:
 		bytesConsumed += len(currentLine)
 		currentLineStart = nextChar
 	}
-
 	hasSignificantLines := currentMode != MODE_PRECEDING_BLANK_LINES
 	if !hasSignificantLines {
 		return nil, bytesConsumed
