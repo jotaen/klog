@@ -27,14 +27,14 @@ type checker interface {
 	Message() string
 }
 
-// CheckForWarnings checks records for potential user errors. It’s not meant as strict validation,
-// but the main purpose is to help users spot accidental mistakes they might have made.
-// The checks are mostly limited to record-level, because otherwise it would need to make
-// assumptions on how records are organised within or across files.
-func CheckForWarnings(reference gotime.Time, rs []klog.Record) []Warning {
+// CheckForWarnings checks records for potential logical issues in the data. For every
+// issue encountered, it invokes the `onWarn` callback. Note: Warnings are not meant as
+// strict validation, but the main purpose is to help users spot accidental mistakes users
+// might have made. The checks are limited to record-level, because otherwise it would
+// need to make assumptions on how records are organised within or across files.
+func CheckForWarnings(onWarn func(Warning), reference gotime.Time, rs []klog.Record) {
 	now := NewDateTimeFromGo(reference)
 	sortedRs := Sort(rs, false)
-	var ws []Warning
 	checkers := []checker{
 		&unclosedOpenRangeChecker{today: now.Date},
 		&futureEntriesChecker{now: now, gracePeriod: klog.NewDuration(0, 31)},
@@ -45,14 +45,13 @@ func CheckForWarnings(reference gotime.Time, rs []klog.Record) []Warning {
 		for _, c := range checkers {
 			d := c.Warn(r)
 			if d != nil {
-				ws = append(ws, Warning{
+				onWarn(Warning{
 					date:   d,
 					origin: c,
 				})
 			}
 		}
 	}
-	return ws
 }
 
 type unclosedOpenRangeChecker struct {

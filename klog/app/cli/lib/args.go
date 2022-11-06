@@ -196,8 +196,9 @@ func (args *WarnArgs) PrintWarnings(ctx app.Context, records []klog.Record) {
 	if args.NoWarn {
 		return
 	}
-	ws := service.CheckForWarnings(ctx.Now(), records)
-	ctx.Print(PrettifyWarnings(ws))
+	service.CheckForWarnings(func(w service.Warning) {
+		ctx.Print(PrettifyWarning(w))
+	}, ctx.Now(), records)
 }
 
 type NoStyleArgs struct {

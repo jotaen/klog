@@ -17,6 +17,7 @@ for size in "${samples[@]}"; do
     file="$(mktemp)"
     go run benchmark.go "${size}" > "${file}"
 
+    # Disable warnings, as the generated data will trigger lots of them.
     runtime=$( { time klog total --no-warn "${file}" > /dev/null; } 2>&1 )
     printf "%ss  " $runtime
   done

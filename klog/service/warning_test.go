@@ -7,7 +7,7 @@ import (
 	gotime "time"
 )
 
-func CountWarningsOfKind(c checker, ws []Warning) int {
+func countWarningsOfKind(c checker, ws []Warning) int {
 	count := 0
 	for _, w := range ws {
 		if w.Warning() == c.Message() {
@@ -15,6 +15,14 @@ func CountWarningsOfKind(c checker, ws []Warning) int {
 		}
 	}
 	return count
+}
+
+func checkForWarningsWithCollect(reference gotime.Time, rs []klog.Record) []Warning {
+	var ws []Warning
+	CheckForWarnings(func(w Warning) {
+		ws = append(ws, w)
+	}, reference, rs)
+	return ws
 }
 
 func TestNoWarnForOpenRanges(t *testing.T) {
@@ -33,8 +41,8 @@ func TestNoWarnForOpenRanges(t *testing.T) {
 			return r
 		}(),
 	}
-	ws1 := CheckForWarnings(timestamp, rs1)
-	assert.Equal(t, 0, CountWarningsOfKind(&unclosedOpenRangeChecker{}, ws1))
+	ws1 := checkForWarningsWithCollect(timestamp, rs1)
+	assert.Equal(t, 0, countWarningsOfKind(&unclosedOpenRangeChecker{}, ws1))
 
 	rs2 := []klog.Record{
 		func() klog.Record {
@@ -43,8 +51,8 @@ func TestNoWarnForOpenRanges(t *testing.T) {
 			return r
 		}(),
 	}
-	ws2 := CheckForWarnings(timestamp, rs2)
-	assert.Equal(t, 0, CountWarningsOfKind(&unclosedOpenRangeChecker{}, ws2))
+	ws2 := checkForWarningsWithCollect(timestamp, rs2)
+	assert.Equal(t, 0, countWarningsOfKind(&unclosedOpenRangeChecker{}, ws2))
 }
 
 func TestOpenRangeWarningWhenUnclosedOpenRangeBeforeTodayRegardlessOfOrder(t *testing.T) {
@@ -68,8 +76,8 @@ func TestOpenRangeWarningWhenUnclosedOpenRangeBeforeTodayRegardlessOfOrder(t *te
 			return r
 		}(),
 	}
-	ws := CheckForWarnings(timestamp, rs)
-	assert.Equal(t, 2, CountWarningsOfKind(&unclosedOpenRangeChecker{}, ws))
+	ws := checkForWarningsWithCollect(timestamp, rs)
+	assert.Equal(t, 2, countWarningsOfKind(&unclosedOpenRangeChecker{}, ws))
 	assert.Equal(t, today.PlusDays(-1), ws[0].Date())
 	assert.Equal(t, today.PlusDays(-2), ws[1].Date())
 }
@@ -104,8 +112,8 @@ func TestNoWarningForFutureEntries(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := CheckForWarnings(timestamp, rs)
-	assert.Equal(t, 0, CountWarningsOfKind(&futureEntriesChecker{}, ws))
+	ws := checkForWarningsWithCollect(timestamp, rs)
+	assert.Equal(t, 0, countWarningsOfKind(&futureEntriesChecker{}, ws))
 }
 
 func TestFutureEntriesWarning(t *testing.T) {
@@ -151,8 +159,8 @@ func TestFutureEntriesWarning(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := CheckForWarnings(timestamp, rs)
-	assert.Equal(t, len(rs), CountWarningsOfKind(&futureEntriesChecker{}, ws))
+	ws := checkForWarningsWithCollect(timestamp, rs)
+	assert.Equal(t, len(rs), countWarningsOfKind(&futureEntriesChecker{}, ws))
 }
 
 func TestNoWarnForMoreThan24HoursPerRecord(t *testing.T) {
@@ -165,8 +173,8 @@ func TestNoWarnForMoreThan24HoursPerRecord(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := CheckForWarnings(timestamp, rs)
-	assert.Equal(t, 0, CountWarningsOfKind(&moreThan24HoursChecker{}, ws))
+	ws := checkForWarningsWithCollect(timestamp, rs)
+	assert.Equal(t, 0, countWarningsOfKind(&moreThan24HoursChecker{}, ws))
 }
 
 func TestMoreThan24HoursPerRecord(t *testing.T) {
@@ -184,8 +192,8 @@ func TestMoreThan24HoursPerRecord(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := CheckForWarnings(timestamp, rs)
-	assert.Equal(t, len(rs), CountWarningsOfKind(&moreThan24HoursChecker{}, ws))
+	ws := checkForWarningsWithCollect(timestamp, rs)
+	assert.Equal(t, len(rs), countWarningsOfKind(&moreThan24HoursChecker{}, ws))
 }
 
 func TestNoWarnForOverlappingTimeRanges(t *testing.T) {
@@ -204,8 +212,8 @@ func TestNoWarnForOverlappingTimeRanges(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := CheckForWarnings(timestamp, rs)
-	assert.Equal(t, 0, CountWarningsOfKind(&overlappingTimeRangesChecker{}, ws))
+	ws := checkForWarningsWithCollect(timestamp, rs)
+	assert.Equal(t, 0, countWarningsOfKind(&overlappingTimeRangesChecker{}, ws))
 }
 
 func TestOverlappingTimeRanges(t *testing.T) {
@@ -235,6 +243,6 @@ func TestOverlappingTimeRanges(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := CheckForWarnings(timestamp, rs)
-	assert.Equal(t, len(rs), CountWarningsOfKind(&overlappingTimeRangesChecker{}, ws))
+	ws := checkForWarningsWithCollect(timestamp, rs)
+	assert.Equal(t, len(rs), countWarningsOfKind(&overlappingTimeRangesChecker{}, ws))
 }
