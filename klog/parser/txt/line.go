@@ -36,6 +36,19 @@ func (l *Line) Original() string {
 	return l.Text + l.LineEnding
 }
 
+// IsBlank checks whether a line is all spaces or tabs.
+func (l *Line) IsBlank() bool {
+	if len(l.Text) == 0 {
+		return true
+	}
+	for _, c := range l.Text {
+		if c != ' ' && c != '\t' {
+			return false
+		}
+	}
+	return true
+}
+
 // Indentation returns the indentation sequence of a line that is indented at least once.
 // Note: it cannot determine the level of indentation. If the line is not indented,
 // it returns empty string.

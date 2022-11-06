@@ -7,19 +7,45 @@ type SerialParser[T any] struct {
 }
 
 func (p SerialParser[T]) Parse(text string) ([]T, []txt.Block, []txt.Error) {
-	blocks := txt.GroupIntoBlocks(text)
-	result := make([]T, len(blocks))
-	var errs []txt.Error
-	for i, in := range blocks {
-		out, err := p.ParseOne(in)
+	ts, blocks, _, errs, hasErrors := p.parse(text)
+	if hasErrors {
+		return nil, nil, flatten[txt.Error](errs)
+	}
+	return ts, blocks, nil
+}
+
+func (p SerialParser[T]) parse(text string) ([]T, []txt.Block, int, [][]txt.Error, bool) {
+	var ts []T
+	var blocks []txt.Block
+	var errs [][]txt.Error
+	totalBytesConsumed := 0
+	lineNumber := 1
+	hasErrors := false
+	for {
+		block, bytesConsumed := txt.ParseBlock(text[totalBytesConsumed:], lineNumber)
+		lineNumber += len(block)
+		if bytesConsumed == 0 || block == nil {
+			break
+		}
+		totalBytesConsumed += bytesConsumed
+		t, err := p.ParseOne(block)
+		ts = append(ts, t)
+		blocks = append(blocks, block)
+		errs = append(errs, err)
 		if err != nil {
-			errs = append(errs, err...)
+			hasErrors = true
+		}
+	}
+	return ts, blocks, totalBytesConsumed, errs, hasErrors
+}
+
+func flatten[T any](xss [][]T) []T {
+	var result []T
+	for _, xs := range xss {
+		if len(xs) == 0 {
 			continue
 		}
-		result[i] = out
+		result = append(result, xs...)
 	}
-	if errs != nil {
-		return nil, nil, errs
-	}
-	return result, blocks, errs
+	return result
 }

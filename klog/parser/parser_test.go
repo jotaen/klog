@@ -9,9 +9,9 @@ import (
 
 var parsers = []Parser{
 	NewSerialParser(),
-	//NewParallelParser(1), // TODO: re-enable
-	//NewParallelParser(2),
-	//NewParallelParser(4),
+	NewParallelParser(1),
+	NewParallelParser(2),
+	NewParallelParser(4),
 }
 
 func TestParseMinimalDocument(t *testing.T) {

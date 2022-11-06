@@ -39,14 +39,18 @@ func (p *Parseable) PeekUntil(isMatch func(rune) bool) (Parseable, bool) {
 		PointerPosition: p.PointerPosition,
 		Line:            Line{},
 	}
+	matchLength := 0
+	hasMatched := false
 	for i := p.PointerPosition; i < len(p.Chars); i++ {
-		next := SubRune(p.Chars, i, 1)
-		if isMatch(next[0]) {
-			return result, true
+		matchLength++
+		if isMatch(SubRune(p.Chars, i, 1)[0]) {
+			matchLength -= 1
+			hasMatched = true
+			break
 		}
-		result.Chars = append(result.Chars, next[0])
 	}
-	return result, false
+	result.Chars = SubRune(p.Chars, p.PointerPosition, matchLength)
+	return result, hasMatched
 }
 
 // Advance moves forward the cursor position.

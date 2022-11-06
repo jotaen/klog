@@ -16,12 +16,15 @@ func NewSerialParser() Parser {
 	return serialParser
 }
 
-//func NewParallelParser(numberOfWorkers int) Parser {
-//	return engine.ParallelBatchParser[string, txt.Block, klog.Record, txt.Error]{
-//		SerialParser:    serialParser,
-//		NumberOfWorkers: numberOfWorkers,
-//	}
-//}
+func NewParallelParser(numberOfWorkers int) Parser {
+	if numberOfWorkers <= 0 {
+		panic("ILLEGAL_WORKER_SIZE")
+	}
+	return engine.ParallelBatchParser[klog.Record]{
+		NumberOfWorkers: numberOfWorkers,
+		SerialParser:    serialParser,
+	}
+}
 
 var serialParser = engine.SerialParser[klog.Record]{
 	ParseOne: parse,

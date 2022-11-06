@@ -2,7 +2,7 @@
 
 set -e
 
-declare -a samples=(1 10 100 1000 10000)
+declare -a samples=(1 10 100 1000 10000 100000)
 ITERATIONS=3
 
 # Ensure binary is all set.
