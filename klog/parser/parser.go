@@ -9,7 +9,11 @@ import (
 )
 
 func parse(block txt.Block) (klog.Record, []txt.Error) {
-	lines := block.SignificantLines()
+	lines, initialLineOffset, _ := block.SignificantLines()
+	initialLineCount := len(lines)
+	nr := func(lines []txt.Line) int {
+		return initialLineOffset + initialLineCount - len(lines)
+	}
 	var errs []txt.Error
 
 	// ========== HEADLINE ==========
@@ -18,7 +22,7 @@ func parse(block txt.Block) (klog.Record, []txt.Error) {
 
 		// There is no leading whitespace allowed in the headline.
 		if txt.IsSpaceOrTab(headline.Peek()) {
-			errs = append(errs, ErrorIllegalIndentation().New(headline.Line, 0, headline.Length()))
+			errs = append(errs, ErrorIllegalIndentation().New(block, nr(lines), 0, headline.Length()))
 			return nil
 		}
 
@@ -26,7 +30,7 @@ func parse(block txt.Block) (klog.Record, []txt.Error) {
 		dateText, _ := headline.PeekUntil(txt.IsSpaceOrTab)
 		rDate, dErr := klog.NewDateFromString(dateText.ToString())
 		if dErr != nil {
-			errs = append(errs, ErrorInvalidDate().New(headline.Line, headline.PointerPosition, dateText.Length()))
+			errs = append(errs, ErrorInvalidDate().New(block, nr(lines), headline.PointerPosition, dateText.Length()))
 			return nil
 		}
 		headline.Advance(dateText.Length())
@@ -39,21 +43,21 @@ func parse(block txt.Block) (klog.Record, []txt.Error) {
 			headline.SkipWhile(txt.IsSpaceOrTab)
 			allPropsText, hasClosingParenthesis := headline.PeekUntil(txt.Is(')'))
 			if !hasClosingParenthesis {
-				errs = append(errs, ErrorMalformedPropertiesSyntax().New(headline.Line, headline.Length(), 1))
+				errs = append(errs, ErrorMalformedPropertiesSyntax().New(block, nr(lines), headline.Length(), 1))
 				return r
 			}
 			if allPropsText.Length() == 0 {
-				errs = append(errs, ErrorMalformedPropertiesSyntax().New(headline.Line, headline.PointerPosition, 1))
+				errs = append(errs, ErrorMalformedPropertiesSyntax().New(block, nr(lines), headline.PointerPosition, 1))
 				return r
 			}
 			shouldTotalText, hasExclamationMark := headline.PeekUntil(txt.Is('!'))
 			if !hasExclamationMark {
-				errs = append(errs, ErrorUnrecognisedProperty().New(headline.Line, headline.PointerPosition, shouldTotalText.Length()-1))
+				errs = append(errs, ErrorUnrecognisedProperty().New(block, nr(lines), headline.PointerPosition, shouldTotalText.Length()-1))
 				return r
 			}
 			shouldTotal, sErr := klog.NewDurationFromString(shouldTotalText.ToString())
 			if sErr != nil {
-				errs = append(errs, ErrorMalformedShouldTotal().New(headline.Line, headline.PointerPosition, shouldTotalText.Length()))
+				errs = append(errs, ErrorMalformedShouldTotal().New(block, nr(lines), headline.PointerPosition, shouldTotalText.Length()))
 				return r
 			}
 			r.SetShouldTotal(shouldTotal)
@@ -63,7 +67,7 @@ func parse(block txt.Block) (klog.Record, []txt.Error) {
 
 			// Make sure there is no other text between the braces.
 			if headline.Peek() != ')' {
-				errs = append(errs, ErrorUnrecognisedProperty().New(headline.Line, headline.PointerPosition, headline.RemainingLength()-1))
+				errs = append(errs, ErrorUnrecognisedProperty().New(block, nr(lines), headline.PointerPosition, headline.RemainingLength()-1))
 				return r
 			}
 			headline.Advance(1) // ')'
@@ -72,7 +76,7 @@ func parse(block txt.Block) (klog.Record, []txt.Error) {
 		// Make sure there is no other text left in the headline.
 		headline.SkipWhile(txt.IsSpaceOrTab)
 		if headline.RemainingLength() > 0 {
-			errs = append(errs, ErrorUnrecognisedTextInHeadline().New(headline.Line, headline.PointerPosition, headline.RemainingLength()))
+			errs = append(errs, ErrorUnrecognisedTextInHeadline().New(block, nr(lines), headline.PointerPosition, headline.RemainingLength()))
 		}
 		return r
 	}()
@@ -96,7 +100,7 @@ func parse(block txt.Block) (klog.Record, []txt.Error) {
 		summary := txt.NewParseable(l, 0)
 		newSummary, sErr := klog.NewRecordSummary(append(record.Summary(), summary.ToString())...)
 		if sErr != nil {
-			errs = append(errs, ErrorMalformedSummary().New(summary.Line, 0, summary.Length()))
+			errs = append(errs, ErrorMalformedSummary().New(block, nr(lines), 0, summary.Length()))
 		}
 		lines = lines[1:]
 		record.SetSummary(newSummary)
@@ -113,10 +117,9 @@ func parse(block txt.Block) (klog.Record, []txt.Error) {
 		// Check for correct indentation.
 		entry := indentator.NewIndentedParseable(l, 1)
 		if entry == nil || txt.IsSpaceOrTab(entry.Peek()) {
-			errs = append(errs, ErrorIllegalIndentation().New(l, 0, len(l.Text)))
+			errs = append(errs, ErrorIllegalIndentation().New(block, nr(lines), 0, len(l.Text)))
 			break
 		}
-		lines = lines[1:]
 
 		// Parse entry value.
 		createEntry, evErr := func() (func(klog.EntrySummary) txt.Error, txt.Error) {
@@ -136,11 +139,11 @@ func parse(block txt.Block) (klog.Record, []txt.Error) {
 			if startCandidate.Length() == 0 {
 				// Handle case where `-` appears right at the beginning of the line.
 				firstToken, _ := entry.PeekUntil(txt.IsSpaceOrTab)
-				return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, firstToken.Length())
+				return nil, ErrorMalformedEntry().New(block, nr(lines), entry.PointerPosition, firstToken.Length())
 			}
 			start, t1Err := klog.NewTimeFromString(startCandidate.ToString())
 			if t1Err != nil {
-				return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, startCandidate.Length())
+				return nil, ErrorMalformedEntry().New(block, nr(lines), entry.PointerPosition, startCandidate.Length())
 			}
 			entryStartPosition := startCandidate.PointerPosition
 			entry.Advance(startCandidate.Length())
@@ -153,7 +156,7 @@ func parse(block txt.Block) (klog.Record, []txt.Error) {
 			}
 
 			if entry.Peek() != '-' {
-				return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, 1)
+				return nil, ErrorMalformedEntry().New(block, nr(lines), entry.PointerPosition, 1)
 			}
 			entry.Advance(1) // '-'
 			entry.SkipWhile(txt.Is(' '))
@@ -166,10 +169,11 @@ func parse(block txt.Block) (klog.Record, []txt.Error) {
 				// The placeholder can appear multiple times.
 				for _, p := range placeholderRepetition.Chars {
 					if p != '?' {
-						return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, placeholderRepetition.Length())
+						return nil, ErrorMalformedEntry().New(block, nr(lines), entry.PointerPosition, placeholderRepetition.Length())
 					}
 				}
 				entry.Advance(placeholderRepetition.Length())
+				lineNr := nr(lines) // Capture state of `line` at time of function creation.
 				return func(s klog.EntrySummary) txt.Error {
 					or := klog.NewOpenRangeWithFormat(start, klog.OpenRangeFormat{
 						UseSpacesAroundDash:        hasRangeSpacesAroundDash,
@@ -177,7 +181,7 @@ func parse(block txt.Block) (klog.Record, []txt.Error) {
 					})
 					sErr := record.Start(or, s)
 					if sErr != nil {
-						return ErrorDuplicateOpenRange().New(entry.Line, entryStartPosition, entry.PointerPosition-entryStartPosition)
+						return ErrorDuplicateOpenRange().New(block, lineNr, entryStartPosition, entry.PointerPosition-entryStartPosition)
 					}
 					return nil
 				}, nil
@@ -186,22 +190,23 @@ func parse(block txt.Block) (klog.Record, []txt.Error) {
 			// Ultimately, the entry can only be a regular range.
 			endCandidate, _ := entry.PeekUntil(txt.IsSpaceOrTab)
 			if endCandidate.Length() == 0 {
-				return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, 1)
+				return nil, ErrorMalformedEntry().New(block, nr(lines), entry.PointerPosition, 1)
 			}
 			end, t2Err := klog.NewTimeFromString(endCandidate.ToString())
 			if t2Err != nil {
-				return nil, ErrorMalformedEntry().New(entry.Line, entry.PointerPosition, endCandidate.Length())
+				return nil, ErrorMalformedEntry().New(block, nr(lines), entry.PointerPosition, endCandidate.Length())
 			}
 			entry.Advance(endCandidate.Length())
 			timeRange, rErr := klog.NewRangeWithFormat(start, end, klog.RangeFormat{UseSpacesAroundDash: hasRangeSpacesAroundDash})
 			if rErr != nil {
-				return nil, ErrorIllegalRange().New(entry.Line, entryStartPosition, entry.PointerPosition-entryStartPosition)
+				return nil, ErrorIllegalRange().New(block, nr(lines), entryStartPosition, entry.PointerPosition-entryStartPosition)
 			}
 			return func(s klog.EntrySummary) txt.Error {
 				record.AddRange(timeRange, s)
 				return nil
 			}, nil
 		}()
+		lines = lines[1:]
 
 		// Check for error while parsing the entry value.
 		if evErr != nil {
@@ -219,7 +224,7 @@ func parse(block txt.Block) (klog.Record, []txt.Error) {
 				summaryText, _ := entry.PeekUntil(txt.Is(txt.END_OF_TEXT))
 				firstLine, sErr := klog.NewEntrySummary(summaryText.ToString())
 				if sErr != nil {
-					return nil, ErrorMalformedSummary().New(summaryText.Line, 0, summaryText.Length())
+					return nil, ErrorMalformedSummary().New(block, nr(lines), 0, summaryText.Length())
 				}
 				result = firstLine
 			} else {
@@ -238,7 +243,7 @@ func parse(block txt.Block) (klog.Record, []txt.Error) {
 				})
 				newEntrySummary, sErr := klog.NewEntrySummary(append(result, additionalText.ToString())...)
 				if sErr != nil {
-					return nil, ErrorMalformedSummary().New(nextEntrySummaryLine.Line, 0, nextEntrySummaryLine.Length())
+					return nil, ErrorMalformedSummary().New(block, nr(lines), 0, nextEntrySummaryLine.Length())
 				}
 				result = newEntrySummary
 			}

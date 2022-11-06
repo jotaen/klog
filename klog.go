@@ -7,6 +7,7 @@ import (
 	"github.com/jotaen/klog/klog/app/cli/main"
 	"os"
 	"os/user"
+	"runtime"
 )
 
 //go:embed Specification.md
@@ -31,6 +32,9 @@ func main() {
 	}
 	if os.Getenv("NO_COLOR") != "" {
 		prefs.NoColour = true
+	}
+	if os.Getenv("KLOG_BETA_PARALLEL") != "" {
+		prefs.CpuKernels = runtime.NumCPU()
 	}
 	prefs.Editor = os.Getenv("EDITOR")
 	homeDir, err := user.Current()

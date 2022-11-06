@@ -30,8 +30,10 @@ jobs:
         run: |
           source ./run.sh && run_build
           mv out/klog /usr/local/bin/klog
-      - name: Benchmark
+      - name: "Benchmark: serial parsing"
         run: cd .github/ && ./benchmark.sh
+      - name: "Benchmark: parallel parsing (beta)"
+        run: cd .github/ && KLOG_BETA_PARALLEL=1 ./benchmark.sh
   format:
     name: Static analysis
     runs-on: ubuntu-latest

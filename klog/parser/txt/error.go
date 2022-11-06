@@ -5,8 +5,11 @@ type Error interface {
 	// Error is an alias for Message.
 	Error() string
 
-	// Context is the Line in which the error occurred.
-	Context() Line
+	// LineNumber returns the logical line number, as shown in an editor.
+	LineNumber() int
+
+	// LineText is the original text of the line.
+	LineText() string
 
 	// Position is the cursor position in the line, excluding the indentation.
 	Position() int
@@ -34,7 +37,8 @@ type Error interface {
 }
 
 type err struct {
-	context  Line
+	context  Block
+	line     int
 	position int
 	length   int
 	code     string
@@ -42,15 +46,16 @@ type err struct {
 	details  string
 }
 
-func (e *err) Error() string   { return e.Message() }
-func (e *err) Context() Line   { return e.context }
-func (e *err) Position() int   { return e.position }
-func (e *err) Column() int     { return e.position + 1 }
-func (e *err) Length() int     { return e.length }
-func (e *err) Code() string    { return e.code }
-func (e *err) Title() string   { return e.title }
-func (e *err) Details() string { return e.details }
-func (e *err) Message() string { return e.title + ": " + e.details }
+func (e *err) Error() string    { return e.Message() }
+func (e *err) LineNumber() int  { return e.context.OverallLineIndex(e.line) + 1 }
+func (e *err) LineText() string { return e.context.Lines()[e.line].Text }
+func (e *err) Position() int    { return e.position }
+func (e *err) Column() int      { return e.position + 1 }
+func (e *err) Length() int      { return e.length }
+func (e *err) Code() string     { return e.code }
+func (e *err) Title() string    { return e.title }
+func (e *err) Details() string  { return e.details }
+func (e *err) Message() string  { return e.title + ": " + e.details }
 func (e *err) Set(code string, title string, details string) Error {
 	e.code = code
 	e.title = title
@@ -58,9 +63,10 @@ func (e *err) Set(code string, title string, details string) Error {
 	return e
 }
 
-func NewError(t Line, start int, length int, code string, title string, details string) Error {
+func NewError(b Block, line int, start int, length int, code string, title string, details string) Error {
 	return &err{
-		context:  t,
+		context:  b,
+		line:     line,
 		position: start,
 		length:   length,
 		code:     code,

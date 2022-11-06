@@ -113,7 +113,7 @@ func toErrorViews(errs []txt.Error) []ErrorView {
 	var result []ErrorView
 	for _, e := range errs {
 		result = append(result, ErrorView{
-			Line:    e.Context().LineNumber,
+			Line:    e.LineNumber(),
 			Column:  e.Column(),
 			Length:  e.Length(),
 			Title:   e.Title(),

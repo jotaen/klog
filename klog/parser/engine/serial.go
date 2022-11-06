@@ -19,14 +19,14 @@ func (p SerialParser[T]) parse(text string) ([]T, []txt.Block, int, [][]txt.Erro
 	var blocks []txt.Block
 	var errs [][]txt.Error
 	totalBytesConsumed := 0
-	lineNumber := 1
+	totalLines := 0
 	hasErrors := false
 	for {
-		block, bytesConsumed := txt.ParseBlock(text[totalBytesConsumed:], lineNumber)
-		lineNumber += len(block)
+		block, bytesConsumed := txt.ParseBlock(text[totalBytesConsumed:], totalLines)
 		if bytesConsumed == 0 || block == nil {
 			break
 		}
+		totalLines += len(block.Lines())
 		totalBytesConsumed += bytesConsumed
 		t, err := p.ParseOne(block)
 		ts = append(ts, t)

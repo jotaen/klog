@@ -51,14 +51,14 @@ func determine(r klog.Record, b txt.Block) *style {
 			return nil
 		})
 	}
-	for _, l := range b {
+	for _, l := range b.Lines() {
 		if l.Indentation() != "" {
 			s.indentation.Set(l.Indentation())
 			break
 		}
 	}
-	if len(b) > 0 && b[0].LineEnding != "" {
-		s.lineEnding.Set(b[0].LineEnding)
+	if len(b.Lines()) > 0 && b.Lines()[0].LineEnding != "" {
+		s.lineEnding.Set(b.Lines()[0].LineEnding)
 	}
 	return s
 }

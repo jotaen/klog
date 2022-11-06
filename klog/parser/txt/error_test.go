@@ -6,11 +6,8 @@ import (
 )
 
 func TestCreateError(t *testing.T) {
-	err := NewError(Line{
-		Text:       "Hello World",
-		LineNumber: 2,
-		LineEnding: "\n",
-	}, 0, 5, "CODE", "Title", "Details")
+	block, _ := ParseBlock("Hello World\n", 2)
+	err := NewError(block, 0, 0, 5, "CODE", "Title", "Details")
 	assert.Equal(t, "CODE", err.Code())
 	assert.Equal(t, "Title", err.Title())
 	assert.Equal(t, "Details", err.Details())

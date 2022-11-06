@@ -94,11 +94,9 @@ func TestSerialiseFullBlownRecord(t *testing.T) {
 }
 
 func TestSerialiseParserErrors(t *testing.T) {
+	block, _ := txt.ParseBlock("2018-99-99", 6)
 	json := ToJson(nil, []txt.Error{
-		parser.ErrorInvalidDate().New(txt.Line{
-			Text:       "2018-99-99",
-			LineNumber: 7,
-		}, 0, 10),
+		parser.ErrorInvalidDate().New(block, 0, 0, 10),
 	}, false)
 	assert.Equal(t, `{"records":null,"errors":[{`+
 		`"line":7,`+

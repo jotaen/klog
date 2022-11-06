@@ -411,15 +411,17 @@ func TestReportErrorsInEntries(t *testing.T) {
 		{"2020-01-01\n\t08:00-asdf", ErrorMalformedEntry().toErrData(2, 7, 4)},
 		{"2020-01-01\n\t08:00 - ?asdf", ErrorMalformedEntry().toErrData(2, 10, 4)},
 		{"2020-01-01\n\t-18:00", ErrorMalformedEntry().toErrData(2, 1, 6)},
-		{"2020-01-01\n\t15:30 Foo Bar Baz", ErrorMalformedEntry().toErrData(2, 7, 1)},
-
-		// Logical errors
-		{"2020-01-01\n\t08:00- ?\n\t09:00 - ?", ErrorDuplicateOpenRange().toErrData(3, 1, 9)},
-		{"2020-01-01\n\t15:00 - 14:00", ErrorIllegalRange().toErrData(2, 1, 13)},
+		{"2020-01-01\n\t5h Test\n\t15:30 Foo Bar Baz", ErrorMalformedEntry().toErrData(3, 7, 1)},
+		{"2020-01-01\n\t5h Hello\n\t\tFoo\n\t15:30 Foo Bar Baz", ErrorMalformedEntry().toErrData(4, 7, 1)},
 		{"2020-01-01\n\t12:76 - 13:00", ErrorMalformedEntry().toErrData(2, 1, 5)},
 		{"2020-01-01\n\t12:00 - 44:00", ErrorMalformedEntry().toErrData(2, 9, 5)},
 		{"2020-01-01\n\t23:00> - 25:61>", ErrorMalformedEntry().toErrData(2, 10, 6)},
 		{"2020-01-01\n\t12:00> - 24:00>", ErrorMalformedEntry().toErrData(2, 10, 6)},
+
+		// Logical errors
+		{"2020-01-01\n\t08:00- ?\n\t09:00 - ?", ErrorDuplicateOpenRange().toErrData(3, 1, 9)},
+		{"2020-01-01\n\t15:00 - 14:00", ErrorIllegalRange().toErrData(2, 1, 13)},
+		{"2020-01-01\n\t15:00 - 14:00", ErrorIllegalRange().toErrData(2, 1, 13)},
 	} {
 		for _, p := range parsers {
 			rs, _, errs := p.Parse(test.text)

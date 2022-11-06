@@ -7,9 +7,9 @@ import (
 
 func TestDeterminesLineEndings(t *testing.T) {
 	ls := []Line{NewLineFromString(
-		"foo\n", 1),
-		NewLineFromString("bar\r\n", 2),
-		NewLineFromString("baz", 3),
+		"foo\n"),
+		NewLineFromString("bar\r\n"),
+		NewLineFromString("baz"),
 	}
 	assert.Equal(t, "foo", ls[0].Text)
 	assert.Equal(t, "\n", ls[0].LineEnding)

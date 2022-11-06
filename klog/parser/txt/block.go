@@ -5,19 +5,38 @@ package txt
 // It’s basically like a paragraph of text, with surrounding whitespace.
 // The Block is guaranteed to contain exactly a single sequence of
 // significant lines, i.e. lines that contain text.
-type Block []Line
+type Block interface {
+	// Lines returns all lines.
+	Lines() []Line
+
+	// SignificantLines returns the lines that are not blank. The two integers
+	// are the number of insignificant lines at the beginning and the end.
+	SignificantLines() ([]Line, int, int)
+
+	// OverallLineIndex returns the overall line index, taking into
+	// account the context of all preceding blocks.
+	OverallLineIndex(int) int
+
+	// SetPrecedingLineCount adjusts the overall line count.
+	SetPrecedingLineCount(int)
+}
+
+type block struct {
+	precedingLineCount int
+	lines              []Line
+}
 
 // ParseBlock parses a block from the beginning of a text. It returns
 // the parsed block, along with the number of bytes consumed from the
 // string. If the text doesn’t contain significant lines, it returns nil.
-func ParseBlock(text string, initialLineNumber int) (Block, int) {
+func ParseBlock(text string, precedingLineCount int) (Block, int) {
 	const (
 		MODE_PRECEDING_BLANK_LINES = iota
 		MODE_SIGNIFICANT_LINES
 		MODE_TRAILING_BLANK_LINES
 	)
 
-	var block Block
+	var lines []Line
 	bytesConsumed := 0
 	currentLineStart := 0
 	currentMode := MODE_PRECEDING_BLANK_LINES
@@ -32,7 +51,7 @@ parsingLoop:
 		// Process line.
 		nextChar := i + len(string(char))
 		currentLine := text[currentLineStart:nextChar]
-		line := NewLineFromString(currentLine, initialLineNumber)
+		line := NewLineFromString(currentLine)
 
 		switch currentMode {
 		case MODE_PRECEDING_BLANK_LINES:
@@ -48,24 +67,34 @@ parsingLoop:
 				break parsingLoop
 			}
 		}
-		block = append(block, line)
+		lines = append(lines, line)
 		bytesConsumed += len(currentLine)
 		currentLineStart = nextChar
-		initialLineNumber++
 	}
 
 	hasSignificantLines := currentMode != MODE_PRECEDING_BLANK_LINES
 	if !hasSignificantLines {
-		block = nil
+		return nil, bytesConsumed
 	}
-	return block, bytesConsumed
+	return &block{precedingLineCount, lines}, bytesConsumed
 }
 
-// SignificantLines returns the lines that are not blank.
-func (b Block) SignificantLines() []Line {
-	first, last := 0, len(b)
+func (b *block) OverallLineIndex(lineIndex int) int {
+	return b.precedingLineCount + lineIndex
+}
+
+func (b *block) SetPrecedingLineCount(count int) {
+	b.precedingLineCount = count
+}
+
+func (b *block) Lines() []Line {
+	return b.lines
+}
+
+func (b *block) SignificantLines() ([]Line, int, int) {
+	first, last := 0, len(b.lines)
 	hasSeenSignificant := false
-	for i, l := range b {
+	for i, l := range b.lines {
 		if !hasSeenSignificant && !l.IsBlank() {
 			first = i
 			hasSeenSignificant = true
@@ -76,5 +105,5 @@ func (b Block) SignificantLines() []Line {
 			break
 		}
 	}
-	return b[first:last]
+	return b.lines[first:last], first, last
 }

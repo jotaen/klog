@@ -32,9 +32,10 @@ func TestGroupLinesOfSingleBlock(t *testing.T) {
 		block, _ := ParseBlock(x.text, 0)
 
 		require.NotNil(t, block)
-		require.Len(t, block, x.count)
-		require.Len(t, block.SignificantLines(), 1)
-		assert.Equal(t, block.SignificantLines()[0].Text, "a1")
+		require.Len(t, block.Lines(), x.count)
+		sgLines, _, _ := block.SignificantLines()
+		require.Len(t, sgLines, 1)
+		assert.Equal(t, sgLines[0].Text, "a1")
 	}
 }
 
@@ -55,9 +56,10 @@ func TestGroupLinesOfSingleBlockWithMultipleLines(t *testing.T) {
 		block, _ := ParseBlock(x.text, 0)
 
 		require.NotNil(t, block)
-		require.Len(t, block, x.count)
-		require.Len(t, block.SignificantLines(), 2)
-		assert.Equal(t, block.SignificantLines()[0].Text, "a1")
-		assert.Equal(t, block.SignificantLines()[1].Text, "a2")
+		require.Len(t, block.Lines(), x.count)
+		sgLines, _, _ := block.SignificantLines()
+		require.Len(t, sgLines, 2)
+		assert.Equal(t, sgLines[0].Text, "a1")
+		assert.Equal(t, sgLines[1].Text, "a2")
 	}
 }

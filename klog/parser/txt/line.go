@@ -9,9 +9,6 @@ type Line struct {
 	// Text contains the copy of the line.
 	Text string
 
-	// LineNumber is the line number, starting with 1.
-	LineNumber int
-
 	// LineEnding is the encountered line ending sequence `\n` or `\r\n`.
 	// Note that for the last line in a file, there might be no line ending.
 	LineEnding string
@@ -22,11 +19,10 @@ var LineEndings = []string{"\r\n", "\n"}
 var Indentations = []string{"    ", "   ", "  ", "\t"}
 
 // NewLineFromString turns data into a Line object.
-func NewLineFromString(rawLineText string, lineNumber int) Line {
+func NewLineFromString(rawLineText string) Line {
 	text, lineEnding := splitOffLineEnding(rawLineText)
 	return Line{
 		Text:       text,
-		LineNumber: lineNumber,
 		LineEnding: lineEnding,
 	}
 }

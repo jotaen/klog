@@ -19,14 +19,14 @@ func PrettifyError(err error, isDebug bool) error {
 		for _, e := range e.All() {
 			message += fmt.Sprintf(
 				terminalformat.Style{Background: "160", Color: "015"}.Format(" ERROR in line %d: "),
-				e.Context().LineNumber,
+				e.LineNumber(),
 			) + "\n"
 			message += fmt.Sprintf(
 				terminalformat.Style{Color: "247"}.Format(INDENT+"%s"),
 				// Replace all tabs with one space each, otherwise the carets might
 				// not be in line with the text anymore (since we can’t know how wide
 				// a tab is).
-				strings.Replace(e.Context().Text, "\t", " ", -1),
+				strings.Replace(e.LineText(), "\t", " ", -1),
 			) + "\n"
 			message += fmt.Sprintf(
 				terminalformat.Style{Color: "160"}.Format(INDENT+"%s%s"),

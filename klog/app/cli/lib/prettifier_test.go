@@ -10,9 +10,11 @@ import (
 )
 
 func TestFormatParserError(t *testing.T) {
+	block1, _ := txt.ParseBlock("Good text\nSome malformed text", 37)
+	block2, _ := txt.ParseBlock("Another issue!", 133)
 	err := app.NewParserErrors([]txt.Error{
-		txt.NewError(txt.NewLineFromString("Some malformed text", 39), 0, 4, "CODE", "Error", "Short explanation."),
-		txt.NewError(txt.NewLineFromString("Another issue!", 134), 8, 5, "CODE", "Problem", "More info."),
+		txt.NewError(block1, 1, 0, 4, "CODE", "Error", "Short explanation."),
+		txt.NewError(block2, 0, 8, 5, "CODE", "Problem", "More info."),
 	})
 	text := PrettifyError(err, false).Error()
 	assert.Equal(t, ` ERROR in line 39: 
@@ -29,8 +31,9 @@ func TestFormatParserError(t *testing.T) {
 }
 
 func TestReflowsLongMessages(t *testing.T) {
+	block, _ := txt.ParseBlock("Foo bar", 1)
 	err := app.NewParserErrors([]txt.Error{
-		txt.NewError(txt.NewLineFromString("Foo bar", 2), 4, 3, "CODE", "Some Title", "A verbose description with details, potentially spanning multiple lines with a comprehensive text and tremendously helpful information.\nBut it respects newlines."),
+		txt.NewError(block, 0, 4, 3, "CODE", "Some Title", "A verbose description with details, potentially spanning multiple lines with a comprehensive text and tremendously helpful information.\nBut it respects newlines."),
 	})
 	text := PrettifyError(err, false).Error()
 	assert.Equal(t, ` ERROR in line 2: 
@@ -45,8 +48,9 @@ func TestReflowsLongMessages(t *testing.T) {
 }
 
 func TestConvertsTabToSpaces(t *testing.T) {
+	block, _ := txt.ParseBlock("\tFoo\tbar", 13)
 	err := app.NewParserErrors([]txt.Error{
-		txt.NewError(txt.NewLineFromString("\tFoo\tbar", 14), 0, 8, "CODE", "Error title", "Error details"),
+		txt.NewError(block, 0, 0, 8, "CODE", "Error title", "Error details"),
 	})
 	text := PrettifyError(err, false).Error()
 	assert.Equal(t, ` ERROR in line 14: 

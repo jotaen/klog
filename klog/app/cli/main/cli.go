@@ -9,7 +9,6 @@ import (
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli"
 	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
 	kongcompletion "github.com/jotaen/kong-completion"
@@ -66,7 +65,6 @@ func Run(homeDir string, meta app.Meta, prefs app.Preferences, args []string) (i
 	ctx := app.NewContext(
 		homeDir,
 		meta,
-		parser.NewSerialParser(),
 		lib.CliSerialiser{},
 		prefs,
 	)

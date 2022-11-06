@@ -61,7 +61,7 @@ func NewReconcilerForNewRecord(params RecordParams) Creator {
 			}
 			// The new record is dated after the last one, so we have to prepend a blank line.
 			recordText = append([]insertableText{blankLine}, recordText...)
-			return recordText, lastLine(bs[i].SignificantLines()).LineNumber, 2, i + 1
+			return recordText, indexOfLastSignificantLine(bs[i]), 2, i + 1
 		}()
 
 		// Insert record and adjust pointers accordingly.
@@ -89,7 +89,7 @@ func NewReconcilerAtRecord(atDate klog.Date) Creator {
 		return &Reconciler{
 			Record:          rs[index],
 			style:           elect(*style, rs, bs),
-			lastLinePointer: lastLine(bs[index].SignificantLines()).LineNumber,
+			lastLinePointer: indexOfLastSignificantLine(bs[index]),
 			recordPointer:   index,
 			lines:           flatten(bs),
 		}
@@ -99,11 +99,12 @@ func NewReconcilerAtRecord(atDate klog.Date) Creator {
 func flatten(bs []txt.Block) []txt.Line {
 	var result []txt.Line
 	for _, b := range bs {
-		result = append(result, b...)
+		result = append(result, b.Lines()...)
 	}
 	return result
 }
 
-func lastLine(block txt.Block) txt.Line {
-	return block[len(block)-1]
+func indexOfLastSignificantLine(block txt.Block) int {
+	significantLines, precedingInsignificantLineCount, _ := block.SignificantLines()
+	return block.OverallLineIndex(precedingInsignificantLineCount + len(significantLines))
 }

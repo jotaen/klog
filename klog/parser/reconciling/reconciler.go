@@ -93,12 +93,11 @@ func (r *Reconciler) insert(lineIndex int, texts []insertableText) {
 		if i >= lineIndex && offset < len(texts) {
 			line := strings.Repeat(r.style.indentation.Get(), texts[offset].indentation)
 			line += texts[offset].text + r.style.lineEnding.Get()
-			result[i] = txt.NewLineFromString(line, -1)
+			result[i] = txt.NewLineFromString(line)
 			offset++
 		} else {
 			result[i] = r.lines[i-offset]
 		}
-		result[i].LineNumber = i + 1
 	}
 	if lineIndex > 0 && result[lineIndex-1].LineEnding == "" {
 		result[lineIndex-1].LineEnding = r.style.lineEnding.Get()

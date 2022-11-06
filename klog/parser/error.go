@@ -8,8 +8,8 @@ type HumanError struct {
 	details string
 }
 
-func (e HumanError) New(t txt.Line, start int, length int) txt.Error {
-	return txt.NewError(t, start, length, e.code, e.title, e.details)
+func (e HumanError) New(b txt.Block, line int, start int, length int) txt.Error {
+	return txt.NewError(b, line, start, length, e.code, e.title, e.details)
 }
 
 func ErrorInvalidDate() HumanError {

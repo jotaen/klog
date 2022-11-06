@@ -14,6 +14,7 @@ import (
 	"github.com/jotaen/klog/klog/parser/txt"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	gotime "time"
 )
@@ -97,30 +98,36 @@ type Meta struct {
 
 // Preferences are user-defined configuration.
 type Preferences struct {
-	IsDebug  bool
-	Editor   string
-	NoColour bool
+	IsDebug    bool
+	Editor     string
+	NoColour   bool
+	CpuKernels int // Must be 1 or higher
 }
 
 func NewDefaultPreferences() Preferences {
 	return Preferences{
-		IsDebug:  false,
-		Editor:   "",
-		NoColour: false,
+		IsDebug:    false,
+		Editor:     "",
+		NoColour:   false,
+		CpuKernels: 1,
 	}
 }
 
 // NewContext creates a new Context object.
-func NewContext(homeDir string, meta Meta, parser parser.Parser, serialiser parser.Serialiser, prefs Preferences) Context {
+func NewContext(homeDir string, meta Meta, serialiser parser.Serialiser, prefs Preferences) Context {
 	if meta.Version == "" {
 		meta.Version = "v?.?"
 	}
 	if meta.BuildHash == "" {
 		meta.BuildHash = strings.Repeat("?", 7)
 	}
+	parserEngine := parser.NewSerialParser()
+	if prefs.CpuKernels > 1 {
+		parserEngine = parser.NewParallelParser(runtime.NumCPU())
+	}
 	return &context{
 		homeDir,
-		parser,
+		parserEngine,
 		serialiser,
 		meta,
 		prefs,

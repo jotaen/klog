@@ -95,6 +95,11 @@ func (p ParallelBatchParser[T]) Parse(text string) ([]T, []txt.Block, []txt.Erro
 	carryValues, carryBlocks, _, carryErrs, hasErrors := p.SerialParser.parse(carryText)
 	allValues = append(allValues, carryValues...)
 	allBlocks = append(allBlocks, carryBlocks...)
+	lineCount := 0
+	for _, b := range allBlocks {
+		b.SetPrecedingLineCount(lineCount)
+		lineCount += len(b.Lines())
+	}
 	if hasErrors {
 		allErrs = append(allErrs, flatten(carryErrs)...)
 	}
@@ -130,7 +135,7 @@ func splitIntoChunks(txt string, numberOfBatches int) []string {
 
 func countBytes(b txt.Block) int {
 	result := 0
-	for _, l := range b {
+	for _, l := range b.Lines() {
 		result += len(l.Original())
 	}
 	return result
