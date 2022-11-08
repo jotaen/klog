@@ -152,6 +152,23 @@ func TestStartTakesOverStyle(t *testing.T) {
 `, state.writtenFileContents)
 }
 
+func TestStartIgnoresExistingStyleIfExplicitStyleWasGiven(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+1920/02/02
+  9:00am-1:00pm
+`)._SetNow(1920, 2, 2, 8, 12)._Run((&Start{
+		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
+			Time: klog.Ɀ_Time_(9, 44),
+		},
+	}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+1920/02/02
+  9:00am-1:00pm
+  9:44-?
+`, state.writtenFileContents)
+}
+
 func TestStartWithRounding(t *testing.T) {
 	r5, _ := service.NewRounding(5)
 	state, err := NewTestingContext()._SetRecords(`

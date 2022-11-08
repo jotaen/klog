@@ -7,14 +7,16 @@ type SerialParser[T any] struct {
 }
 
 func (p SerialParser[T]) Parse(text string) ([]T, []txt.Block, []txt.Error) {
-	ts, blocks, _, errs, hasErrors := p.parse(text)
+	ts, blocks, _, errs, hasErrors := p.mapParse(text)
 	if hasErrors {
 		return nil, nil, flatten[txt.Error](errs)
 	}
 	return ts, blocks, nil
 }
 
-func (p SerialParser[T]) parse(text string) ([]T, []txt.Block, int, [][]txt.Error, bool) {
+// mapParse parses the text. All 3 return arrays have the same arity, and the last
+// bool indicates whether any errors occurred.
+func (p SerialParser[T]) mapParse(text string) ([]T, []txt.Block, int, [][]txt.Error, bool) {
 	var ts []T
 	var blocks []txt.Block
 	var errs [][]txt.Error

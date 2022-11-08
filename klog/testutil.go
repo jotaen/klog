@@ -20,6 +20,16 @@ func Ɀ_Date_(year int, month int, day int) Date {
 }
 
 // Deprecated
+func Ɀ_Slashes_(d Date) Date {
+	df, canCast := d.(*date)
+	if !canCast {
+		panic("Operation failed!")
+	}
+	df.format.UseDashes = false
+	return df
+}
+
+// Deprecated
 func Ɀ_RecordSummary_(line ...string) RecordSummary {
 	summary, err := NewRecordSummary(line...)
 	if err != nil {

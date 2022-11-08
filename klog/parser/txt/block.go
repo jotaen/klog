@@ -13,7 +13,7 @@ type Block interface {
 
 	// SignificantLines returns the lines that are not blank. The two integers
 	// are the number of insignificant lines at the beginning and the end.
-	SignificantLines() ([]Line, int, int)
+	SignificantLines() (significant []Line, headCount int, tailCount int)
 
 	// OverallLineIndex returns the overall line index, taking into
 	// account the context of all preceding blocks.
@@ -93,7 +93,7 @@ func (b *block) Lines() []Line {
 	return b.lines
 }
 
-func (b *block) SignificantLines() ([]Line, int, int) {
+func (b *block) SignificantLines() (significant []Line, headCount int, tailCount int) {
 	first, last := 0, len(b.lines)
 	hasSeenSignificant := false
 	for i, l := range b.lines {
@@ -107,5 +107,6 @@ func (b *block) SignificantLines() ([]Line, int, int) {
 			break
 		}
 	}
-	return b.lines[first:last], first, last
+	significant = b.lines[first:last]
+	return significant, first, len(b.lines) - last
 }

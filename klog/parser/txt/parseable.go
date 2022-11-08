@@ -1,31 +1,30 @@
 /*
-Package engine is a generic utility for parsing and processing a text
+Package txt is a generic utility for parsing and processing a text
 that is structured in individual lines.
 */
 package txt
 
-// Parseable is utility data structure for processing a Line in a parser.
+import "unicode/utf8"
+
+// Parseable is utility data structure for parsing a piece of text.
 type Parseable struct {
-	Line
 	Chars           []rune
 	PointerPosition int
 }
 
-var END_OF_TEXT int32 = -1
-
+// NewParseable creates a parseable from the given line.
 func NewParseable(l Line, startPointerPosition int) *Parseable {
 	return &Parseable{
 		PointerPosition: startPointerPosition,
 		Chars:           []rune(l.Text),
-		Line:            l,
 	}
 }
 
-// Peek returns the next character, or END_OF_TEXT if there is none anymore.
+// Peek returns the next character, or `utf8.RuneError` if there is none anymore.
 func (p *Parseable) Peek() rune {
 	char := SubRune(p.Chars, p.PointerPosition, 1)
 	if char == nil {
-		return END_OF_TEXT
+		return utf8.RuneError
 	}
 	return char[0]
 }
@@ -35,10 +34,6 @@ func (p *Parseable) Peek() rune {
 // as well as a bool to indicate whether the condition was met (`true`) or the end of the
 // line was encountered (`false`).
 func (p *Parseable) PeekUntil(isMatch func(rune) bool) (Parseable, bool) {
-	result := Parseable{
-		PointerPosition: p.PointerPosition,
-		Line:            Line{},
-	}
 	matchLength := 0
 	hasMatched := false
 	for i := p.PointerPosition; i < len(p.Chars); i++ {
@@ -49,8 +44,16 @@ func (p *Parseable) PeekUntil(isMatch func(rune) bool) (Parseable, bool) {
 			break
 		}
 	}
-	result.Chars = SubRune(p.Chars, p.PointerPosition, matchLength)
-	return result, hasMatched
+	return Parseable{
+		PointerPosition: p.PointerPosition,
+		Chars:           SubRune(p.Chars, p.PointerPosition, matchLength),
+	}, hasMatched
+}
+
+// Remainder returns the rest of the text.
+func (p *Parseable) Remainder() Parseable {
+	rest, _ := p.PeekUntil(Is(utf8.RuneError))
+	return rest
 }
 
 // Advance moves forward the cursor position.

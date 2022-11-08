@@ -40,7 +40,7 @@ func (p ParallelBatchParser[T]) Parse(text string) ([]T, []txt.Block, []txt.Erro
 		}
 
 		batchText = batchText[headBytesConsumed:]
-		values, blocks, bytesConsumed, errs, _ := p.SerialParser.parse(batchText)
+		values, blocks, bytesConsumed, errs, _ := p.SerialParser.mapParse(batchText)
 		if len(blocks) == 0 { // The remainder was empty or all blank
 			result.tailText = batchText
 		} else { // The remainder was more than one block
@@ -61,7 +61,7 @@ func (p ParallelBatchParser[T]) Parse(text string) ([]T, []txt.Block, []txt.Erro
 	for _, result := range allResults {
 		carryText += result.headText
 		if len(result.blocks) > 0 {
-			carryValues, carryBlocks, _, carryErrs, hasErrors := p.SerialParser.parse(carryText)
+			carryValues, carryBlocks, _, carryErrs, hasErrors := p.SerialParser.mapParse(carryText)
 			allValues = append(allValues, carryValues...)
 			allBlocks = append(allBlocks, carryBlocks...)
 			if hasErrors {
@@ -74,7 +74,7 @@ func (p ParallelBatchParser[T]) Parse(text string) ([]T, []txt.Block, []txt.Erro
 		}
 		carryText += result.tailText
 	}
-	carryValues, carryBlocks, _, carryErrs, hasErrors := p.SerialParser.parse(carryText)
+	carryValues, carryBlocks, _, carryErrs, hasErrors := p.SerialParser.mapParse(carryText)
 	allValues = append(allValues, carryValues...)
 	allBlocks = append(allBlocks, carryBlocks...)
 	lineCount := 0

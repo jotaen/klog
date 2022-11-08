@@ -27,11 +27,12 @@ and to avoid the text being processed by your shell.`
 func (opt *Track) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	now := ctx.Now()
-	date, _ := opt.AtDate(now)
+	date, isAutoDate := opt.AtDate(now)
+	atDate := reconciling.NewStyled[klog.Date](date, isAutoDate)
 	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
-			reconciling.NewReconcilerAtRecord(date),
-			reconciling.NewReconcilerForNewRecord(reconciling.RecordParams{Date: date}),
+			reconciling.NewReconcilerAtRecord(atDate.Value),
+			reconciling.NewReconcilerForNewRecord(atDate, reconciling.AdditionalData{}),
 		},
 
 		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {

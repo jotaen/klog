@@ -23,19 +23,21 @@ The start time is the current time (or whatever is specified by --time).`
 func (opt *Start) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
 	now := ctx.Now()
-	date, _ := opt.AtDate(now)
-	time, _, err := opt.AtTime(now)
+	date, isAutoDate := opt.AtDate(now)
+	time, isAutoTime, err := opt.AtTime(now)
 	if err != nil {
 		return err
 	}
+	atDate := reconciling.NewStyled[klog.Date](date, isAutoDate)
+	startTime := reconciling.NewStyled[klog.Time](time, isAutoTime)
 	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
-			reconciling.NewReconcilerAtRecord(date),
-			reconciling.NewReconcilerForNewRecord(reconciling.RecordParams{Date: date}),
+			reconciling.NewReconcilerAtRecord(atDate.Value),
+			reconciling.NewReconcilerForNewRecord(atDate, reconciling.AdditionalData{}),
 		},
 
 		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
-			return reconciler.StartOpenRange(time, opt.Summary)
+			return reconciler.StartOpenRange(startTime, opt.Summary)
 		},
 	)
 }

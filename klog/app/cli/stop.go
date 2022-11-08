@@ -25,13 +25,14 @@ func (opt *Stop) Run(ctx app.Context) error {
 	now := ctx.Now()
 	date, isAutoDate := opt.AtDate(now)
 	time, isAutoTime, err := opt.AtTime(now)
+	if err != nil {
+		return err
+	}
+	atTime := reconciling.NewStyled[klog.Time](time, isAutoTime)
 	// Only fall back to yesterday if no explicit date has been given.
 	// Otherwise, it wouldn’t make sense to decrement the day.
 	shouldTryYesterday := isAutoDate && isAutoTime
 	yesterday := date.PlusDays(-1)
-	if err != nil {
-		return err
-	}
 	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			reconciling.NewReconcilerAtRecord(date),
@@ -45,9 +46,10 @@ func (opt *Stop) Run(ctx app.Context) error {
 
 		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
 			if shouldTryYesterday && reconciler.Record.Date().IsEqualTo(yesterday) {
-				time, _ = time.Plus(klog.NewDuration(24, 0))
+				shiftedTime, _ := time.Plus(klog.NewDuration(24, 0))
+				atTime.Value = shiftedTime
 			}
-			return reconciler.CloseOpenRange(time, opt.Summary)
+			return reconciler.CloseOpenRange(atTime, opt.Summary)
 		},
 	)
 }

@@ -9,7 +9,22 @@ import (
 	"testing"
 )
 
-func TestReconcilerAddsNewEntry(t *testing.T) {
+func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
+	original := "\n2018-01-01\n    1h"
+	rs, bs, _ := parser.NewSerialParser().Parse(original)
+
+	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2018, 1, 1))(rs, bs)
+	require.NotNil(t, reconciler)
+	result, err := reconciler.AppendEntry(klog.Ɀ_EntrySummary_("16:00-17:00"))
+	require.Nil(t, err)
+	assert.Equal(t, `
+2018-01-01
+    1h
+    16:00-17:00
+`, result.AllSerialised)
+}
+
+func TestReconcilerAddsNewEntryInTheMiddleOfFile(t *testing.T) {
 	original := `
 2018-01-01
     1h
@@ -47,18 +62,19 @@ Hello World
 `, result.AllSerialised)
 }
 
-func TestReconcilerAddsNewlyCreatedEntryAtEndOfFile(t *testing.T) {
-	original := "\n2018-01-01\n    1h"
+func TestReconcilerCanHandleUTF8Input(t *testing.T) {
+	original := "\n2018-01-01\n家事\n    1h ランドリー"
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2018, 1, 1))(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.AppendEntry(klog.Ɀ_EntrySummary_("16:00-17:00"))
+	result, err := reconciler.AppendEntry(klog.Ɀ_EntrySummary_("20m 掃除機"))
 	require.Nil(t, err)
 	assert.Equal(t, `
 2018-01-01
-    1h
-    16:00-17:00
+家事
+    1h ランドリー
+    20m 掃除機
 `, result.AllSerialised)
 }
 

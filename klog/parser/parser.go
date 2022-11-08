@@ -10,7 +10,7 @@ import (
 
 func parse(block txt.Block) (klog.Record, []txt.Error) {
 	lines, initialLineOffset, _ := block.SignificantLines()
-	initialLineCount := len(lines)
+	initialLineCount := len(lines) // Capture current value
 	nr := func(lines []txt.Line) int {
 		return initialLineOffset + initialLineCount - len(lines)
 	}
@@ -221,7 +221,7 @@ func parse(block txt.Block) (klog.Record, []txt.Error) {
 			// Parse first line of entry summary.
 			if txt.IsSpaceOrTab(entry.Peek()) {
 				entry.Advance(1)
-				summaryText, _ := entry.PeekUntil(txt.Is(txt.END_OF_TEXT))
+				summaryText := entry.Remainder()
 				firstLine, sErr := klog.NewEntrySummary(summaryText.ToString())
 				if sErr != nil {
 					return nil, ErrorMalformedSummary().New(block, nr(lines), 0, summaryText.Length())

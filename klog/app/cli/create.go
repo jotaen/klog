@@ -23,11 +23,13 @@ func (opt *Create) Help() string {
 
 func (opt *Create) Run(ctx app.Context) error {
 	opt.NoStyleArgs.Apply(&ctx)
-	date, _ := opt.AtDate(ctx.Now())
+	date, isAutoDate := opt.AtDate(ctx.Now())
+	atDate := reconciling.NewStyled[klog.Date](date, isAutoDate)
 	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			reconciling.NewReconcilerForNewRecord(
-				reconciling.RecordParams{Date: date, ShouldTotal: opt.ShouldTotal, Summary: opt.Summary},
+				atDate,
+				reconciling.AdditionalData{ShouldTotal: opt.ShouldTotal, Summary: opt.Summary},
 			),
 		},
 

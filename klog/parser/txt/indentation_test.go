@@ -33,7 +33,7 @@ func TestCreatesIndentedParseable(t *testing.T) {
 	p1 := indentator.NewIndentedParseable(NewLineFromString("Hello"), 0)
 	require.NotNil(t, p1)
 	assert.Equal(t, p1.PointerPosition, 0)
-	assert.Equal(t, "Hello", p1.Text)
+	assert.Equal(t, []rune{'H', 'e', 'l', 'l', 'o'}, p1.Chars)
 
 	p2 := indentator.NewIndentedParseable(NewLineFromString("\tHello"), 1)
 	require.NotNil(t, p2)

@@ -8,22 +8,21 @@ import (
 // Creator is a function interface for creating a new reconciler.
 type Creator func([]klog.Record, []txt.Block) *Reconciler
 
-type RecordParams struct {
-	Date        klog.Date
+type AdditionalData struct {
 	ShouldTotal klog.ShouldTotal
 	Summary     klog.RecordSummary
 }
 
 // NewReconcilerForNewRecord is a reconciler creator for a new record at a given date and
 // with the given parameters.
-func NewReconcilerForNewRecord(params RecordParams) Creator {
+func NewReconcilerForNewRecord(atDate Styled[klog.Date], ad AdditionalData) Creator {
 	return func(rs []klog.Record, bs []txt.Block) *Reconciler {
-		record := klog.NewRecord(params.Date)
-		if params.ShouldTotal != nil {
-			record.SetShouldTotal(params.ShouldTotal)
+		record := klog.NewRecord(atDate.Value)
+		if ad.ShouldTotal != nil {
+			record.SetShouldTotal(ad.ShouldTotal)
 		}
-		if params.Summary != nil {
-			record.SetSummary(params.Summary)
+		if ad.Summary != nil {
+			record.SetSummary(ad.Summary)
 		}
 		reconciler := &Reconciler{
 			Record:          record,
@@ -32,14 +31,18 @@ func NewReconcilerForNewRecord(params RecordParams) Creator {
 			style:           elect(*defaultStyle(), rs, bs),
 			lines:           flatten(bs),
 		}
+		dateFormat := reconciler.style.dateFormat()
+		if !atDate.AutoStyle {
+			dateFormat = atDate.Value.Format()
+		}
 		recordText := func() []insertableText {
-			result := params.Date.ToStringWithFormat(reconciler.style.dateFormat())
-			if params.ShouldTotal != nil {
-				result += " (" + params.ShouldTotal.ToString() + ")"
+			result := atDate.Value.ToStringWithFormat(dateFormat)
+			if ad.ShouldTotal != nil {
+				result += " (" + ad.ShouldTotal.ToString() + ")"
 			}
 			return []insertableText{{result, 0}}
 		}()
-		for _, s := range params.Summary {
+		for _, s := range ad.Summary {
 			recordText = append(recordText, insertableText{s, 0})
 		}
 		newRecordLines, insertPointer, lastLineOffset, newRecordIndex := func() ([]insertableText, int, int, int) {
@@ -48,12 +51,12 @@ func NewReconcilerForNewRecord(params RecordParams) Creator {
 			}
 			i := 0
 			for _, r := range rs {
-				if i == 0 && !params.Date.IsAfterOrEqual(r.Date()) {
+				if i == 0 && !atDate.Value.IsAfterOrEqual(r.Date()) {
 					// The new record is dated prior to the first one, so we have to append a blank line.
 					recordText = append(recordText, blankLine)
 					return recordText, 0, 1, 0
 				}
-				if len(rs)-1 == i || (params.Date.IsAfterOrEqual(r.Date()) && !params.Date.IsAfterOrEqual(rs[i+1].Date())) {
+				if len(rs)-1 == i || (atDate.Value.IsAfterOrEqual(r.Date()) && !atDate.Value.IsAfterOrEqual(rs[i+1].Date())) {
 					// The record is in between.
 					break
 				}

@@ -13,7 +13,10 @@ func NewIndentator(allowedIndentationStyles []string, l Line) *Indentator {
 	return nil
 }
 
-// Indentator is a utility to check to consistently process indentated text.
+// Indentator is a utility to check to process indented text. It is initialised
+// with the first indented line, and determines the indentation style of that line.
+// For all subsequent lines, it can then create Parseable’s that are already pre-
+// processed.
 type Indentator struct {
 	indentationStyle string
 }

@@ -52,7 +52,8 @@ func TestReconcilerRespectsLineEndingStyle(t *testing.T) {
 
 func TestReconcileAddRecordIfOriginalIsEmpty(t *testing.T) {
 	rs, bs, _ := parser.NewSerialParser().Parse("")
-	reconciler := NewReconcilerForNewRecord(RecordParams{Date: klog.Ɀ_Date_(2000, 5, 5)})(rs, bs)
+	atDate := Styled[klog.Date]{klog.Ɀ_Date_(2000, 5, 5), false}
+	reconciler := NewReconcilerForNewRecord(atDate, AdditionalData{})(rs, bs)
 	result, err := reconciler.MakeResult()
 	require.Nil(t, err)
 	assert.Equal(t, "2000-05-05\n", result.AllSerialised)
@@ -61,7 +62,8 @@ func TestReconcileAddRecordIfOriginalIsEmpty(t *testing.T) {
 
 func TestReconcileAddRecordIfOriginalContainsOneRecord(t *testing.T) {
 	rs, bs, _ := parser.NewSerialParser().Parse("1999-12-31")
-	reconciler := NewReconcilerForNewRecord(RecordParams{Date: klog.Ɀ_Date_(2000, 2, 1)})(rs, bs)
+	atDate := Styled[klog.Date]{klog.Ɀ_Date_(2000, 2, 1), false}
+	reconciler := NewReconcilerForNewRecord(atDate, AdditionalData{})(rs, bs)
 	result, err := reconciler.MakeResult()
 	require.Nil(t, err)
 	assert.Equal(t, "1999-12-31\n\n2000-02-01\n", result.AllSerialised)
@@ -79,7 +81,8 @@ func TestReconcileNewRecordFromEmptyFile(t *testing.T) {
 		{"\n\n     \t\n \t     \n  "},
 	} {
 		rs, bs, _ := parser.NewSerialParser().Parse(x.original)
-		reconciler := NewReconcilerForNewRecord(RecordParams{Date: klog.Ɀ_Date_(1995, 3, 17)})(rs, bs)
+		atDate := Styled[klog.Date]{klog.Ɀ_Date_(1995, 3, 17), false}
+		reconciler := NewReconcilerForNewRecord(atDate, AdditionalData{})(rs, bs)
 		result, err := reconciler.MakeResult()
 		require.Nil(t, err)
 		assert.Equal(t, "1995-03-17\n", result.AllSerialised)
@@ -98,7 +101,8 @@ func TestReconcilePrependNewRecord(t *testing.T) {
 		{"\n\n2018-01-02\n", "2018-01-01\n\n\n\n2018-01-02\n"},
 	} {
 		rs, bs, _ := parser.NewSerialParser().Parse(x.original)
-		reconciler := NewReconcilerForNewRecord(RecordParams{Date: klog.Ɀ_Date_(2018, 1, 1)})(rs, bs)
+		atDate := Styled[klog.Date]{klog.Ɀ_Date_(2018, 1, 1), false}
+		reconciler := NewReconcilerForNewRecord(atDate, AdditionalData{})(rs, bs)
 		result, err := reconciler.MakeResult()
 		require.Nil(t, err)
 		assert.Equal(t, x.expected, result.AllSerialised)
@@ -115,7 +119,8 @@ func TestReconcileAppendNewRecord(t *testing.T) {
 		{"\n\n2018-01-01\n", "\n\n2018-01-01\n\n2019-01-01\n"},
 	} {
 		rs, bs, _ := parser.NewSerialParser().Parse(x.original)
-		reconciler := NewReconcilerForNewRecord(RecordParams{Date: klog.Ɀ_Date_(2019, 1, 1)})(rs, bs)
+		atDate := Styled[klog.Date]{klog.Ɀ_Date_(2019, 1, 1), false}
+		reconciler := NewReconcilerForNewRecord(atDate, AdditionalData{})(rs, bs)
 		result, err := reconciler.MakeResult()
 		require.Nil(t, err)
 		assert.Equal(t, x.expected, result.AllSerialised)
@@ -132,7 +137,8 @@ func TestReconcileAddBlockInBetween(t *testing.T) {
 		{"2018-01-02\n\t1h\n\n2018-01-03", "2018-01-02\n\t1h\n\n2018-01-02\n\n2018-01-03"},
 	} {
 		rs, bs, _ := parser.NewSerialParser().Parse(x.original)
-		reconciler := NewReconcilerForNewRecord(RecordParams{Date: klog.Ɀ_Date_(2018, 1, 2)})(rs, bs)
+		atDate := Styled[klog.Date]{klog.Ɀ_Date_(2018, 1, 2), false}
+		reconciler := NewReconcilerForNewRecord(atDate, AdditionalData{})(rs, bs)
 		result, err := reconciler.MakeResult()
 		require.Nil(t, err)
 		assert.Equal(t, x.expected, result.AllSerialised)
@@ -144,7 +150,8 @@ func TestReconcileAddRecordWithShouldTotal(t *testing.T) {
 2018-01-01
     1h`
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
-	reconciler := NewReconcilerForNewRecord(RecordParams{Date: klog.Ɀ_Date_(2018, 1, 2), ShouldTotal: klog.NewShouldTotal(5, 31)})(rs, bs)
+	atDate := Styled[klog.Date]{klog.Ɀ_Date_(2018, 1, 2), false}
+	reconciler := NewReconcilerForNewRecord(atDate, AdditionalData{ShouldTotal: klog.NewShouldTotal(5, 31)})(rs, bs)
 	result, err := reconciler.MakeResult()
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -161,8 +168,9 @@ func TestReconcileAddRecordWithSummary(t *testing.T) {
 2018-01-01
     1h`
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
+	atDate := Styled[klog.Date]{klog.Ɀ_Date_(2018, 1, 2), false}
 	summary := klog.Ɀ_RecordSummary_("This is a new record.", "It has a summary.")
-	reconciler := NewReconcilerForNewRecord(RecordParams{Date: klog.Ɀ_Date_(2018, 1, 2), Summary: summary})(rs, bs)
+	reconciler := NewReconcilerForNewRecord(atDate, AdditionalData{Summary: summary})(rs, bs)
 	result, err := reconciler.MakeResult()
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -176,6 +184,30 @@ It has a summary.
 	assert.Equal(t, result.Record.Summary(), summary)
 }
 
+func TestReconcileAddRecordWithUTF8Summary(t *testing.T) {
+	original := `
+2018-01-01
+Þetta er gömul færsla.
+    1h Ein klukkustund.
+`
+	rs, bs, _ := parser.NewSerialParser().Parse(original)
+	atDate := Styled[klog.Date]{klog.Ɀ_Date_(2018, 1, 2), false}
+	summary := klog.Ɀ_RecordSummary_("Þetta er ný færsla.", "Það hefur margar línur.")
+	reconciler := NewReconcilerForNewRecord(atDate, AdditionalData{Summary: summary})(rs, bs)
+	result, err := reconciler.MakeResult()
+	require.Nil(t, err)
+	assert.Equal(t, `
+2018-01-01
+Þetta er gömul færsla.
+    1h Ein klukkustund.
+
+2018-01-02
+Þetta er ný færsla.
+Það hefur margar línur.
+`, result.AllSerialised)
+	assert.Equal(t, result.Record.Summary(), summary)
+}
+
 func TestReconcileRespectsExistingStylePref(t *testing.T) {
 	for _, x := range []struct {
 		original string
@@ -185,7 +217,8 @@ func TestReconcileRespectsExistingStylePref(t *testing.T) {
 		{"3145/06/14\n\n3145/06/15\n\n3145-06-15\n", "3145/06/14\n\n3145/06/15\n\n3145-06-15\n\n3145/06/16\n"},
 	} {
 		rs, bs, _ := parser.NewSerialParser().Parse(x.original)
-		reconciler := NewReconcilerForNewRecord(RecordParams{Date: klog.Ɀ_Date_(3145, 6, 16)})(rs, bs)
+		atDate := Styled[klog.Date]{klog.Ɀ_Date_(3145, 6, 16), true}
+		reconciler := NewReconcilerForNewRecord(atDate, AdditionalData{})(rs, bs)
 		result, err := reconciler.MakeResult()
 		require.Nil(t, err)
 		assert.Equal(t, x.expected, result.AllSerialised)
