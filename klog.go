@@ -48,7 +48,7 @@ func main() {
 		License:       license,
 		Changelog:     changelog,
 		Version:       BinaryVersion,
-		BuildHash:     BinaryBuildHash,
+		SrcHash:       BinaryBuildHash,
 	}, prefs, os.Args[1:])
 	if runErr != nil {
 		fmt.Println(runErr)

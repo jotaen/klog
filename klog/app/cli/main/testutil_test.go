@@ -39,7 +39,7 @@ func (e *Env) run(invocation ...[]string) []string {
 			License:       "[License text]",
 			Changelog:     "[Changelog text]",
 			Version:       "v0.0",
-			BuildHash:     "1234567",
+			SrcHash:       "abc1234",
 		}, app.NewDefaultPreferences(), args)
 
 		_ = w.Close()

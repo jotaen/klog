@@ -89,11 +89,11 @@ type Meta struct {
 	// Changelog contains the history of all changes.
 	Changelog string
 
-	// Version contains the build version.
+	// Version contains the release version, e.g. `v2.7`.
 	Version string
 
-	// BuildHash contains a unique build identifier.
-	BuildHash string
+	// SrcHash contains the hash of the sources that the binary was built from.
+	SrcHash string
 }
 
 // Preferences are user-defined configuration.
@@ -118,8 +118,8 @@ func NewContext(homeDir string, meta Meta, serialiser parser.Serialiser, prefs P
 	if meta.Version == "" {
 		meta.Version = "v?.?"
 	}
-	if meta.BuildHash == "" {
-		meta.BuildHash = strings.Repeat("?", 7)
+	if meta.SrcHash == "" {
+		meta.SrcHash = strings.Repeat("?", 7)
 	}
 	parserEngine := parser.NewSerialParser()
 	if prefs.CpuKernels > 1 {

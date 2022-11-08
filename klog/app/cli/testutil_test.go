@@ -85,7 +85,7 @@ func (ctx *TestingContext) Meta() app.Meta {
 		Specification: "",
 		License:       "",
 		Version:       "v0.0",
-		BuildHash:     "abcdef1",
+		SrcHash:       "abc1234",
 	}
 }
 
