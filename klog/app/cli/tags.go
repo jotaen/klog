@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/lib"
 	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
@@ -9,6 +10,7 @@ import (
 
 type Tags struct {
 	Values bool `name:"values" short:"v" help:"Display breakdown of tag values"`
+	Count  bool `name:"count" short:"c" help:"Display the number of matching entries per tag"`
 	lib.FilterArgs
 	lib.NowArgs
 	lib.DecimalArgs
@@ -36,23 +38,31 @@ func (opt *Tags) Run(ctx app.Context) error {
 	}
 	numberOfColumns := 2
 	if opt.Values {
-		numberOfColumns = 3
+		numberOfColumns++
+	}
+	if opt.Count {
+		numberOfColumns++
 	}
 	table := terminalformat.NewTable(numberOfColumns, " ")
 	for _, t := range totalByTag {
 		totalString := ctx.Serialiser().Duration(t.Total)
+		countString := ctx.Serialiser().Format(terminalformat.Style{Color: "247"}, fmt.Sprintf(" (%d)", t.Count))
 		if t.Tag.Value() == "" {
 			table.CellL("#" + t.Tag.Name())
 			table.CellL(totalString)
-		} else {
 			if opt.Values {
-				table.CellL(" " + t.Tag.Value())
 				table.Skip(1)
-				table.CellL(totalString)
 			}
-		}
-		if t.Tag.Value() == "" && opt.Values {
+			if opt.Count {
+				table.CellL(countString)
+			}
+		} else if opt.Values {
+			table.CellL(" " + ctx.Serialiser().Format(terminalformat.Style{Color: "247"}, t.Tag.Value()))
 			table.Skip(1)
+			table.CellL(totalString)
+			if opt.Count {
+				table.CellL(countString)
+			}
 		}
 	}
 	table.Collect(ctx.Print)

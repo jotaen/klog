@@ -13,7 +13,7 @@ type CliSerialiser struct {
 	Decimal  bool // -> Decimal values rather than the canonical totals
 }
 
-func (cs CliSerialiser) format(s tf.Style, t string) string {
+func (cs CliSerialiser) Format(s parser.Styler, t string) string {
 	if cs.Unstyled {
 		return t
 	}
@@ -38,11 +38,11 @@ func (cs CliSerialiser) duration(d klog.Duration, withSign bool) string {
 }
 
 func (cs CliSerialiser) Date(d klog.Date) string {
-	return cs.format(tf.Style{Color: "015", IsUnderlined: true}, d.ToString())
+	return cs.Format(tf.Style{Color: "015", IsUnderlined: true}, d.ToString())
 }
 
 func (cs CliSerialiser) ShouldTotal(d klog.Duration) string {
-	return cs.format(tf.Style{Color: "213"}, cs.duration(d, false))
+	return cs.Format(tf.Style{Color: "213"}, cs.duration(d, false))
 }
 
 func (cs CliSerialiser) Summary(s parser.SummaryText) string {
@@ -52,15 +52,15 @@ func (cs CliSerialiser) Summary(s parser.SummaryText) string {
 	txt = klog.HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
 		return cs.formatAndRestore(hashStyle, style, h)
 	})
-	return cs.format(style, txt)
+	return cs.Format(style, txt)
 }
 
 func (cs CliSerialiser) Range(r klog.Range) string {
-	return cs.format(tf.Style{Color: "117"}, r.ToString())
+	return cs.Format(tf.Style{Color: "117"}, r.ToString())
 }
 
 func (cs CliSerialiser) OpenRange(or klog.OpenRange) string {
-	return cs.format(tf.Style{Color: "027"}, or.ToString())
+	return cs.Format(tf.Style{Color: "027"}, or.ToString())
 }
 
 func (cs CliSerialiser) Duration(d klog.Duration) string {
@@ -68,7 +68,7 @@ func (cs CliSerialiser) Duration(d klog.Duration) string {
 	if d.InMinutes() < 0 {
 		f.Color = "167"
 	}
-	return cs.format(f, cs.duration(d, false))
+	return cs.Format(f, cs.duration(d, false))
 }
 
 func (cs CliSerialiser) SignedDuration(d klog.Duration) string {
@@ -76,9 +76,9 @@ func (cs CliSerialiser) SignedDuration(d klog.Duration) string {
 	if d.InMinutes() < 0 {
 		f.Color = "167"
 	}
-	return cs.format(f, cs.duration(d, true))
+	return cs.Format(f, cs.duration(d, true))
 }
 
 func (cs CliSerialiser) Time(t klog.Time) string {
-	return cs.format(tf.Style{Color: "027"}, t.ToString())
+	return cs.Format(tf.Style{Color: "027"}, t.ToString())
 }
