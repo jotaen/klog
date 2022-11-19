@@ -4,6 +4,7 @@ import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/lib"
+	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/service"
 	"strings"
@@ -22,7 +23,7 @@ func (opt *Print) Help() string {
 	return `The output is syntax-highlighted and the formatting is slightly sanitised.`
 }
 
-func (opt *Print) Run(ctx app.Context) error {
+func (opt *Print) Run(ctx app.Context) app.Error {
 	opt.NoStyleArgs.Apply(&ctx)
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
@@ -49,11 +50,11 @@ func (opt *Print) Run(ctx app.Context) error {
 
 func printWithDurations(serialiser parser.Serialiser, ls parser.Lines) string {
 	type Prefix struct {
-		d      klog.Duration
-		column int
+		d     klog.Duration
+		isSub bool
 	}
 	var prefixes []*Prefix
-	maxColumnLengths := []int{0, 0}
+	maxColumnLength := 0
 	var previousRecord klog.Record
 	previousEntry := -1
 	for _, l := range ls {
@@ -65,43 +66,44 @@ func printWithDurations(serialiser parser.Serialiser, ls parser.Lines) string {
 			}
 			if previousRecord == nil {
 				previousRecord = l.Record
-				return &Prefix{service.Total(l.Record), 0}
+				return &Prefix{service.Total(l.Record), false}
 			}
 			if l.EntryI != -1 && l.EntryI != previousEntry {
 				previousEntry = l.EntryI
-				return &Prefix{l.Record.Entries()[l.EntryI].Duration(), 1}
+				return &Prefix{l.Record.Entries()[l.EntryI].Duration(), true}
 			} else {
 				return nil
 			}
 		}()
 		prefixes = append(prefixes, prefix)
-		if prefix != nil && len(prefix.d.ToString()) > maxColumnLengths[prefix.column] {
-			maxColumnLengths[prefix.column] = len(prefix.d.ToString())
+		if prefix != nil && len(prefix.d.ToString()) > maxColumnLength {
+			maxColumnLength = len(prefix.d.ToString())
 		}
 	}
-	RECORD_SEPARATOR := strings.Repeat("-", maxColumnLengths[0]) + "-+-" + strings.Repeat("-", maxColumnLengths[1])
-	result := RECORD_SEPARATOR + "-+ " + "\n"
+
+	result := "\n"
 	for i, l := range ls {
-		prefixText := ""
 		p := prefixes[i]
 		if l.Record == nil {
-			prefixText = RECORD_SEPARATOR
-			prefixText += "-+ "
-		} else {
-			column := []string{strings.Repeat(" ", maxColumnLengths[0]), strings.Repeat(" ", maxColumnLengths[1])}
-			if p != nil {
-				column[p.column] = strings.Repeat(" ", maxColumnLengths[0]-len(p.d.ToString()))
-				column[p.column] += serialiser.Duration(p.d)
-			}
-			prefixText += column[0]
-			prefixText += " | "
-			prefixText += column[1]
-			prefixText += " | "
+			result += "\n"
+			continue
 		}
-		result += prefixText
+		result += func() string {
+			if p == nil {
+				return strings.Repeat(" ", maxColumnLength+1)
+			}
+			length := len(p.d.ToString())
+			value := ""
+			if p.isSub {
+				value += serialiser.Format(terminalformat.Style{Color: "247"}, p.d.ToString())
+			} else {
+				value += serialiser.Format(terminalformat.Style{IsUnderlined: true}, p.d.ToString())
+			}
+			return strings.Repeat(" ", maxColumnLength-length+1) + value
+		}()
+		result += "  |  "
 		result += l.Text
 		result += "\n"
 	}
-	result += RECORD_SEPARATOR + "-+ "
 	return result
 }

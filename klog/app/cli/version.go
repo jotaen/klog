@@ -19,7 +19,7 @@ type Version struct {
 
 var KLOG_WEBSITE_URL = "https://klog.jotaen.net"
 
-func (opt *Version) Run(ctx app.Context) error {
+func (opt *Version) Run(ctx app.Context) app.Error {
 	if opt.Quiet {
 		ctx.Print(ctx.Meta().Version + "\n")
 		return nil

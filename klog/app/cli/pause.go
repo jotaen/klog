@@ -23,7 +23,7 @@ The command is blocking, and it keeps updating the pause entry until the process
 `
 }
 
-func (opt *Pause) Run(ctx app.Context) error {
+func (opt *Pause) Run(ctx app.Context) app.Error {
 	// We don’t rely on the accumulated counter, because then it might
 	// also accumulate imprecisions over time. Therefore, we always base the
 	// increment off the initial start time.
@@ -34,7 +34,7 @@ func (opt *Pause) Run(ctx app.Context) error {
 	start := gotime.Now()
 	minsProcessed := 0
 	isDryRun := true
-	return lib.WithRepeat(ctx.Print, 500*gotime.Millisecond, func(counter int64) error {
+	return lib.WithRepeat(ctx.Print, 500*gotime.Millisecond, func(counter int64) app.Error {
 		dots := strings.Repeat(".", int(counter%4))
 		diffMins := int(-1 * gotime.Time.Sub(start, gotime.Now()).Minutes())
 		ctx.Print("Pausing since " +

@@ -19,7 +19,7 @@ func (opt *Info) Help() string {
 	return DESCRIPTION
 }
 
-func (opt *Info) Run(ctx app.Context) error {
+func (opt *Info) Run(ctx app.Context) app.Error {
 	if opt.Version {
 		versionCmd := Version{}
 		return versionCmd.Run(ctx)

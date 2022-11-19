@@ -32,7 +32,7 @@ You can specify as many bookmarks as you want. There can even be one â€œunnamedâ
 
 type BookmarksList struct{}
 
-func (opt *BookmarksList) Run(ctx app.Context) error {
+func (opt *BookmarksList) Run(ctx app.Context) app.Error {
 	bc, err := ctx.ReadBookmarks()
 	if err != nil {
 		return err

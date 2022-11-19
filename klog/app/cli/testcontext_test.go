@@ -64,7 +64,7 @@ func (ctx TestingContext) _SetExecute(execute func(command.Command) app.Error) T
 	return ctx
 }
 
-func (ctx TestingContext) _Run(cmd func(app.Context) error) (State, error) {
+func (ctx TestingContext) _Run(cmd func(app.Context) app.Error) (State, app.Error) {
 	cmdErr := cmd(&ctx)
 	out := terminalformat.StripAllAnsiSequences(ctx.printBuffer)
 	if len(out) > 0 && out[0] != '\n' {

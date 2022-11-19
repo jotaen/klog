@@ -116,3 +116,17 @@ func TestAddDurations(t *testing.T) {
 	assert.Equal(t, d3, w.Entries()[2].value)
 	assert.Nil(t, w.Entries()[2].Summary())
 }
+
+func TestCalculatesDurationForEntries(t *testing.T) {
+	r := NewRecord(Ɀ_Date_(2012, 6, 17))
+	r.AddRange(Ɀ_Range_(Ɀ_Time_(8, 30), Ɀ_Time_(9, 19)), nil)
+	r.Start(NewOpenRange(Ɀ_Time_(10, 00)), nil)
+	r.AddDuration(NewDuration(15, 8), nil)
+	// Don’t take over forced sign from duration:
+	r.AddDuration(NewDurationWithFormat(0, 16, DurationFormat{ForceSign: true}), nil)
+	require.Len(t, r.Entries(), 4)
+	assert.Equal(t, NewDuration(0, 49), r.Entries()[0].Duration())
+	assert.Equal(t, NewDuration(0, 0), r.Entries()[1].Duration())
+	assert.Equal(t, NewDuration(15, 8), r.Entries()[2].Duration())
+	assert.Equal(t, NewDuration(0, 16), r.Entries()[3].Duration())
+}

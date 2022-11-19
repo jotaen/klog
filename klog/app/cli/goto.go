@@ -9,7 +9,7 @@ type Goto struct {
 	lib.OutputFileArgs
 }
 
-func (opt *Goto) Run(ctx app.Context) error {
+func (opt *Goto) Run(ctx app.Context) app.Error {
 	target, rErr := ctx.RetrieveTargetFile(opt.File)
 	if rErr != nil {
 		return rErr

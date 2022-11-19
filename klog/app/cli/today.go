@@ -28,11 +28,11 @@ When both --now and --diff are set, it also calculates the forecasted end-time a
 If there are no records today, it falls back to yesterday.`
 }
 
-func (opt *Today) Run(ctx app.Context) error {
+func (opt *Today) Run(ctx app.Context) app.Error {
 	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)
 	if opt.Follow {
-		return lib.WithRepeat(ctx.Print, 1*gotime.Second, func(counter int64) error {
+		return lib.WithRepeat(ctx.Print, 1*gotime.Second, func(counter int64) app.Error {
 			err := handle(opt, ctx)
 			if counter < 7 {
 				// Display exit hint for a couple of seconds.
@@ -56,7 +56,7 @@ var (
 	COL_4  = 11
 )
 
-func handle(opt *Today, ctx app.Context) error {
+func handle(opt *Today, ctx app.Context) app.Error {
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err

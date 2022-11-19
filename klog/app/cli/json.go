@@ -25,7 +25,7 @@ The structure of the "record" and "error" objects is always uniform. You can bes
 `
 }
 
-func (opt *Json) Run(ctx app.Context) error {
+func (opt *Json) Run(ctx app.Context) app.Error {
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		parserErrs, isParserErr := err.(app.ParserErrors)

@@ -13,7 +13,7 @@ type Edit struct {
 
 var hint = "You can specify your preferred editor via the $EDITOR or $KLOG_EDITOR environment variable."
 
-func (opt *Edit) Run(ctx app.Context) error {
+func (opt *Edit) Run(ctx app.Context) app.Error {
 	target, err := ctx.RetrieveTargetFile(opt.File)
 	if err != nil {
 		return err

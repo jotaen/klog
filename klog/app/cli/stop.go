@@ -20,7 +20,7 @@ func (opt *Stop) Help() string {
 will replace the end placeholder with the current time (or the one specified via --time).`
 }
 
-func (opt *Stop) Run(ctx app.Context) error {
+func (opt *Stop) Run(ctx app.Context) app.Error {
 	opt.NoStyleArgs.Apply(&ctx)
 	now := ctx.Now()
 	date, isAutoDate := opt.AtDate(now)
