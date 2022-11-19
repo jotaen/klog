@@ -48,6 +48,38 @@ Was #sick, need to compensate later
 `, state.printBuffer)
 }
 
+func TestPrintTagsWithCount(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+1995-03-17
+#sports
+	3h #badminton
+	1h #running
+	1h #running
+
+1995-03-28
+Was #sick, need to compensate later
+	-30m #running
+
+1995-04-02
+	9h something untagged
+	45m #badminton
+
+1995-04-19
+#sports #running (Don’t count that twice!)
+	14:00 - 17:00 #sports #running
+	
+`)._Run((&Tags{
+		Count: true,
+	}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+#badminton 3h45m  (2)
+#running   4h30m  (4)
+#sick      -30m   (1)
+#sports    8h     (4)
+`, state.printBuffer)
+}
+
 func TestPrintTagsOverviewWithValueGrouping(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 1995-03-17
@@ -60,6 +92,24 @@ func TestPrintTagsOverviewWithValueGrouping(t *testing.T) {
 #ticket 4h   
  105       1h
  481       3h
+`, state.printBuffer)
+}
+
+func TestPrintTagsOverviewWithValueGroupingAndCount(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+1995-03-17
+	3h #ticket=481
+	1h #ticket=105
+	1h
+`)._Run((&Tags{
+		Values: true,
+		Count:  true,
+	}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+#ticket 4h     (2)
+ 105       1h  (1)
+ 481       3h  (1)
 `, state.printBuffer)
 }
 

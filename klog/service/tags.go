@@ -5,14 +5,22 @@ import (
 	"sort"
 )
 
-type TagTotal struct {
-	Tag     klog.Tag
-	Total   klog.Duration
-	forSort string
+type TagStats struct {
+	Tag klog.Tag
+
+	// Total is the total duration alloted to the tag.
+	Total klog.Duration
+
+	// Count is the total number of matching entries for that tag.
+	// I.e., this is *not* how often a tag appears in the record text.
+	Count int
+
+	keyForSort string
 }
 
-// AggregateTotalsByTags returns a map for looking up matching entries for a given tag.
-func AggregateTotalsByTags(rs ...klog.Record) []TagTotal {
+// AggregateTotalsByTags returns a list of tags (sorted by tag, alphanumerically)
+// that contains statistics about the tags appearing in the data.
+func AggregateTotalsByTags(rs ...klog.Record) []*TagStats {
 	result := make(totalByTag)
 	for _, r := range rs {
 		for _, e := range r.Entries() {
@@ -29,32 +37,37 @@ func AggregateTotalsByTags(rs ...klog.Record) []TagTotal {
 	return result.toSortedList()
 }
 
-type totalByTag map[string]map[string]klog.Duration
+// Structure: "tagName":"tagValue":TagStats
+type totalByTag map[string]map[string]*TagStats
 
 func (tbt totalByTag) put(t klog.Tag, d klog.Duration) {
 	if tbt[t.Name()] == nil {
-		tbt[t.Name()] = make(map[string]klog.Duration)
+		tbt[t.Name()] = make(map[string]*TagStats)
 	}
 
 	if tbt[t.Name()][t.Value()] == nil {
-		tbt[t.Name()][t.Value()] = klog.NewDuration(0, 0)
+		tbt[t.Name()][t.Value()] = &TagStats{
+			Tag:        t,
+			Total:      klog.NewDuration(0, 0),
+			Count:      0,
+			keyForSort: t.Name() + "=" + t.Value(),
+		}
 	}
-	tbt[t.Name()][t.Value()] = tbt[t.Name()][t.Value()].Plus(d)
+
+	stats := tbt[t.Name()][t.Value()]
+	stats.Total = stats.Total.Plus(d)
+	stats.Count++
 }
 
-func (tbt totalByTag) toSortedList() []TagTotal {
-	var result []TagTotal
-	for tagName, totalsByValue := range tbt {
-		for tagValue, total := range totalsByValue {
-			result = append(result, TagTotal{
-				forSort: tagName + "=" + tagValue,
-				Tag:     klog.NewTagOrPanic(tagName, tagValue),
-				Total:   total,
-			})
+func (tbt totalByTag) toSortedList() []*TagStats {
+	var result []*TagStats
+	for _, ts := range tbt {
+		for _, t := range ts {
+			result = append(result, t)
 		}
 	}
 	sort.Slice(result, func(i int, j int) bool {
-		return result[i].forSort < result[j].forSort
+		return result[i].keyForSort < result[j].keyForSort
 	})
 	return result
 }

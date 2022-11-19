@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+type Styler interface {
+	Format(string) string
+}
+
 // Serialiser is used when the output should be modified, e.g. coloured.
 type Serialiser interface {
 	Date(klog.Date) string
@@ -15,6 +19,7 @@ type Serialiser interface {
 	Duration(klog.Duration) string
 	SignedDuration(klog.Duration) string
 	Time(klog.Time) string
+	Format(Styler, string) string
 }
 
 type Line struct {
@@ -94,3 +99,4 @@ func (ps PlainSerialiser) OpenRange(x klog.OpenRange) string     { return x.ToSt
 func (ps PlainSerialiser) Duration(x klog.Duration) string       { return x.ToString() }
 func (ps PlainSerialiser) SignedDuration(x klog.Duration) string { return x.ToString() }
 func (ps PlainSerialiser) Time(x klog.Time) string               { return x.ToString() }
+func (ps PlainSerialiser) Format(_ Styler, x string) string      { return x }
