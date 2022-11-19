@@ -3,14 +3,19 @@
 package app
 
 import (
+	"github.com/jotaen/klog/klog/app/cli/lib/command"
 	"os"
 	"syscall"
 	"unsafe"
 )
 
-var POTENTIAL_EDITORS = [][]string{{"notepad"}}
+var POTENTIAL_EDITORS = []command.Command{
+	command.New("notepad"),
+}
 
-var POTENTIAL_FILE_EXLORERS = [][]string{{"cmd.exe", "/C", "start"}}
+var POTENTIAL_FILE_EXLORERS = []command.Command{
+	command.New("cmd.exe", []string{"/C", "start"}),
+}
 
 func flagAsHidden(path string) {
 	winFileName, err := syscall.UTF16PtrFromString(path)

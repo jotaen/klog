@@ -9,6 +9,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/jotaen/klog/klog"
+	"github.com/jotaen/klog/klog/app/cli/lib/command"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 	"github.com/jotaen/klog/klog/parser/txt"
@@ -44,6 +45,9 @@ type Context interface {
 	// ReadInputs retrieves all input from the given file or bookmark names.
 	ReadInputs(...FileOrBookmarkName) ([]klog.Record, Error)
 
+	// RetrieveTargetFile returns the desired file, requiring that there is exactly one.
+	RetrieveTargetFile(fileArg FileOrBookmarkName) (FileWithContents, Error)
+
 	// ReconcileFile applies one or more reconcile handlers to a file and saves it.
 	// The boolean argument specifies whether the result shall be written into the file (true),
 	// or whether it should only perform a dry-run (false).
@@ -58,11 +62,16 @@ type Context interface {
 	// ManipulateBookmarks saves a modified bookmark collection.
 	ManipulateBookmarks(func(BookmarksCollection) Error) Error
 
-	// OpenInFileBrowser tries to open the file explorer at the location of the file.
-	OpenInFileBrowser(FileOrBookmarkName) Error
+	// Execute attempts to run a command on the system.
+	Execute(command.Command) Error
 
-	// OpenInEditor tries to open a file or bookmark in the user’s preferred $EDITOR.
-	OpenInEditor(FileOrBookmarkName, func(string)) Error
+	// Editors returns commands to launch a text editor on the system.
+	// - The string is a user-specified command, if specified.
+	// - The command list is a prioritised list of predefined commands.
+	Editors() (string, []command.Command)
+
+	// FileExplorers returns commands to launch a file explorer on the system.
+	FileExplorers() []command.Command
 
 	// Serialiser returns the current serialiser.
 	Serialiser() parser.Serialiser
@@ -206,7 +215,7 @@ func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]klog.Record, E
 	return allRecords, nil
 }
 
-func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithContents, Error) {
+func (ctx *context) RetrieveTargetFile(fileArg FileOrBookmarkName) (FileWithContents, Error) {
 	bc, err := ctx.ReadBookmarks()
 	if err != nil {
 		return nil, err
@@ -227,7 +236,7 @@ func (ctx *context) retrieveTargetFile(fileArg FileOrBookmarkName) (FileWithCont
 }
 
 func (ctx *context) ReconcileFile(doWrite bool, fileArg FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, Error) {
-	target, err := ctx.retrieveTargetFile(fileArg)
+	target, err := ctx.RetrieveTargetFile(fileArg)
 	if err != nil {
 		return nil, err
 	}
@@ -350,71 +359,27 @@ func (ctx *context) bookmarkDatabasePath() File {
 	return NewFileOrPanic(ctx.KlogFolder() + "bookmarks.json")
 }
 
-// tryCommands tries to execute the given commands one after the other.
-// Returns `true` upon first successful execution; `false` otherwise.
-func tryCommands(commands [][]string, pathArg string) bool {
-	for _, command := range commands {
-		bin := command[0]
-		binArgs := command[1:]
-		cmd := exec.Command(bin, append(binArgs, pathArg)...)
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		err := cmd.Run()
-		if err == nil {
-			return true
-		}
-	}
-	return false
-}
-
-func (ctx *context) OpenInFileBrowser(fileArg FileOrBookmarkName) Error {
-	target, rErr := ctx.retrieveTargetFile(fileArg)
-	if rErr != nil {
-		return rErr
-	}
-	hasSucceeded := tryCommands(POTENTIAL_FILE_EXLORERS, target.Location())
-	if !hasSucceeded {
-		return NewError(
-			"Failed to open file browser",
-			"Opening a file browser doesn’t seem possible on your system.",
-			nil)
-	}
-	return nil
-}
-
-func (ctx *context) OpenInEditor(fileArg FileOrBookmarkName, printHint func(string)) Error {
-	target, err := ctx.retrieveTargetFile(fileArg)
-	if err != nil {
-		return err
-	}
-
-	// If $EDITOR is specified, try to open it.
-	preferredEditor := ctx.prefs.Editor
-	if preferredEditor != "" {
-		hasSucceeded := tryCommands([][]string{{preferredEditor}}, target.Path())
-		if hasSucceeded {
-			return nil
-		}
-		return NewError(
-			"Cannot open preferred editor",
-			"$EDITOR variable was: "+preferredEditor,
-			nil,
-		)
-	}
-
-	// If no $EDITOR is specified, fall back to trying the pre-configured options.
-	hasSucceeded := tryCommands(POTENTIAL_EDITORS, target.Path())
-	hint := "You can specify your preferred editor via the $EDITOR environment variable."
-	if hasSucceeded {
-		// Inform the user that they can configure their editor:
-		printHint(hint)
+func (ctx *context) Execute(cmd command.Command) Error {
+	c := exec.Command(cmd.Bin, cmd.Args...)
+	c.Stdin = os.Stdin
+	c.Stdout = os.Stdout
+	err := c.Run()
+	if err == nil {
 		return nil
 	}
 	return NewError(
-		"Cannot open any editor",
-		hint,
-		nil,
+		"Failed to run command",
+		"The command exited with non-zero status",
+		err,
 	)
+}
+
+func (ctx *context) Editors() (string, []command.Command) {
+	return ctx.prefs.Editor, POTENTIAL_EDITORS
+}
+
+func (ctx *context) FileExplorers() []command.Command {
+	return POTENTIAL_FILE_EXLORERS
 }
 
 func (ctx *context) Serialiser() parser.Serialiser {

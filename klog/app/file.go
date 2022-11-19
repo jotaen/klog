@@ -50,6 +50,14 @@ func NewFileOrPanic(absolutePath string) File {
 	return &fileWithPath{absolutePath}
 }
 
+func NewFileWithContents(path string, contents string) (FileWithContents, Error) {
+	file, err := NewFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return &fileWithContents{file, contents}, nil
+}
+
 type fileWithPath struct {
 	absolutePath string
 }
