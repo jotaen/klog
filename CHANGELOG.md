@@ -1,6 +1,18 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## Next
+- **[ BREAKING ]** For `klog edit`, support if the `$EDITOR` variable
+  contains additional flags. (If your editor path contains spaces,
+  you now have to quote it.)
+- **[ FEATURE ]** For `klog tags`, optionally display how many entries
+  there are per tag.
+- **[ FEATURE ]** Significantly improve the parsing performance for
+  large data inputs (i.e., for files with 1000+ records).
+- **[ FEATURE ]** For `klog json`, provide `--now` flag.
+- **[ FEATURE ]** For file manipulation commands (e.g. `klog track`),
+  improve automatic detection of style preferences.
+
 ## v5.3
 - **[ FEATURE ]** Optionally amend `klog print` output with total
   values via the `--with-totals` flag.
