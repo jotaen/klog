@@ -3,15 +3,15 @@
 
 ## Next
 - **[ BREAKING ]** For `klog edit`, support if the `$EDITOR` variable
-  contains additional flags. (If your editor path contains spaces,
-  you now have to quote it.)
+  contains additional flags, e.g. `vi -R` or `subl -w`. (If your editor
+  path contains spaces, you now have to wrap it in quotes.)
 - **[ FEATURE ]** For `klog tags`, optionally display how many entries
-  there are per tag.
-- **[ FEATURE ]** Significantly improve the parsing performance for
-  large data inputs (i.e., for files with 1000+ records).
+  there are per tag via `--count`.
+- **[ FEATURE ]** Significantly improve parsing performance for large
+  data inputs (i.e., for files with 1000+ records).
 - **[ FEATURE ]** For `klog json`, provide `--now` flag.
 - **[ FEATURE ]** For file manipulation commands (e.g. `klog track`),
-  improve automatic detection of style preferences.
+  improve automatic detection of style preferences in the file.
 
 ## v5.3
 - **[ FEATURE ]** Optionally amend `klog print` output with total
