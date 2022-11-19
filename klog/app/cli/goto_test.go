@@ -18,7 +18,8 @@ func TestGotoLocation(t *testing.T) {
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, 1, spy.Count)
-	assert.Equal(t, "goto --file /tmp", spy.LastCmd.ToString())
+	assert.Equal(t, "goto", spy.LastCmd.Bin)
+	assert.Equal(t, []string{"--file", "/tmp"}, spy.LastCmd.Args)
 }
 
 func TestGotoLocationFirstSucceeds(t *testing.T) {
@@ -37,7 +38,8 @@ func TestGotoLocationFirstSucceeds(t *testing.T) {
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, 2, spy.Count)
-	assert.Equal(t, "goto2 /tmp", spy.LastCmd.ToString())
+	assert.Equal(t, "goto2", spy.LastCmd.Bin)
+	assert.Equal(t, []string{"/tmp"}, spy.LastCmd.Args)
 }
 
 func TestGotoFails(t *testing.T) {

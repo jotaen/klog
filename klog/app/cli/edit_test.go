@@ -19,7 +19,8 @@ func TestEditWithAutoEditor(t *testing.T) {
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, 1, spy.Count)
-	assert.Equal(t, "editor --file /tmp/file.klg", spy.LastCmd.ToString())
+	assert.Equal(t, "editor", spy.LastCmd.Bin)
+	assert.Equal(t, []string{"--file", "/tmp/file.klg"}, spy.LastCmd.Args)
 	// Hint was printed:
 	assert.Equal(t, hint, strings.Trim(state.printBuffer, "\n"))
 }
@@ -40,7 +41,8 @@ func TestFirstAutoEditorSucceeds(t *testing.T) {
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, 2, spy.Count)
-	assert.Equal(t, "editor2 --file /tmp/file.klg", spy.LastCmd.ToString())
+	assert.Equal(t, "editor2", spy.LastCmd.Bin)
+	assert.Equal(t, []string{"--file", "/tmp/file.klg"}, spy.LastCmd.Args)
 }
 
 func TestEditWithExplicitEditor(t *testing.T) {
@@ -52,12 +54,58 @@ func TestEditWithExplicitEditor(t *testing.T) {
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, 1, spy.Count)
-	assert.Equal(t, "myedit /tmp/file.klg", spy.LastCmd.ToString())
+	assert.Equal(t, "myedit", spy.LastCmd.Bin)
+	assert.Equal(t, []string{"/tmp/file.klg"}, spy.LastCmd.Args)
 	// No hint was printed:
 	assert.Equal(t, "", state.printBuffer)
 }
 
-func TestFailsIfExplicitEditorIncorrect(t *testing.T) {
+func TestEditWithExplicitEditorWithSpaces(t *testing.T) {
+	spy := newCommandSpy(nil)
+	_, err := NewTestingContext()._SetEditors([]command.Command{
+		command.New("editor", []string{"--file"}),
+	}, "'C:\\Program Files\\Sublime Text'")._SetExecute(spy.Execute)._Run((&Edit{
+		OutputFileArgs: lib.OutputFileArgs{File: "/tmp/file.klg"},
+	}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, 1, spy.Count)
+	assert.Equal(t, "C:\\Program Files\\Sublime Text", spy.LastCmd.Bin)
+	assert.Equal(t, []string{"/tmp/file.klg"}, spy.LastCmd.Args)
+}
+
+func TestEditWithExplicitEditorWithAdditionalArgs(t *testing.T) {
+	spy := newCommandSpy(nil)
+	_, err := NewTestingContext()._SetEditors([]command.Command{
+		command.New("editor", []string{"--file"}),
+	}, "myedit -f")._SetExecute(spy.Execute)._Run((&Edit{
+		OutputFileArgs: lib.OutputFileArgs{File: "/tmp/file.klg"},
+	}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, 1, spy.Count)
+	assert.Equal(t, "myedit", spy.LastCmd.Bin)
+	assert.Equal(t, []string{"-f", "/tmp/file.klg"}, spy.LastCmd.Args)
+}
+
+func TestEditFailsWithExplicitEditorThatHasMalformedSyntax(t *testing.T) {
+	for _, editor := range []string{
+		// Unmatched single quote:
+		`'myedit`,
+
+		// Unmatched double quote
+		`myedit --arg "foo`,
+	} {
+		spy := newCommandSpy(nil)
+		_, err := NewTestingContext()._SetEditors([]command.Command{
+			command.New("editor", []string{"--file"}),
+		}, editor)._SetExecute(spy.Execute)._Run((&Edit{
+			OutputFileArgs: lib.OutputFileArgs{File: "/tmp/file.klg"},
+		}).Run)
+		require.Error(t, err)
+		assert.Equal(t, "Invalid $EDITOR / $KLOG_EDITOR variable", err.Error())
+	}
+}
+
+func TestFailsIfExplicitEditorCrashes(t *testing.T) {
 	spy := newCommandSpy(func(c command.Command) app.Error {
 		return app.NewError("Error", "Error", nil)
 	})

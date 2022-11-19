@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go v0.104.0
 	github.com/alecthomas/kong v0.6.1
 	github.com/jotaen/kong-completion v0.0.4
+	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/posener/complete v1.2.3
 	github.com/stretchr/testify v1.7.2
 )
