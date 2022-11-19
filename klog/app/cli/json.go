@@ -7,10 +7,11 @@ import (
 )
 
 type Json struct {
+	Pretty bool `name:"pretty" help:"Pretty-print output"`
+	lib.NowArgs
 	lib.FilterArgs
 	lib.SortArgs
 	lib.InputFilesArgs
-	Pretty bool `name:"pretty" help:"Pretty-print output"`
 }
 
 func (opt *Json) Help() string {
@@ -20,7 +21,7 @@ If the file is valid, "records" is an array containing a JSON object for each re
 
 If the file has syntax errors, "records" is null and "errors" contains an array of error objects.
 
-The structure of the objects is always uniform, so you can explore it by running the command with the --pretty flag.
+The structure of the "record" and "error" objects is always uniform. You can best explore it by running the command with the --pretty flag.
 `
 }
 
@@ -34,7 +35,12 @@ func (opt *Json) Run(ctx app.Context) error {
 		}
 		return err
 	}
-	records = opt.ApplyFilter(ctx.Now(), records)
+	now := ctx.Now()
+	records, nErr := opt.ApplyNow(now, records...)
+	if nErr != nil {
+		return nErr
+	}
+	records = opt.ApplyFilter(now, records)
 	records = opt.ApplySort(records)
 	ctx.Print(json.ToJson(records, nil, opt.Pretty) + "\n")
 	return nil
