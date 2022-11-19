@@ -36,7 +36,10 @@ func main() {
 	if os.Getenv("KLOG_BETA_PARALLEL") != "" {
 		prefs.CpuKernels = runtime.NumCPU()
 	}
-	prefs.Editor = os.Getenv("EDITOR")
+	prefs.Editor = os.Getenv("KLOG_EDITOR")
+	if prefs.Editor == "" {
+		prefs.Editor = os.Getenv("EDITOR")
+	}
 	homeDir, err := user.Current()
 	if err != nil {
 		fmt.Println("Failed to initialise application. Error:")
