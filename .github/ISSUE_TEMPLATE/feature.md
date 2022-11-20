@@ -7,6 +7,6 @@ assignees: ''
 
 ---
 
-For feature ideas / requests, please use discussions instead of issues:
+Note: for feature ideas / requests, please use discussions instead of issues. Thanks!
 
 https://github.com/jotaen/klog/discussions
