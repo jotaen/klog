@@ -7,58 +7,49 @@ import (
 	"strings"
 )
 
-// PauseOpenRange adds/extends a pause entry after an open-ended time range.
-// If the next entry is a negative duration and has the same summary, its
-// value is extended. Otherwise, a new entry is created.
-// The pause duration must be negative and can’t be 0.
-func (r *Reconciler) PauseOpenRange(pause klog.Duration, summary klog.EntrySummary) (*Result, error) {
-	if pause.InMinutes() > 0 {
-		return nil, errors.New("Invalid pause duration")
+// AppendPause adds a new pause entry to a record that contains an open range.
+func (r *Reconciler) AppendPause(summary klog.EntrySummary) (*Result, error) {
+	if r.findOpenRangeIndex() == -1 {
+		return nil, errors.New("No open time range found")
 	}
-	openRangeEntryIndex := r.findOpenRangeIndex()
-	if openRangeEntryIndex == -1 {
-		return nil, errors.New("No open time range")
+	entryValue := "-0m"
+	if len(summary) == 0 {
+		summary, _ = klog.NewEntrySummary("")
 	}
-	openRangeEntryLastLineIndex := r.lastLinePointer - countLines(r.Record.Entries()[openRangeEntryIndex:])
+	if len(summary[0]) > 0 {
+		entryValue += " "
+	}
+	summary[0] = entryValue + summary[0]
+	return r.AppendEntry(summary)
+}
 
-	existingPause := func() klog.Duration {
-		// The open range is the last entry.
-		if openRangeEntryIndex == len(r.Record.Entries())-1 {
-			return nil
-		}
-		nextEntry := r.Record.Entries()[openRangeEntryIndex+1]
-		if !nextEntry.Summary().Equals(summary) {
-			// Summaries don’t match.
-			return nil
-		}
-		// Find next duration entry.
-		pauseCandidate := klog.Unbox[klog.Duration](&nextEntry,
-			func(r klog.Range) klog.Duration { return nil },
-			func(d klog.Duration) klog.Duration { return d },
-			func(or klog.OpenRange) klog.Duration { return nil },
-		)
-		// Only return it if it’s negative.
-		if pauseCandidate.InMinutes() < 0 {
-			return pauseCandidate
-		}
-		return nil
-	}()
-
-	// If there is no existing pause that matches, create a new entry underneath
-	// the open range entry.
-	if existingPause == nil {
-		r.insert(openRangeEntryLastLineIndex+1, toMultilineEntryTexts(pause.ToString(), summary))
-		return r.MakeResult()
+// ExtendPause extends an existing pause entry.
+func (r *Reconciler) ExtendPause(increment klog.Duration, additionalSummary klog.EntrySummary) (*Result, error) {
+	if r.findOpenRangeIndex() == -1 {
+		return nil, errors.New("No open time range found")
 	}
 
-	// If there is an existing pause that matches, replace it’s duration
-	// with the extended value.
-	extendedPause := existingPause.Plus(pause)
-	pauseEntryLineIndex := openRangeEntryLastLineIndex + countLines([]klog.Entry{r.Record.Entries()[openRangeEntryIndex]})
+	pauseEntryI := r.findLastEntry(func(e klog.Entry) bool {
+		return klog.Unbox[bool](&e, func(_ klog.Range) bool {
+			return false
+		}, func(d klog.Duration) bool {
+			return d.InMinutes() <= 0
+		}, func(_ klog.OpenRange) bool {
+			return false
+		})
+	})
+	if pauseEntryI == -1 {
+		return nil, errors.New("Could not find existing pause to extend")
+	}
+
+	extendedPause := r.Record.Entries()[pauseEntryI].Duration().Plus(increment)
+	pauseLineIndex := r.lastLinePointer - countLines(r.Record.Entries()[pauseEntryI:])
 	durationPattern := regexp.MustCompile(`(-\w+)`)
-	value := durationPattern.FindString(r.lines[pauseEntryLineIndex].Text)
-	if value != "" {
-		r.lines[pauseEntryLineIndex].Text = strings.Replace(r.lines[pauseEntryLineIndex].Text, value, extendedPause.ToString(), 1)
+	value := durationPattern.FindString(r.lines[pauseLineIndex].Text)
+	if extendedPause.InMinutes() != 0 {
+		r.lines[pauseLineIndex].Text = strings.Replace(r.lines[pauseLineIndex].Text, value, extendedPause.ToString(), 1)
 	}
+
+	r.concatenateSummary(pauseEntryI, pauseLineIndex, additionalSummary)
 	return r.MakeResult()
 }
