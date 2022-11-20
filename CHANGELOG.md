@@ -5,6 +5,8 @@
 - **[ BREAKING ]** For `klog edit`, support if the `$EDITOR` variable
   contains additional flags, e.g. `vi -R` or `subl -w`. (If your editor
   path contains spaces, you now have to wrap it in quotes.)
+- **[ BREAKING ]** Simplify logic of `klog pause` command; add `--extend`
+  flag for extending a previous pause.
 - **[ FEATURE ]** For `klog tags`, optionally display how many entries
   there are per tag via `--count`.
 - **[ FEATURE ]** Significantly improve parsing performance for large
