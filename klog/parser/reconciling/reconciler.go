@@ -65,18 +65,49 @@ func (r *Reconciler) MakeResult() (*Result, error) {
 
 // findOpenRangeIndex returns the index of the open range entry, or -1 if no open range.
 func (r *Reconciler) findOpenRangeIndex() int {
-	openRangeEntryIndex := -1
-	for i, e := range r.Record.Entries() {
-		klog.Unbox(&e,
-			func(klog.Range) any { return nil },
-			func(klog.Duration) any { return nil },
-			func(klog.OpenRange) any {
-				openRangeEntryIndex = i
-				return nil
-			},
+	return r.findLastEntry(func(e klog.Entry) bool {
+		return klog.Unbox[bool](&e,
+			func(klog.Range) bool { return false },
+			func(klog.Duration) bool { return false },
+			func(klog.OpenRange) bool { return true },
 		)
+	})
+}
+
+// findLastEntry finds the last entry that matches the predicate, or -1 if none match.
+func (r *Reconciler) findLastEntry(match func(klog.Entry) bool) int {
+	candidate := -1
+	for i, e := range r.Record.Entries() {
+		if match(e) {
+			candidate = i
+		}
 	}
-	return openRangeEntryIndex
+	return candidate
+}
+
+// concatenateSummary adds summary text to an existing entry that potentially already has one ore
+// more lines of summary text.
+func (r *Reconciler) concatenateSummary(entryIndex int, entryLineIndex int, additionalSummary klog.EntrySummary) {
+	// Append additional summary text. Due to multiline entry summaries, that might
+	// not be the same line as the time value.
+	lineIndexOfLastSummaryLine := entryLineIndex + countLines([]klog.Entry{r.Record.Entries()[entryIndex]}) - 1
+	if len(additionalSummary) > 0 {
+		if len(additionalSummary[0]) > 0 {
+			// If there is additional summary text, always prepend a space to delimit
+			// the additional summary from either the time value or from an already
+			// existing summary text.
+			r.lines[lineIndexOfLastSummaryLine].Text += " "
+		}
+		r.lines[lineIndexOfLastSummaryLine].Text += additionalSummary[0]
+	}
+
+	if len(additionalSummary) > 1 {
+		var subsequentSummaryLines []insertableText
+		for _, nextLine := range additionalSummary[1:] {
+			subsequentSummaryLines = append(subsequentSummaryLines, insertableText{nextLine, 2})
+		}
+		r.insert(lineIndexOfLastSummaryLine+1, subsequentSummaryLines)
+	}
 }
 
 var blankLine = insertableText{"", 0}
