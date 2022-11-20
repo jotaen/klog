@@ -19,7 +19,7 @@ type Tags struct {
 	lib.InputFilesArgs
 }
 
-func (opt *Tags) Run(ctx app.Context) error {
+func (opt *Tags) Run(ctx app.Context) app.Error {
 	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)
 	records, err := ctx.ReadInputs(opt.File...)

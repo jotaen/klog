@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"github.com/jotaen/klog/klog/app"
 	"os"
 	"os/signal"
 	"syscall"
@@ -9,7 +10,7 @@ import (
 
 // WithRepeat repetitively invokes the callback at the desired rate.
 // It always clears the terminal screen.
-func WithRepeat(print func(string), interval gotime.Duration, fn func(int64) error) error {
+func WithRepeat(print func(string), interval gotime.Duration, fn func(int64) app.Error) app.Error {
 	// Handle ^C gracefully
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)

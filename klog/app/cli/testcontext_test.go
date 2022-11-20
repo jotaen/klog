@@ -64,7 +64,7 @@ func (ctx TestingContext) _SetExecute(execute func(command.Command) app.Error) T
 	return ctx
 }
 
-func (ctx TestingContext) _Run(cmd func(app.Context) error) (State, error) {
+func (ctx TestingContext) _Run(cmd func(app.Context) app.Error) (State, app.Error) {
 	cmdErr := cmd(&ctx)
 	out := terminalformat.StripAllAnsiSequences(ctx.printBuffer)
 	if len(out) > 0 && out[0] != '\n' {
@@ -120,14 +120,12 @@ func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]klog.Recor
 	return ctx.records, nil
 }
 
-func (ctx *TestingContext) ReconcileFile(doWrite bool, _ app.FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, app.Error) {
+func (ctx *TestingContext) ReconcileFile(_ app.FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, app.Error) {
 	result, err := app.ApplyReconciler(ctx.records, ctx.blocks, creators, reconcile)
 	if err != nil {
 		return nil, err
 	}
-	if doWrite {
-		ctx.writtenFileContents = result.AllSerialised
-	}
+	ctx.writtenFileContents = result.AllSerialised
 	return result, nil
 }
 

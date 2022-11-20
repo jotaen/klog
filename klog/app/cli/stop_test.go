@@ -2,7 +2,6 @@ package cli
 
 import (
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/lib"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/stretchr/testify/assert"
@@ -121,8 +120,8 @@ func TestStopFailsIfNoOpenRange(t *testing.T) {
 		},
 	}).Run)
 	require.Error(t, err)
-	assert.Equal(t, "Manipulation failed", err.(app.Error).Error())
-	assert.Equal(t, "No open time range", err.(app.Error).Details())
+	assert.Equal(t, "Manipulation failed", err.Error())
+	assert.Equal(t, "No open time range", err.Details())
 	assert.Equal(t, "", state.writtenFileContents)
 }
 

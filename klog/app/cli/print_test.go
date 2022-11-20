@@ -86,8 +86,9 @@ Hello #world
 	1h
 
 2018-02-04
-	15:00 - 17:22
-	-1h1m
+	10:00 - 17:22
+	+6h
+	-5m
 
 2018-02-07
 	35m
@@ -99,20 +100,20 @@ Hello #world
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
-------+-------+ 
-   1h |       | 2018-01-31
-      |       | Hello #world
-      |    1h |     1h
-------+-------+ 
-1h21m |       | 2018-02-04
-      | 2h22m |     15:00 - 17:22
-      | -1h1m |     -1h1m
-------+-------+ 
-  35m |       | 2018-02-07
-      |   35m |     35m
-      |       |         Foo
-      |    0m |     18:00 - ? I just
-      |       |         started something
-------+-------+ 
+     1h  |  2018-01-31
+         |  Hello #world
+     1h  |      1h
+
+ 13h17m  |  2018-02-04
+  7h22m  |      10:00 - 17:22
+     6h  |      +6h
+    -5m  |      -5m
+
+    35m  |  2018-02-07
+    35m  |      35m
+         |          Foo
+     0m  |      18:00 - ? I just
+         |          started something
+
 `, state.printBuffer)
 }

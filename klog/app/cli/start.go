@@ -20,7 +20,7 @@ func (opt *Start) Help() string {
 The start time is the current time (or whatever is specified by --time).`
 }
 
-func (opt *Start) Run(ctx app.Context) error {
+func (opt *Start) Run(ctx app.Context) app.Error {
 	opt.NoStyleArgs.Apply(&ctx)
 	now := ctx.Now()
 	date, isAutoDate := opt.AtDate(now)

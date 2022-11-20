@@ -11,13 +11,8 @@ type ReconcileOpts struct {
 	WarnArgs
 }
 
-func Reconcile(ctx app.Context, opts ReconcileOpts, creators []reconciling.Creator, reconcile reconciling.Reconcile) error {
-	result, err := ctx.ReconcileFile(
-		true,
-		opts.OutputFileArgs.File,
-		creators,
-		reconcile,
-	)
+func Reconcile(ctx app.Context, opts ReconcileOpts, creators []reconciling.Creator, reconcile reconciling.Reconcile) app.Error {
+	result, err := ctx.ReconcileFile(opts.OutputFileArgs.File, creators, reconcile)
 	if err != nil {
 		return err
 	}

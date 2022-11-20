@@ -49,9 +49,7 @@ type Context interface {
 	RetrieveTargetFile(fileArg FileOrBookmarkName) (FileWithContents, Error)
 
 	// ReconcileFile applies one or more reconcile handlers to a file and saves it.
-	// The boolean argument specifies whether the result shall be written into the file (true),
-	// or whether it should only perform a dry-run (false).
-	ReconcileFile(bool, FileOrBookmarkName, []reconciling.Creator, reconciling.Reconcile) (*reconciling.Result, Error)
+	ReconcileFile(FileOrBookmarkName, []reconciling.Creator, reconciling.Reconcile) (*reconciling.Result, Error)
 
 	// Now returns the current timestamp.
 	Now() gotime.Time
@@ -235,7 +233,7 @@ func (ctx *context) RetrieveTargetFile(fileArg FileOrBookmarkName) (FileWithCont
 	return inputs[0], nil
 }
 
-func (ctx *context) ReconcileFile(doWrite bool, fileArg FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, Error) {
+func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, Error) {
 	target, err := ctx.RetrieveTargetFile(fileArg)
 	if err != nil {
 		return nil, err
@@ -248,11 +246,9 @@ func (ctx *context) ReconcileFile(doWrite bool, fileArg FileOrBookmarkName, crea
 	if aErr != nil {
 		return nil, aErr
 	}
-	if doWrite {
-		wErr := WriteToFile(target, result.AllSerialised)
-		if wErr != nil {
-			return nil, wErr
-		}
+	wErr := WriteToFile(target, result.AllSerialised)
+	if wErr != nil {
+		return nil, wErr
 	}
 	return result, nil
 }

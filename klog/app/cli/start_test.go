@@ -2,7 +2,6 @@ package cli
 
 import (
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/lib"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/stretchr/testify/assert"
@@ -85,7 +84,7 @@ func TestStartFailsIfDateIsInPastAndNoTimeIsGiven(t *testing.T) {
 		},
 	}).Run)
 	require.Error(t, err)
-	assert.Equal(t, "Please specify a time value for dates in the past", err.(app.Error).Details())
+	assert.Equal(t, "Please specify a time value for dates in the past", err.Details())
 	assert.Equal(t, state.writtenFileContents, "")
 }
 
@@ -100,7 +99,7 @@ func TestStartFailsIfAlreadyStarted(t *testing.T) {
 		},
 	}).Run)
 	require.Error(t, err)
-	assert.Equal(t, "There is already an open range in this record", err.(app.Error).Details())
+	assert.Equal(t, "There is already an open range in this record", err.Details())
 	assert.Equal(t, state.writtenFileContents, "")
 }
 

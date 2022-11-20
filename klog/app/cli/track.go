@@ -24,7 +24,7 @@ Remember to use 'quotes' if the entry consists of multiple words,
 and to avoid the text being processed by your shell.`
 }
 
-func (opt *Track) Run(ctx app.Context) error {
+func (opt *Track) Run(ctx app.Context) app.Error {
 	opt.NoStyleArgs.Apply(&ctx)
 	now := ctx.Now()
 	date, isAutoDate := opt.AtDate(now)

@@ -21,7 +21,7 @@ func (opt *Create) Help() string {
 (Assuming that the records are sorted from oldest to latest.)`
 }
 
-func (opt *Create) Run(ctx app.Context) error {
+func (opt *Create) Run(ctx app.Context) app.Error {
 	opt.NoStyleArgs.Apply(&ctx)
 	date, isAutoDate := opt.AtDate(ctx.Now())
 	atDate := reconciling.NewStyled[klog.Date](date, isAutoDate)

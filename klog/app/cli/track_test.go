@@ -2,7 +2,6 @@ package cli
 
 import (
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/lib"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -62,6 +61,6 @@ func TestTrackFailsIfEntryInvalid(t *testing.T) {
 	}).Run)
 	require.Error(t, err)
 	assert.Equal(t, "Manipulation failed", err.Error())
-	assert.Equal(t, "This operation wouldn’t result in a valid record", err.(app.Error).Details())
+	assert.Equal(t, "This operation wouldn’t result in a valid record", err.Details())
 	assert.Equal(t, "", state.writtenFileContents)
 }

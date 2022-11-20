@@ -40,7 +40,7 @@ func Unbox[TargetT any](e *Entry, r func(Range) TargetT, d func(Duration) Target
 func (e *Entry) Duration() Duration {
 	return Unbox[Duration](e,
 		func(r Range) Duration { return r.Duration() },
-		func(d Duration) Duration { return d },
+		func(d Duration) Duration { return NewDuration(0, d.InMinutes()) },
 		func(o OpenRange) Duration { return NewDuration(0, 0) },
 	)
 }

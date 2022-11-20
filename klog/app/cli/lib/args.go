@@ -78,7 +78,7 @@ type NowArgs struct {
 	Now bool `name:"now" short:"n" help:"Assume open ranges to be closed at this moment"`
 }
 
-func (args *NowArgs) ApplyNow(reference gotime.Time, rs ...klog.Record) ([]klog.Record, error) {
+func (args *NowArgs) ApplyNow(reference gotime.Time, rs ...klog.Record) ([]klog.Record, app.Error) {
 	if args.Now {
 		rs, err := service.CloseOpenRanges(reference, rs...)
 		if err != nil {
