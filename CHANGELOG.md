@@ -7,6 +7,9 @@
   path contains spaces, you now have to wrap it in quotes.)
 - **[ BREAKING ]** Simplify logic of `klog pause` command; add `--extend`
   flag for extending a previous pause.
+- **[ FIX ]** For `klog pause`, recover correctly after computer had
+  been asleep.
+- **[ FEATURE ]** For `klog pause`, display record while pausing.
 - **[ FEATURE ]** For `klog tags`, optionally display how many entries
   there are per tag via `--count`.
 - **[ FEATURE ]** Significantly improve parsing performance for large
