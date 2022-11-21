@@ -54,6 +54,9 @@ lines and contains a #tag as well.
     5h30m This and that
     -2h Something else
     +12m
+    0m
+    +0m
+    -0m
     <18:00 - 4:00 Foo
         Bar
     19:00 - 20:00

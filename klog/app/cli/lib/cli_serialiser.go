@@ -5,6 +5,7 @@ import (
 	tf "github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
 	"github.com/jotaen/klog/klog/parser"
 	"strconv"
+	"strings"
 )
 
 // CliSerialiser is a specialised parser.Serialiser implementation for the terminal.
@@ -74,7 +75,7 @@ func (cs CliSerialiser) OpenRange(or klog.OpenRange) string {
 
 func (cs CliSerialiser) Duration(d klog.Duration) string {
 	f := Green
-	if d.InMinutes() < 0 {
+	if strings.HasPrefix(d.ToStringWithSign(), "-") {
 		f = Red
 	}
 	return cs.Format(f, cs.duration(d, false))
@@ -82,7 +83,7 @@ func (cs CliSerialiser) Duration(d klog.Duration) string {
 
 func (cs CliSerialiser) SignedDuration(d klog.Duration) string {
 	f := Green
-	if d.InMinutes() < 0 {
+	if strings.HasPrefix(d.ToStringWithSign(), "-") {
 		f = Red
 	}
 	return cs.Format(f, cs.duration(d, true))

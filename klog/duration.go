@@ -31,12 +31,17 @@ type Duration interface {
 
 // DurationFormat contains the formatting options for a Duration.
 type DurationFormat struct {
-	ForceSign bool
+	// ForcePlus indicates whether to enforce a `+` for positive values (including 0)
+	ForcePlus bool
+
+	// ZeroSign indicates what sign a value of `0` should have:
+	// `0` means no sign (default), `1` means `+`, `-1` means `-`.
+	ZeroSign int
 }
 
 // DefaultDurationFormat returns the canonical duration format, as recommended by the spec.
 func DefaultDurationFormat() DurationFormat {
-	return DurationFormat{ForceSign: false}
+	return DurationFormat{ForcePlus: false, ZeroSign: 0}
 }
 
 func NewDuration(amountHours int, amountMinutes int) Duration {
@@ -73,14 +78,20 @@ func (d duration) Minus(deductible Duration) Duration {
 
 func (d duration) ToString() string {
 	if d.minutes == 0 {
-		return "0m"
+		sign := ""
+		if d.format.ZeroSign < 0 {
+			sign = "-"
+		} else if d.format.ZeroSign > 0 {
+			sign = "+"
+		}
+		return sign + "0m"
 	}
 	hours := abs(d.minutes / 60)
 	minutes := abs(d.minutes % 60)
 	result := ""
 	if d.minutes < 0 {
 		result += "-"
-	} else if d.format.ForceSign {
+	} else if d.format.ForcePlus {
 		result += "+"
 	}
 	if hours > 0 {
@@ -111,9 +122,9 @@ func NewDurationFromString(hhmm string) (Duration, error) {
 	if match[1] == "-" {
 		sign = -1
 	}
-	format := DurationFormat{ForceSign: false}
+	format := DefaultDurationFormat()
 	if match[1] == "+" {
-		format.ForceSign = true
+		format.ForcePlus = true
 	}
 	if match[3] == "" && match[5] == "" {
 		return nil, errors.New("MALFORMED_DURATION")
@@ -122,6 +133,9 @@ func NewDurationFromString(hhmm string) (Duration, error) {
 	amountOfMinutes, _ := strconv.Atoi(match[5])
 	if amountOfHours != 0 && amountOfMinutes >= 60 {
 		return nil, errors.New("UNREPRESENTABLE_DURATION")
+	}
+	if amountOfHours == 0 && amountOfMinutes == 0 && match[1] != "" {
+		format.ZeroSign = sign
 	}
 	return NewDurationWithFormat(sign*amountOfHours, sign*amountOfMinutes, format), nil
 }

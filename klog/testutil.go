@@ -53,7 +53,7 @@ func Ɀ_ForceSign_(d Duration) Duration {
 	if !canCast {
 		panic("Operation failed!")
 	}
-	do.format.ForceSign = true
+	do.format.ForcePlus = true
 	return do
 }
 

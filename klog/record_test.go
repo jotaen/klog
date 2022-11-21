@@ -123,7 +123,7 @@ func TestCalculatesDurationForEntries(t *testing.T) {
 	r.Start(NewOpenRange(Ɀ_Time_(10, 00)), nil)
 	r.AddDuration(NewDuration(15, 8), nil)
 	// Don’t take over forced sign from duration:
-	r.AddDuration(NewDurationWithFormat(0, 16, DurationFormat{ForceSign: true}), nil)
+	r.AddDuration(NewDurationWithFormat(0, 16, DurationFormat{ForcePlus: true}), nil)
 	require.Len(t, r.Entries(), 4)
 	assert.Equal(t, NewDuration(0, 49), r.Entries()[0].Duration())
 	assert.Equal(t, NewDuration(0, 0), r.Entries()[1].Duration())
