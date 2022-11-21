@@ -25,24 +25,48 @@ func TestSerialiseDurationOfNegativeValues(t *testing.T) {
 	assert.Equal(t, "-18m", NewDuration(0, -18).ToString())
 }
 
-func TestSerialiseDurationOfExplicitlyPositiveValues(t *testing.T) {
+func TestSerialiseDurationWithSign(t *testing.T) {
+	// Zero is neutral by default:
+	assert.Equal(t, "0m", NewDuration(0, 0).ToStringWithSign())
+
+	// Positive values:
 	assert.Equal(t, "+3h18m", NewDuration(3, 18).ToStringWithSign())
 	assert.Equal(t, "+3h", NewDuration(3, 0).ToStringWithSign())
 	assert.Equal(t, "+18m", NewDuration(0, 18).ToStringWithSign())
 
-	// 0 is an exception, as it doesn’t make sense to sign it
-	assert.Equal(t, "0m", NewDuration(0, 0).ToStringWithSign())
+	// Negative values:
+	assert.Equal(t, "-3h18m", NewDuration(-3, -18).ToStringWithSign())
+	assert.Equal(t, "-3h", NewDuration(-3, 0).ToStringWithSign())
+	assert.Equal(t, "-18m", NewDuration(0, -18).ToStringWithSign())
+}
+
+func TestSerialisePreservesOriginalFormatting(t *testing.T) {
+	for _, x := range []string{
+		"0m",
+		"+0m",
+		"-0m",
+
+		"15m",
+		"+15m",
+		"-15m",
+	} {
+		neutralZero, _ := NewDurationFromString(x)
+		assert.Equal(t, x, neutralZero.ToString())
+	}
 }
 
 func TestNormaliseDurationsWhenSerialising(t *testing.T) {
 	assert.Equal(t, "2h", NewDuration(0, 120).ToString())
 	assert.Equal(t, "2h30m", NewDuration(0, 150).ToString())
+
+	d, _ := NewDurationFromString("120m")
+	assert.Equal(t, "2h", d.ToString())
 }
 
 func TestParsingDurationWithHoursAndMinutes(t *testing.T) {
-	duration, err := NewDurationFromString("2h6m")
+	d, err := NewDurationFromString("2h6m")
 	assert.Nil(t, err)
-	assert.Equal(t, NewDuration(2, 6), duration)
+	assert.Equal(t, NewDuration(2, 6), d)
 }
 
 func TestParsingDurationWithHourValueOnly(t *testing.T) {
@@ -83,7 +107,7 @@ func TestParsingNegativeDuration(t *testing.T) {
 func TestParsingExplicitlyPositiveDuration(t *testing.T) {
 	duration, err := NewDurationFromString("+2h5m")
 	assert.Nil(t, err)
-	assert.Equal(t, NewDurationWithFormat(2, 5, DurationFormat{ForceSign: true}), duration)
+	assert.Equal(t, NewDurationWithFormat(2, 5, DurationFormat{ForcePlus: true}), duration)
 	assert.Equal(t, "+2h5m", duration.ToString())
 }
 

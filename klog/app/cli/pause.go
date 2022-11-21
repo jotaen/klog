@@ -1,9 +1,11 @@
 package cli
 
 import (
+	"fmt"
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/lib"
+	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 	"strings"
 	gotime "time"
@@ -26,9 +28,9 @@ The command is blocking – it keeps updating the pause entry until the process 
 
 func (opt *Pause) Run(ctx app.Context) app.Error {
 	opt.NoStyleArgs.Apply(&ctx)
-	today := klog.NewDateFromGo(gotime.Now())
-	doReconcile := func(reconcile reconciling.Reconcile) app.Error {
-		_, err := ctx.ReconcileFile(
+	today := klog.NewDateFromGo(ctx.Now())
+	doReconcile := func(reconcile reconciling.Reconcile) (*reconciling.Result, app.Error) {
+		return ctx.ReconcileFile(
 			opt.OutputFileArgs.File,
 			[]reconciling.Creator{
 				reconciling.NewReconcilerAtRecord(today),
@@ -36,14 +38,13 @@ func (opt *Pause) Run(ctx app.Context) app.Error {
 			},
 			reconcile,
 		)
-		return err
 	}
 
 	// Initial run:
 	// Ensure that an open range exists, and set up the pause entry:
 	// - Without `--extend`, append a new entry, including the summary
 	// - With `--extend`, find a pause and append the summary
-	err := doReconcile(func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
+	lastResult, err := doReconcile(func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
 		if opt.Extend {
 			return reconciler.ExtendPause(klog.NewDuration(0, 0), opt.Summary)
 		}
@@ -56,40 +57,52 @@ func (opt *Pause) Run(ctx app.Context) app.Error {
 	// Subsequent runs:
 	// We don’t rely on the accumulated counter, because then it might also accumulate
 	// imprecisions over time. Therefore, we always base the increment off the initial
-	// start time.
-	start := gotime.Now()
+	// start time. Also, if the computer is set to sleep, it should properly “recover”
+	// afterwards.
+	start := ctx.Now()
 	minsCaptured := 0 // The amount of minutes that have already been written into the file.
 	return lib.WithRepeat(ctx.Print, 500*gotime.Millisecond, func(counter int64) app.Error {
+		uncapturedIncrement := diffInMinutes(ctx.Now(), start) - minsCaptured
+		ctx.Debug(func() {
+			ctx.Print(fmt.Sprintf("Started: %s\n", start))
+			ctx.Print(fmt.Sprintf("Now:     %s\n", ctx.Now()))
+			ctx.Print(fmt.Sprintf("Incr.:   %d\n", uncapturedIncrement))
+			ctx.Print("\n")
+		})
+		if uncapturedIncrement > 0 {
+			lastResult, err = doReconcile(func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
+				// Don’t add the summary here, as we already appended it in the initial run.
+				return reconciler.ExtendPause(klog.NewDuration(0, -1*uncapturedIncrement), nil)
+			})
+			minsCaptured += uncapturedIncrement
+			if err != nil {
+				return err
+			}
+		}
+
 		dots := strings.Repeat(".", int(counter%4))
 		ctx.Print("" +
 			"Pausing for " +
 			// Always print number in red, but without sign
 			ctx.Serialiser().Format(lib.Red, klog.NewDuration(0, minsCaptured).ToString()) +
-			dots + "\n" +
+			fmt.Sprintf("%-4s", dots) +
 			"(since " +
 			klog.NewTimeFromGo(start).ToString() +
 			")\n")
+		ctx.Print("\n" + parser.SerialiseRecords(ctx.Serialiser(), lastResult.Record).ToString() + "\n")
 		if counter < 14 {
 			// Display exit hint for a couple of seconds.
 			ctx.Print("\n")
 			ctx.Print("Press ^C to stop\n")
 		}
-
-		diffMins := int(gotime.Time.Sub(gotime.Now(), start).Minutes())
-		increment := diffMins - minsCaptured
-		if increment > 0 {
-			minsCaptured += increment
-			err := doReconcile(func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
-				// Don’t add the summary, as we already appended it in the initial run.
-				return reconciler.ExtendPause(klog.NewDuration(0, -1*increment), nil)
-			})
-			if err != nil {
-				return err
-			}
-			ctx.Debug(func() {
-				ctx.Print("File saved.\n")
-			})
-		}
 		return nil
 	})
+}
+
+// diffInMinutes computes the “wall-clock” difference between two times.
+// Note, the built-in `Time.Sub` function computes the difference of the
+// underlying monotonic time counter, which would yield incorrect results
+// in case the monotonic timer was suspended, e.g. due to sleep.
+func diffInMinutes(t1 gotime.Time, t2 gotime.Time) int {
+	return int(t1.Unix()-t2.Unix()) / 60
 }
