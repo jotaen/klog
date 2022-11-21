@@ -459,3 +459,33 @@ func TestReportErrorsInEntries(t *testing.T) {
 		}
 	}
 }
+
+func TestParseLongDocumentWithMultipleErrors(t *testing.T) {
+	text := `
+2019-08-15
+    16:00-19:41 Something
+    20:02-?
+
+2019-08-16
+    Entry without value
+    8h
+    -12m Break
+
+2019-08-17 (8h)
+Record summary
+    11:00-?
+      Open range
+
+
+2019-08-38
+What date is this?!?
+`
+	for _, p := range parsers {
+		_, _, errs := p.Parse(text)
+		require.Len(t, errs, 4)
+		assert.Equal(t, ErrorMalformedEntry().toErrData(7, 4, 5), toErrData(errs[0]))
+		assert.Equal(t, ErrorUnrecognisedProperty().toErrData(11, 12, 2), toErrData(errs[1]))
+		assert.Equal(t, ErrorIllegalIndentation().toErrData(14, 0, 16), toErrData(errs[2]))
+		assert.Equal(t, ErrorInvalidDate().toErrData(17, 0, 10), toErrData(errs[3]))
+	}
+}

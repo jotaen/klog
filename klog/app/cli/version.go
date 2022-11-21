@@ -17,9 +17,22 @@ type Version struct {
 	lib.QuietArgs
 }
 
-var KLOG_WEBSITE_URL = "https://klog.jotaen.net"
+const KLOG_WEBSITE_URL = "https://klog.jotaen.net"
+
+var versionCheckers = []versionChecker{
+	{"https://klog.jotaen.net/versions/latest.json", &versionFromJotaen{}},
+	{"https://api.github.com/repos/jotaen/klog/releases/latest", &versionFromGithub{}},
+}
 
 func (opt *Version) Run(ctx app.Context) app.Error {
+	if ctx.Meta().Version == "" {
+		return app.NewError(
+			"Cannot check version",
+			"There is no version information embedded in your binary. Please check manually for updates on "+KLOG_WEBSITE_URL,
+			nil,
+		)
+	}
+
 	if opt.Quiet {
 		ctx.Print(ctx.Meta().Version + "\n")
 		return nil
@@ -38,13 +51,8 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 		ctx.Print(".")
 	}, stopTicker)
 
-	v := fetchVersionInfo([]versionChecker{
-		{"https://klog.jotaen.net/versions/latest.json", &versionFromJotaen{}},
-		{"https://api.github.com/repos/jotaen/klog/releases/latest", &versionFromGithub{}},
-	})
+	origin, v := fetchVersionInfo(versionCheckers)
 	close(stopTicker)
-	ctx.Print("\n")
-
 	if v == nil {
 		return app.NewError(
 			"Failed to retrieve version information.",
@@ -52,6 +60,11 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 			nil,
 		)
 	}
+
+	ctx.Print("\n")
+	ctx.Debug(func() {
+		ctx.Print("Fetched from: " + origin.url + "\n")
+	})
 	if v.Version() == ctx.Meta().Version && ctx.Meta().SrcHash == v.SrcHash() {
 		ctx.Print("You already have the latest version!\n")
 	} else {
@@ -92,7 +105,7 @@ func progressTicker(onTick func(), stop chan bool) {
 
 // fetchVersionInfo requests version info from the origins by trying them
 // one after the other. It returns the first response that succeeds.
-func fetchVersionInfo(origins []versionChecker) versionInfo {
+func fetchVersionInfo(origins []versionChecker) (*versionChecker, versionInfo) {
 	for _, origin := range origins {
 		req, _ := http.NewRequest(http.MethodGet, origin.url, nil)
 		res, err := (&http.Client{
@@ -110,9 +123,9 @@ func fetchVersionInfo(origins []versionChecker) versionInfo {
 		if err != nil || !v.IsValid() {
 			continue
 		}
-		return v
+		return &origin, v
 	}
-	return nil
+	return nil, nil
 }
 
 // versionFromJotaen checks the version from klog.jotaen.net

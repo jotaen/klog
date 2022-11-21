@@ -16,7 +16,6 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
-	"strings"
 	gotime "time"
 )
 
@@ -93,9 +92,6 @@ type Meta struct {
 	// License contains the license text.
 	License string
 
-	// Changelog contains the history of all changes.
-	Changelog string
-
 	// Version contains the release version, e.g. `v2.7`.
 	Version string
 
@@ -122,12 +118,6 @@ func NewDefaultPreferences() Preferences {
 
 // NewContext creates a new Context object.
 func NewContext(homeDir string, meta Meta, serialiser parser.Serialiser, prefs Preferences) Context {
-	if meta.Version == "" {
-		meta.Version = "v?.?"
-	}
-	if meta.SrcHash == "" {
-		meta.SrcHash = strings.Repeat("?", 7)
-	}
 	parserEngine := parser.NewSerialParser()
 	if prefs.CpuKernels > 1 {
 		parserEngine = parser.NewParallelParser(runtime.NumCPU())

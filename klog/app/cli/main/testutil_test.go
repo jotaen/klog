@@ -4,7 +4,6 @@ import (
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
 	"io"
-	"io/ioutil"
 	"os"
 )
 
@@ -14,7 +13,7 @@ type Env struct {
 
 func (e *Env) run(invocation ...[]string) []string {
 	// Create temp directory and change work dir to it.
-	tmpDir, tErr := ioutil.TempDir("", "")
+	tmpDir, tErr := os.MkdirTemp("", "")
 	assertNil(tErr)
 	cErr := os.Chdir(tmpDir)
 	assertNil(cErr)
@@ -37,7 +36,6 @@ func (e *Env) run(invocation ...[]string) []string {
 		code, runErr := Run(tmpDir, app.Meta{
 			Specification: "[Specification text]",
 			License:       "[License text]",
-			Changelog:     "[Changelog text]",
 			Version:       "v0.0",
 			SrcHash:       "abc1234",
 		}, app.NewDefaultPreferences(), args)
