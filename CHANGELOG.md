@@ -1,6 +1,23 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## Next
+- **[ BREAKING ]** For `klog edit`, support if the `$EDITOR` variable
+  contains additional flags, e.g. `vi -R` or `subl -w`. (If your editor
+  path contains spaces, you now have to wrap it in quotes.)
+- **[ BREAKING ]** Simplify logic of `klog pause` command; add `--extend`
+  flag for extending a previous pause.
+- **[ FIX ]** For `klog pause`, recover correctly after computer had
+  been asleep.
+- **[ FEATURE ]** For `klog pause`, display current record while pausing.
+- **[ FEATURE ]** For `klog tags`, optionally display how many entries
+  there are per tag via `--count`.
+- **[ FEATURE ]** For `klog json`, provide `--now` flag.
+- **[ FEATURE ]** For file manipulation commands (e.g. `klog track`),
+  improve automatic detection of style preferences in the file.
+- **[ INFO ]** Significantly improve parsing performance for large
+  data inputs (i.e., for files with 1000+ records).
+
 ## v5.3
 - **[ FEATURE ]** Optionally amend `klog print` output with total
   values via the `--with-totals` flag.

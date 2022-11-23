@@ -1,4 +1,4 @@
-![klog logp](https://klog.jotaen.net/logo/klog-black-small.svg)
+![klog logo](https://klog.jotaen.net/logo/klog-black-small.svg)
 
 # klog
 
