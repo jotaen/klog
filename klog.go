@@ -16,9 +16,6 @@ var specification string
 //go:embed LICENSE.txt
 var license string
 
-//go:embed CHANGELOG.md
-var changelog string
-
 var BinaryVersion string   // Set via build flag
 var BinaryBuildHash string // Set via build flag
 
@@ -33,9 +30,7 @@ func main() {
 	if os.Getenv("NO_COLOR") != "" {
 		prefs.NoColour = true
 	}
-	if os.Getenv("KLOG_BETA_PARALLEL") != "" {
-		prefs.CpuKernels = runtime.NumCPU()
-	}
+	prefs.CpuKernels = runtime.NumCPU()
 	prefs.Editor = os.Getenv("KLOG_EDITOR")
 	if prefs.Editor == "" {
 		prefs.Editor = os.Getenv("EDITOR")
@@ -49,7 +44,6 @@ func main() {
 	exitCode, runErr := klog.Run(homeDir.HomeDir, app.Meta{
 		Specification: specification,
 		License:       license,
-		Changelog:     changelog,
 		Version:       BinaryVersion,
 		SrcHash:       BinaryBuildHash,
 	}, prefs, os.Args[1:])

@@ -10,7 +10,7 @@ import (
 )
 
 var POTENTIAL_EDITORS = []command.Command{
-	command.New("notepad"),
+	command.New("notepad", nil),
 }
 
 var POTENTIAL_FILE_EXLORERS = []command.Command{
