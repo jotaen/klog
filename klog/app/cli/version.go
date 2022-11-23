@@ -53,6 +53,7 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 
 	origin, v := fetchVersionInfo(versionCheckers)
 	close(stopTicker)
+	ctx.Print("\n")
 	if v == nil {
 		return app.NewError(
 			"Failed to retrieve version information.",
@@ -61,7 +62,6 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 		)
 	}
 
-	ctx.Print("\n")
 	ctx.Debug(func() {
 		ctx.Print("Fetched from: " + origin.url + "\n")
 	})
@@ -107,7 +107,10 @@ func progressTicker(onTick func(), stop chan bool) {
 // one after the other. It returns the first response that succeeds.
 func fetchVersionInfo(origins []versionChecker) (*versionChecker, versionInfo) {
 	for _, origin := range origins {
-		req, _ := http.NewRequest(http.MethodGet, origin.url, nil)
+		req, err := http.NewRequest(http.MethodGet, origin.url, nil)
+		if err != nil {
+			continue
+		}
 		res, err := (&http.Client{
 			Timeout: time.Second * 5,
 		}).Do(req)
