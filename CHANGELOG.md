@@ -1,7 +1,7 @@
 # Changelog
 **Summary of changes of the command line tool**
 
-## Next
+## v5.4
 - **[ BREAKING ]** For `klog edit`, support if the `$EDITOR` variable
   contains additional flags, e.g. `vi -R` or `subl -w`. (If your editor
   path contains spaces, you now have to wrap it in quotes.)
