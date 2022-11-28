@@ -7,8 +7,9 @@ assignees: ''
 
 ---
 
-Please describe the problem and consider to include the following information:
+Please describe the problem and include helpful information such as:
 
-- Technical details, e.g. what klog version or your operating system you use
+- Technical details, e.g. what klog version or operating system you use
 - Sample data to reproduce the problem
-- The offending command that you used
+- The command that you used
+- Other relevant configuration
