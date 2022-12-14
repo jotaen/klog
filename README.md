@@ -25,7 +25,8 @@ version numbers of both are independent of each other.
 
 ## About
 
-klog is free and open-source software.
+klog was created by [Jan Heuermann](https://www.jotaen.net).
+It is open-source software, which you may use under the following terms:
 
-- The command line tool is distributed under the [MIT license](LICENSE.txt).
-- The file specification is available under the [CC0/OWFa](Specification.md#License) dual license.
+- Command line tool: [MIT license](LICENSE.txt)
+- File specification: [public domain (CC0/OWFa)](Specification.md#License)
