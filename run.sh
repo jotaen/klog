@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 # Install all dependencies
-run_install() {
+run::install() {
 	go get -t ./...
 }
 
@@ -9,7 +9,7 @@ run_install() {
 # Takes two positional arguments:
 # - The version (e.g.: v1.2)
 # - The build hash (7 chars hex)
-run_build() {
+run::build() {
 	go build \
 	  -ldflags "-X 'main.BinaryVersion=$1' -X 'main.BinaryBuildHash=$2'" \
 	  -o ./out/klog \
@@ -17,17 +17,17 @@ run_build() {
 }
 
 # Execute all tests
-run_test() {
+run::test() {
 	go test ./...
 }
 
 # Reformat all code
-run_format() {
+run::format() {
 	go fmt ./...
 }
 
 # Static code (style) analysis
-run_lint() {
+run::lint() {
   set -o errexit
   go vet ./...
   staticcheck ./...
@@ -35,6 +35,6 @@ run_lint() {
 
 # Run CLI from sources “on the fly”
 # Passes through all input args
-run_cli() {
+run::cli() {
 	go run klog.go "$@"
 }

@@ -68,7 +68,7 @@ jobs:
           GOARCH: ${{ matrix.go_arch }}
         run: |
           source ./run.sh
-          run_build ${{ github.event.inputs.release_id }} ${{ github.sha }}
+          run::build ${{ github.event.inputs.release_id }} ${{ github.sha }}
       - name: Smoke test
         if: ${{ matrix.name == 'linux' }}
         env:
