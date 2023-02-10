@@ -9,11 +9,11 @@ jobs:
     env:
       TARGET: klog/
       TEST_FILE_PATTERN: .*_test\.go
-      IMAGE_NAME: aldanial/cloc
+      IMAGE_NAME: aldanial/cloc:1.90
     steps:
       - uses: actions/checkout@v2
       - name: Prepare tooling
-        run: docker pull "${IMAGE_NAME}:1.90"
+        run: docker pull "${IMAGE_NAME}"
       - name: LOC of source files
         run: docker run --rm -v $(pwd):/wdir:ro -w /wdir "${IMAGE_NAME}" --not-match-f="${TEST_FILE_PATTERN}" "${TARGET}"
       - name: LOC of test files
