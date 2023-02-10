@@ -75,23 +75,36 @@ type DiffArgs struct {
 }
 
 type NowArgs struct {
-	Now bool `name:"now" short:"n" help:"Assume open ranges to be closed at this moment"`
+	Now          bool `name:"now" short:"n" help:"Assume open ranges to be closed at this moment"`
+	hadOpenRange bool // Field only for internal use
 }
 
-func (args *NowArgs) ApplyNow(reference gotime.Time, rs ...klog.Record) ([]klog.Record, app.Error) {
+func (args *NowArgs) ApplyNow(reference gotime.Time, rs ...klog.Record) app.Error {
 	if args.Now {
-		rs, err := service.CloseOpenRanges(reference, rs...)
+		hasClosedAnyRange, err := service.CloseOpenRanges(reference, rs...)
 		if err != nil {
-			return nil, app.NewErrorWithCode(
+			return app.NewErrorWithCode(
 				app.LOGICAL_ERROR,
 				"Cannot apply --now flag",
 				"There are records with uncloseable time ranges",
 				err,
 			)
 		}
-		return rs, nil
+		args.hadOpenRange = hasClosedAnyRange
+		return nil
 	}
-	return rs, nil
+	return nil
+}
+
+func (args *NowArgs) HadOpenRange() bool {
+	return args.hadOpenRange
+}
+
+func (args *NowArgs) GetNowWarnings() []string {
+	if args.Now && !args.hadOpenRange {
+		return []string{"You specified --now, but there was no open-ended time range."}
+	}
+	return nil
 }
 
 type FilterArgs struct {
@@ -192,9 +205,12 @@ type WarnArgs struct {
 	NoWarn bool `name:"no-warn" help:"Suppress warnings about potential mistakes"`
 }
 
-func (args *WarnArgs) PrintWarnings(ctx app.Context, records []klog.Record) {
+func (args *WarnArgs) PrintWarnings(ctx app.Context, records []klog.Record, additionalWarnings []string) {
 	if args.NoWarn {
 		return
+	}
+	for _, msg := range additionalWarnings {
+		ctx.Print(PrettifyGeneralWarning(msg))
 	}
 	service.CheckForWarnings(func(w service.Warning) {
 		ctx.Print(PrettifyWarning(w))

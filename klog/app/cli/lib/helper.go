@@ -17,6 +17,6 @@ func Reconcile(ctx app.Context, opts ReconcileOpts, creators []reconciling.Creat
 		return err
 	}
 	ctx.Print("\n" + parser.SerialiseRecords(ctx.Serialiser(), result.Record).ToString() + "\n")
-	opts.WarnArgs.PrintWarnings(ctx, result.AllRecords)
+	opts.WarnArgs.PrintWarnings(ctx, result.AllRecords, nil)
 	return nil
 }

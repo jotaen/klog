@@ -9,9 +9,11 @@ import (
 // CloseOpenRanges closes open ranges at the time of `endTime`. Returns an error
 // if a range is not closeable at that point in time.
 // This method alters the provided records!
-func CloseOpenRanges(endTime gotime.Time, rs ...klog.Record) ([]klog.Record, error) {
+// The bool return value indicates whether any open ranges have been closed.
+func CloseOpenRanges(endTime gotime.Time, rs ...klog.Record) (bool, error) {
 	thisDay := klog.NewDateFromGo(endTime)
 	theDayBefore := thisDay.PlusDays(-1)
+	hasClosedAnyRange := false
 	for _, r := range rs {
 		if r.OpenRange() == nil {
 			continue
@@ -27,12 +29,13 @@ func CloseOpenRanges(endTime gotime.Time, rs ...klog.Record) ([]klog.Record, err
 			return nil, errors.New("Encountered uncloseable open range")
 		}()
 		if tErr != nil {
-			return nil, tErr
+			return false, tErr
 		}
 		eErr := r.EndOpenRange(end)
+		hasClosedAnyRange = true
 		if eErr != nil {
-			return nil, errors.New("Encountered uncloseable open range")
+			return false, errors.New("Encountered uncloseable open range")
 		}
 	}
-	return rs, nil
+	return hasClosedAnyRange, nil
 }

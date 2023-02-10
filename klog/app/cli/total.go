@@ -34,7 +34,7 @@ func (opt *Total) Run(ctx app.Context) app.Error {
 	}
 	now := ctx.Now()
 	records = opt.ApplyFilter(now, records)
-	records, nErr := opt.ApplyNow(now, records...)
+	nErr := opt.ApplyNow(now, records...)
 	if nErr != nil {
 		return nErr
 	}
@@ -53,6 +53,6 @@ func (opt *Total) Run(ctx app.Context) app.Error {
 		return "s"
 	}()))
 
-	opt.WarnArgs.PrintWarnings(ctx, records)
+	opt.WarnArgs.PrintWarnings(ctx, records, opt.GetNowWarnings())
 	return nil
 }

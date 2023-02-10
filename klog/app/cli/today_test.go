@@ -104,11 +104,37 @@ All         10h25m    9h10m!   +1h15m      16:58
 `, state.printBuffer)
 }
 
+func TestPrintsEvaluationWithDiffAndNowEndTimeInParenthesisIfNoOpenRange(t *testing.T) {
+	state, err := NewTestingContext()._SetNow(1999, 3, 14, 21, 05)._SetRecords(`
+1999-03-12 (3h10m!)
+	6h50m
+
+1999-03-14 (6h!)
+	14:38 - 21:05
+`)._Run((&Today{
+		DiffArgs: lib.DiffArgs{Diff: true},
+		NowArgs:  lib.NowArgs{Now: true},
+		WarnArgs: lib.WarnArgs{NoWarn: true},
+	}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+             Total    Should     Diff   End-Time
+Today        6h27m       6h!     +27m    (20:38)
+Other        6h50m    3h10m!   +3h40m           
+          ======== ========= ========           
+All         13h17m    9h10m!    +4h7m    (16:58)
+`, state.printBuffer)
+}
+
 func TestPrintsPlaceholderIfEndTimeIsOutOfBounds(t *testing.T) {
 	state, err := NewTestingContext()._SetNow(1999, 3, 14, 18, 13)._SetRecords(`
 1999-03-14 (60h!)
 	1h
-`)._Run((&Today{DiffArgs: lib.DiffArgs{Diff: true}, NowArgs: lib.NowArgs{Now: true}}).Run)
+`)._Run((&Today{
+		DiffArgs: lib.DiffArgs{Diff: true},
+		NowArgs:  lib.NowArgs{Now: true},
+		WarnArgs: lib.WarnArgs{NoWarn: true},
+	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
              Total    Should     Diff   End-Time
@@ -123,7 +149,11 @@ func TestPrintsNAWhenNoCurrentRecord(t *testing.T) {
 	state, err := NewTestingContext()._SetNow(1999, 3, 16, 18, 13)._SetRecords(`
 1999-03-12 (3h10m!)
 	6h50m
-`)._Run((&Today{DiffArgs: lib.DiffArgs{Diff: true}, NowArgs: lib.NowArgs{Now: true}}).Run)
+`)._Run((&Today{
+		DiffArgs: lib.DiffArgs{Diff: true},
+		NowArgs:  lib.NowArgs{Now: true},
+		WarnArgs: lib.WarnArgs{NoWarn: true},
+	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
              Total    Should     Diff   End-Time
