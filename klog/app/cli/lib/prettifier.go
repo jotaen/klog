@@ -49,12 +49,17 @@ func PrettifyError(err error, isDebug bool) error {
 	return errors.New("Error: " + err.Error())
 }
 
-// PrettifyWarning turns an error into a coloured and well-structured form.
+// PrettifyWarning formats a warning about a record.
 func PrettifyWarning(w service.Warning) string {
+	return PrettifyGeneralWarning(w.Date().ToString() + ": " + w.Warning())
+}
+
+// PrettifyGeneralWarning formats a general warning message.
+func PrettifyGeneralWarning(message string) string {
 	result := ""
 	result += terminalformat.Style{Background: "227", Color: "000"}.Format(" WARNING ")
 	result += " "
-	result += terminalformat.Style{Color: "227"}.Format(w.Date().ToString() + ": " + w.Warning())
+	result += terminalformat.Style{Color: "227"}.Format(message)
 	result += "\n"
 	return result
 }

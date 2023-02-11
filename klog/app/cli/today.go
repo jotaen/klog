@@ -36,9 +36,7 @@ func (opt *Today) Run(ctx app.Context) app.Error {
 			err := handle(opt, ctx)
 			if counter < 7 {
 				// Display exit hint for a couple of seconds.
-				ctx.Print("\n")
-				ctx.Print("Press ^C to exit")
-				ctx.Print("\n")
+				ctx.Print("\nPress ^C to exit\n")
 			}
 			return err
 		})
@@ -62,9 +60,9 @@ func handle(opt *Today, ctx app.Context) app.Error {
 		return err
 	}
 	now := ctx.Now()
-	records, nErr := opt.ApplyNow(now, records...)
+	nErr := opt.ApplyNow(now, records...)
 	if nErr != nil {
-		return nil
+		return nErr
 	}
 
 	currentRecords, otherRecords, isYesterday := splitIntoCurrentAndOther(now, records)
@@ -125,7 +123,13 @@ func handle(opt *Today, ctx app.Context) app.Error {
 		if opt.Now {
 			if hasCurrentRecords {
 				if currentEndTime != nil {
-					table.CellR(ctx.Serialiser().Time(currentEndTime))
+					if opt.HadOpenRange() {
+						table.CellR(ctx.Serialiser().Time(currentEndTime))
+					} else {
+						table.CellR(ctx.Serialiser().Format(terminalformat.Style{
+							Color: "247",
+						}, "("+currentEndTime.ToString()+")"))
+					}
 				} else {
 					table.CellR(QQQ)
 				}
@@ -164,7 +168,13 @@ func handle(opt *Today, ctx app.Context) app.Error {
 		if opt.Now {
 			if hasCurrentRecords {
 				if grandEndTime != nil {
-					table.CellR(ctx.Serialiser().Time(grandEndTime))
+					if opt.HadOpenRange() {
+						table.CellR(ctx.Serialiser().Time(grandEndTime))
+					} else {
+						table.CellR(ctx.Serialiser().Format(terminalformat.Style{
+							Color: "247",
+						}, "("+grandEndTime.ToString()+")"))
+					}
 				} else {
 					table.CellR(QQQ)
 				}
@@ -174,7 +184,7 @@ func handle(opt *Today, ctx app.Context) app.Error {
 		}
 	}
 	table.Collect(ctx.Print)
-	opt.WarnArgs.PrintWarnings(ctx, records)
+	opt.WarnArgs.PrintWarnings(ctx, records, opt.GetNowWarnings())
 	return nil
 }
 

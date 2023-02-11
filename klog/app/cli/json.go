@@ -36,7 +36,7 @@ func (opt *Json) Run(ctx app.Context) app.Error {
 		return err
 	}
 	now := ctx.Now()
-	records, nErr := opt.ApplyNow(now, records...)
+	nErr := opt.ApplyNow(now, records...)
 	if nErr != nil {
 		return nErr
 	}

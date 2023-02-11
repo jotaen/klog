@@ -35,7 +35,7 @@ func (opt *Report) Run(ctx app.Context) app.Error {
 	if len(records) == 0 {
 		return nil
 	}
-	records, nErr := opt.ApplyNow(now, records...)
+	nErr := opt.ApplyNow(now, records...)
 	if nErr != nil {
 		return nErr
 	}
@@ -107,7 +107,7 @@ func (opt *Report) Run(ctx app.Context) app.Error {
 	}
 
 	table.Collect(ctx.Print)
-	opt.WarnArgs.PrintWarnings(ctx, records)
+	opt.WarnArgs.PrintWarnings(ctx, records, opt.GetNowWarnings())
 	return nil
 }
 

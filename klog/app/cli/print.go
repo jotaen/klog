@@ -44,7 +44,7 @@ func (opt *Print) Run(ctx app.Context) app.Error {
 	}()
 	ctx.Print(output + "\n")
 
-	opt.WarnArgs.PrintWarnings(ctx, records)
+	opt.WarnArgs.PrintWarnings(ctx, records, nil)
 	return nil
 }
 
