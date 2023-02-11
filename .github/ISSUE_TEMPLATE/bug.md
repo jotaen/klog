@@ -7,9 +7,11 @@ assignees: ''
 
 ---
 
-Please describe the problem and include helpful information such as:
-
-- Technical details, e.g. what klog version or operating system you use
-- Sample data to reproduce the problem
-- The command that you used
-- Other relevant configuration
+<!--
+          Dear bug reporter,
+          please describe your problem and include helpful information such as:
+          - Technical details, e.g. what klog version or operating system you use
+          - Sample data that demonstrates and reproduces the problem
+          - The command and input arguments that you used
+          - Other relevant configuration
+-->
