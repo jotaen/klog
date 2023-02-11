@@ -1,6 +1,10 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## Next Up
+- **[ FEATURE ]** Display warning when using `--now` without there
+  being any open-ended time range in the data.
+
 ## v5.4
 - **[ BREAKING ]** For `klog edit`, support if the `$EDITOR` variable
   contains additional flags, e.g. `vi -R` or `subl -w`. (If your editor
