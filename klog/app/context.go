@@ -15,7 +15,6 @@ import (
 	"github.com/jotaen/klog/klog/parser/txt"
 	"os"
 	"os/exec"
-	"runtime"
 	gotime "time"
 )
 
@@ -120,7 +119,7 @@ func NewDefaultPreferences() Preferences {
 func NewContext(homeDir string, meta Meta, serialiser parser.Serialiser, prefs Preferences) Context {
 	parserEngine := parser.NewSerialParser()
 	if prefs.CpuKernels > 1 {
-		parserEngine = parser.NewParallelParser(runtime.NumCPU())
+		parserEngine = parser.NewParallelParser(prefs.CpuKernels)
 	}
 	return &context{
 		homeDir,
@@ -299,23 +298,11 @@ func (ctx *context) initialiseKlogFolder() Error {
 func (ctx *context) ReadBookmarks() (BookmarksCollection, Error) {
 	bookmarksDatabase, err := ReadFile(ctx.bookmarkDatabasePath())
 	if err != nil {
-		// If database doesn’t exist, try to convert from legacy bookmark file.
-		// If that fails for whatever reason, don’t bother and create fresh collection.
 		if os.IsNotExist(err.Original()) {
-			newBc := NewEmptyBookmarksCollection()
-			legacyTargetPath, rErr := os.Readlink(ctx.bookmarkLegacySymlinkPath())
-			if rErr != nil {
-				return newBc, nil
-			}
-			legacyTarget, fErr := NewFile(legacyTargetPath)
-			if fErr != nil {
-				return newBc, nil
-			}
-			newBc.Set(NewDefaultBookmark(legacyTarget))
-			return newBc, nil
-		} else {
-			return nil, err
+			// An absent bookmarks file is equivalent to an empty one.
+			return NewEmptyBookmarksCollection(), nil
 		}
+		return nil, err
 	}
 	return NewBookmarksCollectionFromJson(bookmarksDatabase)
 }
@@ -333,12 +320,7 @@ func (ctx *context) ManipulateBookmarks(manipulate func(BookmarksCollection) Err
 	if iErr != nil {
 		return iErr
 	}
-	_ = os.Remove(ctx.bookmarkLegacySymlinkPath()) // Clean up legacy bookmark file, if exists
 	return WriteToFile(ctx.bookmarkDatabasePath(), bc.ToJson())
-}
-
-func (ctx *context) bookmarkLegacySymlinkPath() string {
-	return ctx.KlogFolder() + "bookmark.klg"
 }
 
 func (ctx *context) bookmarkDatabasePath() File {
