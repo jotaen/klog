@@ -38,7 +38,7 @@ func (e *Env) run(invocation ...[]string) []string {
 			License:       "[License text]",
 			Version:       "v0.0",
 			SrcHash:       "abc1234",
-		}, app.NewDefaultPreferences(), args)
+		}, app.NewDefaultConfig(), args)
 
 		_ = w.Close()
 		if runErr != nil || code != 0 {

@@ -175,6 +175,6 @@ func (ctx *TestingContext) SetSerialiser(s parser.Serialiser) {
 
 func (ctx *TestingContext) Debug(_ func()) {}
 
-func (ctx *TestingContext) Preferences() app.Preferences {
-	return app.NewDefaultPreferences()
+func (ctx *TestingContext) Config() app.Config {
+	return app.NewDefaultConfig()
 }

@@ -23,30 +23,25 @@ func main() {
 	if len(BinaryBuildHash) > 7 {
 		BinaryBuildHash = BinaryBuildHash[:7]
 	}
-	prefs := app.NewDefaultPreferences()
-	if os.Getenv("KLOG_DEBUG") != "" {
-		prefs.IsDebug = true
-	}
-	if os.Getenv("NO_COLOR") != "" {
-		prefs.NoColour = true
-	}
-	prefs.CpuKernels = runtime.NumCPU()
-	prefs.Editor = os.Getenv("KLOG_EDITOR")
-	if prefs.Editor == "" {
-		prefs.Editor = os.Getenv("EDITOR")
-	}
+
 	homeDir, err := user.Current()
 	if err != nil {
 		fmt.Println("Failed to initialise application. Error:")
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	config := app.NewConfig(
+		app.ConfigFromStaticValues{NumCpus: runtime.NumCPU()},
+		app.ConfigFromEnvVars{GetVar: os.Getenv},
+	)
+
 	exitCode, runErr := klog.Run(homeDir.HomeDir, app.Meta{
 		Specification: specification,
 		License:       license,
 		Version:       BinaryVersion,
 		SrcHash:       BinaryBuildHash,
-	}, prefs, os.Args[1:])
+	}, config, os.Args[1:])
 	if runErr != nil {
 		fmt.Println(runErr)
 	}

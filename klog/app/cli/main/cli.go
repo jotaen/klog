@@ -15,7 +15,7 @@ import (
 	"reflect"
 )
 
-func Run(homeDir string, meta app.Meta, prefs app.Preferences, args []string) (int, error) {
+func Run(homeDir string, meta app.Meta, config app.Config, args []string) (int, error) {
 	kongApp, nErr := kong.New(
 		&cli.Cli{},
 		kong.Name("klog"),
@@ -66,7 +66,7 @@ func Run(homeDir string, meta app.Meta, prefs app.Preferences, args []string) (i
 		homeDir,
 		meta,
 		lib.CliSerialiser{},
-		prefs,
+		config,
 	)
 
 	// When klog is invoked by shell completion (specifically, when the
@@ -82,7 +82,7 @@ func Run(homeDir string, meta app.Meta, prefs app.Preferences, args []string) (i
 
 	rErr := kongCtx.Run()
 	if rErr != nil {
-		ctx.Print(lib.PrettifyError(rErr, prefs.IsDebug).Error() + "\n")
+		ctx.Print(lib.PrettifyError(rErr, config.IsDebug.Value()).Error() + "\n")
 		if appErr, isAppError := rErr.(app.Error); isAppError {
 			return int(appErr.Code()), nil
 		} else {

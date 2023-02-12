@@ -78,8 +78,8 @@ type Context interface {
 	// Debug takes a void function that is only executed in debug mode.
 	Debug(func())
 
-	// Preferences returns the current preferences.
-	Preferences() Preferences
+	// Config returns the current preferences.
+	Config() Config
 }
 
 // Meta holds miscellaneous information about the klog binary.
@@ -98,35 +98,18 @@ type Meta struct {
 	SrcHash string
 }
 
-// Preferences are user-defined configuration.
-type Preferences struct {
-	IsDebug    bool
-	Editor     string
-	NoColour   bool
-	CpuKernels int // Must be 1 or higher
-}
-
-func NewDefaultPreferences() Preferences {
-	return Preferences{
-		IsDebug:    false,
-		Editor:     "",
-		NoColour:   false,
-		CpuKernels: 1,
-	}
-}
-
 // NewContext creates a new Context object.
-func NewContext(homeDir string, meta Meta, serialiser parser.Serialiser, prefs Preferences) Context {
+func NewContext(homeDir string, meta Meta, serialiser parser.Serialiser, cfg Config) Context {
 	parserEngine := parser.NewSerialParser()
-	if prefs.CpuKernels > 1 {
-		parserEngine = parser.NewParallelParser(prefs.CpuKernels)
+	if cfg.CpuKernels.Value() > 1 {
+		parserEngine = parser.NewParallelParser(cfg.CpuKernels.Value())
 	}
 	return &context{
 		homeDir,
 		parserEngine,
 		serialiser,
 		meta,
-		prefs,
+		cfg,
 	}
 }
 
@@ -135,7 +118,7 @@ type context struct {
 	parser     parser.Parser
 	serialiser parser.Serialiser
 	meta       Meta
-	prefs      Preferences
+	config     Config
 }
 
 func (ctx *context) Print(text string) {
@@ -343,7 +326,7 @@ func (ctx *context) Execute(cmd command.Command) Error {
 }
 
 func (ctx *context) Editors() (string, []command.Command) {
-	return ctx.prefs.Editor, POTENTIAL_EDITORS
+	return ctx.config.Editor.Value(), POTENTIAL_EDITORS
 }
 
 func (ctx *context) FileExplorers() []command.Command {
@@ -359,11 +342,11 @@ func (ctx *context) SetSerialiser(s parser.Serialiser) {
 }
 
 func (ctx *context) Debug(task func()) {
-	if ctx.prefs.IsDebug {
+	if ctx.config.IsDebug.Value() {
 		task()
 	}
 }
 
-func (ctx *context) Preferences() Preferences {
-	return ctx.prefs
+func (ctx *context) Config() Config {
+	return ctx.config
 }

@@ -222,7 +222,7 @@ type NoStyleArgs struct {
 }
 
 func (args *NoStyleArgs) Apply(ctx *app.Context) {
-	if args.NoStyle || (*ctx).Preferences().NoColour {
+	if args.NoStyle || (*ctx).Config().NoColour.Value() {
 		if s, ok := (*ctx).Serialiser().(CliSerialiser); ok {
 			s.Unstyled = true
 			(*ctx).SetSerialiser(s)
