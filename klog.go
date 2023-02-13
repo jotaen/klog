@@ -26,15 +26,15 @@ func main() {
 	}
 
 	klogFolder := func() app.File {
-		f, err := determineKlogFolderPath()
+		f, err := determineKlogFolderLocation()
 		if err != nil {
 			fail(err, false)
 		}
-		return f
+		return app.Join(f, app.KLOG_FOLDER_NAME)
 	}()
 
 	configFile := func() string {
-		c, err := readConfigFile(klogFolder.Path())
+		c, err := readConfigFile(app.Join(klogFolder, app.CONFIG_FILE_NAME))
 		if err != nil {
 			fail(err, false)
 		}
@@ -78,12 +78,8 @@ func fail(e error, isDebug bool) {
 
 // readConfigFile reads the config file from disk, if present.
 // If not present, it returns empty string.
-func readConfigFile(klogFolderPath string) (string, error) {
-	file, fErr := app.NewFile(klogFolderPath + app.CONFIG_FILE_NAME)
-	if fErr != nil {
-		return "", fErr
-	}
-	contents, rErr := app.ReadFile(file)
+func readConfigFile(location app.File) (string, error) {
+	contents, rErr := app.ReadFile(location)
 	if rErr != nil {
 		if rErr.Code() == app.NO_SUCH_FILE {
 			return "", nil
@@ -93,12 +89,12 @@ func readConfigFile(klogFolderPath string) (string, error) {
 	return contents, nil
 }
 
-// determineKlogFolderPath returns the path of the `.klog` folder, determined by
-// following this lookup precedence:
+// determineKlogFolderLocation returns the location where the `.klog` folder should be place.
+// This is determined by following this lookup precedence:
 // - $KLOG_FOLDER_LOCATION, if set
 // - $XDG_CONFIG_HOME, if set
 // - The default home folder, e.g. `~`
-func determineKlogFolderPath() (app.File, error) {
+func determineKlogFolderLocation() (app.File, error) {
 	location := os.Getenv("$KLOG_FOLDER_LOCATION")
 	if os.Getenv("XDG_CONFIG_HOME") != "" {
 		location = os.Getenv("XDG_CONFIG_HOME")
@@ -109,9 +105,5 @@ func determineKlogFolderPath() (app.File, error) {
 		}
 		location = homeDir.HomeDir
 	}
-	f, fErr := app.NewFile(location)
-	if fErr != nil {
-		return nil, fErr
-	}
-	return app.Join(f, app.KLOG_FOLDER_NAME), nil
+	return app.NewFile(location)
 }
