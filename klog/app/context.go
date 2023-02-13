@@ -22,6 +22,12 @@ import (
 // as specified as argument on the command line.
 type FileOrBookmarkName string
 
+const (
+	KLOG_FOLDER    = ".klog/"
+	BOOKMARKS_FILE = "bookmarks.json"
+	CONFIG_FILE    = "config.yml"
+)
+
 // Context is a representation of the runtime environment of klog.
 // The commands carry out all side effects via this interface.
 type Context interface {
@@ -33,9 +39,6 @@ type Context interface {
 
 	// KlogFolder returns the path of the .klog folder.
 	KlogFolder() string
-
-	// HomeFolder returns the path of the user’s home folder.
-	HomeFolder() string
 
 	// Meta returns miscellaneous meta information.
 	Meta() Meta
@@ -99,13 +102,13 @@ type Meta struct {
 }
 
 // NewContext creates a new Context object.
-func NewContext(homeDir string, meta Meta, serialiser parser.Serialiser, cfg Config) Context {
+func NewContext(klogFolderPath string, meta Meta, serialiser parser.Serialiser, cfg Config) Context {
 	parserEngine := parser.NewSerialParser()
 	if cfg.CpuKernels.Value() > 1 {
 		parserEngine = parser.NewParallelParser(cfg.CpuKernels.Value())
 	}
 	return &context{
-		homeDir,
+		klogFolderPath,
 		parserEngine,
 		serialiser,
 		meta,
@@ -114,11 +117,11 @@ func NewContext(homeDir string, meta Meta, serialiser parser.Serialiser, cfg Con
 }
 
 type context struct {
-	homeDir    string
-	parser     parser.Parser
-	serialiser parser.Serialiser
-	meta       Meta
-	config     Config
+	klogFolderPath string
+	parser         parser.Parser
+	serialiser     parser.Serialiser
+	meta           Meta
+	config         Config
 }
 
 func (ctx *context) Print(text string) {
@@ -139,12 +142,8 @@ func (ctx *context) ReadLine() (string, Error) {
 	)
 }
 
-func (ctx *context) HomeFolder() string {
-	return ctx.homeDir
-}
-
 func (ctx *context) KlogFolder() string {
-	return ctx.homeDir + "/.klog/"
+	return ctx.klogFolderPath
 }
 
 func (ctx *context) Meta() Meta {
@@ -307,7 +306,7 @@ func (ctx *context) ManipulateBookmarks(manipulate func(BookmarksCollection) Err
 }
 
 func (ctx *context) bookmarkDatabasePath() File {
-	return NewFileOrPanic(ctx.KlogFolder() + "bookmarks.json")
+	return NewFileOrPanic(ctx.KlogFolder() + BOOKMARKS_FILE)
 }
 
 func (ctx *context) Execute(cmd command.Command) Error {

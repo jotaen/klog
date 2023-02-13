@@ -9,13 +9,18 @@ import (
 
 // Rounding is an integer divider of 60 that Time values can be rounded to.
 type Rounding interface {
-	toInt() int
+	ToInt() int
+	ToString() string
 }
 
 type rounding int
 
-func (r rounding) toInt() int {
+func (r rounding) ToInt() int {
 	return int(r)
+}
+
+func (r rounding) ToString() string {
+	return strconv.Itoa(r.ToInt()) + "m"
 }
 
 // NewRounding creates a Rounding from an integer. For non-allowed
@@ -51,7 +56,7 @@ func NewRoundingFromString(v string) (Rounding, error) {
 // E.g., for rounding=5m: 8:03 => 8:05, or for rounding=30m: 15:12 => 15:00
 func RoundToNearest(t klog.Time, r Rounding) klog.Time {
 	midnightOffset := t.MidnightOffset().InMinutes()
-	v := r.toInt()
+	v := r.ToInt()
 	remainder := midnightOffset % v
 	uprounder := func() int { // Decide whether to round up the value.
 		if remainder >= (v/2 + v%2) {
