@@ -95,7 +95,7 @@ func readConfigFile(location app.File) (string, error) {
 // - $XDG_CONFIG_HOME, if set
 // - The default home folder, e.g. `~`
 func determineKlogFolderLocation() (app.File, error) {
-	location := os.Getenv("$KLOG_FOLDER_LOCATION")
+	location := os.Getenv("KLOG_FOLDER_LOCATION")
 	if os.Getenv("XDG_CONFIG_HOME") != "" {
 		location = os.Getenv("XDG_CONFIG_HOME")
 	} else if location == "" {
