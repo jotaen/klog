@@ -11,7 +11,10 @@ run::install() {
 # - The build hash (7 chars hex)
 run::build() {
 	go build \
-	  -ldflags "-X 'main.BinaryVersion=$1' -X 'main.BinaryBuildHash=$2'" \
+	  -ldflags "\
+	    -X 'main.BinaryVersion=${1:-v?.?}' \
+	    -X 'main.BinaryBuildHash=${2:-???????}' \
+	    " \
 	  -o ./out/klog \
 	  klog.go
 }

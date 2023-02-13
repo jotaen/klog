@@ -4,6 +4,7 @@ import (
 	"github.com/jotaen/klog/klog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"strings"
 	"testing"
 )
 
@@ -21,7 +22,7 @@ func TestValidRoundingValues(t *testing.T) {
 	} {
 		fr, err := NewRounding(m)
 		require.Nil(t, err)
-		assert.Equal(t, m, fr.toInt())
+		assert.Equal(t, m, fr.ToInt())
 	}
 }
 
@@ -51,7 +52,11 @@ func TestParseRoundingValuesFromString(t *testing.T) {
 	} {
 		fr, err := NewRoundingFromString(x.value)
 		require.Nil(t, err)
-		assert.Equal(t, x.expected, fr.toInt())
+		assert.Equal(t, x.expected, fr.ToInt())
+		if strings.HasSuffix(x.value, "m") {
+			// It always stringifies with a `m` suffix.
+			assert.Equal(t, x.value, fr.ToString())
+		}
 	}
 }
 

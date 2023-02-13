@@ -15,13 +15,18 @@ import (
 	"github.com/jotaen/klog/klog/parser/txt"
 	"os"
 	"os/exec"
-	"runtime"
 	gotime "time"
 )
 
 // FileOrBookmarkName is either a file name or a bookmark name
 // as specified as argument on the command line.
 type FileOrBookmarkName string
+
+const (
+	KLOG_FOLDER_NAME    = ".klog"
+	BOOKMARKS_FILE_NAME = "bookmarks.json"
+	CONFIG_FILE_NAME    = "config.yml"
+)
 
 // Context is a representation of the runtime environment of klog.
 // The commands carry out all side effects via this interface.
@@ -33,10 +38,7 @@ type Context interface {
 	ReadLine() (string, Error)
 
 	// KlogFolder returns the path of the .klog folder.
-	KlogFolder() string
-
-	// HomeFolder returns the path of the user’s home folder.
-	HomeFolder() string
+	KlogFolder() File
 
 	// Meta returns miscellaneous meta information.
 	Meta() Meta
@@ -79,8 +81,8 @@ type Context interface {
 	// Debug takes a void function that is only executed in debug mode.
 	Debug(func())
 
-	// Preferences returns the current preferences.
-	Preferences() Preferences
+	// Config returns the current preferences.
+	Config() Config
 }
 
 // Meta holds miscellaneous information about the klog binary.
@@ -99,44 +101,27 @@ type Meta struct {
 	SrcHash string
 }
 
-// Preferences are user-defined configuration.
-type Preferences struct {
-	IsDebug    bool
-	Editor     string
-	NoColour   bool
-	CpuKernels int // Must be 1 or higher
-}
-
-func NewDefaultPreferences() Preferences {
-	return Preferences{
-		IsDebug:    false,
-		Editor:     "",
-		NoColour:   false,
-		CpuKernels: 1,
-	}
-}
-
 // NewContext creates a new Context object.
-func NewContext(homeDir string, meta Meta, serialiser parser.Serialiser, prefs Preferences) Context {
+func NewContext(klogFolder File, meta Meta, serialiser parser.Serialiser, cfg Config) Context {
 	parserEngine := parser.NewSerialParser()
-	if prefs.CpuKernels > 1 {
-		parserEngine = parser.NewParallelParser(runtime.NumCPU())
+	if cfg.CpuKernels.Value() > 1 {
+		parserEngine = parser.NewParallelParser(cfg.CpuKernels.Value())
 	}
 	return &context{
-		homeDir,
+		klogFolder,
 		parserEngine,
 		serialiser,
 		meta,
-		prefs,
+		cfg,
 	}
 }
 
 type context struct {
-	homeDir    string
+	klogFolder File
 	parser     parser.Parser
 	serialiser parser.Serialiser
 	meta       Meta
-	prefs      Preferences
+	config     Config
 }
 
 func (ctx *context) Print(text string) {
@@ -157,12 +142,8 @@ func (ctx *context) ReadLine() (string, Error) {
 	)
 }
 
-func (ctx *context) HomeFolder() string {
-	return ctx.homeDir
-}
-
-func (ctx *context) KlogFolder() string {
-	return ctx.homeDir + "/.klog/"
+func (ctx *context) KlogFolder() File {
+	return ctx.klogFolder
 }
 
 func (ctx *context) Meta() Meta {
@@ -284,8 +265,8 @@ func (ctx *context) Now() gotime.Time {
 
 func (ctx *context) initialiseKlogFolder() Error {
 	klogFolder := ctx.KlogFolder()
-	err := os.MkdirAll(klogFolder, 0700)
-	flagAsHidden(klogFolder)
+	err := os.MkdirAll(klogFolder.Path(), 0700)
+	flagAsHidden(klogFolder.Path())
 	if err != nil {
 		return NewError(
 			"Unable to initialise ~/.klog folder",
@@ -299,23 +280,11 @@ func (ctx *context) initialiseKlogFolder() Error {
 func (ctx *context) ReadBookmarks() (BookmarksCollection, Error) {
 	bookmarksDatabase, err := ReadFile(ctx.bookmarkDatabasePath())
 	if err != nil {
-		// If database doesn’t exist, try to convert from legacy bookmark file.
-		// If that fails for whatever reason, don’t bother and create fresh collection.
 		if os.IsNotExist(err.Original()) {
-			newBc := NewEmptyBookmarksCollection()
-			legacyTargetPath, rErr := os.Readlink(ctx.bookmarkLegacySymlinkPath())
-			if rErr != nil {
-				return newBc, nil
-			}
-			legacyTarget, fErr := NewFile(legacyTargetPath)
-			if fErr != nil {
-				return newBc, nil
-			}
-			newBc.Set(NewDefaultBookmark(legacyTarget))
-			return newBc, nil
-		} else {
-			return nil, err
+			// An absent bookmarks file is equivalent to an empty one.
+			return NewEmptyBookmarksCollection(), nil
 		}
+		return nil, err
 	}
 	return NewBookmarksCollectionFromJson(bookmarksDatabase)
 }
@@ -333,16 +302,11 @@ func (ctx *context) ManipulateBookmarks(manipulate func(BookmarksCollection) Err
 	if iErr != nil {
 		return iErr
 	}
-	_ = os.Remove(ctx.bookmarkLegacySymlinkPath()) // Clean up legacy bookmark file, if exists
 	return WriteToFile(ctx.bookmarkDatabasePath(), bc.ToJson())
 }
 
-func (ctx *context) bookmarkLegacySymlinkPath() string {
-	return ctx.KlogFolder() + "bookmark.klg"
-}
-
 func (ctx *context) bookmarkDatabasePath() File {
-	return NewFileOrPanic(ctx.KlogFolder() + "bookmarks.json")
+	return Join(ctx.KlogFolder(), BOOKMARKS_FILE_NAME)
 }
 
 func (ctx *context) Execute(cmd command.Command) Error {
@@ -361,7 +325,7 @@ func (ctx *context) Execute(cmd command.Command) Error {
 }
 
 func (ctx *context) Editors() (string, []command.Command) {
-	return ctx.prefs.Editor, POTENTIAL_EDITORS
+	return ctx.config.Editor.Value(), POTENTIAL_EDITORS
 }
 
 func (ctx *context) FileExplorers() []command.Command {
@@ -377,11 +341,11 @@ func (ctx *context) SetSerialiser(s parser.Serialiser) {
 }
 
 func (ctx *context) Debug(task func()) {
-	if ctx.prefs.IsDebug {
+	if ctx.config.IsDebug.Value() {
 		task()
 	}
 }
 
-func (ctx *context) Preferences() Preferences {
-	return ctx.prefs
+func (ctx *context) Config() Config {
+	return ctx.config
 }

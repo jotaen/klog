@@ -33,15 +33,15 @@ func (e *Env) run(invocation ...[]string) []string {
 		r, w, _ := os.Pipe()
 		os.Stdout = w
 
-		code, runErr := Run(tmpDir, app.Meta{
+		runErr := Run(app.NewFileOrPanic(tmpDir), app.Meta{
 			Specification: "[Specification text]",
 			License:       "[License text]",
 			Version:       "v0.0",
 			SrcHash:       "abc1234",
-		}, app.NewDefaultPreferences(), args)
+		}, app.NewDefaultConfig(), args)
 
 		_ = w.Close()
-		if runErr != nil || code != 0 {
+		if runErr != nil {
 			outs[i] = runErr.Error()
 			continue
 		}

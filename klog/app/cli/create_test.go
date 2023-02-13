@@ -57,3 +57,53 @@ This is a
 new record!
 `, state.writtenFileContents)
 }
+
+func TestCreateWithFileConfig(t *testing.T) {
+	// With should-total from config file
+	{
+		state, err := NewTestingContext()._SetRecords(`
+1920-02-01
+	4h33m
+
+1920-02-02
+	9:00-12:00
+`)._SetFileConfig(`
+default_should_total: 30m!
+`)._SetNow(1920, 2, 3, 15, 24)._Run((&Create{}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+1920-02-01
+	4h33m
+
+1920-02-02
+	9:00-12:00
+
+1920-02-03 (30m!)
+`, state.writtenFileContents)
+	}
+
+	// --should-total flag trumps should-total from config file
+	{
+		state, err := NewTestingContext()._SetRecords(`
+1920-02-01
+	4h33m
+
+1920-02-02
+	9:00-12:00
+`)._SetFileConfig(`
+default_should_total: 30m!
+`)._SetNow(1920, 2, 3, 15, 24)._Run((&Create{
+			ShouldTotal: klog.NewShouldTotal(5, 55),
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+1920-02-01
+	4h33m
+
+1920-02-02
+	9:00-12:00
+
+1920-02-03 (5h55m!)
+`, state.writtenFileContents)
+	}
+}

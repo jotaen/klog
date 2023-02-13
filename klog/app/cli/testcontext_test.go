@@ -14,6 +14,7 @@ import (
 
 func NewTestingContext() TestingContext {
 	bc := app.NewEmptyBookmarksCollection()
+	config := app.NewDefaultConfig()
 	return TestingContext{
 		State: State{
 			printBuffer:         "",
@@ -30,6 +31,7 @@ func NewTestingContext() TestingContext {
 		execute: func(_ command.Command) app.Error {
 			return nil
 		},
+		config: &config,
 	}
 }
 
@@ -56,6 +58,15 @@ func (ctx TestingContext) _SetEditors(auto []command.Command, explicit string) T
 
 func (ctx TestingContext) _SetFileExplorers(cs []command.Command) TestingContext {
 	ctx.fileExplorers = cs
+	return ctx
+}
+
+func (ctx TestingContext) _SetFileConfig(configFile string) TestingContext {
+	fileCfg := app.FromConfigFile{FileContents: configFile}
+	err := fileCfg.Apply(ctx.config)
+	if err != nil {
+		panic(err)
+	}
 	return ctx
 }
 
@@ -89,6 +100,7 @@ type TestingContext struct {
 	editorExplicit string
 	fileExplorers  []command.Command
 	execute        func(command.Command) app.Error
+	config         *app.Config
 }
 
 func (ctx *TestingContext) Print(s string) {
@@ -103,8 +115,8 @@ func (ctx *TestingContext) HomeFolder() string {
 	return "~"
 }
 
-func (ctx *TestingContext) KlogFolder() string {
-	return ctx.HomeFolder() + "/.klog/"
+func (ctx *TestingContext) KlogFolder() app.File {
+	return app.NewFileOrPanic(ctx.HomeFolder() + app.KLOG_FOLDER_NAME)
 }
 
 func (ctx *TestingContext) Meta() app.Meta {
@@ -175,6 +187,6 @@ func (ctx *TestingContext) SetSerialiser(s parser.Serialiser) {
 
 func (ctx *TestingContext) Debug(_ func()) {}
 
-func (ctx *TestingContext) Preferences() app.Preferences {
-	return app.NewDefaultPreferences()
+func (ctx *TestingContext) Config() app.Config {
+	return *ctx.config
 }

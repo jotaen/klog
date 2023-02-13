@@ -24,7 +24,7 @@ func (opt *Stop) Run(ctx app.Context) app.Error {
 	opt.NoStyleArgs.Apply(&ctx)
 	now := ctx.Now()
 	date, isAutoDate := opt.AtDate(now)
-	time, isAutoTime, err := opt.AtTime(now)
+	time, isAutoTime, err := opt.AtTime(now, ctx.Config())
 	if err != nil {
 		return err
 	}

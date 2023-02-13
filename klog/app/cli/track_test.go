@@ -51,6 +51,26 @@ func TestTrackEntryAtUnknownDateCreatesNewRecord(t *testing.T) {
 `, state.writtenFileContents)
 }
 
+func TestTrackNewRecordWithShouldTotal(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+1855-04-25
+	1h
+`)._SetFileConfig(`
+default_should_total: 7h30m!
+`)._Run((&Track{
+		Entry:      klog.Ɀ_EntrySummary_("2h"),
+		AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(2000, 1, 1)},
+	}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+1855-04-25
+	1h
+
+2000-01-01 (7h30m!)
+	2h
+`, state.writtenFileContents)
+}
+
 func TestTrackFailsIfEntryInvalid(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 1855-04-25
