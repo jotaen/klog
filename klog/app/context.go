@@ -102,13 +102,13 @@ type Meta struct {
 }
 
 // NewContext creates a new Context object.
-func NewContext(klogFolderPath File, meta Meta, serialiser parser.Serialiser, cfg Config) Context {
+func NewContext(klogFolder File, meta Meta, serialiser parser.Serialiser, cfg Config) Context {
 	parserEngine := parser.NewSerialParser()
 	if cfg.CpuKernels.Value() > 1 {
 		parserEngine = parser.NewParallelParser(cfg.CpuKernels.Value())
 	}
 	return &context{
-		klogFolderPath,
+		klogFolder,
 		parserEngine,
 		serialiser,
 		meta,
@@ -117,11 +117,11 @@ func NewContext(klogFolderPath File, meta Meta, serialiser parser.Serialiser, cf
 }
 
 type context struct {
-	klogFolderPath File
-	parser         parser.Parser
-	serialiser     parser.Serialiser
-	meta           Meta
-	config         Config
+	klogFolder File
+	parser     parser.Parser
+	serialiser parser.Serialiser
+	meta       Meta
+	config     Config
 }
 
 func (ctx *context) Print(text string) {
@@ -143,7 +143,7 @@ func (ctx *context) ReadLine() (string, Error) {
 }
 
 func (ctx *context) KlogFolder() File {
-	return ctx.klogFolderPath
+	return ctx.klogFolder
 }
 
 func (ctx *context) Meta() Meta {
