@@ -29,10 +29,14 @@ func (opt *Track) Run(ctx app.Context) app.Error {
 	now := ctx.Now()
 	date, isAutoDate := opt.AtDate(now)
 	atDate := reconciling.NewStyled[klog.Date](date, isAutoDate)
+	additionalData := reconciling.AdditionalData{}
+	ctx.Config().DefaultShouldTotal.Map(func(s klog.ShouldTotal) {
+		additionalData.ShouldTotal = s
+	})
 	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			reconciling.NewReconcilerAtRecord(atDate.Value),
-			reconciling.NewReconcilerForNewRecord(atDate, reconciling.AdditionalData{}),
+			reconciling.NewReconcilerForNewRecord(atDate, additionalData),
 		},
 
 		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {

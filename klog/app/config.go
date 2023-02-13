@@ -11,23 +11,23 @@ import (
 // controlled by the user.
 type Config struct {
 	// IsDebug indicates whether klog should print additional debug information.
-	IsDebug Param[bool]
+	IsDebug MandatoryParam[bool]
 
 	// Editor is the CLI command with which to invoke the preferred editor.
-	Editor Param[string]
+	Editor MandatoryParam[string]
 
 	// NoColour specifies whether output should be coloured.
-	NoColour Param[bool]
+	NoColour MandatoryParam[bool]
 
 	// CpuKernels is the number of available CPUs that klog is allowed to utilise.
 	// The value must be `1` or higher.
-	CpuKernels Param[int]
+	CpuKernels MandatoryParam[int]
 
 	// DefaultRounding is the default for the --round flag.
-	DefaultRounding Param[service.Rounding]
+	DefaultRounding OptionalParam[service.Rounding]
 
 	// DefaultShouldTotal is the default should total for new records.
-	DefaultShouldTotal Param[klog.ShouldTotal]
+	DefaultShouldTotal OptionalParam[klog.ShouldTotal]
 }
 
 type Reader interface {
@@ -46,43 +46,54 @@ func NewConfig(c1 FromStaticValues, c2 FromEnvVars, c3 FromConfigFile) (Config, 
 }
 
 func NewDefaultConfig() Config {
-	defaultRounding, err := service.NewRounding(15)
-	if err != nil {
-		panic(err) // This can/should never happen
-	}
 	return Config{
-		IsDebug:            newDefaultParam(false),
-		Editor:             newDefaultParam(""),
-		NoColour:           newDefaultParam(false),
-		CpuKernels:         newDefaultParam(1),
-		DefaultRounding:    newDefaultParam(defaultRounding),
-		DefaultShouldTotal: newDefaultParam(klog.NewShouldTotal(0, 0)),
+		IsDebug:            newMandatoryParam(false),
+		Editor:             newMandatoryParam(""),
+		NoColour:           newMandatoryParam(false),
+		CpuKernels:         newMandatoryParam(1),
+		DefaultRounding:    newOptionalParam[service.Rounding](),
+		DefaultShouldTotal: newOptionalParam[klog.ShouldTotal](),
 	}
 }
 
-type Param[T any] struct {
-	actualValue T
-	isExplicit  bool
+type MandatoryParam[T any] struct {
+	value T
 }
 
-func newDefaultParam[T any](value T) Param[T] {
-	return Param[T]{
-		actualValue: value,
-		isExplicit:  false,
+func newMandatoryParam[T any](defaultValue T) MandatoryParam[T] {
+	return MandatoryParam[T]{
+		value: defaultValue,
 	}
 }
 
-func (p Param[T]) Value() T {
-	return p.actualValue
+func (p MandatoryParam[T]) Value() T {
+	return p.value
 }
 
-func (p Param[T]) WasExplicitlySet() bool {
-	return p.isExplicit
+func (p *MandatoryParam[T]) override(value T) {
+	p.value = value
 }
 
-func (p *Param[T]) set(value T) {
-	p.actualValue = value
-	p.isExplicit = true
+type OptionalParam[T any] struct {
+	value T
+	isSet bool
+}
+
+func newOptionalParam[T any]() OptionalParam[T] {
+	return OptionalParam[T]{
+		isSet: false,
+	}
+}
+
+func (p OptionalParam[T]) Map(f func(T)) {
+	if p.isSet {
+		f(p.value)
+	}
+}
+
+func (p *OptionalParam[T]) set(value T) {
+	p.value = value
+	p.isSet = true
 }
 
 // FromStaticValues is the part of the configuration that is automatically
@@ -92,7 +103,7 @@ type FromStaticValues struct {
 }
 
 func (e FromStaticValues) Apply(config *Config) Error {
-	config.CpuKernels.set(e.NumCpus)
+	config.CpuKernels.override(e.NumCpus)
 	return nil
 }
 
@@ -104,15 +115,15 @@ type FromEnvVars struct {
 
 func (e FromEnvVars) Apply(config *Config) Error {
 	if e.GetVar("KLOG_DEBUG") != "" {
-		config.IsDebug.set(true)
+		config.IsDebug.override(true)
 	}
 	if e.GetVar("NO_COLOR") != "" {
-		config.NoColour.set(true)
+		config.NoColour.override(true)
 	}
 	if e.GetVar("KLOG_EDITOR") != "" {
-		config.Editor.set(e.GetVar("KLOG_EDITOR"))
+		config.Editor.override(e.GetVar("KLOG_EDITOR"))
 	} else if e.GetVar("EDITOR") != "" {
-		config.Editor.set(e.GetVar("EDITOR"))
+		config.Editor.override(e.GetVar("EDITOR"))
 	}
 	return nil
 }
@@ -135,10 +146,11 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			return nil
 		},
 		Value: func(c Config) string {
-			if !c.DefaultRounding.WasExplicitlySet() {
-				return ""
-			}
-			return c.DefaultRounding.Value().ToString()
+			result := ""
+			c.DefaultRounding.Map(func(r service.Rounding) {
+				result = r.ToString()
+			})
+			return result
 		},
 		Description:  "The default value that shall be used for rounding time values via the `--round` flag, e.g. in `klog start --round 15m`. (If absent/empty, klog doesn’t round.)",
 		Instructions: "The value must be one of: `5m`, `10m`, `15m`, `20m`, `30m`, `60m`. ",
@@ -154,10 +166,11 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			return nil
 		},
 		Value: func(c Config) string {
-			if !c.DefaultShouldTotal.WasExplicitlySet() {
-				return ""
-			}
-			return c.DefaultShouldTotal.Value().ToString()
+			result := ""
+			c.DefaultShouldTotal.Map(func(s klog.ShouldTotal) {
+				result = s.ToString()
+			})
+			return result
 		},
 		Description:  "The default duration value that shall be used as should-total when creating new records. (If absent/empty, klog doesn’t set a should-total on new records.)",
 		Instructions: "The value must be a duration followed by an exclamation mark. Examples: `8h!`, `6h30m!`. ",

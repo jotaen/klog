@@ -43,7 +43,7 @@ type AtDateAndTimeArgs struct {
 	Round service.Rounding `name:"round" short:"r" help:"Round time to nearest multiple of 5m, 10m, 15m, 30m, or 60m / 1h"`
 }
 
-func (args *AtDateAndTimeArgs) AtTime(now gotime.Time) (klog.Time, bool, app.Error) {
+func (args *AtDateAndTimeArgs) AtTime(now gotime.Time, config app.Config) (klog.Time, bool, app.Error) {
 	if args.Time != nil {
 		return args.Time, false, nil
 	}
@@ -52,6 +52,10 @@ func (args *AtDateAndTimeArgs) AtTime(now gotime.Time) (klog.Time, bool, app.Err
 	time := klog.NewTimeFromGo(now)
 	if args.Round != nil {
 		time = service.RoundToNearest(time, args.Round)
+	} else {
+		config.DefaultRounding.Map(func(r service.Rounding) {
+			time = service.RoundToNearest(time, r)
+		})
 	}
 	if today.IsEqualTo(date) {
 		return time, true, nil

@@ -1,6 +1,8 @@
 package app
 
 import (
+	"github.com/jotaen/klog/klog"
+	"github.com/jotaen/klog/klog/service"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -17,14 +19,24 @@ func TestCreatesNewDefaultConfig(t *testing.T) {
 	assert.Equal(t, c.Editor.Value(), "")
 	assert.Equal(t, c.NoColour.Value(), false)
 	assert.Equal(t, c.CpuKernels.Value(), 1)
-	assert.Equal(t, c.DefaultRounding.Value().ToInt(), 15)
+
+	isRoundingSet := false
+	c.DefaultRounding.Map(func(_ service.Rounding) {
+		isRoundingSet = true
+	})
+	assert.False(t, isRoundingSet)
+
+	isShouldTotalSet := false
+	c.DefaultShouldTotal.Map(func(_ klog.ShouldTotal) {
+		isShouldTotalSet = true
+	})
+	assert.False(t, isShouldTotalSet)
 }
 
 func TestSetsParamsMetadataIsHandledCorrectly(t *testing.T) {
 	{
 		c := NewDefaultConfig()
 		assert.Equal(t, c.NoColour.Value(), false)
-		assert.False(t, c.NoColour.WasExplicitlySet())
 	}
 	{
 		c, _ := NewConfig(
@@ -35,7 +47,6 @@ func TestSetsParamsMetadataIsHandledCorrectly(t *testing.T) {
 			FromConfigFile{""},
 		)
 		assert.Equal(t, c.NoColour.Value(), true)
-		assert.True(t, c.NoColour.WasExplicitlySet())
 	}
 }
 
@@ -79,8 +90,11 @@ func TestSetsDefaultRoundingParamFromConfigFile(t *testing.T) {
 			createMockConfigFromEnv(map[string]string{}),
 			FromConfigFile{tml},
 		)
-		assert.Equal(t, c.DefaultRounding.Value().ToInt(), 30)
-		assert.True(t, c.DefaultRounding.WasExplicitlySet())
+		var value int
+		c.DefaultRounding.Map(func(r service.Rounding) {
+			value = r.ToInt()
+		})
+		assert.Equal(t, value, 30)
 	}
 }
 
@@ -93,25 +107,26 @@ func TestSetsDefaultShouldTotalParamFromConfigFile(t *testing.T) {
 			createMockConfigFromEnv(map[string]string{}),
 			FromConfigFile{tml},
 		)
-		assert.Equal(t, c.DefaultShouldTotal.Value().ToString(), "8h30m!")
-		assert.True(t, c.DefaultShouldTotal.WasExplicitlySet())
+		var value string
+		c.DefaultShouldTotal.Map(func(s klog.ShouldTotal) {
+			value = s.ToString()
+		})
+		assert.Equal(t, value, "8h30m!")
 	}
 }
 
 func TestIgnoresUnknownPropertiesInConfigFile(t *testing.T) {
 	for _, tml := range []string{`
 unknown_property: 1
-what_is_this:
-  - 1
-  - 2
+what_is_this: true
 `,
 	} {
-		c, _ := NewConfig(
+		_, err := NewConfig(
 			FromStaticValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{}),
 			FromConfigFile{tml},
 		)
-		assert.False(t, c.DefaultRounding.WasExplicitlySet())
+		assert.Nil(t, err)
 	}
 }
 
