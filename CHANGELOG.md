@@ -2,6 +2,13 @@
 **Summary of changes of the command line tool**
 
 ## Next Up
+- **[ BREAKING ]** Respect `$XDG_CONFIG_HOME` or `$KLOG_FOLDER_LOCATION`
+  environment variables (if set) as default location for the `.klog/` folder.
+  (The `.klog/` folder is used for storing configuration and bookmarks.)
+  If these variables are set on your system, and if you use bookmarks, you need
+  to manually move the contents of the `.klog/` folder over to the new location.
+- **[ FEATURE ]** Introduce optional, file-based configuration for certain
+  preferences. See `klog config` for details on how to set this up.
 - **[ FEATURE ]** Display warning when using `--now` without there
   being any open-ended time range in the data.
 
