@@ -196,6 +196,9 @@ func (e FromConfigFile) Apply(config *Config) Error {
 		)
 	}
 	for key, value := range data {
+		if value == "" {
+			continue
+		}
 		for _, entry := range CONFIG_FILE_ENTRIES {
 			if entry.Name == key {
 				rErr := entry.Reader(value, config)

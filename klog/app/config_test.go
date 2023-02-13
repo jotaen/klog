@@ -130,6 +130,25 @@ what_is_this: true
 	}
 }
 
+func TestIgnoresEmptyConfigFileOrEmptyParameters(t *testing.T) {
+	for _, tml := range []string{
+		``,
+		`
+default_rounding:
+`,
+		`
+default_should_total: 
+`,
+	} {
+		_, err := NewConfig(
+			FromStaticValues{NumCpus: 1},
+			createMockConfigFromEnv(map[string]string{}),
+			FromConfigFile{tml},
+		)
+		assert.Nil(t, err)
+	}
+}
+
 func TestRejectsInvalidConfigFile(t *testing.T) {
 	for _, tml := range []string{
 		`default_rounding: true`,              // Wrong type
