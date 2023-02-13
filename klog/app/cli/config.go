@@ -11,7 +11,7 @@ type Config struct {
 }
 
 func (opt *Config) Help() string {
-	return `You are able to configure some of klog’s behaviour via a YAML file in your ` + "`" + app.KLOG_FOLDER + "`" + ` folder. (Run ` + "`" + `klog config --file-path` + "`" + ` to print the exact location.)
+	return `You are able to configure some of klog’s behaviour via a YAML file in your ` + "`" + app.KLOG_FOLDER_NAME + "`" + ` folder. (Run ` + "`" + `klog config --file-path` + "`" + ` to print the exact location.)
 
 If you run ` + "`" + `klog config` + "`" + `, you can learn about the supported YAML properties in the file, and you also see what values are in effect at the moment.
 
@@ -20,7 +20,7 @@ Note: the output of the command does not print the actual file. You may, however
 
 func (opt *Config) Run(ctx app.Context) app.Error {
 	if opt.ConfigFilePath {
-		ctx.Print(app.Join(ctx.KlogFolder(), app.CONFIG_FILE).Path() + "\n")
+		ctx.Print(app.Join(ctx.KlogFolder(), app.CONFIG_FILE_NAME).Path() + "\n")
 		return nil
 	}
 	for i, e := range app.CONFIG_FILE_ENTRIES {

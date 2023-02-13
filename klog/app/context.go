@@ -23,9 +23,9 @@ import (
 type FileOrBookmarkName string
 
 const (
-	KLOG_FOLDER    = ".klog"
-	BOOKMARKS_FILE = "bookmarks.json"
-	CONFIG_FILE    = "config.yml"
+	KLOG_FOLDER_NAME    = ".klog"
+	BOOKMARKS_FILE_NAME = "bookmarks.json"
+	CONFIG_FILE_NAME    = "config.yml"
 )
 
 // Context is a representation of the runtime environment of klog.
@@ -306,7 +306,7 @@ func (ctx *context) ManipulateBookmarks(manipulate func(BookmarksCollection) Err
 }
 
 func (ctx *context) bookmarkDatabasePath() File {
-	return Join(ctx.KlogFolder(), BOOKMARKS_FILE)
+	return Join(ctx.KlogFolder(), BOOKMARKS_FILE_NAME)
 }
 
 func (ctx *context) Execute(cmd command.Command) Error {

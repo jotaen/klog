@@ -116,7 +116,7 @@ func (ctx *TestingContext) HomeFolder() string {
 }
 
 func (ctx *TestingContext) KlogFolder() app.File {
-	return app.NewFileOrPanic(ctx.HomeFolder() + app.KLOG_FOLDER)
+	return app.NewFileOrPanic(ctx.HomeFolder() + app.KLOG_FOLDER_NAME)
 }
 
 func (ctx *TestingContext) Meta() app.Meta {

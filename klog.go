@@ -79,7 +79,7 @@ func fail(e error, isDebug bool) {
 // readConfigFile reads the config file from disk, if present.
 // If not present, it returns empty string.
 func readConfigFile(klogFolderPath string) (string, error) {
-	file, fErr := app.NewFile(klogFolderPath + app.CONFIG_FILE)
+	file, fErr := app.NewFile(klogFolderPath + app.CONFIG_FILE_NAME)
 	if fErr != nil {
 		return "", fErr
 	}
@@ -113,5 +113,5 @@ func determineKlogFolderPath() (app.File, error) {
 	if fErr != nil {
 		return nil, fErr
 	}
-	return app.Join(f, app.KLOG_FOLDER), nil
+	return app.Join(f, app.KLOG_FOLDER_NAME), nil
 }
