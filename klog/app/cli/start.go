@@ -24,16 +24,20 @@ func (opt *Start) Run(ctx app.Context) app.Error {
 	opt.NoStyleArgs.Apply(&ctx)
 	now := ctx.Now()
 	date, isAutoDate := opt.AtDate(now)
-	time, isAutoTime, err := opt.AtTime(now)
+	time, isAutoTime, err := opt.AtTime(now, ctx.Config())
 	if err != nil {
 		return err
 	}
 	atDate := reconciling.NewStyled[klog.Date](date, isAutoDate)
 	startTime := reconciling.NewStyled[klog.Time](time, isAutoTime)
+	additionalData := reconciling.AdditionalData{}
+	ctx.Config().DefaultShouldTotal.Map(func(s klog.ShouldTotal) {
+		additionalData.ShouldTotal = s
+	})
 	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			reconciling.NewReconcilerAtRecord(atDate.Value),
-			reconciling.NewReconcilerForNewRecord(atDate, reconciling.AdditionalData{}),
+			reconciling.NewReconcilerForNewRecord(atDate, additionalData),
 		},
 
 		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {

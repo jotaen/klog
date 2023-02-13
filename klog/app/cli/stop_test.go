@@ -126,16 +126,52 @@ func TestStopFailsIfNoOpenRange(t *testing.T) {
 }
 
 func TestStopWithRounding(t *testing.T) {
-	r15, _ := service.NewRounding(15)
-	state, err := NewTestingContext()._SetRecords(`
+	// With --round flag
+	{
+		r15, _ := service.NewRounding(15)
+		state, err := NewTestingContext()._SetRecords(`
 2005-05-05
     8:10 - ?
 `)._SetNow(2005, 5, 5, 11, 24)._Run((&Stop{
-		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{Round: r15},
-	}).Run)
-	require.Nil(t, err)
-	assert.Equal(t, `
+			AtDateAndTimeArgs: lib.AtDateAndTimeArgs{Round: r15},
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
 2005-05-05
     8:10 - 11:30
 `, state.writtenFileContents)
+	}
+
+	// With file config
+	{
+		state, err := NewTestingContext()._SetRecords(`
+2005-05-05
+    8:10 - ?
+`)._SetNow(2005, 5, 5, 11, 24)._SetFileConfig(`
+default_rounding: 30m
+`)._Run((&Stop{}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+2005-05-05
+    8:10 - 11:30
+`, state.writtenFileContents)
+	}
+
+	// --round flag trumps file config
+	{
+		r5, _ := service.NewRounding(5)
+		state, err := NewTestingContext()._SetRecords(`
+2005-05-05
+    8:10 - ?
+`)._SetNow(2005, 5, 5, 11, 24)._SetFileConfig(`
+default_rounding: 30m
+`)._Run((&Stop{
+			AtDateAndTimeArgs: lib.AtDateAndTimeArgs{Round: r5},
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+2005-05-05
+    8:10 - 11:25
+`, state.writtenFileContents)
+	}
 }

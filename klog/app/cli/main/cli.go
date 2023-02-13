@@ -15,7 +15,7 @@ import (
 	"reflect"
 )
 
-func Run(homeDir string, meta app.Meta, config app.Config, args []string) (int, error) {
+func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) error {
 	kongApp, nErr := kong.New(
 		&cli.Cli{},
 		kong.Name("klog"),
@@ -59,7 +59,7 @@ func Run(homeDir string, meta app.Meta, config app.Config, args []string) (int, 
 		}),
 	)
 	if nErr != nil {
-		return -1, nErr
+		return nErr
 	}
 
 	ctx := app.NewContext(
@@ -76,18 +76,9 @@ func Run(homeDir string, meta app.Meta, config app.Config, args []string) (int, 
 	kongcompletion.Register(kongApp, kongcompletion.WithPredictors(CompletionPredictors(ctx)))
 	kongCtx, cErr := kongApp.Parse(args)
 	if cErr != nil {
-		return -1, cErr
+		return cErr
 	}
 	kongCtx.BindTo(ctx, (*app.Context)(nil))
 
-	rErr := kongCtx.Run()
-	if rErr != nil {
-		ctx.Print(lib.PrettifyError(rErr, config.IsDebug.Value()).Error() + "\n")
-		if appErr, isAppError := rErr.(app.Error); isAppError {
-			return int(appErr.Code()), nil
-		} else {
-			return -1, rErr
-		}
-	}
-	return 0, nil
+	return kongCtx.Run()
 }

@@ -83,6 +83,10 @@ func (f *fileWithContents) Contents() string {
 	return f.contents
 }
 
+func Join(f File, fileOrFolderName string) File {
+	return NewFileOrPanic(filepath.Join(f.Path(), fileOrFolderName))
+}
+
 // IsAbs checks whether the given path is absolute.
 func IsAbs(path string) bool {
 	return filepath.IsAbs(path)

@@ -134,6 +134,21 @@ func TestStartAtUnknownDateCreatesNewRecord(t *testing.T) {
 `, state.writtenFileContents)
 }
 
+func TestStartNewRecordWithShouldTotal(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`1623-12-13
+	09:23 - ???
+`)._SetNow(1623, 12, 11, 12, 49)._SetFileConfig(`
+default_should_total: 8h!
+`)._Run((&Start{}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `1623-12-11 (8h!)
+	12:49 - ???
+
+1623-12-13
+	09:23 - ???
+`, state.writtenFileContents)
+}
+
 func TestStartTakesOverStyle(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 1920/02/02
@@ -169,15 +184,49 @@ func TestStartIgnoresExistingStyleIfExplicitStyleWasGiven(t *testing.T) {
 }
 
 func TestStartWithRounding(t *testing.T) {
-	r5, _ := service.NewRounding(5)
-	state, err := NewTestingContext()._SetRecords(`
+	// With --round flag
+	{
+		r5, _ := service.NewRounding(5)
+		state, err := NewTestingContext()._SetRecords(`
 2005-05-05
 `)._SetNow(2005, 5, 5, 8, 12)._Run((&Start{
-		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{Round: r5},
-	}).Run)
-	require.Nil(t, err)
-	assert.Equal(t, `
+			AtDateAndTimeArgs: lib.AtDateAndTimeArgs{Round: r5},
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
 2005-05-05
     8:10 - ?
 `, state.writtenFileContents)
+	}
+
+	// With file config
+	{
+		state, err := NewTestingContext()._SetRecords(`
+2005-05-05
+`)._SetNow(2005, 5, 5, 8, 12)._SetFileConfig(`
+default_rounding: 15m
+`)._Run((&Start{}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+2005-05-05
+    8:15 - ?
+`, state.writtenFileContents)
+	}
+
+	// Flag trumps file config
+	{
+		r5, _ := service.NewRounding(5)
+		state, err := NewTestingContext()._SetRecords(`
+2005-05-05
+`)._SetNow(2005, 5, 5, 8, 12)._SetFileConfig(`
+default_rounding: 60m
+`)._Run((&Start{
+			AtDateAndTimeArgs: lib.AtDateAndTimeArgs{Round: r5},
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+2005-05-05
+    8:10 - ?
+`, state.writtenFileContents)
+	}
 }
