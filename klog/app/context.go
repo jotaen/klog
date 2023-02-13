@@ -23,7 +23,7 @@ import (
 type FileOrBookmarkName string
 
 const (
-	KLOG_FOLDER    = ".klog/"
+	KLOG_FOLDER    = ".klog"
 	BOOKMARKS_FILE = "bookmarks.json"
 	CONFIG_FILE    = "config.yml"
 )
@@ -38,7 +38,7 @@ type Context interface {
 	ReadLine() (string, Error)
 
 	// KlogFolder returns the path of the .klog folder.
-	KlogFolder() string
+	KlogFolder() File
 
 	// Meta returns miscellaneous meta information.
 	Meta() Meta
@@ -102,7 +102,7 @@ type Meta struct {
 }
 
 // NewContext creates a new Context object.
-func NewContext(klogFolderPath string, meta Meta, serialiser parser.Serialiser, cfg Config) Context {
+func NewContext(klogFolderPath File, meta Meta, serialiser parser.Serialiser, cfg Config) Context {
 	parserEngine := parser.NewSerialParser()
 	if cfg.CpuKernels.Value() > 1 {
 		parserEngine = parser.NewParallelParser(cfg.CpuKernels.Value())
@@ -117,7 +117,7 @@ func NewContext(klogFolderPath string, meta Meta, serialiser parser.Serialiser, 
 }
 
 type context struct {
-	klogFolderPath string
+	klogFolderPath File
 	parser         parser.Parser
 	serialiser     parser.Serialiser
 	meta           Meta
@@ -142,7 +142,7 @@ func (ctx *context) ReadLine() (string, Error) {
 	)
 }
 
-func (ctx *context) KlogFolder() string {
+func (ctx *context) KlogFolder() File {
 	return ctx.klogFolderPath
 }
 
@@ -265,8 +265,8 @@ func (ctx *context) Now() gotime.Time {
 
 func (ctx *context) initialiseKlogFolder() Error {
 	klogFolder := ctx.KlogFolder()
-	err := os.MkdirAll(klogFolder, 0700)
-	flagAsHidden(klogFolder)
+	err := os.MkdirAll(klogFolder.Path(), 0700)
+	flagAsHidden(klogFolder.Path())
 	if err != nil {
 		return NewError(
 			"Unable to initialise ~/.klog folder",
@@ -306,7 +306,7 @@ func (ctx *context) ManipulateBookmarks(manipulate func(BookmarksCollection) Err
 }
 
 func (ctx *context) bookmarkDatabasePath() File {
-	return NewFileOrPanic(ctx.KlogFolder() + BOOKMARKS_FILE)
+	return Join(ctx.KlogFolder(), BOOKMARKS_FILE)
 }
 
 func (ctx *context) Execute(cmd command.Command) Error {

@@ -115,8 +115,8 @@ func (ctx *TestingContext) HomeFolder() string {
 	return "~"
 }
 
-func (ctx *TestingContext) KlogFolder() string {
-	return ctx.HomeFolder() + "/.klog/"
+func (ctx *TestingContext) KlogFolder() app.File {
+	return app.NewFileOrPanic(ctx.HomeFolder() + app.KLOG_FOLDER)
 }
 
 func (ctx *TestingContext) Meta() app.Meta {

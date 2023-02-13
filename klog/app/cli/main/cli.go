@@ -15,7 +15,7 @@ import (
 	"reflect"
 )
 
-func Run(homeDir string, meta app.Meta, config app.Config, args []string) error {
+func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) error {
 	kongApp, nErr := kong.New(
 		&cli.Cli{},
 		kong.Name("klog"),

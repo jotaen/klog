@@ -190,7 +190,7 @@ func (e FromConfigFile) Apply(config *Config) Error {
 	lErr := yaml.Unmarshal([]byte(e.FileContents), &data)
 	if lErr != nil {
 		return NewError(
-			"Invalid config file (~/"+KLOG_FOLDER+CONFIG_FILE+")",
+			"Invalid config file",
 			"The syntax in the file is not valid YAML.",
 			lErr,
 		)
@@ -201,7 +201,7 @@ func (e FromConfigFile) Apply(config *Config) Error {
 				rErr := entry.Reader(value, config)
 				if rErr != nil {
 					return NewError(
-						"Invalid config file (~/"+KLOG_FOLDER+CONFIG_FILE+")",
+						"Invalid config file",
 						"The value for `"+key+"` is not valid: "+entry.Instructions,
 						rErr,
 					)

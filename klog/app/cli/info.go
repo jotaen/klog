@@ -9,9 +9,10 @@ const DESCRIPTION = "klog: command line app for time tracking with plain-text fi
 	"Documentation online at " + KLOG_WEBSITE_URL
 
 type Info struct {
-	Version bool `short:"v" name:"version" help:"Alias for 'klog version'"`
-	Spec    bool `name:"spec" help:"Print file format specification"`
-	License bool `name:"license" help:"Print license"`
+	Version    bool `short:"v" name:"version" help:"Alias for 'klog version'"`
+	Spec       bool `name:"spec" help:"Print file format specification"`
+	License    bool `name:"license" help:"Print license"`
+	KlogFolder bool `name:"klog-folder" help:"Print path of .klog folder"`
 }
 
 func (opt *Info) Help() string {
@@ -27,6 +28,9 @@ func (opt *Info) Run(ctx app.Context) app.Error {
 		return nil
 	} else if opt.License {
 		ctx.Print(ctx.Meta().License + "\n")
+		return nil
+	} else if opt.KlogFolder {
+		ctx.Print(ctx.KlogFolder().Path() + "\n")
 		return nil
 	}
 	ctx.Print(DESCRIPTION + "\n")

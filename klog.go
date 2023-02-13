@@ -25,42 +25,46 @@ func main() {
 		BinaryBuildHash = BinaryBuildHash[:7]
 	}
 
-	klogFolderPath := func() string {
-		homeDir, hErr := user.Current()
-		if hErr != nil {
-			fail(hErr, false)
+	klogFolder := func() app.File {
+		f, err := determineKlogFolderPath()
+		if err != nil {
+			fail(err, false)
 		}
-		return homeDir.HomeDir + "/" + app.KLOG_FOLDER + "/"
+		return f
 	}()
 
 	configFile := func() string {
-		c, cErr := readConfigFile(klogFolderPath)
-		if cErr != nil {
-			fail(cErr, false)
+		c, err := readConfigFile(klogFolder.Path())
+		if err != nil {
+			fail(err, false)
 		}
 		return c
 	}()
 
-	config, cErr := app.NewConfig(
-		app.FromStaticValues{NumCpus: runtime.NumCPU()},
-		app.FromEnvVars{GetVar: os.Getenv},
-		app.FromConfigFile{FileContents: configFile},
-	)
-	if cErr != nil {
-		fail(cErr, false)
-	}
+	config := func() app.Config {
+		c, err := app.NewConfig(
+			app.FromStaticValues{NumCpus: runtime.NumCPU()},
+			app.FromEnvVars{GetVar: os.Getenv},
+			app.FromConfigFile{FileContents: configFile},
+		)
+		if err != nil {
+			fail(err, false)
+		}
+		return c
+	}()
 
-	runErr := klog.Run(klogFolderPath, app.Meta{
+	err := klog.Run(klogFolder, app.Meta{
 		Specification: specification,
 		License:       license,
 		Version:       BinaryVersion,
 		SrcHash:       BinaryBuildHash,
 	}, config, os.Args[1:])
-	if runErr != nil {
-		fail(runErr, config.IsDebug.Value())
+	if err != nil {
+		fail(err, config.IsDebug.Value())
 	}
 }
 
+// fail terminates the process with an error.
 func fail(e error, isDebug bool) {
 	exitCode := -1
 	if e != nil {
@@ -72,6 +76,8 @@ func fail(e error, isDebug bool) {
 	os.Exit(exitCode)
 }
 
+// readConfigFile reads the config file from disk, if present.
+// If not present, it returns empty string.
 func readConfigFile(klogFolderPath string) (string, error) {
 	file, fErr := app.NewFile(klogFolderPath + app.CONFIG_FILE)
 	if fErr != nil {
@@ -85,4 +91,24 @@ func readConfigFile(klogFolderPath string) (string, error) {
 		return "", rErr
 	}
 	return contents, nil
+}
+
+// determineKlogFolderPath returns the path of the `.klog` folder, based on the
+// following precedence:
+// - $XDG_CONFIG_HOME if set
+// - The default home folder, e.g. `~`
+func determineKlogFolderPath() (app.File, error) {
+	location := os.Getenv("XDG_CONFIG_HOME")
+	if location == "" {
+		homeDir, hErr := user.Current()
+		if hErr != nil {
+			return nil, hErr
+		}
+		location = homeDir.HomeDir
+	}
+	f, fErr := app.NewFile(location)
+	if fErr != nil {
+		return nil, fErr
+	}
+	return app.Join(f, app.KLOG_FOLDER), nil
 }
