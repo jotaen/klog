@@ -93,13 +93,16 @@ func readConfigFile(klogFolderPath string) (string, error) {
 	return contents, nil
 }
 
-// determineKlogFolderPath returns the path of the `.klog` folder, based on the
-// following precedence:
-// - $XDG_CONFIG_HOME if set
+// determineKlogFolderPath returns the path of the `.klog` folder, determined by
+// following this lookup precedence:
+// - $KLOG_FOLDER_LOCATION, if set
+// - $XDG_CONFIG_HOME, if set
 // - The default home folder, e.g. `~`
 func determineKlogFolderPath() (app.File, error) {
-	location := os.Getenv("XDG_CONFIG_HOME")
-	if location == "" {
+	location := os.Getenv("$KLOG_FOLDER_LOCATION")
+	if os.Getenv("XDG_CONFIG_HOME") != "" {
+		location = os.Getenv("XDG_CONFIG_HOME")
+	} else if location == "" {
 		homeDir, hErr := user.Current()
 		if hErr != nil {
 			return nil, hErr
