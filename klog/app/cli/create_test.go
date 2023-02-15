@@ -68,7 +68,7 @@ func TestCreateWithFileConfig(t *testing.T) {
 1920-02-02
 	9:00-12:00
 `)._SetFileConfig(`
-default_should_total: 30m!
+default_should_total = 30m!
 `)._SetNow(1920, 2, 3, 15, 24)._Run((&Create{}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `
@@ -91,7 +91,7 @@ default_should_total: 30m!
 1920-02-02
 	9:00-12:00
 `)._SetFileConfig(`
-default_should_total: 30m!
+default_should_total = 30m!
 `)._SetNow(1920, 2, 3, 15, 24)._Run((&Create{
 			ShouldTotal: klog.NewShouldTotal(5, 55),
 		}).Run)

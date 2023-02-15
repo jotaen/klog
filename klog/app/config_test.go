@@ -83,7 +83,7 @@ func TestSetsParamsFromEnv(t *testing.T) {
 
 func TestSetsDefaultRoundingParamFromConfigFile(t *testing.T) {
 	for _, tml := range []string{
-		`default_rounding: 30m`,
+		`default_rounding = 30m`,
 	} {
 		c, _ := NewConfig(
 			FromStaticValues{NumCpus: 1},
@@ -100,7 +100,7 @@ func TestSetsDefaultRoundingParamFromConfigFile(t *testing.T) {
 
 func TestSetsDefaultShouldTotalParamFromConfigFile(t *testing.T) {
 	for _, tml := range []string{
-		`default_should_total: 8h30m!`,
+		`default_should_total = 8h30m!`,
 	} {
 		c, _ := NewConfig(
 			FromStaticValues{NumCpus: 1},
@@ -117,8 +117,8 @@ func TestSetsDefaultShouldTotalParamFromConfigFile(t *testing.T) {
 
 func TestIgnoresUnknownPropertiesInConfigFile(t *testing.T) {
 	for _, tml := range []string{`
-unknown_property: 1
-what_is_this: true
+unknown_property = 1
+what_is_this = true
 `,
 	} {
 		_, err := NewConfig(
@@ -134,10 +134,10 @@ func TestIgnoresEmptyConfigFileOrEmptyParameters(t *testing.T) {
 	for _, tml := range []string{
 		``,
 		`
-default_rounding:
+default_rounding =
 `,
 		`
-default_should_total: 
+default_should_total = 
 `,
 	} {
 		_, err := NewConfig(
@@ -151,10 +151,10 @@ default_should_total:
 
 func TestRejectsInvalidConfigFile(t *testing.T) {
 	for _, tml := range []string{
-		`default_rounding: true`,              // Wrong type
-		`default_rounding: 22m`,               // Invalid value
-		`default_should_total: [true, false]`, // Wrong type
-		`default_should_total: 15`,            // Invalid value
+		`default_rounding = true`,              // Wrong type
+		`default_rounding = 22m`,               // Invalid value
+		`default_should_total = [true, false]`, // Wrong type
+		`default_should_total = 15`,            // Invalid value
 	} {
 		_, err := NewConfig(
 			FromStaticValues{NumCpus: 1},

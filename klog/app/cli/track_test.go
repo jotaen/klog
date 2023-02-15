@@ -56,7 +56,7 @@ func TestTrackNewRecordWithShouldTotal(t *testing.T) {
 1855-04-25
 	1h
 `)._SetFileConfig(`
-default_should_total: 7h30m!
+default_should_total = 7h30m!
 `)._Run((&Track{
 		Entry:      klog.Ɀ_EntrySummary_("2h"),
 		AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(2000, 1, 1)},

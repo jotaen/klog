@@ -148,7 +148,7 @@ func TestStopWithRounding(t *testing.T) {
 2005-05-05
     8:10 - ?
 `)._SetNow(2005, 5, 5, 11, 24)._SetFileConfig(`
-default_rounding: 30m
+default_rounding = 30m
 `)._Run((&Stop{}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `
@@ -164,7 +164,7 @@ default_rounding: 30m
 2005-05-05
     8:10 - ?
 `)._SetNow(2005, 5, 5, 11, 24)._SetFileConfig(`
-default_rounding: 30m
+default_rounding = 30m
 `)._Run((&Stop{
 			AtDateAndTimeArgs: lib.AtDateAndTimeArgs{Round: r5},
 		}).Run)

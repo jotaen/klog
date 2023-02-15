@@ -1,9 +1,9 @@
 package app
 
 import (
+	"github.com/jotaen/genie"
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/service"
-	"gopkg.in/yaml.v3"
 	"strings"
 )
 
@@ -186,31 +186,29 @@ type ConfigFileEntries[T any] struct {
 }
 
 func (e FromConfigFile) Apply(config *Config) Error {
-	data := map[string]string{}
-	lErr := yaml.Unmarshal([]byte(e.FileContents), &data)
+	data, lErr := genie.Parse(e.FileContents)
 	if lErr != nil {
 		return NewError(
 			"Invalid config file",
-			"The syntax in the file is not valid YAML.",
-			lErr,
+			lErr.Error(),
+			nil,
 		)
 	}
-	for key, value := range data {
+	for _, entry := range CONFIG_FILE_ENTRIES {
+		key := entry.Name
+		value := data.Get(key)
 		if value == "" {
 			continue
 		}
-		for _, entry := range CONFIG_FILE_ENTRIES {
-			if entry.Name == key {
-				rErr := entry.Reader(value, config)
-				if rErr != nil {
-					return NewError(
-						"Invalid config file",
-						"The value for `"+key+"` is not valid: "+entry.Instructions,
-						rErr,
-					)
-				}
-			}
+		rErr := entry.Reader(value, config)
+		if rErr != nil {
+			return NewError(
+				"Invalid config file",
+				"The value for `"+key+"` is not valid: "+entry.Instructions,
+				rErr,
+			)
 		}
+
 	}
 	return nil
 }
