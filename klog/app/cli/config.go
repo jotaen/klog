@@ -11,13 +11,11 @@ type Config struct {
 }
 
 func (opt *Config) Help() string {
-	return `You are able to configure some of klog’s behaviour via a .ini file in your ` + "`" + app.KLOG_FOLDER_NAME + "`" + ` folder. (Run ` + "`" + `klog config --file-path` + "`" + ` to print the exact location.)
+	return `You are able to configure some of klog’s behaviour via an .ini file in your ` + "`" + app.KLOG_FOLDER_NAME + "`" + ` folder. (Run ` + "`" + `klog config --file-path` + "`" + ` to print the exact location.)
 
-If you run ` + "`" + `klog config` + "`" + `, you can learn about the supported properties in the file, and you also see what values are in effect at the moment.
+If you run ` + "`" + `klog config` + "`" + `, you can learn about the supported properties in the file, and you also see what values are in effect at the moment. (Note: the output of the command does not print the actual file, it rather shows the configuration as it is in effect!)
 
-Note: the output of the command does not print the actual file, it rather shows the configuration as it is in effect.
-
-You may use the output as template for setting up your config file, as its correctly formatted.`
+You may use the output as template for setting up your config file, as its format is valid as shown.`
 }
 
 func (opt *Config) Run(ctx app.Context) app.Error {

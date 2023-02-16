@@ -150,8 +150,8 @@ func TestSetTimeFormatParamFromConfigFile(t *testing.T) {
 		cfg string
 		exp bool
 	}{
-		{`time_format = 24h`, true},
-		{`time_format = 12h`, false},
+		{`time_convention = 24h`, true},
+		{`time_convention = 12h`, false},
 	} {
 		c, _ := NewConfig(
 			FromStaticValues{NumCpus: 1},
@@ -188,7 +188,7 @@ func TestIgnoresEmptyConfigFileOrEmptyParameters(t *testing.T) {
 		`default_rounding =`,
 		`default_should_total = `,
 		`date_format = `,
-		`time_format = `,
+		`time_convention = `,
 	} {
 		_, err := NewConfig(
 			FromStaticValues{NumCpus: 1},
@@ -207,8 +207,8 @@ func TestRejectsInvalidConfigFile(t *testing.T) {
 		`default_should_total = 15`,            // Invalid value
 		`date_format = [true, false]`,          // Wrong type
 		`date_format = YYYY.MM.DD`,             // Invalid value
-		`time_format = [true, false]`,          // Wrong type
-		`date_format = 2h`,                     // Invalid value
+		`time_convention = [true, false]`,      // Wrong type
+		`time_convention = 2h`,                 // Invalid value
 	} {
 		_, err := NewConfig(
 			FromStaticValues{NumCpus: 1},

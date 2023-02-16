@@ -156,9 +156,9 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			return c.Editor.Value()
 		},
 		Help: Help{
-			Summary: "A CLI command that starts the preferred editor, used for `klog edit`. klog will pass the target file path as last argument. Note: you can use quotes in order to prevent undesired shell word-splitting, if need be.",
-			Default: "If absent/empty, `klog edit` tries to fall back to the $EDITOR environment variable; which you may see below in that case.",
-			Value:   "The value can be any valid CLI command, pasted as is from the terminal.",
+			Summary: "The CLI command that shall be invoked when running `klog edit`.",
+			Value:   "The config property can be any valid CLI command, as you would type it on the terminal. klog will append the target file path as last input argument to that command. Note: you can use quotes in order to prevent undesired shell word-splitting, e.g. if the command name/path contains spaces.",
+			Default: "If absent/empty, `klog edit` tries to fall back to the $EDITOR environment variable (which you’d see below in that case).",
 		},
 	}, {
 		Name: "default_rounding",
@@ -178,9 +178,9 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			return result
 		},
 		Help: Help{
-			Summary: "The default value that shall be used for rounding time values via the `--round` flag, e.g. in `klog start --round 15m`.",
-			Default: "If absent/empty, klog doesn’t round.",
-			Value:   "The value must be one of: `5m`, `10m`, `15m`, `30m`, `60m`.",
+			Summary: "The default value that shall be used for rounding input times via the `--round` flag, e.g. in `klog start --round 15m`.",
+			Value:   "The config property must be one of: `5m`, `10m`, `15m`, `30m`, `60m`.",
+			Default: "If absent/empty, klog doesn’t round input times.",
 		},
 	}, {
 		Name: "default_should_total",
@@ -201,9 +201,9 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			return result
 		},
 		Help: Help{
-			Summary: "The default duration value that shall be used as should-total when creating new records.",
+			Summary: "The default duration value that shall be used as should-total when creating new records, e.g. in `klog create --should '8h!'`.",
+			Value:   "The config property must be a duration followed by an exclamation mark. Examples: `8h!`, `6h30m!`.",
 			Default: "If absent/empty, klog doesn’t set a should-total on new records.",
-			Value:   "The value must be a duration followed by an exclamation mark. Examples: `8h!`, `6h30m!`.",
 		},
 	}, {
 		Name: "date_format",
@@ -231,12 +231,12 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			return result
 		},
 		Help: Help{
-			Summary: "The preferred date format to use for new records, e.g. 2022-03-24 or 2022/03/24.",
-			Default: "If absent/empty, klog automatically tries to be consistent with what is used in the target file; otherwise, it defaults the YYYY-MM-DD format.",
-			Value:   "The value must be either `YYYY-MM-DD` or `YYYY/MM/DD`.",
+			Summary: "The preferred date notation for klog to use when adding a new record to a target file, i.e. whether it uses dashes (as in `2022-03-24`) or slashes (as in `2022/03/24`) as delimiter.",
+			Value:   "The config property must be either `YYYY-MM-DD` or `YYYY/MM/DD`.",
+			Default: "If absent/empty, klog automatically tries to be consistent with what is used in the target file; in doubt, it defaults to the YYYY-MM-DD format.",
 		},
 	}, {
-		Name: "time_format",
+		Name: "time_convention",
 		Reader: func(value string, config *Config) error {
 			use24HourClock := true
 			if value == "24h" {
@@ -261,9 +261,9 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			return result
 		},
 		Help: Help{
-			Summary: "The preferred time format to use for new range entries, e.g. 13:00 or 1:00pm.",
-			Default: "If absent/empty, klog automatically tries to be consistent with what is used in the target file; otherwise, it defaults to the 24h format.",
-			Value:   "The value must be either `24h` or `12h`.",
+			Summary: "The preferred time convention for klog to use when adding a new time range entry to a target file, i.e. whether it uses the 24-hour clock (as in `13:00`) or the 12-hour clock (as in `1:00pm`).",
+			Value:   "The config property must be either `24h` or `12h`.",
+			Default: "If absent/empty, klog automatically tries to be consistent with what is used in the target file; in doubt, it defaults to the 24-hour clock format.",
 		},
 	},
 }
