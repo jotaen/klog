@@ -23,15 +23,14 @@ will replace the end placeholder with the current time (or the one specified via
 func (opt *Stop) Run(ctx app.Context) app.Error {
 	opt.NoStyleArgs.Apply(&ctx)
 	now := ctx.Now()
-	date, isAutoDate := opt.AtDate(now)
-	time, isAutoTime, err := opt.AtTime(now, ctx.Config())
+	date := opt.AtDate(now)
+	time, err := opt.AtTime(now, ctx.Config())
 	if err != nil {
 		return err
 	}
-	atTime := reconciling.NewStyled[klog.Time](time, isAutoTime)
 	// Only fall back to yesterday if no explicit date has been given.
 	// Otherwise, it wouldn’t make sense to decrement the day.
-	shouldTryYesterday := isAutoDate && isAutoTime
+	shouldTryYesterday := opt.WasAutomatic()
 	yesterday := date.PlusDays(-1)
 	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
@@ -46,10 +45,9 @@ func (opt *Stop) Run(ctx app.Context) app.Error {
 
 		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
 			if shouldTryYesterday && reconciler.Record.Date().IsEqualTo(yesterday) {
-				shiftedTime, _ := time.Plus(klog.NewDuration(24, 0))
-				atTime.Value = shiftedTime
+				time, _ = time.Plus(klog.NewDuration(24, 0))
 			}
-			return reconciler.CloseOpenRange(atTime, opt.Summary)
+			return reconciler.CloseOpenRange(time, opt.TimeFormat(ctx.Config()), opt.Summary)
 		},
 	)
 }

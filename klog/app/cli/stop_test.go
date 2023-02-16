@@ -63,6 +63,53 @@ func TestStopsYesterdaysRecordWithShiftedAutoTime(t *testing.T) {
 `, state.writtenFileContents)
 }
 
+func TestStopWithStyle(t *testing.T) {
+	// Without any preference, detect from file.
+	{
+		state, err := NewTestingContext()._SetRecords(`
+1920-02-02
+	10:22am-?
+`)._SetNow(1920, 2, 2, 14, 49)._Run((&Stop{}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+1920-02-02
+	10:22am-2:49pm
+`, state.writtenFileContents)
+	}
+
+	// Use preference from config file, if given.
+	{
+		state, err := NewTestingContext()._SetRecords(`
+1920-02-02
+	10:22am-?
+`)._SetFileConfig(`
+time_format = 24h
+`)._SetNow(1920, 2, 2, 14, 49)._Run((&Stop{}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+1920-02-02
+	10:22am-14:49
+`, state.writtenFileContents)
+	}
+
+	// If explicit flag was provided, that takes ultimate precedence.
+	{
+		state, err := NewTestingContext()._SetRecords(`
+1920-02-02
+	10:22am-?
+`)._SetFileConfig(`
+time_format = 12h
+`)._SetNow(1920, 2, 2, 14, 49)._Run((&Stop{
+			AtDateAndTimeArgs: lib.AtDateAndTimeArgs{Time: klog.Ɀ_Time_(14, 49)},
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+1920-02-02
+	10:22am-14:49
+`, state.writtenFileContents)
+	}
+}
+
 func TestStopWithExtendingSummary(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 1920-02-02
@@ -148,7 +195,7 @@ func TestStopWithRounding(t *testing.T) {
 2005-05-05
     8:10 - ?
 `)._SetNow(2005, 5, 5, 11, 24)._SetFileConfig(`
-default_rounding: 30m
+default_rounding = 30m
 `)._Run((&Stop{}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `
@@ -164,7 +211,7 @@ default_rounding: 30m
 2005-05-05
     8:10 - ?
 `)._SetNow(2005, 5, 5, 11, 24)._SetFileConfig(`
-default_rounding: 30m
+default_rounding = 30m
 `)._Run((&Stop{
 			AtDateAndTimeArgs: lib.AtDateAndTimeArgs{Round: r5},
 		}).Run)

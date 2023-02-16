@@ -35,13 +35,13 @@ func PrettifyError(err error, isDebug bool) error {
 			) + "\n"
 			message += fmt.Sprintf(
 				terminalformat.Style{Color: "227"}.Format("%s"),
-				Reflower.Reflow(e.Message(), INDENT),
+				Reflower.Reflow(e.Message(), []string{INDENT}),
 			) + "\n\n"
 		}
 		return errors.New(message)
 	case app.Error:
 		message := "Error: " + e.Error() + "\n"
-		message += Reflower.Reflow(e.Details(), "")
+		message += Reflower.Reflow(e.Details(), nil)
 		if isDebug && e.Original() != nil {
 			message += "\n\nOriginal Error:\n" + e.Original().Error()
 		}

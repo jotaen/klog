@@ -101,7 +101,7 @@ func TestEditFailsWithExplicitEditorThatHasMalformedSyntax(t *testing.T) {
 			OutputFileArgs: lib.OutputFileArgs{File: "/tmp/file.klg"},
 		}).Run)
 		require.Error(t, err)
-		assert.Equal(t, "Invalid $EDITOR / $KLOG_EDITOR variable", err.Error())
+		assert.Equal(t, "Invalid editor setting", err.Error())
 	}
 }
 

@@ -11,7 +11,7 @@ type Edit struct {
 	lib.QuietArgs
 }
 
-var hint = "You can specify your preferred editor via the $EDITOR or $KLOG_EDITOR environment variable."
+var hint = "You can specify your preferred editor via the $EDITOR environment variable, or the klog config file."
 
 func (opt *Edit) Run(ctx app.Context) app.Error {
 	target, err := ctx.RetrieveTargetFile(opt.File)
@@ -25,7 +25,7 @@ func (opt *Edit) Run(ctx app.Context) app.Error {
 		c, cErr := command.NewFromString(explicitEditor)
 		if cErr != nil {
 			return app.NewError(
-				"Invalid $EDITOR / $KLOG_EDITOR variable",
+				"Invalid editor setting",
 				"Please check the value for invalid syntax: "+explicitEditor,
 				cErr,
 			)
@@ -35,7 +35,7 @@ func (opt *Edit) Run(ctx app.Context) app.Error {
 		if rErr != nil {
 			return app.NewError(
 				"Cannot open preferred editor",
-				"$EDITOR / $KLOG_EDITOR variable was: "+explicitEditor+"\nNote that if your editor path contains spaces, you have to quote it.",
+				"Editor command was: "+explicitEditor+"\nNote that if your editor path contains spaces, you have to quote it.",
 				nil,
 			)
 		}

@@ -1,26 +1,33 @@
 package app
 
 import (
+	"errors"
+	"github.com/jotaen/genie"
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/service"
-	"gopkg.in/yaml.v3"
 	"strings"
 )
 
-// Config are all aspects and behaviour of the application that can be
-// controlled by the user.
+// Config contain all variable settings that influence the behaviour of
+// the application. Some of these properties can be controlled by the user
+// in one way or the other, depending on their purpose.
 type Config struct {
 	// IsDebug indicates whether klog should print additional debug information.
+	// This is an ephemeral property, which is used for debugging purposes, and not
+	// supposed to be configured permanently.
 	IsDebug MandatoryParam[bool]
 
 	// Editor is the CLI command with which to invoke the preferred editor.
 	Editor MandatoryParam[string]
 
 	// NoColour specifies whether output should be coloured.
+	// This is an ephemeral property, which may be used in the context of scripting,
+	// and not supposed to be configured permanently.
 	NoColour MandatoryParam[bool]
 
 	// CpuKernels is the number of available CPUs that klog is allowed to utilise.
 	// The value must be `1` or higher.
+	// This is a low-level property that is not supposed to be exposed to end-users at all.
 	CpuKernels MandatoryParam[int]
 
 	// DefaultRounding is the default for the --round flag.
@@ -28,6 +35,12 @@ type Config struct {
 
 	// DefaultShouldTotal is the default should total for new records.
 	DefaultShouldTotal OptionalParam[klog.ShouldTotal]
+
+	// DateUseDashes denotes the preferred date format: YYYY-MM-DD (true) or YYYY/MM/DD (false).
+	DateUseDashes OptionalParam[bool]
+
+	// TimeUse24HourClock denotes the preferred time format: 13:00 (true) or 1:00pm (false).
+	TimeUse24HourClock OptionalParam[bool]
 }
 
 type Reader interface {
@@ -120,9 +133,7 @@ func (e FromEnvVars) Apply(config *Config) Error {
 	if e.GetVar("NO_COLOR") != "" {
 		config.NoColour.override(true)
 	}
-	if e.GetVar("KLOG_EDITOR") != "" {
-		config.Editor.override(e.GetVar("KLOG_EDITOR"))
-	} else if e.GetVar("EDITOR") != "" {
+	if e.GetVar("EDITOR") != "" {
 		config.Editor.override(e.GetVar("EDITOR"))
 	}
 	return nil
@@ -136,6 +147,20 @@ type FromConfigFile struct {
 
 var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 	{
+		Name: "editor",
+		Reader: func(value string, config *Config) error {
+			config.Editor.override(value)
+			return nil
+		},
+		Value: func(c Config) string {
+			return c.Editor.Value()
+		},
+		Help: Help{
+			Summary: "A CLI command that starts the preferred editor, used for `klog edit`. klog will pass the target file path as last argument. Note: you can use quotes in order to prevent undesired shell word-splitting, if need be.",
+			Default: "If absent/empty, `klog edit` tries to fall back to the $EDITOR environment variable; which you may see below in that case.",
+			Value:   "The value can be any valid CLI command, pasted as is from the terminal.",
+		},
+	}, {
 		Name: "default_rounding",
 		Reader: func(value string, config *Config) error {
 			rounding, err := service.NewRoundingFromString(value)
@@ -152,8 +177,11 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			})
 			return result
 		},
-		Description:  "The default value that shall be used for rounding time values via the `--round` flag, e.g. in `klog start --round 15m`. (If absent/empty, klog doesn’t round.)",
-		Instructions: "The value must be one of: `5m`, `10m`, `15m`, `20m`, `30m`, `60m`. ",
+		Help: Help{
+			Summary: "The default value that shall be used for rounding time values via the `--round` flag, e.g. in `klog start --round 15m`.",
+			Default: "If absent/empty, klog doesn’t round.",
+			Value:   "The value must be one of: `5m`, `10m`, `15m`, `30m`, `60m`.",
+		},
 	}, {
 		Name: "default_should_total",
 		Reader: func(value string, config *Config) error {
@@ -172,45 +200,111 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			})
 			return result
 		},
-		Description:  "The default duration value that shall be used as should-total when creating new records. (If absent/empty, klog doesn’t set a should-total on new records.)",
-		Instructions: "The value must be a duration followed by an exclamation mark. Examples: `8h!`, `6h30m!`. ",
+		Help: Help{
+			Summary: "The default duration value that shall be used as should-total when creating new records.",
+			Default: "If absent/empty, klog doesn’t set a should-total on new records.",
+			Value:   "The value must be a duration followed by an exclamation mark. Examples: `8h!`, `6h30m!`.",
+		},
+	}, {
+		Name: "date_format",
+		Reader: func(value string, config *Config) error {
+			useDashes := true
+			if value == "YYYY-MM-DD" {
+				useDashes = true
+			} else if value == "YYYY/MM/DD" {
+				useDashes = false
+			} else {
+				return errors.New("The value must be `YYYY-MM-DD` or `YYYY/MM/DD`")
+			}
+			config.DateUseDashes.set(useDashes)
+			return nil
+		},
+		Value: func(c Config) string {
+			result := ""
+			c.DateUseDashes.Map(func(d bool) {
+				if d {
+					result = "YYYY-MM-DD"
+				} else {
+					result = "YYYY/MM/DD"
+				}
+			})
+			return result
+		},
+		Help: Help{
+			Summary: "The preferred date format to use for new records, e.g. 2022-03-24 or 2022/03/24.",
+			Default: "If absent/empty, klog automatically tries to be consistent with what is used in the target file; otherwise, it defaults the YYYY-MM-DD format.",
+			Value:   "The value must be either `YYYY-MM-DD` or `YYYY/MM/DD`.",
+		},
+	}, {
+		Name: "time_format",
+		Reader: func(value string, config *Config) error {
+			use24HourClock := true
+			if value == "24h" {
+				use24HourClock = true
+			} else if value == "12h" {
+				use24HourClock = false
+			} else {
+				return errors.New("The value must be `24h` or `12h`")
+			}
+			config.TimeUse24HourClock.set(use24HourClock)
+			return nil
+		},
+		Value: func(c Config) string {
+			result := ""
+			c.TimeUse24HourClock.Map(func(t bool) {
+				if t {
+					result = "24h"
+				} else {
+					result = "12h"
+				}
+			})
+			return result
+		},
+		Help: Help{
+			Summary: "The preferred time format to use for new range entries, e.g. 13:00 or 1:00pm.",
+			Default: "If absent/empty, klog automatically tries to be consistent with what is used in the target file; otherwise, it defaults to the 24h format.",
+			Value:   "The value must be either `24h` or `12h`.",
+		},
 	},
 }
 
+type Help struct {
+	Summary string
+	Default string
+	Value   string
+}
+
 type ConfigFileEntries[T any] struct {
-	Name         string
-	Reader       func(string, *Config) error
-	Value        func(Config) string
-	Description  string
-	Instructions string
+	Name   string
+	Reader func(string, *Config) error
+	Value  func(Config) string
+	Help   Help
 }
 
 func (e FromConfigFile) Apply(config *Config) Error {
-	data := map[string]string{}
-	lErr := yaml.Unmarshal([]byte(e.FileContents), &data)
+	data, lErr := genie.Parse(e.FileContents)
 	if lErr != nil {
 		return NewError(
 			"Invalid config file",
-			"The syntax in the file is not valid YAML.",
-			lErr,
+			lErr.Error(),
+			nil,
 		)
 	}
-	for key, value := range data {
+	for _, entry := range CONFIG_FILE_ENTRIES {
+		key := entry.Name
+		value := data.Get(key)
 		if value == "" {
 			continue
 		}
-		for _, entry := range CONFIG_FILE_ENTRIES {
-			if entry.Name == key {
-				rErr := entry.Reader(value, config)
-				if rErr != nil {
-					return NewError(
-						"Invalid config file",
-						"The value for `"+key+"` is not valid: "+entry.Instructions,
-						rErr,
-					)
-				}
-			}
+		rErr := entry.Reader(value, config)
+		if rErr != nil {
+			return NewError(
+				"Invalid config file",
+				"The value for `"+key+"` is not valid: "+entry.Help.Value,
+				rErr,
+			)
 		}
+
 	}
 	return nil
 }

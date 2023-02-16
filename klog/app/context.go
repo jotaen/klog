@@ -25,7 +25,7 @@ type FileOrBookmarkName string
 const (
 	KLOG_FOLDER_NAME    = ".klog"
 	BOOKMARKS_FILE_NAME = "bookmarks.json"
-	CONFIG_FILE_NAME    = "config.yml"
+	CONFIG_FILE_NAME    = "config.ini"
 )
 
 // Context is a representation of the runtime environment of klog.
