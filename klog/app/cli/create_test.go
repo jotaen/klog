@@ -58,7 +58,86 @@ new record!
 `, state.writtenFileContents)
 }
 
-func TestCreateWithFileConfig(t *testing.T) {
+func TestCreateWithStyle(t *testing.T) {
+	// For empty file and no preferences, use recommended default.
+	{
+		state, err := NewTestingContext()._SetRecords(``).
+			_SetNow(1920, 2, 3, 15, 24)._Run((&Create{}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, "1920-02-03\n", state.writtenFileContents)
+	}
+
+	// Without any preference, detect from file.
+	{
+		state, err := NewTestingContext()._SetRecords(`
+1920/02/01
+	4h33m
+
+1920/02/02
+	9:00-12:00
+`)._SetNow(1920, 2, 3, 15, 24)._Run((&Create{}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+1920/02/01
+	4h33m
+
+1920/02/02
+	9:00-12:00
+
+1920/02/03
+`, state.writtenFileContents)
+	}
+
+	// Use preference from config file, if given.
+	{
+		state, err := NewTestingContext()._SetRecords(`
+1920/02/01
+	4h33m
+
+1920/02/02
+	9:00-12:00
+`)._SetFileConfig(`
+date_format = YYYY-MM-DD
+`)._SetNow(1920, 2, 3, 15, 24)._Run((&Create{}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+1920/02/01
+	4h33m
+
+1920/02/02
+	9:00-12:00
+
+1920-02-03
+`, state.writtenFileContents)
+	}
+
+	// If explicit flag was provided, that takes ultimate precedence.
+	{
+		state, err := NewTestingContext()._SetRecords(`
+1920/02/01
+	4h33m
+
+1920/02/02
+	9:00-12:00
+`)._SetFileConfig(`
+date_format = YYYY/MM/DD
+`)._SetNow(1920, 2, 3, 15, 24)._Run((&Create{
+			AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 3)},
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+1920/02/01
+	4h33m
+
+1920/02/02
+	9:00-12:00
+
+1920-02-03
+`, state.writtenFileContents)
+	}
+}
+
+func TestCreateWithShouldTotalConfig(t *testing.T) {
 	// With should-total from config file
 	{
 		state, err := NewTestingContext()._SetRecords(`

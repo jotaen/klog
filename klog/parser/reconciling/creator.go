@@ -15,9 +15,9 @@ type AdditionalData struct {
 
 // NewReconcilerForNewRecord is a reconciler creator for a new record at a given date and
 // with the given parameters.
-func NewReconcilerForNewRecord(atDate Styled[klog.Date], ad AdditionalData) Creator {
+func NewReconcilerForNewRecord(atDate klog.Date, format ReformatDirective[klog.DateFormat], ad AdditionalData) Creator {
 	return func(rs []klog.Record, bs []txt.Block) *Reconciler {
-		record := klog.NewRecord(atDate.Value)
+		record := klog.NewRecord(atDate)
 		if ad.ShouldTotal != nil {
 			record.SetShouldTotal(ad.ShouldTotal)
 		}
@@ -31,12 +31,12 @@ func NewReconcilerForNewRecord(atDate Styled[klog.Date], ad AdditionalData) Crea
 			style:           elect(*defaultStyle(), rs, bs),
 			lines:           flatten(bs),
 		}
-		dateFormat := reconciler.style.dateFormat()
-		if !atDate.AutoStyle {
-			dateFormat = atDate.Value.Format()
-		}
+		dateValue := atDate.ToString()
+		format.apply(reconciler.style.dateFormat(), func(f klog.DateFormat) {
+			dateValue = atDate.ToStringWithFormat(f)
+		})
 		recordText := func() []insertableText {
-			result := atDate.Value.ToStringWithFormat(dateFormat)
+			result := dateValue
 			if ad.ShouldTotal != nil {
 				result += " (" + ad.ShouldTotal.ToString() + ")"
 			}
@@ -51,12 +51,12 @@ func NewReconcilerForNewRecord(atDate Styled[klog.Date], ad AdditionalData) Crea
 			}
 			i := 0
 			for _, r := range rs {
-				if i == 0 && !atDate.Value.IsAfterOrEqual(r.Date()) {
+				if i == 0 && !atDate.IsAfterOrEqual(r.Date()) {
 					// The new record is dated prior to the first one, so we have to append a blank line.
 					recordText = append(recordText, blankLine)
 					return recordText, 0, 1, 0
 				}
-				if len(rs)-1 == i || (atDate.Value.IsAfterOrEqual(r.Date()) && !atDate.Value.IsAfterOrEqual(rs[i+1].Date())) {
+				if len(rs)-1 == i || (atDate.IsAfterOrEqual(r.Date()) && !atDate.IsAfterOrEqual(rs[i+1].Date())) {
 					// The record is in between.
 					break
 				}

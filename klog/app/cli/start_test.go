@@ -149,14 +149,28 @@ default_should_total = 8h!
 `, state.writtenFileContents)
 }
 
-func TestStartTakesOverStyle(t *testing.T) {
-	state, err := NewTestingContext()._SetRecords(`
+func TestStartWithStyle(t *testing.T) {
+	// For empty file and no preferences, use recommended default.
+	{
+		state, err := NewTestingContext()._SetRecords(`
+1920/02/02
+`)._SetNow(1920, 2, 2, 9, 44)._Run((&Start{}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+1920/02/02
+    9:44 - ?
+`, state.writtenFileContents)
+	}
+
+	// Without any preference, detect from file.
+	{
+		state, err := NewTestingContext()._SetRecords(`
 1920/02/02
   9:00am-1:00pm
   3h
 `)._SetNow(1920, 2, 3, 8, 12)._Run((&Start{}).Run)
-	require.Nil(t, err)
-	assert.Equal(t, `
+		require.Nil(t, err)
+		assert.Equal(t, `
 1920/02/02
   9:00am-1:00pm
   3h
@@ -164,23 +178,48 @@ func TestStartTakesOverStyle(t *testing.T) {
 1920/02/03
   8:12am-?
 `, state.writtenFileContents)
-}
+	}
 
-func TestStartIgnoresExistingStyleIfExplicitStyleWasGiven(t *testing.T) {
-	state, err := NewTestingContext()._SetRecords(`
+	// Use preference from config file, if given.
+	{
+		state, err := NewTestingContext()._SetRecords(`
 1920/02/02
   9:00am-1:00pm
+  3h
+`)._SetNow(1920, 2, 3, 8, 12)._SetFileConfig(`
+date_format = YYYY-MM-DD
+time_format = 24h
+`)._Run((&Start{}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+1920/02/02
+  9:00am-1:00pm
+  3h
+
+1920-02-03
+  8:12-?
+`, state.writtenFileContents)
+	}
+
+	// If explicit flag was provided, that takes ultimate precedence.
+	{
+		state, err := NewTestingContext()._SetRecords(`
+1920/02/02
+  9:00am-1:00pm
+`)._SetFileConfig(`
+time_format = 12h
 `)._SetNow(1920, 2, 2, 8, 12)._Run((&Start{
-		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
-			Time: klog.Ɀ_Time_(9, 44),
-		},
-	}).Run)
-	require.Nil(t, err)
-	assert.Equal(t, `
+			AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
+				Time: klog.Ɀ_Time_(9, 44),
+			},
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
 1920/02/02
   9:00am-1:00pm
   9:44-?
 `, state.writtenFileContents)
+	}
 }
 
 func TestStartWithRounding(t *testing.T) {

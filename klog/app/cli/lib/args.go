@@ -3,6 +3,7 @@ package lib
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
+	"github.com/jotaen/klog/klog/parser/reconciling"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
 	"strings"
@@ -24,17 +25,28 @@ type AtDateArgs struct {
 	Tomorrow  bool      `name:"tomorrow" help:"Use tomorrow’s date"`
 }
 
-func (args *AtDateArgs) AtDate(now gotime.Time) (klog.Date, bool) {
+func (args *AtDateArgs) AtDate(now gotime.Time) klog.Date {
 	if args.Date != nil {
-		return args.Date, false
+		return args.Date
 	}
 	today := klog.NewDateFromGo(now) // That’s effectively/implicitly `--today`
 	if args.Yesterday {
-		return today.PlusDays(-1), false
+		return today.PlusDays(-1)
 	} else if args.Tomorrow {
-		return today.PlusDays(1), false
+		return today.PlusDays(1)
 	}
-	return today, true
+	return today
+}
+
+func (args *AtDateArgs) DateFormat(config app.Config) reconciling.ReformatDirective[klog.DateFormat] {
+	if args.Date != nil {
+		return reconciling.NoReformat[klog.DateFormat]()
+	}
+	fd := reconciling.ReformatAutoStyle[klog.DateFormat]()
+	config.DateUseDashes.Map(func(x bool) {
+		fd = reconciling.ReformatExplicitly(klog.DateFormat{UseDashes: x})
+	})
+	return fd
 }
 
 type AtDateAndTimeArgs struct {
@@ -43,11 +55,11 @@ type AtDateAndTimeArgs struct {
 	Round service.Rounding `name:"round" short:"r" help:"Round time to nearest multiple of 5m, 10m, 15m, 30m, or 60m / 1h"`
 }
 
-func (args *AtDateAndTimeArgs) AtTime(now gotime.Time, config app.Config) (klog.Time, bool, app.Error) {
+func (args *AtDateAndTimeArgs) AtTime(now gotime.Time, config app.Config) (klog.Time, app.Error) {
 	if args.Time != nil {
-		return args.Time, false, nil
+		return args.Time, nil
 	}
-	date, _ := args.AtDate(now)
+	date := args.AtDate(now)
 	today := klog.NewDateFromGo(now)
 	time := klog.NewTimeFromGo(now)
 	if args.Round != nil {
@@ -58,20 +70,35 @@ func (args *AtDateAndTimeArgs) AtTime(now gotime.Time, config app.Config) (klog.
 		})
 	}
 	if today.IsEqualTo(date) {
-		return time, true, nil
+		return time, nil
 	} else if today.PlusDays(-1).IsEqualTo(date) {
 		shiftedTime, _ := time.Plus(klog.NewDuration(24, 0))
-		return shiftedTime, true, nil
+		return shiftedTime, nil
 	} else if today.PlusDays(1).IsEqualTo(date) {
 		shiftedTime, _ := time.Plus(klog.NewDuration(-24, 0))
-		return shiftedTime, true, nil
+		return shiftedTime, nil
 	}
-	return nil, false, app.NewErrorWithCode(
+	return nil, app.NewErrorWithCode(
 		app.LOGICAL_ERROR,
 		"Missing time parameter",
 		"Please specify a time value for dates in the past",
 		nil,
 	)
+}
+
+func (args *AtDateAndTimeArgs) TimeFormat(config app.Config) reconciling.ReformatDirective[klog.TimeFormat] {
+	if args.Time != nil {
+		return reconciling.NoReformat[klog.TimeFormat]()
+	}
+	fd := reconciling.ReformatAutoStyle[klog.TimeFormat]()
+	config.TimeUse24HourClock.Map(func(x bool) {
+		fd = reconciling.ReformatExplicitly(klog.TimeFormat{Use24HourClock: x})
+	})
+	return fd
+}
+
+func (args *AtDateAndTimeArgs) WasAutomatic() bool {
+	return args.Date == nil && args.Time == nil
 }
 
 type DiffArgs struct {

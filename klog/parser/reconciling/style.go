@@ -5,18 +5,6 @@ import (
 	"github.com/jotaen/klog/klog/parser/txt"
 )
 
-type Styled[T any] struct {
-	Value     T
-	AutoStyle bool
-}
-
-func NewStyled[T any](value T, isAutoStyle bool) Styled[T] {
-	return Styled[T]{
-		Value:     value,
-		AutoStyle: isAutoStyle,
-	}
-}
-
 // style describes the general styling and formatting preferences of a record.
 type style struct {
 	lineEnding                          styleProp[string]

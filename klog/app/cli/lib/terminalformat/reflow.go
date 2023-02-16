@@ -14,13 +14,14 @@ func NewReflower(maxLineLength int, newLineChar string) Reflower {
 	}
 }
 
-func (b Reflower) Reflow(text string, linePrefix string) string {
+func (b Reflower) Reflow(text string, linePrefixes []string) string {
 	SPACE := " "
 	var resultParagraphs []string
 
 	for _, paragraph := range strings.Split(text, b.newLine) {
 		words := strings.Split(paragraph, SPACE)
 		lines := []string{""}
+		currentLinePrefix := ""
 		for i, word := range words {
 			nr := len(lines) - 1
 			isLastWordOfText := i == len(words)-1
@@ -29,7 +30,10 @@ func (b Reflower) Reflow(text string, linePrefix string) string {
 				nr = len(lines) - 1
 			}
 			if lines[nr] == "" {
-				lines[nr] += linePrefix
+				if len(linePrefixes) > nr {
+					currentLinePrefix = linePrefixes[nr]
+				}
+				lines[nr] += currentLinePrefix
 			} else {
 				lines[nr] += SPACE
 			}

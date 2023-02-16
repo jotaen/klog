@@ -15,7 +15,9 @@ func (opt *Config) Help() string {
 
 If you run ` + "`" + `klog config` + "`" + `, you can learn about the supported properties in the file, and you also see what values are in effect at the moment.
 
-Note: the output of the command does not print the actual file. You may, however, use the output as template for setting up the file, as its correctly formatted.`
+Note: the output of the command does not print the actual file, it rather shows the configuration as it is in effect.
+
+You may use the output as template for setting up your config file, as its correctly formatted.`
 }
 
 func (opt *Config) Run(ctx app.Context) app.Error {
@@ -24,7 +26,11 @@ func (opt *Config) Run(ctx app.Context) app.Error {
 		return nil
 	}
 	for i, e := range app.CONFIG_FILE_ENTRIES {
-		ctx.Print(lib.Subdued.Format(lib.Reflower.Reflow(e.Description+"\n"+e.Instructions, "# ")))
+		ctx.Print(lib.Subdued.Format(lib.Reflower.Reflow(e.Help.Summary, []string{"# "})))
+		ctx.Print("\n")
+		ctx.Print(lib.Subdued.Format(lib.Reflower.Reflow("Value: "+e.Help.Value, []string{"# - ", "#   "})))
+		ctx.Print("\n")
+		ctx.Print(lib.Subdued.Format(lib.Reflower.Reflow("Default: "+e.Help.Default, []string{"# - ", "#   "})))
 		ctx.Print("\n")
 		ctx.Print(lib.Red.Format(e.Name) + ` = ` + terminalformat.Style{Color: "227"}.Format(e.Value(ctx.Config())))
 		if i < len(app.CONFIG_FILE_ENTRIES)-1 {

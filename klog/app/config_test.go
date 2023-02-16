@@ -67,51 +67,102 @@ func TestSetsParamsFromEnv(t *testing.T) {
 		assert.Equal(t, c.Editor.Value(), "subl")
 	}
 
-	// `KLOG_EDITOR` would trump `EDITOR`.
+	// `editor` from file would trump `$EDITOR` env variable.
 	{
 		c, _ := NewConfig(
 			FromStaticValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{
-				"EDITOR":      "subl",
-				"KLOG_EDITOR": "vi",
+				"EDITOR": "subl",
 			}),
-			FromConfigFile{""},
+			FromConfigFile{"editor = vi"},
 		)
 		assert.Equal(t, c.Editor.Value(), "vi")
 	}
 }
 
 func TestSetsDefaultRoundingParamFromConfigFile(t *testing.T) {
-	for _, tml := range []string{
-		`default_rounding = 30m`,
+	for _, x := range []struct {
+		cfg string
+		exp int
+	}{
+		{`default_rounding = 5m`, 5},
+		{`default_rounding = 10m`, 10},
+		{`default_rounding = 15m`, 15},
+		{`default_rounding = 30m`, 30},
+		{`default_rounding = 60m`, 60},
 	} {
 		c, _ := NewConfig(
 			FromStaticValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{}),
-			FromConfigFile{tml},
+			FromConfigFile{x.cfg},
 		)
 		var value int
 		c.DefaultRounding.Map(func(r service.Rounding) {
 			value = r.ToInt()
 		})
-		assert.Equal(t, value, 30)
+		assert.Equal(t, x.exp, value)
 	}
 }
 
 func TestSetsDefaultShouldTotalParamFromConfigFile(t *testing.T) {
-	for _, tml := range []string{
-		`default_should_total = 8h30m!`,
+	for _, x := range []struct {
+		cfg string
+		exp string
+	}{
+		{`default_should_total = 8h30m!`, "8h30m!"},
 	} {
 		c, _ := NewConfig(
 			FromStaticValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{}),
-			FromConfigFile{tml},
+			FromConfigFile{x.cfg},
 		)
 		var value string
 		c.DefaultShouldTotal.Map(func(s klog.ShouldTotal) {
 			value = s.ToString()
 		})
-		assert.Equal(t, value, "8h30m!")
+		assert.Equal(t, x.exp, value)
+	}
+}
+
+func TestSetsDateFormatParamFromConfigFile(t *testing.T) {
+	for _, x := range []struct {
+		cfg string
+		exp bool
+	}{
+		{`date_format = YYYY-MM-DD`, true},
+		{`date_format = YYYY/MM/DD`, false},
+	} {
+		c, _ := NewConfig(
+			FromStaticValues{NumCpus: 1},
+			createMockConfigFromEnv(map[string]string{}),
+			FromConfigFile{x.cfg},
+		)
+		var value bool
+		c.DateUseDashes.Map(func(s bool) {
+			value = s
+		})
+		assert.Equal(t, x.exp, value)
+	}
+}
+
+func TestSetTimeFormatParamFromConfigFile(t *testing.T) {
+	for _, x := range []struct {
+		cfg string
+		exp bool
+	}{
+		{`time_format = 24h`, true},
+		{`time_format = 12h`, false},
+	} {
+		c, _ := NewConfig(
+			FromStaticValues{NumCpus: 1},
+			createMockConfigFromEnv(map[string]string{}),
+			FromConfigFile{x.cfg},
+		)
+		var value bool
+		c.TimeUse24HourClock.Map(func(s bool) {
+			value = s
+		})
+		assert.Equal(t, x.exp, value)
 	}
 }
 
@@ -133,12 +184,11 @@ what_is_this = true
 func TestIgnoresEmptyConfigFileOrEmptyParameters(t *testing.T) {
 	for _, tml := range []string{
 		``,
-		`
-default_rounding =
-`,
-		`
-default_should_total = 
-`,
+		`editor = `,
+		`default_rounding =`,
+		`default_should_total = `,
+		`date_format = `,
+		`time_format = `,
 	} {
 		_, err := NewConfig(
 			FromStaticValues{NumCpus: 1},
@@ -152,9 +202,13 @@ default_should_total =
 func TestRejectsInvalidConfigFile(t *testing.T) {
 	for _, tml := range []string{
 		`default_rounding = true`,              // Wrong type
-		`default_rounding = 22m`,               // Invalid value
+		`default_rounding = 20m`,               // Invalid value
 		`default_should_total = [true, false]`, // Wrong type
 		`default_should_total = 15`,            // Invalid value
+		`date_format = [true, false]`,          // Wrong type
+		`date_format = YYYY.MM.DD`,             // Invalid value
+		`time_format = [true, false]`,          // Wrong type
+		`date_format = 2h`,                     // Invalid value
 	} {
 		_, err := NewConfig(
 			FromStaticValues{NumCpus: 1},

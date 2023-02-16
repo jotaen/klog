@@ -23,8 +23,7 @@ func (opt *Create) Help() string {
 
 func (opt *Create) Run(ctx app.Context) app.Error {
 	opt.NoStyleArgs.Apply(&ctx)
-	date, isAutoDate := opt.AtDate(ctx.Now())
-	atDate := reconciling.NewStyled[klog.Date](date, isAutoDate)
+	date := opt.AtDate(ctx.Now())
 	additionalData := reconciling.AdditionalData{ShouldTotal: opt.ShouldTotal, Summary: opt.Summary}
 	if additionalData.ShouldTotal == nil {
 		ctx.Config().DefaultShouldTotal.Map(func(s klog.ShouldTotal) {
@@ -33,7 +32,7 @@ func (opt *Create) Run(ctx app.Context) app.Error {
 	}
 	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
-			reconciling.NewReconcilerForNewRecord(atDate, additionalData),
+			reconciling.NewReconcilerForNewRecord(date, opt.DateFormat(ctx.Config()), additionalData),
 		},
 
 		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
