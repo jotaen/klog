@@ -7,7 +7,6 @@ import (
 	"github.com/jotaen/klog/klog/app/cli/lib"
 	"github.com/jotaen/klog/klog/app/cli/main"
 	"os"
-	"os/user"
 	"runtime"
 )
 
@@ -26,11 +25,11 @@ func main() {
 	}
 
 	klogFolder := func() app.File {
-		f, err := determineKlogFolderLocation()
+		f, err := determineKlogConfigFolder()
 		if err != nil {
 			fail(err, false)
 		}
-		return app.Join(f, app.KLOG_FOLDER_NAME)
+		return f
 	}()
 
 	configFile := func() string {
@@ -78,7 +77,7 @@ func fail(e error, isDebug bool) {
 
 // readConfigFile reads the config file from disk, if present.
 // If not present, it returns empty string.
-func readConfigFile(location app.File) (string, error) {
+func readConfigFile(location app.File) (string, app.Error) {
 	contents, rErr := app.ReadFile(location)
 	if rErr != nil {
 		if rErr.Code() == app.NO_SUCH_FILE {
@@ -89,21 +88,18 @@ func readConfigFile(location app.File) (string, error) {
 	return contents, nil
 }
 
-// determineKlogFolderLocation returns the location where the `.klog` folder should be place.
-// This is determined by following this lookup precedence:
-// - $KLOG_FOLDER_LOCATION, if set
-// - $XDG_CONFIG_HOME, if set
-// - The default home folder, e.g. `~`
-func determineKlogFolderLocation() (app.File, error) {
-	location := os.Getenv("KLOG_FOLDER_LOCATION")
-	if os.Getenv("XDG_CONFIG_HOME") != "" {
-		location = os.Getenv("XDG_CONFIG_HOME")
-	} else if location == "" {
-		homeDir, hErr := user.Current()
-		if hErr != nil {
-			return nil, hErr
+// determineKlogConfigFolder returns the location where the klog config folder
+// is (or should be) located.
+func determineKlogConfigFolder() (app.File, app.Error) {
+	for _, kf := range app.KLOG_CONFIG_FOLDER {
+		basePath := os.Getenv(kf.BasePathEnvVar)
+		if basePath != "" {
+			return app.NewFile(basePath, kf.Location)
 		}
-		location = homeDir.HomeDir
 	}
-	return app.NewFile(location)
+	return nil, app.NewError(
+		"Cannot determine klog config folder",
+		"Please set the `KLOG_CONFIG_HOME` environment variable, and make it point to a valid, empty folder.",
+		nil,
+	)
 }

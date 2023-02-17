@@ -55,7 +55,8 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) erro
 			return kong.TypeMapper(reflect.TypeOf(&s).Elem(), entrySummaryDecoder())
 		}(),
 		kong.ConfigureHelp(kong.HelpOptions{
-			Compact: true,
+			Compact:             true,
+			NoExpandSubcommands: true,
 		}),
 	)
 	if nErr != nil {

@@ -20,7 +20,7 @@ const (
 	// IO_ERROR should be used for errors during I/O processes.
 	IO_ERROR
 
-	// CONFIG_ERROR should be used for .klog-folder-related problems.
+	// CONFIG_ERROR should be used for config-folder-related problems.
 	CONFIG_ERROR
 
 	// NO_SUCH_BOOKMARK_ERROR should be used if the specified an unknown bookmark name.

@@ -15,6 +15,12 @@ var POTENTIAL_FILE_EXLORERS = []command.Command{
 	command.New("xdg-open", nil),
 }
 
-func flagAsHidden(path string) {
-	// Nothing to do on UNIX due to the dotfile convention
+var KLOG_CONFIG_FOLDER = []KlogFolder{
+	{"KLOG_CONFIG_HOME", ""},
+	{"XDG_CONFIG_HOME", "klog"},
+	{"HOME", ".config/klog"},
+}
+
+func (kf KlogFolder) EnvVarSymbol() string {
+	return "$" + kf.BasePathEnvVar
 }
