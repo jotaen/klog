@@ -23,7 +23,6 @@ import (
 type FileOrBookmarkName string
 
 const (
-	KLOG_FOLDER_NAME    = ".klog"
 	BOOKMARKS_FILE_NAME = "bookmarks.json"
 	CONFIG_FILE_NAME    = "config.ini"
 )
@@ -37,8 +36,8 @@ type Context interface {
 	// ReadLine reads user input from stdin.
 	ReadLine() (string, Error)
 
-	// KlogFolder returns the path of the .klog folder.
-	KlogFolder() File
+	// KlogConfigFolder returns the path of the klog config folder.
+	KlogConfigFolder() File
 
 	// Meta returns miscellaneous meta information.
 	Meta() Meta
@@ -142,7 +141,7 @@ func (ctx *context) ReadLine() (string, Error) {
 	)
 }
 
-func (ctx *context) KlogFolder() File {
+func (ctx *context) KlogConfigFolder() File {
 	return ctx.klogFolder
 }
 
@@ -264,13 +263,12 @@ func (ctx *context) Now() gotime.Time {
 }
 
 func (ctx *context) initialiseKlogFolder() Error {
-	klogFolder := ctx.KlogFolder()
+	klogFolder := ctx.KlogConfigFolder()
 	err := os.MkdirAll(klogFolder.Path(), 0700)
-	flagAsHidden(klogFolder.Path())
 	if err != nil {
 		return NewError(
-			"Unable to initialise ~/.klog folder",
-			"Please create a ~/.klog folder manually",
+			"Unable to initialise klog config folder",
+			"Please create a klog config folder manually",
 			err,
 		)
 	}
@@ -306,7 +304,7 @@ func (ctx *context) ManipulateBookmarks(manipulate func(BookmarksCollection) Err
 }
 
 func (ctx *context) bookmarkDatabasePath() File {
-	return Join(ctx.KlogFolder(), BOOKMARKS_FILE_NAME)
+	return Join(ctx.KlogConfigFolder(), BOOKMARKS_FILE_NAME)
 }
 
 func (ctx *context) Execute(cmd command.Command) Error {

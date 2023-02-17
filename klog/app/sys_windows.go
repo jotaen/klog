@@ -17,12 +17,13 @@ var POTENTIAL_FILE_EXLORERS = []command.Command{
 	command.New("cmd.exe", []string{"/C", "start"}),
 }
 
-func flagAsHidden(path string) {
-	winFileName, err := syscall.UTF16PtrFromString(path)
-	if err != nil {
-		return
-	}
-	_ = syscall.SetFileAttributes(winFileName, syscall.FILE_ATTRIBUTE_HIDDEN)
+var KLOG_CONFIG_FOLDER = []KlogFolder{
+	{"KLOG_CONFIG_HOME", ""},
+	{"AppData", "klog"},
+}
+
+func (kf KlogFolder) EnvVarSymbol() string {
+	return "%" + kf.BasePathEnvVar + "%"
 }
 
 func init() {
