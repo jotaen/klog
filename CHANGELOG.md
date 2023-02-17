@@ -2,11 +2,13 @@
 **Summary of changes of the command line tool**
 
 ## v6.0
-- **[ BREAKING ]** Respect `$XDG_CONFIG_HOME` or `$KLOG_FOLDER_LOCATION`
-  environment variables (if set) as default location for the `.klog/` folder.
-  (The `.klog/` folder is used for storing configuration and bookmarks.)
-  If these variables are set on your system, and if you use bookmarks, you need
-  to manually move the contents of the `.klog/` folder over to the new location.
+- **[ BREAKING ]** The default location of the klog config folder has moved!
+  So far, that folder only contains the bookmark database, so if you don’t
+  use bookmarks, you can ignore this change. In order to see or configure the
+  location of the klog config folder, please run `klog --config-folder`.
+  The previous location was `~/.klog` on all systems, so you might have to
+  manually move over the contents of that previous folder, and potentially adjust
+  your dotfile management (if you have that).
 - **[ FEATURE ]** Introduce optional, file-based configuration for general
   preferences such as the preferred date or time format, or default values for
   certain CLI flags. See `klog config` / `klog config --help` to learn more.
