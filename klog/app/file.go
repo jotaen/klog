@@ -29,13 +29,14 @@ type FileWithContents interface {
 
 // NewFile creates a new File object from an absolute or relative path.
 // It returns an error if the given path cannot be resolved.
-func NewFile(path string) (File, Error) {
-	absolutePath, err := filepath.Abs(path)
+func NewFile(path ...string) (File, Error) {
+	fullPath := filepath.Join(path...)
+	absolutePath, err := filepath.Abs(fullPath)
 	if err != nil {
 		return nil, NewErrorWithCode(
 			IO_ERROR,
 			"Invalid file path",
-			"Location: "+path,
+			"Location: "+fullPath,
 			err,
 		)
 	}

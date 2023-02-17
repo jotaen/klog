@@ -8,8 +8,9 @@ import (
 )
 
 type Create struct {
-	ShouldTotal klog.ShouldTotal   `name:"should" help:"The should-total of the record"`
-	Summary     klog.RecordSummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the new record"`
+	ShouldTotal      klog.ShouldTotal   `name:"should" help:"The should-total of the record"`
+	ShouldTotalAlias klog.ShouldTotal   `name:"should-total" hidden:""` // Alias for “canonical” term
+	Summary          klog.RecordSummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the new record"`
 	lib.AtDateArgs
 	lib.NoStyleArgs
 	lib.OutputFileArgs
@@ -24,7 +25,7 @@ func (opt *Create) Help() string {
 func (opt *Create) Run(ctx app.Context) app.Error {
 	opt.NoStyleArgs.Apply(&ctx)
 	date := opt.AtDate(ctx.Now())
-	additionalData := reconciling.AdditionalData{ShouldTotal: opt.ShouldTotal, Summary: opt.Summary}
+	additionalData := reconciling.AdditionalData{ShouldTotal: opt.GetShouldTotal(), Summary: opt.Summary}
 	if additionalData.ShouldTotal == nil {
 		ctx.Config().DefaultShouldTotal.Map(func(s klog.ShouldTotal) {
 			additionalData.ShouldTotal = s
@@ -39,4 +40,11 @@ func (opt *Create) Run(ctx app.Context) app.Error {
 			return reconciler.MakeResult()
 		},
 	)
+}
+
+func (opt *Create) GetShouldTotal() klog.ShouldTotal {
+	if opt.ShouldTotal != nil {
+		return opt.ShouldTotal
+	}
+	return opt.ShouldTotalAlias
 }

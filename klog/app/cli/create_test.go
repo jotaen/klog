@@ -58,6 +58,15 @@ new record!
 `, state.writtenFileContents)
 }
 
+func TestCreateWithShouldTotalAlias(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(``).
+		_SetNow(1976, 1, 1, 2, 2)._Run((&Create{
+		ShouldTotalAlias: klog.NewShouldTotal(0, 30),
+	}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, "1976-01-01 (30m!)\n", state.writtenFileContents)
+}
+
 func TestCreateWithStyle(t *testing.T) {
 	// For empty file and no preferences, use recommended default.
 	{

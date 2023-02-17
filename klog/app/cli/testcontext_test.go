@@ -115,8 +115,8 @@ func (ctx *TestingContext) HomeFolder() string {
 	return "~"
 }
 
-func (ctx *TestingContext) KlogFolder() app.File {
-	return app.NewFileOrPanic(ctx.HomeFolder() + app.KLOG_FOLDER_NAME)
+func (ctx *TestingContext) KlogConfigFolder() app.File {
+	return app.NewFileOrPanic("/tmp/sample-klog-config-folder")
 }
 
 func (ctx *TestingContext) Meta() app.Meta {

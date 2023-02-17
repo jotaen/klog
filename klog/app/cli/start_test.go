@@ -188,7 +188,7 @@ func TestStartWithStyle(t *testing.T) {
   3h
 `)._SetNow(1920, 2, 3, 8, 12)._SetFileConfig(`
 date_format = YYYY-MM-DD
-time_format = 24h
+time_convention = 24h
 `)._Run((&Start{}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `
@@ -207,7 +207,7 @@ time_format = 24h
 1920/02/02
   9:00am-1:00pm
 `)._SetFileConfig(`
-time_format = 12h
+time_convention = 12h
 `)._SetNow(1920, 2, 2, 8, 12)._Run((&Start{
 			AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
 				Time: klog.Ɀ_Time_(9, 44),
