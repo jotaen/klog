@@ -23,6 +23,12 @@ type Report struct {
 	lib.InputFilesArgs
 }
 
+func (opt *Report) Help() string {
+	return `It aggregates the totals by period, and prints the respective values from oldest to latest.
+
+The default aggregation is by day, but you choose other periods via the --aggregate flag.`
+}
+
 func (opt *Report) Run(ctx app.Context) app.Error {
 	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)

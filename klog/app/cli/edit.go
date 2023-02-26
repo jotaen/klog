@@ -11,7 +11,11 @@ type Edit struct {
 	lib.QuietArgs
 }
 
-var hint = "You can specify your preferred editor via the $EDITOR environment variable, or the klog config file."
+const hint = "You can specify your preferred editor via the $EDITOR environment variable, or the klog config file."
+
+func (opt *Edit) Help() string {
+	return hint
+}
 
 func (opt *Edit) Run(ctx app.Context) app.Error {
 	target, err := ctx.RetrieveTargetFile(opt.File)

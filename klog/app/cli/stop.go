@@ -17,7 +17,9 @@ type Stop struct {
 
 func (opt *Stop) Help() string {
 	return `If the record contains an open-ended time range (e.g. 18:00-?) then this command
-will replace the end placeholder with the current time (or the one specified via --time).`
+will replace the end placeholder with the current time (or the one specified via --time).
+
+If the --time flag is not specified, it defaults to the current time as end time. In the latter case, the time can be rounded via --round.`
 }
 
 func (opt *Stop) Run(ctx app.Context) app.Error {
