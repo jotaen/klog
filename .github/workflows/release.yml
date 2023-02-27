@@ -78,7 +78,7 @@ jobs:
           EXPECTED_LICENSE_PATH: LICENSE.txt
         run: |
           sudo cp out/klog /usr/bin/klog
-          ./.github/smoke_test.sh
+          ./.github/smoke-test.sh
       - name: Bundle
         run: |
           if [[ "${{ matrix.binary_name }}" != "klog" ]]; then
