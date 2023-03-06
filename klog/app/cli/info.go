@@ -2,44 +2,47 @@ package cli
 
 import (
 	"github.com/jotaen/klog/klog/app"
+	"github.com/jotaen/klog/klog/app/cli/lib"
 	"path/filepath"
 	"strings"
 )
 
-const DESCRIPTION = "klog: command line app for time tracking with plain-text files.\n" +
-	"Run with --help to learn usage.\n" +
-	"Documentation online at " + KLOG_WEBSITE_URL
-
 type Info struct {
-	Version      bool `short:"v" name:"version" help:"Alias for 'klog version'"`
-	ConfigFolder bool `name:"config-folder" help:"Prints path of klog config folder"`
-	Spec         bool `name:"spec" help:"Prints file format specification"`
-	License      bool `name:"license" help:"Prints license"`
+	Spec         InfoSpec         `cmd:"" name:"spec" help:"Prints file format specification"`
+	License      InfoLicense      `cmd:"" name:"license" help:"Prints license / copyright information"`
+	ConfigFolder InfoConfigFolder `cmd:"" name:"config-folder" help:"Prints path of klog config folder"`
 }
 
 func (opt *Info) Help() string {
-	return DESCRIPTION
+	return ""
 }
 
-func (opt *Info) Run(ctx app.Context) app.Error {
-	if opt.Version {
-		versionCmd := Version{}
-		return versionCmd.Run(ctx)
-	} else if opt.Spec {
-		ctx.Print(ctx.Meta().Specification + "\n")
-		return nil
-	} else if opt.License {
-		ctx.Print(ctx.Meta().License + "\n")
-		return nil
-	} else if opt.ConfigFolder {
-		ctx.Print(ctx.KlogConfigFolder().Path() + "\n")
+type InfoConfigFolder struct {
+	lib.QuietArgs
+}
+
+func (opt *InfoConfigFolder) Run(ctx app.Context) app.Error {
+	ctx.Print(ctx.KlogConfigFolder().Path() + "\n")
+	if !opt.Quiet {
 		lookups := make([]string, len(app.KLOG_CONFIG_FOLDER))
 		for i, f := range app.KLOG_CONFIG_FOLDER {
 			lookups[i] = filepath.Join(f.EnvVarSymbol(), f.Location)
 		}
 		ctx.Print("(Lookup order: " + strings.Join(lookups, ", ") + ")\n")
-		return nil
 	}
-	ctx.Print(DESCRIPTION + "\n")
+	return nil
+}
+
+type InfoSpec struct{}
+
+func (opt *InfoSpec) Run(ctx app.Context) app.Error {
+	ctx.Print(ctx.Meta().Specification + "\n")
+	return nil
+}
+
+type InfoLicense struct{}
+
+func (opt *InfoLicense) Run(ctx app.Context) app.Error {
+	ctx.Print(ctx.Meta().License + "\n")
 	return nil
 }

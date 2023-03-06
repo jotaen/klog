@@ -30,9 +30,9 @@ ACTUAL_BUILD_HASH="$(klog version --no-check | grep -oE '\[[abcdef0123456789]{7}
 [[ "${ACTUAL_BUILD_HASH}" == "[${EXPECTED_BUILD_HASH::7}]" ]] || exit 1
 
 echo 'Check embedded spec file...'
-ACTUAL_SPEC="$(klog info --spec)"
+ACTUAL_SPEC="$(klog info spec)"
 [[ "${ACTUAL_SPEC}" == "$(cat "${EXPECTED_SPEC_PATH}")" ]] || exit 1
 
 echo 'Check embedded license file...'
-ACTUAL_LICENSE="$(klog info --license)"
+ACTUAL_LICENSE="$(klog info license)"
 [[ "${ACTUAL_LICENSE}" == "$(cat "${EXPECTED_LICENSE_PATH}")" ]] || exit 1

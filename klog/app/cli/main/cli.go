@@ -74,7 +74,12 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) erro
 	// bash-specific COMP_LINE environment variable is set), the
 	// kongplete.Complete function generates a list of possible completions,
 	// prints them one per line to stdout, and then exits the program early.
-	kongcompletion.Register(kongApp, kongcompletion.WithPredictors(CompletionPredictors(ctx)))
+	kongcompletion.Register(
+		kongApp,
+		kongcompletion.WithPredictors(CompletionPredictors(ctx)),
+		kongcompletion.WithFlagOverrides(lib.FilterArgsCompletionOverrides),
+	)
+
 	kongCtx, cErr := kongApp.Parse(args)
 	if cErr != nil {
 		return cErr

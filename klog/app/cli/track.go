@@ -16,12 +16,12 @@ type Track struct {
 }
 
 func (opt *Track) Help() string {
-	return `The text of the new entry is taken over as is and appended to the record.
+	return `The given text is appended to the record as new entry (taken over as is).
 
 Example: klog track '1h work' file.klg
 
 Remember to use 'quotes' if the entry consists of multiple words,
-and to avoid the text being processed by your shell.`
+to avoid the text being split or interpreted by your shell.`
 }
 
 func (opt *Track) Run(ctx app.Context) app.Error {

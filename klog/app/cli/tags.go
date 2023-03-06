@@ -19,6 +19,14 @@ type Tags struct {
 	lib.InputFilesArgs
 }
 
+func (opt *Tags) Help() string {
+	return `Aggregates the total times of entries by tags.
+
+If a tag appears in the overall record summary, then all of the record’s entries match. If a tag appears in an entry summary, only that particular entry matches.
+
+Every matching entry is counted individually.`
+}
+
 func (opt *Tags) Run(ctx app.Context) app.Error {
 	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)

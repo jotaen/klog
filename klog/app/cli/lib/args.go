@@ -146,29 +146,46 @@ type FilterArgs struct {
 	Until  klog.Date     `name:"until" group:"Filter" help:"Records until this date (inclusive)"`
 	After  klog.Date     `name:"after" group:"Filter" help:"Records after this date (exclusive)"`
 	Before klog.Date     `name:"before" group:"Filter" help:"Records before this date (exclusive)"`
-	Period period.Period `name:"period" group:"Filter" help:"Records in period: YYYY (year), YYYY-MM (month), YYYY-Www (week), or YYYY-Qq (quarter)"`
+	Period period.Period `name:"period" group:"Filter" help:"Records in period: YYYY, YYYY-MM, YYYY-Www, or YYYY-Qq"`
 
 	// Shortcut filters
 	// The `XXX` ones are dummy entries just for the help output
-	Today            bool `name:"today" group:"Filter (shortcuts)" help:"Records at today’s date"`
-	Yesterday        bool `name:"yesterday" group:"Filter (shortcuts)" help:"Records at yesterday’s date"`
-	Tomorrow         bool `name:"tomorrow" group:"Filter (shortcuts)" help:"Records at tomorrow’s date"`
-	ThisWeek         bool `name:"this-week" group:"Filter (shortcuts)" help:"Records of the current week"`
-	ThisWeekAlias    bool `name:"thisweek" group:"Filter (shortcuts)" hidden:""`
-	LastWeek         bool `name:"last-week" group:"Filter (shortcuts)" help:"Records of the last week"`
-	LastWeekAlias    bool `name:"lastweek" group:"Filter (shortcuts)" hidden:""`
-	ThisMonth        bool `name:"this-month" group:"Filter (shortcuts)" help:"Records of the current month"`
-	ThisMonthAlias   bool `name:"thismonth" group:"Filter (shortcuts)" hidden:""`
-	LastMonth        bool `name:"last-month" group:"Filter (shortcuts)" help:"Records of the last month"`
-	LastMonthAlias   bool `name:"lastmonth" group:"Filter (shortcuts)" hidden:""`
-	ThisQuarter      bool `name:"this-quarter" group:"Filter (shortcuts)" help:"Records of the current quarter"`
-	ThisQuarterAlias bool `name:"thisquarter" group:"Filter (shortcuts)" hidden:""`
-	LastQuarter      bool `name:"last-quarter" group:"Filter (shortcuts)" help:"Records of the last quarter"`
-	LastQuarterAlias bool `name:"lastquarter" group:"Filter (shortcuts)" hidden:""`
-	ThisYear         bool `name:"this-year" group:"Filter (shortcuts)" help:"Records of the current year"`
-	ThisYearAlias    bool `name:"thisyear" group:"Filter (shortcuts)" hidden:""`
-	LastYear         bool `name:"last-year" group:"Filter (shortcuts)" help:"Records of the last year"`
-	LastYearAlias    bool `name:"lastyear" group:"Filter (shortcuts)" hidden:""`
+	Today            bool `name:"today" group:"Filter" help:"Records at today’s date"`
+	Yesterday        bool `name:"yesterday" group:"Filter" help:"Records at yesterday’s date"`
+	Tomorrow         bool `name:"tomorrow" group:"Filter" help:"Records at tomorrow’s date"`
+	ThisXXX          bool `name:"this-***" group:"Filter" help:"Records of this week/month/quarter/year, e.g. --this-week"`
+	LastXXX          bool `name:"last-***" group:"Filter" help:"Records of last week/month/quarter/year, e.g. --last-month"`
+	ThisWeek         bool `hidden:"" name:"this-week" group:"Filter"`
+	ThisWeekAlias    bool `hidden:"" name:"thisweek" group:"Filter"`
+	LastWeek         bool `hidden:"" name:"last-week" group:"Filter"`
+	LastWeekAlias    bool `hidden:"" name:"lastweek" group:"Filter"`
+	ThisMonth        bool `hidden:"" name:"this-month" group:"Filter"`
+	ThisMonthAlias   bool `hidden:"" name:"thismonth" group:"Filter"`
+	LastMonth        bool `hidden:"" name:"last-month" group:"Filter"`
+	LastMonthAlias   bool `hidden:"" name:"lastmonth" group:"Filter"`
+	ThisQuarter      bool `hidden:"" name:"this-quarter" group:"Filter"`
+	ThisQuarterAlias bool `hidden:"" name:"thisquarter" group:"Filter"`
+	LastQuarter      bool `hidden:"" name:"last-quarter" group:"Filter"`
+	LastQuarterAlias bool `hidden:"" name:"lastquarter" group:"Filter"`
+	ThisYear         bool `hidden:"" name:"this-year" group:"Filter"`
+	ThisYearAlias    bool `hidden:"" name:"thisyear" group:"Filter"`
+	LastYear         bool `hidden:"" name:"last-year" group:"Filter"`
+	LastYearAlias    bool `hidden:"" name:"lastyear" group:"Filter"`
+}
+
+// FilterArgsCompletionOverrides enables/disables tab completion for
+// certain flags.
+var FilterArgsCompletionOverrides = map[string]bool{
+	"this-***":     false, // disable, although not flagged as hidden
+	"last-***":     false,
+	"this-week":    true, // enable, although flagged as hidden
+	"last-week":    true,
+	"this-month":   true,
+	"last-month":   true,
+	"this-quarter": true,
+	"last-quarter": true,
+	"this-year":    true,
+	"last-year":    true,
 }
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) []klog.Record {

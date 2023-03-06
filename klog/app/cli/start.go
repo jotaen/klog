@@ -17,7 +17,8 @@ type Start struct {
 
 func (opt *Start) Help() string {
 	return `A new open-ended entry is appended to the record, e.g. 14:00-?.
-The start time is the current time (or whatever is specified by --time).`
+
+If the --time flag is not specified, it defaults to the current time as start time. In the latter case, the time can be rounded via --round.`
 }
 
 func (opt *Start) Run(ctx app.Context) app.Error {
