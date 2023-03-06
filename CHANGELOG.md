@@ -5,10 +5,10 @@
 - **[ BREAKING ]** The default location of the klog config folder has moved!
   So far, that folder only contains the bookmark database, so if you don’t
   use bookmarks, you can ignore this change. In order to see or configure the
-  new location of the klog config folder, please run `klog --config-folder`.
-  The previous location was `~/.klog` on all systems, so you might have to
-  manually move over the contents of that previous folder, and potentially adjust
-  your dotfile management (if you have that).
+  location of the klog config folder, please run `klog info config-folder`
+  (on the new release). The previous location was `~/.klog` on all systems,
+  so you might have to manually move over the contents of that previous folder,
+  and potentially adjust your dotfile management (if you have that).
 - **[ FEATURE ]** Introduce optional, file-based configuration for general
   preferences such as the preferred date or time format, or default values for
   certain CLI flags. See `klog config` / `klog config --help` to learn more.
