@@ -20,7 +20,8 @@ type Today struct {
 }
 
 func (opt *Today) Help() string {
-	return `Evaluates the total time, separately for today’s records and all other records.
+	return `Convenience command to “check in” on the current day.
+It evaluates the total time separately for today’s records and all other records.
 
 When both --now and --diff are set, it also calculates the forecasted end-time at which the time goal will be reached.
 (I.e. when the difference between should and actual time will be 0.)
