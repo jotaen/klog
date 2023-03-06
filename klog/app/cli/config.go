@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	ConfigFilePath bool `name:"file-path" help:"Prints the path to your config file"`
+	lib.NoStyleArgs
 }
 
 func (opt *Config) Help() string {
@@ -19,18 +20,21 @@ You may use the output as template for setting up your config file, as its forma
 }
 
 func (opt *Config) Run(ctx app.Context) app.Error {
+	opt.NoStyleArgs.Apply(&ctx)
 	if opt.ConfigFilePath {
 		ctx.Print(app.Join(ctx.KlogConfigFolder(), app.CONFIG_FILE_NAME).Path() + "\n")
 		return nil
 	}
 	for i, e := range app.CONFIG_FILE_ENTRIES {
-		ctx.Print(lib.Subdued.Format(lib.Reflower.Reflow(e.Help.Summary, []string{"# "})))
+		ctx.Print(ctx.Serialiser().Format(lib.Subdued, lib.Reflower.Reflow(e.Help.Summary, []string{"# "})))
 		ctx.Print("\n")
-		ctx.Print(lib.Subdued.Format(lib.Reflower.Reflow("Value: "+e.Help.Value, []string{"# - ", "#   "})))
+		ctx.Print(ctx.Serialiser().Format(lib.Subdued, lib.Reflower.Reflow("Value: "+e.Help.Value, []string{"# - ", "#   "})))
 		ctx.Print("\n")
-		ctx.Print(lib.Subdued.Format(lib.Reflower.Reflow("Default: "+e.Help.Default, []string{"# - ", "#   "})))
+		ctx.Print(ctx.Serialiser().Format(lib.Subdued, lib.Reflower.Reflow("Default: "+e.Help.Default, []string{"# - ", "#   "})))
 		ctx.Print("\n")
-		ctx.Print(lib.Red.Format(e.Name) + ` = ` + terminalformat.Style{Color: "227"}.Format(e.Value(ctx.Config())))
+		ctx.Print(ctx.Serialiser().Format(lib.Red, e.Name))
+		ctx.Print(" = ")
+		ctx.Print(ctx.Serialiser().Format(terminalformat.Style{Color: "227"}, e.Value(ctx.Config())))
 		if i < len(app.CONFIG_FILE_ENTRIES)-1 {
 			ctx.Print("\n\n")
 		}
