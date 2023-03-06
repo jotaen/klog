@@ -153,8 +153,8 @@ type FilterArgs struct {
 	Today            bool `name:"today" group:"Filter" help:"Records at today’s date"`
 	Yesterday        bool `name:"yesterday" group:"Filter" help:"Records at yesterday’s date"`
 	Tomorrow         bool `name:"tomorrow" group:"Filter" help:"Records at tomorrow’s date"`
-	ThisXXX          bool `name:"this-***" group:"Filter" help:"Records of this week/month/quarter/year"`
-	LastXXX          bool `name:"last-***" group:"Filter" help:"Records of last week/month/quarter/year"`
+	ThisXXX          bool `name:"this-***" group:"Filter" help:"Records of this week/month/quarter/year, e.g. --this-week"`
+	LastXXX          bool `name:"last-***" group:"Filter" help:"Records of last week/month/quarter/year, e.g. --last-month"`
 	ThisWeek         bool `hidden:"" name:"this-week" group:"Filter"`
 	ThisWeekAlias    bool `hidden:"" name:"thisweek" group:"Filter"`
 	LastWeek         bool `hidden:"" name:"last-week" group:"Filter"`
