@@ -11,8 +11,9 @@ For an archive of all klog releases, [see here](https://github.com/jotaen/klog/r
 1. Download the latest version and unzip
    - [**Download for Intel**](https://github.com/jotaen/klog/releases/latest/download/klog-mac-intel.zip)
    - [**Download for M1 (ARM)**](https://github.com/jotaen/klog/releases/latest/download/klog-mac-arm.zip)
-2. Right-click on the binary and select “Open“
-   (due to [Gatekeeper](https://support.apple.com/en-us/HT202491))
+2. Make [MacOS “Gatekeeper”](https://support.apple.com/en-us/HT202491) trust the executable:
+   - Either right-click on the binary in the Finder, and select “Open“
+   - Or remove the “quarantine” flag from the binary via the CLI: `xattr -d com.apple.quarantine klog`
 3. Copy to path, e.g. `mv klog /usr/local/bin/klog` (might require `sudo`)
 
 ## Linux
