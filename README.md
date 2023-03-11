@@ -6,11 +6,11 @@ klog is a plain-text file format and a command line tool for time tracking.
 
 📕 [**Documentation**](https://klog.jotaen.net) – **Learn how to use klog**
 
-📥 [Download](INSTALL.md) – Get the latest version
+📥 [Install](https://klog.jotaen.net#get-klog) – Get the latest version
 
 📢 [Changelog](https://github.com/jotaen/klog/blob/main/CHANGELOG.md) – See what’s new
 
-💡 [Specification](Specification.md) – Understand the file format in-depth
+💡 [Specification](Specification.md) – Understand the file format
 
 ## Contribute
 
