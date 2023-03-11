@@ -27,8 +27,9 @@ jobs:
             - [**Linux**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-linux.zip)
             - [**Windows**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-windows.zip)
 
-            You find the install instructions [here](https://github.com/jotaen/klog/blob/main/INSTALL.md).
-            Consult the [Changelog](https://github.com/jotaen/klog/blob/main/CHANGELOG.md) to learn what’s new.
+            Consult the [changelog](https://github.com/jotaen/klog/blob/main/CHANGELOG.md) to learn what’s new.
+
+            See the [documentation website](https://klog.jotaen.net#get-klog) for install instructions, or to explore other install options.
 
             In order to not miss any updates you can either subscribe to the release notifications on Github (at the top right: “Watch”→“Custom”→“Releases”), or check occasionally by running `klog version`.
           release_name: ${{ github.event.inputs.release_id }}
@@ -84,6 +85,7 @@ jobs:
           if [[ "${{ matrix.binary_name }}" != "klog" ]]; then
             mv ./out/klog ./out/${{ matrix.binary_name }}
           fi
+          cp ./.github/install_${{ matrix.go_os }}.md ./INSTALL.md
           zip -j klog-${{ matrix.name }}.zip ./out/${{ matrix.binary_name }} ./INSTALL.md ./LICENSE.txt
       - name: Upload binaries
         uses: actions/upload-release-asset@v1 # https://github.com/actions/upload-release-asset
