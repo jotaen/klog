@@ -8,7 +8,8 @@ import (
 )
 
 type Start struct {
-	Summary klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for this entry"`
+	SummaryText klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for this entry"`
+	Resume      bool              `name:"resume" short:"R" help:"Take over summary of last entry (if applicable)"`
 	lib.AtDateAndTimeArgs
 	lib.NoStyleArgs
 	lib.OutputFileArgs
@@ -25,9 +26,9 @@ func (opt *Start) Run(ctx app.Context) app.Error {
 	opt.NoStyleArgs.Apply(&ctx)
 	now := ctx.Now()
 	date := opt.AtDate(now)
-	time, err := opt.AtTime(now, ctx.Config())
-	if err != nil {
-		return err
+	time, tErr := opt.AtTime(now, ctx.Config())
+	if tErr != nil {
+		return tErr
 	}
 	additionalData := reconciling.AdditionalData{}
 	ctx.Config().DefaultShouldTotal.Map(func(s klog.ShouldTotal) {
@@ -40,7 +41,30 @@ func (opt *Start) Run(ctx app.Context) app.Error {
 		},
 
 		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
-			return reconciler.StartOpenRange(time, opt.TimeFormat(ctx.Config()), opt.Summary)
+			summary, sErr := opt.Summary(reconciler.Record)
+			if sErr != nil {
+				return nil, sErr
+			}
+			return reconciler.StartOpenRange(time, opt.TimeFormat(ctx.Config()), summary)
 		},
 	)
+}
+
+func (opt *Start) Summary(r klog.Record) (klog.EntrySummary, app.Error) {
+	if opt.SummaryText != nil && opt.Resume {
+		return nil, app.NewErrorWithCode(
+			app.LOGICAL_ERROR,
+			"Conflicting flags: --summary and --resume cannot be used at the same time",
+			"",
+			nil,
+		)
+	}
+	if opt.SummaryText != nil {
+		return opt.SummaryText, nil
+	}
+	entriesCount := len(r.Entries())
+	if opt.Resume && entriesCount > 0 {
+		return r.Entries()[entriesCount-1].Summary(), nil
+	}
+	return nil, nil
 }
