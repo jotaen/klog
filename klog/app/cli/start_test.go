@@ -111,7 +111,7 @@ func TestStartWithSummary(t *testing.T) {
 		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
 			AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
 		},
-		Summary: klog.Ɀ_EntrySummary_("Started something"),
+		SummaryText: klog.Ɀ_EntrySummary_("Started something"),
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -267,5 +267,92 @@ default_rounding = 60m
 2005-05-05
     8:10 - ?
 `, state.writtenFileContents)
+	}
+}
+
+func TestStartWithResume(t *testing.T) {
+	// No previous entry -> Empty entry summary
+	{
+		state, err := NewTestingContext()._SetRecords(`1623-12-13
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+			Resume: true,
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `1623-12-13
+    12:49 - ?
+`, state.writtenFileContents)
+	}
+
+	// No previous entry summary -> Empty entry summary
+	{
+		state, err := NewTestingContext()._SetRecords(`1623-12-13
+    8:13 - 9:44
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+			Resume: true,
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `1623-12-13
+    8:13 - 9:44
+    12:49 - ?
+`, state.writtenFileContents)
+	}
+
+	// With previous entry summary -> Take it over
+	{
+		state, err := NewTestingContext()._SetRecords(`1623-12-13
+    8:13 - 9:44 Work
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+			Resume: true,
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `1623-12-13
+    8:13 - 9:44 Work
+    12:49 - ? Work
+`, state.writtenFileContents)
+	}
+
+	// With previous entry summaries -> Take over the last one
+	{
+		state, err := NewTestingContext()._SetRecords(`1623-12-13
+    8:13 - 9:44 Work
+    9:51 - 11:22 More work
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+			Resume: true,
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `1623-12-13
+    8:13 - 9:44 Work
+    9:51 - 11:22 More work
+    12:49 - ? More work
+`, state.writtenFileContents)
+	}
+
+	// With previous multiline entry summary -> Take it over completely
+	{
+		state, err := NewTestingContext()._SetRecords(`1623-12-13
+    8:13 - 9:44
+        Work
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+			Resume: true,
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `1623-12-13
+    8:13 - 9:44
+        Work
+    12:49 - ?
+        Work
+`, state.writtenFileContents)
+	}
+
+	// Resuming fails if summary tag is specified as well
+	{
+		_, err := NewTestingContext()._SetRecords(`1623-12-13
+    8:13 - 9:44
+        Work
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+			Resume:      true,
+			SummaryText: klog.Ɀ_EntrySummary_("Test"),
+		}).Run)
+		require.Error(t, err)
 	}
 }
