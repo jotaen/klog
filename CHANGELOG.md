@@ -1,6 +1,10 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## Next up
+- **[ FEATURE ]** Add new flag `klog start --resume`, which takes over the
+  summary of the last entry for the new open-ended entry.
+
 ## v6.0
 - **[ BREAKING ]** The default location of the klog config folder has moved!
   So far, that folder only contains the bookmark database, so if you don’t
