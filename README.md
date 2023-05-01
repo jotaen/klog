@@ -14,19 +14,20 @@ klog is a plain-text file format and a command line tool for time tracking.
 
 ## Contribute
 
-If you have questions, feature ideas, or just want to bounce off some feedback
+If you have questions, feature ideas, or just want to bounce off some feedback,
 feel invited to [start a discussion](https://github.com/jotaen/klog/discussions).
-In case you run into a bug please [file an issue](https://github.com/jotaen/klog/issues).
-(When in doubt just go for an issue.)
+In case you run into a bug, please [file an issue](https://github.com/jotaen/klog/issues).
+(When in doubt, just go for an issue.)
 
-This repository contains the sources of the command line tool as well as
-the [specification](Specification.md) of the klog file format. Note, that the
-version numbers of both are independent of each other.
+This repository contains the sources of the klog command line tool as well as
+the [specification document](Specification.md) of the klog file format.
+Note that both are technically independent of each other, which implies that
+they also have different version numbers.
 
 ## About
 
 klog was created by [Jan Heuermann](https://www.jotaen.net).
-It is open-source software, which you may use under the following terms:
+It is open-source software, which you are free to use under the following terms:
 
 - Command line tool: [MIT license](LICENSE.txt)
 - File specification: [public domain (CC0/OWFa)](Specification.md#License)
