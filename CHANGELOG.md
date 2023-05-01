@@ -1,7 +1,7 @@
 # Changelog
 **Summary of changes of the command line tool**
 
-## Next up
+## v6.1
 - **[ FEATURE ]** Add new flag `klog start --resume`, which takes over the
   summary of the last entry for the new open-ended entry.
 
