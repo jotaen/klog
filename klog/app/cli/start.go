@@ -50,7 +50,8 @@ func (opt *Start) Run(ctx app.Context) app.Error {
 	)
 }
 
-func (opt *Start) Summary(r klog.Record) (klog.EntrySummary, app.Error) {
+func (opt *Start) Summary(currentRecord klog.Record) (klog.EntrySummary, app.Error) {
+	// Check for conflicting flags.
 	if opt.SummaryText != nil && opt.Resume {
 		return nil, app.NewErrorWithCode(
 			app.LOGICAL_ERROR,
@@ -59,12 +60,31 @@ func (opt *Start) Summary(r klog.Record) (klog.EntrySummary, app.Error) {
 			nil,
 		)
 	}
+
+	// Return summary flag, if specified.
 	if opt.SummaryText != nil {
 		return opt.SummaryText, nil
 	}
-	entriesCount := len(r.Entries())
-	if opt.Resume && entriesCount > 0 {
-		return r.Entries()[entriesCount-1].Summary(), nil
+
+	// Skip if resume flag wasn’t specified.
+	if !opt.Resume {
+		return nil, nil
 	}
+
+	// Return summary of last entry from current record, if it has any entries.
+	if len(currentRecord.Entries()) > 0 {
+		return LastEntrySummary(currentRecord), nil
+	}
+
+	//// Return summary of last entry from last record, if exists.
+	//if maybeLastRecord != nil {
+	//	return LastEntrySummary(maybeLastRecord), nil
+	//}
+
 	return nil, nil
+}
+
+func LastEntrySummary(r klog.Record) klog.EntrySummary {
+	entriesCount := len(r.Entries())
+	return r.Entries()[entriesCount-1].Summary()
 }
