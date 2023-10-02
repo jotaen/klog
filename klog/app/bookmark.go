@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"encoding/json"
+	"os"
 	"sort"
 	"strings"
 )
@@ -100,7 +101,7 @@ func (b *bookmark) Target() File {
 }
 
 func (b *bookmark) IsDefault() bool {
-	return b.name.Value() == BOOKMARK_DEFAULT_NAME
+	return b.Name() == getDefaultBookmarkName()
 }
 
 type bookmarksCollection struct {
@@ -108,7 +109,7 @@ type bookmarksCollection struct {
 }
 
 func (bc *bookmarksCollection) Default() Bookmark {
-	return bc.bookmarks[Name(BOOKMARK_DEFAULT_NAME)]
+	return bc.bookmarks[getDefaultBookmarkName()]
 }
 
 type bookmarkJson struct {
@@ -212,4 +213,8 @@ func (bc *bookmarksCollection) ToJson() string {
 		panic(err)
 	}
 	return buffer.String()
+}
+
+func getDefaultBookmarkName() Name {
+	return NewName(os.Getenv("KLOG_DEFAULT_BOOKMARK"))
 }

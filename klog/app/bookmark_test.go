@@ -139,3 +139,12 @@ func TestSerializeEmptyCollectionToJson(t *testing.T) {
 	bc, _ := NewBookmarksCollectionFromJson(jsonText)
 	assert.Equal(t, jsonText, bc.ToJson())
 }
+
+func TestOverrideDefaultBookmark(t *testing.T) {
+	bc := NewEmptyBookmarksCollection()
+	bc.Set(NewBookmark("foo", NewFileOrPanic("/foo.klg")))
+
+	t.Setenv("KLOG_DEFAULT_BOOKMARK", "@foo")
+
+	assert.Equal(t, "foo", bc.Default().Name().Value())
+}
