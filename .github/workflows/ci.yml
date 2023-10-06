@@ -3,7 +3,7 @@ on: push
 env:
   GO_VERSION: '1.21'
   STATIC_CHECK_VERSION: '2023.1.6'
-  COUNT_LOC_VERSION: '1.98'
+  COUNT_LOC_DOCKER_IMAGE: 'aldanial/cloc:1.98'
 jobs:
   statistics:
     name: Statistics
@@ -11,15 +11,14 @@ jobs:
     env:
       TARGET: klog/
       TEST_FILE_PATTERN: .*_test\.go
-      IMAGE_NAME: aldanial/cloc:${{ env.COUNT_LOC_VERSION }}
     steps:
       - uses: actions/checkout@v2
       - name: Prepare tooling
-        run: docker pull "${IMAGE_NAME}"
+        run: docker pull "${COUNT_LOC_DOCKER_IMAGE}"
       - name: LOC of source files
-        run: docker run --rm -v $(pwd):/wdir:ro -w /wdir "${IMAGE_NAME}" --not-match-f="${TEST_FILE_PATTERN}" "${TARGET}"
+        run: docker run --rm -v $(pwd):/wdir:ro -w /wdir "${COUNT_LOC_DOCKER_IMAGE}" --not-match-f="${TEST_FILE_PATTERN}" "${TARGET}"
       - name: LOC of test files
-        run: docker run --rm -v $(pwd):/wdir:ro -w /wdir "${IMAGE_NAME}" --match-f="${TEST_FILE_PATTERN}" "${TARGET}"
+        run: docker run --rm -v $(pwd):/wdir:ro -w /wdir "${COUNT_LOC_DOCKER_IMAGE}" --match-f="${TEST_FILE_PATTERN}" "${TARGET}"
   benchmark:
     name: Benchmark
     runs-on: ubuntu-latest
