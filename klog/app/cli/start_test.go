@@ -150,8 +150,7 @@ default_should_total = 8h!
 }
 
 func TestStartWithStyle(t *testing.T) {
-	// For empty file and no preferences, use recommended default.
-	{
+	t.Run("For empty file and no preferences, use recommended default.", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1920/02/02
 `)._SetNow(1920, 2, 2, 9, 44)._Run((&Start{}).Run)
@@ -160,10 +159,9 @@ func TestStartWithStyle(t *testing.T) {
 1920/02/02
     9:44 - ?
 `, state.writtenFileContents)
-	}
+	})
 
-	// Without any preference, detect from file.
-	{
+	t.Run("Without any preference, detect from file.", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1920/02/02
   9:00am-1:00pm
@@ -178,10 +176,9 @@ func TestStartWithStyle(t *testing.T) {
 1920/02/03
   8:12am-?
 `, state.writtenFileContents)
-	}
+	})
 
-	// Use preference from config file, if given.
-	{
+	t.Run("Use preference from config file, if given.", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1920/02/02
   9:00am-1:00pm
@@ -199,10 +196,9 @@ time_convention = 24h
 1920-02-03
   8:12-?
 `, state.writtenFileContents)
-	}
+	})
 
-	// If explicit flag was provided, that takes ultimate precedence.
-	{
+	t.Run("If explicit flag was provided, that takes ultimate precedence.", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1920/02/02
   9:00am-1:00pm
@@ -219,12 +215,11 @@ time_convention = 12h
   9:00am-1:00pm
   9:44-?
 `, state.writtenFileContents)
-	}
+	})
 }
 
 func TestStartWithRounding(t *testing.T) {
-	// With --round flag
-	{
+	t.Run("With --round flag", func(t *testing.T) {
 		r5, _ := service.NewRounding(5)
 		state, err := NewTestingContext()._SetRecords(`
 2005-05-05
@@ -236,10 +231,9 @@ func TestStartWithRounding(t *testing.T) {
 2005-05-05
     8:10 - ?
 `, state.writtenFileContents)
-	}
+	})
 
-	// With file config
-	{
+	t.Run("With file config", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 2005-05-05
 `)._SetNow(2005, 5, 5, 8, 12)._SetFileConfig(`
@@ -250,10 +244,9 @@ default_rounding = 15m
 2005-05-05
     8:15 - ?
 `, state.writtenFileContents)
-	}
+	})
 
-	// Flag trumps file config
-	{
+	t.Run("Flag trumps file config", func(t *testing.T) {
 		r5, _ := service.NewRounding(5)
 		state, err := NewTestingContext()._SetRecords(`
 2005-05-05
@@ -267,12 +260,11 @@ default_rounding = 60m
 2005-05-05
     8:10 - ?
 `, state.writtenFileContents)
-	}
+	})
 }
 
 func TestStartWithResume(t *testing.T) {
-	// No previous entry -> Empty entry summary
-	{
+	t.Run("No previous entry -> Empty entry summary", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`1623-12-13
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
 			Resume: true,
@@ -281,10 +273,9 @@ func TestStartWithResume(t *testing.T) {
 		assert.Equal(t, `1623-12-13
     12:49 - ?
 `, state.writtenFileContents)
-	}
+	})
 
-	// No previous entry summary -> Empty entry summary
-	{
+	t.Run("No previous entry summary -> Empty entry summary", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`1623-12-13
     8:13 - 9:44
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
@@ -295,10 +286,9 @@ func TestStartWithResume(t *testing.T) {
     8:13 - 9:44
     12:49 - ?
 `, state.writtenFileContents)
-	}
+	})
 
-	// With previous entry summary -> Take it over
-	{
+	t.Run("With previous entry summary -> Take it over", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`1623-12-13
     8:13 - 9:44 Work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
@@ -309,10 +299,9 @@ func TestStartWithResume(t *testing.T) {
     8:13 - 9:44 Work
     12:49 - ? Work
 `, state.writtenFileContents)
-	}
+	})
 
-	// With previous entry summaries -> Take over the last one
-	{
+	t.Run("With previous entry summaries -> Take over the last one", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`1623-12-13
     8:13 - 9:44 Work
     9:51 - 11:22 More work
@@ -325,10 +314,9 @@ func TestStartWithResume(t *testing.T) {
     9:51 - 11:22 More work
     12:49 - ? More work
 `, state.writtenFileContents)
-	}
+	})
 
-	// With previous multiline entry summary -> Take it over completely
-	{
+	t.Run("With previous multiline entry summary -> Take it over completely", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`1623-12-13
     8:13 - 9:44
         Work
@@ -342,10 +330,9 @@ func TestStartWithResume(t *testing.T) {
     12:49 - ?
         Work
 `, state.writtenFileContents)
-	}
+	})
 
-	// Resuming fails if summary tag is specified as well
-	{
+	t.Run("Resuming fails if summary tag is specified as well", func(t *testing.T) {
 		_, err := NewTestingContext()._SetRecords(`1623-12-13
     8:13 - 9:44
         Work
@@ -354,5 +341,5 @@ func TestStartWithResume(t *testing.T) {
 			SummaryText: klog.Ɀ_EntrySummary_("Test"),
 		}).Run)
 		require.Error(t, err)
-	}
+	})
 }

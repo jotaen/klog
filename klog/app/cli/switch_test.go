@@ -54,8 +54,7 @@ Next day
 }
 
 func TestSwitchWithStyle(t *testing.T) {
-	// Without any preference, detect from file.
-	{
+	t.Run("Without any preference, detect from file.", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1920-02-02
 	10:22am-???
@@ -66,10 +65,9 @@ func TestSwitchWithStyle(t *testing.T) {
 	10:22am-2:49pm
 	2:49pm-???
 `, state.writtenFileContents)
-	}
+	})
 
-	// Use preference from config file, if given.
-	{
+	t.Run("Use preference from config file, if given.", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1920-02-02
 	10:22am-?
@@ -82,10 +80,9 @@ time_convention = 24h
 	10:22am-14:49
 	14:49-?
 `, state.writtenFileContents)
-	}
+	})
 
-	// If explicit flag was provided, that takes ultimate precedence.
-	{
+	t.Run("If explicit flag was provided, that takes ultimate precedence.", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1920-02-02
 	10:22am-?
@@ -100,7 +97,7 @@ time_convention = 12h
 	10:22am-14:49
 	14:49-?
 `, state.writtenFileContents)
-	}
+	})
 }
 
 func TestSwitchFailsIfNoRecentRecord(t *testing.T) {
@@ -135,8 +132,7 @@ func TestSwitchFailsIfNoOpenRange(t *testing.T) {
 }
 
 func TestSwitchWithRounding(t *testing.T) {
-	// With --round flag
-	{
+	t.Run("With --round flag", func(t *testing.T) {
 		r15, _ := service.NewRounding(15)
 		state, err := NewTestingContext()._SetRecords(`
 2005-05-05
@@ -150,10 +146,9 @@ func TestSwitchWithRounding(t *testing.T) {
     8:10 - 11:30
     11:30 - ?
 `, state.writtenFileContents)
-	}
+	})
 
-	// With file config
-	{
+	t.Run("With file config", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 2005-05-05
     8:10 - ?
@@ -166,10 +161,9 @@ default_rounding = 30m
     8:10 - 11:30
     11:30 - ?
 `, state.writtenFileContents)
-	}
+	})
 
-	// --round flag trumps file config
-	{
+	t.Run("--round flag trumps file config", func(t *testing.T) {
 		r5, _ := service.NewRounding(5)
 		state, err := NewTestingContext()._SetRecords(`
 2005-05-05
@@ -185,5 +179,5 @@ default_rounding = 30m
     8:10 - 11:25
     11:25 - ?
 `, state.writtenFileContents)
-	}
+	})
 }

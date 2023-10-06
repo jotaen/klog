@@ -68,16 +68,14 @@ func TestCreateWithShouldTotalAlias(t *testing.T) {
 }
 
 func TestCreateWithStyle(t *testing.T) {
-	// For empty file and no preferences, use recommended default.
-	{
+	t.Run("For empty file and no preferences, use recommended default.", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(``).
 			_SetNow(1920, 2, 3, 15, 24)._Run((&Create{}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, "1920-02-03\n", state.writtenFileContents)
-	}
+	})
 
-	// Without any preference, detect from file.
-	{
+	t.Run("Without any preference, detect from file.", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1920/02/01
 	4h33m
@@ -95,10 +93,9 @@ func TestCreateWithStyle(t *testing.T) {
 
 1920/02/03
 `, state.writtenFileContents)
-	}
+	})
 
-	// Use preference from config file, if given.
-	{
+	t.Run("Use preference from config file, if given.", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1920/02/01
 	4h33m
@@ -118,10 +115,9 @@ date_format = YYYY-MM-DD
 
 1920-02-03
 `, state.writtenFileContents)
-	}
+	})
 
-	// If explicit flag was provided, that takes ultimate precedence.
-	{
+	t.Run("If explicit flag was provided, that takes ultimate precedence.", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1920/02/01
 	4h33m
@@ -143,12 +139,11 @@ date_format = YYYY/MM/DD
 
 1920-02-03
 `, state.writtenFileContents)
-	}
+	})
 }
 
 func TestCreateWithShouldTotalConfig(t *testing.T) {
-	// With should-total from config file
-	{
+	t.Run("With should-total from config file", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1920-02-01
 	4h33m
@@ -168,10 +163,9 @@ default_should_total = 30m!
 
 1920-02-03 (30m!)
 `, state.writtenFileContents)
-	}
+	})
 
-	// --should-total flag trumps should-total from config file
-	{
+	t.Run("--should-total flag trumps should-total from config file", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1920-02-01
 	4h33m
@@ -193,5 +187,5 @@ default_should_total = 30m!
 
 1920-02-03 (5h55m!)
 `, state.writtenFileContents)
-	}
+	})
 }

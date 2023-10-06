@@ -86,21 +86,17 @@ func TestTrackFailsIfEntryInvalid(t *testing.T) {
 }
 
 func TestTrackWithStyle(t *testing.T) {
-	// For empty file and no preferences, use recommended default.
-	{
-		{
-			state, err := NewTestingContext()._SetRecords("").
-				_SetNow(2000, 1, 1, 12, 00).
-				_Run((&Track{
-					Entry: klog.Ɀ_EntrySummary_("2h"),
-				}).Run)
-			require.Nil(t, err)
-			assert.Equal(t, "2000-01-01\n    2h\n", state.writtenFileContents)
-		}
-	}
+	t.Run("For empty file and no preferences, use recommended default.", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords("").
+			_SetNow(2000, 1, 1, 12, 00).
+			_Run((&Track{
+				Entry: klog.Ɀ_EntrySummary_("2h"),
+			}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, "2000-01-01\n    2h\n", state.writtenFileContents)
+	})
 
-	// Without any preference, detect from file.
-	{
+	t.Run("Without any preference, detect from file.", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1855/04/25
 	1h
@@ -115,10 +111,9 @@ func TestTrackWithStyle(t *testing.T) {
 2000/01/01
 	2h
 `, state.writtenFileContents)
-	}
+	})
 
-	// Use preference from config file, if given.
-	{
+	t.Run("Use preference from config file, if given.", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1855/04/25
 	1h
@@ -135,10 +130,9 @@ date_format = YYYY-MM-DD
 2000-01-01
 	2h
 `, state.writtenFileContents)
-	}
+	})
 
-	// If explicit flag was provided, that takes ultimate precedence.
-	{
+	t.Run("If explicit flag was provided, that takes ultimate precedence.", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1855/04/25
 	1h
@@ -156,5 +150,5 @@ date_format = YYYY/MM/DD
 2000-01-01
 	2h
 `, state.writtenFileContents)
-	}
+	})
 }

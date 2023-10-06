@@ -51,8 +51,7 @@ func TestSetsParamsMetadataIsHandledCorrectly(t *testing.T) {
 }
 
 func TestSetsParamsFromEnv(t *testing.T) {
-	// Read plain environment variables.
-	{
+	t.Run("Read plain environment variables.", func(t *testing.T) {
 		c, _ := NewConfig(
 			FromStaticValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{
@@ -65,10 +64,9 @@ func TestSetsParamsFromEnv(t *testing.T) {
 		assert.Equal(t, c.IsDebug.Value(), true)
 		assert.Equal(t, c.NoColour.Value(), true)
 		assert.Equal(t, c.Editor.Value(), "subl")
-	}
+	})
 
-	// `editor` from file would trump `$EDITOR` env variable.
-	{
+	t.Run("`editor` from file would trump `$EDITOR` env variable.", func(t *testing.T) {
 		c, _ := NewConfig(
 			FromStaticValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{
@@ -77,7 +75,7 @@ func TestSetsParamsFromEnv(t *testing.T) {
 			FromConfigFile{"editor = vi"},
 		)
 		assert.Equal(t, c.Editor.Value(), "vi")
-	}
+	})
 }
 
 func TestSetsDefaultRoundingParamFromConfigFile(t *testing.T) {
