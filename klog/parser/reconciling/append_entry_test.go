@@ -132,7 +132,7 @@ func TestReconcilerRejectsInvalidEntry(t *testing.T) {
 	require.NotNil(t, reconciler)
 
 	err := reconciler.AppendEntry(klog.Ɀ_EntrySummary_("this is not valid entry text"))
-	assert.Nil(t, err) // This doesn’t create an error yet, only calling `MakingResult` will!
+	assert.Nil(t, err) // This doesn’t produce an error yet, but calling `MakingResult` will!
 
 	result, rErr := reconciler.MakeResult()
 	assert.Error(t, rErr)

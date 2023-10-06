@@ -31,7 +31,6 @@ func (opt *Switch) Run(ctx app.Context) app.Error {
 		return tErr
 	}
 
-	// Start new range at the exact same time.
 	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			reconciling.NewReconcilerAtRecord(date),
