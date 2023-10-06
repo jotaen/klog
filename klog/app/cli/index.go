@@ -23,6 +23,7 @@ type Cli struct {
 	Start  Start  `cmd:"" name:"start" group:"Manipulate Files" aliases:"in" help:"Starts a new open time range"`
 	Stop   Stop   `cmd:"" name:"stop" group:"Manipulate Files" aliases:"out" help:"Closes the open time range"`
 	Pause  Pause  `cmd:"" name:"pause" group:"Manipulate Files" help:"Pauses the open time range"`
+	Switch Switch `cmd:"" name:"switch" group:"Manipulate Files" help:"Closes open range and starts a new one"`
 	Create Create `cmd:"" name:"create" group:"Manipulate Files" help:"Creates a new, empty record"`
 
 	// Manage Files
