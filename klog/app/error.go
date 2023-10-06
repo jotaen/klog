@@ -98,11 +98,11 @@ func NewParserErrors(errs []txt.Error) ParserErrors {
 }
 
 func (pe parserErrors) Error() string {
-	return fmt.Sprintf("%d parsing errors", len(pe.errors))
+	return fmt.Sprintf("%d parsing error(s)", len(pe.errors))
 }
 
 func (pe parserErrors) Details() string {
-	return fmt.Sprintf("%d parsing errors", len(pe.errors))
+	return fmt.Sprintf("%d parsing error(s)", len(pe.errors))
 }
 
 func (pe parserErrors) Original() error {
