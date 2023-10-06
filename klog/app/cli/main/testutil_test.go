@@ -2,6 +2,7 @@ package klog
 
 import (
 	"github.com/jotaen/klog/klog/app"
+	"github.com/jotaen/klog/klog/app/cli/lib"
 	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
 	"io"
 	"os"
@@ -42,7 +43,7 @@ func (e *Env) run(invocation ...[]string) []string {
 
 		_ = w.Close()
 		if runErr != nil {
-			outs[i] = runErr.Error()
+			outs[i] = lib.PrettifyError(runErr, false).Error()
 			continue
 		}
 		out, _ := io.ReadAll(r)

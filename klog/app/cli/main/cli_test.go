@@ -23,6 +23,28 @@ func TestHandleInputFiles(t *testing.T) {
 	assert.True(t, strings.Contains(out[1], "#foo 2h"), out)
 }
 
+func TestPrintAppErrors(t *testing.T) {
+	out := (&Env{
+		files: map[string]string{
+			"invalid.klg": "2020-01-01asdf",
+			"valid.klg":   "2020-01-01",
+		},
+	}).run(
+		[]string{"print", "invalid.klg"},
+		[]string{"start", "valid.klg"},
+		[]string{"start", "valid.klg"},
+	)
+	// Out 0 should contain pretty-printed parsing errors.
+	assert.True(t, strings.Contains(out[0], "ERROR in line 1:"), out)
+	assert.True(t, strings.Contains(out[0], "2020-01-01asdf"), out)
+	assert.True(t, strings.Contains(out[0], "^^^^^^^^^^^^^^"), out)
+	assert.True(t, strings.Contains(out[0], "Invalid date"), out)
+	// Out 1 should go through without errors.
+	// Out 2 should then display logical error, since there is an open-range already.
+	assert.True(t, strings.Contains(out[2], "Error: Manipulation failed"), out)
+	assert.True(t, strings.Contains(out[2], "There is already an open range in this record"), out)
+}
+
 func TestBookmarkFile(t *testing.T) {
 	klog := &Env{
 		files: map[string]string{

@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	cloud.google.com/go v0.110.8
-	github.com/alecthomas/kong v0.8.0
+	github.com/alecthomas/kong v0.7.1
 	github.com/jotaen/genie v0.0.1
 	github.com/jotaen/kong-completion v0.0.5
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
