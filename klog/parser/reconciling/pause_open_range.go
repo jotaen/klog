@@ -8,9 +8,9 @@ import (
 )
 
 // AppendPause adds a new pause entry to a record that contains an open range.
-func (r *Reconciler) AppendPause(summary klog.EntrySummary) (*Result, error) {
+func (r *Reconciler) AppendPause(summary klog.EntrySummary) error {
 	if r.findOpenRangeIndex() == -1 {
-		return nil, errors.New("No open time range found")
+		return errors.New("No open time range found")
 	}
 	entryValue := "-0m"
 	if len(summary) == 0 {
@@ -24,9 +24,9 @@ func (r *Reconciler) AppendPause(summary klog.EntrySummary) (*Result, error) {
 }
 
 // ExtendPause extends an existing pause entry.
-func (r *Reconciler) ExtendPause(increment klog.Duration, additionalSummary klog.EntrySummary) (*Result, error) {
+func (r *Reconciler) ExtendPause(increment klog.Duration, additionalSummary klog.EntrySummary) error {
 	if r.findOpenRangeIndex() == -1 {
-		return nil, errors.New("No open time range found")
+		return errors.New("No open time range found")
 	}
 
 	pauseEntryI := r.findLastEntry(func(e klog.Entry) bool {
@@ -39,7 +39,7 @@ func (r *Reconciler) ExtendPause(increment klog.Duration, additionalSummary klog
 		})
 	})
 	if pauseEntryI == -1 {
-		return nil, errors.New("Could not find existing pause to extend")
+		return errors.New("Could not find existing pause to extend")
 	}
 
 	extendedPause := r.Record.Entries()[pauseEntryI].Duration().Plus(increment)
@@ -51,5 +51,5 @@ func (r *Reconciler) ExtendPause(increment klog.Duration, additionalSummary klog
 	}
 
 	r.concatenateSummary(pauseEntryI, pauseLineIndex, additionalSummary)
-	return r.MakeResult()
+	return nil
 }

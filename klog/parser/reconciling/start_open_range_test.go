@@ -18,8 +18,10 @@ func TestReconcilerStartsOpenRange(t *testing.T) {
 	atTime := klog.Ɀ_Time_(8, 3)
 	reconciler := NewReconcilerAtRecord(atDate)(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.StartOpenRange(atTime, NoReformat[klog.TimeFormat](), nil)
+	err := reconciler.StartOpenRange(atTime, NoReformat[klog.TimeFormat](), nil)
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	assert.Equal(t, `
 2018-01-01
 	5h22m
@@ -38,8 +40,10 @@ func TestReconcilerStartsOpenRangeWithSummary(t *testing.T) {
 	atTime := klog.Ɀ_Time_(8, 3)
 	reconciler := NewReconcilerAtRecord(atDate)(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.StartOpenRange(atTime, NoReformat[klog.TimeFormat](), klog.Ɀ_EntrySummary_("Test"))
+	err := reconciler.StartOpenRange(atTime, NoReformat[klog.TimeFormat](), klog.Ɀ_EntrySummary_("Test"))
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	assert.Equal(t, `
 2018-01-01
 	5h22m
@@ -59,8 +63,10 @@ func TestReconcilerStartsOpenRangeWithUTF8Summary(t *testing.T) {
 	atTime := klog.Ɀ_Time_(12, 00)
 	reconciler := NewReconcilerAtRecord(atDate)(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.StartOpenRange(atTime, NoReformat[klog.TimeFormat](), klog.Ɀ_EntrySummary_("ናይ ምሳሕ ዕረፍቲ"))
+	err := reconciler.StartOpenRange(atTime, NoReformat[klog.TimeFormat](), klog.Ɀ_EntrySummary_("ናይ ምሳሕ ዕረፍቲ"))
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	assert.Equal(t, `
 2018-01-01
 ኣብ ቤት ጽሕፈት ሓደ መዓልቲ።
@@ -79,8 +85,10 @@ func TestReconcilerStartsOpenRangeWithNewMultilineSummary(t *testing.T) {
 	atTime := klog.Ɀ_Time_(8, 3)
 	reconciler := NewReconcilerAtRecord(atDate)(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.StartOpenRange(atTime, NoReformat[klog.TimeFormat](), klog.Ɀ_EntrySummary_("", "Started...", "something!"))
+	err := reconciler.StartOpenRange(atTime, NoReformat[klog.TimeFormat](), klog.Ɀ_EntrySummary_("", "Started...", "something!"))
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	assert.Equal(t, `
 2018-01-01
 	5h22m
@@ -100,8 +108,10 @@ func TestReconcilerStartsOpenRangeWithAutoStyleFromSameRecord(t *testing.T) {
 	atTime := klog.Ɀ_Time_(8, 3)
 	reconciler := NewReconcilerAtRecord(atDate)(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.StartOpenRange(atTime, ReformatAutoStyle[klog.TimeFormat](), nil)
+	err := reconciler.StartOpenRange(atTime, ReformatAutoStyle[klog.TimeFormat](), nil)
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	// Conforms to both am/pm and spaces around dash
 	assert.Equal(t, `
 2018-01-01
@@ -120,8 +130,10 @@ func TestReconcilerStartsOpenRangeWithAutoStyleFromOtherRecord(t *testing.T) {
 	atTime := klog.Ɀ_Time_(8, 3)
 	reconciler := NewReconcilerForNewRecord(atDate, ReformatAutoStyle[klog.DateFormat](), AdditionalData{})(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.StartOpenRange(atTime, ReformatAutoStyle[klog.TimeFormat](), nil)
+	err := reconciler.StartOpenRange(atTime, ReformatAutoStyle[klog.TimeFormat](), nil)
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	// Conforms to both am/pm and spaces around dash
 	assert.Equal(t, `
 2018/01/01
@@ -141,8 +153,10 @@ func TestReconcilerStartsOpenRangeExplicitFormatOverrulesAutoFormat(t *testing.T
 	atTime := klog.Ɀ_IsAmPm_(klog.Ɀ_Time_(8, 3))
 	reconciler := NewReconcilerForNewRecord(atDate, ReformatExplicitly[klog.DateFormat](atDate.Format()), AdditionalData{})(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.StartOpenRange(atTime, ReformatExplicitly[klog.TimeFormat](atTime.Format()), nil)
+	err := reconciler.StartOpenRange(atTime, ReformatExplicitly[klog.TimeFormat](atTime.Format()), nil)
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	assert.Equal(t, `
 2018-01-01
 

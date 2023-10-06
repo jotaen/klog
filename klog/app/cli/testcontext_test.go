@@ -132,8 +132,8 @@ func (ctx *TestingContext) ReadInputs(_ ...app.FileOrBookmarkName) ([]klog.Recor
 	return ctx.records, nil
 }
 
-func (ctx *TestingContext) ReconcileFile(_ app.FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, app.Error) {
-	result, err := app.ApplyReconciler(ctx.records, ctx.blocks, creators, reconcile)
+func (ctx *TestingContext) ReconcileFile(_ app.FileOrBookmarkName, creators []reconciling.Creator, reconcile ...reconciling.Reconcile) (*reconciling.Result, app.Error) {
+	result, err := app.ApplyReconciler(ctx.records, ctx.blocks, creators, reconcile...)
 	if err != nil {
 		return nil, err
 	}

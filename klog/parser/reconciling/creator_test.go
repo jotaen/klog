@@ -28,8 +28,10 @@ func TestReconcilerRespectsIndentationStyle(t *testing.T) {
 	} {
 		rs, bs, _ := parser.NewSerialParser().Parse(x.original)
 		reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(1444, 10, 9))(rs, bs)
-		result, err := reconciler.AppendEntry(klog.Ɀ_EntrySummary_("30m"))
+		err := reconciler.AppendEntry(klog.Ɀ_EntrySummary_("30m"))
 		require.Nil(t, err)
+
+		result := assertResult(t, reconciler)
 		assert.Equal(t, x.expected, result.AllSerialised)
 	}
 }
@@ -44,8 +46,10 @@ func TestReconcilerRespectsLineEndingStyle(t *testing.T) {
 	} {
 		rs, bs, _ := parser.NewSerialParser().Parse(x.original)
 		reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(1444, 10, 9))(rs, bs)
-		result, err := reconciler.AppendEntry(klog.Ɀ_EntrySummary_("30m"))
+		err := reconciler.AppendEntry(klog.Ɀ_EntrySummary_("30m"))
 		require.Nil(t, err)
+
+		result := assertResult(t, reconciler)
 		assert.Equal(t, x.expected, result.AllSerialised)
 	}
 }

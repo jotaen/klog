@@ -45,7 +45,7 @@ func (opt *Stop) Run(ctx app.Context) app.Error {
 			}(),
 		},
 
-		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
+		func(reconciler *reconciling.Reconciler) error {
 			if shouldTryYesterday && reconciler.Record.Date().IsEqualTo(yesterday) {
 				time, _ = time.Plus(klog.NewDuration(24, 0))
 			}

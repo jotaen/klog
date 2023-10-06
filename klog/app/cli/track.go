@@ -38,7 +38,7 @@ func (opt *Track) Run(ctx app.Context) app.Error {
 			reconciling.NewReconcilerForNewRecord(date, opt.DateFormat(ctx.Config()), additionalData),
 		},
 
-		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
+		func(reconciler *reconciling.Reconciler) error {
 			return reconciler.AppendEntry(opt.Entry)
 		},
 	)

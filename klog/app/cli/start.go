@@ -40,10 +40,10 @@ func (opt *Start) Run(ctx app.Context) app.Error {
 			reconciling.NewReconcilerForNewRecord(date, opt.DateFormat(ctx.Config()), additionalData),
 		},
 
-		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
+		func(reconciler *reconciling.Reconciler) error {
 			summary, sErr := opt.Summary(reconciler.Record)
 			if sErr != nil {
-				return nil, sErr
+				return sErr
 			}
 			return reconciler.StartOpenRange(time, opt.TimeFormat(ctx.Config()), summary)
 		},

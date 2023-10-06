@@ -16,8 +16,10 @@ func TestReconcilerAppendingPauseAddsNewEntry(t *testing.T) {
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2010, 4, 27))(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.AppendPause(nil)
+	err := reconciler.AppendPause(nil)
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	assert.Equal(t, `
 2010-04-27
     3:00pm - ?
@@ -33,8 +35,10 @@ func TestReconcilerAppendingPauseWithSummary(t *testing.T) {
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2010, 4, 27))(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.AppendPause(klog.Ɀ_EntrySummary_("Lunch break"))
+	err := reconciler.AppendPause(klog.Ɀ_EntrySummary_("Lunch break"))
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	assert.Equal(t, `
 2010-04-27
     3:00pm - ?
@@ -50,8 +54,10 @@ func TestReconcilerAppendingPauseWithMultilineSummary(t *testing.T) {
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2010, 4, 27))(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.AppendPause(klog.Ɀ_EntrySummary_("Lunch", "break"))
+	err := reconciler.AppendPause(klog.Ɀ_EntrySummary_("Lunch", "break"))
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	assert.Equal(t, `
 2010-04-27
     3:00pm - ?
@@ -69,8 +75,10 @@ func TestReconcilerAppendPauseWithUTF8Summary(t *testing.T) {
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2010, 4, 27))(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.AppendPause(klog.Ɀ_EntrySummary_("午休"))
+	err := reconciler.AppendPause(klog.Ɀ_EntrySummary_("午休"))
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	assert.Equal(t, `
 2010-04-27
 你好！你好吗？
@@ -87,9 +95,8 @@ func TestReconcilerAppendingPauseFailsIfThereIsNoOpenRange(t *testing.T) {
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2010, 4, 27))(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.AppendPause(nil)
+	err := reconciler.AppendPause(nil)
 	require.Error(t, err)
-	assert.Nil(t, result)
 }
 
 func TestReconcilerExtendingPauseExtendsPause(t *testing.T) {
@@ -103,8 +110,10 @@ Foo
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2010, 4, 27))(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.ExtendPause(klog.NewDuration(0, -3), nil)
+	err := reconciler.ExtendPause(klog.NewDuration(0, -3), nil)
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	assert.Equal(t, `
 2010-04-27
 Foo
@@ -125,8 +134,10 @@ Foo
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2010, 4, 27))(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.ExtendPause(klog.NewDuration(0, -3), klog.Ɀ_EntrySummary_("and more break"))
+	err := reconciler.ExtendPause(klog.NewDuration(0, -3), klog.Ɀ_EntrySummary_("and more break"))
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	assert.Equal(t, `
 2010-04-27
 Foo
@@ -147,8 +158,10 @@ Foo
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2010, 4, 27))(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.ExtendPause(klog.NewDuration(-1, 0), klog.Ɀ_EntrySummary_("", "and more break"))
+	err := reconciler.ExtendPause(klog.NewDuration(-1, 0), klog.Ɀ_EntrySummary_("", "and more break"))
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	assert.Equal(t, `
 2010-04-27
 Foo
@@ -171,8 +184,10 @@ Foo
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2010, 4, 27))(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.ExtendPause(klog.NewDuration(-1, 0), klog.Ɀ_EntrySummary_("and more break"))
+	err := reconciler.ExtendPause(klog.NewDuration(-1, 0), klog.Ɀ_EntrySummary_("and more break"))
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	assert.Equal(t, `
 2010-04-27
 Foo
@@ -195,8 +210,10 @@ Foo
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2010, 4, 27))(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.ExtendPause(klog.NewDuration(-2, -51), nil)
+	err := reconciler.ExtendPause(klog.NewDuration(-2, -51), nil)
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	assert.Equal(t, `
 2010-04-27
 Foo
@@ -218,8 +235,10 @@ Foo
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2010, 4, 27))(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.ExtendPause(klog.NewDuration(0, 0), nil)
+	err := reconciler.ExtendPause(klog.NewDuration(0, 0), nil)
 	require.Nil(t, err)
+
+	result := assertResult(t, reconciler)
 	assert.Equal(t, `
 2010-04-27
 Foo
@@ -238,9 +257,8 @@ func TestReconcilerExtendingPauseFailsIfThereIsNoOpenRange(t *testing.T) {
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2010, 4, 27))(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.ExtendPause(klog.NewDuration(2, 0), nil)
+	err := reconciler.ExtendPause(klog.NewDuration(2, 0), nil)
 	require.Error(t, err)
-	assert.Nil(t, result)
 }
 
 func TestReconcilerDoesNotExtendNonNegativeDurations(t *testing.T) {
@@ -252,7 +270,6 @@ func TestReconcilerDoesNotExtendNonNegativeDurations(t *testing.T) {
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2010, 4, 27))(rs, bs)
 	require.NotNil(t, reconciler)
-	result, err := reconciler.ExtendPause(klog.NewDuration(0, -10), nil)
+	err := reconciler.ExtendPause(klog.NewDuration(0, -10), nil)
 	require.Error(t, err)
-	assert.Nil(t, result)
 }
