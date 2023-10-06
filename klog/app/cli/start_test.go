@@ -264,7 +264,7 @@ default_rounding = 60m
 }
 
 func TestStartWithResume(t *testing.T) {
-	t.Run("No previous entry -> Empty entry summary", func(t *testing.T) {
+	t.Run("No previous entry, no previous record -> Empty entry summary", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`1623-12-13
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
 			Resume: true,
@@ -272,6 +272,25 @@ func TestStartWithResume(t *testing.T) {
 		require.Nil(t, err)
 		assert.Equal(t, `1623-12-13
     12:49 - ?
+`, state.writtenFileContents)
+	})
+
+	t.Run("No previous entry, but previous record -> Take over from previous record", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords(`
+1623-12-12
+    14:00 - 15:00 Did something
+    10m Some activity
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+			Resume: true,
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+1623-12-12
+    14:00 - 15:00 Did something
+    10m Some activity
+
+1623-12-13
+    12:49 - ? Some activity
 `, state.writtenFileContents)
 	})
 

@@ -4,6 +4,8 @@
 ## Next up
 - **[ FEATURE ]** Add new command `klog switch`, that stops a previously
   ongoing activity (open time range), and starts a new one.
+- **[ FEATURE ]** `klog start --resume` now falls back to the previous
+  record for determining the last entry summary.
 
 ## v6.1
 - **[ FEATURE ]** Add new flag `klog start --resume`, which takes over the
