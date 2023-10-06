@@ -5,6 +5,8 @@ import (
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/lib"
 	"github.com/jotaen/klog/klog/parser/reconciling"
+	"github.com/jotaen/klog/klog/parser/txt"
+	"github.com/jotaen/klog/klog/service"
 )
 
 type Start struct {
@@ -34,14 +36,16 @@ func (opt *Start) Run(ctx app.Context) app.Error {
 	ctx.Config().DefaultShouldTotal.Map(func(s klog.ShouldTotal) {
 		additionalData.ShouldTotal = s
 	})
+	spy := PreviousRecordSpy{}
 	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
+			spy.phonyCreator(date),
 			reconciling.NewReconcilerAtRecord(date),
 			reconciling.NewReconcilerForNewRecord(date, opt.DateFormat(ctx.Config()), additionalData),
 		},
 
 		func(reconciler *reconciling.Reconciler) error {
-			summary, sErr := opt.Summary(reconciler.Record)
+			summary, sErr := opt.Summary(reconciler.Record, spy.PreviousRecord)
 			if sErr != nil {
 				return sErr
 			}
@@ -50,7 +54,7 @@ func (opt *Start) Run(ctx app.Context) app.Error {
 	)
 }
 
-func (opt *Start) Summary(currentRecord klog.Record) (klog.EntrySummary, app.Error) {
+func (opt *Start) Summary(currentRecord klog.Record, previousRecord klog.Record) (klog.EntrySummary, app.Error) {
 	// Check for conflicting flags.
 	if opt.SummaryText != nil && opt.Resume {
 		return nil, app.NewErrorWithCode(
@@ -73,18 +77,38 @@ func (opt *Start) Summary(currentRecord klog.Record) (klog.EntrySummary, app.Err
 
 	// Return summary of last entry from current record, if it has any entries.
 	if len(currentRecord.Entries()) > 0 {
-		return LastEntrySummary(currentRecord), nil
+		return lastEntrySummary(currentRecord), nil
 	}
 
-	//// Return summary of last entry from last record, if exists.
-	//if maybeLastRecord != nil {
-	//	return LastEntrySummary(maybeLastRecord), nil
-	//}
+	// Return summary of last entry from previous record, if exists.
+	if previousRecord != nil {
+		return lastEntrySummary(previousRecord), nil
+	}
 
 	return nil, nil
 }
 
-func LastEntrySummary(r klog.Record) klog.EntrySummary {
+func lastEntrySummary(r klog.Record) klog.EntrySummary {
 	entriesCount := len(r.Entries())
 	return r.Entries()[entriesCount-1].Summary()
+}
+
+type PreviousRecordSpy struct {
+	PreviousRecord klog.Record
+}
+
+// phonyCreator is a no-op “pass-through” creator, whose only purpose it is to hook into
+// the reconciler-creation mechanism, to get a handle on the records for determining
+// the previous record.
+func (p *PreviousRecordSpy) phonyCreator(currentDate klog.Date) reconciling.Creator {
+	return func(records []klog.Record, _ []txt.Block) *reconciling.Reconciler {
+		for _, r := range service.Sort(records, false) {
+			if r.Date().IsAfterOrEqual(currentDate) {
+				continue
+			}
+			p.PreviousRecord = r
+			return nil
+		}
+		return nil
+	}
 }
