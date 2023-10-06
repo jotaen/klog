@@ -1,15 +1,15 @@
 module github.com/jotaen/klog
 
-go 1.20
+go 1.21
 
 require (
-	cloud.google.com/go v0.104.0
-	github.com/alecthomas/kong v0.7.1
+	cloud.google.com/go v0.110.8
+	github.com/alecthomas/kong v0.8.0
 	github.com/jotaen/genie v0.0.1
 	github.com/jotaen/kong-completion v0.0.5
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/posener/complete v1.2.3
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.4
 )
 
 require (
