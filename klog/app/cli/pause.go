@@ -44,7 +44,7 @@ func (opt *Pause) Run(ctx app.Context) app.Error {
 	// Ensure that an open range exists, and set up the pause entry:
 	// - Without `--extend`, append a new entry, including the summary
 	// - With `--extend`, find a pause and append the summary
-	lastResult, err := doReconcile(func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
+	lastResult, err := doReconcile(func(reconciler *reconciling.Reconciler) error {
 		if opt.Extend {
 			return reconciler.ExtendPause(klog.NewDuration(0, 0), opt.Summary)
 		}
@@ -70,7 +70,7 @@ func (opt *Pause) Run(ctx app.Context) app.Error {
 			ctx.Print("\n")
 		})
 		if uncapturedIncrement > 0 {
-			lastResult, err = doReconcile(func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
+			lastResult, err = doReconcile(func(reconciler *reconciling.Reconciler) error {
 				// Don’t add the summary here, as we already appended it in the initial run.
 				return reconciler.ExtendPause(klog.NewDuration(0, -1*uncapturedIncrement), nil)
 			})

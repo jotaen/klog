@@ -36,8 +36,8 @@ func (opt *Create) Run(ctx app.Context) app.Error {
 			reconciling.NewReconcilerForNewRecord(date, opt.DateFormat(ctx.Config()), additionalData),
 		},
 
-		func(reconciler *reconciling.Reconciler) (*reconciling.Result, error) {
-			return reconciler.MakeResult()
+		func(reconciler *reconciling.Reconciler) error {
+			return nil
 		},
 	)
 }

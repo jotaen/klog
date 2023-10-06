@@ -6,9 +6,9 @@ import (
 )
 
 // StartOpenRange appends a new open range entry in a record.
-func (r *Reconciler) StartOpenRange(startTime klog.Time, format ReformatDirective[klog.TimeFormat], entrySummary klog.EntrySummary) (*Result, error) {
+func (r *Reconciler) StartOpenRange(startTime klog.Time, format ReformatDirective[klog.TimeFormat], entrySummary klog.EntrySummary) error {
 	if r.findOpenRangeIndex() != -1 {
-		return nil, errors.New("There is already an open range in this record")
+		return errors.New("There is already an open range in this record")
 	}
 	format.apply(r.style.timeFormat(), func(f klog.TimeFormat) {
 		// Re-parse time to apply format.
@@ -21,5 +21,5 @@ func (r *Reconciler) StartOpenRange(startTime klog.Time, format ReformatDirectiv
 	or := klog.NewOpenRangeWithFormat(startTime, r.style.openRangeFormat())
 	entryValue := or.ToString()
 	r.insert(r.lastLinePointer, toMultilineEntryTexts(entryValue, entrySummary))
-	return r.MakeResult()
+	return nil
 }

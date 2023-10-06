@@ -33,7 +33,7 @@ type Result struct {
 }
 
 // Reconcile is a function interface for applying a reconciler.
-type Reconcile func(*Reconciler) (*Result, error)
+type Reconcile func(*Reconciler) error
 
 func countLines(es []klog.Entry) int {
 	result := 0

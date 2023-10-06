@@ -49,7 +49,7 @@ type Context interface {
 	RetrieveTargetFile(fileArg FileOrBookmarkName) (FileWithContents, Error)
 
 	// ReconcileFile applies one or more reconcile handlers to a file and saves it.
-	ReconcileFile(FileOrBookmarkName, []reconciling.Creator, reconciling.Reconcile) (*reconciling.Result, Error)
+	ReconcileFile(FileOrBookmarkName, []reconciling.Creator, ...reconciling.Reconcile) (*reconciling.Result, Error)
 
 	// Now returns the current timestamp.
 	Now() gotime.Time
@@ -203,7 +203,7 @@ func (ctx *context) RetrieveTargetFile(fileArg FileOrBookmarkName) (FileWithCont
 	return inputs[0], nil
 }
 
-func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, Error) {
+func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, creators []reconciling.Creator, reconcile ...reconciling.Reconcile) (*reconciling.Result, Error) {
 	target, err := ctx.RetrieveTargetFile(fileArg)
 	if err != nil {
 		return nil, err
@@ -212,7 +212,7 @@ func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, creators []reconci
 	if errs != nil {
 		return nil, NewParserErrors(errs)
 	}
-	result, aErr := ApplyReconciler(records, blocks, creators, reconcile)
+	result, aErr := ApplyReconciler(records, blocks, creators, reconcile...)
 	if aErr != nil {
 		return nil, aErr
 	}
@@ -223,7 +223,7 @@ func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, creators []reconci
 	return result, nil
 }
 
-func ApplyReconciler(records []klog.Record, blocks []txt.Block, creators []reconciling.Creator, reconcile reconciling.Reconcile) (*reconciling.Result, Error) {
+func ApplyReconciler(records []klog.Record, blocks []txt.Block, creators []reconciling.Creator, reconcile ...reconciling.Reconcile) (*reconciling.Result, Error) {
 	reconciler := func() *reconciling.Reconciler {
 		for _, createReconciler := range creators {
 			// Both the creator and the created reconciler might be nil,
@@ -246,13 +246,24 @@ func ApplyReconciler(records []klog.Record, blocks []txt.Block, creators []recon
 			nil,
 		)
 	}
-	result, rErr := reconcile(reconciler)
-	if rErr != nil {
+	for _, r := range reconcile {
+		err := r(reconciler)
+		if err != nil {
+			return nil, NewErrorWithCode(
+				LOGICAL_ERROR,
+				"Manipulation failed",
+				err.Error(),
+				err,
+			)
+		}
+	}
+	result, err := reconciler.MakeResult()
+	if err != nil {
 		return nil, NewErrorWithCode(
 			LOGICAL_ERROR,
 			"Manipulation failed",
-			rErr.Error(),
-			rErr,
+			err.Error(),
+			err,
 		)
 	}
 	return result, nil
