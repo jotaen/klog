@@ -3,6 +3,7 @@
 # Install all dependencies
 run::install() {
 	go get -t ./...
+	go mod tidy
 }
 
 # Compile to ./out/klog
