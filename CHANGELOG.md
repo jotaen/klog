@@ -1,7 +1,7 @@
 # Changelog
 **Summary of changes of the command line tool**
 
-## Next up
+## v6.2
 - **[ FEATURE ]** Add new command `klog switch`, that stops a previously
   ongoing activity (open time range), and starts a new one.
 - **[ FEATURE ]** `klog start --resume` now falls back to the previous
