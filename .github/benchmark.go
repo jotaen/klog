@@ -76,7 +76,7 @@ func re() func(r *klog.Record) bool {
 	}
 	entryAdders := []func(r *klog.Record) bool{
 		func(r *klog.Record) bool {
-			(*r).AddDuration(klog.NewDuration(ri(0, 23), ri(0, 60)), entrySummary)
+			(*r).AddDuration(klog.NewDuration(ri(-2, 23), ri(0, 60)), entrySummary)
 			return true
 		},
 		func(r *klog.Record) bool {
