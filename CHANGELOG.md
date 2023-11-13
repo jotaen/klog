@@ -1,6 +1,10 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## Next Up
+- **[ FEATURE ]** Add two new rounding options: `12m` and `20m`.
+  (E.g., when using `klog start --round`.)
+
 ## v6.2
 - **[ FEATURE ]** Add new command `klog switch`, that stops a previously
   ongoing activity (open time range), and starts a new one.
