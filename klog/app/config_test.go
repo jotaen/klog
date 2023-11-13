@@ -200,7 +200,7 @@ func TestIgnoresEmptyConfigFileOrEmptyParameters(t *testing.T) {
 func TestRejectsInvalidConfigFile(t *testing.T) {
 	for _, tml := range []string{
 		`default_rounding = true`,              // Wrong type
-		`default_rounding = 20m`,               // Invalid value
+		`default_rounding = 25m`,               // Invalid value
 		`default_should_total = [true, false]`, // Wrong type
 		`default_should_total = 15`,            // Invalid value
 		`date_format = [true, false]`,          // Wrong type

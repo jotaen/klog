@@ -52,7 +52,7 @@ func (args *AtDateArgs) DateFormat(config app.Config) reconciling.ReformatDirect
 type AtDateAndTimeArgs struct {
 	AtDateArgs
 	Time  klog.Time        `name:"time" short:"t" help:"Specify the time (defaults to now)"`
-	Round service.Rounding `name:"round" short:"r" help:"Round time to nearest multiple of 5m, 10m, 15m, 30m, or 60m / 1h"`
+	Round service.Rounding `name:"round" short:"r" help:"Round time to nearest multiple of 5m, 10m, 12m, 15m, 20m, 30m, or 60m / 1h"`
 }
 
 func (args *AtDateAndTimeArgs) AtTime(now gotime.Time, config app.Config) (klog.Time, app.Error) {
