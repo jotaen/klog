@@ -26,7 +26,7 @@ func (r rounding) ToString() string {
 // NewRounding creates a Rounding from an integer. For non-allowed
 // values, it returns error.
 func NewRounding(r int) (Rounding, error) {
-	for _, validRounding := range []int{5, 10, 15, 30, 60} {
+	for _, validRounding := range []int{5, 10, 12, 15, 20, 30, 60} {
 		if r == validRounding {
 			return rounding(r), nil
 		}

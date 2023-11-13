@@ -28,7 +28,7 @@ func TestValidRoundingValues(t *testing.T) {
 
 func TestInvalidRoundingValues(t *testing.T) {
 	for _, m := range []int{
-		-60, -30, -15, -10, -5, 0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 20, 25, 35, 45, 55, 120, 600,
+		-60, -30, -15, -10, -5, 0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 16, 17, 18, 19, 25, 35, 45, 55, 120, 600,
 	} {
 		fr, err := NewRounding(m)
 		require.Nil(t, fr)
@@ -45,7 +45,9 @@ func TestParseRoundingValuesFromString(t *testing.T) {
 		{"5m", 5},
 		{"10", 10},
 		{"10m", 10},
+		{"12m", 12},
 		{"15m", 15},
+		{"20m", 20},
 		{"30m", 30},
 		{"60m", 60},
 		{"1h", 60},
@@ -98,6 +100,17 @@ func TestRound(t *testing.T) {
 		{RoundToNearest(klog.Ɀ_Time_(8, 15), r(10)), klog.Ɀ_Time_(8, 20)},
 		{RoundToNearest(klog.Ɀ_Time_(8, 55), r(10)), klog.Ɀ_Time_(9, 00)},
 
+		// Round to 12s
+		{RoundToNearest(klog.Ɀ_Time_(8, 00), r(12)), klog.Ɀ_Time_(8, 00)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 04), r(12)), klog.Ɀ_Time_(8, 00)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 05), r(12)), klog.Ɀ_Time_(8, 00)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 06), r(12)), klog.Ɀ_Time_(8, 12)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 11), r(12)), klog.Ɀ_Time_(8, 12)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 12), r(12)), klog.Ɀ_Time_(8, 12)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 13), r(12)), klog.Ɀ_Time_(8, 12)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 17), r(12)), klog.Ɀ_Time_(8, 12)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 18), r(12)), klog.Ɀ_Time_(8, 24)},
+
 		// Round to 15s
 		{RoundToNearest(klog.Ɀ_Time_(8, 00), r(15)), klog.Ɀ_Time_(8, 00)},
 		{RoundToNearest(klog.Ɀ_Time_(8, 07), r(15)), klog.Ɀ_Time_(8, 00)},
@@ -105,6 +118,17 @@ func TestRound(t *testing.T) {
 		{RoundToNearest(klog.Ɀ_Time_(8, 15), r(15)), klog.Ɀ_Time_(8, 15)},
 		{RoundToNearest(klog.Ɀ_Time_(8, 22), r(15)), klog.Ɀ_Time_(8, 15)},
 		{RoundToNearest(klog.Ɀ_Time_(8, 23), r(15)), klog.Ɀ_Time_(8, 30)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 55), r(15)), klog.Ɀ_Time_(9, 00)},
+
+		// Round to 20s
+		{RoundToNearest(klog.Ɀ_Time_(8, 00), r(20)), klog.Ɀ_Time_(8, 00)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 9), r(20)), klog.Ɀ_Time_(8, 00)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 10), r(20)), klog.Ɀ_Time_(8, 20)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 20), r(20)), klog.Ɀ_Time_(8, 20)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 29), r(20)), klog.Ɀ_Time_(8, 20)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 30), r(20)), klog.Ɀ_Time_(8, 40)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 49), r(20)), klog.Ɀ_Time_(8, 40)},
+		{RoundToNearest(klog.Ɀ_Time_(8, 50), r(20)), klog.Ɀ_Time_(9, 00)},
 
 		// Round to 30s
 		{RoundToNearest(klog.Ɀ_Time_(8, 00), r(30)), klog.Ɀ_Time_(8, 00)},
