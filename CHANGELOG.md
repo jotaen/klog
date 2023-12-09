@@ -57,7 +57,7 @@
 - **[ FIX ]** `klog edit` handles when the `$EDITOR` variable contains
    spaces, and it also fails when `$EDITOR` is invalid.
 
-## v5.1 (2022-06-20)
+## v5.1 (2022-07-20)
 - **[ FEATURE ]** Optionally print out totals as decimal values (in minutes)
   via the `--decimal` flag; e.g. `150` instead of `2h30m`.
 - **[ FEATURE ]** Support `--now` on `klog tags` as well.
@@ -143,7 +143,7 @@
 - **[ FEATURE ]** Support `klog --version` in addition to `klog version`
 - **[ FIX ]** Windows: don’t require admin privileges for setting bookmarks 
 
-## v2.6 (2021-06-25)
+## v2.6 (2021-07-25)
 - **[ INFO ]** Release first version of the file format
   specification (v1.0)
 - **[ FIX ]** If a duration only contains a minute part,
@@ -209,7 +209,7 @@
 ## v1.4 (2021-02-16)
 - **[ FIX ]** Fix the ongoing time counter in the MacOS widget
 
-## v1.3 (2021-02-13)
+## v1.3 (2021-02-14)
 - **[ BREAKING ]** Change structure of the bookmark subcommand
   (This is in order to account for the increasing number of operations)
 - **[ FEATURE ]** Add subcommand `now` for displaying an ongoing total
