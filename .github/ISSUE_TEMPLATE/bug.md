@@ -14,4 +14,6 @@ assignees: ''
           - Sample data that demonstrates and reproduces the problem
           - The command and input arguments that you used
           - Other relevant configuration
+          PLEASE NOTE: For feature ideas, feedback, or questions, please create
+          a discussion at https://github.com/jotaen/klog/discussions.
 -->
