@@ -1,7 +1,7 @@
 name: CI
 on: push
 env:
-  GO_VERSION: '1.21'
+  GO_VERSION: '1.22'
   STATIC_CHECK_VERSION: '2023.1.6'
   COUNT_LOC_DOCKER_IMAGE: 'aldanial/cloc:1.98'
 jobs:
