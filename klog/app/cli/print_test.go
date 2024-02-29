@@ -83,6 +83,7 @@ func TestPrintRecordsWithDurations(t *testing.T) {
 	state, err := NewTestingContext()._SetNow(2018, 02, 07, 19, 00)._SetRecords(`
 2018-01-31
 Hello #world
+Test test test
 	1h
 
 2018-02-04
@@ -93,6 +94,7 @@ Hello #world
 2018-02-07
 	35m
 		Foo
+		Bar
 	18:00 - ? I just
 		started something
 `)._Run((&Print{
@@ -102,6 +104,7 @@ Hello #world
 	assert.Equal(t, `
      1h  |  2018-01-31
          |  Hello #world
+         |  Test test test
      1h  |      1h
 
  13h17m  |  2018-02-04
@@ -112,6 +115,7 @@ Hello #world
     35m  |  2018-02-07
     35m  |      35m
          |          Foo
+         |          Bar
      0m  |      18:00 - ? I just
          |          started something
 
