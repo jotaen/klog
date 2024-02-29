@@ -2,6 +2,7 @@ package parser
 
 import (
 	"github.com/jotaen/klog/klog"
+	"github.com/jotaen/klog/klog/app/cli/lib"
 	"strings"
 )
 
@@ -20,6 +21,7 @@ type Serialiser interface {
 	SignedDuration(klog.Duration) string
 	Time(klog.Time) string
 	Format(Styler, string) string
+	Colours() lib.ColourScheme
 }
 
 type Line struct {
@@ -100,3 +102,4 @@ func (ps PlainSerialiser) Duration(x klog.Duration) string       { return x.ToSt
 func (ps PlainSerialiser) SignedDuration(x klog.Duration) string { return x.ToString() }
 func (ps PlainSerialiser) Time(x klog.Time) string               { return x.ToString() }
 func (ps PlainSerialiser) Format(_ Styler, x string) string      { return x }
+func (ps PlainSerialiser) Colours() *lib.ColourScheme            { return nil }

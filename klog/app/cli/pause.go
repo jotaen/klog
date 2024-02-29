@@ -84,7 +84,7 @@ func (opt *Pause) Run(ctx app.Context) app.Error {
 		ctx.Print("" +
 			"Pausing for " +
 			// Always print number in red, but without sign
-			ctx.Serialiser().Format(lib.Red, klog.NewDuration(0, minsCaptured).ToString()) +
+			ctx.Serialiser().Format(ctx.Serialiser().Colours().Red, klog.NewDuration(0, minsCaptured).ToString()) +
 			fmt.Sprintf("%-4s", dots) +
 			"(since " +
 			klog.NewTimeFromGo(start).ToString() +

@@ -66,7 +66,7 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) erro
 	ctx := app.NewContext(
 		homeDir,
 		meta,
-		lib.CliSerialiser{},
+		lib.NewSerialiser(true),
 		config,
 	)
 

@@ -10,18 +10,39 @@ import (
 
 // CliSerialiser is a specialised parser.Serialiser implementation for the terminal.
 type CliSerialiser struct {
-	Unstyled bool // -> No colouring/styling
-	Decimal  bool // -> Decimal values rather than the canonical totals
+	Unstyled     bool // -> No colouring/styling
+	Decimal      bool // -> Decimal values rather than the canonical totals
+	ColourScheme ColourScheme
+}
+
+type ColourScheme struct {
+	Green     tf.Style
+	Red       tf.Style
+	BlueDark  tf.Style
+	BlueLight tf.Style
+	Subdued   tf.Style
+	Purple    tf.Style
 }
 
 var (
-	Green     = tf.Style{Color: "120"}
-	Red       = tf.Style{Color: "167"}
-	BlueDark  = tf.Style{Color: "117"}
-	BlueLight = tf.Style{Color: "027"}
-	Subdued   = tf.Style{Color: "249"}
-	Purple    = tf.Style{Color: "213"}
+	ColourSchemeDark = ColourScheme{
+		Green:     tf.Style{Color: "120"},
+		Red:       tf.Style{Color: "167"},
+		BlueDark:  tf.Style{Color: "117"},
+		BlueLight: tf.Style{Color: "027"},
+		Subdued:   tf.Style{Color: "249"},
+		Purple:    tf.Style{Color: "213"},
+	}
 )
+
+func NewSerialiser(darkMode bool) CliSerialiser {
+	cs := CliSerialiser{
+		Unstyled:     false,
+		Decimal:      false,
+		ColourScheme: ColourSchemeDark,
+	}
+	return cs
+}
 
 func (cs CliSerialiser) Format(s parser.Styler, t string) string {
 	if cs.Unstyled {
@@ -52,12 +73,12 @@ func (cs CliSerialiser) Date(d klog.Date) string {
 }
 
 func (cs CliSerialiser) ShouldTotal(d klog.Duration) string {
-	return cs.Format(Purple, cs.duration(d, false))
+	return cs.Format(cs.ColourScheme.Purple, cs.duration(d, false))
 }
 
 func (cs CliSerialiser) Summary(s parser.SummaryText) string {
 	txt := s.ToString()
-	style := Subdued
+	style := cs.ColourScheme.Subdued
 	hashStyle := style.ChangedBold(true).ChangedColor("251")
 	txt = klog.HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
 		return cs.formatAndRestore(hashStyle, style, h)
@@ -66,29 +87,33 @@ func (cs CliSerialiser) Summary(s parser.SummaryText) string {
 }
 
 func (cs CliSerialiser) Range(r klog.Range) string {
-	return cs.Format(BlueDark, r.ToString())
+	return cs.Format(cs.ColourScheme.BlueDark, r.ToString())
 }
 
 func (cs CliSerialiser) OpenRange(or klog.OpenRange) string {
-	return cs.Format(BlueLight, or.ToString())
+	return cs.Format(cs.ColourScheme.BlueLight, or.ToString())
 }
 
 func (cs CliSerialiser) Duration(d klog.Duration) string {
-	f := Green
+	f := cs.ColourScheme.Green
 	if strings.HasPrefix(d.ToStringWithSign(), "-") {
-		f = Red
+		f = cs.ColourScheme.Red
 	}
 	return cs.Format(f, cs.duration(d, false))
 }
 
 func (cs CliSerialiser) SignedDuration(d klog.Duration) string {
-	f := Green
+	f := cs.ColourScheme.Green
 	if strings.HasPrefix(d.ToStringWithSign(), "-") {
-		f = Red
+		f = cs.ColourScheme.Red
 	}
 	return cs.Format(f, cs.duration(d, true))
 }
 
 func (cs CliSerialiser) Time(t klog.Time) string {
-	return cs.Format(BlueLight, t.ToString())
+	return cs.Format(cs.ColourScheme.BlueLight, t.ToString())
+}
+
+func (cs CliSerialiser) Colours() ColourScheme {
+	return cs.ColourScheme
 }

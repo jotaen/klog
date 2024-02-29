@@ -25,14 +25,15 @@ func (opt *Config) Run(ctx app.Context) app.Error {
 		ctx.Print(app.Join(ctx.KlogConfigFolder(), app.CONFIG_FILE_NAME).Path() + "\n")
 		return nil
 	}
+	colours := ctx.Serialiser().Colours()
 	for i, e := range app.CONFIG_FILE_ENTRIES {
-		ctx.Print(ctx.Serialiser().Format(lib.Subdued, lib.Reflower.Reflow(e.Help.Summary, []string{"# "})))
+		ctx.Print(ctx.Serialiser().Format(colours.Subdued, lib.Reflower.Reflow(e.Help.Summary, []string{"# "})))
 		ctx.Print("\n")
-		ctx.Print(ctx.Serialiser().Format(lib.Subdued, lib.Reflower.Reflow("Value: "+e.Help.Value, []string{"# - ", "#   "})))
+		ctx.Print(ctx.Serialiser().Format(colours.Subdued, lib.Reflower.Reflow("Value: "+e.Help.Value, []string{"# - ", "#   "})))
 		ctx.Print("\n")
-		ctx.Print(ctx.Serialiser().Format(lib.Subdued, lib.Reflower.Reflow("Default: "+e.Help.Default, []string{"# - ", "#   "})))
+		ctx.Print(ctx.Serialiser().Format(colours.Subdued, lib.Reflower.Reflow("Default: "+e.Help.Default, []string{"# - ", "#   "})))
 		ctx.Print("\n")
-		ctx.Print(ctx.Serialiser().Format(lib.Red, e.Name))
+		ctx.Print(ctx.Serialiser().Format(colours.Red, e.Name))
 		ctx.Print(" = ")
 		ctx.Print(ctx.Serialiser().Format(terminalformat.Style{Color: "227"}, e.Value(ctx.Config())))
 		if i < len(app.CONFIG_FILE_ENTRIES)-1 {
