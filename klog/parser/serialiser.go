@@ -61,8 +61,8 @@ func serialiseRecord(s Serialiser, r klog.Record) []Line {
 		headline += " (" + s.ShouldTotal(r.ShouldTotal()) + ")"
 	}
 	lines = append(lines, Line{headline, r, -1})
-	if r.Summary() != nil {
-		lines = append(lines, Line{s.Summary(SummaryText(r.Summary())), r, -1})
+	for _, l := range r.Summary().Lines() {
+		lines = append(lines, Line{s.Summary([]string{l}), r, -1})
 	}
 	for entryI, e := range r.Entries() {
 		entryValue := klog.Unbox[string](&e,
