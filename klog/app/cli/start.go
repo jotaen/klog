@@ -33,7 +33,7 @@ func (opt *Start) Run(ctx app.Context) app.Error {
 		return tErr
 	}
 	additionalData := reconciling.AdditionalData{}
-	ctx.Config().DefaultShouldTotal.Map(func(s klog.ShouldTotal) {
+	ctx.Config().DefaultShouldTotal.Unwrap(func(s klog.ShouldTotal) {
 		additionalData.ShouldTotal = s
 	})
 	spy := PreviousRecordSpy{}

@@ -7,6 +7,7 @@ import (
 
 func TestPrintTable(t *testing.T) {
 	result := ""
+	styler := NewStyler(DARK)
 	table := NewTable(3, " ")
 	table.
 		Cell("FIRST", Options{align: ALIGN_LEFT}).
@@ -16,7 +17,7 @@ func TestPrintTable(t *testing.T) {
 		CellR("2").
 		CellR("3").
 		Cell("long-text", Options{align: ALIGN_LEFT}).
-		Cell(Style{IsUnderlined: true}.Format("asdf"), Options{align: ALIGN_RIGHT}).
+		Cell(styler.Props(StyleProps{IsUnderlined: true}).Format("asdf"), Options{align: ALIGN_RIGHT}).
 		Fill("-").
 		Skip(2).
 		Cell("foo", Options{align: ALIGN_LEFT})

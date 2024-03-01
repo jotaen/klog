@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/jotaen/genie"
 	"github.com/jotaen/klog/klog"
+	tf "github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
 	"github.com/jotaen/klog/klog/service"
 	"strings"
 )
@@ -18,12 +19,11 @@ type Config struct {
 	IsDebug MandatoryParam[bool]
 
 	// Editor is the CLI command with which to invoke the preferred editor.
-	Editor MandatoryParam[string]
+	Editor OptionalParam[string]
 
-	// NoColour specifies whether output should be coloured.
-	// This is an ephemeral property, which may be used in the context of scripting,
-	// and not supposed to be configured permanently.
-	NoColour MandatoryParam[bool]
+	// ColourScheme specifies the background of the terminal, so that
+	// the output colours can be adjusted accordingly.
+	ColourScheme MandatoryParam[tf.ColourTheme]
 
 	// CpuKernels is the number of available CPUs that klog is allowed to utilise.
 	// The value must be `1` or higher.
@@ -48,7 +48,7 @@ type Reader interface {
 }
 
 func NewConfig(c1 FromStaticValues, c2 FromEnvVars, c3 FromConfigFile) (Config, Error) {
-	config := NewDefaultConfig()
+	config := NewDefaultConfig(tf.DARK)
 	for _, c := range []Reader{c1, c2, c3} {
 		err := c.Apply(&config)
 		if err != nil {
@@ -58,11 +58,11 @@ func NewConfig(c1 FromStaticValues, c2 FromEnvVars, c3 FromConfigFile) (Config, 
 	return config, nil
 }
 
-func NewDefaultConfig() Config {
+func NewDefaultConfig(c tf.ColourTheme) Config {
 	return Config{
 		IsDebug:            newMandatoryParam(false),
-		Editor:             newMandatoryParam(""),
-		NoColour:           newMandatoryParam(false),
+		Editor:             newOptionalParam[string](),
+		ColourScheme:       newMandatoryParam(c),
 		CpuKernels:         newMandatoryParam(1),
 		DefaultRounding:    newOptionalParam[service.Rounding](),
 		DefaultShouldTotal: newOptionalParam[klog.ShouldTotal](),
@@ -70,12 +70,14 @@ func NewDefaultConfig() Config {
 }
 
 type MandatoryParam[T any] struct {
-	value T
+	value        T
+	wasSetInFile bool
 }
 
 func newMandatoryParam[T any](defaultValue T) MandatoryParam[T] {
 	return MandatoryParam[T]{
-		value: defaultValue,
+		value:        defaultValue,
+		wasSetInFile: false,
 	}
 }
 
@@ -98,10 +100,17 @@ func newOptionalParam[T any]() OptionalParam[T] {
 	}
 }
 
-func (p OptionalParam[T]) Map(f func(T)) {
+func (p OptionalParam[T]) Unwrap(f func(T)) {
 	if p.isSet {
 		f(p.value)
 	}
+}
+
+func (p OptionalParam[T]) UnwrapOr(defaultValue T) T {
+	if p.isSet {
+		return p.value
+	}
+	return defaultValue
 }
 
 func (p *OptionalParam[T]) set(value T) {
@@ -131,10 +140,10 @@ func (e FromEnvVars) Apply(config *Config) Error {
 		config.IsDebug.override(true)
 	}
 	if e.GetVar("NO_COLOR") != "" {
-		config.NoColour.override(true)
+		config.ColourScheme.override(tf.NO_COLOUR)
 	}
 	if e.GetVar("EDITOR") != "" {
-		config.Editor.override(e.GetVar("EDITOR"))
+		config.Editor.set(e.GetVar("EDITOR"))
 	}
 	return nil
 }
@@ -149,16 +158,47 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 	{
 		Name: "editor",
 		Reader: func(value string, config *Config) error {
-			config.Editor.override(value)
+			if value != "" {
+				config.Editor.set(value)
+			}
 			return nil
 		},
 		Value: func(c Config) string {
-			return c.Editor.Value()
+			return c.Editor.value
 		},
 		Help: Help{
 			Summary: "The CLI command that shall be invoked when running `klog edit`.",
 			Value:   "The config property can be any valid CLI command, as you would type it on the terminal. klog will append the target file path as last input argument to that command. Note: you can use quotes in order to prevent undesired shell word-splitting, e.g. if the command name/path contains spaces.",
 			Default: "If absent/empty, `klog edit` tries to fall back to the $EDITOR environment variable (which you’d see below in that case).",
+		},
+	}, {
+		Name: "colour_scheme",
+		Reader: func(value string, config *Config) error {
+			switch value {
+			case string(tf.DARK):
+				config.ColourScheme.override(tf.DARK)
+				config.ColourScheme.wasSetInFile = true
+			case string(tf.LIGHT):
+				config.ColourScheme.override(tf.LIGHT)
+				config.ColourScheme.wasSetInFile = true
+			case string(tf.NO_COLOUR):
+				config.ColourScheme.override(tf.NO_COLOUR)
+				config.ColourScheme.wasSetInFile = true
+			default:
+				return errors.New("The value must be `dark`, `light` or `no_colour`")
+			}
+			return nil
+		},
+		Value: func(c Config) string {
+			if !c.ColourScheme.wasSetInFile {
+				return ""
+			}
+			return string(c.ColourScheme.Value())
+		},
+		Help: Help{
+			Summary: "The colour scheme of your terminal, so that klog can choose an optimal colour theme for its output.",
+			Value:   "The config property must be one of: `dark`, `light` or `no_colour`",
+			Default: "If absent/empty, klog assumes a `dark` theme.",
 		},
 	}, {
 		Name: "default_rounding",
@@ -172,7 +212,7 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 		},
 		Value: func(c Config) string {
 			result := ""
-			c.DefaultRounding.Map(func(r service.Rounding) {
+			c.DefaultRounding.Unwrap(func(r service.Rounding) {
 				result = r.ToString()
 			})
 			return result
@@ -195,7 +235,7 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 		},
 		Value: func(c Config) string {
 			result := ""
-			c.DefaultShouldTotal.Map(func(s klog.ShouldTotal) {
+			c.DefaultShouldTotal.Unwrap(func(s klog.ShouldTotal) {
 				result = s.ToString()
 			})
 			return result
@@ -221,7 +261,7 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 		},
 		Value: func(c Config) string {
 			result := ""
-			c.DateUseDashes.Map(func(d bool) {
+			c.DateUseDashes.Unwrap(func(d bool) {
 				if d {
 					result = "YYYY-MM-DD"
 				} else {
@@ -251,7 +291,7 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 		},
 		Value: func(c Config) string {
 			result := ""
-			c.TimeUse24HourClock.Map(func(t bool) {
+			c.TimeUse24HourClock.Unwrap(func(t bool) {
 				if t {
 					result = "24h"
 				} else {

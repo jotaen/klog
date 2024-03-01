@@ -27,7 +27,7 @@ func (opt *Create) Run(ctx app.Context) app.Error {
 	date := opt.AtDate(ctx.Now())
 	additionalData := reconciling.AdditionalData{ShouldTotal: opt.GetShouldTotal(), Summary: opt.Summary}
 	if additionalData.ShouldTotal == nil {
-		ctx.Config().DefaultShouldTotal.Map(func(s klog.ShouldTotal) {
+		ctx.Config().DefaultShouldTotal.Unwrap(func(s klog.ShouldTotal) {
 			additionalData.ShouldTotal = s
 		})
 	}

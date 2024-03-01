@@ -1,63 +1,69 @@
 package terminalformat
 
-type Style struct {
-	Color        string
-	Background   string
+type StyleProps struct {
+	Color        Colour
+	Background   Colour
 	IsBold       bool
 	IsUnderlined bool
 }
 
-var reset = "\033[0m"
-
-func (s Style) Format(text string) string {
-	return s.seqs() + text + reset
+type Styler struct {
+	props            StyleProps
+	colourCodes      map[Colour]string
+	reset            string
+	foregroundPrefix string
+	backgroundPrefix string
+	colourSuffix     string
+	underlined       string
+	bold             string
 }
 
-func (s Style) FormatAndRestore(text string, previousStyle Style) string {
+type Colour int
+
+const (
+	unspecified = iota
+	TEXT
+	TEXT_INVERSE
+	GREEN
+	RED
+	YELLOW
+	BLUE_DARK
+	BLUE_LIGHT
+	SUBDUED
+	PURPLE
+)
+
+func (s Styler) Format(text string) string {
+	return s.seqs() + text + s.reset
+}
+
+func (s Styler) Props(p StyleProps) Styler {
+	newS := s
+	newS.props = p
+	return newS
+}
+
+func (s Styler) FormatAndRestore(text string, previousStyle Styler) string {
 	return s.Format(text) + previousStyle.seqs()
 }
 
-func (s Style) ChangedColor(color string) Style {
-	newS := s
-	newS.Color = color
-	return newS
-}
+func (s Styler) seqs() string {
+	seqs := s.reset
 
-func (s Style) ChangedBackground(color string) Style {
-	newS := s
-	newS.Background = color
-	return newS
-}
-
-func (s Style) ChangedBold(isBold bool) Style {
-	newS := s
-	newS.IsBold = isBold
-	return newS
-}
-
-func (s Style) ChangedUnderlined(isUnderlined bool) Style {
-	newS := s
-	newS.IsUnderlined = isUnderlined
-	return newS
-}
-
-func (s Style) seqs() string {
-	seqs := reset
-
-	if s.Color != "" {
-		seqs = seqs + "\033[38;5;" + s.Color + "m"
+	if s.props.Color != unspecified {
+		seqs = seqs + s.foregroundPrefix + s.colourCodes[s.props.Color] + s.colourSuffix
 	}
 
-	if s.Background != "" {
-		seqs = seqs + "\033[48;5;" + s.Background + "m"
+	if s.props.Background != unspecified {
+		seqs = seqs + s.backgroundPrefix + s.colourCodes[s.props.Background] + s.colourSuffix
 	}
 
-	if s.IsUnderlined {
-		seqs = seqs + "\033[4m"
+	if s.props.IsUnderlined {
+		seqs = seqs + s.underlined
 	}
 
-	if s.IsBold {
-		seqs = seqs + "\033[1m"
+	if s.props.IsBold {
+		seqs = seqs + s.bold
 	}
 
 	return seqs

@@ -27,7 +27,7 @@ func main() {
 	klogFolder := func() app.File {
 		f, err := determineKlogConfigFolder()
 		if err != nil {
-			fail(err, false)
+			fail(lib.PrettifyAppError(err, false), app.GENERAL_ERROR.ToInt())
 		}
 		return f
 	}()
@@ -35,7 +35,7 @@ func main() {
 	configFile := func() string {
 		c, err := readConfigFile(app.Join(klogFolder, app.CONFIG_FILE_NAME))
 		if err != nil {
-			fail(err, false)
+			fail(lib.PrettifyAppError(err, false), app.GENERAL_ERROR.ToInt())
 		}
 		return c
 	}()
@@ -47,31 +47,25 @@ func main() {
 			app.FromConfigFile{FileContents: configFile},
 		)
 		if err != nil {
-			fail(err, false)
+			fail(lib.PrettifyAppError(err, false), app.GENERAL_ERROR.ToInt())
 		}
 		return c
 	}()
 
-	err := klog.Run(klogFolder, app.Meta{
+	err, code := klog.Run(klogFolder, app.Meta{
 		Specification: specification,
 		License:       license,
 		Version:       BinaryVersion,
 		SrcHash:       BinaryBuildHash,
 	}, config, os.Args[1:])
 	if err != nil {
-		fail(err, config.IsDebug.Value())
+		fail(err, code)
 	}
 }
 
 // fail terminates the process with an error.
-func fail(e error, isDebug bool) {
-	exitCode := -1
-	if e != nil {
-		fmt.Println(lib.PrettifyError(e, isDebug))
-		if appErr, isAppError := e.(app.Error); isAppError {
-			exitCode = appErr.Code().ToInt()
-		}
-	}
+func fail(err error, exitCode int) {
+	fmt.Println(err)
 	os.Exit(exitCode)
 }
 

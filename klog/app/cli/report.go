@@ -32,6 +32,7 @@ The default aggregation is by day, but you choose other periods via the --aggreg
 func (opt *Report) Run(ctx app.Context) app.Error {
 	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)
+	_, serialiser := ctx.Serialise()
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err
@@ -87,12 +88,12 @@ func (opt *Report) Run(ctx app.Context) app.Error {
 		}
 
 		total := service.Total(rs...)
-		table.CellR(ctx.Serialiser().Duration(total))
+		table.CellR(serialiser.Duration(total))
 
 		if opt.Diff {
 			should := service.ShouldTotalSum(rs...)
 			diff := service.Diff(should, total)
-			table.CellR(ctx.Serialiser().ShouldTotal(should)).CellR(ctx.Serialiser().SignedDuration(diff))
+			table.CellR(serialiser.ShouldTotal(should)).CellR(serialiser.SignedDuration(diff))
 		}
 	}
 
@@ -105,11 +106,11 @@ func (opt *Report) Run(ctx app.Context) app.Error {
 
 	// Footer
 	table.Skip(aggregator.NumberOfPrefixColumns())
-	table.CellR(ctx.Serialiser().Duration(grandTotal))
+	table.CellR(serialiser.Duration(grandTotal))
 	if opt.Diff {
 		grandShould := service.ShouldTotalSum(records...)
 		grandDiff := service.Diff(grandShould, grandTotal)
-		table.CellR(ctx.Serialiser().ShouldTotal(grandShould)).CellR(ctx.Serialiser().SignedDuration(grandDiff))
+		table.CellR(serialiser.ShouldTotal(grandShould)).CellR(serialiser.SignedDuration(grandDiff))
 	}
 
 	table.Collect(ctx.Print)

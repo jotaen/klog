@@ -3,9 +3,8 @@ package cli
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
 	"github.com/jotaen/klog/klog/app/cli/lib/command"
-	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 	"github.com/jotaen/klog/klog/parser/txt"
@@ -14,7 +13,8 @@ import (
 
 func NewTestingContext() TestingContext {
 	bc := app.NewEmptyBookmarksCollection()
-	config := app.NewDefaultConfig()
+	config := app.NewDefaultConfig(tf.NO_COLOUR)
+	styler := tf.NewStyler(tf.NO_COLOUR)
 	return TestingContext{
 		State: State{
 			printBuffer:         "",
@@ -23,7 +23,8 @@ func NewTestingContext() TestingContext {
 		now:            gotime.Now(),
 		records:        nil,
 		blocks:         nil,
-		serialiser:     lib.CliSerialiser{},
+		styler:         styler,
+		serialiser:     app.NewSerialiser(styler, false),
 		bookmarks:      bc,
 		editorsAuto:    nil,
 		editorExplicit: "",
@@ -77,7 +78,7 @@ func (ctx TestingContext) _SetExecute(execute func(command.Command) app.Error) T
 
 func (ctx TestingContext) _Run(cmd func(app.Context) app.Error) (State, app.Error) {
 	cmdErr := cmd(&ctx)
-	out := terminalformat.StripAllAnsiSequences(ctx.printBuffer)
+	out := tf.StripAllAnsiSequences(ctx.printBuffer)
 	if len(out) > 0 && out[0] != '\n' {
 		out = "\n" + out
 	}
@@ -94,7 +95,8 @@ type TestingContext struct {
 	now            gotime.Time
 	records        []klog.Record
 	blocks         []txt.Block
-	serialiser     parser.Serialiser
+	styler         tf.Styler
+	serialiser     app.TextSerialiser
 	bookmarks      app.BookmarksCollection
 	editorsAuto    []command.Command
 	editorExplicit string
@@ -177,12 +179,14 @@ func (ctx *TestingContext) FileExplorers() []command.Command {
 	return ctx.fileExplorers
 }
 
-func (ctx *TestingContext) Serialiser() parser.Serialiser {
-	return ctx.serialiser
+func (ctx *TestingContext) Serialise() (tf.Styler, app.TextSerialiser) {
+	return ctx.styler, ctx.serialiser
 }
 
-func (ctx *TestingContext) SetSerialiser(s parser.Serialiser) {
-	ctx.serialiser = s
+func (ctx *TestingContext) ConfigureSerialisation(fn func(tf.Styler, bool) (tf.Styler, bool)) {
+	styler, decimalDuration := fn(ctx.styler, ctx.serialiser.DecimalDuration)
+	ctx.styler = styler
+	ctx.serialiser = app.NewSerialiser(styler, decimalDuration)
 }
 
 func (ctx *TestingContext) Debug(_ func()) {}

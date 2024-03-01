@@ -30,6 +30,7 @@ Every matching entry is counted individually.`
 func (opt *Tags) Run(ctx app.Context) app.Error {
 	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)
+	styler, serialiser := ctx.Serialise()
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err
@@ -53,8 +54,8 @@ func (opt *Tags) Run(ctx app.Context) app.Error {
 	}
 	table := terminalformat.NewTable(numberOfColumns, " ")
 	for _, t := range totalByTag {
-		totalString := ctx.Serialiser().Duration(t.Total)
-		countString := ctx.Serialiser().Format(terminalformat.Style{Color: "247"}, fmt.Sprintf(" (%d)", t.Count))
+		totalString := serialiser.Duration(t.Total)
+		countString := styler.Props(terminalformat.StyleProps{Color: terminalformat.SUBDUED}).Format(fmt.Sprintf(" (%d)", t.Count))
 		if t.Tag.Value() == "" {
 			table.CellL("#" + t.Tag.Name())
 			table.CellL(totalString)
@@ -65,7 +66,7 @@ func (opt *Tags) Run(ctx app.Context) app.Error {
 				table.CellL(countString)
 			}
 		} else if opt.Values {
-			table.CellL(" " + ctx.Serialiser().Format(terminalformat.Style{Color: "247"}, t.Tag.Value()))
+			table.CellL(" " + styler.Props(terminalformat.StyleProps{Color: terminalformat.SUBDUED}).Format(t.Tag.Value()))
 			table.Skip(1)
 			table.CellL(totalString)
 			if opt.Count {

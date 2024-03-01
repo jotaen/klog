@@ -65,6 +65,7 @@ func handle(opt *Today, ctx app.Context) app.Error {
 	if nErr != nil {
 		return nErr
 	}
+	styler, serialiser := ctx.Serialise()
 
 	currentRecords, otherRecords, isYesterday := splitIntoCurrentAndOther(now, records)
 	hasCurrentRecords := len(currentRecords) > 0
@@ -109,15 +110,15 @@ func handle(opt *Today, ctx app.Context) app.Error {
 		table.CellL("Today")
 	}
 	if hasCurrentRecords {
-		table.CellR(ctx.Serialiser().Duration(currentTotal))
+		table.CellR(serialiser.Duration(currentTotal))
 	} else {
 		table.CellR(N_A)
 	}
 	if opt.Diff {
 		if hasCurrentRecords {
 			table.
-				CellR(ctx.Serialiser().ShouldTotal(currentShouldTotal)).
-				CellR(ctx.Serialiser().SignedDuration(currentDiff))
+				CellR(serialiser.ShouldTotal(currentShouldTotal)).
+				CellR(serialiser.SignedDuration(currentDiff))
 		} else {
 			table.CellR(N_A).CellR(N_A)
 		}
@@ -125,11 +126,11 @@ func handle(opt *Today, ctx app.Context) app.Error {
 			if hasCurrentRecords {
 				if currentEndTime != nil {
 					if opt.HadOpenRange() {
-						table.CellR(ctx.Serialiser().Time(currentEndTime))
+						table.CellR(serialiser.Time(currentEndTime))
 					} else {
-						table.CellR(ctx.Serialiser().Format(terminalformat.Style{
-							Color: "247",
-						}, "("+currentEndTime.ToString()+")"))
+						table.CellR(
+							styler.Props(terminalformat.StyleProps{Color: terminalformat.SUBDUED}).
+								Format("(" + currentEndTime.ToString() + ")"))
 					}
 				} else {
 					table.CellR(QQQ)
@@ -141,11 +142,11 @@ func handle(opt *Today, ctx app.Context) app.Error {
 	}
 
 	// Other:
-	table.CellL("Other").CellR(ctx.Serialiser().Duration(otherTotal))
+	table.CellL("Other").CellR(serialiser.Duration(otherTotal))
 	if opt.Diff {
 		table.
-			CellR(ctx.Serialiser().ShouldTotal(otherShouldTotal)).
-			CellR(ctx.Serialiser().SignedDuration(otherDiff))
+			CellR(serialiser.ShouldTotal(otherShouldTotal)).
+			CellR(serialiser.SignedDuration(otherDiff))
 		if opt.Now {
 			table.Skip(1)
 		}
@@ -161,20 +162,20 @@ func handle(opt *Today, ctx app.Context) app.Error {
 	}
 
 	// GrandTotal:
-	table.CellL("All").CellR(ctx.Serialiser().Duration(grandTotal))
+	table.CellL("All").CellR(serialiser.Duration(grandTotal))
 	if opt.Diff {
 		table.
-			CellR(ctx.Serialiser().ShouldTotal(grandShouldTotal)).
-			CellR(ctx.Serialiser().SignedDuration(grandDiff))
+			CellR(serialiser.ShouldTotal(grandShouldTotal)).
+			CellR(serialiser.SignedDuration(grandDiff))
 		if opt.Now {
 			if hasCurrentRecords {
 				if grandEndTime != nil {
 					if opt.HadOpenRange() {
-						table.CellR(ctx.Serialiser().Time(grandEndTime))
+						table.CellR(serialiser.Time(grandEndTime))
 					} else {
-						table.CellR(ctx.Serialiser().Format(terminalformat.Style{
-							Color: "247",
-						}, "("+grandEndTime.ToString()+")"))
+						table.CellR(
+							styler.Props(terminalformat.StyleProps{Color: terminalformat.SUBDUED}).
+								Format("(" + grandEndTime.ToString() + ")"))
 					}
 				} else {
 					table.CellR(QQQ)

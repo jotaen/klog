@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app/cli/lib/command"
+	tf "github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 	"github.com/jotaen/klog/klog/parser/txt"
@@ -71,11 +72,12 @@ type Context interface {
 	// FileExplorers returns commands to launch a file explorer on the system.
 	FileExplorers() []command.Command
 
-	// Serialiser returns the current serialiser.
-	Serialiser() parser.Serialiser
+	// Serialise returns the current styler + serialiser according to the user’s
+	// style preferences.
+	Serialise() (tf.Styler, TextSerialiser)
 
-	// SetSerialiser sets a new serialiser.
-	SetSerialiser(parser.Serialiser)
+	// ConfigureSerialisation changes serialisation properties.
+	ConfigureSerialisation(func(tf.Styler, bool) (tf.Styler, bool))
 
 	// Debug takes a void function that is only executed in debug mode.
 	Debug(func())
@@ -101,7 +103,7 @@ type Meta struct {
 }
 
 // NewContext creates a new Context object.
-func NewContext(klogFolder File, meta Meta, serialiser parser.Serialiser, cfg Config) Context {
+func NewContext(klogFolder File, meta Meta, styler tf.Styler, cfg Config) Context {
 	parserEngine := parser.NewSerialParser()
 	if cfg.CpuKernels.Value() > 1 {
 		parserEngine = parser.NewParallelParser(cfg.CpuKernels.Value())
@@ -109,7 +111,8 @@ func NewContext(klogFolder File, meta Meta, serialiser parser.Serialiser, cfg Co
 	return &context{
 		klogFolder,
 		parserEngine,
-		serialiser,
+		styler,
+		NewSerialiser(styler, false),
 		meta,
 		cfg,
 	}
@@ -118,7 +121,8 @@ func NewContext(klogFolder File, meta Meta, serialiser parser.Serialiser, cfg Co
 type context struct {
 	klogFolder File
 	parser     parser.Parser
-	serialiser parser.Serialiser
+	styler     tf.Styler
+	serialiser TextSerialiser
 	meta       Meta
 	config     Config
 }
@@ -334,19 +338,25 @@ func (ctx *context) Execute(cmd command.Command) Error {
 }
 
 func (ctx *context) Editors() (string, []command.Command) {
-	return ctx.config.Editor.Value(), POTENTIAL_EDITORS
+	configuredEditor := ""
+	ctx.config.Editor.Unwrap(func(s string) {
+		configuredEditor = s
+	})
+	return configuredEditor, POTENTIAL_EDITORS
 }
 
 func (ctx *context) FileExplorers() []command.Command {
 	return POTENTIAL_FILE_EXLORERS
 }
 
-func (ctx *context) Serialiser() parser.Serialiser {
-	return ctx.serialiser
+func (ctx *context) Serialise() (tf.Styler, TextSerialiser) {
+	return ctx.styler, ctx.serialiser
 }
 
-func (ctx *context) SetSerialiser(s parser.Serialiser) {
-	ctx.serialiser = s
+func (ctx *context) ConfigureSerialisation(fn func(tf.Styler, bool) (tf.Styler, bool)) {
+	styler, decimalDuration := fn(ctx.styler, ctx.serialiser.DecimalDuration)
+	ctx.styler = styler
+	ctx.serialiser = NewSerialiser(styler, decimalDuration)
 }
 
 func (ctx *context) Debug(task func()) {

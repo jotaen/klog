@@ -4,18 +4,20 @@ Package klog is the entry point of the command line tool.
 package klog
 
 import (
+	"errors"
 	"github.com/alecthomas/kong"
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli"
 	"github.com/jotaen/klog/klog/app/cli/lib"
+	tf "github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
 	kongcompletion "github.com/jotaen/kong-completion"
 	"reflect"
 )
 
-func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) error {
+func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (error, int) {
 	kongApp, nErr := kong.New(
 		&cli.Cli{},
 		kong.Name("klog"),
@@ -60,13 +62,14 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) erro
 		}),
 	)
 	if nErr != nil {
-		return nErr
+		return errors.New("Internal error: " + nErr.Error()), app.GENERAL_ERROR.ToInt()
 	}
 
+	styler := tf.NewStyler(config.ColourScheme.Value())
 	ctx := app.NewContext(
 		homeDir,
 		meta,
-		lib.NewSerialiser(true),
+		styler,
 		config,
 	)
 
@@ -82,9 +85,20 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) erro
 
 	kongCtx, cErr := kongApp.Parse(args)
 	if cErr != nil {
-		return cErr
+		return errors.New("Invocation error: " + cErr.Error()), app.GENERAL_ERROR.ToInt()
 	}
 	kongCtx.BindTo(ctx, (*app.Context)(nil))
 
-	return kongCtx.Run()
+	rErr := kongCtx.Run()
+	if rErr != nil {
+		switch e := rErr.(type) {
+		case app.ParserErrors:
+			return lib.PrettifyParsingError(e, config.IsDebug.Value(), styler), e.Code().ToInt()
+		case app.Error:
+			return lib.PrettifyAppError(e, config.IsDebug.Value()), e.Code().ToInt()
+		default:
+			return errors.New("Error: " + e.Error()), app.GENERAL_ERROR.ToInt()
+		}
+	}
+	return nil, 0
 }
