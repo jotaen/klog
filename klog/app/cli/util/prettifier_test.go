@@ -16,16 +16,16 @@ func TestFormatParserError(t *testing.T) {
 	block2, _ := txt.ParseBlock("Another issue!", 133)
 	err := app.NewParserErrors([]txt.Error{
 		txt.NewError(block1, 1, 0, 4, "CODE", "Error", "Short explanation."),
-		txt.NewError(block2, 0, 8, 5, "CODE", "Problem", "More info."),
+		txt.NewError(block2, 0, 8, 5, "CODE", "Problem", "More info.").SetOrigin("some-file.klg"),
 	})
 	text := PrettifyParsingError(err, false, styler).Error()
 	assert.Equal(t, `
-[SYNTAX ERROR] in line 39: 
+[SYNTAX ERROR] in line 39
     Some malformed text
     ^^^^
     Error: Short explanation.
 
-[SYNTAX ERROR] in line 134: 
+[SYNTAX ERROR] in line 134 of file some-file.klg
     Another issue!
             ^^^^^
     Problem: More info.
@@ -39,7 +39,7 @@ func TestReflowsLongMessages(t *testing.T) {
 	})
 	text := PrettifyParsingError(err, false, styler).Error()
 	assert.Equal(t, `
-[SYNTAX ERROR] in line 2: 
+[SYNTAX ERROR] in line 2
     Foo bar
         ^^^
     Some Title: A verbose description with details, potentially
@@ -56,7 +56,7 @@ func TestConvertsTabToSpaces(t *testing.T) {
 	})
 	text := PrettifyParsingError(err, false, styler).Error()
 	assert.Equal(t, `
-[SYNTAX ERROR] in line 14: 
+[SYNTAX ERROR] in line 14
      Foo bar
     ^^^^^^^^
     Error title: Error details

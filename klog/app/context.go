@@ -177,12 +177,16 @@ func (ctx *context) ReadInputs(fileArgs ...FileOrBookmarkName) ([]klog.Record, E
 		)
 	}
 	var allRecords []klog.Record
+	var allErrors []txt.Error
 	for _, f := range files {
 		records, _, errs := ctx.parser.Parse(f.Contents())
-		if errs != nil {
-			return nil, NewParserErrors(errs)
+		for _, e := range errs {
+			allErrors = append(allErrors, e.SetOrigin(f.Path()))
 		}
 		allRecords = append(allRecords, records...)
+	}
+	if len(allErrors) > 0 {
+		return nil, NewParserErrors(allErrors)
 	}
 	return allRecords, nil
 }
@@ -213,6 +217,9 @@ func (ctx *context) ReconcileFile(fileArg FileOrBookmarkName, creators []reconci
 		return nil, err
 	}
 	records, blocks, errs := ctx.parser.Parse(target.Contents())
+	for i, e := range errs {
+		errs[i] = e.SetOrigin(target.Path())
+	}
 	if errs != nil {
 		return nil, NewParserErrors(errs)
 	}
