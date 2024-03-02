@@ -86,3 +86,17 @@ func (s EntrySummary) Equals(summary EntrySummary) bool {
 	}
 	return RecordSummary(s).Equals(RecordSummary(summary))
 }
+
+// Append appends a text to an entry summary
+func (s EntrySummary) Append(appendableText string) EntrySummary {
+	if len(s) == 0 {
+		return []string{appendableText}
+	}
+	delimiter := ""
+	lastLine := s[len(s)-1]
+	if len(lastLine) > 0 {
+		delimiter = " "
+	}
+	s[len(s)-1] = lastLine + delimiter + appendableText
+	return s
+}

@@ -13,8 +13,9 @@ import (
 )
 
 type Pause struct {
-	Summary klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the pause entry"`
-	Extend  bool              `name:"extend" short:"e" help:"Extend latest pause, instead of adding a new pause entry"`
+	Summary      klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the pause entry"`
+	NoAppendTags bool              `name:"no-tags" help:"Do not automatically take over (append) tags from open range"`
+	Extend       bool              `name:"extend" short:"e" help:"Extend latest pause, instead of adding a new pause entry"`
 	util.OutputFileArgs
 	util.NoStyleArgs
 	util.WarnArgs
@@ -24,11 +25,20 @@ func (opt *Pause) Help() string {
 	return `Creates a pause entry for a record with an open time range.
 The command is blocking – it keeps updating the pause entry until the process is exited.
 (The file will be written into once per minute.)
+
+If the open range in the record contains tags, then these will automatically be taken over and appended to the pause entry.
 `
 }
 
 func (opt *Pause) Run(ctx app.Context) app.Error {
 	opt.NoStyleArgs.Apply(&ctx)
+	if opt.Extend && opt.Summary != nil {
+		return app.NewError(
+			"Illegal flag combination",
+			"It’s not possible to combine --extend with --summary",
+			nil,
+		)
+	}
 	today := klog.NewDateFromGo(ctx.Now())
 	doReconcile := func(reconcile reconciling.Reconcile) (*reconciling.Result, app.Error) {
 		return ctx.ReconcileFile(
@@ -47,9 +57,9 @@ func (opt *Pause) Run(ctx app.Context) app.Error {
 	// - With `--extend`, find a pause and append the summary
 	lastResult, err := doReconcile(func(reconciler *reconciling.Reconciler) error {
 		if opt.Extend {
-			return reconciler.ExtendPause(klog.NewDuration(0, 0), opt.Summary)
+			return reconciler.ExtendPause(klog.NewDuration(0, 0))
 		}
-		return reconciler.AppendPause(opt.Summary)
+		return reconciler.AppendPause(opt.Summary, !opt.NoAppendTags)
 	})
 	if err != nil {
 		return err
@@ -73,7 +83,7 @@ func (opt *Pause) Run(ctx app.Context) app.Error {
 		if uncapturedIncrement > 0 {
 			lastResult, err = doReconcile(func(reconciler *reconciling.Reconciler) error {
 				// Don’t add the summary here, as we already appended it in the initial run.
-				return reconciler.ExtendPause(klog.NewDuration(0, -1*uncapturedIncrement), nil)
+				return reconciler.ExtendPause(klog.NewDuration(0, -1*uncapturedIncrement))
 			})
 			minsCaptured += uncapturedIncrement
 			if err != nil {

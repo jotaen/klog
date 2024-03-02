@@ -195,3 +195,26 @@ func TestRecognisesAllTags(t *testing.T) {
 	entrySummary, _ := NewEntrySummary("Hello #world, I feel #great #TODAY")
 	assert.Equal(t, entrySummary.Tags().ToStrings(), []string{"#great", "#today", "#world"})
 }
+
+func TestAppendsToEntrySummary(t *testing.T) {
+	t.Run("append empty to empty", func(t *testing.T) {
+		e := Ɀ_EntrySummary_().Append("")
+		assert.Equal(t, []string{""}, e.Lines())
+	})
+	t.Run("append non-empty to zero", func(t *testing.T) {
+		e := Ɀ_EntrySummary_().Append("foo")
+		assert.Equal(t, []string{"foo"}, e.Lines())
+	})
+	t.Run("append non-empty to empty", func(t *testing.T) {
+		e := Ɀ_EntrySummary_("").Append("foo")
+		assert.Equal(t, []string{"foo"}, e.Lines())
+	})
+	t.Run("append non-empty to existing", func(t *testing.T) {
+		e := Ɀ_EntrySummary_("hello").Append("foo")
+		assert.Equal(t, []string{"hello foo"}, e.Lines())
+	})
+	t.Run("append non-empty to multiline", func(t *testing.T) {
+		e := Ɀ_EntrySummary_("hello", "world").Append("foo")
+		assert.Equal(t, []string{"hello", "world foo"}, e.Lines())
+	})
+}
