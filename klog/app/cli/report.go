@@ -3,9 +3,9 @@ package cli
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
 	"github.com/jotaen/klog/klog/app/cli/report"
+	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
 	"strings"
@@ -14,13 +14,13 @@ import (
 type Report struct {
 	AggregateBy string `name:"aggregate" short:"a" help:"Aggregate data by: day, week, month, quarter, year" enum:"DAY,day,d,WEEK,week,w,MONTH,month,m,QUARTER,quarter,q,YEAR,year,y," default:"day"`
 	Fill        bool   `name:"fill" short:"f" help:"Fill the gaps and show a consecutive stream"`
-	lib.DiffArgs
-	lib.FilterArgs
-	lib.NowArgs
-	lib.DecimalArgs
-	lib.WarnArgs
-	lib.NoStyleArgs
-	lib.InputFilesArgs
+	util.DiffArgs
+	util.FilterArgs
+	util.NowArgs
+	util.DecimalArgs
+	util.WarnArgs
+	util.NoStyleArgs
+	util.InputFilesArgs
 }
 
 func (opt *Report) Help() string {

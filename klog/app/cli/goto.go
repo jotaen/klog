@@ -2,11 +2,11 @@ package cli
 
 import (
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
+	"github.com/jotaen/klog/klog/app/cli/util"
 )
 
 type Goto struct {
-	lib.OutputFileArgs
+	util.OutputFileArgs
 }
 
 func (opt *Goto) Run(ctx app.Context) app.Error {

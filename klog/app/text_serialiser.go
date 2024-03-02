@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/jotaen/klog/klog"
-	tf "github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/parser"
 	"strconv"
 	"strings"

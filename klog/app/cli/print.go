@@ -3,8 +3,8 @@ package cli
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/service"
 	"strings"
@@ -12,11 +12,11 @@ import (
 
 type Print struct {
 	WithTotals bool `name:"with-totals" help:"Amend output with evaluated total times"`
-	lib.FilterArgs
-	lib.SortArgs
-	lib.WarnArgs
-	lib.NoStyleArgs
-	lib.InputFilesArgs
+	util.FilterArgs
+	util.SortArgs
+	util.WarnArgs
+	util.NoStyleArgs
+	util.InputFilesArgs
 }
 
 func (opt *Print) Help() string {

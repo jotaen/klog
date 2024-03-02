@@ -3,20 +3,20 @@ package cli
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	terminalformat2 "github.com/jotaen/klog/klog/app/cli/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service"
 	gotime "time"
 )
 
 type Today struct {
-	lib.DiffArgs
-	lib.NowArgs
+	util.DiffArgs
+	util.NowArgs
 	Follow bool `name:"follow" short:"f" help:"Keep shell open and follow changes"`
-	lib.DecimalArgs
-	lib.WarnArgs
-	lib.NoStyleArgs
-	lib.InputFilesArgs
+	util.DecimalArgs
+	util.WarnArgs
+	util.NoStyleArgs
+	util.InputFilesArgs
 }
 
 func (opt *Today) Help() string {
@@ -33,7 +33,7 @@ func (opt *Today) Run(ctx app.Context) app.Error {
 	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)
 	if opt.Follow {
-		return lib.WithRepeat(ctx.Print, 1*gotime.Second, func(counter int64) app.Error {
+		return util.WithRepeat(ctx.Print, 1*gotime.Second, func(counter int64) app.Error {
 			err := handle(opt, ctx)
 			if counter < 7 {
 				// Display exit hint for a couple of seconds.
@@ -90,7 +90,7 @@ func handle(opt *Today, ctx app.Context) app.Error {
 		return 1
 	}()
 	numberOfColumns := 1 + numberOfValueColumns
-	table := terminalformat.NewTable(numberOfColumns, " ")
+	table := terminalformat2.NewTable(numberOfColumns, " ")
 
 	// Headline:
 	table.
@@ -129,7 +129,7 @@ func handle(opt *Today, ctx app.Context) app.Error {
 						table.CellR(serialiser.Time(currentEndTime))
 					} else {
 						table.CellR(
-							styler.Props(terminalformat.StyleProps{Color: terminalformat.SUBDUED}).
+							styler.Props(terminalformat2.StyleProps{Color: terminalformat2.SUBDUED}).
 								Format("(" + currentEndTime.ToString() + ")"))
 					}
 				} else {
@@ -174,7 +174,7 @@ func handle(opt *Today, ctx app.Context) app.Error {
 						table.CellR(serialiser.Time(grandEndTime))
 					} else {
 						table.CellR(
-							styler.Props(terminalformat.StyleProps{Color: terminalformat.SUBDUED}).
+							styler.Props(terminalformat2.StyleProps{Color: terminalformat2.SUBDUED}).
 								Format("(" + grandEndTime.ToString() + ")"))
 					}
 				} else {

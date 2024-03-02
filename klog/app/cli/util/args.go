@@ -1,9 +1,9 @@
-package lib
+package util
 
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	tf "github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
@@ -273,8 +273,8 @@ type NoStyleArgs struct {
 
 func (args *NoStyleArgs) Apply(ctx *app.Context) {
 	if args.NoStyle {
-		(*ctx).ConfigureSerialisation(func(styler tf.Styler, decimalDuration bool) (tf.Styler, bool) {
-			return tf.NewStyler(tf.NO_COLOUR), decimalDuration
+		(*ctx).ConfigureSerialisation(func(styler terminalformat.Styler, decimalDuration bool) (terminalformat.Styler, bool) {
+			return terminalformat.NewStyler(terminalformat.NO_COLOUR), decimalDuration
 		})
 	}
 }
@@ -304,7 +304,7 @@ type DecimalArgs struct {
 
 func (args *DecimalArgs) Apply(ctx *app.Context) {
 	if args.Decimal {
-		(*ctx).ConfigureSerialisation(func(styler tf.Styler, decimalDuration bool) (tf.Styler, bool) {
+		(*ctx).ConfigureSerialisation(func(styler terminalformat.Styler, decimalDuration bool) (terminalformat.Styler, bool) {
 			return styler, true
 		})
 	}

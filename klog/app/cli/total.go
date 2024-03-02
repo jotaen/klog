@@ -3,18 +3,18 @@ package cli
 import (
 	"fmt"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service"
 )
 
 type Total struct {
-	lib.FilterArgs
-	lib.DiffArgs
-	lib.NowArgs
-	lib.DecimalArgs
-	lib.WarnArgs
-	lib.NoStyleArgs
-	lib.InputFilesArgs
+	util.FilterArgs
+	util.DiffArgs
+	util.NowArgs
+	util.DecimalArgs
+	util.WarnArgs
+	util.NoStyleArgs
+	util.InputFilesArgs
 }
 
 func (opt *Total) Help() string {

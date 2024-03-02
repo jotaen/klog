@@ -2,7 +2,9 @@
 
 package app
 
-import "github.com/jotaen/klog/klog/app/cli/lib/command"
+import (
+	"github.com/jotaen/klog/klog/app/cli/command"
+)
 
 var POTENTIAL_EDITORS = []command.Command{
 	command.New("vim", nil),

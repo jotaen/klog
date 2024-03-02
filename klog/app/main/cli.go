@@ -9,8 +9,8 @@ import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli"
-	"github.com/jotaen/klog/klog/app/cli/lib"
-	tf "github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
 	kongcompletion "github.com/jotaen/kong-completion"
@@ -80,7 +80,7 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (err
 	kongcompletion.Register(
 		kongApp,
 		kongcompletion.WithPredictors(CompletionPredictors(ctx)),
-		kongcompletion.WithFlagOverrides(lib.FilterArgsCompletionOverrides),
+		kongcompletion.WithFlagOverrides(util.FilterArgsCompletionOverrides),
 	)
 
 	kongCtx, cErr := kongApp.Parse(args)
@@ -93,9 +93,9 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (err
 	if rErr != nil {
 		switch e := rErr.(type) {
 		case app.ParserErrors:
-			return lib.PrettifyParsingError(e, config.IsDebug.Value(), styler), e.Code().ToInt()
+			return util.PrettifyParsingError(e, config.IsDebug.Value(), styler), e.Code().ToInt()
 		case app.Error:
-			return lib.PrettifyAppError(e, config.IsDebug.Value()), e.Code().ToInt()
+			return util.PrettifyAppError(e, config.IsDebug.Value()), e.Code().ToInt()
 		default:
 			return errors.New("Error: " + e.Error()), app.GENERAL_ERROR.ToInt()
 		}

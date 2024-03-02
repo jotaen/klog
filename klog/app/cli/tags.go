@@ -3,20 +3,20 @@ package cli
 import (
 	"fmt"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	terminalformat2 "github.com/jotaen/klog/klog/app/cli/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service"
 )
 
 type Tags struct {
 	Values bool `name:"values" short:"v" help:"Display breakdown of tag values"`
 	Count  bool `name:"count" short:"c" help:"Display the number of matching entries per tag"`
-	lib.FilterArgs
-	lib.NowArgs
-	lib.DecimalArgs
-	lib.WarnArgs
-	lib.NoStyleArgs
-	lib.InputFilesArgs
+	util.FilterArgs
+	util.NowArgs
+	util.DecimalArgs
+	util.WarnArgs
+	util.NoStyleArgs
+	util.InputFilesArgs
 }
 
 func (opt *Tags) Help() string {
@@ -52,10 +52,10 @@ func (opt *Tags) Run(ctx app.Context) app.Error {
 	if opt.Count {
 		numberOfColumns++
 	}
-	table := terminalformat.NewTable(numberOfColumns, " ")
+	table := terminalformat2.NewTable(numberOfColumns, " ")
 	for _, t := range totalByTag {
 		totalString := serialiser.Duration(t.Total)
-		countString := styler.Props(terminalformat.StyleProps{Color: terminalformat.SUBDUED}).Format(fmt.Sprintf(" (%d)", t.Count))
+		countString := styler.Props(terminalformat2.StyleProps{Color: terminalformat2.SUBDUED}).Format(fmt.Sprintf(" (%d)", t.Count))
 		if t.Tag.Value() == "" {
 			table.CellL("#" + t.Tag.Name())
 			table.CellL(totalString)
@@ -66,7 +66,7 @@ func (opt *Tags) Run(ctx app.Context) app.Error {
 				table.CellL(countString)
 			}
 		} else if opt.Values {
-			table.CellL(" " + styler.Props(terminalformat.StyleProps{Color: terminalformat.SUBDUED}).Format(t.Tag.Value()))
+			table.CellL(" " + styler.Props(terminalformat2.StyleProps{Color: terminalformat2.SUBDUED}).Format(t.Tag.Value()))
 			table.Skip(1)
 			table.CellL(totalString)
 			if opt.Count {

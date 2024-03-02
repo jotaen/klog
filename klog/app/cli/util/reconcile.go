@@ -1,4 +1,4 @@
-package lib
+package util
 
 import (
 	"github.com/jotaen/klog/klog/app"

@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/stretchr/testify/assert"
 	"testing"

@@ -2,7 +2,7 @@ package cli
 
 import (
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"path/filepath"
 	"strings"
 )
@@ -18,7 +18,7 @@ func (opt *Info) Help() string {
 }
 
 type InfoConfigFolder struct {
-	lib.QuietArgs
+	util.QuietArgs
 }
 
 func (opt *InfoConfigFolder) Run(ctx app.Context) app.Error {

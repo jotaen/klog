@@ -1,15 +1,15 @@
-package lib
+package util
 
 import (
 	"errors"
 	"fmt"
 	"github.com/jotaen/klog/klog/app"
-	tf "github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/service"
 	"strings"
 )
 
-var Reflower = tf.NewReflower(60, "\n")
+var Reflower = terminalformat.NewReflower(60, "\n")
 
 // PrettifyAppError prints app errors including details.
 func PrettifyAppError(err app.Error, isDebug bool) error {
@@ -22,31 +22,31 @@ func PrettifyAppError(err app.Error, isDebug bool) error {
 }
 
 // PrettifyParsingError turns a parsing error into a coloured and well-structured form.
-func PrettifyParsingError(err app.ParserErrors, isDebug bool, styler tf.Styler) error {
+func PrettifyParsingError(err app.ParserErrors, isDebug bool, styler terminalformat.Styler) error {
 	message := ""
 	INDENT := "    "
 	for _, e := range err.All() {
 		message += "\n"
 		message += fmt.Sprintf(
-			styler.Props(tf.StyleProps{Background: tf.RED, Color: tf.RED}).Format("[")+
-				styler.Props(tf.StyleProps{Background: tf.RED, Color: tf.TEXT_INVERSE}).Format("SYNTAX ERROR")+
-				styler.Props(tf.StyleProps{Background: tf.RED, Color: tf.RED}).Format("]")+
-				styler.Props(tf.StyleProps{Color: tf.RED}).Format(" in line %d: "),
+			styler.Props(terminalformat.StyleProps{Background: terminalformat.RED, Color: terminalformat.RED}).Format("[")+
+				styler.Props(terminalformat.StyleProps{Background: terminalformat.RED, Color: terminalformat.TEXT_INVERSE}).Format("SYNTAX ERROR")+
+				styler.Props(terminalformat.StyleProps{Background: terminalformat.RED, Color: terminalformat.RED}).Format("]")+
+				styler.Props(terminalformat.StyleProps{Color: terminalformat.RED}).Format(" in line %d: "),
 			e.LineNumber(),
 		) + "\n"
 		message += fmt.Sprintf(
-			styler.Props(tf.StyleProps{Color: tf.SUBDUED}).Format(INDENT+"%s"),
+			styler.Props(terminalformat.StyleProps{Color: terminalformat.SUBDUED}).Format(INDENT+"%s"),
 			// Replace all tabs with one space each, otherwise the carets might
 			// not be in line with the text anymore (since we can’t know how wide
 			// a tab is).
 			strings.Replace(e.LineText(), "\t", " ", -1),
 		) + "\n"
 		message += fmt.Sprintf(
-			styler.Props(tf.StyleProps{Color: tf.RED}).Format(INDENT+"%s%s"),
+			styler.Props(terminalformat.StyleProps{Color: terminalformat.RED}).Format(INDENT+"%s%s"),
 			strings.Repeat(" ", e.Position()), strings.Repeat("^", e.Length()),
 		) + "\n"
 		message += fmt.Sprintf(
-			styler.Props(tf.StyleProps{Color: tf.YELLOW}).Format("%s"),
+			styler.Props(terminalformat.StyleProps{Color: terminalformat.YELLOW}).Format("%s"),
 			Reflower.Reflow(e.Message(), []string{INDENT}),
 		) + "\n"
 	}
@@ -54,18 +54,18 @@ func PrettifyParsingError(err app.ParserErrors, isDebug bool, styler tf.Styler) 
 }
 
 // PrettifyWarning formats a warning about a record.
-func PrettifyWarning(w service.Warning, styler tf.Styler) string {
+func PrettifyWarning(w service.Warning, styler terminalformat.Styler) string {
 	return PrettifyGeneralWarning(w.Date().ToString()+": "+w.Warning(), styler)
 }
 
 // PrettifyGeneralWarning formats a general warning message.
-func PrettifyGeneralWarning(message string, styler tf.Styler) string {
+func PrettifyGeneralWarning(message string, styler terminalformat.Styler) string {
 	result := ""
-	result += styler.Props(tf.StyleProps{Background: tf.YELLOW, Color: tf.YELLOW}).Format("[")
-	result += styler.Props(tf.StyleProps{Background: tf.YELLOW, Color: tf.TEXT_INVERSE}).Format("WARNING")
-	result += styler.Props(tf.StyleProps{Background: tf.YELLOW, Color: tf.YELLOW}).Format("]")
+	result += styler.Props(terminalformat.StyleProps{Background: terminalformat.YELLOW, Color: terminalformat.YELLOW}).Format("[")
+	result += styler.Props(terminalformat.StyleProps{Background: terminalformat.YELLOW, Color: terminalformat.TEXT_INVERSE}).Format("WARNING")
+	result += styler.Props(terminalformat.StyleProps{Background: terminalformat.YELLOW, Color: terminalformat.YELLOW}).Format("]")
 	result += " "
-	result += styler.Props(tf.StyleProps{Color: tf.YELLOW}).Format(message)
+	result += styler.Props(terminalformat.StyleProps{Color: terminalformat.YELLOW}).Format(message)
 	result += "\n"
 	return result
 }

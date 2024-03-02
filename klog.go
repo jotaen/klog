@@ -4,8 +4,8 @@ import (
 	_ "embed"
 	"fmt"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/app/cli/main"
+	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/main"
 	"os"
 	"runtime"
 )
@@ -27,7 +27,7 @@ func main() {
 	klogFolder := func() app.File {
 		f, err := determineKlogConfigFolder()
 		if err != nil {
-			fail(lib.PrettifyAppError(err, false), app.GENERAL_ERROR.ToInt())
+			fail(util.PrettifyAppError(err, false), app.GENERAL_ERROR.ToInt())
 		}
 		return f
 	}()
@@ -35,7 +35,7 @@ func main() {
 	configFile := func() string {
 		c, err := readConfigFile(app.Join(klogFolder, app.CONFIG_FILE_NAME))
 		if err != nil {
-			fail(lib.PrettifyAppError(err, false), app.GENERAL_ERROR.ToInt())
+			fail(util.PrettifyAppError(err, false), app.GENERAL_ERROR.ToInt())
 		}
 		return c
 	}()
@@ -47,7 +47,7 @@ func main() {
 			app.FromConfigFile{FileContents: configFile},
 		)
 		if err != nil {
-			fail(lib.PrettifyAppError(err, false), app.GENERAL_ERROR.ToInt())
+			fail(util.PrettifyAppError(err, false), app.GENERAL_ERROR.ToInt())
 		}
 		return c
 	}()
