@@ -5,6 +5,7 @@ type ColourTheme string
 const (
 	NO_COLOUR = ColourTheme("no_colour")
 	DARK      = ColourTheme("dark")
+	LIGHT     = ColourTheme("light")
 )
 
 func NewStyler(c ColourTheme) Styler {
@@ -42,6 +43,19 @@ func NewStyler(c ColourTheme) Styler {
 			SUBDUED:      "249",
 			PURPLE:       "213",
 			YELLOW:       "221",
+		}
+		return baseColouredStyler
+	case LIGHT:
+		baseColouredStyler.colourCodes = map[Colour]string{
+			TEXT:         "000",
+			TEXT_INVERSE: "015",
+			GREEN:        "028",
+			RED:          "124",
+			BLUE_DARK:    "025",
+			BLUE_LIGHT:   "033",
+			SUBDUED:      "237",
+			PURPLE:       "055",
+			YELLOW:       "208",
 		}
 		return baseColouredStyler
 	}
