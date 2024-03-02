@@ -2,6 +2,11 @@
 **Summary of changes of the command line tool**
 
 ## Next Up (YYYY-MM-DD)
+- **[ BREAKING ]** For `klog pause`, you cannot use the `--extend` and `--summary`
+  flags together anymore.
+- **[ FEATURE / BREAKING ]** The `klog pause` commands now automatically takes
+  over all tags from the open range in the record, and appends them to the summary
+  of the pause entry. You can disable this via the `--no-tags` flag.
 - **[ FEATURE ]** There is a new setting for the klog `config.ini` file,
   which allows to specify the colour theme of the terminal, so that klog
   can optimise its output colouring. The available options are: `dark` (the
