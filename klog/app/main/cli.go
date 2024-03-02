@@ -17,7 +17,7 @@ import (
 	"reflect"
 )
 
-func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (error, int) {
+func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int, error) {
 	kongApp, nErr := kong.New(
 		&cli.Cli{},
 		kong.Name("klog"),
@@ -62,7 +62,7 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (err
 		}),
 	)
 	if nErr != nil {
-		return errors.New("Internal error: " + nErr.Error()), app.GENERAL_ERROR.ToInt()
+		return app.GENERAL_ERROR.ToInt(), errors.New("Internal error: " + nErr.Error())
 	}
 
 	styler := tf.NewStyler(config.ColourScheme.Value())
@@ -85,7 +85,7 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (err
 
 	kongCtx, cErr := kongApp.Parse(args)
 	if cErr != nil {
-		return errors.New("Invocation error: " + cErr.Error()), app.GENERAL_ERROR.ToInt()
+		return app.GENERAL_ERROR.ToInt(), errors.New("Invocation error: " + cErr.Error())
 	}
 	kongCtx.BindTo(ctx, (*app.Context)(nil))
 
@@ -93,12 +93,12 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (err
 	if rErr != nil {
 		switch e := rErr.(type) {
 		case app.ParserErrors:
-			return util.PrettifyParsingError(e, config.IsDebug.Value(), styler), e.Code().ToInt()
+			return e.Code().ToInt(), util.PrettifyParsingError(e, config.IsDebug.Value(), styler)
 		case app.Error:
-			return util.PrettifyAppError(e, config.IsDebug.Value()), e.Code().ToInt()
+			return e.Code().ToInt(), util.PrettifyAppError(e, config.IsDebug.Value())
 		default:
-			return errors.New("Error: " + e.Error()), app.GENERAL_ERROR.ToInt()
+			return app.GENERAL_ERROR.ToInt(), errors.New("Error: " + e.Error())
 		}
 	}
-	return nil, 0
+	return 0, nil
 }

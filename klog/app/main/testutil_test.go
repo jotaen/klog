@@ -34,7 +34,7 @@ func (e *Env) run(invocation ...[]string) []string {
 		os.Stdout = w
 
 		config := app.NewDefaultConfig(terminalformat.NO_COLOUR)
-		runErr, code := Run(app.NewFileOrPanic(tmpDir), app.Meta{
+		code, runErr := Run(app.NewFileOrPanic(tmpDir), app.Meta{
 			Specification: "[Specification text]",
 			License:       "[License text]",
 			Version:       "v0.0",

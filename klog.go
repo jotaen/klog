@@ -52,7 +52,7 @@ func main() {
 		return c
 	}()
 
-	err, code := klog.Run(klogFolder, app.Meta{
+	code, err := klog.Run(klogFolder, app.Meta{
 		Specification: specification,
 		License:       license,
 		Version:       BinaryVersion,
