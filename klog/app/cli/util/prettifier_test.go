@@ -3,13 +3,13 @@ package util
 import (
 	"errors"
 	"github.com/jotaen/klog/klog/app"
-	terminalformat2 "github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/parser/txt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-var styler = terminalformat2.NewStyler(terminalformat2.NO_COLOUR)
+var styler = tf.NewStyler(tf.NO_COLOUR)
 
 func TestFormatParserError(t *testing.T) {
 	block1, _ := txt.ParseBlock("Good text\nSome malformed text", 37)
@@ -29,7 +29,7 @@ func TestFormatParserError(t *testing.T) {
     Another issue!
             ^^^^^
     Problem: More info.
-`, terminalformat2.StripAllAnsiSequences(text))
+`, tf.StripAllAnsiSequences(text))
 }
 
 func TestReflowsLongMessages(t *testing.T) {
@@ -46,7 +46,7 @@ func TestReflowsLongMessages(t *testing.T) {
     spanning multiple lines with a comprehensive text
     and tremendously helpful information.
     But it respects newlines.
-`, terminalformat2.StripAllAnsiSequences(text))
+`, tf.StripAllAnsiSequences(text))
 }
 
 func TestConvertsTabToSpaces(t *testing.T) {
@@ -60,7 +60,7 @@ func TestConvertsTabToSpaces(t *testing.T) {
      Foo bar
     ^^^^^^^^
     Error title: Error details
-`, terminalformat2.StripAllAnsiSequences(text))
+`, tf.StripAllAnsiSequences(text))
 }
 
 func TestFormatAppError(t *testing.T) {

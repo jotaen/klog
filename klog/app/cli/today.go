@@ -3,7 +3,7 @@ package cli
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	terminalformat2 "github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service"
 	gotime "time"
@@ -90,7 +90,7 @@ func handle(opt *Today, ctx app.Context) app.Error {
 		return 1
 	}()
 	numberOfColumns := 1 + numberOfValueColumns
-	table := terminalformat2.NewTable(numberOfColumns, " ")
+	table := tf.NewTable(numberOfColumns, " ")
 
 	// Headline:
 	table.
@@ -129,7 +129,7 @@ func handle(opt *Today, ctx app.Context) app.Error {
 						table.CellR(serialiser.Time(currentEndTime))
 					} else {
 						table.CellR(
-							styler.Props(terminalformat2.StyleProps{Color: terminalformat2.SUBDUED}).
+							styler.Props(tf.StyleProps{Color: tf.SUBDUED}).
 								Format("(" + currentEndTime.ToString() + ")"))
 					}
 				} else {
@@ -174,7 +174,7 @@ func handle(opt *Today, ctx app.Context) app.Error {
 						table.CellR(serialiser.Time(grandEndTime))
 					} else {
 						table.CellR(
-							styler.Props(terminalformat2.StyleProps{Color: terminalformat2.SUBDUED}).
+							styler.Props(tf.StyleProps{Color: tf.SUBDUED}).
 								Format("(" + grandEndTime.ToString() + ")"))
 					}
 				} else {

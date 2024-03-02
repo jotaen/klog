@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 	"github.com/jotaen/klog/klog/app"
-	terminalformat2 "github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service"
 )
@@ -52,10 +52,10 @@ func (opt *Tags) Run(ctx app.Context) app.Error {
 	if opt.Count {
 		numberOfColumns++
 	}
-	table := terminalformat2.NewTable(numberOfColumns, " ")
+	table := tf.NewTable(numberOfColumns, " ")
 	for _, t := range totalByTag {
 		totalString := serialiser.Duration(t.Total)
-		countString := styler.Props(terminalformat2.StyleProps{Color: terminalformat2.SUBDUED}).Format(fmt.Sprintf(" (%d)", t.Count))
+		countString := styler.Props(tf.StyleProps{Color: tf.SUBDUED}).Format(fmt.Sprintf(" (%d)", t.Count))
 		if t.Tag.Value() == "" {
 			table.CellL("#" + t.Tag.Name())
 			table.CellL(totalString)
@@ -66,7 +66,7 @@ func (opt *Tags) Run(ctx app.Context) app.Error {
 				table.CellL(countString)
 			}
 		} else if opt.Values {
-			table.CellL(" " + styler.Props(terminalformat2.StyleProps{Color: terminalformat2.SUBDUED}).Format(t.Tag.Value()))
+			table.CellL(" " + styler.Props(tf.StyleProps{Color: tf.SUBDUED}).Format(t.Tag.Value()))
 			table.Skip(1)
 			table.CellL(totalString)
 			if opt.Count {
