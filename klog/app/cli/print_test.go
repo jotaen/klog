@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"github.com/jotaen/klog/klog/app/cli/lib"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -70,12 +70,12 @@ func TestPrintOutRecordsInChronologicalOrder(t *testing.T) {
 
 	stateSortedAsc, _ := NewTestingContext().
 		_SetRecords(original).
-		_Run((&Print{SortArgs: lib.SortArgs{Sort: "asc"}}).Run)
+		_Run((&Print{SortArgs: util.SortArgs{Sort: "asc"}}).Run)
 	assert.Equal(t, "\n2018-01-30\n\n2018-01-31\n\n2018-02-01\n\n", stateSortedAsc.printBuffer)
 
 	stateSortedDesc, _ := NewTestingContext().
 		_SetRecords(original).
-		_Run((&Print{SortArgs: lib.SortArgs{Sort: "desc"}}).Run)
+		_Run((&Print{SortArgs: util.SortArgs{Sort: "desc"}}).Run)
 	assert.Equal(t, "\n2018-02-01\n\n2018-01-31\n\n2018-01-30\n\n", stateSortedDesc.printBuffer)
 }
 

@@ -3,8 +3,8 @@ package report
 import (
 	"fmt"
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service/period"
 )
 
@@ -40,5 +40,5 @@ func (a *monthAggregator) OnRowPrefix(table *terminalformat.Table, date klog.Dat
 	}
 
 	// Month
-	table.CellR(lib.PrettyMonth(date.Month())[:3])
+	table.CellR(util.PrettyMonth(date.Month())[:3])
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"io"
 	"net/http"
 	"strings"
@@ -14,7 +14,7 @@ import (
 
 type Version struct {
 	NoCheck bool `name:"no-check" help:"Don’t check online for updates"` // used for the smoke test
-	lib.QuietArgs
+	util.QuietArgs
 }
 
 const KLOG_WEBSITE_URL = "https://klog.jotaen.net"

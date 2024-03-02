@@ -35,7 +35,8 @@ func TestPrintAppErrors(t *testing.T) {
 		[]string{"start", "valid.klg"},
 	)
 	// Out 0 should contain pretty-printed parsing errors.
-	assert.True(t, strings.Contains(out[0], "ERROR in line 1:"), out)
+	assert.True(t, strings.Contains(out[0], "[SYNTAX ERROR] in line 1 of file"), out)
+	assert.True(t, strings.Contains(out[0], "invalid.klg"), out)
 	assert.True(t, strings.Contains(out[0], "2020-01-01asdf"), out)
 	assert.True(t, strings.Contains(out[0], "^^^^^^^^^^^^^^"), out)
 	assert.True(t, strings.Contains(out[0], "Invalid date"), out)

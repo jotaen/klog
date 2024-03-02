@@ -2,7 +2,7 @@ package cli
 
 import (
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"strings"
 )
 
@@ -81,7 +81,7 @@ type BookmarksSet struct {
 	File  string `arg:"" type:"string" predictor:"file" help:".klg source file"`
 	Name  string `arg:"" name:"bookmark" type:"string" optional:"1" help:"The name of the bookmark."`
 	Force bool   `name:"force" help:"Force to set, even if target file does not exist or is invalid"`
-	lib.QuietArgs
+	util.QuietArgs
 }
 
 func (opt *BookmarksSet) Run(ctx app.Context) error {
@@ -129,7 +129,7 @@ func (opt *BookmarksSet) Run(ctx app.Context) error {
 type BookmarksUnset struct {
 	// The name is not optional here, to avoid accidental invocations
 	Name string `arg:"" name:"bookmark" type:"string" predictor:"bookmark" help:"The name of the bookmark"`
-	lib.QuietArgs
+	util.QuietArgs
 }
 
 func (opt *BookmarksUnset) Run(ctx app.Context) error {
@@ -157,7 +157,7 @@ func (opt *BookmarksUnset) Run(ctx app.Context) error {
 
 type BookmarksClear struct {
 	Yes bool `name:"yes" short:"y" help:"Skip confirmation"`
-	lib.QuietArgs
+	util.QuietArgs
 }
 
 func (opt *BookmarksClear) Run(ctx app.Context) error {

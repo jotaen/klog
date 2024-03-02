@@ -3,20 +3,20 @@ package cli
 import (
 	"fmt"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service"
 )
 
 type Tags struct {
 	Values bool `name:"values" short:"v" help:"Display breakdown of tag values"`
 	Count  bool `name:"count" short:"c" help:"Display the number of matching entries per tag"`
-	lib.FilterArgs
-	lib.NowArgs
-	lib.DecimalArgs
-	lib.WarnArgs
-	lib.NoStyleArgs
-	lib.InputFilesArgs
+	util.FilterArgs
+	util.NowArgs
+	util.DecimalArgs
+	util.WarnArgs
+	util.NoStyleArgs
+	util.InputFilesArgs
 }
 
 func (opt *Tags) Help() string {
@@ -30,6 +30,7 @@ Every matching entry is counted individually.`
 func (opt *Tags) Run(ctx app.Context) app.Error {
 	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)
+	styler, serialiser := ctx.Serialise()
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err
@@ -51,10 +52,10 @@ func (opt *Tags) Run(ctx app.Context) app.Error {
 	if opt.Count {
 		numberOfColumns++
 	}
-	table := terminalformat.NewTable(numberOfColumns, " ")
+	table := tf.NewTable(numberOfColumns, " ")
 	for _, t := range totalByTag {
-		totalString := ctx.Serialiser().Duration(t.Total)
-		countString := ctx.Serialiser().Format(terminalformat.Style{Color: "247"}, fmt.Sprintf(" (%d)", t.Count))
+		totalString := serialiser.Duration(t.Total)
+		countString := styler.Props(tf.StyleProps{Color: tf.SUBDUED}).Format(fmt.Sprintf(" (%d)", t.Count))
 		if t.Tag.Value() == "" {
 			table.CellL("#" + t.Tag.Name())
 			table.CellL(totalString)
@@ -65,7 +66,7 @@ func (opt *Tags) Run(ctx app.Context) app.Error {
 				table.CellL(countString)
 			}
 		} else if opt.Values {
-			table.CellL(" " + ctx.Serialiser().Format(terminalformat.Style{Color: "247"}, t.Tag.Value()))
+			table.CellL(" " + styler.Props(tf.StyleProps{Color: tf.SUBDUED}).Format(t.Tag.Value()))
 			table.Skip(1)
 			table.CellL(totalString)
 			if opt.Count {

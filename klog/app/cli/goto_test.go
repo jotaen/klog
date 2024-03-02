@@ -2,8 +2,8 @@ package cli
 
 import (
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/app/cli/lib/command"
+	"github.com/jotaen/klog/klog/app/cli/command"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -14,7 +14,7 @@ func TestGotoLocation(t *testing.T) {
 	_, err := NewTestingContext()._SetFileExplorers([]command.Command{
 		command.New("goto", []string{"--file"}),
 	})._SetExecute(spy.Execute)._Run((&Goto{
-		OutputFileArgs: lib.OutputFileArgs{File: "/tmp/file.klg"},
+		OutputFileArgs: util.OutputFileArgs{File: "/tmp/file.klg"},
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, 1, spy.Count)
@@ -34,7 +34,7 @@ func TestGotoLocationFirstSucceeds(t *testing.T) {
 		command.New("goto2", nil),
 		command.New("goto3", []string{"--file"}),
 	})._SetExecute(spy.Execute)._Run((&Goto{
-		OutputFileArgs: lib.OutputFileArgs{File: "/tmp/file.klg"},
+		OutputFileArgs: util.OutputFileArgs{File: "/tmp/file.klg"},
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, 2, spy.Count)
@@ -49,7 +49,7 @@ func TestGotoFails(t *testing.T) {
 	_, err := NewTestingContext()._SetFileExplorers([]command.Command{
 		command.New("goto", []string{"--file"}),
 	})._SetExecute(spy.Execute)._Run((&Goto{
-		OutputFileArgs: lib.OutputFileArgs{File: "/tmp/file.klg"},
+		OutputFileArgs: util.OutputFileArgs{File: "/tmp/file.klg"},
 	}).Run)
 	require.Error(t, err)
 	assert.Equal(t, 1, spy.Count)

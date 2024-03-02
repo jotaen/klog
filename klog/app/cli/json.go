@@ -2,16 +2,16 @@ package cli
 
 import (
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/parser/json"
 )
 
 type Json struct {
 	Pretty bool `name:"pretty" help:"Pretty-print output"`
-	lib.NowArgs
-	lib.FilterArgs
-	lib.SortArgs
-	lib.InputFilesArgs
+	util.NowArgs
+	util.FilterArgs
+	util.SortArgs
+	util.InputFilesArgs
 }
 
 func (opt *Json) Help() string {

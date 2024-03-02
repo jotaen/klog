@@ -1,8 +1,9 @@
-package lib
+package util
 
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
+	"github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
@@ -43,7 +44,7 @@ func (args *AtDateArgs) DateFormat(config app.Config) reconciling.ReformatDirect
 		return reconciling.NoReformat[klog.DateFormat]()
 	}
 	fd := reconciling.ReformatAutoStyle[klog.DateFormat]()
-	config.DateUseDashes.Map(func(x bool) {
+	config.DateUseDashes.Unwrap(func(x bool) {
 		fd = reconciling.ReformatExplicitly(klog.DateFormat{UseDashes: x})
 	})
 	return fd
@@ -65,7 +66,7 @@ func (args *AtDateAndTimeArgs) AtTime(now gotime.Time, config app.Config) (klog.
 	if args.Round != nil {
 		time = service.RoundToNearest(time, args.Round)
 	} else {
-		config.DefaultRounding.Map(func(r service.Rounding) {
+		config.DefaultRounding.Unwrap(func(r service.Rounding) {
 			time = service.RoundToNearest(time, r)
 		})
 	}
@@ -91,7 +92,7 @@ func (args *AtDateAndTimeArgs) TimeFormat(config app.Config) reconciling.Reforma
 		return reconciling.NoReformat[klog.TimeFormat]()
 	}
 	fd := reconciling.ReformatAutoStyle[klog.TimeFormat]()
-	config.TimeUse24HourClock.Map(func(x bool) {
+	config.TimeUse24HourClock.Unwrap(func(x bool) {
 		fd = reconciling.ReformatExplicitly(klog.TimeFormat{Use24HourClock: x})
 	})
 	return fd
@@ -254,14 +255,15 @@ type WarnArgs struct {
 }
 
 func (args *WarnArgs) PrintWarnings(ctx app.Context, records []klog.Record, additionalWarnings []string) {
+	styler, _ := ctx.Serialise()
 	if args.NoWarn {
 		return
 	}
 	for _, msg := range additionalWarnings {
-		ctx.Print(PrettifyGeneralWarning(msg))
+		ctx.Print(PrettifyGeneralWarning(msg, styler))
 	}
 	service.CheckForWarnings(func(w service.Warning) {
-		ctx.Print(PrettifyWarning(w))
+		ctx.Print(PrettifyWarning(w, styler))
 	}, ctx.Now(), records)
 }
 
@@ -270,11 +272,10 @@ type NoStyleArgs struct {
 }
 
 func (args *NoStyleArgs) Apply(ctx *app.Context) {
-	if args.NoStyle || (*ctx).Config().NoColour.Value() {
-		if s, ok := (*ctx).Serialiser().(CliSerialiser); ok {
-			s.Unstyled = true
-			(*ctx).SetSerialiser(s)
-		}
+	if args.NoStyle {
+		(*ctx).ConfigureSerialisation(func(styler terminalformat.Styler, decimalDuration bool) (terminalformat.Styler, bool) {
+			return terminalformat.NewStyler(terminalformat.NO_COLOUR), decimalDuration
+		})
 	}
 }
 
@@ -303,9 +304,8 @@ type DecimalArgs struct {
 
 func (args *DecimalArgs) Apply(ctx *app.Context) {
 	if args.Decimal {
-		if s, ok := (*ctx).Serialiser().(CliSerialiser); ok {
-			s.Decimal = true
-			(*ctx).SetSerialiser(s)
-		}
+		(*ctx).ConfigureSerialisation(func(styler terminalformat.Styler, decimalDuration bool) (terminalformat.Styler, bool) {
+			return styler, true
+		})
 	}
 }

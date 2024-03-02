@@ -2,7 +2,7 @@ package cli
 
 import (
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/lib"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -14,8 +14,8 @@ func TestStop(t *testing.T) {
 1920-02-02
 	11:22-?
 `)._SetNow(1920, 2, 2, 15, 24)._Run((&Stop{
-		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
-			AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
+		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
+			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
 		},
 	}).Run)
 	require.Nil(t, err)
@@ -42,7 +42,7 @@ func TestDoesNotFallBackToYesterdayWhenTimeIsExplicit(t *testing.T) {
 1920-02-02
 	22:22-?
 `)._SetNow(1920, 2, 3, 4, 16)._Run((&Stop{
-		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{Time: klog.Ɀ_Time_(23, 30)},
+		AtDateAndTimeArgs: util.AtDateAndTimeArgs{Time: klog.Ɀ_Time_(23, 30)},
 	}).Run)
 	require.Error(t, err)
 }
@@ -52,8 +52,8 @@ func TestStopsYesterdaysRecordWithShiftedAutoTime(t *testing.T) {
 1920-02-02
 	10:22pm-?
 `)._SetNow(1920, 2, 3, 2, 49)._Run((&Stop{
-		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
-			AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
+		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
+			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
 		},
 	}).Run)
 	require.Nil(t, err)
@@ -97,7 +97,7 @@ time_convention = 24h
 `)._SetFileConfig(`
 time_convention = 12h
 `)._SetNow(1920, 2, 2, 14, 49)._Run((&Stop{
-			AtDateAndTimeArgs: lib.AtDateAndTimeArgs{Time: klog.Ɀ_Time_(14, 49)},
+			AtDateAndTimeArgs: util.AtDateAndTimeArgs{Time: klog.Ɀ_Time_(14, 49)},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `
@@ -112,8 +112,8 @@ func TestStopWithExtendingSummary(t *testing.T) {
 1920-02-02
 	11:22-? Started something...
 `)._SetNow(1920, 2, 2, 15, 24)._Run((&Stop{
-		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
-			AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
+		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
+			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
 		},
 		Summary: klog.Ɀ_EntrySummary_("Done!"),
 	}).Run)
@@ -129,8 +129,8 @@ func TestStopFailsIfNoTimeSpecifiedForPastDates(t *testing.T) {
 1623-12-12
 	15:00-?
 `)._Run((&Stop{
-		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
-			AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1624, 02, 1)},
+		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
+			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1624, 02, 1)},
 		},
 	}).Run)
 	require.Error(t, err)
@@ -143,8 +143,8 @@ func TestStopFailsIfNoRecentRecord(t *testing.T) {
 1623-12-12
 	15:00-?
 `)._Run((&Stop{
-		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
-			AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1624, 02, 1)},
+		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
+			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1624, 02, 1)},
 			Time:       klog.Ɀ_Time_(16, 00),
 		},
 	}).Run)
@@ -158,8 +158,8 @@ func TestStopFailsIfNoOpenRange(t *testing.T) {
 1623-12-12
 	15:00-16:00
 `)._Run((&Stop{
-		AtDateAndTimeArgs: lib.AtDateAndTimeArgs{
-			AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1623, 12, 12)},
+		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
+			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1623, 12, 12)},
 			Time:       klog.Ɀ_Time_(16, 00),
 		},
 	}).Run)
@@ -176,7 +176,7 @@ func TestStopWithRounding(t *testing.T) {
 2005-05-05
     8:10 - ?
 `)._SetNow(2005, 5, 5, 11, 24)._Run((&Stop{
-			AtDateAndTimeArgs: lib.AtDateAndTimeArgs{Round: r15},
+			AtDateAndTimeArgs: util.AtDateAndTimeArgs{Round: r15},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `
@@ -207,7 +207,7 @@ default_rounding = 30m
 `)._SetNow(2005, 5, 5, 11, 24)._SetFileConfig(`
 default_rounding = 30m
 `)._Run((&Stop{
-			AtDateAndTimeArgs: lib.AtDateAndTimeArgs{Round: r5},
+			AtDateAndTimeArgs: util.AtDateAndTimeArgs{Round: r5},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `

@@ -3,12 +3,16 @@ package main
 import (
 	"fmt"
 	"github.com/jotaen/klog/klog"
+	"github.com/jotaen/klog/klog/app"
+	"github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/parser"
 	"math/rand"
 	"os"
 	"strconv"
 	"time"
 )
+
+var serialiser = app.NewSerialiser(terminalformat.NewStyler(terminalformat.NO_COLOUR), false)
 
 func main() {
 	// Setup
@@ -43,7 +47,7 @@ func main() {
 				entriesCount++
 			}
 		}
-		fmt.Println(parser.SerialiseRecords(parser.PlainSerialiser{}, r).ToString())
+		fmt.Println(parser.SerialiseRecords(serialiser, r).ToString())
 	}
 }
 

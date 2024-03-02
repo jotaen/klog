@@ -3,16 +3,16 @@ package cli
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 )
 
 type Switch struct {
 	SummaryText klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the new entry"`
-	lib.AtDateAndTimeArgs
-	lib.NoStyleArgs
-	lib.OutputFileArgs
-	lib.WarnArgs
+	util.AtDateAndTimeArgs
+	util.NoStyleArgs
+	util.OutputFileArgs
+	util.WarnArgs
 }
 
 func (opt *Switch) Help() string {
@@ -31,7 +31,7 @@ func (opt *Switch) Run(ctx app.Context) app.Error {
 		return tErr
 	}
 
-	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
+	return util.Reconcile(ctx, util.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			reconciling.NewReconcilerAtRecord(date),
 		},
