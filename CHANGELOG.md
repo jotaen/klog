@@ -1,7 +1,7 @@
 # Changelog
 **Summary of changes of the command line tool**
 
-## Next Up
+## Next Up (YYYY-MM-DD)
 - **[ FEATURE ]** There is a new setting for the klog `config.ini` file,
   which allows to specify the colour theme of the terminal, so that klog
   can optimise its output colouring. The available options are: `dark` (the
