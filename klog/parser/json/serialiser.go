@@ -118,6 +118,7 @@ func toErrorViews(errs []txt.Error) []ErrorView {
 			Length:  e.Length(),
 			Title:   e.Title(),
 			Details: e.Details(),
+			File:    e.Origin(),
 		})
 	}
 	return result

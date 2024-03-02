@@ -53,4 +53,5 @@ type ErrorView struct {
 	Length  int    `json:"length"`
 	Title   string `json:"title"`
 	Details string `json:"details"`
+	File    string `json:"file"`
 }
