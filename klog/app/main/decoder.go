@@ -169,3 +169,28 @@ func entrySummaryDecoder() kong.MapperFunc {
 		return nil
 	}
 }
+
+func entryTypeDecoder() kong.MapperFunc {
+	return func(ctx *kong.DecodeContext, target reflect.Value) error {
+		var value string
+		if err := ctx.Scan.PopValueInto("entryType", &value); err != nil {
+			return err
+		}
+		if value == "" {
+			return errors.New("Please provide a valid entry type")
+		}
+		ts := map[service.EntryType]bool{
+			service.ENTRY_TYPE_RANGE:             true,
+			service.ENTRY_TYPE_OPEN_RANGE:        true,
+			service.ENTRY_TYPE_DURATION:          true,
+			service.ENTRY_TYPE_POSITIVE_DURATION: true,
+			service.ENTRY_TYPE_NEGATIVE_DURATION: true,
+		}
+		t := service.EntryType(strings.ReplaceAll(strings.ToUpper(value), "-", "_"))
+		if ok := ts[t]; !ok {
+			return errors.New("`" + value + "` is not a valid entry type")
+		}
+		target.Set(reflect.ValueOf(t))
+		return nil
+	}
+}
