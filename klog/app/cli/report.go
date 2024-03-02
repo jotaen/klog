@@ -3,9 +3,9 @@ package cli
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
 	"github.com/jotaen/klog/klog/app/cli/report"
+	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
 	"strings"
@@ -14,13 +14,13 @@ import (
 type Report struct {
 	AggregateBy string `name:"aggregate" short:"a" help:"Aggregate data by: day, week, month, quarter, year" enum:"DAY,day,d,WEEK,week,w,MONTH,month,m,QUARTER,quarter,q,YEAR,year,y," default:"day"`
 	Fill        bool   `name:"fill" short:"f" help:"Fill the gaps and show a consecutive stream"`
-	lib.DiffArgs
-	lib.FilterArgs
-	lib.NowArgs
-	lib.DecimalArgs
-	lib.WarnArgs
-	lib.NoStyleArgs
-	lib.InputFilesArgs
+	util.DiffArgs
+	util.FilterArgs
+	util.NowArgs
+	util.DecimalArgs
+	util.WarnArgs
+	util.NoStyleArgs
+	util.InputFilesArgs
 }
 
 func (opt *Report) Help() string {
@@ -32,6 +32,7 @@ The default aggregation is by day, but you choose other periods via the --aggreg
 func (opt *Report) Run(ctx app.Context) app.Error {
 	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)
+	_, serialiser := ctx.Serialise()
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err
@@ -87,12 +88,12 @@ func (opt *Report) Run(ctx app.Context) app.Error {
 		}
 
 		total := service.Total(rs...)
-		table.CellR(ctx.Serialiser().Duration(total))
+		table.CellR(serialiser.Duration(total))
 
 		if opt.Diff {
 			should := service.ShouldTotalSum(rs...)
 			diff := service.Diff(should, total)
-			table.CellR(ctx.Serialiser().ShouldTotal(should)).CellR(ctx.Serialiser().SignedDuration(diff))
+			table.CellR(serialiser.ShouldTotal(should)).CellR(serialiser.SignedDuration(diff))
 		}
 	}
 
@@ -105,11 +106,11 @@ func (opt *Report) Run(ctx app.Context) app.Error {
 
 	// Footer
 	table.Skip(aggregator.NumberOfPrefixColumns())
-	table.CellR(ctx.Serialiser().Duration(grandTotal))
+	table.CellR(serialiser.Duration(grandTotal))
 	if opt.Diff {
 		grandShould := service.ShouldTotalSum(records...)
 		grandDiff := service.Diff(grandShould, grandTotal)
-		table.CellR(ctx.Serialiser().ShouldTotal(grandShould)).CellR(ctx.Serialiser().SignedDuration(grandDiff))
+		table.CellR(serialiser.ShouldTotal(grandShould)).CellR(serialiser.SignedDuration(grandDiff))
 	}
 
 	table.Collect(ctx.Print)

@@ -3,8 +3,8 @@ package cli
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/service"
 	"strings"
@@ -12,11 +12,11 @@ import (
 
 type Print struct {
 	WithTotals bool `name:"with-totals" help:"Amend output with evaluated total times"`
-	lib.FilterArgs
-	lib.SortArgs
-	lib.WarnArgs
-	lib.NoStyleArgs
-	lib.InputFilesArgs
+	util.FilterArgs
+	util.SortArgs
+	util.WarnArgs
+	util.NoStyleArgs
+	util.InputFilesArgs
 }
 
 func (opt *Print) Help() string {
@@ -25,6 +25,7 @@ func (opt *Print) Help() string {
 
 func (opt *Print) Run(ctx app.Context) app.Error {
 	opt.NoStyleArgs.Apply(&ctx)
+	styler, serialser := ctx.Serialise()
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
 		return err
@@ -35,10 +36,10 @@ func (opt *Print) Run(ctx app.Context) app.Error {
 		return nil
 	}
 	records = opt.ApplySort(records)
-	serialisedRecords := parser.SerialiseRecords(ctx.Serialiser(), records...)
+	serialisedRecords := parser.SerialiseRecords(serialser, records...)
 	output := func() string {
 		if opt.WithTotals {
-			return printWithDurations(ctx.Serialiser(), serialisedRecords)
+			return printWithDurations(styler, serialisedRecords)
 		}
 		return "\n" + serialisedRecords.ToString()
 	}()
@@ -48,7 +49,7 @@ func (opt *Print) Run(ctx app.Context) app.Error {
 	return nil
 }
 
-func printWithDurations(serialiser parser.Serialiser, ls parser.Lines) string {
+func printWithDurations(styler terminalformat.Styler, ls parser.Lines) string {
 	type Prefix struct {
 		d     klog.Duration
 		isSub bool
@@ -95,9 +96,9 @@ func printWithDurations(serialiser parser.Serialiser, ls parser.Lines) string {
 			length := len(p.d.ToString())
 			value := ""
 			if p.isSub {
-				value += serialiser.Format(terminalformat.Style{Color: "247"}, p.d.ToString())
+				value += styler.Props(terminalformat.StyleProps{Color: terminalformat.RED}).Format(p.d.ToString())
 			} else {
-				value += serialiser.Format(terminalformat.Style{IsUnderlined: true}, p.d.ToString())
+				value += styler.Props(terminalformat.StyleProps{IsUnderlined: true}).Format(p.d.ToString())
 			}
 			return strings.Repeat(" ", maxColumnLength-length+1) + value
 		}()

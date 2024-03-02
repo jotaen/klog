@@ -3,20 +3,20 @@ package cli
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service"
 	gotime "time"
 )
 
 type Today struct {
-	lib.DiffArgs
-	lib.NowArgs
+	util.DiffArgs
+	util.NowArgs
 	Follow bool `name:"follow" short:"f" help:"Keep shell open and follow changes"`
-	lib.DecimalArgs
-	lib.WarnArgs
-	lib.NoStyleArgs
-	lib.InputFilesArgs
+	util.DecimalArgs
+	util.WarnArgs
+	util.NoStyleArgs
+	util.InputFilesArgs
 }
 
 func (opt *Today) Help() string {
@@ -33,7 +33,7 @@ func (opt *Today) Run(ctx app.Context) app.Error {
 	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)
 	if opt.Follow {
-		return lib.WithRepeat(ctx.Print, 1*gotime.Second, func(counter int64) app.Error {
+		return util.WithRepeat(ctx.Print, 1*gotime.Second, func(counter int64) app.Error {
 			err := handle(opt, ctx)
 			if counter < 7 {
 				// Display exit hint for a couple of seconds.
@@ -65,6 +65,7 @@ func handle(opt *Today, ctx app.Context) app.Error {
 	if nErr != nil {
 		return nErr
 	}
+	styler, serialiser := ctx.Serialise()
 
 	currentRecords, otherRecords, isYesterday := splitIntoCurrentAndOther(now, records)
 	hasCurrentRecords := len(currentRecords) > 0
@@ -89,7 +90,7 @@ func handle(opt *Today, ctx app.Context) app.Error {
 		return 1
 	}()
 	numberOfColumns := 1 + numberOfValueColumns
-	table := terminalformat.NewTable(numberOfColumns, " ")
+	table := tf.NewTable(numberOfColumns, " ")
 
 	// Headline:
 	table.
@@ -109,15 +110,15 @@ func handle(opt *Today, ctx app.Context) app.Error {
 		table.CellL("Today")
 	}
 	if hasCurrentRecords {
-		table.CellR(ctx.Serialiser().Duration(currentTotal))
+		table.CellR(serialiser.Duration(currentTotal))
 	} else {
 		table.CellR(N_A)
 	}
 	if opt.Diff {
 		if hasCurrentRecords {
 			table.
-				CellR(ctx.Serialiser().ShouldTotal(currentShouldTotal)).
-				CellR(ctx.Serialiser().SignedDuration(currentDiff))
+				CellR(serialiser.ShouldTotal(currentShouldTotal)).
+				CellR(serialiser.SignedDuration(currentDiff))
 		} else {
 			table.CellR(N_A).CellR(N_A)
 		}
@@ -125,11 +126,11 @@ func handle(opt *Today, ctx app.Context) app.Error {
 			if hasCurrentRecords {
 				if currentEndTime != nil {
 					if opt.HadOpenRange() {
-						table.CellR(ctx.Serialiser().Time(currentEndTime))
+						table.CellR(serialiser.Time(currentEndTime))
 					} else {
-						table.CellR(ctx.Serialiser().Format(terminalformat.Style{
-							Color: "247",
-						}, "("+currentEndTime.ToString()+")"))
+						table.CellR(
+							styler.Props(tf.StyleProps{Color: tf.SUBDUED}).
+								Format("(" + currentEndTime.ToString() + ")"))
 					}
 				} else {
 					table.CellR(QQQ)
@@ -141,11 +142,11 @@ func handle(opt *Today, ctx app.Context) app.Error {
 	}
 
 	// Other:
-	table.CellL("Other").CellR(ctx.Serialiser().Duration(otherTotal))
+	table.CellL("Other").CellR(serialiser.Duration(otherTotal))
 	if opt.Diff {
 		table.
-			CellR(ctx.Serialiser().ShouldTotal(otherShouldTotal)).
-			CellR(ctx.Serialiser().SignedDuration(otherDiff))
+			CellR(serialiser.ShouldTotal(otherShouldTotal)).
+			CellR(serialiser.SignedDuration(otherDiff))
 		if opt.Now {
 			table.Skip(1)
 		}
@@ -161,20 +162,20 @@ func handle(opt *Today, ctx app.Context) app.Error {
 	}
 
 	// GrandTotal:
-	table.CellL("All").CellR(ctx.Serialiser().Duration(grandTotal))
+	table.CellL("All").CellR(serialiser.Duration(grandTotal))
 	if opt.Diff {
 		table.
-			CellR(ctx.Serialiser().ShouldTotal(grandShouldTotal)).
-			CellR(ctx.Serialiser().SignedDuration(grandDiff))
+			CellR(serialiser.ShouldTotal(grandShouldTotal)).
+			CellR(serialiser.SignedDuration(grandDiff))
 		if opt.Now {
 			if hasCurrentRecords {
 				if grandEndTime != nil {
 					if opt.HadOpenRange() {
-						table.CellR(ctx.Serialiser().Time(grandEndTime))
+						table.CellR(serialiser.Time(grandEndTime))
 					} else {
-						table.CellR(ctx.Serialiser().Format(terminalformat.Style{
-							Color: "247",
-						}, "("+grandEndTime.ToString()+")"))
+						table.CellR(
+							styler.Props(tf.StyleProps{Color: tf.SUBDUED}).
+								Format("(" + grandEndTime.ToString() + ")"))
 					}
 				} else {
 					table.CellR(QQQ)

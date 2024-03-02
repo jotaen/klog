@@ -2,7 +2,7 @@ package cli
 
 import (
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/lib"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -11,7 +11,7 @@ import (
 func TestTrackEntryInEmptyFile(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords("")._Run((&Track{
 		Entry:      klog.Ɀ_EntrySummary_("2h"),
-		AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1855, 4, 25)},
+		AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1855, 4, 25)},
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, "1855-04-25\n    2h\n", state.writtenFileContents)
@@ -23,7 +23,7 @@ func TestTrackEntryInExistingFile(t *testing.T) {
 	1h
 `)._Run((&Track{
 		Entry:      klog.Ɀ_EntrySummary_("2h"),
-		AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1855, 4, 25)},
+		AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1855, 4, 25)},
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -39,7 +39,7 @@ func TestTrackEntryAtUnknownDateCreatesNewRecord(t *testing.T) {
 	1h
 `)._Run((&Track{
 		Entry:      klog.Ɀ_EntrySummary_("2h"),
-		AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(2000, 1, 1)},
+		AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(2000, 1, 1)},
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -59,7 +59,7 @@ func TestTrackNewRecordWithShouldTotal(t *testing.T) {
 default_should_total = 7h30m!
 `)._Run((&Track{
 		Entry:      klog.Ɀ_EntrySummary_("2h"),
-		AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(2000, 1, 1)},
+		AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(2000, 1, 1)},
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -77,7 +77,7 @@ func TestTrackFailsIfEntryInvalid(t *testing.T) {
 	1h
 `)._Run((&Track{
 		Entry:      klog.Ɀ_EntrySummary_("Foo"),
-		AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(1855, 4, 25)},
+		AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1855, 4, 25)},
 	}).Run)
 	require.Error(t, err)
 	assert.Equal(t, "Manipulation failed", err.Error())
@@ -140,7 +140,7 @@ date_format = YYYY-MM-DD
 date_format = YYYY/MM/DD
 `)._Run((&Track{
 			Entry:      klog.Ɀ_EntrySummary_("2h"),
-			AtDateArgs: lib.AtDateArgs{Date: klog.Ɀ_Date_(2000, 1, 1)},
+			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(2000, 1, 1)},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `

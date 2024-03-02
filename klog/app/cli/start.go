@@ -3,7 +3,7 @@ package cli
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 	"github.com/jotaen/klog/klog/parser/txt"
 	"github.com/jotaen/klog/klog/service"
@@ -12,10 +12,10 @@ import (
 type Start struct {
 	SummaryText klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for this entry"`
 	Resume      bool              `name:"resume" short:"R" help:"Take over summary of last entry (if applicable)"`
-	lib.AtDateAndTimeArgs
-	lib.NoStyleArgs
-	lib.OutputFileArgs
-	lib.WarnArgs
+	util.AtDateAndTimeArgs
+	util.NoStyleArgs
+	util.OutputFileArgs
+	util.WarnArgs
 }
 
 func (opt *Start) Help() string {
@@ -33,11 +33,11 @@ func (opt *Start) Run(ctx app.Context) app.Error {
 		return tErr
 	}
 	additionalData := reconciling.AdditionalData{}
-	ctx.Config().DefaultShouldTotal.Map(func(s klog.ShouldTotal) {
+	ctx.Config().DefaultShouldTotal.Unwrap(func(s klog.ShouldTotal) {
 		additionalData.ShouldTotal = s
 	})
 	spy := PreviousRecordSpy{}
-	return lib.Reconcile(ctx, lib.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
+	return util.Reconcile(ctx, util.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			spy.phonyCreator(date),
 			reconciling.NewReconcilerAtRecord(date),

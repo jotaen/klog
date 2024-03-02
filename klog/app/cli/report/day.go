@@ -3,8 +3,8 @@ package report
 import (
 	"fmt"
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service/period"
 )
 
@@ -46,11 +46,11 @@ func (a *dayAggregator) OnRowPrefix(table *terminalformat.Table, date klog.Date)
 	// Month
 	if date.Month() != a.m {
 		a.m = date.Month()
-		table.CellR(lib.PrettyMonth(a.m)[:3])
+		table.CellR(util.PrettyMonth(a.m)[:3])
 	} else {
 		table.Skip(1)
 	}
 
 	// Day
-	table.CellR(lib.PrettyDay(date.Weekday())[:3]).CellR(fmt.Sprintf("%2v.", date.Day()))
+	table.CellR(util.PrettyDay(date.Weekday())[:3]).CellR(fmt.Sprintf("%2v.", date.Day()))
 }

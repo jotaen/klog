@@ -3,7 +3,7 @@ package report
 import (
 	"fmt"
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/service/period"
 )
 

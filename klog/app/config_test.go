@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/jotaen/klog/klog"
+	"github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -14,20 +15,19 @@ func createMockConfigFromEnv(vs map[string]string) FromEnvVars {
 }
 
 func TestCreatesNewDefaultConfig(t *testing.T) {
-	c := NewDefaultConfig()
+	c := NewDefaultConfig(terminalformat.NO_COLOUR)
 	assert.Equal(t, c.IsDebug.Value(), false)
-	assert.Equal(t, c.Editor.Value(), "")
-	assert.Equal(t, c.NoColour.Value(), false)
+	assert.Equal(t, c.Editor.UnwrapOr(""), "")
 	assert.Equal(t, c.CpuKernels.Value(), 1)
 
 	isRoundingSet := false
-	c.DefaultRounding.Map(func(_ service.Rounding) {
+	c.DefaultRounding.Unwrap(func(_ service.Rounding) {
 		isRoundingSet = true
 	})
 	assert.False(t, isRoundingSet)
 
 	isShouldTotalSet := false
-	c.DefaultShouldTotal.Map(func(_ klog.ShouldTotal) {
+	c.DefaultShouldTotal.Unwrap(func(_ klog.ShouldTotal) {
 		isShouldTotalSet = true
 	})
 	assert.False(t, isShouldTotalSet)
@@ -35,18 +35,18 @@ func TestCreatesNewDefaultConfig(t *testing.T) {
 
 func TestSetsParamsMetadataIsHandledCorrectly(t *testing.T) {
 	{
-		c := NewDefaultConfig()
-		assert.Equal(t, c.NoColour.Value(), false)
+		c := NewDefaultConfig(terminalformat.NO_COLOUR)
+		assert.Equal(t, c.IsDebug.Value(), false)
 	}
 	{
 		c, _ := NewConfig(
 			FromStaticValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{
-				"NO_COLOR": "1",
+				"KLOG_DEBUG": "1",
 			}),
 			FromConfigFile{""},
 		)
-		assert.Equal(t, c.NoColour.Value(), true)
+		assert.Equal(t, c.IsDebug.Value(), true)
 	}
 }
 
@@ -62,8 +62,8 @@ func TestSetsParamsFromEnv(t *testing.T) {
 			FromConfigFile{""},
 		)
 		assert.Equal(t, c.IsDebug.Value(), true)
-		assert.Equal(t, c.NoColour.Value(), true)
-		assert.Equal(t, c.Editor.Value(), "subl")
+		assert.Equal(t, c.ColourScheme.Value(), terminalformat.NO_COLOUR)
+		assert.Equal(t, c.Editor.UnwrapOr(""), "subl")
 	})
 
 	t.Run("`editor` from file would trump `$EDITOR` env variable.", func(t *testing.T) {
@@ -74,7 +74,7 @@ func TestSetsParamsFromEnv(t *testing.T) {
 			}),
 			FromConfigFile{"editor = vi"},
 		)
-		assert.Equal(t, c.Editor.Value(), "vi")
+		assert.Equal(t, "vi", c.Editor.UnwrapOr(""))
 	})
 }
 
@@ -95,7 +95,7 @@ func TestSetsDefaultRoundingParamFromConfigFile(t *testing.T) {
 			FromConfigFile{x.cfg},
 		)
 		var value int
-		c.DefaultRounding.Map(func(r service.Rounding) {
+		c.DefaultRounding.Unwrap(func(r service.Rounding) {
 			value = r.ToInt()
 		})
 		assert.Equal(t, x.exp, value)
@@ -115,7 +115,7 @@ func TestSetsDefaultShouldTotalParamFromConfigFile(t *testing.T) {
 			FromConfigFile{x.cfg},
 		)
 		var value string
-		c.DefaultShouldTotal.Map(func(s klog.ShouldTotal) {
+		c.DefaultShouldTotal.Unwrap(func(s klog.ShouldTotal) {
 			value = s.ToString()
 		})
 		assert.Equal(t, x.exp, value)
@@ -136,7 +136,7 @@ func TestSetsDateFormatParamFromConfigFile(t *testing.T) {
 			FromConfigFile{x.cfg},
 		)
 		var value bool
-		c.DateUseDashes.Map(func(s bool) {
+		c.DateUseDashes.Unwrap(func(s bool) {
 			value = s
 		})
 		assert.Equal(t, x.exp, value)
@@ -157,7 +157,7 @@ func TestSetTimeFormatParamFromConfigFile(t *testing.T) {
 			FromConfigFile{x.cfg},
 		)
 		var value bool
-		c.TimeUse24HourClock.Map(func(s bool) {
+		c.TimeUse24HourClock.Unwrap(func(s bool) {
 			value = s
 		})
 		assert.Equal(t, x.exp, value)

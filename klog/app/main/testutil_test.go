@@ -2,8 +2,7 @@ package klog
 
 import (
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/lib"
-	"github.com/jotaen/klog/klog/app/cli/lib/terminalformat"
+	"github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"io"
 	"os"
 )
@@ -34,16 +33,20 @@ func (e *Env) run(invocation ...[]string) []string {
 		r, w, _ := os.Pipe()
 		os.Stdout = w
 
-		runErr := Run(app.NewFileOrPanic(tmpDir), app.Meta{
+		config := app.NewDefaultConfig(terminalformat.NO_COLOUR)
+		code, runErr := Run(app.NewFileOrPanic(tmpDir), app.Meta{
 			Specification: "[Specification text]",
 			License:       "[License text]",
 			Version:       "v0.0",
 			SrcHash:       "abc1234",
-		}, app.NewDefaultConfig(), args)
+		}, config, args)
 
 		_ = w.Close()
 		if runErr != nil {
-			outs[i] = lib.PrettifyError(runErr, false).Error()
+			if code == 0 {
+				panic("App returned error, but exit code was 0")
+			}
+			outs[i] = runErr.Error()
 			continue
 		}
 		out, _ := io.ReadAll(r)

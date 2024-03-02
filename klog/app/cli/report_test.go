@@ -2,7 +2,7 @@ package cli
 
 import (
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/lib"
+	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -19,7 +19,7 @@ func TestReportOfEmptyFilteredData(t *testing.T) {
 2022-10-30
 	8h
 `)._Run((&Report{
-		FilterArgs: lib.FilterArgs{Date: klog.Ɀ_Date_(2022, 10, 31)},
+		FilterArgs: util.FilterArgs{Date: klog.Ɀ_Date_(2022, 10, 31)},
 		Fill:       true,
 	}).Run)
 	require.Nil(t, err)
@@ -55,7 +55,7 @@ func TestDayReportOfRecords(t *testing.T) {
 
 2021-01-19
 	5m
-`)._SetNow(2021, 3, 4, 0, 0)._Run((&Report{WarnArgs: lib.WarnArgs{NoWarn: true}}).Run)
+`)._SetNow(2021, 3, 4, 0, 0)._Run((&Report{WarnArgs: util.WarnArgs{NoWarn: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
                        Total
@@ -106,7 +106,7 @@ func TestDayReportWithDiff(t *testing.T) {
 	5h20m
 
 2018-07-09 (19m!)
-`)._Run((&Report{DiffArgs: lib.DiffArgs{Diff: true}}).Run)
+`)._Run((&Report{DiffArgs: util.DiffArgs{Diff: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
                        Total    Should     Diff
@@ -130,7 +130,7 @@ func TestDayReportWithDecimal(t *testing.T) {
 	5h20m
 
 2018-07-09 (19m!)
-`)._Run((&Report{DiffArgs: lib.DiffArgs{Diff: true}, DecimalArgs: lib.DecimalArgs{Decimal: true}}).Run)
+`)._Run((&Report{DiffArgs: util.DiffArgs{Diff: true}, DecimalArgs: util.DecimalArgs{Decimal: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
                        Total    Should     Diff
@@ -182,7 +182,7 @@ func TestWeekReportWithFillAndDiff(t *testing.T) {
 	3h
 
 2019-01-08 (19m!)
-`)._Run((&Report{AggregateBy: "week", DiffArgs: lib.DiffArgs{Diff: true}, Fill: true}).Run)
+`)._Run((&Report{AggregateBy: "week", DiffArgs: util.DiffArgs{Diff: true}, Fill: true}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
                  Total    Should     Diff
@@ -209,7 +209,7 @@ func TestQuarterReport(t *testing.T) {
 	5h20m
 
 2019-01-01 (19m!)
-`)._Run((&Report{AggregateBy: "quarter", DiffArgs: lib.DiffArgs{Diff: true}, Fill: true}).Run)
+`)._Run((&Report{AggregateBy: "quarter", DiffArgs: util.DiffArgs{Diff: true}, Fill: true}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
            Total    Should     Diff
@@ -235,7 +235,7 @@ func TestMonthReport(t *testing.T) {
 	5h20m
 
 2019-01-01 (19m!)
-`)._Run((&Report{AggregateBy: "month", DiffArgs: lib.DiffArgs{Diff: true}, Fill: true}).Run)
+`)._Run((&Report{AggregateBy: "month", DiffArgs: util.DiffArgs{Diff: true}, Fill: true}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
             Total    Should     Diff
@@ -268,7 +268,7 @@ func TestYearReport(t *testing.T) {
 	5h20m
 
 2019-01-01 (19m!)
-`)._Run((&Report{AggregateBy: "year", DiffArgs: lib.DiffArgs{Diff: true}, Fill: true}).Run)
+`)._Run((&Report{AggregateBy: "year", DiffArgs: util.DiffArgs{Diff: true}, Fill: true}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
         Total    Should     Diff
