@@ -193,8 +193,10 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 				config.ColourScheme.override(tf.DARK, configOriginFile)
 			case string(tf.NO_COLOUR):
 				config.ColourScheme.override(tf.NO_COLOUR, configOriginFile)
+			case string(tf.LIGHT):
+				config.ColourScheme.override(tf.LIGHT, configOriginFile)
 			default:
-				return errors.New("The value must be `dark` or `no_colour`")
+				return errors.New("The value must be `dark`, `light` or `no_colour`")
 			}
 			return nil
 		},
@@ -203,7 +205,7 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 		},
 		Help: Help{
 			Summary: "The colour scheme of your terminal, so that klog can choose an optimal colour theme for its output.",
-			Value:   "The config property must be one of: `dark` or `no_colour`",
+			Value:   "The config property must be one of: `dark`, `light` or `no_colour`",
 			Default: "If absent/empty, klog assumes a `dark` theme.",
 		},
 	}, {
