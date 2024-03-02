@@ -8,6 +8,8 @@
   default), `light`, and `no_colour`. Run `klog config` to learn more.
 - **[ FEATURE ]** Add two new rounding options: `12m` and `20m`.
   (E.g., when using `klog start --round`.)
+- **[ FEATURE ]** Print file names in the error output when a file contains
+  syntax errors, to ease troubleshooting when evaluating multiple files at once.
 - **[ FIX ]** Fix formatting bug of `klog print --with-totals` for
   multiline record summaries.
 
