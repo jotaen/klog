@@ -32,12 +32,14 @@ type Error interface {
 	// Message is a combination of Title and Details.
 	Message() string
 
-	// Set fills in Code, Title and Message (in this order).
-	Set(string, string, string) Error
+	// Origin returns the origin of the error, such as the file name.
+	Origin() string
+	SetOrigin(string) Error
 }
 
 type err struct {
 	context  Block
+	origin   string
 	line     int
 	position int
 	length   int
@@ -46,22 +48,18 @@ type err struct {
 	details  string
 }
 
-func (e *err) Error() string    { return e.Message() }
-func (e *err) LineNumber() int  { return e.context.OverallLineIndex(e.line) + 1 }
-func (e *err) LineText() string { return e.context.Lines()[e.line].Text }
-func (e *err) Position() int    { return e.position }
-func (e *err) Column() int      { return e.position + 1 }
-func (e *err) Length() int      { return e.length }
-func (e *err) Code() string     { return e.code }
-func (e *err) Title() string    { return e.title }
-func (e *err) Details() string  { return e.details }
-func (e *err) Message() string  { return e.title + ": " + e.details }
-func (e *err) Set(code string, title string, details string) Error {
-	e.code = code
-	e.title = title
-	e.details = details
-	return e
-}
+func (e *err) Error() string                 { return e.Message() }
+func (e *err) LineNumber() int               { return e.context.OverallLineIndex(e.line) + 1 }
+func (e *err) LineText() string              { return e.context.Lines()[e.line].Text }
+func (e *err) Position() int                 { return e.position }
+func (e *err) Column() int                   { return e.position + 1 }
+func (e *err) Length() int                   { return e.length }
+func (e *err) Code() string                  { return e.code }
+func (e *err) Title() string                 { return e.title }
+func (e *err) Details() string               { return e.details }
+func (e *err) Message() string               { return e.title + ": " + e.details }
+func (e *err) Origin() string                { return e.origin }
+func (e *err) SetOrigin(origin string) Error { e.origin = origin; return e }
 
 func NewError(b Block, line int, start int, length int, code string, title string, details string) Error {
 	return &err{

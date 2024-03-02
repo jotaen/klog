@@ -31,9 +31,16 @@ func PrettifyParsingError(err app.ParserErrors, isDebug bool, styler terminalfor
 			styler.Props(terminalformat.StyleProps{Background: terminalformat.RED, Color: terminalformat.RED}).Format("[")+
 				styler.Props(terminalformat.StyleProps{Background: terminalformat.RED, Color: terminalformat.TEXT_INVERSE}).Format("SYNTAX ERROR")+
 				styler.Props(terminalformat.StyleProps{Background: terminalformat.RED, Color: terminalformat.RED}).Format("]")+
-				styler.Props(terminalformat.StyleProps{Color: terminalformat.RED}).Format(" in line %d: "),
+				styler.Props(terminalformat.StyleProps{Color: terminalformat.RED}).Format(" in line %d"),
 			e.LineNumber(),
-		) + "\n"
+		)
+		if e.Origin() != "" {
+			message += fmt.Sprintf(
+				styler.Props(terminalformat.StyleProps{Color: terminalformat.RED}).Format(" of file %s"),
+				e.Origin(),
+			)
+		}
+		message += "\n"
 		message += fmt.Sprintf(
 			styler.Props(terminalformat.StyleProps{Color: terminalformat.SUBDUED}).Format(INDENT+"%s"),
 			// Replace all tabs with one space each, otherwise the carets might
