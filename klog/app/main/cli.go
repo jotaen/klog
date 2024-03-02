@@ -56,6 +56,10 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 			s, _ := klog.NewEntrySummary("test")
 			return kong.TypeMapper(reflect.TypeOf(&s).Elem(), entrySummaryDecoder())
 		}(),
+		func() kong.Option {
+			t := service.ENTRY_TYPE_DURATION
+			return kong.TypeMapper(reflect.TypeOf(&t).Elem(), entryTypeDecoder())
+		}(),
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact:             true,
 			NoExpandSubcommands: true,

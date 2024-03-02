@@ -203,3 +203,29 @@ func TestDecodesRecordSummary(t *testing.T) {
 	assert.True(t, strings.Contains(out[2], "A record summary cannot contain blank lines"), out)
 	assert.True(t, strings.Contains(out[3], "A record summary cannot contain blank lines"), out)
 }
+
+func TestDecodesEntryType(t *testing.T) {
+	klog := &Env{
+		files: map[string]string{
+			"test.klg": "2020-01-01\n\t1h\n\t9:00-12:00",
+		},
+	}
+	out := klog.run(
+		[]string{"total", "--entry-type", "duration", "test.klg"},
+		[]string{"total", "--entry-type", "DURATION", "test.klg"},
+		[]string{"total", "--entry-type", "duration-positive", "test.klg"},
+		[]string{"total", "--entry-type", "duration-negative", "test.klg"},
+		[]string{"total", "--entry-type", "open_range", "test.klg"},
+		[]string{"total", "--entry-type", "open-range", "test.klg"},
+		[]string{"total", "--entry-type", "range", "test.klg"},
+		[]string{"total", "--entry-type", "asdf", "test.klg"},
+	)
+	assert.True(t, strings.Contains(out[0], "1h"), out)
+	assert.True(t, strings.Contains(out[1], "1h"), out)
+	assert.True(t, strings.Contains(out[2], "1h"), out)
+	assert.True(t, strings.Contains(out[3], "0m"), out)
+	assert.True(t, strings.Contains(out[4], "0m"), out)
+	assert.True(t, strings.Contains(out[5], "0m"), out)
+	assert.True(t, strings.Contains(out[6], "3h"), out)
+	assert.True(t, strings.Contains(out[7], "is not a valid entry type"), out)
+}

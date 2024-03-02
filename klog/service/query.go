@@ -5,12 +5,23 @@ import (
 	gosort "sort"
 )
 
+type EntryType string
+
+const (
+	ENTRY_TYPE_DURATION          = EntryType("DURATION")
+	ENTRY_TYPE_POSITIVE_DURATION = EntryType("DURATION_POSITIVE")
+	ENTRY_TYPE_NEGATIVE_DURATION = EntryType("DURATION_NEGATIVE")
+	ENTRY_TYPE_RANGE             = EntryType("RANGE")
+	ENTRY_TYPE_OPEN_RANGE        = EntryType("OPEN_RANGE")
+)
+
 // FilterQry represents the filter clauses of a query.
 type FilterQry struct {
 	Tags          []klog.Tag
 	BeforeOrEqual klog.Date
 	AfterOrEqual  klog.Date
 	AtDate        klog.Date
+	EntryType     EntryType
 }
 
 // Filter returns all records the matches the query.
@@ -29,6 +40,13 @@ func Filter(rs []klog.Record, o FilterQry) []klog.Record {
 		}
 		if len(o.Tags) > 0 {
 			reducedR, hasMatched := reduceRecordToMatchingTags(o.Tags, r)
+			if !hasMatched {
+				continue
+			}
+			r = reducedR
+		}
+		if o.EntryType != "" {
+			reducedR, hasMatched := reduceRecordToMatchingEntryTypes(o.EntryType, r)
 			if !hasMatched {
 				continue
 			}
@@ -60,6 +78,34 @@ func reduceRecordToMatchingTags(queriedTags []klog.Tag, r klog.Record) (klog.Rec
 	for _, e := range r.Entries() {
 		allTags := klog.Merge(r.Summary().Tags(), e.Summary().Tags())
 		if isSubsetOf(queriedTags, allTags) {
+			matchingEntries = append(matchingEntries, e)
+		}
+	}
+	if len(matchingEntries) == 0 {
+		return nil, false
+	}
+	r.SetEntries(matchingEntries)
+	return r, true
+}
+
+func reduceRecordToMatchingEntryTypes(t EntryType, r klog.Record) (klog.Record, bool) {
+	var matchingEntries []klog.Entry
+	for _, e := range r.Entries() {
+		isMatch := klog.Unbox(&e, func(r klog.Range) bool {
+			return t == ENTRY_TYPE_RANGE
+		}, func(duration klog.Duration) bool {
+			if t == ENTRY_TYPE_DURATION {
+				return true
+			} else if t == ENTRY_TYPE_POSITIVE_DURATION && e.Duration().InMinutes() >= 0 {
+				return true
+			} else if t == ENTRY_TYPE_NEGATIVE_DURATION && e.Duration().InMinutes() < 0 {
+				return true
+			}
+			return false
+		}, func(openRange klog.OpenRange) bool {
+			return t == ENTRY_TYPE_OPEN_RANGE
+		})
+		if isMatch {
 			matchingEntries = append(matchingEntries, e)
 		}
 	}

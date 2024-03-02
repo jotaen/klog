@@ -20,7 +20,7 @@ type OutputFileArgs struct {
 }
 
 type AtDateArgs struct {
-	Date      klog.Date `name:"date" short:"d" help:"The date of the record"`
+	Date      klog.Date `name:"date" placeholder:"DATE" short:"d" help:"The date of the record"`
 	Today     bool      `name:"today" help:"Use today’s date (default)"`
 	Yesterday bool      `name:"yesterday" help:"Use yesterday’s date"`
 	Tomorrow  bool      `name:"tomorrow" help:"Use tomorrow’s date"`
@@ -52,8 +52,8 @@ func (args *AtDateArgs) DateFormat(config app.Config) reconciling.ReformatDirect
 
 type AtDateAndTimeArgs struct {
 	AtDateArgs
-	Time  klog.Time        `name:"time" short:"t" help:"Specify the time (defaults to now)"`
-	Round service.Rounding `name:"round" short:"r" help:"Round time to nearest multiple of 5m, 10m, 12m, 15m, 20m, 30m, or 60m / 1h"`
+	Time  klog.Time        `name:"time" placeholder:"TIME" short:"t" help:"Specify the time (defaults to now)"`
+	Round service.Rounding `name:"round" placeholder:"ROUNDING" short:"r" help:"Round time to nearest multiple of 5m, 10m, 12m, 15m, 20m, 30m, or 60m / 1h"`
 }
 
 func (args *AtDateAndTimeArgs) AtTime(now gotime.Time, config app.Config) (klog.Time, app.Error) {
@@ -141,13 +141,14 @@ func (args *NowArgs) GetNowWarnings() []string {
 
 type FilterArgs struct {
 	// General filters
-	Tags   []klog.Tag    `name:"tag" group:"Filter" help:"Records (or entries) that match these tags"`
-	Date   klog.Date     `name:"date" group:"Filter" help:"Records at this date"`
-	Since  klog.Date     `name:"since" group:"Filter" help:"Records since this date (inclusive)"`
-	Until  klog.Date     `name:"until" group:"Filter" help:"Records until this date (inclusive)"`
-	After  klog.Date     `name:"after" group:"Filter" help:"Records after this date (exclusive)"`
-	Before klog.Date     `name:"before" group:"Filter" help:"Records before this date (exclusive)"`
-	Period period.Period `name:"period" group:"Filter" help:"Records in period: YYYY, YYYY-MM, YYYY-Www, or YYYY-Qq"`
+	Tags      []klog.Tag        `name:"tag" placeholder:"TAG" group:"Filter" help:"Records (or entries) that match these tags"`
+	Date      klog.Date         `name:"date" placeholder:"DATE" group:"Filter" help:"Records at this date"`
+	Since     klog.Date         `name:"since" placeholder:"DATE" group:"Filter" help:"Records since this date (inclusive)"`
+	Until     klog.Date         `name:"until" placeholder:"DATE" group:"Filter" help:"Records until this date (inclusive)"`
+	After     klog.Date         `name:"after" placeholder:"DATE" group:"Filter" help:"Records after this date (exclusive)"`
+	Before    klog.Date         `name:"before" placeholder:"DATE" group:"Filter" help:"Records before this date (exclusive)"`
+	EntryType service.EntryType `name:"entry-type" placeholder:"TYPE" group:"Filter" help:"Entries of this type (duration, range, open-range)"`
+	Period    period.Period     `name:"period" placeholder:"PERIOD" group:"Filter" help:"Records in period: YYYY, YYYY-MM, YYYY-Www, or YYYY-Qq"`
 
 	// Shortcut filters
 	// The `XXX` ones are dummy entries just for the help output
@@ -215,6 +216,9 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) []klog.Re
 	}
 	if args.Tomorrow {
 		qry.AtDate = today.PlusDays(+1)
+	}
+	if args.EntryType != "" {
+		qry.EntryType = args.EntryType
 	}
 	shortcutPeriod := func() period.Period {
 		if args.ThisWeek || args.ThisWeekAlias {
@@ -284,7 +288,7 @@ type QuietArgs struct {
 }
 
 type SortArgs struct {
-	Sort string `name:"sort" help:"Sort output by date (asc or desc)" enum:"asc,desc,ASC,DESC," default:""`
+	Sort string `name:"sort" placeholder:"ORDER" help:"Sort output by date (asc or desc)" enum:"asc,desc,ASC,DESC," default:""`
 }
 
 func (args *SortArgs) ApplySort(rs []klog.Record) []klog.Record {
