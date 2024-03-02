@@ -94,15 +94,24 @@ func TestSerialiseFullBlownRecord(t *testing.T) {
 }
 
 func TestSerialiseParserErrors(t *testing.T) {
-	block, _ := txt.ParseBlock("2018-99-99", 6)
+	block, _ := txt.ParseBlock("2018-99-99\n asdf", 6)
 	json := ToJson(nil, []txt.Error{
 		parser.ErrorInvalidDate().New(block, 0, 0, 10),
+		parser.ErrorMalformedSummary().New(block, 1, 3, 5).SetOrigin("/a/b/c/file.klg"),
 	}, false)
 	assert.Equal(t, `{"records":null,"errors":[{`+
 		`"line":7,`+
 		`"column":1,`+
 		`"length":10,`+
 		`"title":"Invalid date",`+
-		`"details":"Please make sure that the date format is either YYYY-MM-DD or YYYY/MM/DD, and that its value represents a valid day in the calendar."`+
+		`"details":"Please make sure that the date format is either YYYY-MM-DD or YYYY/MM/DD, and that its value represents a valid day in the calendar.",`+
+		`"file":""`+
+		`},{`+
+		`"line":8,`+
+		`"column":4,`+
+		`"length":5,`+
+		`"title":"Malformed summary",`+
+		`"details":"Summary lines cannot start with blank characters, such as non-breaking spaces.",`+
+		`"file":"/a/b/c/file.klg"`+
 		`}]}`, json)
 }

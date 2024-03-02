@@ -34,6 +34,7 @@ func sampleRecordsForQuerying() []klog.Record {
 			r.SetSummary(klog.Ɀ_RecordSummary_("#foo=a"))
 			r.AddDuration(klog.NewDuration(4, 0), klog.Ɀ_EntrySummary_("test", "foo #bar=1"))
 			r.AddDuration(klog.NewDuration(4, 0), klog.Ɀ_EntrySummary_("#bar=2"))
+			r.Start(klog.NewOpenRange(klog.Ɀ_Time_(12, 00)), nil)
 			return r
 		}(),
 	}
@@ -111,6 +112,35 @@ func TestQueryWithTagValuesInEntries(t *testing.T) {
 func TestQueryWithTagNonMatchingValues(t *testing.T) {
 	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []klog.Tag{klog.NewTagOrPanic("bar", "3")}})
 	require.Len(t, rs, 0)
+}
+
+func TestQueryWithEntryTypes(t *testing.T) {
+	{
+		rs := Filter(sampleRecordsForQuerying(), FilterQry{EntryType: ENTRY_TYPE_DURATION})
+		require.Len(t, rs, 4)
+		assert.Equal(t, klog.NewDuration(0, 1545), Total(rs...))
+	}
+	{
+		rs := Filter(sampleRecordsForQuerying(), FilterQry{EntryType: ENTRY_TYPE_NEGATIVE_DURATION})
+		require.Len(t, rs, 1)
+		assert.Equal(t, 1, rs[0].Date().Day())
+		assert.Equal(t, klog.NewDuration(0, -30), Total(rs...))
+	}
+	{
+		rs := Filter(sampleRecordsForQuerying(), FilterQry{EntryType: ENTRY_TYPE_POSITIVE_DURATION})
+		require.Len(t, rs, 4)
+		assert.Equal(t, klog.NewDuration(0, 1575), Total(rs...))
+	}
+	{
+		rs := Filter(sampleRecordsForQuerying(), FilterQry{EntryType: ENTRY_TYPE_RANGE})
+		require.Len(t, rs, 0)
+		assert.Equal(t, klog.NewDuration(0, 0), Total(rs...))
+	}
+	{
+		rs := Filter(sampleRecordsForQuerying(), FilterQry{EntryType: ENTRY_TYPE_OPEN_RANGE})
+		require.Len(t, rs, 1)
+		assert.Equal(t, klog.NewDuration(0, 0), Total(rs...))
+	}
 }
 
 func TestQueryWithSorting(t *testing.T) {

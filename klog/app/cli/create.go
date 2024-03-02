@@ -8,8 +8,8 @@ import (
 )
 
 type Create struct {
-	ShouldTotal      klog.ShouldTotal   `name:"should" help:"The should-total of the record"`
-	ShouldTotalAlias klog.ShouldTotal   `name:"should-total" hidden:""` // Alias for “canonical” term
+	ShouldTotal      klog.ShouldTotal   `name:"should" placeholder:"DURATION" help:"The should-total of the record"`
+	ShouldTotalAlias klog.ShouldTotal   `name:"should-total" placeholder:"DURATION" hidden:""` // Alias for “canonical” term
 	Summary          klog.RecordSummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the new record"`
 	util.AtDateArgs
 	util.NoStyleArgs
