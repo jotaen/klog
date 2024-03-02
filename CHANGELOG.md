@@ -6,6 +6,8 @@
   which allows to specify the colour theme of the terminal, so that klog
   can optimise its output colouring. The available options are: `dark` (the
   default), `light`, and `no_colour`. Run `klog config` to learn more.
+- **[ FEATURE ]** Add `--entry-type` filter option to filter by entry type,
+  e.g.: `--entry-type open-range` or `--entry-type duration`.
 - **[ FEATURE ]** Add two new rounding options: `12m` and `20m`.
   (E.g., when using `klog start --round`.)
 - **[ FEATURE ]** Print file names in the error output when a file contains
