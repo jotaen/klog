@@ -2,7 +2,7 @@ package klog
 
 import (
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"io"
 	"os"
 )
@@ -33,7 +33,7 @@ func (e *Env) run(invocation ...[]string) []string {
 		r, w, _ := os.Pipe()
 		os.Stdout = w
 
-		config := app.NewDefaultConfig(terminalformat.NO_COLOUR)
+		config := app.NewDefaultConfig(tf.NO_COLOUR)
 		code, runErr := Run(app.NewFileOrPanic(tmpDir), app.Meta{
 			Specification: "[Specification text]",
 			License:       "[License text]",
@@ -50,7 +50,7 @@ func (e *Env) run(invocation ...[]string) []string {
 			continue
 		}
 		out, _ := io.ReadAll(r)
-		outs[i] = terminalformat.StripAllAnsiSequences(string(out))
+		outs[i] = tf.StripAllAnsiSequences(string(out))
 	}
 
 	// Clean up temp dir.

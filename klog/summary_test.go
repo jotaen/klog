@@ -10,36 +10,36 @@ func TestCreatesEmptySummary(t *testing.T) {
 	recordSummary, rErr := NewRecordSummary()
 	require.Nil(t, rErr)
 	assert.Nil(t, recordSummary.Lines())
-	assert.Empty(t, recordSummary.Tags())
+	assert.True(t, recordSummary.Tags().IsEmpty())
 
 	entrySummary, eErr := NewEntrySummary()
 	require.Nil(t, eErr)
 	assert.Nil(t, entrySummary.Lines())
-	assert.Empty(t, entrySummary.Tags())
+	assert.True(t, entrySummary.Tags().IsEmpty())
 }
 
 func TestCreatesValidSingleLineSummary(t *testing.T) {
 	recordSummary, rErr := NewRecordSummary("First line")
 	require.Nil(t, rErr)
 	assert.Equal(t, []string{"First line"}, recordSummary.Lines())
-	assert.Empty(t, recordSummary.Tags())
+	assert.True(t, recordSummary.Tags().IsEmpty())
 
 	entrySummary, eErr := NewEntrySummary("First line")
 	require.Nil(t, eErr)
 	assert.Equal(t, []string{"First line"}, entrySummary.Lines())
-	assert.Empty(t, entrySummary.Tags())
+	assert.True(t, entrySummary.Tags().IsEmpty())
 }
 
 func TestCreatesValidMultilineSummary(t *testing.T) {
 	recordSummary, rErr := NewRecordSummary("First line", "Second line")
 	require.Nil(t, rErr)
 	assert.Equal(t, []string{"First line", "Second line"}, recordSummary.Lines())
-	assert.Empty(t, recordSummary.Tags())
+	assert.True(t, recordSummary.Tags().IsEmpty())
 
 	entrySummary, eErr := NewEntrySummary("First line", "Second line")
 	require.Nil(t, eErr)
 	assert.Equal(t, []string{"First line", "Second line"}, entrySummary.Lines())
-	assert.Empty(t, entrySummary.Tags())
+	assert.True(t, entrySummary.Tags().IsEmpty())
 }
 
 func TestRecordSummaryCannotContainBlankLines(t *testing.T) {
@@ -168,7 +168,7 @@ func TestRecognisesAllTags(t *testing.T) {
 	)
 
 	assert.Equal(t, recordSummary.Tags().ToStrings(), []string{
-		"#123_test", "#234-foo", "#great", "#léift", "#world", "#γεια-σασ", "#λουλούδι", "#мир", "#पह", "#太陽",
+		"#world", "#great", "#123_test", "#234-foo", "#太陽", "#λουλούδι", "#पह", "#мир", "#léift", "#γεια-σασ",
 	})
 
 	assert.True(t, recordSummary.Tags().Contains(NewTagOrPanic("123_test", "")))
@@ -193,7 +193,7 @@ func TestRecognisesAllTags(t *testing.T) {
 	assert.False(t, recordSummary.Tags().Contains(NewTagOrPanic("blabla", "")))
 
 	entrySummary, _ := NewEntrySummary("Hello #world, I feel #great #TODAY")
-	assert.Equal(t, entrySummary.Tags().ToStrings(), []string{"#great", "#today", "#world"})
+	assert.Equal(t, entrySummary.Tags().ToStrings(), []string{"#world", "#great", "#today"})
 }
 
 func TestAppendsToEntrySummary(t *testing.T) {

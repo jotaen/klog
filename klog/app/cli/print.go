@@ -3,7 +3,7 @@ package cli
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/service"
@@ -50,7 +50,7 @@ func (opt *Print) Run(ctx app.Context) app.Error {
 	return nil
 }
 
-func printWithDurations(styler terminalformat.Styler, ls parser.Lines) string {
+func printWithDurations(styler tf.Styler, ls parser.Lines) string {
 	type Prefix struct {
 		d     klog.Duration
 		isSub bool
@@ -97,9 +97,9 @@ func printWithDurations(styler terminalformat.Styler, ls parser.Lines) string {
 			length := len(p.d.ToString())
 			value := ""
 			if p.isSub {
-				value += styler.Props(terminalformat.StyleProps{Color: terminalformat.RED}).Format(p.d.ToString())
+				value += styler.Props(tf.StyleProps{Color: tf.RED}).Format(p.d.ToString())
 			} else {
-				value += styler.Props(terminalformat.StyleProps{IsUnderlined: true}).Format(p.d.ToString())
+				value += styler.Props(tf.StyleProps{IsUnderlined: true}).Format(p.d.ToString())
 			}
 			return strings.Repeat(" ", maxColumnLength-length+1) + value
 		}()

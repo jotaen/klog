@@ -10,6 +10,7 @@ import (
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/txt"
 	"github.com/jotaen/klog/klog/service"
+	"sort"
 	"strings"
 )
 
@@ -65,11 +66,14 @@ func toRecordViews(rs []klog.Record) []RecordView {
 	return result
 }
 
-func toTagViews(ts klog.TagSet) []string {
+func toTagViews(ts *klog.TagSet) []string {
 	result := ts.ToStrings()
 	if result == nil {
 		return []string{}
 	}
+	sort.Slice(result, func(i, j int) bool {
+		return result[i] < result[j]
+	})
 	return result
 }
 

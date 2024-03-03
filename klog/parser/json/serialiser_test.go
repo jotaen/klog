@@ -52,7 +52,7 @@ func TestSerialiseFullBlownRecord(t *testing.T) {
 		r.SetShouldTotal(klog.NewDuration(7, 30))
 		r.AddDuration(klog.NewDuration(2, 3), klog.Ɀ_EntrySummary_("#some #thing"))
 		r.AddRange(klog.Ɀ_Range_(klog.Ɀ_TimeYesterday_(23, 44), klog.Ɀ_Time_(5, 23)), nil)
-		r.Start(klog.NewOpenRange(klog.Ɀ_TimeTomorrow_(0, 28)), klog.Ɀ_EntrySummary_("Started #todo", "still on it"))
+		r.Start(klog.NewOpenRange(klog.Ɀ_TimeTomorrow_(0, 28)), klog.Ɀ_EntrySummary_("Started #todo=nr4", "still on #it"))
 		return []klog.Record{r}
 	}(), nil, false)
 	assert.Equal(t, `{"records":[{`+
@@ -83,8 +83,8 @@ func TestSerialiseFullBlownRecord(t *testing.T) {
 		`"end_mins":323`+
 		`},{`+
 		`"type":"open_range",`+
-		`"summary":"Started #todo\nstill on it",`+
-		`"tags":["#todo"],`+
+		`"summary":"Started #todo=nr4\nstill on #it",`+
+		`"tags":["#it","#todo=nr4"],`+
 		`"total":"0m",`+
 		`"total_mins":0,`+
 		`"start":"0:28>",`+

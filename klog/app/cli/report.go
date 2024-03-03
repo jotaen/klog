@@ -4,7 +4,7 @@ import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/report"
-	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
@@ -60,7 +60,7 @@ func (opt *Report) Run(ctx app.Context) app.Error {
 		}
 		return 1
 	}()
-	table := terminalformat.NewTable(
+	table := tf.NewTable(
 		aggregator.NumberOfPrefixColumns()+numberOfValueColumns,
 		" ",
 	)
