@@ -1,4 +1,8 @@
-![klog logo](https://klog.jotaen.net/logo/klog-black-small.svg)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://klog.jotaen.net/logo/klog-white.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://klog.jotaen.net/logo/klog-black.svg">
+  <img alt="klog logo" src="https://klog.jotaen.net/logo/klog-black.svg" height="80">
+</picture>
 
 # klog
 
