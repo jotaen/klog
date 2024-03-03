@@ -7,6 +7,8 @@
 - **[ FEATURE / BREAKING ]** The `klog pause` command now automatically takes
   over all tags from the open range of the record, and appends them to the summary
   of the pause entry. (You can opt out of this via the `--no-tags` flag.)
+- **[ FEATURE / INFO ]** Extend and clarify `--help` output for all subcommands
+  and flags.
 - **[ FEATURE ]** There is a new setting for the klog `config.ini` file,
   which allows to specify the colour theme of the terminal, so that klog
   can optimise its output colouring. The available options are: `dark` (the
