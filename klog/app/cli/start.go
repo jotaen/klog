@@ -90,6 +90,9 @@ func (opt *Start) Summary(currentRecord klog.Record, previousRecord klog.Record)
 
 func lastEntrySummary(r klog.Record) klog.EntrySummary {
 	entriesCount := len(r.Entries())
+	if entriesCount == 0 {
+		return nil
+	}
 	return r.Entries()[entriesCount-1].Summary()
 }
 
