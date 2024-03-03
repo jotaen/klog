@@ -1,6 +1,27 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## v6.3 (2024-03-03)
+- **[ BREAKING ]** For `klog pause`, you cannot use the `--extend` and `--summary`
+  flags together anymore.
+- **[ FEATURE / BREAKING ]** The `klog pause` command now automatically takes
+  over all tags from the open range of the record (if applicable), and appends them to
+  the summary of the pause entry. (You can opt out of this via the `--no-tags` flag.)
+- **[ FEATURE / INFO ]** Extend and clarify `--help` output and built-in documentation
+  for all subcommands and flags.
+- **[ FEATURE ]** There is a new setting for the klog `config.ini` file,
+  which allows to specify the colour theme of the terminal, so that klog
+  can optimise its output colouring. The available options are: `dark` (the
+  default), `light`, and `no_colour`. Run `klog config` to learn more.
+- **[ FEATURE ]** Add `--entry-type` filter flag for filtering by entry type,
+  e.g.: `--entry-type open-range` or `--entry-type duration`.
+- **[ FEATURE ]** Add two new rounding options for the `--round` flag: `12m` and `20m`.
+  (e.g., when doing `klog start --round`.)
+- **[ FEATURE ]** Print file names in the error output when a file contains
+  syntax errors, to ease troubleshooting when evaluating multiple files.
+- **[ FIX ]** Fix minor formatting bug of `klog print --with-totals` when a file
+  contains multiline record summaries.
+
 ## v6.2 (2023-10-17)
 - **[ FEATURE ]** Add new command `klog switch`, that stops a previously
   ongoing activity (open time range), and starts a new one.
