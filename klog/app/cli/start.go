@@ -10,18 +10,26 @@ import (
 )
 
 type Start struct {
-	SummaryText klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for this entry"`
-	Resume      bool              `name:"resume" short:"R" help:"Take over summary of last entry (if applicable)"`
+	SummaryText klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for this entry."`
+	Resume      bool              `name:"resume" short:"R" help:"Take over summary of last entry (if applicable)."`
 	util.AtDateAndTimeArgs
 	util.NoStyleArgs
-	util.OutputFileArgs
 	util.WarnArgs
+	util.OutputFileArgs
 }
 
 func (opt *Start) Help() string {
-	return `A new open-ended entry is appended to the record, e.g. 14:00-?.
+	return `
+This appends a new open-ended entry to the record.
+By default, it uses the record at today’s date for the new entry, or creates a new record if there no record at today’s date.
+You can otherwise specify a date with '--date'.
 
-If the --time flag is not specified, it defaults to the current time as start time. In the latter case, the time can be rounded via --round.`
+Unless the '--time' flag is specified, it defaults to the current time as start time.
+If you prefer your time to be rounded, you can use the '--round' flag.
+
+You can either assign a summary text for the new entry via the '--summary' flag, or you can use the '--resume' flag to automatically take over the entry summary of the last entry.
+Note that '--resume' will fall back to the last record, if the current record doesn’t contain any entries yet.
+`
 }
 
 func (opt *Start) Run(ctx app.Context) app.Error {

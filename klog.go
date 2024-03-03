@@ -27,7 +27,7 @@ func main() {
 	klogFolder := func() app.File {
 		f, err := determineKlogConfigFolder()
 		if err != nil {
-			fail(util.PrettifyAppError(err, false), app.GENERAL_ERROR.ToInt())
+			fail(util.PrettifyAppError(err, false), app.CONFIG_ERROR.ToInt())
 		}
 		return f
 	}()
@@ -35,19 +35,19 @@ func main() {
 	configFile := func() string {
 		c, err := readConfigFile(app.Join(klogFolder, app.CONFIG_FILE_NAME))
 		if err != nil {
-			fail(util.PrettifyAppError(err, false), app.GENERAL_ERROR.ToInt())
+			fail(util.PrettifyAppError(err, false), app.CONFIG_ERROR.ToInt())
 		}
 		return c
 	}()
 
 	config := func() app.Config {
 		c, err := app.NewConfig(
-			app.FromStaticValues{NumCpus: runtime.NumCPU()},
+			app.FromDeterminedValues{NumCpus: runtime.NumCPU()},
 			app.FromEnvVars{GetVar: os.Getenv},
 			app.FromConfigFile{FileContents: configFile},
 		)
 		if err != nil {
-			fail(util.PrettifyAppError(err, false), app.GENERAL_ERROR.ToInt())
+			fail(util.PrettifyAppError(err, false), app.CONFIG_ERROR.ToInt())
 		}
 		return c
 	}()

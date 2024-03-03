@@ -7,7 +7,7 @@ import (
 
 func TestPrintTable(t *testing.T) {
 	result := ""
-	styler := NewStyler(DARK)
+	styler := NewStyler(COLOUR_THEME_DARK)
 	table := NewTable(3, " ")
 	table.
 		Cell("FIRST", Options{align: ALIGN_LEFT}).

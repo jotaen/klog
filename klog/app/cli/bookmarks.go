@@ -7,27 +7,38 @@ import (
 )
 
 type Bookmarks struct {
-	List BookmarksList `cmd:"" help:"Displays all bookmarks"`
-	Ls   BookmarksList `cmd:"" hidden:"" help:"Alias for 'list'"`
+	List BookmarksList `cmd:"" help:"Display all bookmarks."`
+	Ls   BookmarksList `cmd:"" hidden:"" help:"Alias for 'list'."`
 
-	Set BookmarksSet `cmd:"" help:"Defines a bookmark (or overwrites an existing one)"`
-	New BookmarksSet `cmd:"" hidden:"" help:"Alias for 'set'"`
+	Set BookmarksSet `cmd:"" help:"Define a bookmark (or overwrite an existing one)."`
+	New BookmarksSet `cmd:"" hidden:"" help:"Alias for 'set'."`
 
-	Unset BookmarksUnset `cmd:"" help:"Removes a bookmark from the collection"`
-	Rm    BookmarksUnset `cmd:"" hidden:"" help:"Alias for 'unset'"`
+	Unset BookmarksUnset `cmd:"" help:"Remove a bookmark from the collection. (This only removes the bookmark, not the target file.)"`
+	Rm    BookmarksUnset `cmd:"" hidden:"" help:"Alias for 'unset'."`
 
-	Clear BookmarksClear `cmd:"" help:"Clears entire bookmark collection"`
+	Clear BookmarksClear `cmd:"" help:"Clear entire bookmark collection. (This only removes the bookmarks, not the target files.)"`
 
-	Info BookmarksInfo `cmd:"" help:"Prints file information for a bookmark"`
+	Info BookmarksInfo `cmd:"" help:"Print file information for a bookmark."`
 }
 
 func (opt *Bookmarks) Help() string {
-	return `Bookmarks allow you to interact with often-used files via an alias,
-regardless of your current working directory. A bookmark name is always prefixed with an '@'.
+	return `
+Bookmarks allow you to interact with often-used files via an alias, independent of your current working directory.
+You can think of a bookmark as some sort of klog-specific symlink, that’s always available when you invoke klog, and that resolves to the designated file.
+Use the subcommands below to set up and manage your bookmarks.
 
-E.g.: klog total @work
+A bookmark name is denoted by the prefix '@'. For example, if you have a bookmark named '@work', that points to a .klg file, you can use klog like this:
 
-You can specify as many bookmarks as you want. There can even be one “unnamed” bookmark.`
+    klog total @work
+    klog start --summary 'Started new project' @work
+    klog edit @work
+
+You can specify as many bookmarks as you want. There can also be one “unnamed” default bookmark (which internally is identified by the name '@default').
+This is useful in case you only have one main file at a time, and allows you to use klog without any input arguments at all. E.g.:
+
+    klog total
+    klog start --summary 'Started new project'
+`
 }
 
 type BookmarksList struct{}

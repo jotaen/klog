@@ -8,18 +8,22 @@ import (
 )
 
 type Create struct {
-	ShouldTotal      klog.ShouldTotal   `name:"should" placeholder:"DURATION" help:"The should-total of the record"`
+	ShouldTotal      klog.ShouldTotal   `name:"should" placeholder:"DURATION" help:"The should-total of the record."`
 	ShouldTotalAlias klog.ShouldTotal   `name:"should-total" placeholder:"DURATION" hidden:""` // Alias for “canonical” term
-	Summary          klog.RecordSummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the new record"`
+	Summary          klog.RecordSummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the new record."`
 	util.AtDateArgs
 	util.NoStyleArgs
-	util.OutputFileArgs
 	util.WarnArgs
+	util.OutputFileArgs
 }
 
 func (opt *Create) Help() string {
-	return `The new record is inserted into the file at the chronologically correct position.
-(Assuming that the records are sorted from oldest to latest.)`
+	return `
+You can set a should-total value via '--should' and a record summary via '--summary'.
+
+The new record is inserted into the file at the chronologically correct position.
+(Assuming that the records are sorted from oldest to latest.)
+`
 }
 
 func (opt *Create) Run(ctx app.Context) app.Error {

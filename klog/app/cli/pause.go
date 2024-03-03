@@ -13,20 +13,25 @@ import (
 )
 
 type Pause struct {
-	Summary      klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the pause entry"`
-	NoAppendTags bool              `name:"no-tags" help:"Do not automatically take over (append) tags from open range"`
-	Extend       bool              `name:"extend" short:"e" help:"Extend latest pause, instead of adding a new pause entry"`
-	util.OutputFileArgs
+	Summary      klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the pause entry."`
+	NoAppendTags bool              `name:"no-tags" help:"Do not automatically take over (append) tags from open range."`
+	Extend       bool              `name:"extend" short:"e" help:"Extend latest pause, instead of adding a new pause entry."`
 	util.NoStyleArgs
 	util.WarnArgs
+	util.OutputFileArgs
 }
 
 func (opt *Pause) Help() string {
-	return `Creates a pause entry for a record with an open time range.
-The command is blocking – it keeps updating the pause entry until the process is exited.
-(The file will be written into once per minute.)
+	return `
+This command is only available for records that contain an open time range (i.e., an ongoing activity).
+The pause is basically a new entry with a negative duration, which is appended to the record.
+The command is blocking and keeps updating (incrementing) the duration of the pause entry until the shell process is exited via Ctrl^C.
+The file will be written into once per minute.
 
-If the open range in the record contains tags, then these will automatically be taken over and appended to the pause entry.
+If you wish to extend an existing pause, you can use the '--extend' flag. In this case it will increment the last pause entry in the record, instead of appending a new entry.
+
+If the open range in the record contains tags in its summary, then these will automatically be taken over and appended to the pause entry.
+You can opt out of this behaviour with the '--no-tags' flag.
 `
 }
 

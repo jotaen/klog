@@ -12,18 +12,18 @@ import (
 )
 
 type InputFilesArgs struct {
-	File []app.FileOrBookmarkName `arg:"" optional:"" type:"string" predictor:"file_or_bookmark" name:"file or bookmark" help:".klg source file(s) (if empty the bookmark is used)"`
+	File []app.FileOrBookmarkName `arg:"" optional:"" type:"string" predictor:"file_or_bookmark" name:"file or bookmark" help:"One or more .klg source files or bookmarks. If absent, klog tries to use the default bookmark."`
 }
 
 type OutputFileArgs struct {
-	File app.FileOrBookmarkName `arg:"" optional:"" type:"string" predictor:"file_or_bookmark" name:"file or bookmark" help:".klg source file (if empty the bookmark is used)"`
+	File app.FileOrBookmarkName `arg:"" optional:"" type:"string" predictor:"file_or_bookmark" name:"file or bookmark" help:"One .klg source file or bookmark. If absent, klog tries to use the default bookmark."`
 }
 
 type AtDateArgs struct {
-	Date      klog.Date `name:"date" placeholder:"DATE" short:"d" help:"The date of the record"`
-	Today     bool      `name:"today" help:"Use today’s date (default)"`
-	Yesterday bool      `name:"yesterday" help:"Use yesterday’s date"`
-	Tomorrow  bool      `name:"tomorrow" help:"Use tomorrow’s date"`
+	Date      klog.Date `name:"date" placeholder:"DATE" short:"d" help:"The date of the record."`
+	Today     bool      `name:"today" help:"Use today’s date."`
+	Yesterday bool      `name:"yesterday" help:"Use yesterday’s date."`
+	Tomorrow  bool      `name:"tomorrow" help:"Use tomorrow’s date."`
 }
 
 func (args *AtDateArgs) AtDate(now gotime.Time) klog.Date {
@@ -51,9 +51,9 @@ func (args *AtDateArgs) DateFormat(config app.Config) reconciling.ReformatDirect
 }
 
 type AtDateAndTimeArgs struct {
+	Round service.Rounding `name:"round" placeholder:"ROUNDING" short:"r" help:"Round time to nearest multiple number. ROUNDING can be one of '5m', '10m', '12m', '15m', '20m', '30m' or '60m' / '1h'."`
 	AtDateArgs
-	Time  klog.Time        `name:"time" placeholder:"TIME" short:"t" help:"Specify the time (defaults to now)"`
-	Round service.Rounding `name:"round" placeholder:"ROUNDING" short:"r" help:"Round time to nearest multiple of 5m, 10m, 12m, 15m, 20m, 30m, or 60m / 1h"`
+	Time klog.Time `name:"time" placeholder:"TIME" short:"t" help:"Specify the time (defaults to now). TIME can be given in the 24h or 12h notation, e.g. '13:00' or '1:00pm'."`
 }
 
 func (args *AtDateAndTimeArgs) AtTime(now gotime.Time, config app.Config) (klog.Time, app.Error) {
@@ -103,11 +103,11 @@ func (args *AtDateAndTimeArgs) WasAutomatic() bool {
 }
 
 type DiffArgs struct {
-	Diff bool `name:"diff" short:"d" help:"Show difference between actual and should-total time"`
+	Diff bool `name:"diff" short:"d" help:"Show difference between actual and should-total time."`
 }
 
 type NowArgs struct {
-	Now          bool `name:"now" short:"n" help:"Assume open ranges to be closed at this moment"`
+	Now          bool `name:"now" short:"n" help:"Assume open ranges to be closed at this moment."`
 	hadOpenRange bool // Field only for internal use
 }
 
@@ -141,22 +141,22 @@ func (args *NowArgs) GetNowWarnings() []string {
 
 type FilterArgs struct {
 	// General filters
-	Tags      []klog.Tag        `name:"tag" placeholder:"TAG" group:"Filter" help:"Records (or entries) that match these tags"`
-	Date      klog.Date         `name:"date" placeholder:"DATE" group:"Filter" help:"Records at this date"`
-	Since     klog.Date         `name:"since" placeholder:"DATE" group:"Filter" help:"Records since this date (inclusive)"`
-	Until     klog.Date         `name:"until" placeholder:"DATE" group:"Filter" help:"Records until this date (inclusive)"`
-	After     klog.Date         `name:"after" placeholder:"DATE" group:"Filter" help:"Records after this date (exclusive)"`
-	Before    klog.Date         `name:"before" placeholder:"DATE" group:"Filter" help:"Records before this date (exclusive)"`
-	EntryType service.EntryType `name:"entry-type" placeholder:"TYPE" group:"Filter" help:"Entries of this type (duration, range, open-range)"`
-	Period    period.Period     `name:"period" placeholder:"PERIOD" group:"Filter" help:"Records in period: YYYY, YYYY-MM, YYYY-Www, or YYYY-Qq"`
+	Tags      []klog.Tag        `name:"tag" placeholder:"TAG" group:"Filter" help:"Records (or entries) that match these tags. You can omit the leading '#'."`
+	Date      klog.Date         `name:"date" placeholder:"DATE" group:"Filter" help:"Records at this date. DATE has to be in format YYYY-MM-DD or YYYY/MM/DD. E.g., '2024-01-31' or '2024/01/31'."`
+	Since     klog.Date         `name:"since" placeholder:"DATE" group:"Filter" help:"Records since this date (inclusive)."`
+	Until     klog.Date         `name:"until" placeholder:"DATE" group:"Filter" help:"Records until this date (inclusive)."`
+	After     klog.Date         `name:"after" placeholder:"DATE" group:"Filter" help:"Records after this date (exclusive)."`
+	Before    klog.Date         `name:"before" placeholder:"DATE" group:"Filter" help:"Records before this date (exclusive)."`
+	EntryType service.EntryType `name:"entry-type" placeholder:"TYPE" group:"Filter" help:"Entries of this type. TYPE can be 'range', 'open-range', 'duration', 'duration-positive' or 'duration-negative'."`
+	Period    period.Period     `name:"period" placeholder:"PERIOD" group:"Filter" help:"Records within a calendar period. PERIOD has to be in format YYYY, YYYY-MM, YYYY-Www or YYYY-Qq. E.g., '2024', '2024-04', '2022-W21' or '2024-Q1'."`
 
 	// Shortcut filters
 	// The `XXX` ones are dummy entries just for the help output
-	Today            bool `name:"today" group:"Filter" help:"Records at today’s date"`
-	Yesterday        bool `name:"yesterday" group:"Filter" help:"Records at yesterday’s date"`
-	Tomorrow         bool `name:"tomorrow" group:"Filter" help:"Records at tomorrow’s date"`
-	ThisXXX          bool `name:"this-***" group:"Filter" help:"Records of this week/month/quarter/year, e.g. --this-week"`
-	LastXXX          bool `name:"last-***" group:"Filter" help:"Records of last week/month/quarter/year, e.g. --last-month"`
+	Today            bool `name:"today" group:"Filter" help:"Records at today’s date."`
+	Yesterday        bool `name:"yesterday" group:"Filter" help:"Records at yesterday’s date."`
+	Tomorrow         bool `name:"tomorrow" group:"Filter" help:"Records at tomorrow’s date."`
+	ThisXXX          bool `name:"this-***" group:"Filter" help:"Records of this week/month/quarter/year, e.g. '--this-week' or '--this-quarter'."`
+	LastXXX          bool `name:"last-***" group:"Filter" help:"Records of last week/month/quarter/year, e.g. '--last-month' or '--last-year'."`
 	ThisWeek         bool `hidden:"" name:"this-week" group:"Filter"`
 	ThisWeekAlias    bool `hidden:"" name:"thisweek" group:"Filter"`
 	LastWeek         bool `hidden:"" name:"last-week" group:"Filter"`
@@ -255,7 +255,7 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) []klog.Re
 }
 
 type WarnArgs struct {
-	NoWarn bool `name:"no-warn" help:"Suppress warnings about potential mistakes"`
+	NoWarn bool `name:"no-warn" help:"Suppress warnings about potential mistakes or logical errors."`
 }
 
 func (args *WarnArgs) PrintWarnings(ctx app.Context, records []klog.Record, additionalWarnings []string) {
@@ -272,23 +272,23 @@ func (args *WarnArgs) PrintWarnings(ctx app.Context, records []klog.Record, addi
 }
 
 type NoStyleArgs struct {
-	NoStyle bool `name:"no-style" help:"Do not style or color the values"`
+	NoStyle bool `name:"no-style" help:"Do not style or colour the values."`
 }
 
 func (args *NoStyleArgs) Apply(ctx *app.Context) {
 	if args.NoStyle {
 		(*ctx).ConfigureSerialisation(func(styler tf.Styler, decimalDuration bool) (tf.Styler, bool) {
-			return tf.NewStyler(tf.NO_COLOUR), decimalDuration
+			return tf.NewStyler(tf.COLOUR_THEME_NO_COLOUR), decimalDuration
 		})
 	}
 }
 
 type QuietArgs struct {
-	Quiet bool `name:"quiet" help:"Output parseable data without descriptive text"`
+	Quiet bool `name:"quiet" help:"Output parseable data without descriptive text."`
 }
 
 type SortArgs struct {
-	Sort string `name:"sort" placeholder:"ORDER" help:"Sort output by date (asc or desc)" enum:"asc,desc,ASC,DESC," default:""`
+	Sort string `name:"sort" placeholder:"ORDER" help:"Sort output by date. ORDER can be 'asc' or 'desc'." enum:"asc,desc,ASC,DESC," default:""`
 }
 
 func (args *SortArgs) ApplySort(rs []klog.Record) []klog.Record {
@@ -303,7 +303,7 @@ func (args *SortArgs) ApplySort(rs []klog.Record) []klog.Record {
 }
 
 type DecimalArgs struct {
-	Decimal bool `name:"decimal" help:"Display totals as decimal values (in minutes)"`
+	Decimal bool `name:"decimal" help:"Display totals as decimal values (in minutes)."`
 }
 
 func (args *DecimalArgs) Apply(ctx *app.Context) {

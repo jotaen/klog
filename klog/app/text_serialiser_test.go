@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-var serialiser = NewSerialiser(tf.NewStyler(tf.NO_COLOUR), false)
+var serialiser = NewSerialiser(tf.NewStyler(tf.COLOUR_THEME_NO_COLOUR), false)
 
 func TestSerialiseNoRecordsToEmptyString(t *testing.T) {
 	text := parser.SerialiseRecords(serialiser, []klog.Record{}...).ToString()

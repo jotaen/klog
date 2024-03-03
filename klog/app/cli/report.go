@@ -12,8 +12,8 @@ import (
 )
 
 type Report struct {
-	AggregateBy string `name:"aggregate" placeholder:"KIND" short:"a" help:"Aggregate data by: day (default), week, month, quarter, year" enum:"DAY,day,d,WEEK,week,w,MONTH,month,m,QUARTER,quarter,q,YEAR,year,y," default:"day"`
-	Fill        bool   `name:"fill" short:"f" help:"Fill the gaps and show a consecutive stream"`
+	AggregateBy string `name:"aggregate" placeholder:"KIND" short:"a" help:"How to aggregate the data. KIND can be 'day' (default), 'week', 'month', 'quarter' or 'year'." enum:"DAY,day,d,WEEK,week,w,MONTH,month,m,QUARTER,quarter,q,YEAR,year,y," default:"day"`
+	Fill        bool   `name:"fill" short:"f" help:"Fill the gaps and show a consecutive stream."`
 	util.DiffArgs
 	util.FilterArgs
 	util.NowArgs
@@ -24,9 +24,13 @@ type Report struct {
 }
 
 func (opt *Report) Help() string {
-	return `It aggregates the totals by period, and prints the respective values from oldest to latest.
+	return `
+It aggregates the totals by period, and prints the respective values chronologically (from oldest to latest).
+The default aggregation is by day, but you can choose other periods via the '--aggregate' flag.
 
-The default aggregation is by day, but you choose other periods via the --aggregate flag.`
+The report skips all days (weeks, months, etc.) if no data is available for them.
+If you want a consecutive, chronological stream, you can use the '--fill' flag.
+`
 }
 
 func (opt *Report) Run(ctx app.Context) app.Error {
