@@ -8,18 +8,22 @@ import (
 )
 
 type Stop struct {
-	Summary klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Text to append to the entry summary"`
+	Summary klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Text to append to the entry summary."`
 	util.AtDateAndTimeArgs
 	util.NoStyleArgs
-	util.OutputFileArgs
 	util.WarnArgs
+	util.OutputFileArgs
 }
 
 func (opt *Stop) Help() string {
-	return `If the record contains an open-ended time range (e.g. 18:00-?) then this command
-will replace the end placeholder with the current time (or the one specified via --time).
+	return `
+If the record contains an open-ended time range (e.g. '18:00 - ?') then this command will replace the end placeholder with the current time.
+By default, it targets the record at today’s date.
+You can otherwise specify a date with '--date'.
 
-If the --time flag is not specified, it defaults to the current time as end time. In the latter case, the time can be rounded via --round.`
+Unless the '--time' flag is specified, it defaults to the current time as end time. If you prefer your time to be rounded, you can use the '--round' flag.
+You may also specify a summary via '--summary', which will be appended to the existing summary of the entry.
+`
 }
 
 func (opt *Stop) Run(ctx app.Context) app.Error {

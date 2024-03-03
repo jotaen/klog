@@ -13,8 +13,14 @@ import (
 )
 
 type Version struct {
-	NoCheck bool `name:"no-check" help:"Don’t check online for updates"` // used for the smoke test
+	NoCheck bool `name:"no-check" help:"Don’t check online for updates."` // used for the smoke test
 	util.QuietArgs
+}
+
+func (opt *Version) Help() string {
+	return `
+If you don’t use a package manager for managing your klog installation, you can subscribe to the release notifications on the Github repository (https://github.com/jotaen/klog).
+`
 }
 
 const KLOG_WEBSITE_URL = "https://klog.jotaen.net"

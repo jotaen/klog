@@ -11,7 +11,7 @@ import (
 )
 
 type Print struct {
-	WithTotals bool `name:"with-totals" help:"Amend output with evaluated total times"`
+	WithTotals bool `name:"with-totals" help:"Amend output with evaluated total times."`
 	util.FilterArgs
 	util.SortArgs
 	util.WarnArgs
@@ -20,8 +20,13 @@ type Print struct {
 }
 
 func (opt *Print) Help() string {
-	return "" +
-		"The output is syntax-highlighted."
+	return `
+Outputs data on the terminal, by default with syntax-highlighting turned on.
+Note that the output doesn’t resemble the file byte by byte, but the command may apply some minor clean-ups of the formatting.
+
+If run with filter flags, it only outputs those entries that match the filter clauses.
+You can optionally also sort the records, or print out the total times for each record and entry.
+`
 }
 
 func (opt *Print) Run(ctx app.Context) app.Error {

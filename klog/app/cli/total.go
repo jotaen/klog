@@ -18,11 +18,12 @@ type Total struct {
 }
 
 func (opt *Total) Help() string {
-	return `The total time is the overall sum of all time entries.
+	return `
+By default, the total time consists of all durations and time ranges, but it doesn’t include open-ended time ranges (e.g., '8:00 - ?').
+If you want to factor them in anyway, you can use the '--now' option, which treats all open-ended time ranges as if they were closed “right now”.
 
-Note that the total time by default doesn’t include open-ended time ranges.
-If you want to factor them in anyway, you can use the --now option,
-which treats all open-ended time ranges as if they were closed “right now”.`
+If the records contain should-total values, you can also compute the difference between should-total and actual total by using the '--diff' flag.
+`
 }
 
 func (opt *Total) Run(ctx app.Context) app.Error {

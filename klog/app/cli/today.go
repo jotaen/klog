@@ -12,7 +12,7 @@ import (
 type Today struct {
 	util.DiffArgs
 	util.NowArgs
-	Follow bool `name:"follow" short:"f" help:"Keep shell open and follow changes"`
+	Follow bool `name:"follow" short:"f" help:"Keep shell open and follow changes."`
 	util.DecimalArgs
 	util.WarnArgs
 	util.NoStyleArgs
@@ -20,13 +20,16 @@ type Today struct {
 }
 
 func (opt *Today) Help() string {
-	return `Convenience command to “check in” on the current day.
+	return `
+Convenience command to get a brief overview (“check in”) of the current day.
 It evaluates the total time separately for today’s records and all other records.
+If there are no records today, it falls back to yesterday.
 
-When both --now and --diff are set, it also calculates the forecasted end-time at which the time goal will be reached.
-(I.e. when the difference between should and actual time will be 0.)
+When both '--now' and '--diff' are set, it also calculates the forecasted end-time at which your time goal will be reached.
+(I.e. when the difference between should and actual time would be 0.)
 
-If there are no records today, it falls back to yesterday.`
+Use the '--follow' flag to keep the shell open and display changes live.
+`
 }
 
 func (opt *Today) Run(ctx app.Context) app.Error {

@@ -8,17 +8,17 @@ import (
 )
 
 type Switch struct {
-	SummaryText klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the new entry"`
+	SummaryText klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the new entry."`
 	util.AtDateAndTimeArgs
 	util.NoStyleArgs
-	util.OutputFileArgs
 	util.WarnArgs
+	util.OutputFileArgs
 }
 
 func (opt *Switch) Help() string {
-	return `Closes a previously ongoing activity (i.e., open time range), and starts a new one.
-
-The end time of the previous activity will be the same as the start time for the new entry.
+	return `
+Closes a previously ongoing activity (i.e., open time range), and starts a new one.
+This is basically a convenience for doing 'klog stop' and 'klog start' – however, in contrast to issuing both commands separately, 'klog switch' guarantees that the end time of the previous activity will be the same as the start time for the new entry.
 `
 }
 

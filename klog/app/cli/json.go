@@ -7,7 +7,7 @@ import (
 )
 
 type Json struct {
-	Pretty bool `name:"pretty" help:"Pretty-print output"`
+	Pretty bool `name:"pretty" help:"Pretty-print output."`
 	util.NowArgs
 	util.FilterArgs
 	util.SortArgs
@@ -15,13 +15,13 @@ type Json struct {
 }
 
 func (opt *Json) Help() string {
-	return `The output structure contains two properties at the top level: "records" and "errors".
+	return `
+The output structure is a JSON object which contains two properties at the top level: 'records' and 'errors'.
+If the file is valid, 'records' is an array containing a JSON object for each record, and 'errors' is 'null'.
+If the file has syntax errors, 'records' is 'null', and 'errors' contains an array of error objects.
 
-If the file is valid, "records" is an array containing a JSON object for each record; "errors" is null.
-
-If the file has syntax errors, "records" is null and "errors" contains an array of error objects.
-
-The structure of the "record" and "error" objects is always uniform. You can best explore it by running the command with the --pretty flag.
+The structure of the 'record' and 'error' objects is always uniform and should be self-explanatory.
+You can best explore it by running the command with the --pretty flag.
 `
 }
 

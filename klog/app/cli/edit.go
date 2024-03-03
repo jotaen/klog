@@ -7,11 +7,11 @@ import (
 )
 
 type Edit struct {
-	util.OutputFileArgs
 	util.QuietArgs
+	util.OutputFileArgs
 }
 
-const hint = "You can specify your preferred editor via the $EDITOR environment variable, or the klog config file."
+const hint = "You can specify your preferred editor via the $EDITOR environment variable, or via the klog config file."
 
 func (opt *Edit) Help() string {
 	return hint
