@@ -98,7 +98,7 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 	if rErr != nil {
 		switch e := rErr.(type) {
 		case app.ParserErrors:
-			return e.Code().ToInt(), util.PrettifyParsingError(e, config.IsDebug.Value(), styler)
+			return e.Code().ToInt(), util.PrettifyParsingError(e, styler)
 		case app.Error:
 			return e.Code().ToInt(), util.PrettifyAppError(e, config.IsDebug.Value())
 		default:

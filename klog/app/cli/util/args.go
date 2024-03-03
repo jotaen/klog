@@ -278,7 +278,7 @@ type NoStyleArgs struct {
 func (args *NoStyleArgs) Apply(ctx *app.Context) {
 	if args.NoStyle {
 		(*ctx).ConfigureSerialisation(func(styler tf.Styler, decimalDuration bool) (tf.Styler, bool) {
-			return tf.NewStyler(tf.NO_COLOUR), decimalDuration
+			return tf.NewStyler(tf.COLOUR_THEME_NO_COLOUR), decimalDuration
 		})
 	}
 }

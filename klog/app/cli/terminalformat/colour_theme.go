@@ -3,9 +3,9 @@ package terminalformat
 type ColourTheme string
 
 const (
-	NO_COLOUR = ColourTheme("no_colour")
-	DARK      = ColourTheme("dark")
-	LIGHT     = ColourTheme("light")
+	COLOUR_THEME_NO_COLOUR = ColourTheme("no_colour")
+	COLOUR_THEME_DARK      = ColourTheme("dark")
+	COLOUR_THEME_LIGHT     = ColourTheme("light")
 )
 
 func NewStyler(c ColourTheme) Styler {
@@ -21,7 +21,7 @@ func NewStyler(c ColourTheme) Styler {
 	}
 
 	switch c {
-	case NO_COLOUR:
+	case COLOUR_THEME_NO_COLOUR:
 		return Styler{
 			props:            StyleProps{},
 			colourCodes:      make(map[Colour]string),
@@ -32,7 +32,7 @@ func NewStyler(c ColourTheme) Styler {
 			underlined:       "",
 			bold:             "",
 		}
-	case DARK:
+	case COLOUR_THEME_DARK:
 		baseColouredStyler.colourCodes = map[Colour]string{
 			TEXT:         "015",
 			TEXT_INVERSE: "000",
@@ -45,7 +45,7 @@ func NewStyler(c ColourTheme) Styler {
 			YELLOW:       "221",
 		}
 		return baseColouredStyler
-	case LIGHT:
+	case COLOUR_THEME_LIGHT:
 		baseColouredStyler.colourCodes = map[Colour]string{
 			TEXT:         "000",
 			TEXT_INVERSE: "015",
