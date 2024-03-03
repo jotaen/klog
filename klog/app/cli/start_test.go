@@ -294,6 +294,21 @@ func TestStartWithResume(t *testing.T) {
 `, state.writtenFileContents)
 	})
 
+	t.Run("No previous entry, and previous record empty -> Start over blank", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords(`
+1623-12-12
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+			Resume: true,
+		}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+1623-12-12
+
+1623-12-13
+    12:49 - ?
+`, state.writtenFileContents)
+	})
+
 	t.Run("No previous entry summary -> Empty entry summary", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`1623-12-13
     8:13 - 9:44

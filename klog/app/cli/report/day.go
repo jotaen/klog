@@ -3,7 +3,7 @@ package report
 import (
 	"fmt"
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service/period"
 )
@@ -25,7 +25,7 @@ func (a *dayAggregator) DateHash(date klog.Date) period.Hash {
 	return period.Hash(period.NewDayFromDate(date).Hash())
 }
 
-func (a *dayAggregator) OnHeaderPrefix(table *terminalformat.Table) {
+func (a *dayAggregator) OnHeaderPrefix(table *tf.Table) {
 	table.
 		CellL("    ").   // 2020
 		CellL("   ").    // Dec
@@ -33,7 +33,7 @@ func (a *dayAggregator) OnHeaderPrefix(table *terminalformat.Table) {
 		CellR("   ")     // 17.
 }
 
-func (a *dayAggregator) OnRowPrefix(table *terminalformat.Table, date klog.Date) {
+func (a *dayAggregator) OnRowPrefix(table *tf.Table, date klog.Date) {
 	// Year
 	if date.Year() != a.y {
 		a.m = -1 // force month to be recalculated

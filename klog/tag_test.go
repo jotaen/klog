@@ -155,3 +155,29 @@ func TestSerialiseTag(t *testing.T) {
 	tagWithValueContainingSingleQuote := NewTagOrPanic("test", `5"`)
 	assert.Equal(t, `#test='5"'`, tagWithValueContainingSingleQuote.ToString())
 }
+
+func TestTagSet(t *testing.T) {
+	ts := NewEmptyTagSet()
+
+	assert.True(t, ts.IsEmpty())
+	assert.False(t, ts.Contains(NewTagOrPanic("test", "")))
+	ts.Put(NewTagOrPanic("test", ""))
+	assert.False(t, ts.IsEmpty())
+	assert.True(t, ts.Contains(NewTagOrPanic("test", "")))
+	assert.Equal(t, []string{"#test"}, ts.ToStrings())
+
+	ts.Put(NewTagOrPanic("project", "value"))
+	assert.True(t, ts.Contains(NewTagOrPanic("project", "")))
+	assert.True(t, ts.Contains(NewTagOrPanic("project", "value")))
+	assert.False(t, ts.Contains(NewTagOrPanic("project", "other-value")))
+	assert.False(t, ts.Contains(NewTagOrPanic("project", "VALUE")))
+	assert.Equal(t, []string{"#test", "#project=value"}, ts.ToStrings())
+
+	ts.Put(NewTagOrPanic("FOO", ""))
+	assert.True(t, ts.Contains(NewTagOrPanic("fOo", "")))
+	assert.Equal(t, []string{"#test", "#project=value", "#foo"}, ts.ToStrings())
+
+	ts.Put(NewTagOrPanic("foo", ""))
+	assert.True(t, ts.Contains(NewTagOrPanic("foo", "")))
+	assert.Equal(t, []string{"#test", "#project=value", "#foo", "#foo"}, ts.ToStrings())
+}

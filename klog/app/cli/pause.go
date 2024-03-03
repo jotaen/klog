@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/reconciling"
@@ -96,7 +96,7 @@ func (opt *Pause) Run(ctx app.Context) app.Error {
 		ctx.Print("" +
 			"Pausing for " +
 			// Always print number in red, but without sign
-			styler.Props(terminalformat.StyleProps{Color: terminalformat.RED}).Format(klog.NewDuration(0, minsCaptured).ToString()) +
+			styler.Props(tf.StyleProps{Color: tf.RED}).Format(klog.NewDuration(0, minsCaptured).ToString()) +
 			fmt.Sprintf("%-4s", dots) +
 			"(since " +
 			klog.NewTimeFromGo(start).ToString() +

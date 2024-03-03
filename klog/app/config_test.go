@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -15,7 +15,7 @@ func createMockConfigFromEnv(vs map[string]string) FromEnvVars {
 }
 
 func TestCreatesNewDefaultConfig(t *testing.T) {
-	c := NewDefaultConfig(terminalformat.NO_COLOUR)
+	c := NewDefaultConfig(tf.NO_COLOUR)
 	assert.Equal(t, c.IsDebug.Value(), false)
 	assert.Equal(t, c.Editor.UnwrapOr(""), "")
 	assert.Equal(t, c.CpuKernels.Value(), 1)
@@ -35,7 +35,7 @@ func TestCreatesNewDefaultConfig(t *testing.T) {
 
 func TestSetsParamsMetadataIsHandledCorrectly(t *testing.T) {
 	{
-		c := NewDefaultConfig(terminalformat.NO_COLOUR)
+		c := NewDefaultConfig(tf.NO_COLOUR)
 		assert.Equal(t, c.IsDebug.Value(), false)
 	}
 	{
@@ -62,7 +62,7 @@ func TestSetsParamsFromEnv(t *testing.T) {
 			FromConfigFile{""},
 		)
 		assert.Equal(t, c.IsDebug.Value(), true)
-		assert.Equal(t, c.ColourScheme.Value(), terminalformat.NO_COLOUR)
+		assert.Equal(t, c.ColourScheme.Value(), tf.NO_COLOUR)
 		assert.Equal(t, c.Editor.UnwrapOr(""), "subl")
 	})
 
