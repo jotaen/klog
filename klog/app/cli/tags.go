@@ -9,8 +9,8 @@ import (
 )
 
 type Tags struct {
-	Values bool `name:"values" short:"v" help:"Display breakdown of tag values"`
-	Count  bool `name:"count" short:"c" help:"Display the number of matching entries per tag"`
+	Values bool `name:"values" short:"v" help:"Display breakdown of tag values (if the data contains any; e.g.: '#tag=value')."`
+	Count  bool `name:"count" short:"c" help:"Display the number of matching entries per tag."`
 	util.FilterArgs
 	util.NowArgs
 	util.DecimalArgs
@@ -20,11 +20,16 @@ type Tags struct {
 }
 
 func (opt *Tags) Help() string {
-	return `Aggregates the total times of entries by tags.
+	return ` 
+If a tag appears in the overall record summary, then all of the record’s entries match.
+If a tag appears in an entry summary, only that particular entry matches.
+If tags are specified redundantly in the data, the respective time is still counted uniquely.
 
-If a tag appears in the overall record summary, then all of the record’s entries match. If a tag appears in an entry summary, only that particular entry matches.
+If you use tags with values (e.g., '#tag=value'), then these also match against the base tag (e.g., '#tag').
+You can use the '--values' flag to display an additional breakdown by tag value.
 
-Every matching entry is counted individually.`
+Note that tag names are case-insensitive (e.g., '#tag' is the same as '#TAG'), whereas tag values are case-sensitive (so '#tag=value' is different from '#tag=VALUE').
+`
 }
 
 func (opt *Tags) Run(ctx app.Context) app.Error {

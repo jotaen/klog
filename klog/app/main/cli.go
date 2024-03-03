@@ -21,7 +21,7 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 	kongApp, nErr := kong.New(
 		&cli.Cli{},
 		kong.Name("klog"),
-		kong.Description(cli.DESCRIPTION),
+		kong.Description((&cli.Default{}).Help()),
 		func() kong.Option {
 			datePrototype, _ := klog.NewDate(1, 1, 1)
 			return kong.TypeMapper(reflect.TypeOf(&datePrototype).Elem(), dateDecoder())
@@ -63,6 +63,7 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact:             true,
 			NoExpandSubcommands: true,
+			WrapUpperBound:      80,
 		}),
 	)
 	if nErr != nil {

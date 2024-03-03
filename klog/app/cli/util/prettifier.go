@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var Reflower = tf.NewReflower(60, "\n")
+var Reflower = tf.NewReflower(80, "\n")
 
 // PrettifyAppError prints app errors including details.
 func PrettifyAppError(err app.Error, isDebug bool) error {
