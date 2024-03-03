@@ -22,7 +22,7 @@ func PrettifyAppError(err app.Error, isDebug bool) error {
 }
 
 // PrettifyParsingError turns a parsing error into a coloured and well-structured form.
-func PrettifyParsingError(err app.ParserErrors, isDebug bool, styler tf.Styler) error {
+func PrettifyParsingError(err app.ParserErrors, styler tf.Styler) error {
 	message := ""
 	INDENT := "    "
 	for _, e := range err.All() {

@@ -33,7 +33,7 @@ func (e *Env) run(invocation ...[]string) []string {
 		r, w, _ := os.Pipe()
 		os.Stdout = w
 
-		config := app.NewDefaultConfig(tf.NO_COLOUR)
+		config := app.NewDefaultConfig(tf.COLOUR_THEME_NO_COLOUR)
 		code, runErr := Run(app.NewFileOrPanic(tmpDir), app.Meta{
 			Specification: "[Specification text]",
 			License:       "[License text]",

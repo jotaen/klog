@@ -42,7 +42,7 @@ func main() {
 
 	config := func() app.Config {
 		c, err := app.NewConfig(
-			app.FromStaticValues{NumCpus: runtime.NumCPU()},
+			app.FromDeterminedValues{NumCpus: runtime.NumCPU()},
 			app.FromEnvVars{GetVar: os.Getenv},
 			app.FromConfigFile{FileContents: configFile},
 		)

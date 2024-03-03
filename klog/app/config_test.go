@@ -15,10 +15,11 @@ func createMockConfigFromEnv(vs map[string]string) FromEnvVars {
 }
 
 func TestCreatesNewDefaultConfig(t *testing.T) {
-	c := NewDefaultConfig(tf.NO_COLOUR)
+	c := NewDefaultConfig(tf.COLOUR_THEME_NO_COLOUR)
 	assert.Equal(t, c.IsDebug.Value(), false)
 	assert.Equal(t, c.Editor.UnwrapOr(""), "")
 	assert.Equal(t, c.CpuKernels.Value(), 1)
+	assert.Equal(t, c.ColourScheme.Value(), tf.COLOUR_THEME_NO_COLOUR)
 
 	isRoundingSet := false
 	c.DefaultRounding.Unwrap(func(_ service.Rounding) {
@@ -35,12 +36,12 @@ func TestCreatesNewDefaultConfig(t *testing.T) {
 
 func TestSetsParamsMetadataIsHandledCorrectly(t *testing.T) {
 	{
-		c := NewDefaultConfig(tf.NO_COLOUR)
+		c := NewDefaultConfig(tf.COLOUR_THEME_NO_COLOUR)
 		assert.Equal(t, c.IsDebug.Value(), false)
 	}
 	{
 		c, _ := NewConfig(
-			FromStaticValues{NumCpus: 1},
+			FromDeterminedValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{
 				"KLOG_DEBUG": "1",
 			}),
@@ -53,7 +54,7 @@ func TestSetsParamsMetadataIsHandledCorrectly(t *testing.T) {
 func TestSetsParamsFromEnv(t *testing.T) {
 	t.Run("Read plain environment variables.", func(t *testing.T) {
 		c, _ := NewConfig(
-			FromStaticValues{NumCpus: 1},
+			FromDeterminedValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{
 				"EDITOR":     "subl",
 				"KLOG_DEBUG": "1",
@@ -62,20 +63,51 @@ func TestSetsParamsFromEnv(t *testing.T) {
 			FromConfigFile{""},
 		)
 		assert.Equal(t, c.IsDebug.Value(), true)
-		assert.Equal(t, c.ColourScheme.Value(), tf.NO_COLOUR)
+		assert.Equal(t, c.ColourScheme.Value(), tf.COLOUR_THEME_NO_COLOUR)
 		assert.Equal(t, c.Editor.UnwrapOr(""), "subl")
 	})
 
-	t.Run("`editor` from file would trump `$EDITOR` env variable.", func(t *testing.T) {
+	t.Run("`$EDITOR` env variable trumps `editor` setting from config file.", func(t *testing.T) {
 		c, _ := NewConfig(
-			FromStaticValues{NumCpus: 1},
+			FromDeterminedValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{
 				"EDITOR": "subl",
 			}),
 			FromConfigFile{"editor = vi"},
 		)
-		assert.Equal(t, "vi", c.Editor.UnwrapOr(""))
+		assert.Equal(t, "subl", c.Editor.UnwrapOr(""))
 	})
+
+	t.Run("`$NO_COLOR` env variable trumps `colour_scheme = dark` from config file.", func(t *testing.T) {
+		// This is important, otherwise you wouldn’t be able to override the colour scheme
+		// e.g. for programmatic usage of klog.
+		c, _ := NewConfig(
+			FromDeterminedValues{NumCpus: 1},
+			createMockConfigFromEnv(map[string]string{
+				"NO_COLOR": "1",
+			}),
+			FromConfigFile{"colour_scheme = dark"},
+		)
+		assert.Equal(t, tf.COLOUR_THEME_NO_COLOUR, c.ColourScheme.Value())
+	})
+}
+
+func TestSetsColourSchemeParamFromConfigFile(t *testing.T) {
+	for _, x := range []struct {
+		cfg string
+		exp tf.ColourTheme
+	}{
+		{`colour_scheme = dark`, tf.COLOUR_THEME_DARK},
+		{`colour_scheme = light`, tf.COLOUR_THEME_LIGHT},
+		{`colour_scheme = no_colour`, tf.COLOUR_THEME_NO_COLOUR},
+	} {
+		c, _ := NewConfig(
+			FromDeterminedValues{NumCpus: 1},
+			createMockConfigFromEnv(map[string]string{}),
+			FromConfigFile{x.cfg},
+		)
+		assert.Equal(t, x.exp, c.ColourScheme.Value())
+	}
 }
 
 func TestSetsDefaultRoundingParamFromConfigFile(t *testing.T) {
@@ -90,7 +122,7 @@ func TestSetsDefaultRoundingParamFromConfigFile(t *testing.T) {
 		{`default_rounding = 60m`, 60},
 	} {
 		c, _ := NewConfig(
-			FromStaticValues{NumCpus: 1},
+			FromDeterminedValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{}),
 			FromConfigFile{x.cfg},
 		)
@@ -110,7 +142,7 @@ func TestSetsDefaultShouldTotalParamFromConfigFile(t *testing.T) {
 		{`default_should_total = 8h30m!`, "8h30m!"},
 	} {
 		c, _ := NewConfig(
-			FromStaticValues{NumCpus: 1},
+			FromDeterminedValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{}),
 			FromConfigFile{x.cfg},
 		)
@@ -131,7 +163,7 @@ func TestSetsDateFormatParamFromConfigFile(t *testing.T) {
 		{`date_format = YYYY/MM/DD`, false},
 	} {
 		c, _ := NewConfig(
-			FromStaticValues{NumCpus: 1},
+			FromDeterminedValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{}),
 			FromConfigFile{x.cfg},
 		)
@@ -152,7 +184,7 @@ func TestSetTimeFormatParamFromConfigFile(t *testing.T) {
 		{`time_convention = 12h`, false},
 	} {
 		c, _ := NewConfig(
-			FromStaticValues{NumCpus: 1},
+			FromDeterminedValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{}),
 			FromConfigFile{x.cfg},
 		)
@@ -171,7 +203,7 @@ what_is_this = true
 `,
 	} {
 		_, err := NewConfig(
-			FromStaticValues{NumCpus: 1},
+			FromDeterminedValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{}),
 			FromConfigFile{tml},
 		)
@@ -183,13 +215,14 @@ func TestIgnoresEmptyConfigFileOrEmptyParameters(t *testing.T) {
 	for _, tml := range []string{
 		``,
 		`editor = `,
+		`colour_scheme = `,
 		`default_rounding =`,
 		`default_should_total = `,
 		`date_format = `,
 		`time_convention = `,
 	} {
 		_, err := NewConfig(
-			FromStaticValues{NumCpus: 1},
+			FromDeterminedValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{}),
 			FromConfigFile{tml},
 		)
@@ -201,6 +234,8 @@ func TestRejectsInvalidConfigFile(t *testing.T) {
 	for _, tml := range []string{
 		`default_rounding = true`,              // Wrong type
 		`default_rounding = 25m`,               // Invalid value
+		`colour_scheme = true`,                 // Wrong type
+		`colour_scheme = yellow`,               // Invalid value
 		`default_should_total = [true, false]`, // Wrong type
 		`default_should_total = 15`,            // Invalid value
 		`date_format = [true, false]`,          // Wrong type
@@ -209,7 +244,7 @@ func TestRejectsInvalidConfigFile(t *testing.T) {
 		`time_convention = 2h`,                 // Invalid value
 	} {
 		_, err := NewConfig(
-			FromStaticValues{NumCpus: 1},
+			FromDeterminedValues{NumCpus: 1},
 			createMockConfigFromEnv(map[string]string{}),
 			FromConfigFile{tml},
 		)

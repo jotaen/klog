@@ -47,9 +47,12 @@ type Reader interface {
 	Apply(*Config) Error
 }
 
-func NewConfig(c1 FromStaticValues, c2 FromEnvVars, c3 FromConfigFile) (Config, Error) {
-	config := NewDefaultConfig(tf.DARK)
-	for _, c := range []Reader{c1, c2, c3} {
+// NewConfig creates a new application configuration by merging the config
+// based on the following precedence: (1) env variables, (2) config file,
+// (3) determined values.
+func NewConfig(determined FromDeterminedValues, env FromEnvVars, file FromConfigFile) (Config, Error) {
+	config := NewDefaultConfig(tf.COLOUR_THEME_DARK)
+	for _, c := range []Reader{determined, file, env} {
 		err := c.Apply(&config)
 		if err != nil {
 			return Config{}, err
@@ -132,13 +135,13 @@ func (p *OptionalParam[T]) set(value T, o configOrigin) {
 	p.origin = o
 }
 
-// FromStaticValues is the part of the configuration that is automatically
+// FromDeterminedValues is the part of the configuration that is automatically
 // determined, e.g. by constraints of the runtime environment.
-type FromStaticValues struct {
+type FromDeterminedValues struct {
 	NumCpus int
 }
 
-func (e FromStaticValues) Apply(config *Config) Error {
+func (e FromDeterminedValues) Apply(config *Config) Error {
 	config.CpuKernels.override(e.NumCpus, configOriginStaticValues)
 	return nil
 }
@@ -154,7 +157,7 @@ func (e FromEnvVars) Apply(config *Config) Error {
 		config.IsDebug.override(true, configOriginEnv)
 	}
 	if e.GetVar("NO_COLOR") != "" {
-		config.ColourScheme.override(tf.NO_COLOUR, configOriginEnv)
+		config.ColourScheme.override(tf.COLOUR_THEME_NO_COLOUR, configOriginEnv)
 	}
 	if e.GetVar("EDITOR") != "" {
 		config.Editor.set(e.GetVar("EDITOR"), configOriginEnv)
@@ -183,18 +186,18 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 		Help: Help{
 			Summary: "The CLI command that shall be invoked when running `klog edit`.",
 			Value:   "The config property can be any valid CLI command, as you would type it on the terminal. klog will append the target file path as last input argument to that command. Note: you can use quotes in order to prevent undesired shell word-splitting, e.g. if the command name/path contains spaces.",
-			Default: "If absent/empty, `klog edit` tries to fall back to the $EDITOR environment variable (which you’d see below in that case).",
+			Default: "If absent/empty, `klog edit` tries to fall back to the $EDITOR environment variable (which, by the way, takes precedence, if set).",
 		},
 	}, {
 		Name: "colour_scheme",
 		reader: func(value string, config *Config) error {
 			switch value {
-			case string(tf.DARK):
-				config.ColourScheme.override(tf.DARK, configOriginFile)
-			case string(tf.NO_COLOUR):
-				config.ColourScheme.override(tf.NO_COLOUR, configOriginFile)
-			case string(tf.LIGHT):
-				config.ColourScheme.override(tf.LIGHT, configOriginFile)
+			case string(tf.COLOUR_THEME_DARK):
+				config.ColourScheme.override(tf.COLOUR_THEME_DARK, configOriginFile)
+			case string(tf.COLOUR_THEME_NO_COLOUR):
+				config.ColourScheme.override(tf.COLOUR_THEME_NO_COLOUR, configOriginFile)
+			case string(tf.COLOUR_THEME_LIGHT):
+				config.ColourScheme.override(tf.COLOUR_THEME_LIGHT, configOriginFile)
 			default:
 				return errors.New("The value must be `dark`, `light` or `no_colour`")
 			}
@@ -356,7 +359,7 @@ func (e FromConfigFile) Apply(config *Config) Error {
 		if rErr != nil {
 			return NewError(
 				"Invalid config file",
-				"The value for `"+key+"` is not valid: "+entry.Help.Value,
+				"The value for the `"+key+"` setting is not valid: "+entry.Help.Value,
 				rErr,
 			)
 		}

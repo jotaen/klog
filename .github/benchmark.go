@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var serialiser = app.NewSerialiser(tf.NewStyler(tf.NO_COLOUR), false)
+var serialiser = app.NewSerialiser(tf.NewStyler(tf.COLOUR_THEME_NO_COLOUR), false)
 
 func main() {
 	// Setup

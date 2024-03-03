@@ -13,8 +13,8 @@ import (
 
 func NewTestingContext() TestingContext {
 	bc := app.NewEmptyBookmarksCollection()
-	config := app.NewDefaultConfig(tf.NO_COLOUR)
-	styler := tf.NewStyler(tf.NO_COLOUR)
+	config := app.NewDefaultConfig(tf.COLOUR_THEME_NO_COLOUR)
+	styler := tf.NewStyler(tf.COLOUR_THEME_NO_COLOUR)
 	return TestingContext{
 		State: State{
 			printBuffer:         "",
