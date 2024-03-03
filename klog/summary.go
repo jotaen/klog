@@ -51,7 +51,7 @@ func (s EntrySummary) Lines() []string {
 	return RecordSummary(s).Lines()
 }
 
-func (s RecordSummary) Tags() TagSet {
+func (s RecordSummary) Tags() *TagSet {
 	tags := NewEmptyTagSet()
 	for _, l := range s {
 		for _, m := range HashTagPattern.FindAllStringSubmatch(l, -1) {
@@ -59,11 +59,11 @@ func (s RecordSummary) Tags() TagSet {
 			tags.Put(tag)
 		}
 	}
-	return tags
+	return &tags
 }
 
 // Tags returns the tags that the entry summary contains.
-func (s EntrySummary) Tags() TagSet {
+func (s EntrySummary) Tags() *TagSet {
 	return RecordSummary(s).Tags()
 }
 

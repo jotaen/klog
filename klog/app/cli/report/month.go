@@ -3,7 +3,7 @@ package report
 import (
 	"fmt"
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service/period"
 )
@@ -24,13 +24,13 @@ func (a *monthAggregator) DateHash(date klog.Date) period.Hash {
 	return period.Hash(period.NewMonthFromDate(date).Hash())
 }
 
-func (a *monthAggregator) OnHeaderPrefix(table *terminalformat.Table) {
+func (a *monthAggregator) OnHeaderPrefix(table *tf.Table) {
 	table.
 		CellL("    "). // 2020
 		CellL("   ")   // Dec
 }
 
-func (a *monthAggregator) OnRowPrefix(table *terminalformat.Table, date klog.Date) {
+func (a *monthAggregator) OnRowPrefix(table *tf.Table, date klog.Date) {
 	// Year
 	if date.Year() != a.y {
 		table.CellR(fmt.Sprint(date.Year()))

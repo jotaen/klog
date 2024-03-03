@@ -77,7 +77,7 @@ func reduceRecordToMatchingTags(queriedTags []klog.Tag, r klog.Record) (klog.Rec
 	var matchingEntries []klog.Entry
 	for _, e := range r.Entries() {
 		allTags := klog.Merge(r.Summary().Tags(), e.Summary().Tags())
-		if isSubsetOf(queriedTags, allTags) {
+		if isSubsetOf(queriedTags, &allTags) {
 			matchingEntries = append(matchingEntries, e)
 		}
 	}
@@ -116,7 +116,7 @@ func reduceRecordToMatchingEntryTypes(t EntryType, r klog.Record) (klog.Record, 
 	return r, true
 }
 
-func isSubsetOf(queriedTags []klog.Tag, allTags klog.TagSet) bool {
+func isSubsetOf(queriedTags []klog.Tag, allTags *klog.TagSet) bool {
 	for _, t := range queriedTags {
 		if !allTags.Contains(t) {
 			return false

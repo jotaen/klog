@@ -3,7 +3,7 @@ package report
 import (
 	"fmt"
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/service/period"
 )
 
@@ -23,13 +23,13 @@ func (a *quarterAggregator) DateHash(date klog.Date) period.Hash {
 	return period.Hash(period.NewQuarterFromDate(date).Hash())
 }
 
-func (a *quarterAggregator) OnHeaderPrefix(table *terminalformat.Table) {
+func (a *quarterAggregator) OnHeaderPrefix(table *tf.Table) {
 	table.
 		CellL("    "). // 2020
 		CellL("  ")    // Q2
 }
 
-func (a *quarterAggregator) OnRowPrefix(table *terminalformat.Table, date klog.Date) {
+func (a *quarterAggregator) OnRowPrefix(table *tf.Table, date klog.Date) {
 	// Year
 	if date.Year() != a.y {
 		table.CellR(fmt.Sprint(date.Year()))

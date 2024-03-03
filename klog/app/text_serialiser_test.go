@@ -2,13 +2,13 @@ package app
 
 import (
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-var serialiser = NewSerialiser(terminalformat.NewStyler(terminalformat.NO_COLOUR), false)
+var serialiser = NewSerialiser(tf.NewStyler(tf.NO_COLOUR), false)
 
 func TestSerialiseNoRecordsToEmptyString(t *testing.T) {
 	text := parser.SerialiseRecords(serialiser, []klog.Record{}...).ToString()

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/parser"
 	"math/rand"
 	"os"
@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var serialiser = app.NewSerialiser(terminalformat.NewStyler(terminalformat.NO_COLOUR), false)
+var serialiser = app.NewSerialiser(tf.NewStyler(tf.NO_COLOUR), false)
 
 func main() {
 	// Setup

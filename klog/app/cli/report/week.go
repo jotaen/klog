@@ -3,7 +3,7 @@ package report
 import (
 	"fmt"
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/service/period"
 )
 
@@ -23,13 +23,13 @@ func (a *weekAggregator) DateHash(date klog.Date) period.Hash {
 	return period.Hash(period.NewWeekFromDate(date).Hash())
 }
 
-func (a *weekAggregator) OnHeaderPrefix(table *terminalformat.Table) {
+func (a *weekAggregator) OnHeaderPrefix(table *tf.Table) {
 	table.
 		CellL("    ").    // 2020
 		CellL("        ") // Week 33
 }
 
-func (a *weekAggregator) OnRowPrefix(table *terminalformat.Table, date klog.Date) {
+func (a *weekAggregator) OnRowPrefix(table *tf.Table, date klog.Date) {
 	year, week := date.WeekNumber()
 
 	if year != a.y {
