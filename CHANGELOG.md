@@ -4,14 +4,14 @@
 ## Next Up (YYYY-MM-DD)
 - **[ BREAKING ]** For `klog pause`, you cannot use the `--extend` and `--summary`
   flags together anymore.
-- **[ FEATURE / BREAKING ]** The `klog pause` commands now automatically takes
-  over all tags from the open range in the record, and appends them to the summary
-  of the pause entry. You can disable this via the `--no-tags` flag.
+- **[ FEATURE / BREAKING ]** The `klog pause` command now automatically takes
+  over all tags from the open range of the record, and appends them to the summary
+  of the pause entry. (You can opt out of this via the `--no-tags` flag.)
 - **[ FEATURE ]** There is a new setting for the klog `config.ini` file,
   which allows to specify the colour theme of the terminal, so that klog
   can optimise its output colouring. The available options are: `dark` (the
   default), `light`, and `no_colour`. Run `klog config` to learn more.
-- **[ FEATURE ]** Add `--entry-type` filter option to filter by entry type,
+- **[ FEATURE ]** Add `--entry-type` filter option for filtering by entry type,
   e.g.: `--entry-type open-range` or `--entry-type duration`.
 - **[ FEATURE ]** Add two new rounding options: `12m` and `20m`.
   (E.g., when using `klog start --round`.)
