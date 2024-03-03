@@ -21,7 +21,19 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 	kongApp, nErr := kong.New(
 		&cli.Cli{},
 		kong.Name("klog"),
-		kong.Description(cli.DESCRIPTION),
+		kong.Description(
+			"klog: command line app for time tracking with plain-text files. See also "+cli.KLOG_WEBSITE_URL+
+				"\n\n"+
+				"Data is stored in files ending in the '.klg' extension. "+
+				"You can use the subcommands below to evaluate, manipulate and manage your files. "+
+				"Use the '--help' flag on the subcommands to learn more."+
+				"\n\n"+
+				"You can specify input data in one of these 3 ways: "+
+				"(a) by passing the name of a file or a bookmark, (b) by piping data to stdin, or (c) by using the default bookmark. "+
+				"Run 'klog bookmarks --help' to learn about bookmark usage."+
+				"\n\n"+
+				"One general note about flags: for all flags that have values, you can either use an equals sign or a space as delimiter, i.e. '--flag=value' or '--flag value'.",
+		),
 		func() kong.Option {
 			datePrototype, _ := klog.NewDate(1, 1, 1)
 			return kong.TypeMapper(reflect.TypeOf(&datePrototype).Elem(), dateDecoder())
@@ -63,6 +75,7 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact:             true,
 			NoExpandSubcommands: true,
+			WrapUpperBound:      80,
 		}),
 	)
 	if nErr != nil {

@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var Reflower = terminalformat.NewReflower(60, "\n")
+var Reflower = terminalformat.NewReflower(80, "\n")
 
 // PrettifyAppError prints app errors including details.
 func PrettifyAppError(err app.Error, isDebug bool) error {

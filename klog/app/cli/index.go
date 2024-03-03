@@ -40,10 +40,6 @@ type Cli struct {
 	Completion kc.Completion `cmd:"" name:"completion" group:"Misc" help:"Outputs shell code for enabling tab completion"`
 }
 
-const DESCRIPTION = "klog: command line app for time tracking with plain-text files.\n" +
-	"Run with --help to learn usage.\n" +
-	"Documentation online at " + KLOG_WEBSITE_URL
-
 type Default struct {
 	Version bool `short:"v" name:"version" help:"Alias for 'klog version'"`
 }
@@ -53,6 +49,7 @@ func (opt *Default) Run(ctx app.Context) app.Error {
 		versionCmd := Version{}
 		return versionCmd.Run(ctx)
 	}
-	ctx.Print(DESCRIPTION + "\n")
+	ctx.Print("klog: command line app for time tracking with plain-text files.\n")
+	ctx.Print("Run with --help to learn usage.\n")
 	return nil
 }

@@ -20,7 +20,8 @@ type Print struct {
 }
 
 func (opt *Print) Help() string {
-	return `The output is syntax-highlighted. Note that the formatting is sanitised/normalised, especially in regards to whitespace.`
+	return "" +
+		"The output is syntax-highlighted."
 }
 
 func (opt *Print) Run(ctx app.Context) app.Error {

@@ -141,22 +141,22 @@ func (args *NowArgs) GetNowWarnings() []string {
 
 type FilterArgs struct {
 	// General filters
-	Tags      []klog.Tag        `name:"tag" placeholder:"TAG" group:"Filter" help:"Records (or entries) that match these tags"`
-	Date      klog.Date         `name:"date" placeholder:"DATE" group:"Filter" help:"Records at this date"`
+	Tags      []klog.Tag        `name:"tag" placeholder:"TAG" group:"Filter" help:"Records (or entries) that match these tags. You can omit the leading '#'"`
+	Date      klog.Date         `name:"date" placeholder:"DATE" group:"Filter" help:"Records at this date. DATE has to be in format YYYY-MM-DD or YYYY/MM/DD. E.g., '2024-01-31' or '2024/01/31'"`
 	Since     klog.Date         `name:"since" placeholder:"DATE" group:"Filter" help:"Records since this date (inclusive)"`
 	Until     klog.Date         `name:"until" placeholder:"DATE" group:"Filter" help:"Records until this date (inclusive)"`
 	After     klog.Date         `name:"after" placeholder:"DATE" group:"Filter" help:"Records after this date (exclusive)"`
 	Before    klog.Date         `name:"before" placeholder:"DATE" group:"Filter" help:"Records before this date (exclusive)"`
-	EntryType service.EntryType `name:"entry-type" placeholder:"TYPE" group:"Filter" help:"Entries of this type (duration, range, open-range)"`
-	Period    period.Period     `name:"period" placeholder:"PERIOD" group:"Filter" help:"Records in period: YYYY, YYYY-MM, YYYY-Www, or YYYY-Qq"`
+	EntryType service.EntryType `name:"entry-type" placeholder:"TYPE" group:"Filter" help:"Entries of this type. TYPE can be 'range', 'open-range', 'duration', 'duration-positive' or 'duration-negative'"`
+	Period    period.Period     `name:"period" placeholder:"PERIOD" group:"Filter" help:"Records within a calendar period. PERIOD has to be in format YYYY, YYYY-MM, YYYY-Www or YYYY-Qq. E.g., '2024', '2024-04', '2022-W21' or '2024-Q1'"`
 
 	// Shortcut filters
 	// The `XXX` ones are dummy entries just for the help output
 	Today            bool `name:"today" group:"Filter" help:"Records at today’s date"`
 	Yesterday        bool `name:"yesterday" group:"Filter" help:"Records at yesterday’s date"`
 	Tomorrow         bool `name:"tomorrow" group:"Filter" help:"Records at tomorrow’s date"`
-	ThisXXX          bool `name:"this-***" group:"Filter" help:"Records of this week/month/quarter/year, e.g. --this-week"`
-	LastXXX          bool `name:"last-***" group:"Filter" help:"Records of last week/month/quarter/year, e.g. --last-month"`
+	ThisXXX          bool `name:"this-***" group:"Filter" help:"Records of this week/month/quarter/year, e.g. --this-week or --this-quarter"`
+	LastXXX          bool `name:"last-***" group:"Filter" help:"Records of last week/month/quarter/year, e.g. --last-month or --last-year"`
 	ThisWeek         bool `hidden:"" name:"this-week" group:"Filter"`
 	ThisWeekAlias    bool `hidden:"" name:"thisweek" group:"Filter"`
 	LastWeek         bool `hidden:"" name:"last-week" group:"Filter"`
@@ -288,7 +288,7 @@ type QuietArgs struct {
 }
 
 type SortArgs struct {
-	Sort string `name:"sort" placeholder:"ORDER" help:"Sort output by date (asc or desc)" enum:"asc,desc,ASC,DESC," default:""`
+	Sort string `name:"sort" placeholder:"ORDER" help:"Sort output by date. ORDER can be 'asc' or 'desc'" enum:"asc,desc,ASC,DESC," default:""`
 }
 
 func (args *SortArgs) ApplySort(rs []klog.Record) []klog.Record {
