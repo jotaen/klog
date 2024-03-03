@@ -50,7 +50,7 @@ func TestReconcilerAppendingPauseTakesOverTags(t *testing.T) {
 	original := `
 2010-04-27
     3:00pm - ? Did some #work
-        and also #misc other #things
+        and also #misc other #THINGS=Thingy
         and then more #work (redundant tag)
 `
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
@@ -63,9 +63,9 @@ func TestReconcilerAppendingPauseTakesOverTags(t *testing.T) {
 	assert.Equal(t, `
 2010-04-27
     3:00pm - ? Did some #work
-        and also #misc other #things
+        and also #misc other #THINGS=Thingy
         and then more #work (redundant tag)
-    -0m #misc #things #work
+    -0m #work #misc #things=Thingy #work
 `, result.AllSerialised)
 }
 

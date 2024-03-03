@@ -3,7 +3,6 @@ package klog
 import (
 	"errors"
 	"regexp"
-	"sort"
 	"strings"
 )
 
@@ -77,37 +76,53 @@ func (t Tag) ToString() string {
 	return result
 }
 
-type TagSet map[Tag]bool
+type TagSet struct {
+	lookup   map[Tag]bool
+	original []Tag
+}
 
 func NewEmptyTagSet() TagSet {
-	return make(map[Tag]bool)
-}
-
-func (ts TagSet) Put(tag Tag) {
-	ts[tag] = true
-	ts[NewTagOrPanic(tag.Name(), "")] = true
-}
-
-func (ts TagSet) Contains(tag Tag) bool {
-	return ts[tag]
-}
-
-func (ts TagSet) ToStrings() []string {
-	var tags []string
-	for t := range ts {
-		tags = append(tags, t.ToString())
+	return TagSet{
+		lookup:   make(map[Tag]bool),
+		original: []Tag{},
 	}
-	sort.Slice(tags, func(i, j int) bool {
-		return tags[i] < tags[j]
-	})
+}
+
+func (ts *TagSet) Put(tag Tag) {
+	ts.lookup[tag] = true
+	ts.lookup[NewTagOrPanic(tag.Name(), "")] = true
+	ts.original = append(ts.original, tag)
+}
+
+func (ts *TagSet) Contains(tag Tag) bool {
+	return ts.lookup[tag]
+}
+
+func (ts *TagSet) IsEmpty() bool {
+	return len(ts.lookup) == 0
+}
+
+// ForLookup returns a denormalised and unordered representation
+// of the TagSet.
+func (ts *TagSet) ForLookup() map[Tag]bool {
+	return ts.lookup
+}
+
+// ToStrings returns the tags as string, in their original order
+// and without deduplication or normalisation.
+func (ts *TagSet) ToStrings() []string {
+	tags := make([]string, len(ts.original))
+	for i, t := range ts.original {
+		tags[i] = t.ToString()
+	}
 	return tags
 }
 
-func Merge(tagSets ...TagSet) TagSet {
+func Merge(tagSets ...*TagSet) TagSet {
 	result := NewEmptyTagSet()
 	for _, ts := range tagSets {
-		for t := range ts {
-			result[t] = true
+		for t := range ts.lookup {
+			result.Put(t)
 		}
 	}
 	return result

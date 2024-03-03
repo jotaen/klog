@@ -26,7 +26,7 @@ func AggregateTotalsByTags(rs ...klog.Record) []*TagStats {
 		for _, e := range r.Entries() {
 			alreadyCounted := make(map[klog.Tag]bool)
 			allTags := klog.Merge(r.Summary().Tags(), e.Summary().Tags())
-			for tag := range allTags {
+			for tag := range allTags.ForLookup() {
 				if alreadyCounted[tag] {
 					continue
 				}
