@@ -2,7 +2,7 @@ package cli
 
 import (
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/app/cli/util"
 )
 
@@ -27,15 +27,15 @@ func (opt *Config) Run(ctx app.Context) app.Error {
 	}
 	styler, _ := ctx.Serialise()
 	for i, e := range app.CONFIG_FILE_ENTRIES {
-		ctx.Print(styler.Props(terminalformat.StyleProps{Color: terminalformat.SUBDUED}).Format(util.Reflower.Reflow(e.Help.Summary, []string{"# "})))
+		ctx.Print(styler.Props(tf.StyleProps{Color: tf.SUBDUED}).Format(util.Reflower.Reflow(e.Help.Summary, []string{"# "})))
 		ctx.Print("\n")
-		ctx.Print(styler.Props(terminalformat.StyleProps{Color: terminalformat.SUBDUED}).Format(util.Reflower.Reflow("Value: "+e.Help.Value, []string{"# - ", "#   "})))
+		ctx.Print(styler.Props(tf.StyleProps{Color: tf.SUBDUED}).Format(util.Reflower.Reflow("Value: "+e.Help.Value, []string{"# - ", "#   "})))
 		ctx.Print("\n")
-		ctx.Print(styler.Props(terminalformat.StyleProps{Color: terminalformat.SUBDUED}).Format(util.Reflower.Reflow("Default: "+e.Help.Default, []string{"# - ", "#   "})))
+		ctx.Print(styler.Props(tf.StyleProps{Color: tf.SUBDUED}).Format(util.Reflower.Reflow("Default: "+e.Help.Default, []string{"# - ", "#   "})))
 		ctx.Print("\n")
-		ctx.Print(styler.Props(terminalformat.StyleProps{Color: terminalformat.RED}).Format(e.Name))
+		ctx.Print(styler.Props(tf.StyleProps{Color: tf.RED}).Format(e.Name))
 		ctx.Print(" = ")
-		ctx.Print(styler.Props(terminalformat.StyleProps{Color: terminalformat.YELLOW}).Format(e.Value(ctx.Config())))
+		ctx.Print(styler.Props(tf.StyleProps{Color: tf.YELLOW}).Format(e.Value(ctx.Config())))
 		if i < len(app.CONFIG_FILE_ENTRIES)-1 {
 			ctx.Print("\n\n")
 		}

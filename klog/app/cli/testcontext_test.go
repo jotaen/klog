@@ -4,7 +4,7 @@ import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/command"
-	"github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 	"github.com/jotaen/klog/klog/parser/txt"
@@ -13,8 +13,8 @@ import (
 
 func NewTestingContext() TestingContext {
 	bc := app.NewEmptyBookmarksCollection()
-	config := app.NewDefaultConfig(terminalformat.NO_COLOUR)
-	styler := terminalformat.NewStyler(terminalformat.NO_COLOUR)
+	config := app.NewDefaultConfig(tf.NO_COLOUR)
+	styler := tf.NewStyler(tf.NO_COLOUR)
 	return TestingContext{
 		State: State{
 			printBuffer:         "",
@@ -78,7 +78,7 @@ func (ctx TestingContext) _SetExecute(execute func(command.Command) app.Error) T
 
 func (ctx TestingContext) _Run(cmd func(app.Context) app.Error) (State, app.Error) {
 	cmdErr := cmd(&ctx)
-	out := terminalformat.StripAllAnsiSequences(ctx.printBuffer)
+	out := ctx.printBuffer
 	if len(out) > 0 && out[0] != '\n' {
 		out = "\n" + out
 	}
@@ -95,7 +95,7 @@ type TestingContext struct {
 	now            gotime.Time
 	records        []klog.Record
 	blocks         []txt.Block
-	styler         terminalformat.Styler
+	styler         tf.Styler
 	serialiser     app.TextSerialiser
 	bookmarks      app.BookmarksCollection
 	editorsAuto    []command.Command
@@ -179,11 +179,11 @@ func (ctx *TestingContext) FileExplorers() []command.Command {
 	return ctx.fileExplorers
 }
 
-func (ctx *TestingContext) Serialise() (terminalformat.Styler, app.TextSerialiser) {
+func (ctx *TestingContext) Serialise() (tf.Styler, app.TextSerialiser) {
 	return ctx.styler, ctx.serialiser
 }
 
-func (ctx *TestingContext) ConfigureSerialisation(fn func(terminalformat.Styler, bool) (terminalformat.Styler, bool)) {
+func (ctx *TestingContext) ConfigureSerialisation(fn func(tf.Styler, bool) (tf.Styler, bool)) {
 	styler, decimalDuration := fn(ctx.styler, ctx.serialiser.DecimalDuration)
 	ctx.styler = styler
 	ctx.serialiser = app.NewSerialiser(styler, decimalDuration)

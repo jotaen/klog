@@ -88,16 +88,21 @@ func NewEmptyTagSet() TagSet {
 	}
 }
 
+// Put inserts the tag into the TagSet.
 func (ts *TagSet) Put(tag Tag) {
 	ts.lookup[tag] = true
 	ts.lookup[NewTagOrPanic(tag.Name(), "")] = true
 	ts.original = append(ts.original, tag)
 }
 
+// Contains checks whether the TagSet contains the given tag.
+// Note that if the TagSet contains a tag with value, then this
+// will always yield a match against the base tag (without value).
 func (ts *TagSet) Contains(tag Tag) bool {
 	return ts.lookup[tag]
 }
 
+// IsEmpty checks whether the TagSet contains something or not.
 func (ts *TagSet) IsEmpty() bool {
 	return len(ts.lookup) == 0
 }
@@ -118,6 +123,7 @@ func (ts *TagSet) ToStrings() []string {
 	return tags
 }
 
+// Merge combines multiple tag sets into a new one.
 func Merge(tagSets ...*TagSet) TagSet {
 	result := NewEmptyTagSet()
 	for _, ts := range tagSets {
