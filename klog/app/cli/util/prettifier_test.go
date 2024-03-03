@@ -35,17 +35,19 @@ func TestFormatParserError(t *testing.T) {
 func TestReflowsLongMessages(t *testing.T) {
 	block, _ := txt.ParseBlock("Foo bar", 1)
 	err := app.NewParserErrors([]txt.Error{
-		txt.NewError(block, 0, 4, 3, "CODE", "Some Title", "A verbose description with details, potentially spanning multiple lines with a comprehensive text and tremendously helpful information.\nBut it respects newlines."),
+		txt.NewError(block, 0, 4, 3, "CODE", "Some Title", "A verbose description with details, potentially spanning multiple lines with a comprehensive text and tremendously helpful information.\nBut\nit\nrespects\nnewlines."),
 	})
 	text := PrettifyParsingError(err, false, styler).Error()
 	assert.Equal(t, `
 [SYNTAX ERROR] in line 2
     Foo bar
         ^^^
-    Some Title: A verbose description with details, potentially
-    spanning multiple lines with a comprehensive text
-    and tremendously helpful information.
-    But it respects newlines.
+    Some Title: A verbose description with details, potentially spanning multiple
+    lines with a comprehensive text and tremendously helpful information.
+    But
+    it
+    respects
+    newlines.
 `, tf.StripAllAnsiSequences(text))
 }
 
