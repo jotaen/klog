@@ -1,6 +1,10 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## v?.? (????-??-??)
+- **[ FEATURE ]** For `klog start`, add `--resume-nth`/`-N` flag to specify the
+  entry to resume.
+
 ## v6.3 (2024-03-03)
 - **[ BREAKING ]** For `klog pause`, you cannot use the `--extend` and `--summary`
   flags together anymore.
