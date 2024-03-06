@@ -68,7 +68,10 @@ You can specify input data in one of these 3 ways:
 
 Run 'klog bookmarks --help' to learn about bookmark usage.
 
-One general note about flags: for all flags that have values, you can either use a space or an equals sign as delimiter, i.e. both '--flag value' and '--flag=value' are fine.
+Some general notes on flag usage:
+  - For flags with values, you can either use a space or an equals sign as delimiter. E.g., both '--flag value' and '--flag=value' are fine.
+  - For shorthand flags with values, you specify the value without a delimiter. E.g., '-n2' (if the long form is '--number 2').
+  - For shorthand flags without values, you can compact them. E.g., '-abc' is the same as '-a -b -c'.
 `
 }
 
