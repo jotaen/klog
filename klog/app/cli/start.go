@@ -11,7 +11,8 @@ import (
 
 type Start struct {
 	SummaryText klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for this entry."`
-	Resume      bool              `name:"resume" short:"R" help:"Take over summary of last entry (if applicable)."`
+	Resume      bool              `name:"resume" short:"R" help:"Take over summary of last entry (if applicable). If the target record is new or empty, it looks at the previous record."`
+	ResumeNth   int               `name:"resume-nth" short:"N" help:"Take over summary of nth entry. If INT is positive, it counts from the start (beginning with '1'); if negative, it counts from the end (beginning with '-1')"`
 	util.AtDateAndTimeArgs
 	util.NoStyleArgs
 	util.WarnArgs
@@ -64,11 +65,18 @@ func (opt *Start) Run(ctx app.Context) app.Error {
 
 func (opt *Start) Summary(currentRecord klog.Record, previousRecord klog.Record) (klog.EntrySummary, app.Error) {
 	// Check for conflicting flags.
-	if opt.SummaryText != nil && opt.Resume {
+	if opt.SummaryText != nil && (opt.Resume || opt.ResumeNth != 0) {
 		return nil, app.NewErrorWithCode(
 			app.LOGICAL_ERROR,
 			"Conflicting flags: --summary and --resume cannot be used at the same time",
 			"",
+			nil,
+		)
+	}
+	if opt.Resume && opt.ResumeNth != 0 {
+		return nil, app.NewError(
+			"Illegal flag combination",
+			"Cannot combine --resume and --resume-nth",
 			nil,
 		)
 	}
@@ -78,30 +86,49 @@ func (opt *Start) Summary(currentRecord klog.Record, previousRecord klog.Record)
 		return opt.SummaryText, nil
 	}
 
-	// Skip if resume flag wasn’t specified.
-	if !opt.Resume {
+	// If --resume was specified: return summary of last entry from current record, if
+	// it has any entries. Otherwise, return summary of last entry from previous record,
+	// if exists.
+	if opt.Resume {
+		if e, ok := findNthEntry(currentRecord, -1); ok {
+			return e.Summary(), nil
+		}
+		if previousRecord != nil {
+			if e, ok := findNthEntry(previousRecord, -1); ok {
+				return e.Summary(), nil
+			}
+		}
 		return nil, nil
 	}
 
-	// Return summary of last entry from current record, if it has any entries.
-	if len(currentRecord.Entries()) > 0 {
-		return lastEntrySummary(currentRecord), nil
-	}
-
-	// Return summary of last entry from previous record, if exists.
-	if previousRecord != nil {
-		return lastEntrySummary(previousRecord), nil
+	// If --resume-nth was specified: return summary of nth-entry. In contrast to --resume,
+	// don’t fall back to previous record, as that would be unintuitive here.
+	if opt.ResumeNth != 0 {
+		if e, ok := findNthEntry(currentRecord, opt.ResumeNth); ok {
+			return e.Summary(), nil
+		}
+		return nil, app.NewError(
+			"No such entry",
+			"",
+			nil,
+		)
 	}
 
 	return nil, nil
 }
 
-func lastEntrySummary(r klog.Record) klog.EntrySummary {
+func findNthEntry(r klog.Record, nr int) (klog.Entry, bool) {
 	entriesCount := len(r.Entries())
-	if entriesCount == 0 {
-		return nil
+	i := func() int {
+		if nr > 0 {
+			return nr - 1
+		}
+		return entriesCount + nr
+	}()
+	if i < 0 || i > entriesCount-1 {
+		return klog.Entry{}, false
 	}
-	return r.Entries()[entriesCount-1].Summary()
+	return r.Entries()[i], true
 }
 
 type PreviousRecordSpy struct {

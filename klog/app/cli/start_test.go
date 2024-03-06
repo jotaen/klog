@@ -366,13 +366,131 @@ func TestStartWithResume(t *testing.T) {
 `, state.writtenFileContents)
 	})
 
-	t.Run("Resuming fails if summary tag is specified as well", func(t *testing.T) {
+	t.Run("Fails if --summary flag is specified as well", func(t *testing.T) {
 		_, err := NewTestingContext()._SetRecords(`1623-12-13
     8:13 - 9:44
         Work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
 			Resume:      true,
 			SummaryText: klog.Ɀ_EntrySummary_("Test"),
+		}).Run)
+		require.Error(t, err)
+	})
+
+	t.Run("Fails if --resume-nth flag is specified as well", func(t *testing.T) {
+		_, err := NewTestingContext()._SetRecords(`1623-12-13
+    8:13 - 9:44
+        Work
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+			Resume:    true,
+			ResumeNth: 1,
+		}).Run)
+		require.Error(t, err)
+	})
+}
+
+func TestStartWithResumeNth(t *testing.T) {
+	t.Run("Takes over first entry", func(t *testing.T) {
+		for _, nth := range []int{1, -3} {
+			state, err := NewTestingContext()._SetRecords(`1623-12-13
+    1h Foo
+    2h Bar
+    3h Asdf
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+				ResumeNth: nth,
+			}).Run)
+			require.Nil(t, err)
+			assert.Equal(t, `1623-12-13
+    1h Foo
+    2h Bar
+    3h Asdf
+    12:49 - ? Foo
+`, state.writtenFileContents)
+		}
+	})
+
+	t.Run("Takes over second entry", func(t *testing.T) {
+		for _, nth := range []int{2, -2} {
+			state, err := NewTestingContext()._SetRecords(`1623-12-13
+    1h Foo
+    2h Bar
+    3h Asdf
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+				ResumeNth: nth,
+			}).Run)
+			require.Nil(t, err)
+			assert.Equal(t, `1623-12-13
+    1h Foo
+    2h Bar
+    3h Asdf
+    12:49 - ? Bar
+`, state.writtenFileContents)
+		}
+	})
+
+	t.Run("Takes over empty entry", func(t *testing.T) {
+		for _, nth := range []int{3, -1} {
+			state, err := NewTestingContext()._SetRecords(`1623-12-13
+    1h Foo
+    2h Bar
+    3h
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+				ResumeNth: nth,
+			}).Run)
+			require.Nil(t, err)
+			assert.Equal(t, `1623-12-13
+    1h Foo
+    2h Bar
+    3h
+    12:49 - ?
+`, state.writtenFileContents)
+		}
+	})
+
+	t.Run("Fails if out of bounds", func(t *testing.T) {
+		for _, nth := range []int{4, 5, 10, -4, -5, -10} {
+			_, err := NewTestingContext()._SetRecords(`1623-12-13
+    1h Foo
+    2h Bar
+    3h Asdf
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+				ResumeNth: nth,
+			}).Run)
+			require.Error(t, err)
+		}
+	})
+
+	t.Run("Doesn’t fall back to previous record", func(t *testing.T) {
+		_, err := NewTestingContext()._SetRecords(`1623-12-12
+    1h Foo
+    2h Bar
+    3h Asdf
+
+1623-12-13
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+			ResumeNth: -1,
+		}).Run)
+		require.Error(t, err)
+	})
+
+	t.Run("Fails if --summary flag is specified as well", func(t *testing.T) {
+		_, err := NewTestingContext()._SetRecords(`1623-12-13
+    8:13 - 9:44
+        Work
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+			ResumeNth:   1,
+			SummaryText: klog.Ɀ_EntrySummary_("Test"),
+		}).Run)
+		require.Error(t, err)
+	})
+
+	t.Run("Fails if --resume flag is specified as well", func(t *testing.T) {
+		_, err := NewTestingContext()._SetRecords(`1623-12-13
+    8:13 - 9:44
+        Work
+`)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
+			Resume:    true,
+			ResumeNth: 1,
 		}).Run)
 		require.Error(t, err)
 	})
