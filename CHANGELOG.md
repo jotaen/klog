@@ -4,6 +4,7 @@
 ## v?.? (????-??-??)
 - **[ FEATURE ]** For `klog start`, add `--resume-nth`/`-N` flag to specify the
   entry to resume.
+- **[ FIX ]** Fix output coloring of total values in `klog print --with-totals`.
 
 ## v6.3 (2024-03-03)
 - **[ BREAKING ]** For `klog pause`, you cannot use the `--extend` and `--summary`
