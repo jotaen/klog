@@ -102,7 +102,7 @@ func printWithDurations(styler tf.Styler, ls parser.Lines) string {
 			length := len(p.d.ToString())
 			value := ""
 			if p.isSub {
-				value += styler.Props(tf.StyleProps{Color: tf.RED}).Format(p.d.ToString())
+				value += styler.Props(tf.StyleProps{Color: tf.SUBDUED}).Format(p.d.ToString())
 			} else {
 				value += styler.Props(tf.StyleProps{IsUnderlined: true}).Format(p.d.ToString())
 			}
