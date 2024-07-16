@@ -1,7 +1,9 @@
 # Changelog
 **Summary of changes of the command line tool**
 
-## v?.? (????-??-??)
+## v6.4 (2024-07-16)
+- **[ FEATURE ]** Add new `--create` flag to `klog bookmarks set`, which creates
+  a new empty target file alongside the bookmark.
 - **[ FEATURE ]** For `klog start`, add `--resume-nth`/`-N` flag to specify the
   entry to resume.
 - **[ FIX ]** Fix output coloring of total values in `klog print --with-totals`.
