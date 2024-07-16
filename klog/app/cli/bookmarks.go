@@ -1,9 +1,11 @@
 package cli
 
 import (
+	"os"
+	"strings"
+
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/util"
-	"strings"
 )
 
 type Bookmarks struct {
@@ -38,6 +40,10 @@ This is useful in case you only have one main file at a time, and allows you to 
 
     klog total
     klog start --summary 'Started new project'
+
+    To initialize a new bookmark and file with the following command:
+
+    klog bookmarks set --create my-bookmarks.klg
 `
 }
 
@@ -89,17 +95,42 @@ func (opt *BookmarksInfo) Run(ctx app.Context) error {
 }
 
 type BookmarksSet struct {
-	File  string `arg:"" type:"string" predictor:"file" help:".klg source file"`
-	Name  string `arg:"" name:"bookmark" type:"string" optional:"1" help:"The name of the bookmark."`
-	Force bool   `name:"force" help:"Force to set, even if target file does not exist or is invalid"`
+	File   string `arg:"" type:"string" predictor:"file" help:".klg source file"`
+	Name   string `arg:"" name:"bookmark" type:"string" optional:"1" help:"The name of the bookmark."`
+	Force  bool   `name:"force" help:"Force to set, even if target file does not exist or is invalid"`
+	Create bool   `name:"create" help:"Create a new file with the given name"`
 	util.QuietArgs
 }
 
 func (opt *BookmarksSet) Run(ctx app.Context) error {
+	if opt.Create {
+		if opt.File == "" {
+			return app.NewErrorWithCode(
+				app.GENERAL_ERROR,
+				"No file specified",
+				"Please provide a file name",
+				nil,
+			)
+		}
+		_, err := os.Create(opt.File)
+		if err != nil {
+			return app.NewErrorWithCode(
+				app.GENERAL_ERROR,
+				"Cannot create file",
+				"Please check the file name and permissions",
+				err,
+			)
+		}
+		_, err = app.NewFile(opt.File)
+		if err != nil {
+			return err
+		}
+	}
 	file, err := app.NewFile(opt.File)
 	if err != nil {
 		return err
 	}
+
 	if !opt.Force {
 		_, rErr := ctx.ReadInputs(app.FileOrBookmarkName(file.Path()))
 		if rErr != nil {
