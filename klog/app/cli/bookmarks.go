@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"os"
 	"strings"
 
 	"github.com/jotaen/klog/klog/app"
@@ -26,7 +25,7 @@ type Bookmarks struct {
 func (opt *Bookmarks) Help() string {
 	return `
 Bookmarks allow you to interact with often-used files via an alias, independent of your current working directory.
-You can think of a bookmark as some sort of klog-specific symlink, that’s always available when you invoke klog, and that resolves to the designated file.
+You can think of a bookmark as some sort of klog-specific symlink, that’s always available when you invoke klog, and that resolves to the designated target file.
 Use the subcommands below to set up and manage your bookmarks.
 
 A bookmark name is denoted by the prefix '@'. For example, if you have a bookmark named '@work', that points to a .klg file, you can use klog like this:
@@ -41,9 +40,7 @@ This is useful in case you only have one main file at a time, and allows you to 
     klog total
     klog start --summary 'Started new project'
 
-    To initialize a new bookmark and file with the following command:
-
-    klog bookmarks set --create my-bookmarks.klg
+When creating a bookmark, you can also create the respective target file by using the '--create' flag.
 `
 }
 
@@ -95,36 +92,24 @@ func (opt *BookmarksInfo) Run(ctx app.Context) error {
 }
 
 type BookmarksSet struct {
-	File   string `arg:"" type:"string" predictor:"file" help:".klg source file"`
+	File   string `arg:"" type:"string" predictor:"file" help:".klg target file"`
 	Name   string `arg:"" name:"bookmark" type:"string" optional:"1" help:"The name of the bookmark."`
+	Create bool   `name:"create" short:"c" help:"Create the target file"`
 	Force  bool   `name:"force" help:"Force to set, even if target file does not exist or is invalid"`
-	Create bool   `name:"create" help:"Create a new file with the given name"`
 	util.QuietArgs
 }
 
 func (opt *BookmarksSet) Run(ctx app.Context) error {
-	if opt.Create {
-		if opt.File == "" {
-			return app.NewErrorWithCode(
-				app.GENERAL_ERROR,
-				"No file specified",
-				"Please provide a file name",
-				nil,
-			)
-		}
-		_, err := os.Create(opt.File)
-		if err != nil {
-			return app.NewErrorWithCode(
-				app.GENERAL_ERROR,
-				"Cannot create file",
-				"Please check the file name and permissions",
-				err,
-			)
-		}
-	}
 	file, err := app.NewFile(opt.File)
 	if err != nil {
 		return err
+	}
+
+	if opt.Create {
+		cErr := app.CreateEmptyFile(file)
+		if cErr != nil {
+			return cErr
+		}
 	}
 
 	if !opt.Force {
@@ -155,10 +140,14 @@ func (opt *BookmarksSet) Run(ctx app.Context) error {
 	}
 	if !opt.Quiet {
 		if didBookmarkAlreadyExist {
-			ctx.Print("Changed bookmark:\n")
+			ctx.Print("Changed bookmark")
 		} else {
-			ctx.Print("Created new bookmark:\n")
+			ctx.Print("Created new bookmark")
 		}
+		if opt.Create {
+			ctx.Print(" and created target file")
+		}
+		ctx.Print(":\n")
 	}
 	ctx.Print(bookmark.Name().ValuePretty() + " -> " + bookmark.Target().Path() + "\n")
 	return nil

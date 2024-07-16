@@ -131,6 +131,31 @@ func WriteToFile(target File, contents string) Error {
 	return nil
 }
 
+// CreateEmptyFile creates a new file on disk.
+// It returns an error if the file already exists, or if the file cannot be
+// created.
+func CreateEmptyFile(file File) Error {
+	if _, sErr := os.Stat(file.Path()); !os.IsNotExist(sErr) {
+		return NewErrorWithCode(
+			GENERAL_ERROR,
+			"Cannot create file",
+			"There is already a file at that location",
+			sErr,
+		)
+	}
+	// Note: `os.Create` would truncate the file if it already exists.
+	_, cErr := os.Create(file.Path())
+	if cErr != nil {
+		return NewErrorWithCode(
+			GENERAL_ERROR,
+			"Cannot create file",
+			"Please check the file name and permissions",
+			cErr,
+		)
+	}
+	return nil
+}
+
 // ReadStdin reads the entire input from stdin and returns it as string.
 // It returns an error if stdin cannot be accessed, or if reading from it fails.
 func ReadStdin() (string, Error) {
