@@ -46,7 +46,7 @@ func TestPrintAppErrors(t *testing.T) {
 	assert.True(t, strings.Contains(out[2], "There is already an open range in this record"), out)
 }
 
-func TestBookmarkFile(t *testing.T) {
+func TestConfigureAndUseBookmark(t *testing.T) {
 	klog := &Env{
 		files: map[string]string{
 			"test.klg": "2020-01-01\nSome stuff\n\t1h7m\n",
@@ -69,6 +69,21 @@ func TestBookmarkFile(t *testing.T) {
 	assert.True(t, strings.Contains(out[2], "@tst"), out)
 	// Out 3 like: `Total: 1h7m`
 	assert.True(t, strings.Contains(out[3], "1h7m"), out)
+}
+
+func TestCreateBookmarkTargetFileOnDemand(t *testing.T) {
+	klog := &Env{}
+	out := klog.run(
+		[]string{"bookmarks", "set", "--create", "test.klg", "tst"},
+		[]string{"bookmarks", "set", "--create", "test.klg", "tst"},
+	)
+	// Out 0 like: `Created new bookmark`, `@tst -> /tmp/.../test.klg`
+	assert.True(t, strings.Contains(out[0], "Created new bookmark and created target file:"), out)
+	assert.True(t, strings.Contains(out[0], "@tst"), out)
+	assert.True(t, strings.Contains(out[0], "test.klg"), out)
+	// Out 1 like: `Error: Cannot create file`, `There is already a file at that location`
+	assert.True(t, strings.Contains(out[1], "Error: Cannot create file"), out)
+	assert.True(t, strings.Contains(out[1], "There is already a file at that location"), out)
 }
 
 func TestWriteToFile(t *testing.T) {
