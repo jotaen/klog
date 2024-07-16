@@ -121,10 +121,6 @@ func (opt *BookmarksSet) Run(ctx app.Context) error {
 				err,
 			)
 		}
-		_, err = app.NewFile(opt.File)
-		if err != nil {
-			return err
-		}
 	}
 	file, err := app.NewFile(opt.File)
 	if err != nil {
