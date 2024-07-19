@@ -2,11 +2,12 @@ package app
 
 import (
 	"errors"
+	"strings"
+
 	"github.com/jotaen/genie"
 	"github.com/jotaen/klog/klog"
 	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/service"
-	"strings"
 )
 
 // Config contain all variable settings that influence the behaviour of
@@ -41,6 +42,9 @@ type Config struct {
 
 	// TimeUse24HourClock denotes the preferred time format: 13:00 (true) or 1:00pm (false).
 	TimeUse24HourClock OptionalParam[bool]
+
+	// HideWarnings indicates whether klog should suppress warnings.
+	HideWarnings OptionalParam[bool]
 }
 
 type Reader interface {
@@ -315,6 +319,35 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			Summary: "The preferred time convention for klog to use when adding a new time range entry to a target file, i.e. whether it uses the 24-hour clock (as in `13:00`) or the 12-hour clock (as in `1:00pm`).",
 			Value:   "The config property must be either `24h` or `12h`.",
 			Default: "If absent/empty, klog automatically tries to be consistent with what is used in the target file; in doubt, it defaults to the 24-hour clock format.",
+		},
+	}, {
+		Name: "hide_warnings",
+		reader: func(value string, config *Config) error {
+			switch value {
+			case "true":
+				config.HideWarnings.set(true, configOriginFile)
+			case "false":
+				config.HideWarnings.set(false, configOriginFile)
+			default:
+				return errors.New("The value must be `true` or `false`")
+			}
+			return nil
+		},
+		value: func(c Config) (string, configOrigin) {
+			result := ""
+			c.HideWarnings.Unwrap(func(h bool) {
+				if h {
+					result = "true"
+				} else {
+					result = "false"
+				}
+			})
+			return result, c.HideWarnings.origin
+		},
+		Help: Help{
+			Summary: "Whether klog should suppress warnings when printing time reports.",
+			Value:   "The config property must be either `true` or `false`.",
+			Default: "If absent/empty, klog prints warnings.",
 		},
 	},
 }

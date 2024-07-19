@@ -260,7 +260,7 @@ type WarnArgs struct {
 
 func (args *WarnArgs) PrintWarnings(ctx app.Context, records []klog.Record, additionalWarnings []string) {
 	styler, _ := ctx.Serialise()
-	if args.NoWarn {
+	if args.NoWarn || ctx.Config().HideWarnings.UnwrapOr(false) {
 		return
 	}
 	for _, msg := range additionalWarnings {
