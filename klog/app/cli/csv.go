@@ -53,8 +53,12 @@ func (opt *Csv) Run(ctx app.Context) app.Error {
 			recordText := strings.Join(sanitizedText, " ")
 
 			tags := summary.Tags().ToStrings()
-			for _, tag := range tags {
-				fmt.Printf("%s,%d,\"%s\",\"%s\"\n", date, duration, tag, recordText)
+			if len(tags) == 0 {
+				fmt.Printf("%s,%d,,\"%s\"\n", date, duration, recordText)
+			} else {
+				for _, tag := range tags {
+					fmt.Printf("%s,%d,\"%s\",\"%s\"\n", date, duration, tag, recordText)
+				}
 			}
 		}
 	}
