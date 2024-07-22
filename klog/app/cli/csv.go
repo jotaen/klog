@@ -17,16 +17,29 @@ type Csv struct {
 
 func (opt *Csv) Help() string {
 	return `
-This commands outputs the records into a simple csv format with the following collumns:
+This command outputs the records into a simple csv format with the following columns:
 
 Example:
 date, duration, tag, description
 2020-01-01 , 60     , #science      , Worked on the project
 Please note: Entries with >1 tag will be repeated for each tag.
 duration will always be in minutes.
-If there are errors in the parsing, they will be printed on separate lines. and
+If there are errors in parsing, they will be printed on separate lines, and
 the operation will return a non-zero exit code.
 `
+}
+
+const csvHeader = "date,duration,tag,description\n"
+
+func sanitizeText(text string) string {
+	sanitizedText := []string{}
+	words := strings.Fields(text)
+	for _, word := range words {
+		if !strings.HasPrefix(word, "#") {
+			sanitizedText = append(sanitizedText, word)
+		}
+	}
+	return strings.Join(sanitizedText, " ")
 }
 
 func (opt *Csv) Run(ctx app.Context) app.Error {
@@ -34,23 +47,14 @@ func (opt *Csv) Run(ctx app.Context) app.Error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("date,duration,tag,description\n")
+	fmt.Print(csvHeader)
 	for _, record := range records {
 		entries := record.Entries()
 		for _, entry := range entries {
+			date := record.Date().ToString()
 			duration := entry.Duration().InMinutes()
 			summary := entry.Summary()
-			date := record.Date().ToString()
-
-			text := strings.Join(summary.Lines(), " ")
-			sanitizedText := []string{}
-			words := strings.Fields(text)
-			for _, word := range words {
-				if !strings.HasPrefix(word, "#") {
-					sanitizedText = append(sanitizedText, word)
-				}
-			}
-			recordText := strings.Join(sanitizedText, " ")
+			recordText := sanitizeText(strings.Join(summary.Lines(), " "))
 
 			tags := summary.Tags().ToStrings()
 			if len(tags) == 0 {
