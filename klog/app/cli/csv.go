@@ -18,9 +18,9 @@ type Csv struct {
 func (opt *Csv) Help() string {
 	return `
 This commands outputs the records into a simple csv format with the following collumns:
-| Date | Duration | Tags | Description |
+
 Example:
-date       ,duration, tag           , description          
+date, duration, tag, description
 2020-01-01 , 60     , #science      , Worked on the project
 Please note: Entries with >1 tag will be repeated for each tag.
 duration will always be in minutes.
