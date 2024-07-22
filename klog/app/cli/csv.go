@@ -50,6 +50,10 @@ func (opt *Csv) Run(ctx app.Context) app.Error {
 	fmt.Print(csvHeader)
 	for _, record := range records {
 		entries := record.Entries()
+		if len(entries) == 0 {
+			fmt.Printf("%s,0,,\n", record.Date().ToString())
+			continue
+		}
 		for _, entry := range entries {
 			date := record.Date().ToString()
 			duration := entry.Duration().InMinutes()
