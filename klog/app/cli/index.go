@@ -46,6 +46,7 @@ type Cli struct {
 	Config     Config        `cmd:"" name:"config" group:"Misc" help:"Print the current configuration."`
 	Info       Info          `cmd:"" name:"info" group:"Misc" help:"Print information about klog."`
 	Json       Json          `cmd:"" name:"json" group:"Misc" help:"Convert records to JSON."`
+	Csv       Csv          `cmd:"" name:"csv" group:"Misc" help:"Convert records to CSV."`
 	Completion kc.Completion `cmd:"" name:"completion" group:"Misc" help:"Output shell code for enabling tab completion."`
 }
 
