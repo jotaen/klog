@@ -27,7 +27,7 @@ func checkForWarningsWithCollect(reference gotime.Time, rs []klog.Record) []Warn
 }
 
 func TestNoWarnForOpenRanges(t *testing.T) {
-	timestamp := gotime.Date(2000, 3, 5, 12, 0o0, 0, 0, gotime.Local)
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
 	today := klog.NewDateFromGo(timestamp)
 	now := klog.NewTimeFromGo(timestamp)
 
@@ -57,7 +57,7 @@ func TestNoWarnForOpenRanges(t *testing.T) {
 }
 
 func TestOpenRangeWarningWhenUnclosedOpenRangeBeforeTodayRegardlessOfOrder(t *testing.T) {
-	timestamp := gotime.Date(2000, 3, 5, 12, 0o0, 0, 0, gotime.Local)
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
 	today := klog.NewDateFromGo(timestamp)
 	now := klog.NewTimeFromGo(timestamp)
 	// The warnings must work reliably even when the records are not ordered by date initially
@@ -84,7 +84,7 @@ func TestOpenRangeWarningWhenUnclosedOpenRangeBeforeTodayRegardlessOfOrder(t *te
 }
 
 func TestNoWarningForFutureEntries(t *testing.T) {
-	timestamp := gotime.Date(2000, 3, 5, 12, 0o0, 0, 0, gotime.Local)
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
 	today := klog.NewDateFromGo(timestamp)
 	rs := []klog.Record{
 		func() klog.Record {
@@ -118,7 +118,7 @@ func TestNoWarningForFutureEntries(t *testing.T) {
 }
 
 func TestFutureEntriesWarning(t *testing.T) {
-	timestamp := gotime.Date(2000, 3, 5, 12, 0o0, 0, 0, gotime.Local)
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
 	today := klog.NewDateFromGo(timestamp)
 	rs := []klog.Record{
 		func() klog.Record {
@@ -138,13 +138,13 @@ func TestFutureEntriesWarning(t *testing.T) {
 		}(),
 		func() klog.Record {
 			r := klog.NewRecord(today)
-			r.AddRange(klog.Ɀ_Range_(klog.Ɀ_Time_(11, 0o0), klog.Ɀ_Time_(12, 31)), nil)
+			r.AddRange(klog.Ɀ_Range_(klog.Ɀ_Time_(11, 00), klog.Ɀ_Time_(12, 31)), nil)
 			return r
 		}(),
 		func() klog.Record {
 			r := klog.NewRecord(today)
 			// Times shifted to next day
-			r.AddRange(klog.Ɀ_Range_(klog.Ɀ_TimeTomorrow_(1, 0o0), klog.Ɀ_TimeTomorrow_(3, 0)), nil)
+			r.AddRange(klog.Ɀ_Range_(klog.Ɀ_TimeTomorrow_(1, 00), klog.Ɀ_TimeTomorrow_(3, 0)), nil)
 			return r
 		}(),
 		func() klog.Record {
@@ -165,7 +165,7 @@ func TestFutureEntriesWarning(t *testing.T) {
 }
 
 func TestNoWarnForMoreThan24HoursPerRecord(t *testing.T) {
-	timestamp := gotime.Date(2000, 3, 5, 12, 0o0, 0, 0, gotime.Local)
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
 	today := klog.NewDateFromGo(timestamp)
 	rs := []klog.Record{
 		func() klog.Record {
@@ -179,7 +179,7 @@ func TestNoWarnForMoreThan24HoursPerRecord(t *testing.T) {
 }
 
 func TestMoreThan24HoursPerRecord(t *testing.T) {
-	timestamp := gotime.Date(2000, 3, 5, 12, 0o0, 0, 0, gotime.Local)
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
 	today := klog.NewDateFromGo(timestamp)
 	rs := []klog.Record{
 		func() klog.Record {
@@ -198,7 +198,7 @@ func TestMoreThan24HoursPerRecord(t *testing.T) {
 }
 
 func TestNoWarnForOverlappingTimeRanges(t *testing.T) {
-	timestamp := gotime.Date(2000, 3, 5, 12, 0o0, 0, 0, gotime.Local)
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
 	today := klog.NewDateFromGo(timestamp)
 	rs := []klog.Record{
 		func() klog.Record {
@@ -218,7 +218,7 @@ func TestNoWarnForOverlappingTimeRanges(t *testing.T) {
 }
 
 func TestOverlappingTimeRanges(t *testing.T) {
-	timestamp := gotime.Date(2000, 3, 5, 12, 0o0, 0, 0, gotime.Local)
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
 	today := klog.NewDateFromGo(timestamp)
 	rs := []klog.Record{
 		func() klog.Record {
