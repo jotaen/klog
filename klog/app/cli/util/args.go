@@ -1,14 +1,15 @@
 package util
 
 import (
+	"strings"
+	gotime "time"
+
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
-	"strings"
-	gotime "time"
 )
 
 type InputFilesArgs struct {
@@ -260,15 +261,16 @@ type WarnArgs struct {
 
 func (args *WarnArgs) PrintWarnings(ctx app.Context, records []klog.Record, additionalWarnings []string) {
 	styler, _ := ctx.Serialise()
-	if args.NoWarn || ctx.Config().HideWarnings.UnwrapOr(false) {
+	if args.NoWarn {
 		return
 	}
 	for _, msg := range additionalWarnings {
 		ctx.Print(PrettifyGeneralWarning(msg, styler))
 	}
+	disabledCheckers := ctx.Config().HideWarnings.UnwrapOr([]string{})
 	service.CheckForWarnings(func(w service.Warning) {
 		ctx.Print(PrettifyWarning(w, styler))
-	}, ctx.Now(), records)
+	}, ctx.Now(), records, disabledCheckers)
 }
 
 type NoStyleArgs struct {

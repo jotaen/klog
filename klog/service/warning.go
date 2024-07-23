@@ -1,9 +1,10 @@
 package service
 
 import (
-	"github.com/jotaen/klog/klog"
 	"sort"
 	gotime "time"
+
+	"github.com/jotaen/klog/klog"
 )
 
 // Warning contains information for helping locate an issue.
@@ -32,14 +33,21 @@ type checker interface {
 // strict validation, but the main purpose is to help users spot accidental mistakes users
 // might have made. The checks are limited to record-level, because otherwise it would
 // need to make assumptions on how records are organised within or across files.
-func CheckForWarnings(onWarn func(Warning), reference gotime.Time, rs []klog.Record) {
+func CheckForWarnings(onWarn func(Warning), reference gotime.Time, rs []klog.Record, disabledCheckers []string) {
 	now := NewDateTimeFromGo(reference)
 	sortedRs := Sort(rs, false)
-	checkers := []checker{
-		&unclosedOpenRangeChecker{today: now.Date},
-		&futureEntriesChecker{now: now, gracePeriod: klog.NewDuration(0, 31)},
-		&overlappingTimeRangesChecker{},
-		&moreThan24HoursChecker{},
+	checkers := []checker{}
+	if !contains(disabledCheckers, "unclosedOpenRange") {
+		checkers = append(checkers, &unclosedOpenRangeChecker{today: now.Date})
+	}
+	if !contains(disabledCheckers, "futureEntries") {
+		checkers = append(checkers, &futureEntriesChecker{now: now, gracePeriod: klog.NewDuration(0, 31)})
+	}
+	if !contains(disabledCheckers, "overlappingTimeRanges") {
+		checkers = append(checkers, &overlappingTimeRangesChecker{})
+	}
+	if !contains(disabledCheckers, "moreThan24Hours") {
+		checkers = append(checkers, &moreThan24HoursChecker{})
 	}
 	for _, r := range sortedRs {
 		for _, c := range checkers {
@@ -199,4 +207,13 @@ func (c *moreThan24HoursChecker) Warn(record klog.Record) klog.Date {
 
 func (c *moreThan24HoursChecker) Message() string {
 	return "Total time exceeds 24 hours"
+}
+
+func contains(haystack []string, needle string) bool {
+	for _, h := range haystack {
+		if h == needle {
+			return true
+		}
+	}
+	return false
 }

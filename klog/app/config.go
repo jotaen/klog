@@ -43,8 +43,8 @@ type Config struct {
 	// TimeUse24HourClock denotes the preferred time format: 13:00 (true) or 1:00pm (false).
 	TimeUse24HourClock OptionalParam[bool]
 
-	// HideWarnings indicates whether klog should suppress warnings.
-	HideWarnings OptionalParam[bool]
+	// HideWarnings indicates klog should suppress any warning types.
+	HideWarnings OptionalParam[[]string]
 }
 
 type Reader interface {
@@ -321,33 +321,34 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			Default: "If absent/empty, klog automatically tries to be consistent with what is used in the target file; in doubt, it defaults to the 24-hour clock format.",
 		},
 	}, {
-		Name: "hide_warnings",
+		Name: "no_warnings",
 		reader: func(value string, config *Config) error {
-			switch value {
-			case "true":
-				config.HideWarnings.set(true, configOriginFile)
-			case "false":
-				config.HideWarnings.set(false, configOriginFile)
-			default:
-				return errors.New("The value must be `true` or `false`")
+			sanitizedString := strings.ToLower(strings.ReplaceAll(value, " ", ""))
+			warningConfigs := strings.Split(sanitizedString, ",")
+
+			hideWarnings := []string{}
+			for _, warningConfig := range warningConfigs {
+				checkerName, err := convertToCheckerName(warningConfig)
+				if err != nil {
+					return err
+				}
+				hideWarnings = append(hideWarnings, checkerName)
 			}
+
+			config.HideWarnings.set(hideWarnings, configOriginFile)
 			return nil
 		},
 		value: func(c Config) (string, configOrigin) {
 			result := ""
-			c.HideWarnings.Unwrap(func(h bool) {
-				if h {
-					result = "true"
-				} else {
-					result = "false"
-				}
+			c.HideWarnings.Unwrap(func(warningConfigs []string) {
+				result = strings.Join(warningConfigs, " , ")
 			})
 			return result, c.HideWarnings.origin
 		},
 		Help: Help{
 			Summary: "Whether klog should suppress warnings when printing time reports.",
-			Value:   "The config property must be either `true` or `false`.",
-			Default: "If absent/empty, klog prints warnings.",
+			Value:   "This value can be left blank, or set to one or more of the following: UNLCLOSED_RANGE, FUTURE_ENTRY, OVERLAPPED_RANGE, GREATER_THAN_24HRS. Multiple values must be separated by a comma, e.g. `UNLCLOSED_RANGE,OVERLAPPED_RANGE`.",
+			Default: "If absent/empty, klog prints all available warnings.",
 		},
 	},
 }
@@ -399,4 +400,24 @@ func (e FromConfigFile) Apply(config *Config) Error {
 
 	}
 	return nil
+}
+
+// We'd like to disconnect our internal names from those that are exposed to the
+// user via the configuration. This function allows us to capture that mapping as
+// needed. See the no_warnings entry in CONFIG_FILE_ENTRIES.
+func convertToCheckerName(configString string) (string, error) {
+	configString = strings.TrimSpace(configString)
+	configString = strings.ToLower(configString)
+	switch configString {
+	case "unclosed_range":
+		return "unclosedOpenRange", nil
+	case "future_entry":
+		return "futureEntries", nil
+	case "overlapped_range":
+		return "overlappingTimeRanges", nil
+	case "greater_than_24hrs":
+		return "moreThan24Hours", nil
+	default:
+		return "", errors.New("Unknown checker name:" + configString)
+	}
 }
