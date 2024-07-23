@@ -1,9 +1,10 @@
 package service
 
 import (
-	"github.com/jotaen/klog/klog"
 	"sort"
 	gotime "time"
+
+	"github.com/jotaen/klog/klog"
 )
 
 // Warning contains information for helping locate an issue.
@@ -25,6 +26,20 @@ func (w Warning) Warning() string {
 type checker interface {
 	Warn(klog.Record) klog.Date
 	Message() string
+	Name() string
+}
+
+// DisabledCheckers is a lookup table for checkers that the user wants to opt out of.
+type DisabledCheckers map[string]bool
+
+// NewDisabledCheckers creates a new lookup table with all checkers opted-in (enabled).
+func NewDisabledCheckers() DisabledCheckers {
+	return map[string]bool{
+		(&unclosedOpenRangeChecker{}).Name():     false,
+		(&futureEntriesChecker{}).Name():         false,
+		(&overlappingTimeRangesChecker{}).Name(): false,
+		(&moreThan24HoursChecker{}).Name():       false,
+	}
 }
 
 // CheckForWarnings checks records for potential logical issues in the data. For every
@@ -32,7 +47,7 @@ type checker interface {
 // strict validation, but the main purpose is to help users spot accidental mistakes users
 // might have made. The checks are limited to record-level, because otherwise it would
 // need to make assumptions on how records are organised within or across files.
-func CheckForWarnings(onWarn func(Warning), reference gotime.Time, rs []klog.Record) {
+func CheckForWarnings(onWarn func(Warning), reference gotime.Time, rs []klog.Record, disabledCheckers DisabledCheckers) {
 	now := NewDateTimeFromGo(reference)
 	sortedRs := Sort(rs, false)
 	checkers := []checker{
@@ -43,6 +58,9 @@ func CheckForWarnings(onWarn func(Warning), reference gotime.Time, rs []klog.Rec
 	}
 	for _, r := range sortedRs {
 		for _, c := range checkers {
+			if disabledCheckers[c.Name()] {
+				continue
+			}
 			d := c.Warn(r)
 			if d != nil {
 				onWarn(Warning{
@@ -81,6 +99,10 @@ func (c *unclosedOpenRangeChecker) Warn(record klog.Record) klog.Date {
 
 func (c *unclosedOpenRangeChecker) Message() string {
 	return "Unclosed open range"
+}
+
+func (c *unclosedOpenRangeChecker) Name() string {
+	return "UNCLOSED_OPEN_RANGE"
 }
 
 type futureEntriesChecker struct {
@@ -136,6 +158,10 @@ func (c *futureEntriesChecker) Message() string {
 	return "Entry in the future"
 }
 
+func (c *futureEntriesChecker) Name() string {
+	return "FUTURE_ENTRIES"
+}
+
 type overlappingTimeRangesChecker struct{}
 
 // Warn returns warnings if there are entries with overlapping time ranges.
@@ -187,6 +213,10 @@ func (c *overlappingTimeRangesChecker) Message() string {
 	return "Overlapping time ranges"
 }
 
+func (c *overlappingTimeRangesChecker) Name() string {
+	return "OVERLAPPING_RANGES"
+}
+
 type moreThan24HoursChecker struct{}
 
 // Warn returns warnings if there are records with a total time of more than 24h.
@@ -199,4 +229,8 @@ func (c *moreThan24HoursChecker) Warn(record klog.Record) klog.Date {
 
 func (c *moreThan24HoursChecker) Message() string {
 	return "Total time exceeds 24 hours"
+}
+
+func (c *moreThan24HoursChecker) Name() string {
+	return "MORE_THAN_24H"
 }

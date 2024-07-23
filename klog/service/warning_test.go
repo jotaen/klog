@@ -1,10 +1,11 @@
 package service
 
 import (
-	"github.com/jotaen/klog/klog"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	gotime "time"
+
+	"github.com/jotaen/klog/klog"
+	"github.com/stretchr/testify/assert"
 )
 
 func countWarningsOfKind(c checker, ws []Warning) int {
@@ -17,11 +18,11 @@ func countWarningsOfKind(c checker, ws []Warning) int {
 	return count
 }
 
-func checkForWarningsWithCollect(reference gotime.Time, rs []klog.Record) []Warning {
+func collectWarnings(reference gotime.Time, rs []klog.Record) []Warning {
 	var ws []Warning
 	CheckForWarnings(func(w Warning) {
 		ws = append(ws, w)
-	}, reference, rs)
+	}, reference, rs, NewDisabledCheckers())
 	return ws
 }
 
@@ -41,7 +42,7 @@ func TestNoWarnForOpenRanges(t *testing.T) {
 			return r
 		}(),
 	}
-	ws1 := checkForWarningsWithCollect(timestamp, rs1)
+	ws1 := collectWarnings(timestamp, rs1)
 	assert.Equal(t, 0, countWarningsOfKind(&unclosedOpenRangeChecker{}, ws1))
 
 	rs2 := []klog.Record{
@@ -51,7 +52,7 @@ func TestNoWarnForOpenRanges(t *testing.T) {
 			return r
 		}(),
 	}
-	ws2 := checkForWarningsWithCollect(timestamp, rs2)
+	ws2 := collectWarnings(timestamp, rs2)
 	assert.Equal(t, 0, countWarningsOfKind(&unclosedOpenRangeChecker{}, ws2))
 }
 
@@ -76,7 +77,7 @@ func TestOpenRangeWarningWhenUnclosedOpenRangeBeforeTodayRegardlessOfOrder(t *te
 			return r
 		}(),
 	}
-	ws := checkForWarningsWithCollect(timestamp, rs)
+	ws := collectWarnings(timestamp, rs)
 	assert.Equal(t, 2, countWarningsOfKind(&unclosedOpenRangeChecker{}, ws))
 	assert.Equal(t, today.PlusDays(-1), ws[0].Date())
 	assert.Equal(t, today.PlusDays(-2), ws[1].Date())
@@ -112,7 +113,7 @@ func TestNoWarningForFutureEntries(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := checkForWarningsWithCollect(timestamp, rs)
+	ws := collectWarnings(timestamp, rs)
 	assert.Equal(t, 0, countWarningsOfKind(&futureEntriesChecker{}, ws))
 }
 
@@ -159,7 +160,7 @@ func TestFutureEntriesWarning(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := checkForWarningsWithCollect(timestamp, rs)
+	ws := collectWarnings(timestamp, rs)
 	assert.Equal(t, len(rs), countWarningsOfKind(&futureEntriesChecker{}, ws))
 }
 
@@ -173,7 +174,7 @@ func TestNoWarnForMoreThan24HoursPerRecord(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := checkForWarningsWithCollect(timestamp, rs)
+	ws := collectWarnings(timestamp, rs)
 	assert.Equal(t, 0, countWarningsOfKind(&moreThan24HoursChecker{}, ws))
 }
 
@@ -192,7 +193,7 @@ func TestMoreThan24HoursPerRecord(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := checkForWarningsWithCollect(timestamp, rs)
+	ws := collectWarnings(timestamp, rs)
 	assert.Equal(t, len(rs), countWarningsOfKind(&moreThan24HoursChecker{}, ws))
 }
 
@@ -212,7 +213,7 @@ func TestNoWarnForOverlappingTimeRanges(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := checkForWarningsWithCollect(timestamp, rs)
+	ws := collectWarnings(timestamp, rs)
 	assert.Equal(t, 0, countWarningsOfKind(&overlappingTimeRangesChecker{}, ws))
 }
 
@@ -243,6 +244,80 @@ func TestOverlappingTimeRanges(t *testing.T) {
 			return r
 		}(),
 	}
-	ws := checkForWarningsWithCollect(timestamp, rs)
+	ws := collectWarnings(timestamp, rs)
 	assert.Equal(t, len(rs), countWarningsOfKind(&overlappingTimeRangesChecker{}, ws))
+}
+
+func TestNoWarningsWithDisabledCheckers(t *testing.T) {
+	timestamp := gotime.Date(2000, 3, 5, 12, 00, 0, 0, gotime.Local)
+	today := klog.NewDateFromGo(timestamp)
+	now := klog.NewTimeFromGo(timestamp)
+
+	for _, x := range []struct {
+		dc  DisabledCheckers
+		exp int
+	}{
+		// No disabled checkers (default)
+		{func() DisabledCheckers {
+			dc := NewDisabledCheckers()
+			return dc
+		}(), 4},
+		// One checker disabled
+		{func() DisabledCheckers {
+			dc := NewDisabledCheckers()
+			dc["MORE_THAN_24H"] = true
+			return dc
+		}(), 3},
+		// Multiple checkers disabled
+		{func() DisabledCheckers {
+			dc := NewDisabledCheckers()
+			dc["FUTURE_ENTRIES"] = true
+			dc["UNCLOSED_OPEN_RANGE"] = true
+			return dc
+		}(), 2},
+		// All checkers disabled
+		{func() DisabledCheckers {
+			dc := NewDisabledCheckers()
+			dc["MORE_THAN_24H"] = true
+			dc["OVERLAPPING_RANGES"] = true
+			dc["FUTURE_ENTRIES"] = true
+			dc["UNCLOSED_OPEN_RANGE"] = true
+			return dc
+		}(), 0},
+	} {
+		rs := []klog.Record{
+			// Unclosed open range
+			func() klog.Record {
+				r := klog.NewRecord(today.PlusDays(-2))
+				r.Start(klog.NewOpenRange(now), nil)
+				return r
+			}(),
+			// Future entries
+			func() klog.Record {
+				r := klog.NewRecord(today.PlusDays(4))
+				r.AddDuration(klog.NewDuration(2, 0), nil)
+				return r
+			}(),
+			// More than 24h
+			func() klog.Record {
+				r := klog.NewRecord(today.PlusDays(-3))
+				r.AddDuration(klog.NewDuration(25, 0), nil)
+				return r
+			}(),
+			// Overlapping entries
+			func() klog.Record {
+				r := klog.NewRecord(today.PlusDays(-2))
+				r.AddRange(klog.Ɀ_Range_(klog.Ɀ_Time_(0, 15), klog.Ɀ_Time_(1, 30)), nil)
+				r.AddRange(klog.Ɀ_Range_(klog.Ɀ_Time_(0, 45), klog.Ɀ_Time_(3, 45)), nil)
+				return r
+			}(),
+		}
+
+		var ws []Warning
+		CheckForWarnings(func(w Warning) {
+			ws = append(ws, w)
+		}, timestamp, rs, x.dc)
+
+		assert.Len(t, ws, x.exp)
+	}
 }

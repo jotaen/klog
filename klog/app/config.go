@@ -2,11 +2,12 @@ package app
 
 import (
 	"errors"
+	"strings"
+
 	"github.com/jotaen/genie"
 	"github.com/jotaen/klog/klog"
 	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/service"
-	"strings"
 )
 
 // Config contain all variable settings that influence the behaviour of
@@ -41,6 +42,9 @@ type Config struct {
 
 	// TimeUse24HourClock denotes the preferred time format: 13:00 (true) or 1:00pm (false).
 	TimeUse24HourClock OptionalParam[bool]
+
+	// NoWarnings indicates klog should suppress any warning types.
+	NoWarnings OptionalParam[service.DisabledCheckers]
 }
 
 type Reader interface {
@@ -69,6 +73,7 @@ func NewDefaultConfig(c tf.ColourTheme) Config {
 		CpuKernels:         newMandatoryParam(1),
 		DefaultRounding:    newOptionalParam[service.Rounding](),
 		DefaultShouldTotal: newOptionalParam[klog.ShouldTotal](),
+		NoWarnings:         newOptionalParam[service.DisabledCheckers](),
 	}
 }
 
@@ -315,6 +320,43 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			Summary: "The preferred time convention for klog to use when adding a new time range entry to a target file, i.e. whether it uses the 24-hour clock (as in `13:00`) or the 12-hour clock (as in `1:00pm`).",
 			Value:   "The config property must be either `24h` or `12h`.",
 			Default: "If absent/empty, klog automatically tries to be consistent with what is used in the target file; in doubt, it defaults to the 24-hour clock format.",
+		},
+	}, {
+		Name: "no_warnings",
+		reader: func(value string, config *Config) error {
+			sanitizedString := strings.ReplaceAll(value, " ", "")
+			warningConfigs := strings.Split(sanitizedString, ",")
+
+			disabledCheckers := service.NewDisabledCheckers()
+			for _, c := range warningConfigs {
+				if _, nameExists := disabledCheckers[c]; !nameExists {
+					return errors.New(
+						"The value must be a valid warning name, such as `UNCLOSED_OPEN_RANGE`, got: " + c + ".",
+					)
+				}
+				disabledCheckers[c] = true
+			}
+
+			config.NoWarnings.set(disabledCheckers, configOriginFile)
+			return nil
+		},
+		value: func(c Config) (string, configOrigin) {
+			result := ""
+			c.NoWarnings.Unwrap(func(warningConfigs service.DisabledCheckers) {
+				keys := make([]string, 0, len(warningConfigs))
+				for k, optedOut := range warningConfigs {
+					if optedOut {
+						keys = append(keys, k)
+					}
+				}
+				result = strings.Join(keys, ", ")
+			})
+			return result, c.NoWarnings.origin
+		},
+		Help: Help{
+			Summary: "Whether klog should suppress warnings when processing files.",
+			Value:   "The config property must be one of: `UNCLOSED_OPEN_RANGE` (for unclosed open ranges in past records), `FUTURE_ENTRIES` (for records/entries in the future), `OVERLAPPING_RANGES` (for time ranges that overlap), `MORE_THAN_24H` (if there is a record with more than 24h total). Multiple values must be separated by a comma, e.g.: `UNCLOSED_OPEN_RANGE, MORE_THAN_24H`.",
+			Default: "If absent/empty, klog prints all available warnings.",
 		},
 	},
 }
