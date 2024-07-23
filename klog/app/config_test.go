@@ -21,7 +21,7 @@ func TestCreatesNewDefaultConfig(t *testing.T) {
 	assert.Equal(t, c.Editor.UnwrapOr(""), "")
 	assert.Equal(t, c.CpuKernels.Value(), 1)
 	assert.Equal(t, c.ColourScheme.Value(), tf.COLOUR_THEME_NO_COLOUR)
-	assert.False(t, c.HideWarnings.UnwrapOr(false))
+	assert.Equal(t, len(c.HideWarnings.UnwrapOr([]string{})), 0)
 
 	isRoundingSet := false
 	c.DefaultRounding.Unwrap(func(_ service.Rounding) {
@@ -199,7 +199,8 @@ func TestSetTimeFormatParamFromConfigFile(t *testing.T) {
 }
 
 func TestIgnoresUnknownPropertiesInConfigFile(t *testing.T) {
-	for _, tml := range []string{`
+	for _, tml := range []string{
+		`
 unknown_property = 1
 what_is_this = true
 `,
