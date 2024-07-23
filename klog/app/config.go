@@ -330,7 +330,9 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			disabledCheckers := service.NewDisabledCheckers()
 			for _, c := range warningConfigs {
 				if _, nameExists := disabledCheckers[c]; !nameExists {
-					return errors.New("The value must be a valid warning name, such as `UNCLOSED_OPEN_RANGE`")
+					return errors.New(
+						"The value must be a valid warning name, such as `UNCLOSED_OPEN_RANGE`, got: " + c + ".",
+					)
 				}
 				disabledCheckers[c] = true
 			}
