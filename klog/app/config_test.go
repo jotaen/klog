@@ -21,7 +21,6 @@ func TestCreatesNewDefaultConfig(t *testing.T) {
 	assert.Equal(t, c.Editor.UnwrapOr(""), "")
 	assert.Equal(t, c.CpuKernels.Value(), 1)
 	assert.Equal(t, c.ColourScheme.Value(), tf.COLOUR_THEME_NO_COLOUR)
-	assert.Equal(t, len(c.HideWarnings.UnwrapOr([]string{})), 0)
 
 	isRoundingSet := false
 	c.DefaultRounding.Unwrap(func(_ service.Rounding) {
@@ -34,6 +33,12 @@ func TestCreatesNewDefaultConfig(t *testing.T) {
 		isShouldTotalSet = true
 	})
 	assert.False(t, isShouldTotalSet)
+
+	isNoWarningsSet := false
+	c.NoWarnings.Unwrap(func(_ service.DisabledCheckers) {
+		isNoWarningsSet = true
+	})
+	assert.False(t, isNoWarningsSet)
 }
 
 func TestSetsParamsMetadataIsHandledCorrectly(t *testing.T) {
@@ -198,6 +203,84 @@ func TestSetTimeFormatParamFromConfigFile(t *testing.T) {
 	}
 }
 
+func TestNoWarningsParamFromConfigFile(t *testing.T) {
+	for _, x := range []struct {
+		cfg string
+		exp service.DisabledCheckers
+	}{
+		// Single value
+		{`no_warnings = MORE_THAN_24H`, func() service.DisabledCheckers {
+			dc := service.NewDisabledCheckers()
+			dc["MORE_THAN_24H"] = true
+			return dc
+		}()},
+		// Multiple values
+		{`no_warnings = MORE_THAN_24H, OVERLAPPING_RANGES`, func() service.DisabledCheckers {
+			dc := service.NewDisabledCheckers()
+			dc["MORE_THAN_24H"] = true
+			dc["OVERLAPPING_RANGES"] = true
+			return dc
+		}()},
+		// Multiple values with additional whitespace
+		{`no_warnings =    MORE_THAN_24H  ,       OVERLAPPING_RANGES  `, func() service.DisabledCheckers {
+			dc := service.NewDisabledCheckers()
+			dc["MORE_THAN_24H"] = true
+			dc["OVERLAPPING_RANGES"] = true
+			return dc
+		}()},
+	} {
+		c, _ := NewConfig(
+			FromDeterminedValues{NumCpus: 1},
+			createMockConfigFromEnv(map[string]string{}),
+			FromConfigFile{x.cfg},
+		)
+		var value service.DisabledCheckers
+		c.NoWarnings.Unwrap(func(s service.DisabledCheckers) {
+			value = s
+		})
+		assert.Equal(t, x.exp, value)
+	}
+}
+
+func TestSerialisesConfigFile(t *testing.T) {
+	for _, tml := range []string{`
+editor = 
+colour_scheme = 
+default_rounding = 
+default_should_total = 
+date_format = 
+time_convention = 
+no_warnings = 
+`, `
+editor = 
+colour_scheme = light
+default_rounding = 
+default_should_total = 
+date_format = YYYY/MM/DD
+time_convention = 
+no_warnings = FUTURE_ENTRIES
+`, `
+editor = subl
+colour_scheme = dark
+default_rounding = 15m
+default_should_total = 8h!
+date_format = YYYY-MM-DD
+time_convention = 24h
+no_warnings = OVERLAPPING_RANGES, MORE_THAN_24H
+`} {
+		cfg, _ := NewConfig(
+			FromDeterminedValues{NumCpus: 1},
+			createMockConfigFromEnv(map[string]string{}),
+			FromConfigFile{tml},
+		)
+		serialisedFile := "\n"
+		for _, e := range CONFIG_FILE_ENTRIES {
+			serialisedFile += e.Name + " = " + e.Value(cfg) + "\n"
+		}
+		assert.Equal(t, serialisedFile, tml)
+	}
+}
+
 func TestIgnoresUnknownPropertiesInConfigFile(t *testing.T) {
 	for _, tml := range []string{`
 unknown_property = 1
@@ -222,6 +305,7 @@ func TestIgnoresEmptyConfigFileOrEmptyParameters(t *testing.T) {
 		`default_should_total = `,
 		`date_format = `,
 		`time_convention = `,
+		`no_warnings = `,
 	} {
 		_, err := NewConfig(
 			FromDeterminedValues{NumCpus: 1},
@@ -234,16 +318,24 @@ func TestIgnoresEmptyConfigFileOrEmptyParameters(t *testing.T) {
 
 func TestRejectsInvalidConfigFile(t *testing.T) {
 	for _, tml := range []string{
-		`default_rounding = true`,              // Wrong type
-		`default_rounding = 25m`,               // Invalid value
-		`colour_scheme = true`,                 // Wrong type
-		`colour_scheme = yellow`,               // Invalid value
-		`default_should_total = [true, false]`, // Wrong type
-		`default_should_total = 15`,            // Invalid value
-		`date_format = [true, false]`,          // Wrong type
-		`date_format = YYYY.MM.DD`,             // Invalid value
-		`time_convention = [true, false]`,      // Wrong type
-		`time_convention = 2h`,                 // Invalid value
+		`default_rounding = true`,                           // Wrong type
+		`default_rounding = 25m`,                            // Invalid value
+		`default_rounding = 15M`,                            // Malformed value
+		`colour_scheme = true`,                              // Wrong type
+		`colour_scheme = yellow`,                            // Invalid value
+		`colour_scheme = DARK`,                              // Malformed value
+		`default_should_total = [true, false]`,              // Wrong type
+		`default_should_total = 15`,                         // Invalid value
+		`default_should_total = 8H`,                         // Malformed value
+		`date_format = [true, false]`,                       // Wrong type
+		`date_format = YYYY.MM.DD`,                          // Invalid value
+		`date_format = yyyy-mm-dd`,                          // Malformed value
+		`time_convention = [true, false]`,                   // Wrong type
+		`time_convention = 2h`,                              // Invalid value
+		`time_convention = 24H`,                             // Malformed value
+		`no_warnings = [OVERLAPPING_RANGES, MORE_THAN_24H]`, // Wrong type
+		`no_warnings = yes`,                                 // Invalid value
+		`no_warnings = overlapping_ranges`,                  // Malformed value
 	} {
 		_, err := NewConfig(
 			FromDeterminedValues{NumCpus: 1},

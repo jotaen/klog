@@ -267,7 +267,7 @@ func (args *WarnArgs) PrintWarnings(ctx app.Context, records []klog.Record, addi
 	for _, msg := range additionalWarnings {
 		ctx.Print(PrettifyGeneralWarning(msg, styler))
 	}
-	disabledCheckers := ctx.Config().HideWarnings.UnwrapOr([]string{})
+	disabledCheckers := ctx.Config().NoWarnings.UnwrapOr(service.NewDisabledCheckers())
 	service.CheckForWarnings(func(w service.Warning) {
 		ctx.Print(PrettifyWarning(w, styler))
 	}, ctx.Now(), records, disabledCheckers)
