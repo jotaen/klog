@@ -199,8 +199,7 @@ func TestSetTimeFormatParamFromConfigFile(t *testing.T) {
 }
 
 func TestIgnoresUnknownPropertiesInConfigFile(t *testing.T) {
-	for _, tml := range []string{
-		`
+	for _, tml := range []string{`
 unknown_property = 1
 what_is_this = true
 `,
