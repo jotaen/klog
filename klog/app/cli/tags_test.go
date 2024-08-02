@@ -48,6 +48,19 @@ Was #sick, need to compensate later
 `, state.printBuffer)
 }
 
+func TestPrintTagsWithUnicodeCharacters(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+1995-03-17
+	1h #ascii
+	2h #üñïčödę
+`)._Run((&Tags{}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+#ascii   1h
+#üñïčödę 2h
+`, state.printBuffer)
+}
+
 func TestPrintTagsWithCount(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 1995-03-17
