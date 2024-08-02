@@ -4,6 +4,8 @@
 ## vX.X (YYYY-MM-DD)
 - **[ FEATURE ]** Provide new `no_warnings` setting in config file to permanently
   suppress certain warnings. (Run `klog config` to learn more.)
+- **[ FIX ]** Fix alignment of output in `klog tags`, if there are tags with
+  multibyte Unicode characters.
 
 ## v6.4 (2024-07-16)
 - **[ FEATURE ]** Add new `--create` flag to `klog bookmarks set`, which creates
