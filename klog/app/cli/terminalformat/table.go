@@ -1,6 +1,9 @@
 package terminalformat
 
-import "strings"
+import (
+	"strings"
+	"unicode/utf8"
+)
 
 type Options struct {
 	fill  bool
@@ -45,7 +48,7 @@ func (t *Table) Cell(text string, opts Options) *Table {
 	c := cell{
 		Options: opts,
 		value:   text,
-		len:     len(StripAllAnsiSequences(text)),
+		len:     utf8.RuneCountInString(StripAllAnsiSequences(text)),
 	}
 	t.cells = append(t.cells, c)
 	if c.len > t.longestCell[t.currentColumn] {

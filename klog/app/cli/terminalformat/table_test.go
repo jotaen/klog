@@ -28,3 +28,19 @@ long-text   `+"\x1b[0m\x1b[4m"+`asdf`+"\x1b[0m"+` -----
                  foo  
 `, result)
 }
+
+func TestPrintTableWithUnicode(t *testing.T) {
+	result := ""
+	table := NewTable(3, " ")
+	table.
+		Cell("FIRST", Options{align: ALIGN_LEFT}).
+		Cell("SECOND", Options{align: ALIGN_LEFT}).
+		Cell("THIRD", Options{align: ALIGN_LEFT}).
+		CellL("first").
+		CellR("șëčøñd").
+		CellR("third")
+	table.Collect(func(x string) { result += x })
+	assert.Equal(t, `FIRST SECOND THIRD
+first șëčøñd third
+`, result)
+}
