@@ -111,7 +111,9 @@ func TestStartWithSummary(t *testing.T) {
 		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
 			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
 		},
-		SummaryText: klog.Ɀ_EntrySummary_("Started something"),
+		SummaryArgs: util.SummaryArgs{
+			SummaryText: klog.Ɀ_EntrySummary_("Started something"),
+		},
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -267,7 +269,9 @@ func TestStartWithResume(t *testing.T) {
 	t.Run("No previous entry, no previous record -> Empty entry summary", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`1623-12-13
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			Resume: true,
+			SummaryArgs: util.SummaryArgs{
+				Resume: true,
+			},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `1623-12-13
@@ -281,7 +285,9 @@ func TestStartWithResume(t *testing.T) {
     14:00 - 15:00 Did something
     10m Some activity
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			Resume: true,
+			SummaryArgs: util.SummaryArgs{
+				Resume: true,
+			},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `
@@ -298,7 +304,9 @@ func TestStartWithResume(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1623-12-12
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			Resume: true,
+			SummaryArgs: util.SummaryArgs{
+				Resume: true,
+			},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `
@@ -313,7 +321,9 @@ func TestStartWithResume(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`1623-12-13
     8:13 - 9:44
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			Resume: true,
+			SummaryArgs: util.SummaryArgs{
+				Resume: true,
+			},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `1623-12-13
@@ -326,7 +336,9 @@ func TestStartWithResume(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`1623-12-13
     8:13 - 9:44 Work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			Resume: true,
+			SummaryArgs: util.SummaryArgs{
+				Resume: true,
+			},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `1623-12-13
@@ -340,7 +352,9 @@ func TestStartWithResume(t *testing.T) {
     8:13 - 9:44 Work
     9:51 - 11:22 More work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			Resume: true,
+			SummaryArgs: util.SummaryArgs{
+				Resume: true,
+			},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `1623-12-13
@@ -355,7 +369,9 @@ func TestStartWithResume(t *testing.T) {
     8:13 - 9:44
         Work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			Resume: true,
+			SummaryArgs: util.SummaryArgs{
+				Resume: true,
+			},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `1623-12-13
@@ -371,8 +387,10 @@ func TestStartWithResume(t *testing.T) {
     8:13 - 9:44
         Work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			Resume:      true,
-			SummaryText: klog.Ɀ_EntrySummary_("Test"),
+			SummaryArgs: util.SummaryArgs{
+				Resume:      true,
+				SummaryText: klog.Ɀ_EntrySummary_("Test"),
+			},
 		}).Run)
 		require.Error(t, err)
 	})
@@ -382,8 +400,10 @@ func TestStartWithResume(t *testing.T) {
     8:13 - 9:44
         Work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			Resume:    true,
-			ResumeNth: 1,
+			SummaryArgs: util.SummaryArgs{
+				Resume:    true,
+				ResumeNth: 1,
+			},
 		}).Run)
 		require.Error(t, err)
 	})
@@ -397,7 +417,9 @@ func TestStartWithResumeNth(t *testing.T) {
     2h Bar
     3h Asdf
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-				ResumeNth: nth,
+				SummaryArgs: util.SummaryArgs{
+					ResumeNth: nth,
+				},
 			}).Run)
 			require.Nil(t, err)
 			assert.Equal(t, `1623-12-13
@@ -416,7 +438,9 @@ func TestStartWithResumeNth(t *testing.T) {
     2h Bar
     3h Asdf
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-				ResumeNth: nth,
+				SummaryArgs: util.SummaryArgs{
+					ResumeNth: nth,
+				},
 			}).Run)
 			require.Nil(t, err)
 			assert.Equal(t, `1623-12-13
@@ -435,7 +459,9 @@ func TestStartWithResumeNth(t *testing.T) {
     2h Bar
     3h
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-				ResumeNth: nth,
+				SummaryArgs: util.SummaryArgs{
+					ResumeNth: nth,
+				},
 			}).Run)
 			require.Nil(t, err)
 			assert.Equal(t, `1623-12-13
@@ -454,7 +480,9 @@ func TestStartWithResumeNth(t *testing.T) {
     2h Bar
     3h Asdf
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-				ResumeNth: nth,
+				SummaryArgs: util.SummaryArgs{
+					ResumeNth: nth,
+				},
 			}).Run)
 			require.Error(t, err)
 		}
@@ -468,7 +496,9 @@ func TestStartWithResumeNth(t *testing.T) {
 
 1623-12-13
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			ResumeNth: -1,
+			SummaryArgs: util.SummaryArgs{
+				ResumeNth: -1,
+			},
 		}).Run)
 		require.Error(t, err)
 	})
@@ -478,8 +508,10 @@ func TestStartWithResumeNth(t *testing.T) {
     8:13 - 9:44
         Work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			ResumeNth:   1,
-			SummaryText: klog.Ɀ_EntrySummary_("Test"),
+			SummaryArgs: util.SummaryArgs{
+				ResumeNth:   1,
+				SummaryText: klog.Ɀ_EntrySummary_("Test"),
+			},
 		}).Run)
 		require.Error(t, err)
 	})
@@ -489,8 +521,10 @@ func TestStartWithResumeNth(t *testing.T) {
     8:13 - 9:44
         Work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			Resume:    true,
-			ResumeNth: 1,
+			SummaryArgs: util.SummaryArgs{
+				Resume:    true,
+				ResumeNth: 1,
+			},
 		}).Run)
 		require.Error(t, err)
 	})
