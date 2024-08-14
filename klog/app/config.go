@@ -203,6 +203,8 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 				config.ColourScheme.override(tf.COLOUR_THEME_NO_COLOUR, configOriginFile)
 			case string(tf.COLOUR_THEME_LIGHT):
 				config.ColourScheme.override(tf.COLOUR_THEME_LIGHT, configOriginFile)
+			case string(tf.COLOUR_THEME_BASIC):
+				config.ColourScheme.override(tf.COLOUR_THEME_BASIC, configOriginFile)
 			default:
 				return errors.New("The value must be `dark`, `light` or `no_colour`")
 			}

@@ -42,7 +42,7 @@ func PrettifyParsingError(err app.ParserErrors, styler tf.Styler) error {
 		}
 		message += "\n"
 		message += fmt.Sprintf(
-			styler.Props(tf.StyleProps{Color: tf.SUBDUED}).Format(INDENT+"%s"),
+			styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(INDENT+"%s"),
 			// Replace all tabs with one space each, otherwise the carets might
 			// not be in line with the text anymore (since we can’t know how wide
 			// a tab is).
