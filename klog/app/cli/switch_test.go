@@ -38,7 +38,9 @@ Next day
 		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
 			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
 		},
-		SummaryText: klog.Ɀ_EntrySummary_("Start", "over"),
+		SummaryArgs: util.SummaryArgs{
+			SummaryText: klog.Ɀ_EntrySummary_("Start", "over"),
+		},
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -51,6 +53,60 @@ Next day
 1920-02-03
 Next day
 `, state.writtenFileContents)
+}
+
+func TestSwitchWithResume(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+1920-02-03
+	8:00 - 9:00 First
+	9:00 - ? Second
+`)._SetNow(1920, 2, 3, 9, 31)._Run((&Switch{
+		SummaryArgs: util.SummaryArgs{
+			Resume: true,
+		},
+	}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+1920-02-03
+	8:00 - 9:00 First
+	9:00 - 9:31 Second
+	9:31 - ? Second
+`, state.writtenFileContents)
+}
+
+func TestSwitchWithResumeNth(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+1920-02-03
+	8:00 - 9:00 First
+	9:00 - ? Second
+`)._SetNow(1920, 2, 3, 9, 31)._Run((&Switch{
+		SummaryArgs: util.SummaryArgs{
+			ResumeNth: 1,
+		},
+	}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+1920-02-03
+	8:00 - 9:00 First
+	9:00 - 9:31 Second
+	9:31 - ? First
+`, state.writtenFileContents)
+}
+
+func TestSwitchCannotResumeAndSummary(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+1920-02-03
+	8:00 - 9:00 First
+	9:00 - ? Second
+`)._SetNow(1920, 2, 3, 9, 31)._Run((&Switch{
+		SummaryArgs: util.SummaryArgs{
+			Resume:      true,
+			SummaryText: klog.Ɀ_EntrySummary_("Foo"),
+		},
+	}).Run)
+	require.Error(t, err)
+	assert.Equal(t, "Manipulation failed", err.Error())
+	assert.Equal(t, "", state.writtenFileContents)
 }
 
 func TestSwitchWithStyle(t *testing.T) {
