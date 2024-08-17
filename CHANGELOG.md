@@ -4,6 +4,7 @@
 ## vX.X (YYYY-MM-DD)
 - **[ FEATURE ]** Provide new `no_warnings` setting in config file to permanently
   suppress certain warnings. (Run `klog config` to learn more.)
+- **[ FEATURE ]** Make `--resume`+`--resume-nth` flags available on `klog switch`.
 - **[ FIX ]** Fix alignment of output in `klog tags`, if there are tags with
   multibyte Unicode characters.
 
