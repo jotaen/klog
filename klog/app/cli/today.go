@@ -132,7 +132,7 @@ func handle(opt *Today, ctx app.Context) app.Error {
 						table.CellR(serialiser.Time(currentEndTime))
 					} else {
 						table.CellR(
-							styler.Props(tf.StyleProps{Color: tf.SUBDUED}).
+							styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).
 								Format("(" + currentEndTime.ToString() + ")"))
 					}
 				} else {
@@ -177,7 +177,7 @@ func handle(opt *Today, ctx app.Context) app.Error {
 						table.CellR(serialiser.Time(grandEndTime))
 					} else {
 						table.CellR(
-							styler.Props(tf.StyleProps{Color: tf.SUBDUED}).
+							styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).
 								Format("(" + grandEndTime.ToString() + ")"))
 					}
 				} else {

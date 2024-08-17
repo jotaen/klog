@@ -106,6 +106,7 @@ func TestSetsColourSchemeParamFromConfigFile(t *testing.T) {
 	}{
 		{`colour_scheme = dark`, tf.COLOUR_THEME_DARK},
 		{`colour_scheme = light`, tf.COLOUR_THEME_LIGHT},
+		{`colour_scheme = basic`, tf.COLOUR_THEME_BASIC},
 		{`colour_scheme = no_colour`, tf.COLOUR_THEME_NO_COLOUR},
 	} {
 		c, _ := NewConfig(

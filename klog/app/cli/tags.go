@@ -60,7 +60,7 @@ func (opt *Tags) Run(ctx app.Context) app.Error {
 	table := tf.NewTable(numberOfColumns, " ")
 	for _, t := range totalByTag {
 		totalString := serialiser.Duration(t.Total)
-		countString := styler.Props(tf.StyleProps{Color: tf.SUBDUED}).Format(fmt.Sprintf(" (%d)", t.Count))
+		countString := styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(fmt.Sprintf(" (%d)", t.Count))
 		if t.Tag.Value() == "" {
 			table.CellL("#" + t.Tag.Name())
 			table.CellL(totalString)
@@ -71,7 +71,7 @@ func (opt *Tags) Run(ctx app.Context) app.Error {
 				table.CellL(countString)
 			}
 		} else if opt.Values {
-			table.CellL(" " + styler.Props(tf.StyleProps{Color: tf.SUBDUED}).Format(t.Tag.Value()))
+			table.CellL(" " + styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(t.Tag.Value()))
 			table.Skip(1)
 			table.CellL(totalString)
 			if opt.Count {

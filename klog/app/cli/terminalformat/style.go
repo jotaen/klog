@@ -23,13 +23,13 @@ type Colour int
 const (
 	unspecified = iota
 	TEXT
+	TEXT_SUBDUED
 	TEXT_INVERSE
 	GREEN
 	RED
 	YELLOW
 	BLUE_DARK
 	BLUE_LIGHT
-	SUBDUED
 	PURPLE
 )
 
@@ -50,11 +50,11 @@ func (s Styler) FormatAndRestore(text string, previousStyle Styler) string {
 func (s Styler) seqs() string {
 	seqs := s.reset
 
-	if s.props.Color != unspecified {
+	if s.props.Color != unspecified && s.colourCodes[s.props.Color] != "" {
 		seqs = seqs + s.foregroundPrefix + s.colourCodes[s.props.Color] + s.colourSuffix
 	}
 
-	if s.props.Background != unspecified {
+	if s.props.Background != unspecified && s.colourCodes[s.props.Background] != "" {
 		seqs = seqs + s.backgroundPrefix + s.colourCodes[s.props.Background] + s.colourSuffix
 	}
 

@@ -41,9 +41,9 @@ func (cs TextSerialiser) ShouldTotal(d klog.Duration) string {
 
 func (cs TextSerialiser) Summary(s parser.SummaryText) string {
 	txt := s.ToString()
-	summaryStyler := cs.Styler.Props(tf.StyleProps{Color: tf.SUBDUED})
+	summaryStyler := cs.Styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED})
 	txt = klog.HashTagPattern.ReplaceAllStringFunc(txt, func(h string) string {
-		return cs.Styler.Props(tf.StyleProps{Color: tf.SUBDUED, IsBold: true}).FormatAndRestore(
+		return cs.Styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED, IsBold: true}).FormatAndRestore(
 			h, summaryStyler,
 		)
 	})
