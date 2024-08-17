@@ -215,7 +215,7 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 		},
 		Help: Help{
 			Summary: "The colour scheme of your terminal, so that klog can choose an optimal colour theme for its output.",
-			Value:   "The config property must be one of: `dark`, `light` or `no_colour`",
+			Value:   "The config property must be one of: `dark`, `light`, `basic`, or `no_colour`",
 			Default: "If absent/empty, klog assumes a `dark` theme.",
 		},
 	}, {
