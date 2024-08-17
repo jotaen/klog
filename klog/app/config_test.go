@@ -214,7 +214,7 @@ func TestNoWarningsParamFromConfigFile(t *testing.T) {
 			dc["MORE_THAN_24H"] = true
 			return dc
 		}()},
-		// Multiple values
+		// Multiple values (sorted alphabetically)
 		{`no_warnings = MORE_THAN_24H, OVERLAPPING_RANGES`, func() service.DisabledCheckers {
 			dc := service.NewDisabledCheckers()
 			dc["MORE_THAN_24H"] = true
@@ -266,7 +266,7 @@ default_rounding = 15m
 default_should_total = 8h!
 date_format = YYYY-MM-DD
 time_convention = 24h
-no_warnings = OVERLAPPING_RANGES, MORE_THAN_24H
+no_warnings = MORE_THAN_24H, OVERLAPPING_RANGES
 `} {
 		cfg, _ := NewConfig(
 			FromDeterminedValues{NumCpus: 1},
