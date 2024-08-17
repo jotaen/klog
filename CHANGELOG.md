@@ -2,9 +2,12 @@
 **Summary of changes of the command line tool**
 
 ## vX.X (YYYY-MM-DD)
-- **[ FEATURE ]** Provide new `no_warnings` setting in config file to permanently
+- **[ FEATURE ]** Introduce `basic` colour scheme based on the basic 8-bit ANSI
+  colours – see `colour_scheme` entry in `config.ini` file. (Run `klog config` to
+  learn more.)
+- **[ FEATURE ]** Provide new `no_warnings` setting in `config.ini` file to permanently
   suppress certain warnings. (Run `klog config` to learn more.)
-- **[ FEATURE ]** Make `--resume`+`--resume-nth` flags available on `klog switch`.
+- **[ FEATURE ]** Make `--resume` and `--resume-nth` flags available on `klog switch`.
 - **[ FIX ]** Fix alignment of output in `klog tags`, if there are tags with
   multibyte Unicode characters.
 
