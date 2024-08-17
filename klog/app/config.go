@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"sort"
 	"strings"
 
 	"github.com/jotaen/genie"
@@ -351,6 +352,7 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 						keys = append(keys, k)
 					}
 				}
+				sort.Strings(keys)
 				result = strings.Join(keys, ", ")
 			})
 			return result, c.NoWarnings.origin
