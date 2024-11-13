@@ -96,13 +96,16 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 
 	rErr := kongCtx.Run()
 	if rErr != nil {
-		switch e := rErr.(type) {
-		case app.ParserErrors:
+		if errors.Is(rErr, app.NewParserErrors(nil)) {
+			var e app.ParserErrors
+			errors.As(rErr, &e)
 			return e.Code().ToInt(), util.PrettifyParsingError(e, styler)
-		case app.Error:
+		} else if errors.Is(rErr, app.NewError("", "", nil)) {
+			var e app.Error
+			errors.As(rErr, &e)
 			return e.Code().ToInt(), util.PrettifyAppError(e, config.IsDebug.Value())
-		default:
-			return app.GENERAL_ERROR.ToInt(), errors.New("Error: " + e.Error())
+		} else {
+			return app.GENERAL_ERROR.ToInt(), errors.New("Error: " + rErr.Error())
 		}
 	}
 	return 0, nil

@@ -43,6 +43,8 @@ type Error interface {
 	// Error returns the error message.
 	Error() string
 
+	Is(error) bool
+
 	// Details returns additional details, such as a hint how to solve the problem.
 	Details() string
 
@@ -72,6 +74,11 @@ func (e AppError) Error() string {
 	return e.message
 }
 
+func (e AppError) Is(err error) bool {
+	_, ok := err.(AppError)
+	return ok
+}
+
 func (e AppError) Details() string {
 	return e.details
 }
@@ -99,6 +106,11 @@ func NewParserErrors(errs []txt.Error) ParserErrors {
 
 func (pe parserErrors) Error() string {
 	return fmt.Sprintf("%d parsing error(s)", len(pe.errors))
+}
+
+func (e parserErrors) Is(err error) bool {
+	_, ok := err.(parserErrors)
+	return ok
 }
 
 func (pe parserErrors) Details() string {
