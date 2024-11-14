@@ -3,8 +3,8 @@ module github.com/jotaen/klog
 go 1.23
 
 require (
-	cloud.google.com/go v0.115.1
-	github.com/alecthomas/kong v0.9.0
+	cloud.google.com/go v0.116.0
+	github.com/alecthomas/kong v1.4.0
 	github.com/jotaen/genie v0.0.1
 	github.com/jotaen/kong-completion v0.0.6
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51

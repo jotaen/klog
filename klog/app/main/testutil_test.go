@@ -3,15 +3,23 @@ package klog
 import (
 	"github.com/jotaen/klog/klog/app"
 	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
+	"github.com/stretchr/testify/require"
 	"io"
 	"os"
+	"strings"
+	"testing"
 )
 
 type Env struct {
 	files map[string]string
 }
 
-func (e *Env) run(invocation ...[]string) []string {
+type invocation struct {
+	args []string
+	test func(t *testing.T, code int, out string)
+}
+
+func (e *Env) execute(t *testing.T, is ...invocation) {
 	// Create temp directory and change work dir to it.
 	tmpDir, tErr := os.MkdirTemp("", "")
 	assertNil(tErr)
@@ -28,8 +36,7 @@ func (e *Env) run(invocation ...[]string) []string {
 	oldStdout := os.Stdout
 
 	// Run all commands one after the other.
-	outs := make([]string, len(invocation))
-	for i, args := range invocation {
+	for _, invoke := range is {
 		r, w, _ := os.Pipe()
 		os.Stdout = w
 
@@ -39,26 +46,24 @@ func (e *Env) run(invocation ...[]string) []string {
 			License:       "[License text]",
 			Version:       "v0.0",
 			SrcHash:       "abc1234",
-		}, config, args)
+		}, config, invoke.args)
 
 		_ = w.Close()
-		if runErr != nil {
-			if code == 0 {
-				panic("App returned error, but exit code was 0")
+
+		t.Run(strings.Join(invoke.args, "__"), func(t *testing.T) {
+			if runErr != nil {
+				require.NotEqual(t, 0, code, "App returned error, but exit code was 0")
+			} else {
+				out, _ := io.ReadAll(r)
+				invoke.test(t, code, tf.StripAllAnsiSequences(string(out)))
 			}
-			outs[i] = runErr.Error()
-			continue
-		}
-		out, _ := io.ReadAll(r)
-		outs[i] = tf.StripAllAnsiSequences(string(out))
+		})
 	}
 
 	// Clean up temp dir.
 	rErr := os.RemoveAll(tmpDir)
 	assertNil(rErr)
 	os.Stdout = oldStdout
-
-	return outs
 }
 
 func assertNil(e error) {
