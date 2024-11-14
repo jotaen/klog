@@ -67,6 +67,8 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 		}),
 	)
 	if nErr != nil {
+		// This code branch is not expected to be invoked in practice. If it were to
+		// happen, that most likely indicates a bug in the app setup.
 		return app.GENERAL_ERROR.ToInt(), errors.New("Internal error: " + nErr.Error())
 	}
 
@@ -95,18 +97,19 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 	kongCtx.BindTo(ctx, (*app.Context)(nil))
 
 	rErr := kongCtx.Run()
-	if rErr != nil {
-		if errors.Is(rErr, app.NewParserErrors(nil)) {
-			var e app.ParserErrors
-			errors.As(rErr, &e)
-			return e.Code().ToInt(), util.PrettifyParsingError(e, styler)
-		} else if errors.Is(rErr, app.NewError("", "", nil)) {
-			var e app.Error
-			errors.As(rErr, &e)
-			return e.Code().ToInt(), util.PrettifyAppError(e, config.IsDebug.Value())
-		} else {
-			return app.GENERAL_ERROR.ToInt(), errors.New("Error: " + rErr.Error())
-		}
+	parserErrors := app.NewParserErrors(nil)
+	appError := app.NewError("", "", nil)
+
+	switch {
+	case rErr == nil:
+		return 0, nil
+	case errors.As(rErr, &parserErrors):
+		return parserErrors.Code().ToInt(), util.PrettifyParsingError(parserErrors, styler)
+	case errors.As(rErr, &appError):
+		return appError.Code().ToInt(), util.PrettifyAppError(appError, config.IsDebug.Value())
+	default:
+		// This is just a fallback clause; this code branch is not expected to be
+		// invoked in practice.
+		return app.GENERAL_ERROR.ToInt(), errors.New("Error: " + rErr.Error())
 	}
-	return 0, nil
 }

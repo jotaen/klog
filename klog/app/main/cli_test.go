@@ -23,6 +23,16 @@ func TestHandleInputFiles(t *testing.T) {
 	assert.True(t, strings.Contains(out[1], "#foo 2h"), out)
 }
 
+func TestHandlesInvocationErrors(t *testing.T) {
+	out := (&Env{
+		files: map[string]string{},
+	}).run(
+		[]string{"print", "--foo"},
+	)
+	// Invocation error: unknown flag --foo
+	assert.True(t, strings.Contains(out[0], "Invocation error: unknown flag --foo"), out)
+}
+
 func TestPrintAppErrors(t *testing.T) {
 	out := (&Env{
 		files: map[string]string{
