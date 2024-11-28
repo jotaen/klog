@@ -1,6 +1,16 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## v6.5 (2024-11-28)
+- **[ FEATURE ]** Introduce `basic` colour scheme based on the basic 8-bit ANSI
+  colours – see `colour_scheme` entry in `config.ini` file. (Run `klog config` to
+  learn more.)
+- **[ FEATURE ]** Provide new `no_warnings` setting in `config.ini` file to permanently
+  suppress certain warnings. (Run `klog config` to learn more.)
+- **[ FEATURE ]** Make `--resume` and `--resume-nth` flags available on `klog switch`.
+- **[ FIX ]** Fix alignment of output in `klog tags`, if there are tags with
+  multibyte Unicode characters.
+
 ## v6.4 (2024-07-16)
 - **[ FEATURE ]** Add new `--create` flag to `klog bookmarks set`, which creates
   a new empty target file alongside the bookmark.
