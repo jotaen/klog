@@ -1,7 +1,7 @@
 # Changelog
 **Summary of changes of the command line tool**
 
-## vX.X (YYYY-MM-DD)
+## v6.5 (2024-11-28)
 - **[ FEATURE ]** Introduce `basic` colour scheme based on the basic 8-bit ANSI
   colours – see `colour_scheme` entry in `config.ini` file. (Run `klog config` to
   learn more.)
