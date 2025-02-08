@@ -195,6 +195,9 @@ func groupByDate(hashProvider func(klog.Date) period.Hash, rs []klog.Record) (ma
 
 func (opt *Report) ApplyChart() app.Error {
 	if opt.ChartResolution == 0 {
+		// Unless specified otherwise, set the default resolution to 15 minutes
+		// per rendered block. This should make for a good balance between granularity
+		// and row width in the context of the (default) daily aggregation mode.
 		opt.ChartResolution = 15
 	} else if opt.ChartResolution > 0 {
 		// When chart resolution is specified, automatically assume --chart
