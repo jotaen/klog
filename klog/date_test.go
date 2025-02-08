@@ -114,6 +114,9 @@ func TestParseDateFailsIfMalformed(t *testing.T) {
 		"20-12-12",
 		"asdf",
 		"01.01.2000",
+		"⠃⠚⠚⠚-⠁⠃-⠚⠛", // Braille digits
+		"二〇〇〇-一二-〇四", // Japanese digits
+		"᠒᠐᠐᠐-᠑᠒-᠐᠗", // Mongolean digits
 	} {
 		d, err := NewDateFromString(s)
 		assert.Nil(t, d)

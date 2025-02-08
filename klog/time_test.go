@@ -207,6 +207,9 @@ func TestParseMalformedTimesFail(t *testing.T) {
 		"13:3",   // Minutes must have 2 digits
 		"-14:12", // Hours cannot be negative
 		"14:-12", // Minutes cannot be negative
+		"⠃⠚:⠙⠛",  // Braille digits
+		"四:二八",   // Japanese digits
+		"᠒᠐:᠑᠒",  // Mongolean digits
 	} {
 		tm, err := NewTimeFromString(s)
 		require.Nil(t, tm, s)
