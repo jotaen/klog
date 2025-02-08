@@ -280,3 +280,138 @@ func TestYearReport(t *testing.T) {
        15h20m   15h49m!     -29m
 `, state.printBuffer)
 }
+
+func TestReportWithChart(t *testing.T) {
+	state, err := NewTestingContext()._SetRecords(`
+2025-01-11
+	-2h
+
+2025-01-11
+	0m
+
+2025-01-13
+	1m
+
+2025-01-14
+	5h
+
+2025-01-16
+	5h1m
+
+2025-01-17
+	5h15m
+
+2025-01-18
+	5h30m
+
+2025-01-20
+	5h51m
+
+2025-01-22
+	6h
+
+2025-01-25
+	9h
+`)._Run((&Report{Chart: true}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+                       Total                                      
+2025 Jan    Sat 11.      -2h                                      
+            Mon 13.       1m  ▇                                   
+            Tue 14.       5h  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇                
+            Thu 16.     5h1m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇               
+            Fri 17.    5h15m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇               
+            Sat 18.    5h30m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇              
+            Mon 20.    5h51m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇            
+            Wed 22.       6h  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇            
+            Sat 25.       9h  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇
+                    ========                                      
+                      39h38m                                      
+`, state.printBuffer)
+}
+
+func TestReportWithScaledChart(t *testing.T) {
+	t.Run("Custom scale factor (large)", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords(`
+2025-01-14
+	12h
+
+2025-01-16
+	18h37m
+`)._Run((&Report{Chart: true, ChartResolution: 120}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+                       Total            
+2025 Jan    Tue 14.      12h  ▇▇▇▇▇▇    
+            Thu 16.   18h37m  ▇▇▇▇▇▇▇▇▇▇
+                    ========            
+                      30h37m            
+`, state.printBuffer)
+	})
+
+	t.Run("Custom scale factor (small)", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords(`
+2025-01-14
+	1h30m
+
+2025-01-16
+	45m
+`)._Run((&Report{Chart: true, ChartResolution: 5}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+                       Total                    
+2025 Jan    Tue 14.    1h30m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇
+            Thu 16.      45m  ▇▇▇▇▇▇▇▇▇         
+                    ========                    
+                       2h15m                    
+`, state.printBuffer)
+	})
+
+	t.Run("Setting resolution implies --chart", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords(`
+2025-01-14
+	12h
+
+2025-01-16
+	18h37m
+`)._Run((&Report{ChartResolution: 120}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+                       Total            
+2025 Jan    Tue 14.      12h  ▇▇▇▇▇▇    
+            Thu 16.   18h37m  ▇▇▇▇▇▇▇▇▇▇
+                    ========            
+                      30h37m            
+`, state.printBuffer)
+	})
+
+	t.Run("With --diff flag", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords(`
+2025-01-14 (2h!)
+	1h30m
+
+2025-01-16 (1h!)
+	45m
+`)._Run((&Report{Chart: true, DiffArgs: util.DiffArgs{Diff: true}}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+                       Total    Should     Diff        
+2025 Jan    Tue 14.    1h30m       2h!     -30m  ▇▇▇▇▇▇
+            Thu 16.      45m       1h!     -15m  ▇▇▇   
+                    ======== ========= ========        
+                       2h15m       3h!     -45m        
+`, state.printBuffer)
+	})
+
+	t.Run("Invalid scale factor", func(t *testing.T) {
+		_, err := NewTestingContext()._SetRecords(`
+2025-01-14
+	12h
+
+2025-01-16
+	18h37m
+`)._Run((&Report{ChartResolution: -10}).Run)
+		require.Error(t, err)
+		assert.Equal(t, "Invalid scale factor", err.Error())
+	})
+}

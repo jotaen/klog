@@ -8,12 +8,15 @@ import (
 	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
+	"math"
 	"strings"
 )
 
 type Report struct {
-	AggregateBy string `name:"aggregate" placeholder:"KIND" short:"a" help:"How to aggregate the data. KIND can be 'day' (default), 'week', 'month', 'quarter' or 'year'." enum:"DAY,day,d,WEEK,week,w,MONTH,month,m,QUARTER,quarter,q,YEAR,year,y," default:"day"`
-	Fill        bool   `name:"fill" short:"f" help:"Fill the gaps and show a consecutive stream."`
+	AggregateBy     string `name:"aggregate" placeholder:"KIND" short:"a" help:"How to aggregate the data. KIND can be 'day' (default), 'week', 'month', 'quarter' or 'year'." enum:"DAY,day,d,WEEK,week,w,MONTH,month,m,QUARTER,quarter,q,YEAR,year,y," default:"day"`
+	Fill            bool   `name:"fill" short:"f" help:"Fill any calendar gaps and show a consecutive sequence of dates."`
+	Chart           bool   `name:"chart" short:"c" help:"Includes a bar chart rendering, to aid visual comparison."`
+	ChartResolution int    `name:"chart-res" help:"Configure the chart resolution. INT must be a positive integer, denoting the minutes per rendered block. The default is 15."`
 	util.DiffArgs
 	util.FilterArgs
 	util.NowArgs
@@ -36,6 +39,10 @@ If you want a consecutive, chronological stream, you can use the '--fill' flag.
 func (opt *Report) Run(ctx app.Context) app.Error {
 	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)
+	cErr := opt.ApplyChart()
+	if cErr != nil {
+		return cErr
+	}
 	_, serialiser := ctx.Serialise()
 	records, err := ctx.ReadInputs(opt.File...)
 	if err != nil {
@@ -59,10 +66,14 @@ func (opt *Report) Run(ctx app.Context) app.Error {
 
 	// Table setup
 	numberOfValueColumns := func() int {
+		n := 1
 		if opt.Diff {
-			return 3
+			n += 2
 		}
-		return 1
+		if opt.Chart {
+			n += 1
+		}
+		return n
 	}()
 	table := tf.NewTable(
 		aggregator.NumberOfPrefixColumns()+numberOfValueColumns,
@@ -74,6 +85,9 @@ func (opt *Report) Run(ctx app.Context) app.Error {
 	table.CellR("   Total")
 	if opt.Diff {
 		table.CellR("   Should").CellR("    Diff")
+	}
+	if opt.Chart {
+		table.Skip(1)
 	}
 
 	// Rows
@@ -99,6 +113,9 @@ func (opt *Report) Run(ctx app.Context) app.Error {
 			diff := service.Diff(should, total)
 			table.CellR(serialiser.ShouldTotal(should)).CellR(serialiser.SignedDuration(diff))
 		}
+		if opt.Chart {
+			table.CellL(" " + renderBar(opt.ChartResolution, total))
+		}
 	}
 
 	// Line
@@ -106,15 +123,21 @@ func (opt *Report) Run(ctx app.Context) app.Error {
 	if opt.Diff {
 		table.Fill("=").Fill("=")
 	}
-	grandTotal := service.Total(records...)
+	if opt.Chart {
+		table.Skip(1)
+	}
 
 	// Footer
+	grandTotal := service.Total(records...)
 	table.Skip(aggregator.NumberOfPrefixColumns())
 	table.CellR(serialiser.Duration(grandTotal))
 	if opt.Diff {
 		grandShould := service.ShouldTotalSum(records...)
 		grandDiff := service.Diff(grandShould, grandTotal)
 		table.CellR(serialiser.ShouldTotal(grandShould)).CellR(serialiser.SignedDuration(grandDiff))
+	}
+	if opt.Chart {
+		table.Skip(1)
 	}
 
 	table.Collect(ctx.Print)
@@ -168,4 +191,29 @@ func groupByDate(hashProvider func(klog.Date) period.Hash, rs []klog.Record) (ma
 		days[h] = append(days[h], r)
 	}
 	return days, order
+}
+
+func (opt *Report) ApplyChart() app.Error {
+	if opt.ChartResolution == 0 {
+		opt.ChartResolution = 15
+	} else if opt.ChartResolution > 0 {
+		// When chart resolution is specified, automatically assume --chart
+		// to be given as well.
+		opt.Chart = true
+	} else if opt.ChartResolution < 0 {
+		return app.NewErrorWithCode(app.LOGICAL_ERROR, "Invalid scale factor", "The scale factor must be positive integer", nil)
+	}
+	return nil
+}
+
+func renderBar(minutesPerUnit int, d klog.Duration) string {
+	block := "▇"
+	blocksCount := func() int {
+		mins := d.InMinutes()
+		if mins <= 0 {
+			return 0
+		}
+		return int(math.Ceil(float64(mins) / float64(minutesPerUnit)))
+	}()
+	return strings.Repeat(block, blocksCount)
 }
