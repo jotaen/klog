@@ -280,3 +280,228 @@ func TestYearReport(t *testing.T) {
        15h20m   15h49m!     -29m
 `, state.printBuffer)
 }
+
+func TestReportWithChart(t *testing.T) {
+	t.Run("Daily (default) aggregation", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords(`
+2025-01-11
+	-2h
+
+2025-01-11
+	0m
+
+2025-01-13
+	1m
+
+2025-01-14
+	5h
+
+2025-01-16
+	5h1m
+
+2025-01-17
+	5h15m
+
+2025-01-18
+	5h30m
+
+2025-01-20
+	5h51m
+
+2025-01-22
+	6h
+
+2025-01-25
+	9h
+`)._Run((&Report{Chart: true}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+                       Total                                      
+2025 Jan    Sat 11.      -2h                                      
+            Mon 13.       1m  ▇                                   
+            Tue 14.       5h  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇                
+            Thu 16.     5h1m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇               
+            Fri 17.    5h15m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇               
+            Sat 18.    5h30m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇              
+            Mon 20.    5h51m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇            
+            Wed 22.       6h  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇            
+            Sat 25.       9h  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇
+                    ========                                      
+                      39h38m                                      
+`, state.printBuffer)
+	})
+
+	t.Run("Weekly aggregation", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords(`
+2025-01-01
+	40h
+
+2025-01-08
+	48h45m
+
+2025-01-15
+	31h15m
+`)._Run((&Report{Chart: true, AggregateBy: "w", WarnArgs: util.WarnArgs{NoWarn: true}}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+                 Total                                                   
+2025  Week  1      40h  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇         
+      Week  2   48h45m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇
+      Week  3   31h15m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇                 
+              ========                                                   
+                  120h                                                   
+`, state.printBuffer)
+	})
+
+	t.Run("Monthly aggregation", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords(`
+2025-01-01
+	173h
+
+2025-02-01
+	208h30m
+
+2025-03-01
+	126h15m
+`)._Run((&Report{Chart: true, AggregateBy: "m", WarnArgs: util.WarnArgs{NoWarn: true}}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+            Total                                                       
+2025 Jan     173h  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇         
+     Feb  208h30m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇
+     Mar  126h15m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇                     
+         ========                                                       
+          507h45m                                                       
+`, state.printBuffer)
+	})
+
+	t.Run("Quarterly aggregation", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords(`
+2025-01-01
+	316h
+
+2025-04-01
+	392h30m
+
+2025-07-01
+	237h45m
+`)._Run((&Report{Chart: true, AggregateBy: "q", WarnArgs: util.WarnArgs{NoWarn: true}}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+           Total                                                    
+2025 Q1     316h  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇          
+     Q2  392h30m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇
+     Q3  237h45m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇                    
+        ========                                                    
+         946h15m                                                    
+`, state.printBuffer)
+	})
+
+	t.Run("Yearly aggregation", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords(`
+2025-01-01
+	1735h
+
+2026-01-01
+	2154h45m
+
+2027-01-01
+	1189h15m
+`)._Run((&Report{Chart: true, AggregateBy: "y", WarnArgs: util.WarnArgs{NoWarn: true}}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+        Total                                         
+2025    1735h  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇        
+2026 2154h45m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇
+2027 1189h15m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇                 
+     ========                                         
+        5079h                                         
+`, state.printBuffer)
+	})
+}
+
+func TestReportWithScaledChart(t *testing.T) {
+	t.Run("Custom resolution (large)", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords(`
+2025-01-14
+	12h
+
+2025-01-16
+	18h37m
+`)._Run((&Report{Chart: true, ChartResolution: 120}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+                       Total            
+2025 Jan    Tue 14.      12h  ▇▇▇▇▇▇    
+            Thu 16.   18h37m  ▇▇▇▇▇▇▇▇▇▇
+                    ========            
+                      30h37m            
+`, state.printBuffer)
+	})
+
+	t.Run("Custom resolution (small)", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords(`
+2025-01-14
+	1h30m
+
+2025-01-16
+	45m
+`)._Run((&Report{Chart: true, ChartResolution: 5}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+                       Total                    
+2025 Jan    Tue 14.    1h30m  ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇
+            Thu 16.      45m  ▇▇▇▇▇▇▇▇▇         
+                    ========                    
+                       2h15m                    
+`, state.printBuffer)
+	})
+
+	t.Run("Setting resolution implies --chart", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords(`
+2025-01-14
+	12h
+
+2025-01-16
+	18h37m
+`)._Run((&Report{ChartResolution: 120}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+                       Total            
+2025 Jan    Tue 14.      12h  ▇▇▇▇▇▇    
+            Thu 16.   18h37m  ▇▇▇▇▇▇▇▇▇▇
+                    ========            
+                      30h37m            
+`, state.printBuffer)
+	})
+
+	t.Run("With --diff flag", func(t *testing.T) {
+		state, err := NewTestingContext()._SetRecords(`
+2025-01-14 (2h!)
+	1h30m
+
+2025-01-16 (1h!)
+	45m
+`)._Run((&Report{Chart: true, DiffArgs: util.DiffArgs{Diff: true}}).Run)
+		require.Nil(t, err)
+		assert.Equal(t, `
+                       Total    Should     Diff        
+2025 Jan    Tue 14.    1h30m       2h!     -30m  ▇▇▇▇▇▇
+            Thu 16.      45m       1h!     -15m  ▇▇▇   
+                    ======== ========= ========        
+                       2h15m       3h!     -45m        
+`, state.printBuffer)
+	})
+
+	t.Run("Invalid resolution", func(t *testing.T) {
+		_, err := NewTestingContext()._SetRecords(`
+2025-01-14
+	12h
+
+2025-01-16
+	18h37m
+`)._Run((&Report{ChartResolution: -10}).Run)
+		require.Error(t, err)
+		assert.Equal(t, "Invalid resolution", err.Error())
+	})
+}
