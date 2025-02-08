@@ -1,6 +1,11 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## Scheduled for next release
+- **[ FEATURE ]** Add `--chart` flag to `klog report` command, which
+  includes bar chart renderings in the output, to allow for convenient visual
+  comparison at a glance. (See also `--chart-resolution`.)
+
 ## v6.5 (2024-11-28)
 - **[ FEATURE ]** Introduce `basic` colour scheme based on the basic 8-bit ANSI
   colours – see `colour_scheme` entry in `config.ini` file. (Run `klog config` to
