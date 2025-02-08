@@ -16,7 +16,7 @@ type Report struct {
 	AggregateBy     string `name:"aggregate" placeholder:"KIND" short:"a" help:"How to aggregate the data. KIND can be 'day' (default), 'week', 'month', 'quarter' or 'year'." enum:"DAY,day,d,WEEK,week,w,MONTH,month,m,QUARTER,quarter,q,YEAR,year,y," default:"day"`
 	Fill            bool   `name:"fill" short:"f" help:"Fill any calendar gaps and show a consecutive sequence of dates."`
 	Chart           bool   `name:"chart" short:"c" help:"Includes a bar chart rendering, to aid visual comparison."`
-	ChartResolution int    `name:"chart-res" help:"Configure the chart resolution. INT must be a positive integer, denoting the minutes per rendered block. The default is 15."`
+	ChartResolution int    `name:"chart-res" help:"Configure the chart resolution. INT must be a positive integer, denoting the minutes per rendered block."`
 	util.DiffArgs
 	util.FilterArgs
 	util.NowArgs
