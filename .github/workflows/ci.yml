@@ -1,9 +1,9 @@
 name: CI
 on: [push, pull_request]
 env:
-  GO_VERSION: '1.23'
-  STATIC_CHECK_VERSION: '2024.1.1'
-  COUNT_LOC_DOCKER_IMAGE: 'aldanial/cloc:1.98'
+  GO_VERSION: '1.24'
+  STATIC_CHECK_VERSION: '2025.1'
+  COUNT_LOC_DOCKER_IMAGE: 'aldanial/cloc:2.04'
 jobs:
   statistics:
     name: Statistics
