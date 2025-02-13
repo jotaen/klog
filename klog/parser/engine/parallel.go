@@ -23,7 +23,7 @@ type batchResult[T any] struct {
 
 func (p ParallelBatchParser[T]) Parse(text string) ([]T, []txt.Block, []txt.Error) {
 	if p.NumberOfWorkers <= 0 {
-		panic("ILLEGAL_WORKER_SIZE")
+		panic("Illegal number of workers")
 	}
 	batches := splitIntoChunks(text, p.NumberOfWorkers)
 	allResults := p.processAsync(batches, func(batchIndex int, batchText string) batchResult[T] {

@@ -133,7 +133,7 @@ func ascertain[T comparable](e *election[T], defaultStyle styleProp[T]) stylePro
 // `base` style that had been set explicitly take precedence.
 func elect(base style, rs []klog.Record, bs []txt.Block) *style {
 	if len(rs) != len(bs) {
-		panic("ASSERTION_ERROR")
+		panic("Internal error")
 	}
 	lineEndingElection := newElection[string]()
 	indentationElection := newElection[string]()
