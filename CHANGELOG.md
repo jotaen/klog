@@ -5,7 +5,10 @@
 - **[ FEATURE ]** Add `--chart` flag to `klog report` command, which
   includes bar chart renderings in the output, to allow for convenient visual
   comparison at a glance. (See also `--chart-resolution`.)
-- 
+- **[ FIX ]** Implement internal protection mechanism against integer overflow.
+  (This, however, is only relevant when dealing with a few trillion years worth of
+  time tracking data.)
+
 ## v6.5 (2024-11-28)
 - **[ FEATURE ]** Introduce `basic` colour scheme based on the basic 8-bit ANSI
   colours – see `colour_scheme` entry in `config.ini` file. (Run `klog config` to
