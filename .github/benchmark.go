@@ -25,6 +25,10 @@ func main() {
 	// Generate records
 	date := klog.Ɀ_Date_(0, 1, 1)
 	for i := 0; i < iterations; i++ {
+		if date.IsEqualTo(klog.Ɀ_Date_(9999, 12, 31)) {
+			// Prevent date overflow
+			date = klog.Ɀ_Date_(0, 1, 1)
+		}
 		date = date.PlusDays(1)
 		r := klog.NewRecord(date)
 

@@ -128,7 +128,7 @@ func NewTimeFromGo(t gotime.Time) Time {
 	time, err := NewTime(t.Hour(), t.Minute())
 	if err != nil {
 		// This can/should never occur
-		panic("ILLEGAL_TIME")
+		panic("Illegal time")
 	}
 	return time
 }

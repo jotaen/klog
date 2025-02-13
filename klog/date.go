@@ -98,7 +98,7 @@ func NewDateFromGo(t gotime.Time) Date {
 	d, err := NewDate(t.Year(), int(t.Month()), t.Day())
 	if err != nil {
 		// This can/should never occur
-		panic("ILLEGAL_DATE")
+		panic("Illegal date")
 	}
 	return d
 }
