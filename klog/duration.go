@@ -3,9 +3,10 @@ package klog
 import (
 	"errors"
 	"fmt"
-	"github.com/jotaen/klog/klog/service/safemath"
 	"regexp"
 	"strconv"
+
+	"github.com/jotaen/safemath/safemath"
 )
 
 // Duration represents a time span.
