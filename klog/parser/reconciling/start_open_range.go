@@ -14,7 +14,7 @@ func (r *Reconciler) StartOpenRange(startTime klog.Time, format ReformatDirectiv
 		// Re-parse time to apply format.
 		reformattedTime, err := klog.NewTimeFromString(startTime.ToStringWithFormat(f))
 		if err != nil {
-			panic("INVALID_TIME")
+			panic("Invalid time")
 		}
 		startTime = reformattedTime
 	})

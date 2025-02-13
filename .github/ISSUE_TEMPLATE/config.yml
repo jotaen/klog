@@ -1,3 +1,4 @@
+blank_issues_enabled: false
 contact_links:
   - name: Feature ideas, feedback, or questions
     url: https://github.com/jotaen/klog/discussions

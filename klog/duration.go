@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+
+	"github.com/jotaen/safemath/safemath"
 )
 
 // Duration represents a time span.
@@ -49,7 +51,12 @@ func NewDuration(amountHours int, amountMinutes int) Duration {
 }
 
 func NewDurationWithFormat(amountHours int, amountMinutes int, format DurationFormat) Duration {
-	return &duration{minutes: amountHours*60 + amountMinutes, format: format}
+	hoursToMins, err1 := safemath.Multiply(amountHours, 60)
+	totalMins, err2 := safemath.Add(hoursToMins, amountMinutes)
+	if err1 != nil || err2 != nil {
+		panic("Integer overflow")
+	}
+	return &duration{minutes: totalMins, format: format}
 }
 
 type duration struct {
@@ -69,11 +76,15 @@ func (d duration) InMinutes() int {
 }
 
 func (d duration) Plus(additional Duration) Duration {
-	return NewDuration(0, d.InMinutes()+additional.InMinutes())
+	mins, err := safemath.Add(d.InMinutes(), additional.InMinutes())
+	if err != nil {
+		panic("Integer overflow")
+	}
+	return NewDuration(0, mins)
 }
 
 func (d duration) Minus(deductible Duration) Duration {
-	return NewDuration(0, d.InMinutes()-deductible.InMinutes())
+	return d.Plus(NewDuration(0, deductible.InMinutes()*-1))
 }
 
 func (d duration) ToString() string {
@@ -129,9 +140,15 @@ func NewDurationFromString(hhmm string) (Duration, error) {
 	if match[3] == "" && match[5] == "" {
 		return nil, errors.New("MALFORMED_DURATION")
 	}
-	amountOfHours, _ := strconv.Atoi(match[3])
-	amountOfMinutes, _ := strconv.Atoi(match[5])
-	if amountOfHours != 0 && amountOfMinutes >= 60 {
+	amountOfHours, a1Err := strconv.Atoi(match[3])
+	if match[3] != "" && a1Err != nil {
+		panic(a1Err)
+	}
+	amountOfMinutes, a2Err := strconv.Atoi(match[5])
+	if match[5] != "" && a2Err != nil {
+		panic(a2Err)
+	}
+	if match[3] != "" && amountOfMinutes >= 60 {
 		return nil, errors.New("UNREPRESENTABLE_DURATION")
 	}
 	if amountOfHours == 0 && amountOfMinutes == 0 && match[1] != "" {
