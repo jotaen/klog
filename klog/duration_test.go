@@ -147,7 +147,7 @@ func TestParsingFailsWithInvalidValue(t *testing.T) {
 		"6h asdf",
 		"qwer 30m",
 		"⠙⠛m",   // Braille digits
-		"四二h", // Japanese digits
+		"四二h",   // Japanese digits
 		"᠒h᠐᠒m", // Mongolean digits
 	} {
 		duration, err := NewDurationFromString(d)
