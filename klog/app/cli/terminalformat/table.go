@@ -103,5 +103,7 @@ func (t *Table) Collect(fn func(string)) {
 			}
 		}
 	}
-	fn("\n")
+	if len(t.cells) > 0 {
+		fn("\n")
+	}
 }

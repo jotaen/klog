@@ -8,7 +8,7 @@ import (
 type TagStats struct {
 	Tag klog.Tag
 
-	// Total is the total duration alloted to the tag.
+	// Total is the total duration allotted to the tag.
 	Total klog.Duration
 
 	// Count is the total number of matching entries for that tag.
@@ -20,21 +20,32 @@ type TagStats struct {
 
 // AggregateTotalsByTags returns a list of tags (sorted by tag, alphanumerically)
 // that contains statistics about the tags appearing in the data.
-func AggregateTotalsByTags(rs ...klog.Record) []*TagStats {
-	result := make(totalByTag)
+func AggregateTotalsByTags(rs ...klog.Record) ([]TagStats, TagStats) {
+	tagStats := make(totalByTag)
+	untagged := TagStats{
+		Tag:        klog.NewTagOrPanic("_", ""),
+		Total:      klog.NewDuration(0, 0),
+		Count:      0,
+		keyForSort: "",
+	}
 	for _, r := range rs {
 		for _, e := range r.Entries() {
-			alreadyCounted := make(map[klog.Tag]bool)
 			allTags := klog.Merge(r.Summary().Tags(), e.Summary().Tags())
+			if allTags.IsEmpty() {
+				untagged.Count += 1
+				untagged.Total = untagged.Total.Plus(e.Duration())
+				continue
+			}
+			alreadyCounted := make(map[klog.Tag]bool)
 			for tag := range allTags.ForLookup() {
 				if alreadyCounted[tag] {
 					continue
 				}
-				result.put(tag, e.Duration())
+				tagStats.put(tag, e.Duration())
 			}
 		}
 	}
-	return result.toSortedList()
+	return tagStats.toSortedList(), untagged
 }
 
 // Structure: "tagName":"tagValue":TagStats
@@ -59,11 +70,11 @@ func (tbt totalByTag) put(t klog.Tag, d klog.Duration) {
 	stats.Count++
 }
 
-func (tbt totalByTag) toSortedList() []*TagStats {
-	var result []*TagStats
+func (tbt totalByTag) toSortedList() []TagStats {
+	var result []TagStats
 	for _, ts := range tbt {
 		for _, t := range ts {
-			result = append(result, t)
+			result = append(result, *t)
 		}
 	}
 	sort.Slice(result, func(i int, j int) bool {
