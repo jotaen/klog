@@ -9,8 +9,9 @@ import (
 )
 
 type Tags struct {
-	Values bool `name:"values" short:"v" help:"Display breakdown of tag values (if the data contains any; e.g.: '#tag=value')."`
-	Count  bool `name:"count" short:"c" help:"Display the number of matching entries per tag."`
+	Values       bool `name:"values" short:"v" help:"Display breakdown of tag values (if the data contains any; e.g.: '#tag=value')."`
+	Count        bool `name:"count" short:"c" help:"Display the number of matching entries per tag."`
+	WithUntagged bool `name:"with-untagged" short:"u" help:"Display remainder of any untagged entries"`
 	util.FilterArgs
 	util.NowArgs
 	util.DecimalArgs
@@ -46,10 +47,7 @@ func (opt *Tags) Run(ctx app.Context) app.Error {
 	if nErr != nil {
 		return nErr
 	}
-	totalByTag := service.AggregateTotalsByTags(records...)
-	if len(totalByTag) == 0 {
-		return nil
-	}
+	tagStats, untagged := service.AggregateTotalsByTags(records...)
 	numberOfColumns := 2
 	if opt.Values {
 		numberOfColumns++
@@ -57,10 +55,12 @@ func (opt *Tags) Run(ctx app.Context) app.Error {
 	if opt.Count {
 		numberOfColumns++
 	}
+	countString := func(c int) string {
+		return styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(fmt.Sprintf(" (%d)", c))
+	}
 	table := tf.NewTable(numberOfColumns, " ")
-	for _, t := range totalByTag {
+	for _, t := range tagStats {
 		totalString := serialiser.Duration(t.Total)
-		countString := styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(fmt.Sprintf(" (%d)", t.Count))
 		if t.Tag.Value() == "" {
 			table.CellL("#" + t.Tag.Name())
 			table.CellL(totalString)
@@ -68,15 +68,25 @@ func (opt *Tags) Run(ctx app.Context) app.Error {
 				table.Skip(1)
 			}
 			if opt.Count {
-				table.CellL(countString)
+				table.CellL(countString(t.Count))
 			}
 		} else if opt.Values {
 			table.CellL(" " + styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(t.Tag.Value()))
 			table.Skip(1)
 			table.CellL(totalString)
 			if opt.Count {
-				table.CellL(countString)
+				table.CellL(countString(t.Count))
 			}
+		}
+	}
+	if opt.WithUntagged {
+		table.CellL("(untagged)")
+		table.CellL(serialiser.Duration(untagged.Total))
+		if opt.Values {
+			table.Skip(1)
+		}
+		if opt.Count {
+			table.CellL(countString(untagged.Count))
 		}
 	}
 	table.Collect(ctx.Print)

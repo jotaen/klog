@@ -29,6 +29,14 @@ long-text   `+"\x1b[0m\x1b[4m"+`asdf`+"\x1b[0m"+` -----
 `, result)
 }
 
+func TestPrintEmptyTable(t *testing.T) {
+	// If the table is empty, it shouldn’t print a trailing newline.
+	result := ""
+	table := NewTable(3, " ")
+	table.Collect(func(x string) { result += x })
+	assert.Equal(t, ``, result)
+}
+
 func TestPrintTableWithUnicode(t *testing.T) {
 	result := ""
 	table := NewTable(3, " ")
