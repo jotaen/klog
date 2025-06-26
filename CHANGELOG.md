@@ -5,6 +5,8 @@
 - **[ FEATURE ]** Add `--chart` flag to `klog report` command, which
   includes bar chart renderings in the output, to allow for convenient visual
   comparison at a glance. (See also `--chart-resolution`.)
+- **[ FEATURE ]** Add `--with-untagged` (`-u`) flag to `klog tags` command,
+  which takes into account the remainder of any untagged entries.
 - **[ FIX ]** Implement internal protection mechanism against integer overflow.
   (This, however, is only relevant when dealing with a few trillion years worth of
   time tracking data.)
