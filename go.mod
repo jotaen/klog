@@ -3,8 +3,8 @@ module github.com/jotaen/klog
 go 1.24
 
 require (
-	cloud.google.com/go v0.118.2
-	github.com/alecthomas/kong v1.8.0
+	cloud.google.com/go v0.121.3
+	github.com/alecthomas/kong v1.12.0
 	github.com/jotaen/genie v0.0.1
 	github.com/jotaen/kong-completion v0.0.6
 	github.com/jotaen/safemath v0.0.1
