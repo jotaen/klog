@@ -2,7 +2,7 @@
 **Summary of changes of the command line tool**
 
 ## v?.? (????-??-??)
-- **[ FEATURE ]** Add `--chart` flag to `klog report` command, which
+- **[ FEATURE ]** Add `--chart` (`-c`) flag to `klog report` command, which
   includes bar chart renderings in the output, to allow for convenient visual
   comparison at a glance. (See also `--chart-resolution`.)
 - **[ FEATURE ]** Add `--with-untagged` (`-u`) flag to `klog tags` command,
