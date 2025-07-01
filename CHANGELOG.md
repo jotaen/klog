@@ -1,10 +1,10 @@
 # Changelog
 **Summary of changes of the command line tool**
 
-## v?.? (????-??-??)
+## v6.6 (2025-07-01)
 - **[ FEATURE ]** Add `--chart` (`-c`) flag to `klog report` command, which
   includes bar chart renderings in the output, to allow for convenient visual
-  comparison at a glance. (See also `--chart-resolution`.)
+  comparison at a glance. (See also `--chart-res` for the chart resolution.)
 - **[ FEATURE ]** Add `--with-untagged` (`-u`) flag to `klog tags` command,
   which takes into account the remainder of any untagged entries.
 - **[ FIX ]** Implement internal protection mechanism against integer overflow.
