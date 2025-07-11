@@ -1,6 +1,10 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+# v?.? (????-??-??)
+- **[ BREAKING ]** Remove `klog info config-folder` command and introduce
+  `klog config --location` instead. (See also `klog config --help`.)
+
 ## v6.6 (2025-07-01)
 - **[ FEATURE ]** Add `--chart` (`-c`) flag to `klog report` command, which
   includes bar chart renderings in the output, to allow for convenient visual
