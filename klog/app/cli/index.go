@@ -82,5 +82,6 @@ func (opt *Default) Run(ctx app.Context) app.Error {
 		return versionCmd.Run(ctx)
 	}
 	ctx.Print(INTRO_SUMMARY)
+	ctx.Print("Run 'klog --help' to learn usage.\n")
 	return nil
 }
