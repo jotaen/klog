@@ -9,8 +9,8 @@ import (
 )
 
 type Config struct {
-	util.NoStyleArgs
 	Location bool `name:"location" help:"Print the location of the config folder."`
+	util.NoStyleArgs
 }
 
 func (opt *Config) Help() string {
