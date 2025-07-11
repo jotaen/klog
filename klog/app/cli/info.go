@@ -11,13 +11,12 @@ type Info struct {
 }
 
 func (opt *Info) Run(ctx app.Context) app.Error {
-	//ctx.Print(ctx.KlogConfigFolder().Path() + "\n")
 	if opt.Spec {
 		ctx.Print(ctx.Meta().Specification + "\n")
 	} else if opt.License {
 		ctx.Print(ctx.Meta().License + "\n")
 	} else if opt.About {
-		ctx.Print("klog is a " + INTRO_SUMMARY + "\n")
+		ctx.Print(INTRO_SUMMARY)
 	} else {
 		ctx.Print("Use --spec or --license\n")
 	}
