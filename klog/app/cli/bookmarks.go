@@ -35,12 +35,14 @@ A bookmark name is denoted by the prefix '@'. For example, if you have a bookmar
     klog edit @work
 
 You can specify as many bookmarks as you want. There can also be one “unnamed” default bookmark (which internally is identified by the name '@default').
-This is useful in case you only have one main file at a time, and allows you to use klog without any input arguments at all. E.g.:
+This is useful in case you only have one main file at a time, and allows you to use klog without any file-related input arguments at all. E.g.:
 
     klog total
     klog start --summary 'Started new project'
 
-When creating a bookmark, you can also create the respective target file by using the '--create' flag.
+When setting up a bookmark, you can also create the respective target file on the file system by using the '--create' flag.
+
+Note that klog keeps track of the bookmarks in an internal config file. Run 'klog config --help' to learn more.
 `
 }
 

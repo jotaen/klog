@@ -4,26 +4,45 @@ import (
 	"github.com/jotaen/klog/klog/app"
 	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/app/cli/util"
+	"path/filepath"
+	"strings"
 )
 
 type Config struct {
+	Location bool `name:"location" help:"Print the location of the config folder."`
 	util.NoStyleArgs
 }
 
 func (opt *Config) Help() string {
+	lookupOrder := func() string {
+		lookups := make([]string, len(app.KLOG_CONFIG_FOLDER))
+		for i, f := range app.KLOG_CONFIG_FOLDER {
+			lookups[i] = filepath.Join(f.EnvVarSymbol(), f.Location)
+		}
+		return strings.Join(lookups, "  ->  ")
+	}()
+
 	return `
-You are able to configure some of klog’s behaviour by providing a configuration file.
+klog relies on file-based configuration to customise some of its default behaviour and to keep track of its internal state.
 
-If you run 'klog config', you can learn about the supported properties in the file, and which of those you have set.
-You may use the output of that command as template for setting up your config file, as its format is valid syntax.
+Run 'klog config --location' to print the path of the folder where klog looks for the configuration.
+The config folder can contain one or both of the following files:
+  - '` + app.CONFIG_FILE_NAME + `': you can create this file manually to override some of klog’s default behaviour. You may use the output of the 'klog config' command as template for setting up this file, as its output is in valid syntax. 
+  - '` + app.BOOKMARKS_FILE_NAME + `': if you use the bookmarks functionality, then klog uses this file as database. You are not supposed to edit this file by hand! Instead, use the 'klog bookmarks' command to manage your bookmarks.
 
-The configuration file is named 'config.ini' and resides in your klog config folder.
-Run 'klog info config-folder' to learn where your klog config folder is located.
+You can customise the location of the config folder via environment variables. klog uses the following lookup precedence:
+  ` + lookupOrder + `
 `
 }
 
 func (opt *Config) Run(ctx app.Context) app.Error {
 	opt.NoStyleArgs.Apply(&ctx)
+
+	if opt.Location {
+		ctx.Print(ctx.KlogConfigFolder().Path() + "\n")
+		return nil
+	}
+
 	styler, _ := ctx.Serialise()
 	for i, e := range app.CONFIG_FILE_ENTRIES {
 		ctx.Print(styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(util.Reflower.Reflow(e.Help.Summary, []string{"# "})))

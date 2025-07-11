@@ -8,6 +8,8 @@ import (
 	kc "github.com/jotaen/kong-completion"
 )
 
+var INTRO_SUMMARY = "klog is a command-line tool for time tracking in a human-readable, plain-text file format.\nSee " + KLOG_WEBSITE_URL + " for documentation.\n"
+
 // Guideline for help texts and descriptions:
 // - Command and flag descriptions are phrased in imperative style, and they
 //   end in a period. Examples:
@@ -54,11 +56,10 @@ type Default struct {
 }
 
 func (opt *Default) Help() string {
-	return `
-klog: command line app for time tracking with plain-text files. See also ` + KLOG_WEBSITE_URL + `
+	return INTRO_SUMMARY + `
 
 Time-tracking data is stored in files ending in the '.klg' extension.
-You can use the subcommands below to evaluate, manipulate and manage your files.
+You can use the subcommands listed below to evaluate, manipulate and manage your files.
 Use the '--help' flag on the subcommands to learn more.
 
 You can specify input data in one of these 3 ways:
@@ -80,7 +81,7 @@ func (opt *Default) Run(ctx app.Context) app.Error {
 		versionCmd := Version{}
 		return versionCmd.Run(ctx)
 	}
-	ctx.Print("klog: command line app for time tracking with plain-text files.\n")
+	ctx.Print(INTRO_SUMMARY)
 	ctx.Print("Run 'klog --help' to learn usage.\n")
 	return nil
 }
