@@ -21,8 +21,8 @@ github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUq
 github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
 github.com/jotaen/genie v0.0.2 h1:arXxp5faTubDwRbKr6ZHHMaHSmo5cdMSfTIctbwF50s=
 github.com/jotaen/genie v0.0.2/go.mod h1:5v0pWbZ+yHWL8QIfTq1PSuUuoGQ1enQZ4XTtV/PnJos=
-github.com/jotaen/kong-completion v0.0.6 h1:VP1KGvXPeB7MytYR+zZQoWw1gf/HIV1/EvWC38BHZN4=
-github.com/jotaen/kong-completion v0.0.6/go.mod h1:fuWw9snL6joY5mXbI0Dd5FWEZODaWXAeqaRxo6dAvLk=
+github.com/jotaen/kong-completion v0.0.7 h1:l2UrG51q0gWD8Ph0CykBvGOb1YlXDc789AQnWkq+U9M=
+github.com/jotaen/kong-completion v0.0.7/go.mod h1:dtitX9zCkffI5AON0IKsqHOFEEaL/S2AudgzJfCVFA4=
 github.com/jotaen/safemath v0.0.2 h1:jH9Bx0c9XmZylZD51Rs0Ojcs0jMcN636E2RgtTCUzOU=
 github.com/jotaen/safemath v0.0.2/go.mod h1:6DmgN+FzJxAYVAdKLR0KZl8i+gpj+7yD/bPdpi7qxfU=
 github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 h1:Z9n2FFNUXsshfwJMBgNA0RU6/i7WVaAegv3PtuIHPMs=
