@@ -18,7 +18,12 @@ func (opt *Info) Run(ctx app.Context) app.Error {
 	} else if opt.About {
 		ctx.Print(INTRO_SUMMARY)
 	} else {
-		ctx.Print("Use --spec or --license\n")
+		return app.NewErrorWithCode(
+			app.GENERAL_ERROR,
+			"No flag specified",
+			"Run with `--help` for more info",
+			nil,
+		)
 	}
 	return nil
 }
