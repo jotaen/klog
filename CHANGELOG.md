@@ -4,6 +4,9 @@
 # v?.? (????-??-??)
 - **[ BREAKING ]** Remove `klog info config-folder` command and introduce
   `klog config --location` instead. (See also `klog config --help`.)
+- **[ BREAKING ]** If the `config.ini` contains and `editor` entry **and**
+  the `$EDITOR` environment variable is specified, the config file now takes
+  precedence over the environment variable.
 
 ## v6.6 (2025-07-01)
 - **[ FEATURE ]** Add `--chart` (`-c`) flag to `klog report` command, which
