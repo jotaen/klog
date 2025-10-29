@@ -1,11 +1,12 @@
 package cli
 
 import (
+	"path/filepath"
+	"strings"
+
 	"github.com/jotaen/klog/klog/app"
 	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/app/cli/util"
-	"path/filepath"
-	"strings"
 )
 
 type Config struct {
@@ -27,7 +28,7 @@ klog relies on file-based configuration to customise some of its default behavio
 
 Run 'klog config --location' to print the path of the folder where klog looks for the configuration.
 The config folder can contain one or both of the following files:
-  - '` + app.CONFIG_FILE_NAME + `': you can create this file manually to override some of klog’s default behaviour. You may use the output of the 'klog config' command as template for setting up this file, as its output is in valid syntax. 
+  - '` + app.CONFIG_FILE_NAME + `': you can create this file manually to override some of klog’s default behaviour. You may use the output of the 'klog config' command as template for setting up this file, as its output is valid .ini syntax. 
   - '` + app.BOOKMARKS_FILE_NAME + `': if you use the bookmarks functionality, then klog uses this file as database. You are not supposed to edit this file by hand! Instead, use the 'klog bookmarks' command to manage your bookmarks.
 
 You can customise the location of the config folder via environment variables. klog uses the following lookup precedence:
