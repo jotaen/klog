@@ -3,11 +3,12 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"os"
+	"runtime"
+
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/app/main"
-	"os"
-	"runtime"
 )
 
 //go:embed Specification.md
@@ -41,11 +42,7 @@ func main() {
 	}()
 
 	config := func() app.Config {
-		c, err := app.NewConfig(
-			app.FromDeterminedValues{NumCpus: runtime.NumCPU()},
-			app.FromEnvVars{GetVar: os.Getenv},
-			app.FromConfigFile{FileContents: configFile},
-		)
+		c, err := app.NewConfig(runtime.NumCPU(), os.Getenv, configFile)
 		if err != nil {
 			fail(util.PrettifyAppError(err, false), app.CONFIG_ERROR.ToInt())
 		}

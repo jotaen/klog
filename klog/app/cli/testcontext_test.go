@@ -1,6 +1,8 @@
 package cli
 
 import (
+	gotime "time"
+
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/command"
@@ -8,7 +10,6 @@ import (
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 	"github.com/jotaen/klog/klog/parser/txt"
-	gotime "time"
 )
 
 func NewTestingContext() TestingContext {
@@ -63,11 +64,11 @@ func (ctx TestingContext) _SetFileExplorers(cs []command.Command) TestingContext
 }
 
 func (ctx TestingContext) _SetFileConfig(configFile string) TestingContext {
-	fileCfg := app.FromConfigFile{FileContents: configFile}
-	err := fileCfg.Apply(ctx.config)
+	cfg, err := app.NewConfig(1, func(_ string) string { return "" }, configFile)
 	if err != nil {
 		panic(err)
 	}
+	ctx.config = &cfg
 	return ctx
 }
 
