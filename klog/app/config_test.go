@@ -9,10 +9,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createMockConfigFromEnv(vs map[string]string) FromEnvVars {
-	return FromEnvVars{GetVar: func(n string) string {
+func createMockConfigFromEnv(vs map[string]string) func(string) string {
+	return func(n string) string {
 		return vs[n]
-	}}
+	}
 }
 
 func TestCreatesNewDefaultConfig(t *testing.T) {
@@ -48,11 +48,11 @@ func TestSetsParamsMetadataIsHandledCorrectly(t *testing.T) {
 	}
 	{
 		c, _ := NewConfig(
-			FromDeterminedValues{NumCpus: 1},
+			1,
 			createMockConfigFromEnv(map[string]string{
 				"KLOG_DEBUG": "1",
 			}),
-			FromConfigFile{""},
+			"",
 		)
 		assert.Equal(t, c.IsDebug.Value(), true)
 	}
@@ -61,39 +61,39 @@ func TestSetsParamsMetadataIsHandledCorrectly(t *testing.T) {
 func TestSetsParamsFromEnv(t *testing.T) {
 	t.Run("Read plain environment variables.", func(t *testing.T) {
 		c, _ := NewConfig(
-			FromDeterminedValues{NumCpus: 1},
+			1,
 			createMockConfigFromEnv(map[string]string{
 				"EDITOR":     "subl",
 				"KLOG_DEBUG": "1",
 				"NO_COLOR":   "1",
 			}),
-			FromConfigFile{""},
+			"",
 		)
 		assert.Equal(t, c.IsDebug.Value(), true)
 		assert.Equal(t, c.ColourScheme.Value(), tf.COLOUR_THEME_NO_COLOUR)
 		assert.Equal(t, c.Editor.UnwrapOr(""), "subl")
 	})
 
-	t.Run("`$EDITOR` env variable trumps `editor` setting from config file.", func(t *testing.T) {
+	t.Run("`$EDITOR` env variable does not trump `editor` setting from config file.", func(t *testing.T) {
 		c, _ := NewConfig(
-			FromDeterminedValues{NumCpus: 1},
+			1,
 			createMockConfigFromEnv(map[string]string{
 				"EDITOR": "subl",
 			}),
-			FromConfigFile{"editor = vi"},
+			"editor = vi",
 		)
-		assert.Equal(t, "subl", c.Editor.UnwrapOr(""))
+		assert.Equal(t, "vi", c.Editor.UnwrapOr(""))
 	})
 
 	t.Run("`$NO_COLOR` env variable trumps `colour_scheme = dark` from config file.", func(t *testing.T) {
 		// This is important, otherwise you wouldn’t be able to override the colour scheme
 		// e.g. for programmatic usage of klog.
 		c, _ := NewConfig(
-			FromDeterminedValues{NumCpus: 1},
+			1,
 			createMockConfigFromEnv(map[string]string{
 				"NO_COLOR": "1",
 			}),
-			FromConfigFile{"colour_scheme = dark"},
+			"colour_scheme = dark",
 		)
 		assert.Equal(t, tf.COLOUR_THEME_NO_COLOUR, c.ColourScheme.Value())
 	})
@@ -110,9 +110,9 @@ func TestSetsColourSchemeParamFromConfigFile(t *testing.T) {
 		{`colour_scheme = no_colour`, tf.COLOUR_THEME_NO_COLOUR},
 	} {
 		c, _ := NewConfig(
-			FromDeterminedValues{NumCpus: 1},
+			1,
 			createMockConfigFromEnv(map[string]string{}),
-			FromConfigFile{x.cfg},
+			x.cfg,
 		)
 		assert.Equal(t, x.exp, c.ColourScheme.Value())
 	}
@@ -130,9 +130,9 @@ func TestSetsDefaultRoundingParamFromConfigFile(t *testing.T) {
 		{`default_rounding = 60m`, 60},
 	} {
 		c, _ := NewConfig(
-			FromDeterminedValues{NumCpus: 1},
+			1,
 			createMockConfigFromEnv(map[string]string{}),
-			FromConfigFile{x.cfg},
+			x.cfg,
 		)
 		var value int
 		c.DefaultRounding.Unwrap(func(r service.Rounding) {
@@ -150,9 +150,9 @@ func TestSetsDefaultShouldTotalParamFromConfigFile(t *testing.T) {
 		{`default_should_total = 8h30m!`, "8h30m!"},
 	} {
 		c, _ := NewConfig(
-			FromDeterminedValues{NumCpus: 1},
+			1,
 			createMockConfigFromEnv(map[string]string{}),
-			FromConfigFile{x.cfg},
+			x.cfg,
 		)
 		var value string
 		c.DefaultShouldTotal.Unwrap(func(s klog.ShouldTotal) {
@@ -171,9 +171,9 @@ func TestSetsDateFormatParamFromConfigFile(t *testing.T) {
 		{`date_format = YYYY/MM/DD`, false},
 	} {
 		c, _ := NewConfig(
-			FromDeterminedValues{NumCpus: 1},
+			1,
 			createMockConfigFromEnv(map[string]string{}),
-			FromConfigFile{x.cfg},
+			x.cfg,
 		)
 		var value bool
 		c.DateUseDashes.Unwrap(func(s bool) {
@@ -192,9 +192,9 @@ func TestSetTimeFormatParamFromConfigFile(t *testing.T) {
 		{`time_convention = 12h`, false},
 	} {
 		c, _ := NewConfig(
-			FromDeterminedValues{NumCpus: 1},
+			1,
 			createMockConfigFromEnv(map[string]string{}),
-			FromConfigFile{x.cfg},
+			x.cfg,
 		)
 		var value bool
 		c.TimeUse24HourClock.Unwrap(func(s bool) {
@@ -231,9 +231,9 @@ func TestNoWarningsParamFromConfigFile(t *testing.T) {
 		}()},
 	} {
 		c, _ := NewConfig(
-			FromDeterminedValues{NumCpus: 1},
+			1,
 			createMockConfigFromEnv(map[string]string{}),
-			FromConfigFile{x.cfg},
+			x.cfg,
 		)
 		var value service.DisabledCheckers
 		c.NoWarnings.Unwrap(func(s service.DisabledCheckers) {
@@ -270,9 +270,9 @@ time_convention = 24h
 no_warnings = MORE_THAN_24H, OVERLAPPING_RANGES
 `} {
 		cfg, _ := NewConfig(
-			FromDeterminedValues{NumCpus: 1},
+			1,
 			createMockConfigFromEnv(map[string]string{}),
-			FromConfigFile{tml},
+			tml,
 		)
 		serialisedFile := "\n"
 		for _, e := range CONFIG_FILE_ENTRIES {
@@ -289,9 +289,9 @@ what_is_this = true
 `,
 	} {
 		_, err := NewConfig(
-			FromDeterminedValues{NumCpus: 1},
+			1,
 			createMockConfigFromEnv(map[string]string{}),
-			FromConfigFile{tml},
+			tml,
 		)
 		assert.Nil(t, err)
 	}
@@ -309,11 +309,39 @@ func TestIgnoresEmptyConfigFileOrEmptyParameters(t *testing.T) {
 		`no_warnings = `,
 	} {
 		_, err := NewConfig(
-			FromDeterminedValues{NumCpus: 1},
+			1,
 			createMockConfigFromEnv(map[string]string{}),
-			FromConfigFile{tml},
+			tml,
 		)
 		assert.Nil(t, err)
+	}
+}
+
+func TestEnvVarsDoNotShowUpInConfigFile(t *testing.T) {
+	for _, tml := range []string{`
+editor = 
+colour_scheme = 
+`, `
+editor = vi
+colour_scheme = light
+`} {
+		cfg, _ := NewConfig(
+			1,
+			createMockConfigFromEnv(map[string]string{
+				"EDITOR":   "subl",
+				"NO_COLOR": "1",
+			}),
+			tml,
+		)
+		serialisedFile := "\n"
+		overlappingConfig := []ConfigFileEntries[any]{
+			CONFIG_FILE_ENTRIES[0], // editor
+			CONFIG_FILE_ENTRIES[1], // colour_scheme
+		}
+		for _, e := range overlappingConfig {
+			serialisedFile += e.Name + " = " + e.Value(cfg) + "\n"
+		}
+		assert.Equal(t, serialisedFile, tml)
 	}
 }
 
@@ -339,9 +367,9 @@ func TestRejectsInvalidConfigFile(t *testing.T) {
 		`no_warnings = overlapping_ranges`,                  // Malformed value
 	} {
 		_, err := NewConfig(
-			FromDeterminedValues{NumCpus: 1},
+			1,
 			createMockConfigFromEnv(map[string]string{}),
-			FromConfigFile{tml},
+			tml,
 		)
 		assert.Error(t, err)
 	}
