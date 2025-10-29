@@ -78,57 +78,6 @@ func NewDefaultConfig(c tf.ColourTheme) Config {
 	}
 }
 
-type BaseParam[T any] struct {
-	value T
-}
-
-type MandatoryParam[T any] struct {
-	BaseParam[T]
-}
-
-func newMandatoryParam[T any](defaultValue T) MandatoryParam[T] {
-	return MandatoryParam[T]{BaseParam[T]{
-		value: defaultValue,
-	}}
-}
-
-func (p MandatoryParam[T]) Value() T {
-	return p.value
-}
-
-func (p *MandatoryParam[T]) override(value T) {
-	p.value = value
-}
-
-type OptionalParam[T any] struct {
-	BaseParam[T]
-	isSet bool
-}
-
-func newOptionalParam[T any]() OptionalParam[T] {
-	return OptionalParam[T]{
-		isSet: false,
-	}
-}
-
-func (p OptionalParam[T]) Unwrap(f func(T)) {
-	if p.isSet {
-		f(p.value)
-	}
-}
-
-func (p OptionalParam[T]) UnwrapOr(defaultValue T) T {
-	if p.isSet {
-		return p.value
-	}
-	return defaultValue
-}
-
-func (p *OptionalParam[T]) set(value T) {
-	p.value = value
-	p.isSet = true
-}
-
 // FromDeterminedValues is the part of the configuration that is automatically
 // determined, e.g. by constraints of the runtime environment.
 type FromDeterminedValues struct {
@@ -136,7 +85,7 @@ type FromDeterminedValues struct {
 }
 
 func (e FromDeterminedValues) Apply(config *Config) Error {
-	config.CpuKernels.override(e.NumCpus)
+	config.CpuKernels.set(e.NumCpus)
 	return nil
 }
 
@@ -148,10 +97,10 @@ type FromEnvVars struct {
 
 func (e FromEnvVars) Apply(config *Config) Error {
 	if e.GetVar("KLOG_DEBUG") != "" {
-		config.IsDebug.override(true)
+		config.IsDebug.set(true)
 	}
 	if e.GetVar("NO_COLOR") != "" {
-		config.ColourScheme.override(tf.COLOUR_THEME_NO_COLOUR)
+		config.ColourScheme.set(tf.COLOUR_THEME_NO_COLOUR)
 	}
 	if e.GetVar("EDITOR") != "" {
 		config.Editor.set(e.GetVar("EDITOR"))
@@ -187,13 +136,13 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 		reader: func(value string, config *Config) error {
 			switch value {
 			case string(tf.COLOUR_THEME_DARK):
-				config.ColourScheme.override(tf.COLOUR_THEME_DARK)
+				config.ColourScheme.set(tf.COLOUR_THEME_DARK)
 			case string(tf.COLOUR_THEME_NO_COLOUR):
-				config.ColourScheme.override(tf.COLOUR_THEME_NO_COLOUR)
+				config.ColourScheme.set(tf.COLOUR_THEME_NO_COLOUR)
 			case string(tf.COLOUR_THEME_LIGHT):
-				config.ColourScheme.override(tf.COLOUR_THEME_LIGHT)
+				config.ColourScheme.set(tf.COLOUR_THEME_LIGHT)
 			case string(tf.COLOUR_THEME_BASIC):
-				config.ColourScheme.override(tf.COLOUR_THEME_BASIC)
+				config.ColourScheme.set(tf.COLOUR_THEME_BASIC)
 			default:
 				return errors.New("The value must be `dark`, `light`, `basic`, or `no_colour`")
 			}
@@ -396,4 +345,51 @@ func (e FromConfigFile) Apply(config *Config) Error {
 
 	}
 	return nil
+}
+
+type baseParam[T any] struct {
+	value T
+	isSet bool
+}
+
+func (p *baseParam[T]) set(value T) {
+	p.value = value
+	p.isSet = true
+}
+
+type MandatoryParam[T any] struct {
+	baseParam[T]
+}
+
+func newMandatoryParam[T any](defaultValue T) MandatoryParam[T] {
+	return MandatoryParam[T]{baseParam[T]{
+		value: defaultValue,
+	}}
+}
+
+func (p MandatoryParam[T]) Value() T {
+	return p.value
+}
+
+type OptionalParam[T any] struct {
+	baseParam[T]
+}
+
+func newOptionalParam[T any]() OptionalParam[T] {
+	return OptionalParam[T]{baseParam[T]{
+		isSet: false,
+	}}
+}
+
+func (p OptionalParam[T]) Unwrap(f func(T)) {
+	if p.isSet {
+		f(p.value)
+	}
+}
+
+func (p OptionalParam[T]) UnwrapOr(defaultValue T) T {
+	if p.isSet {
+		return p.value
+	}
+	return defaultValue
 }
