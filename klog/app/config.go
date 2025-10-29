@@ -78,17 +78,8 @@ func NewDefaultConfig(c tf.ColourTheme) Config {
 	}
 }
 
-type configOrigin int
-
-const (
-	configOriginEnv = iota + 1
-	configOriginFile
-	configOriginStaticValues
-)
-
 type BaseParam[T any] struct {
-	value  T
-	origin configOrigin
+	value T
 }
 
 type MandatoryParam[T any] struct {
@@ -97,8 +88,7 @@ type MandatoryParam[T any] struct {
 
 func newMandatoryParam[T any](defaultValue T) MandatoryParam[T] {
 	return MandatoryParam[T]{BaseParam[T]{
-		value:  defaultValue,
-		origin: 0,
+		value: defaultValue,
 	}}
 }
 
@@ -106,9 +96,8 @@ func (p MandatoryParam[T]) Value() T {
 	return p.value
 }
 
-func (p *MandatoryParam[T]) override(value T, o configOrigin) {
+func (p *MandatoryParam[T]) override(value T) {
 	p.value = value
-	p.origin = o
 }
 
 type OptionalParam[T any] struct {
@@ -135,10 +124,9 @@ func (p OptionalParam[T]) UnwrapOr(defaultValue T) T {
 	return defaultValue
 }
 
-func (p *OptionalParam[T]) set(value T, o configOrigin) {
+func (p *OptionalParam[T]) set(value T) {
 	p.value = value
 	p.isSet = true
-	p.origin = o
 }
 
 // FromDeterminedValues is the part of the configuration that is automatically
@@ -148,7 +136,7 @@ type FromDeterminedValues struct {
 }
 
 func (e FromDeterminedValues) Apply(config *Config) Error {
-	config.CpuKernels.override(e.NumCpus, configOriginStaticValues)
+	config.CpuKernels.override(e.NumCpus)
 	return nil
 }
 
@@ -160,13 +148,13 @@ type FromEnvVars struct {
 
 func (e FromEnvVars) Apply(config *Config) Error {
 	if e.GetVar("KLOG_DEBUG") != "" {
-		config.IsDebug.override(true, configOriginEnv)
+		config.IsDebug.override(true)
 	}
 	if e.GetVar("NO_COLOR") != "" {
-		config.ColourScheme.override(tf.COLOUR_THEME_NO_COLOUR, configOriginEnv)
+		config.ColourScheme.override(tf.COLOUR_THEME_NO_COLOUR)
 	}
 	if e.GetVar("EDITOR") != "" {
-		config.Editor.set(e.GetVar("EDITOR"), configOriginEnv)
+		config.Editor.set(e.GetVar("EDITOR"))
 	}
 	return nil
 }
@@ -182,12 +170,12 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 		Name: "editor",
 		reader: func(value string, config *Config) error {
 			if value != "" {
-				config.Editor.set(value, configOriginFile)
+				config.Editor.set(value)
 			}
 			return nil
 		},
-		value: func(c Config) (string, configOrigin) {
-			return c.Editor.value, c.Editor.origin
+		value: func(c Config) string {
+			return c.Editor.value
 		},
 		Help: Help{
 			Summary: "The CLI command that shall be invoked when running `klog edit`.",
@@ -199,20 +187,20 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 		reader: func(value string, config *Config) error {
 			switch value {
 			case string(tf.COLOUR_THEME_DARK):
-				config.ColourScheme.override(tf.COLOUR_THEME_DARK, configOriginFile)
+				config.ColourScheme.override(tf.COLOUR_THEME_DARK)
 			case string(tf.COLOUR_THEME_NO_COLOUR):
-				config.ColourScheme.override(tf.COLOUR_THEME_NO_COLOUR, configOriginFile)
+				config.ColourScheme.override(tf.COLOUR_THEME_NO_COLOUR)
 			case string(tf.COLOUR_THEME_LIGHT):
-				config.ColourScheme.override(tf.COLOUR_THEME_LIGHT, configOriginFile)
+				config.ColourScheme.override(tf.COLOUR_THEME_LIGHT)
 			case string(tf.COLOUR_THEME_BASIC):
-				config.ColourScheme.override(tf.COLOUR_THEME_BASIC, configOriginFile)
+				config.ColourScheme.override(tf.COLOUR_THEME_BASIC)
 			default:
 				return errors.New("The value must be `dark`, `light`, `basic`, or `no_colour`")
 			}
 			return nil
 		},
-		value: func(c Config) (string, configOrigin) {
-			return string(c.ColourScheme.Value()), c.ColourScheme.origin
+		value: func(c Config) string {
+			return string(c.ColourScheme.Value())
 		},
 		Help: Help{
 			Summary: "The colour scheme of your terminal, so that klog can choose an optimal colour theme for its output.",
@@ -226,15 +214,15 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			if err != nil {
 				return err
 			}
-			config.DefaultRounding.set(rounding, configOriginFile)
+			config.DefaultRounding.set(rounding)
 			return nil
 		},
-		value: func(c Config) (string, configOrigin) {
+		value: func(c Config) string {
 			result := ""
 			c.DefaultRounding.Unwrap(func(r service.Rounding) {
 				result = r.ToString()
 			})
-			return result, c.DefaultRounding.origin
+			return result
 		},
 		Help: Help{
 			Summary: "The default value that shall be used for rounding input times via the `--round` flag, e.g. in `klog start --round 15m`.",
@@ -249,15 +237,15 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			if err != nil {
 				return err
 			}
-			config.DefaultShouldTotal.set(klog.NewShouldTotal(0, d.InMinutes()), configOriginFile)
+			config.DefaultShouldTotal.set(klog.NewShouldTotal(0, d.InMinutes()))
 			return nil
 		},
-		value: func(c Config) (string, configOrigin) {
+		value: func(c Config) string {
 			result := ""
 			c.DefaultShouldTotal.Unwrap(func(s klog.ShouldTotal) {
 				result = s.ToString()
 			})
-			return result, c.DefaultShouldTotal.origin
+			return result
 		},
 		Help: Help{
 			Summary: "The default duration value that shall be used as should-total when creating new records, e.g. in `klog create --should '8h!'`.",
@@ -275,10 +263,10 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			} else {
 				return errors.New("The value must be `YYYY-MM-DD` or `YYYY/MM/DD`")
 			}
-			config.DateUseDashes.set(useDashes, configOriginFile)
+			config.DateUseDashes.set(useDashes)
 			return nil
 		},
-		value: func(c Config) (string, configOrigin) {
+		value: func(c Config) string {
 			result := ""
 			c.DateUseDashes.Unwrap(func(d bool) {
 				if d {
@@ -287,7 +275,7 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 					result = "YYYY/MM/DD"
 				}
 			})
-			return result, c.DateUseDashes.origin
+			return result
 		},
 		Help: Help{
 			Summary: "The preferred date notation for klog to use when adding a new record to a target file, i.e. whether it uses dashes (as in `2022-03-24`) or slashes (as in `2022/03/24`) as delimiter.",
@@ -305,10 +293,10 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 			} else {
 				return errors.New("The value must be `24h` or `12h`")
 			}
-			config.TimeUse24HourClock.set(use24HourClock, configOriginFile)
+			config.TimeUse24HourClock.set(use24HourClock)
 			return nil
 		},
-		value: func(c Config) (string, configOrigin) {
+		value: func(c Config) string {
 			result := ""
 			c.TimeUse24HourClock.Unwrap(func(t bool) {
 				if t {
@@ -317,7 +305,7 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 					result = "12h"
 				}
 			})
-			return result, c.TimeUse24HourClock.origin
+			return result
 		},
 		Help: Help{
 			Summary: "The preferred time convention for klog to use when adding a new time range entry to a target file, i.e. whether it uses the 24-hour clock (as in `13:00`) or the 12-hour clock (as in `1:00pm`).",
@@ -340,10 +328,10 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 				disabledCheckers[c] = true
 			}
 
-			config.NoWarnings.set(disabledCheckers, configOriginFile)
+			config.NoWarnings.set(disabledCheckers)
 			return nil
 		},
-		value: func(c Config) (string, configOrigin) {
+		value: func(c Config) string {
 			result := ""
 			c.NoWarnings.Unwrap(func(warningConfigs service.DisabledCheckers) {
 				keys := make([]string, 0, len(warningConfigs))
@@ -355,7 +343,7 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 				sort.Strings(keys)
 				result = strings.Join(keys, ", ")
 			})
-			return result, c.NoWarnings.origin
+			return result
 		},
 		Help: Help{
 			Summary: "Whether klog should suppress warnings when processing files.",
@@ -375,15 +363,11 @@ type ConfigFileEntries[T any] struct {
 	Name   string
 	Help   Help
 	reader func(string, *Config) error
-	value  func(Config) (string, configOrigin)
+	value  func(Config) string
 }
 
 func (e ConfigFileEntries[T]) Value(c Config) string {
-	v, o := e.value(c)
-	if o == configOriginFile {
-		return v
-	}
-	return ""
+	return e.value(c)
 }
 
 func (e FromConfigFile) Apply(config *Config) Error {
