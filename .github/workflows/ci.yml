@@ -31,6 +31,8 @@ jobs:
         run: |
           source ./run.sh && run::build
           mv out/klog /usr/local/bin/klog
+      - name: Check binary size
+        run: du -h $(which klog)
       - name: Run benchmark
         run: cd .github/ && ./benchmark.sh
   format:
