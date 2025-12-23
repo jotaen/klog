@@ -2,16 +2,17 @@ package cli
 
 import (
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/args"
+	"github.com/jotaen/klog/klog/app/cli/helper"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 )
 
 type Switch struct {
-	util.SummaryArgs
-	util.AtDateAndTimeArgs
-	util.NoStyleArgs
-	util.WarnArgs
-	util.OutputFileArgs
+	args.SummaryArgs
+	args.AtDateAndTimeArgs
+	args.NoStyleArgs
+	args.WarnArgs
+	args.OutputFileArgs
 }
 
 func (opt *Switch) Help() string {
@@ -35,7 +36,7 @@ func (opt *Switch) Run(ctx app.Context) app.Error {
 		return tErr
 	}
 
-	return util.Reconcile(ctx, util.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
+	return helper.Reconcile(ctx, helper.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			reconciling.NewReconcilerAtRecord(date),
 		},

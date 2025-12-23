@@ -1,22 +1,24 @@
 package cli
 
 import (
+	gotime "time"
+
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/args"
+	"github.com/jotaen/klog/klog/app/cli/helper"
 	"github.com/jotaen/klog/klog/service"
-	gotime "time"
+	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
 type Today struct {
-	util.DiffArgs
-	util.NowArgs
+	args.DiffArgs
+	args.NowArgs
 	Follow bool `name:"follow" short:"f" help:"Keep shell open and follow changes."`
-	util.DecimalArgs
-	util.WarnArgs
-	util.NoStyleArgs
-	util.InputFilesArgs
+	args.DecimalArgs
+	args.WarnArgs
+	args.NoStyleArgs
+	args.InputFilesArgs
 }
 
 func (opt *Today) Help() string {
@@ -36,7 +38,7 @@ func (opt *Today) Run(ctx app.Context) app.Error {
 	opt.DecimalArgs.Apply(&ctx)
 	opt.NoStyleArgs.Apply(&ctx)
 	if opt.Follow {
-		return util.WithRepeat(ctx.Print, 1*gotime.Second, func(counter int64) app.Error {
+		return helper.WithRepeat(ctx.Print, 1*gotime.Second, func(counter int64) app.Error {
 			err := handle(opt, ctx)
 			if counter < 7 {
 				// Display exit hint for a couple of seconds.

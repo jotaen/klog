@@ -3,7 +3,8 @@ package cli
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/args"
+	"github.com/jotaen/klog/klog/app/cli/helper"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 )
 
@@ -11,10 +12,10 @@ type Create struct {
 	ShouldTotal      klog.ShouldTotal   `name:"should" placeholder:"DURATION" help:"The should-total of the record."`
 	ShouldTotalAlias klog.ShouldTotal   `name:"should-total" placeholder:"DURATION" hidden:""` // Alias for “canonical” term
 	Summary          klog.RecordSummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the new record."`
-	util.AtDateArgs
-	util.NoStyleArgs
-	util.WarnArgs
-	util.OutputFileArgs
+	args.AtDateArgs
+	args.NoStyleArgs
+	args.WarnArgs
+	args.OutputFileArgs
 }
 
 func (opt *Create) Help() string {
@@ -35,7 +36,7 @@ func (opt *Create) Run(ctx app.Context) app.Error {
 			additionalData.ShouldTotal = s
 		})
 	}
-	return util.Reconcile(ctx, util.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
+	return helper.Reconcile(ctx, helper.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			reconciling.NewReconcilerForNewRecord(date, opt.DateFormat(ctx.Config()), additionalData),
 		},

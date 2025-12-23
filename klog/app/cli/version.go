@@ -3,18 +3,19 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/util"
 	"io"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/jotaen/klog/klog"
+	"github.com/jotaen/klog/klog/app"
+	"github.com/jotaen/klog/klog/app/cli/args"
 )
 
 type Version struct {
 	NoCheck bool `name:"no-check" help:"Don’t check online for updates."` // used for the smoke test
-	util.QuietArgs
+	args.QuietArgs
 }
 
 func (opt *Version) Help() string {

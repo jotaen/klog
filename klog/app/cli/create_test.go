@@ -1,11 +1,12 @@
 package cli
 
 import (
+	"testing"
+
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/args"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestCreate(t *testing.T) {
@@ -38,7 +39,7 @@ func TestCreateWithValues(t *testing.T) {
 1976-01-01
 	1h
 `)._Run((&Create{
-		AtDateArgs:  util.AtDateArgs{Date: klog.Ɀ_Date_(1976, 1, 2)},
+		AtDateArgs:  args.AtDateArgs{Date: klog.Ɀ_Date_(1976, 1, 2)},
 		ShouldTotal: klog.NewShouldTotal(5, 55),
 		Summary:     klog.Ɀ_RecordSummary_("This is a", "new record!"),
 	}).Run)
@@ -127,7 +128,7 @@ date_format = YYYY-MM-DD
 `)._SetFileConfig(`
 date_format = YYYY/MM/DD
 `)._SetNow(1920, 2, 3, 15, 24)._Run((&Create{
-			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 3)},
+			AtDateArgs: args.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 3)},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `

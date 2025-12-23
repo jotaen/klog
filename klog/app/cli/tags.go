@@ -4,21 +4,21 @@ import (
 	"fmt"
 
 	"github.com/jotaen/klog/klog/app"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/args"
 	"github.com/jotaen/klog/klog/service"
+	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
 type Tags struct {
 	Values       bool `name:"values" short:"v" help:"Display breakdown of tag values (if the data contains any; e.g.: '#tag=value')."`
 	Count        bool `name:"count" short:"c" help:"Display the number of matching entries per tag."`
 	WithUntagged bool `name:"with-untagged" short:"u" help:"Display remainder of any untagged entries"`
-	util.FilterArgs
-	util.NowArgs
-	util.DecimalArgs
-	util.WarnArgs
-	util.NoStyleArgs
-	util.InputFilesArgs
+	args.FilterArgs
+	args.NowArgs
+	args.DecimalArgs
+	args.WarnArgs
+	args.NoStyleArgs
+	args.InputFilesArgs
 }
 
 func (opt *Tags) Help() string {

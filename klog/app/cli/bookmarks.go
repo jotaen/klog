@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/args"
 )
 
 type Bookmarks struct {
@@ -98,7 +98,7 @@ type BookmarksSet struct {
 	Name   string `arg:"" name:"bookmark" type:"string" optional:"1" help:"The name of the bookmark."`
 	Create bool   `name:"create" short:"c" help:"Create the target file"`
 	Force  bool   `name:"force" help:"Force to set, even if target file does not exist or is invalid"`
-	util.QuietArgs
+	args.QuietArgs
 }
 
 func (opt *BookmarksSet) Run(ctx app.Context) error {
@@ -158,7 +158,7 @@ func (opt *BookmarksSet) Run(ctx app.Context) error {
 type BookmarksUnset struct {
 	// The name is not optional here, to avoid accidental invocations
 	Name string `arg:"" name:"bookmark" type:"string" predictor:"bookmark" help:"The name of the bookmark"`
-	util.QuietArgs
+	args.QuietArgs
 }
 
 func (opt *BookmarksUnset) Run(ctx app.Context) error {
@@ -186,7 +186,7 @@ func (opt *BookmarksUnset) Run(ctx app.Context) error {
 
 type BookmarksClear struct {
 	Yes bool `name:"yes" short:"y" help:"Skip confirmation"`
-	util.QuietArgs
+	args.QuietArgs
 }
 
 func (opt *BookmarksClear) Run(ctx app.Context) error {

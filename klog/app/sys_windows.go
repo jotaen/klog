@@ -3,18 +3,19 @@
 package app
 
 import (
-	"github.com/jotaen/klog/klog/app/cli/command"
+	"github.com/jotaen/klog/lib/shellcmd"
+
 	"os"
 	"syscall"
 	"unsafe"
 )
 
-var POTENTIAL_EDITORS = []command.Command{
-	command.New("notepad", nil),
+var POTENTIAL_EDITORS = []shellcmd.Command{
+	shellcmd.New("notepad", nil),
 }
 
-var POTENTIAL_FILE_EXLORERS = []command.Command{
-	command.New("cmd.exe", []string{"/C", "start"}),
+var POTENTIAL_FILE_EXLORERS = []shellcmd.Command{
+	shellcmd.New("cmd.exe", []string{"/C", "start"}),
 }
 
 var KLOG_CONFIG_FOLDER = []KlogFolder{

@@ -1,12 +1,13 @@
-package util
+package prettify
 
 import (
 	"errors"
-	"github.com/jotaen/klog/klog/app"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
-	"github.com/jotaen/klog/klog/parser/txt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/jotaen/klog/klog/app"
+	"github.com/jotaen/klog/klog/parser/txt"
+	tf "github.com/jotaen/klog/lib/terminalformat"
+	"github.com/stretchr/testify/assert"
 )
 
 var styler = tf.NewStyler(tf.COLOUR_THEME_NO_COLOUR)

@@ -6,8 +6,8 @@ import (
 
 	"github.com/jotaen/genie"
 	"github.com/jotaen/klog/klog"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/service"
+	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
 // Config contain all variable settings that influence the behaviour of

@@ -7,7 +7,7 @@ import (
 	"runtime"
 
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/prettify"
 	"github.com/jotaen/klog/klog/app/main"
 )
 
@@ -28,7 +28,7 @@ func main() {
 	klogFolder := func() app.File {
 		f, err := determineKlogConfigFolder()
 		if err != nil {
-			fail(util.PrettifyAppError(err, false), app.CONFIG_ERROR.ToInt())
+			fail(prettify.PrettifyAppError(err, false), app.CONFIG_ERROR.ToInt())
 		}
 		return f
 	}()
@@ -36,7 +36,7 @@ func main() {
 	configFile := func() string {
 		c, err := readConfigFile(app.Join(klogFolder, app.CONFIG_FILE_NAME))
 		if err != nil {
-			fail(util.PrettifyAppError(err, false), app.CONFIG_ERROR.ToInt())
+			fail(prettify.PrettifyAppError(err, false), app.CONFIG_ERROR.ToInt())
 		}
 		return c
 	}()
@@ -44,7 +44,7 @@ func main() {
 	config := func() app.Config {
 		c, err := app.NewConfig(runtime.NumCPU(), os.Getenv, configFile)
 		if err != nil {
-			fail(util.PrettifyAppError(err, false), app.CONFIG_ERROR.ToInt())
+			fail(prettify.PrettifyAppError(err, false), app.CONFIG_ERROR.ToInt())
 		}
 		return c
 	}()
