@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/jotaen/klog/klog/app"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/app/cli/util"
+	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
 type Config struct {

@@ -2,7 +2,7 @@ package klog
 
 import (
 	"github.com/jotaen/klog/klog/app"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
+	tf "github.com/jotaen/klog/lib/terminalformat"
 	"github.com/stretchr/testify/require"
 	"io"
 	"os"

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jotaen/klog/klog/app"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/service"
+	tf "github.com/jotaen/klog/lib/terminalformat"
 	"strings"
 )
 
