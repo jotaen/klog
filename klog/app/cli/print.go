@@ -1,13 +1,14 @@
 package cli
 
 import (
+	"strings"
+
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/service"
-	"strings"
 )
 
 type Print struct {
@@ -37,7 +38,10 @@ func (opt *Print) Run(ctx app.Context) app.Error {
 		return err
 	}
 	now := ctx.Now()
-	records = opt.ApplyFilter(now, records)
+	records, fErr := opt.ApplyFilter(now, records)
+	if fErr != nil {
+		return fErr
+	}
 	if len(records) == 0 {
 		return nil
 	}

@@ -181,7 +181,7 @@ var FilterArgsCompletionOverrides = map[string]bool{
 	"last-year":    true,
 }
 
-func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) []klog.Record {
+func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.Record, app.Error) {
 	today := klog.NewDateFromGo(now)
 	qry := service.FilterQry{
 		BeforeOrEqual: args.Until,
@@ -236,7 +236,7 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) []klog.Re
 		qry.AfterOrEqual = shortcutPeriod.Since()
 		qry.BeforeOrEqual = shortcutPeriod.Until()
 	}
-	return service.Filter(rs, qry)
+	return service.Filter(rs, qry), nil
 }
 
 type WarnArgs struct {
