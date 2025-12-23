@@ -3,16 +3,17 @@ package cli
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/args"
+	"github.com/jotaen/klog/klog/app/cli/helper"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 )
 
 type Stop struct {
 	Summary klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Text to append to the entry summary."`
-	util.AtDateAndTimeArgs
-	util.NoStyleArgs
-	util.WarnArgs
-	util.OutputFileArgs
+	args.AtDateAndTimeArgs
+	args.NoStyleArgs
+	args.WarnArgs
+	args.OutputFileArgs
 }
 
 func (opt *Stop) Help() string {
@@ -38,7 +39,7 @@ func (opt *Stop) Run(ctx app.Context) app.Error {
 	// Otherwise, it wouldn’t make sense to decrement the day.
 	shouldTryYesterday := opt.WasAutomatic()
 	yesterday := date.PlusDays(-1)
-	return util.Reconcile(ctx, util.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
+	return helper.Reconcile(ctx, helper.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			reconciling.NewReconcilerAtRecord(date),
 			func() reconciling.Creator {

@@ -6,8 +6,8 @@ import (
 
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
+	"github.com/jotaen/klog/klog/app/cli/args"
 	"github.com/jotaen/klog/klog/app/cli/report"
-	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
 	tf "github.com/jotaen/klog/lib/terminalformat"
@@ -18,13 +18,13 @@ type Report struct {
 	Fill            bool   `name:"fill" short:"f" help:"Fill any calendar gaps and show a consecutive sequence of dates."`
 	Chart           bool   `name:"chart" short:"c" help:"Includes a bar chart rendering, to aid visual comparison."`
 	ChartResolution int    `name:"chart-res" help:"Configure the chart resolution. INT must be a positive integer, denoting the minutes per rendered block."`
-	util.DiffArgs
-	util.FilterArgs
-	util.NowArgs
-	util.DecimalArgs
-	util.WarnArgs
-	util.NoStyleArgs
-	util.InputFilesArgs
+	args.DiffArgs
+	args.FilterArgs
+	args.NowArgs
+	args.DecimalArgs
+	args.WarnArgs
+	args.NoStyleArgs
+	args.InputFilesArgs
 }
 
 func (opt *Report) Help() string {

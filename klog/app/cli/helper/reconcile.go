@@ -1,14 +1,15 @@
-package util
+package helper
 
 import (
 	"github.com/jotaen/klog/klog/app"
+	"github.com/jotaen/klog/klog/app/cli/args"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 )
 
 type ReconcileOpts struct {
-	OutputFileArgs
-	WarnArgs
+	args.OutputFileArgs
+	args.WarnArgs
 }
 
 func Reconcile(ctx app.Context, opts ReconcileOpts, creators []reconciling.Creator, reconcile ...reconciling.Reconcile) app.Error {

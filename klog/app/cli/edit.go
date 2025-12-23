@@ -2,13 +2,13 @@ package cli
 
 import (
 	"github.com/jotaen/klog/klog/app"
+	"github.com/jotaen/klog/klog/app/cli/args"
 	"github.com/jotaen/klog/klog/app/cli/command"
-	"github.com/jotaen/klog/klog/app/cli/util"
 )
 
 type Edit struct {
-	util.QuietArgs
-	util.OutputFileArgs
+	args.QuietArgs
+	args.OutputFileArgs
 }
 
 const hint = "You can specify your preferred editor via the $EDITOR environment variable, or via the klog config file."

@@ -3,16 +3,17 @@ package cli
 import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/args"
+	"github.com/jotaen/klog/klog/app/cli/helper"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 )
 
 type Track struct {
 	Entry klog.EntrySummary `arg:"" required:"" placeholder:"ENTRY" help:"The new entry to add."`
-	util.AtDateArgs
-	util.NoStyleArgs
-	util.WarnArgs
-	util.OutputFileArgs
+	args.AtDateArgs
+	args.NoStyleArgs
+	args.WarnArgs
+	args.OutputFileArgs
 }
 
 func (opt *Track) Help() string {
@@ -39,7 +40,7 @@ func (opt *Track) Run(ctx app.Context) app.Error {
 	ctx.Config().DefaultShouldTotal.Unwrap(func(s klog.ShouldTotal) {
 		additionalData.ShouldTotal = s
 	})
-	return util.Reconcile(ctx, util.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
+	return helper.Reconcile(ctx, helper.ReconcileOpts{OutputFileArgs: opt.OutputFileArgs, WarnArgs: opt.WarnArgs},
 		[]reconciling.Creator{
 			reconciling.NewReconcilerAtRecord(date),
 			reconciling.NewReconcilerForNewRecord(date, opt.DateFormat(ctx.Config()), additionalData),

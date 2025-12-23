@@ -1,10 +1,11 @@
 package cli
 
 import (
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"testing"
+
+	"github.com/jotaen/klog/klog/app/cli/args"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestPrintsTodaysEvalutaion(t *testing.T) {
@@ -57,7 +58,7 @@ func TestPrintsEvaluationWithDiff(t *testing.T) {
 
 1999-03-14 (6h!)
 	14:38 - 18:13
-`)._Run((&Today{DiffArgs: util.DiffArgs{Diff: true}}).Run)
+`)._Run((&Today{DiffArgs: args.DiffArgs{Diff: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
              Total    Should     Diff
@@ -75,7 +76,7 @@ func TestPrintsEvaluationWithNow(t *testing.T) {
 
 1999-03-14
 	14:38 - ??
-`)._Run((&Today{NowArgs: util.NowArgs{Now: true}}).Run)
+`)._Run((&Today{NowArgs: args.NowArgs{Now: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
              Total
@@ -93,7 +94,7 @@ func TestPrintsEvaluationWithDiffAndNow(t *testing.T) {
 
 1999-03-14 (6h!)
 	14:38 - ?
-`)._Run((&Today{DiffArgs: util.DiffArgs{Diff: true}, NowArgs: util.NowArgs{Now: true}}).Run)
+`)._Run((&Today{DiffArgs: args.DiffArgs{Diff: true}, NowArgs: args.NowArgs{Now: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
              Total    Should     Diff   End-Time
@@ -112,9 +113,9 @@ func TestPrintsEvaluationWithDiffAndNowEndTimeInParenthesisIfNoOpenRange(t *test
 1999-03-14 (6h!)
 	14:38 - 21:05
 `)._Run((&Today{
-		DiffArgs: util.DiffArgs{Diff: true},
-		NowArgs:  util.NowArgs{Now: true},
-		WarnArgs: util.WarnArgs{NoWarn: true},
+		DiffArgs: args.DiffArgs{Diff: true},
+		NowArgs:  args.NowArgs{Now: true},
+		WarnArgs: args.WarnArgs{NoWarn: true},
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -131,9 +132,9 @@ func TestPrintsPlaceholderIfEndTimeIsOutOfBounds(t *testing.T) {
 1999-03-14 (60h!)
 	1h
 `)._Run((&Today{
-		DiffArgs: util.DiffArgs{Diff: true},
-		NowArgs:  util.NowArgs{Now: true},
-		WarnArgs: util.WarnArgs{NoWarn: true},
+		DiffArgs: args.DiffArgs{Diff: true},
+		NowArgs:  args.NowArgs{Now: true},
+		WarnArgs: args.WarnArgs{NoWarn: true},
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `
@@ -150,9 +151,9 @@ func TestPrintsNAWhenNoCurrentRecord(t *testing.T) {
 1999-03-12 (3h10m!)
 	6h50m
 `)._Run((&Today{
-		DiffArgs: util.DiffArgs{Diff: true},
-		NowArgs:  util.NowArgs{Now: true},
-		WarnArgs: util.WarnArgs{NoWarn: true},
+		DiffArgs: args.DiffArgs{Diff: true},
+		NowArgs:  args.NowArgs{Now: true},
+		WarnArgs: args.WarnArgs{NoWarn: true},
 	}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, `

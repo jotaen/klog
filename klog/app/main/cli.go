@@ -5,16 +5,18 @@ package klog
 
 import (
 	"errors"
+	"reflect"
+
 	"github.com/alecthomas/kong"
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	arglib "github.com/jotaen/klog/klog/app/cli/args"
+	"github.com/jotaen/klog/klog/app/cli/prettify"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
 	tf "github.com/jotaen/klog/lib/terminalformat"
 	kongcompletion "github.com/jotaen/kong-completion"
-	"reflect"
 )
 
 func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int, error) {
@@ -87,7 +89,7 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 	kongcompletion.Register(
 		kongApp,
 		kongcompletion.WithPredictors(CompletionPredictors(ctx)),
-		kongcompletion.WithFlagOverrides(util.FilterArgsCompletionOverrides),
+		kongcompletion.WithFlagOverrides(arglib.FilterArgsCompletionOverrides),
 	)
 
 	kongCtx, cErr := kongApp.Parse(args)
@@ -104,9 +106,9 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 	case rErr == nil:
 		return 0, nil
 	case errors.As(rErr, &parserErrors):
-		return parserErrors.Code().ToInt(), util.PrettifyParsingError(parserErrors, styler)
+		return parserErrors.Code().ToInt(), prettify.PrettifyParsingError(parserErrors, styler)
 	case errors.As(rErr, &appError):
-		return appError.Code().ToInt(), util.PrettifyAppError(appError, config.IsDebug.Value())
+		return appError.Code().ToInt(), prettify.PrettifyAppError(appError, config.IsDebug.Value())
 	default:
 		// This is just a fallback clause; this code branch is not expected to be
 		// invoked in practice.

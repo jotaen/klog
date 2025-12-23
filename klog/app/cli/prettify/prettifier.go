@@ -1,12 +1,13 @@
-package util
+package prettify
 
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/service"
 	tf "github.com/jotaen/klog/lib/terminalformat"
-	"strings"
 )
 
 var Reflower = tf.NewReflower(80, "\n")

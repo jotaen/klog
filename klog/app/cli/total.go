@@ -4,18 +4,18 @@ import (
 	"fmt"
 
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/args"
 	"github.com/jotaen/klog/klog/service"
 )
 
 type Total struct {
-	util.FilterArgs
-	util.DiffArgs
-	util.NowArgs
-	util.DecimalArgs
-	util.WarnArgs
-	util.NoStyleArgs
-	util.InputFilesArgs
+	args.FilterArgs
+	args.DiffArgs
+	args.NowArgs
+	args.DecimalArgs
+	args.WarnArgs
+	args.NoStyleArgs
+	args.InputFilesArgs
 }
 
 func (opt *Total) Help() string {
