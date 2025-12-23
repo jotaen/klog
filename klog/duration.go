@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/jotaen/safemath/safemath"
+	"github.com/jotaen/klog/lib/safemath"
 )
 
 // Duration represents a time span.
