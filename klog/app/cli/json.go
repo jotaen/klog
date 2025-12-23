@@ -40,7 +40,10 @@ func (opt *Json) Run(ctx app.Context) app.Error {
 	if nErr != nil {
 		return nErr
 	}
-	records = opt.ApplyFilter(now, records)
+	records, fErr := opt.ApplyFilter(now, records)
+	if fErr != nil {
+		return fErr
+	}
 	records = opt.ApplySort(records)
 	ctx.Print(json.ToJson(records, nil, opt.Pretty) + "\n")
 	return nil

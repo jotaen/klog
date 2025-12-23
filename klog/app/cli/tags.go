@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+
 	"github.com/jotaen/klog/klog/app"
 	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/app/cli/util"
@@ -42,7 +43,10 @@ func (opt *Tags) Run(ctx app.Context) app.Error {
 		return err
 	}
 	now := ctx.Now()
-	records = opt.ApplyFilter(now, records)
+	records, fErr := opt.ApplyFilter(now, records)
+	if fErr != nil {
+		return fErr
+	}
 	nErr := opt.ApplyNow(now, records...)
 	if nErr != nil {
 		return nErr

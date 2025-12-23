@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+
 	"github.com/jotaen/klog/klog/parser/txt"
 )
 
@@ -55,7 +56,7 @@ type Error interface {
 	Code() Code
 }
 
-type AppError struct {
+type appError struct {
 	code     Code
 	message  string
 	details  string
@@ -67,27 +68,27 @@ func NewError(message string, details string, original error) Error {
 }
 
 func NewErrorWithCode(code Code, message string, details string, original error) Error {
-	return AppError{code, message, details, original}
+	return appError{code, message, details, original}
 }
 
-func (e AppError) Error() string {
+func (e appError) Error() string {
 	return e.message
 }
 
-func (e AppError) Is(err error) bool {
-	_, ok := err.(AppError)
+func (e appError) Is(err error) bool {
+	_, ok := err.(appError)
 	return ok
 }
 
-func (e AppError) Details() string {
+func (e appError) Details() string {
 	return e.details
 }
 
-func (e AppError) Original() error {
+func (e appError) Original() error {
 	return e.original
 }
 
-func (e AppError) Code() Code {
+func (e appError) Code() Code {
 	return e.code
 }
 
