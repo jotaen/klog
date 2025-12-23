@@ -13,6 +13,7 @@ run::install() {
 run::build() {
 	go build \
 	  -ldflags "\
+	    -s -w \
 	    -X 'main.BinaryVersion=${1:-v?.?}' \
 	    -X 'main.BinaryBuildHash=${2:-???????}' \
 	    " \

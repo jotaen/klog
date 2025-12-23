@@ -1,6 +1,9 @@
 package cli
 
 import (
+	"math"
+	"strings"
+
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/report"
@@ -8,8 +11,6 @@ import (
 	"github.com/jotaen/klog/klog/app/cli/util"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
-	"math"
-	"strings"
 )
 
 type Report struct {
@@ -49,7 +50,10 @@ func (opt *Report) Run(ctx app.Context) app.Error {
 		return err
 	}
 	now := ctx.Now()
-	records = opt.ApplyFilter(now, records)
+	records, fErr := opt.ApplyFilter(now, records)
+	if fErr != nil {
+		return fErr
+	}
 	if len(records) == 0 {
 		return nil
 	}
