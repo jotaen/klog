@@ -26,12 +26,16 @@ type tokenDateRange struct {
 type tokenTag struct {
 	tag string
 }
+type tokenEntryType struct {
+	entryType string
+}
 
 var (
 	tagRegex       = regexp.MustCompile(`^#(([\p{L}\d_-]+)(=(("[^"]*")|('[^']*')|([\p{L}\d_-]*)))?)`)
 	dateRangeRegex = regexp.MustCompile(`^((\d{4}-\d{2}-\d{2})?\.\.\.(\d{4}-\d{2}-\d{2})?)`)
 	dateRegex      = regexp.MustCompile(`^(\d{4}-\d{2}-\d{2})`)
 	periodRegex    = regexp.MustCompile(`^((\d{4}-\p{L}?\d+)|(\d{4}))`)
+	typeRegex      = regexp.MustCompile(`^type:([\p{L}\-_]+)`)
 )
 
 var (
@@ -77,6 +81,12 @@ func tokenise(query string) ([]token, error) {
 			value := tm[1]
 			tokens = append(tokens, tokenTag{value})
 			txtParser.advance(1 + len(value))
+			if !txtParser.peekString(EOT, " ", ")") {
+				return nil, ErrMissingWhiteSpace
+			}
+		} else if ym := txtParser.peekRegex(typeRegex); ym != nil {
+			tokens = append(tokens, tokenEntryType{ym[1]})
+			txtParser.advance(5 + len(ym[1]))
 			if !txtParser.peekString(EOT, " ", ")") {
 				return nil, ErrMissingWhiteSpace
 			}

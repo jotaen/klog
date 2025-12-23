@@ -78,7 +78,7 @@ func (t *tokenParser) checkNextIsOperand() error {
 		return ErrOperandExpected
 	}
 	switch t.tokens[t.pointer].(type) {
-	case tokenOpenBracket, tokenTag, tokenDate, tokenDateRange, tokenPeriod, tokenNot:
+	case tokenOpenBracket, tokenTag, tokenDate, tokenDateRange, tokenPeriod, tokenNot, tokenEntryType:
 		return nil
 	}
 	return ErrOperandExpected

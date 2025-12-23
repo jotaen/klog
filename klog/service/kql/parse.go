@@ -116,6 +116,16 @@ func parseGroup(tp *tokenParser) (Predicate, error) {
 			}
 			g.negateNextOperand()
 
+		case tokenEntryType:
+			if err := tp.checkNextIsOperatorOrEnd(); err != nil {
+				return nil, err
+			}
+			et, err := NewEntryTypeFromString(tk.entryType)
+			if err != nil {
+				return nil, err
+			}
+			g.append(IsEntryType{et})
+
 		case tokenTag:
 			if err := tp.checkNextIsOperatorOrEnd(); err != nil {
 				return nil, err

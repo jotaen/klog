@@ -186,6 +186,10 @@ func TestOperatorOperandSequence(t *testing.T) {
 		"#foo 2020-01-01",
 		"#foo 2020-01",
 		"#foo #foo",
+		"type:duration #foo",
+		"#foo type:duration",
+		"2020 type:duration",
+		"type:duration 2025-Q4",
 
 		// And:
 		"2020-01-01 && #tag #foo",

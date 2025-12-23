@@ -1,6 +1,11 @@
 package kql
 
-import "github.com/jotaen/klog/klog"
+import (
+	"errors"
+	"strings"
+
+	"github.com/jotaen/klog/klog"
+)
 
 type queriedEntry struct {
 	parent klog.Record
@@ -77,12 +82,27 @@ func (n Not) Matches(e queriedEntry) bool {
 type EntryType string
 
 const (
-	ENTRY_TYPE_DURATION          = EntryType("DURATION")
-	ENTRY_TYPE_POSITIVE_DURATION = EntryType("DURATION_POSITIVE")
-	ENTRY_TYPE_NEGATIVE_DURATION = EntryType("DURATION_NEGATIVE")
-	ENTRY_TYPE_RANGE             = EntryType("RANGE")
-	ENTRY_TYPE_OPEN_RANGE        = EntryType("OPEN_RANGE")
+	ENTRY_TYPE_DURATION          = EntryType("duration")
+	ENTRY_TYPE_POSITIVE_DURATION = EntryType("duration-positive")
+	ENTRY_TYPE_NEGATIVE_DURATION = EntryType("duration-negative")
+	ENTRY_TYPE_RANGE             = EntryType("range")
+	ENTRY_TYPE_OPEN_RANGE        = EntryType("open-range")
 )
+
+func NewEntryTypeFromString(val string) (EntryType, error) {
+	for _, t := range []EntryType{
+		ENTRY_TYPE_DURATION,
+		ENTRY_TYPE_POSITIVE_DURATION,
+		ENTRY_TYPE_NEGATIVE_DURATION,
+		ENTRY_TYPE_RANGE,
+		ENTRY_TYPE_OPEN_RANGE,
+	} {
+		if strings.ToLower(strings.ReplaceAll(val, "_", "-")) == string(t) {
+			return t, nil
+		}
+	}
+	return EntryType(""), errors.New("Illegal entry type")
+}
 
 type IsEntryType struct {
 	Type EntryType

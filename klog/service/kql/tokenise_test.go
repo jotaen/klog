@@ -21,7 +21,7 @@ func TestTokeniseEmptyToken(t *testing.T) {
 }
 
 func TestTokeniseAllTokens(t *testing.T) {
-	p, err := tokenise("2020-01-01 && #hello || (2020-02-02 && !2021-Q4)")
+	p, err := tokenise("2020-01-01 && #hello || (2020-02-02 && !2021-Q4) && type:duration")
 	require.Nil(t, err)
 	assert.Equal(t, []token{
 		tokenDate{"2020-01-01"},
@@ -34,11 +34,13 @@ func TestTokeniseAllTokens(t *testing.T) {
 		tokenNot{},
 		tokenPeriod{"2021-Q4"},
 		tokenCloseBracket{},
+		tokenAnd{},
+		tokenEntryType{"duration"},
 	}, p)
 }
 
 func TestDisregardWhitespaceBetweenTokens(t *testing.T) {
-	p, err := tokenise("   2020-01-01    &&     #hello    ||    (   2020-02-02   &&   !   2021-Q4  )  ")
+	p, err := tokenise("   2020-01-01    &&     #hello    ||    (   2020-02-02   &&   !   2021-Q4  )  &&    type:duration")
 	require.Nil(t, err)
 	assert.Equal(t, []token{
 		tokenDate{"2020-01-01"},
@@ -51,6 +53,8 @@ func TestDisregardWhitespaceBetweenTokens(t *testing.T) {
 		tokenNot{},
 		tokenPeriod{"2021-Q4"},
 		tokenCloseBracket{},
+		tokenAnd{},
+		tokenEntryType{"duration"},
 	}, p)
 }
 
