@@ -6,15 +6,15 @@ import (
 
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/args"
-	"github.com/jotaen/klog/klog/app/cli/command"
+	"github.com/jotaen/klog/lib/shellcmd"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestEditWithAutoEditor(t *testing.T) {
 	spy := newCommandSpy(nil)
-	state, err := NewTestingContext()._SetEditors([]command.Command{
-		command.New("editor", []string{"--file"}),
+	state, err := NewTestingContext()._SetEditors([]shellcmd.Command{
+		shellcmd.New("editor", []string{"--file"}),
 	}, "")._SetExecute(spy.Execute)._Run((&Edit{
 		OutputFileArgs: args.OutputFileArgs{File: "/tmp/file.klg"},
 	}).Run)
@@ -27,16 +27,16 @@ func TestEditWithAutoEditor(t *testing.T) {
 }
 
 func TestFirstAutoEditorSucceeds(t *testing.T) {
-	spy := newCommandSpy(func(c command.Command) app.Error {
+	spy := newCommandSpy(func(c shellcmd.Command) app.Error {
 		if c.Bin == "editor2" {
 			return nil
 		}
 		return app.NewError("Error", "Error", nil)
 	})
-	_, err := NewTestingContext()._SetEditors([]command.Command{
-		command.New("editor1", []string{"--file"}),
-		command.New("editor2", []string{"--file"}),
-		command.New("editor3", []string{"--file"}),
+	_, err := NewTestingContext()._SetEditors([]shellcmd.Command{
+		shellcmd.New("editor1", []string{"--file"}),
+		shellcmd.New("editor2", []string{"--file"}),
+		shellcmd.New("editor3", []string{"--file"}),
 	}, "")._SetExecute(spy.Execute)._Run((&Edit{
 		OutputFileArgs: args.OutputFileArgs{File: "/tmp/file.klg"},
 	}).Run)
@@ -48,8 +48,8 @@ func TestFirstAutoEditorSucceeds(t *testing.T) {
 
 func TestEditWithExplicitEditor(t *testing.T) {
 	spy := newCommandSpy(nil)
-	state, err := NewTestingContext()._SetEditors([]command.Command{
-		command.New("editor", []string{"--file"}),
+	state, err := NewTestingContext()._SetEditors([]shellcmd.Command{
+		shellcmd.New("editor", []string{"--file"}),
 	}, "myedit")._SetExecute(spy.Execute)._Run((&Edit{
 		OutputFileArgs: args.OutputFileArgs{File: "/tmp/file.klg"},
 	}).Run)
@@ -63,8 +63,8 @@ func TestEditWithExplicitEditor(t *testing.T) {
 
 func TestEditWithExplicitEditorWithSpaces(t *testing.T) {
 	spy := newCommandSpy(nil)
-	_, err := NewTestingContext()._SetEditors([]command.Command{
-		command.New("editor", []string{"--file"}),
+	_, err := NewTestingContext()._SetEditors([]shellcmd.Command{
+		shellcmd.New("editor", []string{"--file"}),
 	}, "'C:\\Program Files\\Sublime Text'")._SetExecute(spy.Execute)._Run((&Edit{
 		OutputFileArgs: args.OutputFileArgs{File: "/tmp/file.klg"},
 	}).Run)
@@ -76,8 +76,8 @@ func TestEditWithExplicitEditorWithSpaces(t *testing.T) {
 
 func TestEditWithExplicitEditorWithAdditionalArgs(t *testing.T) {
 	spy := newCommandSpy(nil)
-	_, err := NewTestingContext()._SetEditors([]command.Command{
-		command.New("editor", []string{"--file"}),
+	_, err := NewTestingContext()._SetEditors([]shellcmd.Command{
+		shellcmd.New("editor", []string{"--file"}),
 	}, "myedit -f")._SetExecute(spy.Execute)._Run((&Edit{
 		OutputFileArgs: args.OutputFileArgs{File: "/tmp/file.klg"},
 	}).Run)
@@ -96,8 +96,8 @@ func TestEditFailsWithExplicitEditorThatHasMalformedSyntax(t *testing.T) {
 		`myedit --arg "foo`,
 	} {
 		spy := newCommandSpy(nil)
-		_, err := NewTestingContext()._SetEditors([]command.Command{
-			command.New("editor", []string{"--file"}),
+		_, err := NewTestingContext()._SetEditors([]shellcmd.Command{
+			shellcmd.New("editor", []string{"--file"}),
 		}, editor)._SetExecute(spy.Execute)._Run((&Edit{
 			OutputFileArgs: args.OutputFileArgs{File: "/tmp/file.klg"},
 		}).Run)
@@ -107,11 +107,11 @@ func TestEditFailsWithExplicitEditorThatHasMalformedSyntax(t *testing.T) {
 }
 
 func TestFailsIfExplicitEditorCrashes(t *testing.T) {
-	spy := newCommandSpy(func(c command.Command) app.Error {
+	spy := newCommandSpy(func(c shellcmd.Command) app.Error {
 		return app.NewError("Error", "Error", nil)
 	})
-	_, err := NewTestingContext()._SetEditors([]command.Command{
-		command.New("editor", []string{"--file"}),
+	_, err := NewTestingContext()._SetEditors([]shellcmd.Command{
+		shellcmd.New("editor", []string{"--file"}),
 	}, "myedit")._SetExecute(spy.Execute)._Run((&Edit{
 		OutputFileArgs: args.OutputFileArgs{File: "/tmp/file.klg"},
 	}).Run)
@@ -120,12 +120,12 @@ func TestFailsIfExplicitEditorCrashes(t *testing.T) {
 }
 
 func TestFailsIfAutoEditorsUnsuccessful(t *testing.T) {
-	spy := newCommandSpy(func(c command.Command) app.Error {
+	spy := newCommandSpy(func(c shellcmd.Command) app.Error {
 		return app.NewError("Error", "Error", nil)
 	})
-	_, err := NewTestingContext()._SetEditors([]command.Command{
-		command.New("editor1", []string{"--file"}),
-		command.New("editor2", nil),
+	_, err := NewTestingContext()._SetEditors([]shellcmd.Command{
+		shellcmd.New("editor1", []string{"--file"}),
+		shellcmd.New("editor2", nil),
 	}, "")._SetExecute(spy.Execute)._Run((&Edit{
 		OutputFileArgs: args.OutputFileArgs{File: "/tmp/file.klg"},
 	}).Run)
@@ -136,8 +136,8 @@ func TestFailsIfAutoEditorsUnsuccessful(t *testing.T) {
 
 func TestEditFailsWithoutFile(t *testing.T) {
 	spy := newCommandSpy(nil)
-	_, err := NewTestingContext()._SetEditors([]command.Command{
-		command.New("editor", []string{"--file"}),
+	_, err := NewTestingContext()._SetEditors([]shellcmd.Command{
+		shellcmd.New("editor", []string{"--file"}),
 	}, "")._SetExecute(spy.Execute)._Run((&Edit{}).Run)
 	require.Error(t, err)
 	assert.Equal(t, 0, spy.Count)

@@ -5,15 +5,15 @@ import (
 
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/args"
-	"github.com/jotaen/klog/klog/app/cli/command"
+	"github.com/jotaen/klog/lib/shellcmd"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGotoLocation(t *testing.T) {
 	spy := newCommandSpy(nil)
-	_, err := NewTestingContext()._SetFileExplorers([]command.Command{
-		command.New("goto", []string{"--file"}),
+	_, err := NewTestingContext()._SetFileExplorers([]shellcmd.Command{
+		shellcmd.New("goto", []string{"--file"}),
 	})._SetExecute(spy.Execute)._Run((&Goto{
 		OutputFileArgs: args.OutputFileArgs{File: "/tmp/file.klg"},
 	}).Run)
@@ -24,16 +24,16 @@ func TestGotoLocation(t *testing.T) {
 }
 
 func TestGotoLocationFirstSucceeds(t *testing.T) {
-	spy := newCommandSpy(func(c command.Command) app.Error {
+	spy := newCommandSpy(func(c shellcmd.Command) app.Error {
 		if c.Bin == "goto2" {
 			return nil
 		}
 		return app.NewError("Error", "Error", nil)
 	})
-	_, err := NewTestingContext()._SetFileExplorers([]command.Command{
-		command.New("goto1", []string{"--file"}),
-		command.New("goto2", nil),
-		command.New("goto3", []string{"--file"}),
+	_, err := NewTestingContext()._SetFileExplorers([]shellcmd.Command{
+		shellcmd.New("goto1", []string{"--file"}),
+		shellcmd.New("goto2", nil),
+		shellcmd.New("goto3", []string{"--file"}),
 	})._SetExecute(spy.Execute)._Run((&Goto{
 		OutputFileArgs: args.OutputFileArgs{File: "/tmp/file.klg"},
 	}).Run)
@@ -44,11 +44,11 @@ func TestGotoLocationFirstSucceeds(t *testing.T) {
 }
 
 func TestGotoFails(t *testing.T) {
-	spy := newCommandSpy(func(_ command.Command) app.Error {
+	spy := newCommandSpy(func(_ shellcmd.Command) app.Error {
 		return app.NewError("Error", "Error", nil)
 	})
-	_, err := NewTestingContext()._SetFileExplorers([]command.Command{
-		command.New("goto", []string{"--file"}),
+	_, err := NewTestingContext()._SetFileExplorers([]shellcmd.Command{
+		shellcmd.New("goto", []string{"--file"}),
 	})._SetExecute(spy.Execute)._Run((&Goto{
 		OutputFileArgs: args.OutputFileArgs{File: "/tmp/file.klg"},
 	}).Run)
@@ -59,8 +59,8 @@ func TestGotoFails(t *testing.T) {
 
 func TestGotoFailsWithoutFile(t *testing.T) {
 	spy := newCommandSpy(nil)
-	_, err := NewTestingContext()._SetEditors([]command.Command{
-		command.New("goto", []string{"--file"}),
+	_, err := NewTestingContext()._SetEditors([]shellcmd.Command{
+		shellcmd.New("goto", []string{"--file"}),
 	}, "")._SetExecute(spy.Execute)._Run((&Goto{}).Run)
 	require.Error(t, err)
 	assert.Equal(t, 0, spy.Count)

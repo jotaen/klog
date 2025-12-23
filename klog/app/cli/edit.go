@@ -3,7 +3,7 @@ package cli
 import (
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/args"
-	"github.com/jotaen/klog/klog/app/cli/command"
+	"github.com/jotaen/klog/lib/shellcmd"
 )
 
 type Edit struct {
@@ -26,7 +26,7 @@ func (opt *Edit) Run(ctx app.Context) app.Error {
 	explicitEditor, autoEditors := ctx.Editors()
 
 	if explicitEditor != "" {
-		c, cErr := command.NewFromString(explicitEditor)
+		c, cErr := shellcmd.NewFromString(explicitEditor)
 		if cErr != nil {
 			return app.NewError(
 				"Invalid editor setting",

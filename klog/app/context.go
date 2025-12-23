@@ -8,15 +8,16 @@ package app
 import (
 	"bufio"
 	"fmt"
-	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/command"
-	"github.com/jotaen/klog/klog/parser"
-	"github.com/jotaen/klog/klog/parser/reconciling"
-	"github.com/jotaen/klog/klog/parser/txt"
-	tf "github.com/jotaen/klog/lib/terminalformat"
 	"os"
 	"os/exec"
 	gotime "time"
+
+	"github.com/jotaen/klog/klog"
+	"github.com/jotaen/klog/klog/parser"
+	"github.com/jotaen/klog/klog/parser/reconciling"
+	"github.com/jotaen/klog/klog/parser/txt"
+	"github.com/jotaen/klog/lib/shellcmd"
+	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
 // FileOrBookmarkName is either a file name or a bookmark name
@@ -62,15 +63,15 @@ type Context interface {
 	ManipulateBookmarks(func(BookmarksCollection) Error) Error
 
 	// Execute attempts to run a command on the system.
-	Execute(command.Command) Error
+	Execute(shellcmd.Command) Error
 
 	// Editors returns commands to launch a text editor on the system.
 	// - The string is a user-specified command, if specified.
 	// - The command list is a prioritised list of predefined commands.
-	Editors() (string, []command.Command)
+	Editors() (string, []shellcmd.Command)
 
 	// FileExplorers returns commands to launch a file explorer on the system.
-	FileExplorers() []command.Command
+	FileExplorers() []shellcmd.Command
 
 	// Serialise returns the current styler + serialiser according to the user’s
 	// style preferences.
@@ -329,7 +330,7 @@ func (ctx *context) bookmarkDatabasePath() File {
 	return Join(ctx.KlogConfigFolder(), BOOKMARKS_FILE_NAME)
 }
 
-func (ctx *context) Execute(cmd command.Command) Error {
+func (ctx *context) Execute(cmd shellcmd.Command) Error {
 	c := exec.Command(cmd.Bin, cmd.Args...)
 	c.Stdin = os.Stdin
 	c.Stdout = os.Stdout
@@ -344,7 +345,7 @@ func (ctx *context) Execute(cmd command.Command) Error {
 	)
 }
 
-func (ctx *context) Editors() (string, []command.Command) {
+func (ctx *context) Editors() (string, []shellcmd.Command) {
 	configuredEditor := ""
 	ctx.config.Editor.Unwrap(func(s string) {
 		configuredEditor = s
@@ -352,7 +353,7 @@ func (ctx *context) Editors() (string, []command.Command) {
 	return configuredEditor, POTENTIAL_EDITORS
 }
 
-func (ctx *context) FileExplorers() []command.Command {
+func (ctx *context) FileExplorers() []shellcmd.Command {
 	return POTENTIAL_FILE_EXLORERS
 }
 
