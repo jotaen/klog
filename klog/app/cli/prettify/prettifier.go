@@ -10,12 +10,12 @@ import (
 	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
-var Reflower = tf.NewReflower(80, "\n")
+var Reflower = tf.NewReflower(80)
 
 // PrettifyAppError prints app errors including details.
 func PrettifyAppError(err app.Error, isDebug bool) error {
 	message := "Error: " + err.Error() + "\n"
-	message += Reflower.Reflow(err.Details(), nil)
+	message += Reflower.Reflow(err.Details(), "")
 	if isDebug && err.Original() != nil {
 		message += "\n\nOriginal Error:\n" + err.Original().Error()
 	}
@@ -55,7 +55,7 @@ func PrettifyParsingError(err app.ParserErrors, styler tf.Styler) error {
 		) + "\n"
 		message += fmt.Sprintf(
 			styler.Props(tf.StyleProps{Color: tf.YELLOW}).Format("%s"),
-			Reflower.Reflow(e.Message(), []string{INDENT}),
+			Reflower.Reflow(e.Message(), INDENT),
 		) + "\n"
 	}
 	return errors.New(message)
