@@ -1,4 +1,4 @@
-package text
+package terminalformat
 
 import "unicode/utf8"
 

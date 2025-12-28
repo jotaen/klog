@@ -5,7 +5,7 @@ import (
 	"math"
 	"strings"
 
-	tf "github.com/jotaen/klog/lib/text"
+	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
 type ParseError interface {
