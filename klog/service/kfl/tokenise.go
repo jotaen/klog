@@ -1,4 +1,4 @@
-package kql
+package kfl
 
 import (
 	"errors"
@@ -43,8 +43,8 @@ var (
 	ErrUnrecognisedToken = errors.New("Unrecognised query token. Please make sure to use valid query syntax.")
 )
 
-func tokenise(query string) ([]token, error) {
-	txtParser := newTextParser(query)
+func tokenise(filterQuery string) ([]token, error) {
+	txtParser := newTextParser(filterQuery)
 	tokens := []token{}
 	for {
 		if txtParser.isFinished() {

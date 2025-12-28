@@ -1,10 +1,10 @@
-package kql
+package kfl
 
 import (
 	"github.com/jotaen/klog/klog"
 )
 
-func Query(p Predicate, rs []klog.Record) []klog.Record {
+func Filter(p Predicate, rs []klog.Record) []klog.Record {
 	var res []klog.Record
 	for _, r := range rs {
 		var es []klog.Entry

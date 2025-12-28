@@ -1,4 +1,4 @@
-package kql
+package kfl
 
 import (
 	"errors"
@@ -9,17 +9,17 @@ import (
 )
 
 var (
-	ErrMalformedQuery     = errors.New("Malformed query") // This is only a just-in-case fallback.
-	ErrCannotMixAndOr     = errors.New("Cannot mix && and || operators on the same level. Please use parenthesis () for grouping.")
-	ErrUnbalancedBrackets = errors.New("Unbalanced parenthesis. Please make sure that the number of opening and closing parentheses matches.")
-	errOperatorOperand    = errors.New("Missing expected") // Internal “base” class
-	ErrOperatorExpected   = fmt.Errorf("%w operator. Please put logical operators ('&&' or '||') between the search operands.", errOperatorOperand)
-	ErrOperandExpected    = fmt.Errorf("%w operand. Please remove redundant logical operators.", errOperatorOperand)
-	ErrIllegalTokenValue  = errors.New("Illegal value. Please make sure to use only valid operand values.")
+	ErrMalformedFilterQuery = errors.New("Malformed filter query") // This is only a just-in-case fallback.
+	ErrCannotMixAndOr       = errors.New("Cannot mix && and || operators on the same level. Please use parenthesis () for grouping.")
+	ErrUnbalancedBrackets   = errors.New("Unbalanced parenthesis. Please make sure that the number of opening and closing parentheses matches.")
+	errOperatorOperand      = errors.New("Missing expected") // Internal “base” class
+	ErrOperatorExpected     = fmt.Errorf("%w operator. Please put logical operators ('&&' or '||') between the search operands.", errOperatorOperand)
+	ErrOperandExpected      = fmt.Errorf("%w operand. Please remove redundant logical operators.", errOperatorOperand)
+	ErrIllegalTokenValue    = errors.New("Illegal value. Please make sure to use only valid operand values.")
 )
 
-func Parse(query string) (Predicate, error) {
-	tokens, err := tokenise(query)
+func Parse(filterQuery string) (Predicate, error) {
+	tokens, err := tokenise(filterQuery)
 	if err != nil {
 		return nil, err
 	}

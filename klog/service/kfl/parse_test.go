@@ -1,4 +1,4 @@
-package kql
+package kfl
 
 import (
 	"testing"

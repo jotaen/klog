@@ -1,4 +1,4 @@
-package kql
+package kfl
 
 import (
 	"regexp"
@@ -131,6 +131,6 @@ func (g *predicateGroup) make() (Predicate, error) {
 	} else if g.operator == (tokenOr{}) {
 		return Or{g.ps}, nil
 	} else {
-		return nil, ErrMalformedQuery
+		return nil, ErrMalformedFilterQuery
 	}
 }
