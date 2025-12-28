@@ -47,7 +47,7 @@ func TestCannotMixAndOrOnSameLevel(t *testing.T) {
 	} {
 		t.Run(tt, func(t *testing.T) {
 			p, err := Parse(tt)
-			require.ErrorIs(t, err, ErrCannotMixAndOr)
+			require.ErrorIs(t, err.Original(), ErrCannotMixAndOr)
 			require.Nil(t, p)
 		})
 	}
@@ -164,7 +164,7 @@ func TestBracketMismatch(t *testing.T) {
 	} {
 		t.Run(tt, func(t *testing.T) {
 			p, err := Parse(tt)
-			require.ErrorIs(t, err, ErrUnbalancedBrackets)
+			require.ErrorIs(t, err.Original(), ErrUnbalancedBrackets)
 			require.Nil(t, p)
 		})
 	}
@@ -209,7 +209,7 @@ func TestOperatorOperandSequence(t *testing.T) {
 	} {
 		t.Run(tt, func(t *testing.T) {
 			p, err := Parse(tt)
-			require.ErrorIs(t, err, errOperatorOperand)
+			require.ErrorIs(t, err.Original(), errOperatorOperand)
 			require.Nil(t, p)
 		})
 	}

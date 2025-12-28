@@ -9,19 +9,19 @@ import (
 
 func TestTokeniseEmptyToken(t *testing.T) {
 	{ // Empty
-		p, err := tokenise("")
+		p, _, err := tokenise("")
 		require.Nil(t, err)
 		assert.Equal(t, p, []token{})
 	}
 	{ // Blank
-		p, err := tokenise("    ")
+		p, _, err := tokenise("    ")
 		require.Nil(t, err)
 		assert.Equal(t, p, []token{})
 	}
 }
 
 func TestTokeniseAllTokens(t *testing.T) {
-	p, err := tokenise("2020-01-01 && #hello || (2020-02-02 && !2021-Q4) && type:duration")
+	p, _, err := tokenise("2020-01-01 && #hello || (2020-02-02 && !2021-Q4) && type:duration")
 	require.Nil(t, err)
 	assert.Equal(t, []token{
 		tokenDate{"2020-01-01"},
@@ -40,7 +40,7 @@ func TestTokeniseAllTokens(t *testing.T) {
 }
 
 func TestDisregardWhitespaceBetweenTokens(t *testing.T) {
-	p, err := tokenise("   2020-01-01    &&     #hello    ||    (   2020-02-02   &&   !   2021-Q4  )  &&    type:duration")
+	p, _, err := tokenise("   2020-01-01    &&     #hello    ||    (   2020-02-02   &&   !   2021-Q4  )  &&    type:duration")
 	require.Nil(t, err)
 	assert.Equal(t, []token{
 		tokenDate{"2020-01-01"},
@@ -66,8 +66,8 @@ func TestFailsOnUnrecognisedToken(t *testing.T) {
 		"2020-01-01 {2020-01-02}",
 	} {
 		t.Run(txt, func(t *testing.T) {
-			p, err := tokenise(txt)
-			require.ErrorIs(t, err, ErrUnrecognisedToken)
+			p, _, err := tokenise(txt)
+			require.ErrorIs(t, err.Original(), ErrUnrecognisedToken)
 			assert.Nil(t, p)
 		})
 	}
@@ -116,8 +116,8 @@ func TestFailsOnMissingWhitespace(t *testing.T) {
 		"2020-Q4!( 2020-01-01 )",
 	} {
 		t.Run(txt, func(t *testing.T) {
-			p, err := tokenise(txt)
-			require.ErrorIs(t, err, ErrMissingWhiteSpace)
+			p, _, err := tokenise(txt)
+			require.ErrorIs(t, err.Original(), ErrMissingWhiteSpace)
 			assert.Nil(t, p)
 		})
 	}

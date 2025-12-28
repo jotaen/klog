@@ -18,29 +18,45 @@ var (
 	ErrIllegalTokenValue    = errors.New("Illegal value. Please make sure to use only valid operand values.")
 )
 
-func Parse(filterQuery string) (Predicate, error) {
-	tokens, err := tokenise(filterQuery)
-	if err != nil {
-		return nil, err
-	}
-	tp := newTokenParser(append(tokens, tokenCloseBracket{}))
-	p, err := parseGroup(&tp)
-	if err != nil {
-		return nil, err
-	}
-	// Check whether there are tokens left, which would indicate
-	// unbalanced brackets.
-	if tp.next() != nil {
-		return nil, ErrUnbalancedBrackets
+func Parse(filterQuery string) (Predicate, ParseError) {
+	p, pErr := func() (Predicate, ParseError) {
+		tokens, pos, pErr := tokenise(filterQuery)
+		if pErr != nil {
+			return nil, pErr
+		}
+		tp := newTokenParser(
+			append(tokens, tokenCloseBracket{}),
+			append(pos, len(filterQuery)),
+		)
+		p, pErr := parseGroup(&tp)
+		if pErr != nil {
+			return nil, pErr
+		}
+		// Check whether there are tokens left, which would indicate
+		// unbalanced brackets.
+		if nextToken, _ := tp.next(); nextToken != nil {
+			return nil, parseError{
+				err:      ErrUnbalancedBrackets,
+				position: len(filterQuery) - 1,
+				query:    filterQuery,
+			}
+		}
+		return p, nil
+	}()
+	if pErr != nil {
+		if pErr, ok := pErr.(parseError); ok {
+			pErr.query = filterQuery
+			return nil, pErr
+		}
 	}
 	return p, nil
 }
 
-func parseGroup(tp *tokenParser) (Predicate, error) {
+func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 	g := predicateGroup{}
 
 	for {
-		nextToken := tp.next()
+		nextToken, position := tp.next()
 		if nextToken == nil {
 			break
 		}
@@ -48,35 +64,38 @@ func parseGroup(tp *tokenParser) (Predicate, error) {
 		switch tk := nextToken.(type) {
 
 		case tokenOpenBracket:
-			if err := tp.checkNextIsOperand(); err != nil {
-				return nil, err
+			if pErr := tp.checkNextIsOperand(); pErr != nil {
+				return nil, pErr
 			}
-			p, err := parseGroup(tp)
-			if err != nil {
-				return nil, err
+			p, pErr := parseGroup(tp)
+			if pErr != nil {
+				return nil, pErr
 			}
 			g.append(p)
 
 		case tokenCloseBracket:
-			if err := tp.checkNextIsOperatorOrEnd(); err != nil {
-				return nil, err
+			if pErr := tp.checkNextIsOperatorOrEnd(); pErr != nil {
+				return nil, pErr
 			}
-			p, err := g.make()
-			return p, err
+			p, pErr := g.make()
+			return p, pErr
 
 		case tokenDate:
-			if err := tp.checkNextIsOperatorOrEnd(); err != nil {
-				return nil, err
+			if pErr := tp.checkNextIsOperatorOrEnd(); pErr != nil {
+				return nil, pErr
 			}
 			date, err := klog.NewDateFromString(tk.date)
 			if err != nil {
-				return nil, err
+				return nil, parseError{
+					err:      err,
+					position: position,
+				}
 			}
 			g.append(IsInDateRange{date, date})
 
 		case tokenDateRange:
-			if err := tp.checkNextIsOperatorOrEnd(); err != nil {
-				return nil, err
+			if pErr := tp.checkNextIsOperatorOrEnd(); pErr != nil {
+				return nil, pErr
 			}
 			dateBoundaries := []klog.Date{nil, nil}
 			for i, v := range tk.bounds {
@@ -85,54 +104,67 @@ func parseGroup(tp *tokenParser) (Predicate, error) {
 				}
 				date, err := klog.NewDateFromString(v)
 				if err != nil {
-					return nil, err
+					return nil, parseError{
+						err:      err,
+						position: position,
+					}
 				}
 				dateBoundaries[i] = date
 			}
 			g.append(IsInDateRange{dateBoundaries[0], dateBoundaries[1]})
 
 		case tokenPeriod:
-			if err := tp.checkNextIsOperatorOrEnd(); err != nil {
-				return nil, err
+			if pErr := tp.checkNextIsOperatorOrEnd(); pErr != nil {
+				return nil, pErr
 			}
 			prd, err := period.NewPeriodFromPatternString(tk.period)
 			if err != nil {
-				return nil, err
+				return nil, parseError{
+					err:      err,
+					position: position,
+					length:   len(tk.period),
+				}
 			}
 			g.append(IsInDateRange{prd.Since(), prd.Until()})
 
 		case tokenAnd, tokenOr:
-			if err := tp.checkNextIsOperand(); err != nil {
-				return nil, err
+			if pErr := tp.checkNextIsOperand(); pErr != nil {
+				return nil, pErr
 			}
-			err := g.setOperator(tk)
-			if err != nil {
-				return nil, err
+			pErr := g.setOperator(tk, position)
+			if pErr != nil {
+				return nil, pErr
 			}
 
 		case tokenNot:
-			if err := tp.checkNextIsOperand(); err != nil {
-				return nil, err
+			if pErr := tp.checkNextIsOperand(); pErr != nil {
+				return nil, pErr
 			}
 			g.negateNextOperand()
 
 		case tokenEntryType:
-			if err := tp.checkNextIsOperatorOrEnd(); err != nil {
-				return nil, err
+			if pErr := tp.checkNextIsOperatorOrEnd(); pErr != nil {
+				return nil, pErr
 			}
 			et, err := NewEntryTypeFromString(tk.entryType)
 			if err != nil {
-				return nil, err
+				return nil, parseError{
+					err:      err,
+					position: position,
+				}
 			}
 			g.append(IsEntryType{et})
 
 		case tokenTag:
-			if err := tp.checkNextIsOperatorOrEnd(); err != nil {
-				return nil, err
+			if pErr := tp.checkNextIsOperatorOrEnd(); pErr != nil {
+				return nil, pErr
 			}
 			tag, err := klog.NewTagFromString(tk.tag)
 			if err != nil {
-				return nil, err
+				return nil, parseError{
+					err:      err,
+					position: position,
+				}
 			}
 			g.append(HasTag{tag})
 
@@ -141,5 +173,8 @@ func parseGroup(tp *tokenParser) (Predicate, error) {
 		}
 	}
 
-	return nil, ErrUnbalancedBrackets
+	return nil, parseError{
+		err:      ErrUnbalancedBrackets,
+		position: 0,
+	}
 }
