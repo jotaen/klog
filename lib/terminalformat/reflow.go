@@ -90,8 +90,6 @@ func reflowLine(content string, maxWidth int, linePrefix string, indent string) 
 		if wordLen > maxWidth {
 			if currentLen > 0 {
 				result = append(result, currentLine)
-				currentLine = linePrefix + indent
-				currentLen = 0
 			}
 
 			for len(wordRunes) > maxWidth {
