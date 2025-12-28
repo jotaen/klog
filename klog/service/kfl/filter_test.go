@@ -79,77 +79,76 @@ func TestQueryWithBefore(t *testing.T) {
 	assert.Equal(t, 1, rs[1].Date().Day())
 }
 
-//func TestQueryWithTagOnEntries(t *testing.T) {
-//	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []klog.Tag{klog.NewTagOrPanic("bar", "")}})
-//	require.Len(t, rs, 3)
-//	assert.Equal(t, 31, rs[0].Date().Day())
-//	assert.Equal(t, 1, rs[1].Date().Day())
-//	assert.Equal(t, 3, rs[2].Date().Day())
-//	assert.Equal(t, klog.NewDuration(5+8+6, 0), Total(rs...))
-//}
-//
-//func TestQueryWithTagOnOverallSummary(t *testing.T) {
-//	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []klog.Tag{klog.NewTagOrPanic("foo", "")}})
-//	require.Len(t, rs, 4)
-//	assert.Equal(t, 30, rs[0].Date().Day())
-//	assert.Equal(t, 1, rs[1].Date().Day())
-//	assert.Equal(t, 2, rs[2].Date().Day())
-//	assert.Equal(t, 3, rs[3].Date().Day())
-//	assert.Equal(t, klog.NewDuration(6+7+8, -30+15), Total(rs...))
-//}
-//
-//func TestQueryWithTagOnEntriesAndInSummary(t *testing.T) {
-//	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []klog.Tag{klog.NewTagOrPanic("foo", ""), klog.NewTagOrPanic("bar", "")}})
-//	require.Len(t, rs, 2)
-//	assert.Equal(t, 1, rs[0].Date().Day())
-//	assert.Equal(t, 3, rs[1].Date().Day())
-//	assert.Equal(t, klog.NewDuration(8+6, 0), Total(rs...))
-//}
-//
-//func TestQueryWithTagValues(t *testing.T) {
-//	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []klog.Tag{klog.NewTagOrPanic("foo", "a")}})
-//	require.Len(t, rs, 1)
-//	assert.Equal(t, 3, rs[0].Date().Day())
-//	assert.Equal(t, klog.NewDuration(8, 0), Total(rs...))
-//}
-//
-//func TestQueryWithTagValuesInEntries(t *testing.T) {
-//	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []klog.Tag{klog.NewTagOrPanic("bar", "1")}})
-//	require.Len(t, rs, 1)
-//	assert.Equal(t, 3, rs[0].Date().Day())
-//	assert.Equal(t, klog.NewDuration(4, 0), Total(rs...))
-//}
-//
-//func TestQueryWithTagNonMatchingValues(t *testing.T) {
-//	rs := Filter(sampleRecordsForQuerying(), FilterQry{Tags: []klog.Tag{klog.NewTagOrPanic("bar", "3")}})
-//	require.Len(t, rs, 0)
-//}
-//
-//func TestQueryWithEntryTypes(t *testing.T) {
-//	{
-//		rs := Filter(sampleRecordsForQuerying(), FilterQry{EntryType: ENTRY_TYPE_DURATION})
-//		require.Len(t, rs, 4)
-//		assert.Equal(t, klog.NewDuration(0, 1545), Total(rs...))
-//	}
-//	{
-//		rs := Filter(sampleRecordsForQuerying(), FilterQry{EntryType: ENTRY_TYPE_NEGATIVE_DURATION})
-//		require.Len(t, rs, 1)
-//		assert.Equal(t, 1, rs[0].Date().Day())
-//		assert.Equal(t, klog.NewDuration(0, -30), Total(rs...))
-//	}
-//	{
-//		rs := Filter(sampleRecordsForQuerying(), FilterQry{EntryType: ENTRY_TYPE_POSITIVE_DURATION})
-//		require.Len(t, rs, 4)
-//		assert.Equal(t, klog.NewDuration(0, 1575), Total(rs...))
-//	}
-//	{
-//		rs := Filter(sampleRecordsForQuerying(), FilterQry{EntryType: ENTRY_TYPE_RANGE})
-//		require.Len(t, rs, 0)
-//		assert.Equal(t, klog.NewDuration(0, 0), Total(rs...))
-//	}
-//	{
-//		rs := Filter(sampleRecordsForQuerying(), FilterQry{EntryType: ENTRY_TYPE_OPEN_RANGE})
-//		require.Len(t, rs, 1)
-//		assert.Equal(t, klog.NewDuration(0, 0), Total(rs...))
-//	}
-//}
+func TestQueryWithTagOnEntries(t *testing.T) {
+	rs := Filter(HasTag{klog.NewTagOrPanic("bar", "")}, sampleRecordsForQuerying())
+	require.Len(t, rs, 3)
+	assert.Equal(t, 31, rs[0].Date().Day())
+	assert.Equal(t, 1, rs[1].Date().Day())
+	assert.Equal(t, 3, rs[2].Date().Day())
+	assert.Equal(t, klog.NewDuration(5+8+6, 0), service.Total(rs...))
+}
+
+func TestQueryWithTagOnOverallSummary(t *testing.T) {
+	rs := Filter(HasTag{klog.NewTagOrPanic("foo", "")}, sampleRecordsForQuerying())
+	require.Len(t, rs, 3)
+	assert.Equal(t, 1, rs[0].Date().Day())
+	assert.Equal(t, 2, rs[1].Date().Day())
+	assert.Equal(t, 3, rs[2].Date().Day())
+	assert.Equal(t, klog.NewDuration(6+7+8, -30+15), service.Total(rs...))
+}
+
+func TestQueryWithTagOnEntriesAndInSummary(t *testing.T) {
+	rs := Filter(And{[]Predicate{HasTag{klog.NewTagOrPanic("foo", "")}, HasTag{klog.NewTagOrPanic("bar", "")}}}, sampleRecordsForQuerying())
+	require.Len(t, rs, 2)
+	assert.Equal(t, 1, rs[0].Date().Day())
+	assert.Equal(t, 3, rs[1].Date().Day())
+	assert.Equal(t, klog.NewDuration(8+6, 0), service.Total(rs...))
+}
+
+func TestQueryWithTagValues(t *testing.T) {
+	rs := Filter(HasTag{klog.NewTagOrPanic("foo", "a")}, sampleRecordsForQuerying())
+	require.Len(t, rs, 1)
+	assert.Equal(t, 3, rs[0].Date().Day())
+	assert.Equal(t, klog.NewDuration(8, 0), service.Total(rs...))
+}
+
+func TestQueryWithTagValuesInEntries(t *testing.T) {
+	rs := Filter(HasTag{klog.NewTagOrPanic("bar", "1")}, sampleRecordsForQuerying())
+	require.Len(t, rs, 1)
+	assert.Equal(t, 3, rs[0].Date().Day())
+	assert.Equal(t, klog.NewDuration(4, 0), service.Total(rs...))
+}
+
+func TestQueryWithTagNonMatchingValues(t *testing.T) {
+	rs := Filter(HasTag{klog.NewTagOrPanic("bar", "3")}, sampleRecordsForQuerying())
+	require.Len(t, rs, 0)
+}
+
+func TestQueryWithEntryTypes(t *testing.T) {
+	{
+		rs := Filter(IsEntryType{ENTRY_TYPE_DURATION}, sampleRecordsForQuerying())
+		require.Len(t, rs, 4)
+		assert.Equal(t, klog.NewDuration(0, 1545), service.Total(rs...))
+	}
+	{
+		rs := Filter(IsEntryType{ENTRY_TYPE_NEGATIVE_DURATION}, sampleRecordsForQuerying())
+		require.Len(t, rs, 1)
+		assert.Equal(t, 1, rs[0].Date().Day())
+		assert.Equal(t, klog.NewDuration(0, -30), service.Total(rs...))
+	}
+	{
+		rs := Filter(IsEntryType{ENTRY_TYPE_POSITIVE_DURATION}, sampleRecordsForQuerying())
+		require.Len(t, rs, 4)
+		assert.Equal(t, klog.NewDuration(0, 1575), service.Total(rs...))
+	}
+	{
+		rs := Filter(IsEntryType{ENTRY_TYPE_RANGE}, sampleRecordsForQuerying())
+		require.Len(t, rs, 0)
+		assert.Equal(t, klog.NewDuration(0, 0), service.Total(rs...))
+	}
+	{
+		rs := Filter(IsEntryType{ENTRY_TYPE_OPEN_RANGE}, sampleRecordsForQuerying())
+		require.Len(t, rs, 1)
+		assert.Equal(t, klog.NewDuration(0, 0), service.Total(rs...))
+	}
+}
