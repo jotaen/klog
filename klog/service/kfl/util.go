@@ -54,42 +54,44 @@ func (t *textParser) remainder() string {
 
 type tokenParser struct {
 	tokens  []token
-	pos     []int
 	pointer int
 }
 
-func newTokenParser(ts []token, pos []int) tokenParser {
+func newTokenParser(ts []token) tokenParser {
 	return tokenParser{
 		tokens:  ts,
-		pos:     pos,
 		pointer: 0,
 	}
 }
 
-func (t *tokenParser) next() (token, int) {
+func (t *tokenParser) next() token {
 	if t.pointer >= len(t.tokens) {
-		return nil, -1
+		return token{}
 	}
 	next := t.tokens[t.pointer]
-	pos := t.pos[t.pointer]
 	t.pointer += 1
-	return next, pos
+	return next
 }
 
 func (t *tokenParser) checkNextIsOperand() ParseError {
 	if t.pointer >= len(t.tokens) {
 		return parseError{
 			err:      ErrOperandExpected,
-			position: t.pos[t.pointer],
+			position: t.tokens[len(t.tokens)-1].position,
+			length:   1,
 		}
 	}
-	switch t.tokens[t.pointer].(type) {
-	case tokenOpenBracket, tokenTag, tokenDate, tokenDateRange, tokenPeriod, tokenNot, tokenEntryType:
-		return nil
+	for _, k := range []tokenKind{
+		tokenOpenBracket, tokenTag, tokenDate, tokenDateRange, tokenPeriod, tokenNot, tokenEntryType,
+	} {
+		if t.tokens[t.pointer].kind == k {
+			return nil
+		}
 	}
 	return parseError{
 		err:      ErrOperandExpected,
-		position: t.pos[t.pointer],
+		position: t.tokens[t.pointer].position,
+		length:   len(t.tokens[t.pointer].value),
 	}
 }
 
@@ -97,20 +99,32 @@ func (t *tokenParser) checkNextIsOperatorOrEnd() ParseError {
 	if t.pointer >= len(t.tokens) {
 		return nil
 	}
-	switch t.tokens[t.pointer].(type) {
-	case tokenCloseBracket, tokenAnd, tokenOr:
-		return nil
+	for _, k := range []tokenKind{
+		tokenCloseBracket, tokenAnd, tokenOr,
+	} {
+		if t.tokens[t.pointer].kind == k {
+			return nil
+		}
 	}
 	return parseError{
 		err:      ErrOperatorExpected,
-		position: t.pos[t.pointer],
+		position: t.tokens[t.pointer].position,
+		length:   len(t.tokens[t.pointer].value),
 	}
 }
 
 type predicateGroup struct {
 	ps            []Predicate
-	operator      token // nil or tokenAnd or tokenOr
+	operator      tokenKind // -1 (unset) or tokenAnd or tokenOr
 	isNextNegated bool
+}
+
+func newPredicateGroup() predicateGroup {
+	return predicateGroup{
+		ps:            nil,
+		operator:      -1,
+		isNextNegated: false,
+	}
 }
 
 func (g *predicateGroup) append(p Predicate) {
@@ -122,10 +136,10 @@ func (g *predicateGroup) append(p Predicate) {
 }
 
 func (g *predicateGroup) setOperator(operatorT token, position int) ParseError {
-	if g.operator == nil {
-		g.operator = operatorT
+	if g.operator == -1 {
+		g.operator = operatorT.kind
 	}
-	if g.operator != operatorT {
+	if g.operator != operatorT.kind {
 		return parseError{
 			err:      ErrCannotMixAndOr,
 			position: position,
@@ -142,9 +156,9 @@ func (g *predicateGroup) negateNextOperand() {
 func (g *predicateGroup) make() (Predicate, ParseError) {
 	if len(g.ps) == 1 {
 		return g.ps[0], nil
-	} else if g.operator == (tokenAnd{}) {
+	} else if g.operator == tokenAnd {
 		return And{g.ps}, nil
-	} else if g.operator == (tokenOr{}) {
+	} else if g.operator == tokenOr {
 		return Or{g.ps}, nil
 	} else {
 		// This would happen for an empty group.

@@ -16,20 +16,19 @@ var (
 	ErrUnbalancedOpenBracket  = fmt.Errorf("%w opening parenthesis. Please make sure that the number of opening and closing parentheses matches.", errUnbalancedBrackets)
 	ErrUnbalancedCloseBracket = fmt.Errorf("%w closing parenthesis. Please make sure that the number of opening and closing parentheses matches.", errUnbalancedBrackets)
 	errOperatorOperand        = errors.New("Missing") // Internal “base” class
-	ErrOperatorExpected       = fmt.Errorf("%w operator. Please put logical operators ('&&' or '||') between the search operands.", errOperatorOperand)
+	ErrOperatorExpected       = fmt.Errorf("%w operator. Please put a logical operator ('&&' or '||') before this search operand.", errOperatorOperand)
 	ErrOperandExpected        = fmt.Errorf("%w filter term. Please remove redundant logical operators.", errOperatorOperand)
 	ErrIllegalTokenValue      = errors.New("Illegal value. Please make sure to use only valid operand values.")
 )
 
 func Parse(filterQuery string) (Predicate, ParseError) {
 	p, pErr := func() (Predicate, ParseError) {
-		tokens, pos, pErr := tokenise(filterQuery)
+		tokens, pErr := tokenise(filterQuery)
 		if pErr != nil {
 			return nil, pErr
 		}
 		tp := newTokenParser(
-			append(tokens, tokenCloseBracket{}),
-			append(pos, len(filterQuery)),
+			append(tokens, token{tokenCloseBracket, ")", len(filterQuery) - 1}),
 		)
 		p, pErr := parseGroup(&tp)
 		if pErr != nil {
@@ -37,7 +36,7 @@ func Parse(filterQuery string) (Predicate, ParseError) {
 		}
 		// Check whether there are tokens left, which would indicate
 		// unbalanced brackets.
-		if nextToken, _ := tp.next(); nextToken != nil {
+		if tp.next() != (token{}) {
 			return nil, parseError{
 				err:      ErrUnbalancedOpenBracket,
 				position: 0,
@@ -56,22 +55,22 @@ func Parse(filterQuery string) (Predicate, ParseError) {
 }
 
 func parseGroup(tp *tokenParser) (Predicate, ParseError) {
-	g := predicateGroup{}
+	g := newPredicateGroup()
 
 	if pErr := tp.checkNextIsOperand(); pErr != nil {
 		return nil, pErr
 	}
 
 	for {
-		nextToken, position := tp.next()
-		if nextToken == nil {
+		tk := tp.next()
+		if tk == (token{}) {
 			return nil, parseError{
 				err:      ErrUnbalancedCloseBracket,
 				position: 0,
 			}
 		}
 
-		switch tk := nextToken.(type) {
+		switch tk.kind {
 
 		case tokenOpenBracket:
 			if pErr := tp.checkNextIsOperand(); pErr != nil {
@@ -94,12 +93,12 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 			if pErr := tp.checkNextIsOperatorOrEnd(); pErr != nil {
 				return nil, pErr
 			}
-			date, err := klog.NewDateFromString(tk.date)
+			date, err := klog.NewDateFromString(tk.value)
 			if err != nil {
 				return nil, parseError{
 					err:      err,
-					position: position,
-					length:   len(tk.date),
+					position: tk.position,
+					length:   len(tk.value),
 				}
 			}
 			g.append(IsInDateRange{date, date})
@@ -109,7 +108,8 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 				return nil, pErr
 			}
 			dateBoundaries := []klog.Date{nil, nil}
-			for i, v := range tk.bounds {
+			bounds := strings.Split(tk.value, "...")
+			for i, v := range bounds {
 				if v == "" {
 					continue
 				}
@@ -117,8 +117,8 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 				if err != nil {
 					return nil, parseError{
 						err:      err,
-						position: position,
-						length:   len(strings.Join(tk.bounds, "...")),
+						position: tk.position,
+						length:   len(tk.value),
 					}
 				}
 				dateBoundaries[i] = date
@@ -129,12 +129,12 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 			if pErr := tp.checkNextIsOperatorOrEnd(); pErr != nil {
 				return nil, pErr
 			}
-			prd, err := period.NewPeriodFromPatternString(tk.period)
+			prd, err := period.NewPeriodFromPatternString(tk.value)
 			if err != nil {
 				return nil, parseError{
 					err:      err,
-					position: position,
-					length:   len(tk.period),
+					position: tk.position,
+					length:   len(tk.value),
 				}
 			}
 			g.append(IsInDateRange{prd.Since(), prd.Until()})
@@ -143,7 +143,7 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 			if pErr := tp.checkNextIsOperand(); pErr != nil {
 				return nil, pErr
 			}
-			pErr := g.setOperator(tk, position)
+			pErr := g.setOperator(tk, tk.position)
 			if pErr != nil {
 				return nil, pErr
 			}
@@ -158,12 +158,12 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 			if pErr := tp.checkNextIsOperatorOrEnd(); pErr != nil {
 				return nil, pErr
 			}
-			et, err := NewEntryTypeFromString(tk.entryType)
+			et, err := NewEntryTypeFromString(strings.TrimLeft(tk.value, "type:"))
 			if err != nil {
 				return nil, parseError{
 					err:      err,
-					position: position,
-					length:   len("type:") + len(tk.entryType),
+					position: tk.position,
+					length:   len(tk.value),
 				}
 			}
 			g.append(IsEntryType{et})
@@ -172,12 +172,12 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 			if pErr := tp.checkNextIsOperatorOrEnd(); pErr != nil {
 				return nil, pErr
 			}
-			tag, err := klog.NewTagFromString(tk.tag)
+			tag, err := klog.NewTagFromString(tk.value)
 			if err != nil {
 				return nil, parseError{
 					err:      err,
-					position: position,
-					length:   len(tk.tag),
+					position: tk.position,
+					length:   len(tk.value),
 				}
 			}
 			g.append(HasTag{tag})
