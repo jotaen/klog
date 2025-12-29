@@ -64,7 +64,8 @@ func tokenise(filterQuery string) ([]token, []int, ParseError) {
 			if !txtParser.peekString(EOT, " ", ")") {
 				return nil, nil, parseError{
 					err:      ErrMissingWhiteSpace,
-					position: txtParser.pointer,
+					position: txtParser.pointer - 1,
+					length:   1,
 				}
 			}
 		} else if txtParser.peekString("&&") {
@@ -75,6 +76,7 @@ func tokenise(filterQuery string) ([]token, []int, ParseError) {
 				return nil, nil, parseError{
 					err:      ErrMissingWhiteSpace,
 					position: txtParser.pointer,
+					length:   1,
 				}
 			}
 		} else if txtParser.peekString("||") {
@@ -85,6 +87,7 @@ func tokenise(filterQuery string) ([]token, []int, ParseError) {
 				return nil, nil, parseError{
 					err:      ErrMissingWhiteSpace,
 					position: txtParser.pointer,
+					length:   1,
 				}
 			}
 		} else if txtParser.peekString("!") {
@@ -100,6 +103,7 @@ func tokenise(filterQuery string) ([]token, []int, ParseError) {
 				return nil, nil, parseError{
 					err:      ErrMissingWhiteSpace,
 					position: txtParser.pointer,
+					length:   1,
 				}
 			}
 		} else if ym := txtParser.peekRegex(typeRegex); ym != nil {
@@ -109,7 +113,8 @@ func tokenise(filterQuery string) ([]token, []int, ParseError) {
 			if !txtParser.peekString(EOT, " ", ")") {
 				return nil, nil, parseError{
 					err:      ErrMissingWhiteSpace,
-					position: txtParser.pointer,
+					position: txtParser.pointer - 1,
+					length:   1,
 				}
 			}
 		} else if rm := txtParser.peekRegex(dateRangeRegex); rm != nil {
@@ -121,7 +126,8 @@ func tokenise(filterQuery string) ([]token, []int, ParseError) {
 			if !txtParser.peekString(EOT, " ", ")") {
 				return nil, nil, parseError{
 					err:      ErrMissingWhiteSpace,
-					position: txtParser.pointer,
+					position: txtParser.pointer - 1,
+					length:   1,
 				}
 			}
 		} else if dm := txtParser.peekRegex(dateRegex); dm != nil {
@@ -132,7 +138,8 @@ func tokenise(filterQuery string) ([]token, []int, ParseError) {
 			if !txtParser.peekString(EOT, " ", ")") {
 				return nil, nil, parseError{
 					err:      ErrMissingWhiteSpace,
-					position: txtParser.pointer,
+					position: txtParser.pointer - 1,
+					length:   1,
 				}
 			}
 		} else if pm := txtParser.peekRegex(periodRegex); pm != nil {
@@ -143,13 +150,15 @@ func tokenise(filterQuery string) ([]token, []int, ParseError) {
 			if !txtParser.peekString(EOT, " ", ")") {
 				return nil, nil, parseError{
 					err:      ErrMissingWhiteSpace,
-					position: txtParser.pointer,
+					position: txtParser.pointer - 1,
+					length:   1,
 				}
 			}
 		} else {
 			return nil, nil, parseError{
 				err:      ErrUnrecognisedToken,
 				position: txtParser.pointer,
+				length:   1,
 			}
 		}
 	}

@@ -8,6 +8,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type et struct { // “Error Test”
+	input string
+	pos   int
+	len   int
+}
+
 func TestAtDate(t *testing.T) {
 	p, err := Parse("2020-03-01")
 	require.Nil(t, err)
@@ -153,19 +159,36 @@ func TestTags(t *testing.T) {
 		}}, p)
 }
 
-func TestBracketMismatch(t *testing.T) {
-	for _, tt := range []string{
-		"(2020-01",
-		"((2020-01",
-		"(2020-01-01))",
-		"2020-01-01)",
-		"(2020-01-01 && (2020-02-02 || 2020-03-03",
-		"(2020-01-01 && (2020-02-02))) || 2020-03-03",
+func TestOpeningBracketMismatch(t *testing.T) {
+	for _, tt := range []et{
+		{"(2020-01", 0, 0},
+		{"((2020-01", 0, 0},
+		{"(2020-01-01 && (2020-02-02 || 2020-03-03", 0, 0},
 	} {
-		t.Run(tt, func(t *testing.T) {
-			p, err := Parse(tt)
-			require.ErrorIs(t, err.Original(), ErrUnbalancedBrackets)
+		t.Run(tt.input, func(t *testing.T) {
+			p, err := Parse(tt.input)
 			require.Nil(t, p)
+			require.ErrorIs(t, err.Original(), errUnbalancedBrackets)
+			pos, len := err.Position()
+			assert.Equal(t, tt.pos, pos)
+			assert.Equal(t, tt.len, len)
+		})
+	}
+}
+
+func TestClosingBracketMismatch(t *testing.T) {
+	for _, tt := range []et{
+		{"(2020-01-01))", 0, 13},
+		{"2020-01-01)", 0, 11},
+		{"(2020-01-01 && (2020-02-02))) || 2020-03-03", 0, 43},
+	} {
+		t.Run(tt.input, func(t *testing.T) {
+			p, err := Parse(tt.input)
+			require.Nil(t, p)
+			require.ErrorIs(t, err.Original(), errUnbalancedBrackets)
+			pos, len := err.Position()
+			assert.Equal(t, tt.pos, pos)
+			assert.Equal(t, tt.len, len)
 		})
 	}
 }

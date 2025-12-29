@@ -129,6 +129,7 @@ func (g *predicateGroup) setOperator(operatorT token, position int) ParseError {
 		return parseError{
 			err:      ErrCannotMixAndOr,
 			position: position,
+			length:   2,
 		}
 	}
 	return nil
@@ -146,6 +147,10 @@ func (g *predicateGroup) make() (Predicate, ParseError) {
 	} else if g.operator == (tokenOr{}) {
 		return Or{g.ps}, nil
 	} else {
-		return nil, parseError{err: ErrMalformedFilterQuery, position: 0}
+		// This would happen for an empty group.
+		return nil, parseError{
+			err:      ErrMalformedFilterQuery,
+			position: 0,
+		}
 	}
 }

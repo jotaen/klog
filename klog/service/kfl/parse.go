@@ -3,19 +3,22 @@ package kfl
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/service/period"
 )
 
 var (
-	ErrMalformedFilterQuery = errors.New("Malformed filter query") // This is only a just-in-case fallback.
-	ErrCannotMixAndOr       = errors.New("Cannot mix && and || operators on the same level. Please use parenthesis () for grouping.")
-	ErrUnbalancedBrackets   = errors.New("Unbalanced parenthesis. Please make sure that the number of opening and closing parentheses matches.")
-	errOperatorOperand      = errors.New("Missing expected") // Internal “base” class
-	ErrOperatorExpected     = fmt.Errorf("%w operator. Please put logical operators ('&&' or '||') between the search operands.", errOperatorOperand)
-	ErrOperandExpected      = fmt.Errorf("%w operand. Please remove redundant logical operators.", errOperatorOperand)
-	ErrIllegalTokenValue    = errors.New("Illegal value. Please make sure to use only valid operand values.")
+	ErrMalformedFilterQuery   = errors.New("Malformed filter query") // This is only a just-in-case fallback.
+	ErrCannotMixAndOr         = errors.New("Cannot mix && and || operators on the same level. Please use parenthesis () for grouping.")
+	errUnbalancedBrackets     = errors.New("Missing") // Internal “base” class
+	ErrUnbalancedOpenBracket  = fmt.Errorf("%w opening parenthesis. Please make sure that the number of opening and closing parentheses matches.", errUnbalancedBrackets)
+	ErrUnbalancedCloseBracket = fmt.Errorf("%w closing parenthesis. Please make sure that the number of opening and closing parentheses matches.", errUnbalancedBrackets)
+	errOperatorOperand        = errors.New("Missing") // Internal “base” class
+	ErrOperatorExpected       = fmt.Errorf("%w operator. Please put logical operators ('&&' or '||') between the search operands.", errOperatorOperand)
+	ErrOperandExpected        = fmt.Errorf("%w filter term. Please remove redundant logical operators.", errOperatorOperand)
+	ErrIllegalTokenValue      = errors.New("Illegal value. Please make sure to use only valid operand values.")
 )
 
 func Parse(filterQuery string) (Predicate, ParseError) {
@@ -36,9 +39,9 @@ func Parse(filterQuery string) (Predicate, ParseError) {
 		// unbalanced brackets.
 		if nextToken, _ := tp.next(); nextToken != nil {
 			return nil, parseError{
-				err:      ErrUnbalancedBrackets,
-				position: len(filterQuery) - 1,
-				query:    filterQuery,
+				err:      ErrUnbalancedOpenBracket,
+				position: 0,
+				length:   len(filterQuery),
 			}
 		}
 		return p, nil
@@ -55,10 +58,17 @@ func Parse(filterQuery string) (Predicate, ParseError) {
 func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 	g := predicateGroup{}
 
+	if pErr := tp.checkNextIsOperand(); pErr != nil {
+		return nil, pErr
+	}
+
 	for {
 		nextToken, position := tp.next()
 		if nextToken == nil {
-			break
+			return nil, parseError{
+				err:      ErrUnbalancedCloseBracket,
+				position: 0,
+			}
 		}
 
 		switch tk := nextToken.(type) {
@@ -89,6 +99,7 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 				return nil, parseError{
 					err:      err,
 					position: position,
+					length:   len(tk.date),
 				}
 			}
 			g.append(IsInDateRange{date, date})
@@ -107,6 +118,7 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 					return nil, parseError{
 						err:      err,
 						position: position,
+						length:   len(strings.Join(tk.bounds, "...")),
 					}
 				}
 				dateBoundaries[i] = date
@@ -151,6 +163,7 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 				return nil, parseError{
 					err:      err,
 					position: position,
+					length:   len("type:") + len(tk.entryType),
 				}
 			}
 			g.append(IsEntryType{et})
@@ -164,6 +177,7 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 				return nil, parseError{
 					err:      err,
 					position: position,
+					length:   len(tk.tag),
 				}
 			}
 			g.append(HasTag{tag})
@@ -171,10 +185,5 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 		default:
 			panic("Unrecognized token")
 		}
-	}
-
-	return nil, parseError{
-		err:      ErrUnbalancedBrackets,
-		position: 0,
 	}
 }
