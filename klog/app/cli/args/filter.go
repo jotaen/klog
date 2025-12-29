@@ -6,6 +6,7 @@ import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/service"
+	"github.com/jotaen/klog/klog/service/kfl"
 	"github.com/jotaen/klog/klog/service/period"
 )
 
@@ -33,6 +34,8 @@ type FilterArgs struct {
 	LastQuarter bool `hidden:"" name:"last-quarter" group:"Filter"`
 	ThisYear    bool `hidden:"" name:"this-year" group:"Filter"`
 	LastYear    bool `hidden:"" name:"last-year" group:"Filter"`
+
+	FilterQuery string `name:"filter" placeholder:"KQL-FILTER-QUERY" group:"Filter" help:"(Experimental)"`
 }
 
 // FilterArgsCompletionOverrides enables/disables tab completion for
@@ -51,6 +54,19 @@ var FilterArgsCompletionOverrides = map[string]bool{
 }
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.Record, app.Error) {
+	if args.FilterQuery != "" {
+		predicate, err := kfl.Parse(args.FilterQuery)
+		if err != nil {
+			return nil, app.NewErrorWithCode(
+				app.GENERAL_ERROR,
+				"Malformed filter query",
+				err.Error(),
+				err,
+			)
+		}
+		rs = kfl.Filter(predicate, rs)
+		return rs, nil
+	}
 	today := klog.NewDateFromGo(now)
 	qry := service.FilterQry{
 		BeforeOrEqual: args.Until,
