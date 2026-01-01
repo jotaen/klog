@@ -113,15 +113,34 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 				if v == "" {
 					continue
 				}
+				prd, err := period.NewPeriodFromPatternString(v)
+				if err == nil {
+					if i == 0 {
+						dateBoundaries[i] = prd.Since()
+					} else {
+						dateBoundaries[i] = prd.Until()
+					}
+					continue
+				}
 				date, err := klog.NewDateFromString(v)
-				if err != nil {
+				if err == nil {
+					dateBoundaries[i] = date
+					continue
+				}
+				return nil, parseError{
+					err:      err,
+					position: tk.position,
+					length:   len(tk.value),
+				}
+			}
+			if dateBoundaries[0] != nil && dateBoundaries[1] != nil {
+				if !dateBoundaries[1].IsAfterOrEqual(dateBoundaries[0]) {
 					return nil, parseError{
-						err:      err,
+						err:      ErrIllegalTokenValue,
 						position: tk.position,
 						length:   len(tk.value),
 					}
 				}
-				dateBoundaries[i] = date
 			}
 			g.append(IsInDateRange{dateBoundaries[0], dateBoundaries[1]})
 

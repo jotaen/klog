@@ -28,7 +28,7 @@ type token struct {
 
 var (
 	tagRegex       = regexp.MustCompile(`^(#([\p{L}\d_-]+)(=(("[^"]*")|('[^']*')|([\p{L}\d_-]*)))?)`)
-	dateRangeRegex = regexp.MustCompile(`^((\d{4}-\d{2}-\d{2})?\.\.\.(\d{4}-\d{2}-\d{2})?)`)
+	dateRangeRegex = regexp.MustCompile(`^(((\d{4}-\d{2}-\d{2})|(\d{4}-\p{L}?\d+)|(\d{4}))?\.{3}((\d{4}-\d{2}-\d{2})|(\d{4}-\p{L}?\d+)|(\d{4}))?)`)
 	dateRegex      = regexp.MustCompile(`^(\d{4}-\d{2}-\d{2})`)
 	periodRegex    = regexp.MustCompile(`^((\d{4}-\p{L}?\d+)|(\d{4}))`)
 	typeRegex      = regexp.MustCompile(`^(type:[\p{L}\-_]+)`)
