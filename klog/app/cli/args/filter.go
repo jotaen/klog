@@ -12,11 +12,11 @@ import (
 
 type FilterArgs struct {
 	// General filters
-	Date      klog.Date         `name:"date" placeholder:"DATE" group:"Filter" help:"Records at this date. DATE has to be in format YYYY-MM-DD or YYYY/MM/DD. E.g., '2024-01-31' or '2024/01/31'."`
-	Since     klog.Date         `name:"since" placeholder:"DATE" group:"Filter" help:"Records since this date (inclusive)."`
-	Until     klog.Date         `name:"until" placeholder:"DATE" group:"Filter" help:"Records until this date (inclusive)."`
-	Period    period.Period     `name:"period" placeholder:"PERIOD" group:"Filter" help:"Records within a calendar period. PERIOD has to be in format YYYY, YYYY-MM, YYYY-Www or YYYY-Qq. E.g., '2024', '2024-04', '2022-W21' or '2024-Q1'."`
-	Tags      []klog.Tag        `name:"tag" placeholder:"TAG" group:"Filter" help:"Records (or entries) that match these tags. You can omit the leading '#'."`
+	Date      klog.Date         `name:"date" placeholder:"DATE" group:"Filter" help:"Entries at this date. DATE has to be in format YYYY-MM-DD or YYYY/MM/DD. E.g., '2024-01-31' or '2024/01/31'."`
+	Since     klog.Date         `name:"since" placeholder:"DATE" group:"Filter" help:"Entries since this date (inclusive)."`
+	Until     klog.Date         `name:"until" placeholder:"DATE" group:"Filter" help:"Entries until this date (inclusive)."`
+	Period    period.Period     `name:"period" placeholder:"PERIOD" group:"Filter" help:"Entries within a calendar period. PERIOD has to be in format YYYY, YYYY-MM, YYYY-Www or YYYY-Qq. E.g., '2024', '2024-04', '2022-W21' or '2024-Q1'."`
+	Tags      []klog.Tag        `name:"tag" placeholder:"TAG" group:"Filter" help:"Entries that match these tags (either in the record summary or the entry summary). You can omit the leading '#'."`
 	EntryType service.EntryType `name:"entry-type" placeholder:"TYPE" group:"Filter" help:"Entries of this type. TYPE can be 'range', 'open-range', 'duration', 'duration-positive' or 'duration-negative'."`
 
 	// Shortcut filters
@@ -35,7 +35,7 @@ type FilterArgs struct {
 	ThisYear    bool `hidden:"" name:"this-year" group:"Filter"`
 	LastYear    bool `hidden:"" name:"last-year" group:"Filter"`
 
-	FilterQuery string `name:"filter" placeholder:"KQL-FILTER-QUERY" group:"Filter" help:"(Experimental)"`
+	Filter string `name:"filter" placeholder:"FILTER-EXPRESSION" group:"Filter" help:"Entries that match this filter expression. Run 'klog info --filtering' to learn how to use filter expressions."`
 }
 
 // FilterArgsCompletionOverrides enables/disables tab completion for
@@ -54,8 +54,8 @@ var FilterArgsCompletionOverrides = map[string]bool{
 }
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.Record, app.Error) {
-	if args.FilterQuery != "" {
-		predicate, err := filter.Parse(args.FilterQuery)
+	if args.Filter != "" {
+		predicate, err := filter.Parse(args.Filter)
 		if err != nil {
 			return nil, app.NewErrorWithCode(
 				app.GENERAL_ERROR,
