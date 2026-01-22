@@ -1,4 +1,4 @@
-package kfl
+package filter
 
 import (
 	"fmt"

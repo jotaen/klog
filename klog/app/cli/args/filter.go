@@ -6,7 +6,7 @@ import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/service"
-	"github.com/jotaen/klog/klog/service/kfl"
+	"github.com/jotaen/klog/klog/service/filter"
 	"github.com/jotaen/klog/klog/service/period"
 )
 
@@ -55,7 +55,7 @@ var FilterArgsCompletionOverrides = map[string]bool{
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.Record, app.Error) {
 	if args.FilterQuery != "" {
-		predicate, err := kfl.Parse(args.FilterQuery)
+		predicate, err := filter.Parse(args.FilterQuery)
 		if err != nil {
 			return nil, app.NewErrorWithCode(
 				app.GENERAL_ERROR,
@@ -64,7 +64,7 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.R
 				err,
 			)
 		}
-		rs = kfl.Filter(predicate, rs)
+		rs = filter.Filter(predicate, rs)
 		return rs, nil
 	}
 	today := klog.NewDateFromGo(now)
