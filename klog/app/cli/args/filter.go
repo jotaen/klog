@@ -24,33 +24,18 @@ type FilterArgs struct {
 	Today       bool `name:"today" group:"Filter" help:"Records at today’s date."`
 	Yesterday   bool `name:"yesterday" group:"Filter" help:"Records at yesterday’s date."`
 	Tomorrow    bool `name:"tomorrow" group:"Filter" help:"Records at tomorrow’s date."`
-	ThisXXX     bool `name:"this-***" group:"Filter" help:"Records of this week/month/quarter/year, e.g. '--this-week' or '--this-quarter'."`
-	LastXXX     bool `name:"last-***" group:"Filter" help:"Records of last week/month/quarter/year, e.g. '--last-month' or '--last-year'."`
-	ThisWeek    bool `hidden:"" name:"this-week" group:"Filter"`
-	LastWeek    bool `hidden:"" name:"last-week" group:"Filter"`
-	ThisMonth   bool `hidden:"" name:"this-month" group:"Filter"`
-	LastMonth   bool `hidden:"" name:"last-month" group:"Filter"`
-	ThisQuarter bool `hidden:"" name:"this-quarter" group:"Filter"`
-	LastQuarter bool `hidden:"" name:"last-quarter" group:"Filter"`
-	ThisYear    bool `hidden:"" name:"this-year" group:"Filter"`
-	LastYear    bool `hidden:"" name:"last-year" group:"Filter"`
+	ThisXXX     bool `name:"this-***" group:"Filter" help:"Records of this week/month/quarter/year, e.g. '--this-week' or '--this-quarter'." completion-enabled:"false"`
+	LastXXX     bool `name:"last-***" group:"Filter" help:"Records of last week/month/quarter/year, e.g. '--last-month' or '--last-year'." completion-enabled:"false"`
+	ThisWeek    bool `hidden:"" name:"this-week" group:"Filter" completion-enabled:"true"`
+	LastWeek    bool `hidden:"" name:"last-week" group:"Filter" completion-enabled:"true"`
+	ThisMonth   bool `hidden:"" name:"this-month" group:"Filter" completion-enabled:"true"`
+	LastMonth   bool `hidden:"" name:"last-month" group:"Filter" completion-enabled:"true"`
+	ThisQuarter bool `hidden:"" name:"this-quarter" group:"Filter" completion-enabled:"true"`
+	LastQuarter bool `hidden:"" name:"last-quarter" group:"Filter" completion-enabled:"true"`
+	ThisYear    bool `hidden:"" name:"this-year" group:"Filter" completion-enabled:"true"`
+	LastYear    bool `hidden:"" name:"last-year" group:"Filter" completion-enabled:"true"`
 
 	Filter string `name:"filter" placeholder:"FILTER-EXPRESSION" group:"Filter" help:"Entries that match this filter expression. Run 'klog info --filtering' to learn how to use filter expressions."`
-}
-
-// FilterArgsCompletionOverrides enables/disables tab completion for
-// certain flags.
-var FilterArgsCompletionOverrides = map[string]bool{
-	"this-***":     false, // disable, although not flagged as hidden
-	"last-***":     false,
-	"this-week":    true, // enable, although flagged as hidden
-	"last-week":    true,
-	"this-month":   true,
-	"last-month":   true,
-	"this-quarter": true,
-	"last-quarter": true,
-	"this-year":    true,
-	"last-year":    true,
 }
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.Record, app.Error) {
