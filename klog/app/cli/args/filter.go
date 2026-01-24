@@ -36,7 +36,7 @@ type FilterArgs struct {
 	ThisYear    bool `hidden:"" name:"this-year" group:"Filter" completion-enabled:"true"`
 	LastYear    bool `hidden:"" name:"last-year" group:"Filter" completion-enabled:"true"`
 
-	Filter string `name:"filter" placeholder:"FILTER-EXPRESSION" group:"Filter" help:"Entries that match this filter expression. Run 'klog info --filtering' to learn how to use filter expressions."`
+	Filter string `name:"filter" placeholder:"EXPR" group:"Filter" help:"Entries that match this filter expression. Run 'klog info --filtering' to learn how expressions works."`
 }
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.Record, app.Error) {

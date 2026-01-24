@@ -65,7 +65,7 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact:             true,
 			NoExpandSubcommands: true,
-			WrapUpperBound:      80,
+			WrapUpperBound:      prettify.LINE_LENGTH,
 		}),
 	)
 	if nErr != nil {
