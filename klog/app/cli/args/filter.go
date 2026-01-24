@@ -19,8 +19,10 @@ type FilterArgs struct {
 	Tags      []klog.Tag        `name:"tag" placeholder:"TAG" group:"Filter" help:"Entries that match these tags (either in the record summary or the entry summary). You can omit the leading '#'."`
 	EntryType service.EntryType `name:"entry-type" placeholder:"TYPE" group:"Filter" help:"Entries of this type. TYPE can be 'range', 'open-range', 'duration', 'duration-positive' or 'duration-negative'."`
 
-	// Shortcut filters
-	// The `XXX` ones are dummy entries just for the help output
+	// Filter shortcuts:
+	// The two `XXX` ones are dummy entries just for the help output, they also aren’t available
+	// for tab completion. The other ones are not shown in the help output (because that would be
+	// too verbose then), but they are still available for tab completion.
 	Today       bool `name:"today" group:"Filter" help:"Records at today’s date."`
 	Yesterday   bool `name:"yesterday" group:"Filter" help:"Records at yesterday’s date."`
 	Tomorrow    bool `name:"tomorrow" group:"Filter" help:"Records at tomorrow’s date."`
