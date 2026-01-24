@@ -1,9 +1,10 @@
 package klog
 
 import (
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleInputFiles(t *testing.T) {
@@ -291,7 +292,7 @@ func TestDecodesRounding(t *testing.T) {
 func TestDecodesTags(t *testing.T) {
 	(&Env{
 		files: map[string]string{
-			"test.klg": "2020-01-01\n#foo\n\n2020-01-02\n\t1h #bar=1",
+			"test.klg": "2020-01-01\n#foo\n\t2h\n\n2020-01-02\n\t1h #bar=1",
 		},
 	}).execute(t,
 		invocation{

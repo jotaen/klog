@@ -2,12 +2,14 @@ package klog
 
 import (
 	"errors"
+	"reflect"
+	"strings"
+
 	"github.com/alecthomas/kong"
 	klog "github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/service"
+	"github.com/jotaen/klog/klog/service/filter"
 	"github.com/jotaen/klog/klog/service/period"
-	"reflect"
-	"strings"
 )
 
 func dateDecoder() kong.MapperFunc {
@@ -179,14 +181,14 @@ func entryTypeDecoder() kong.MapperFunc {
 		if value == "" {
 			return errors.New("Please provide a valid entry type")
 		}
-		ts := map[service.EntryType]bool{
-			service.ENTRY_TYPE_RANGE:             true,
-			service.ENTRY_TYPE_OPEN_RANGE:        true,
-			service.ENTRY_TYPE_DURATION:          true,
-			service.ENTRY_TYPE_POSITIVE_DURATION: true,
-			service.ENTRY_TYPE_NEGATIVE_DURATION: true,
+		ts := map[filter.EntryType]bool{
+			filter.ENTRY_TYPE_RANGE:             true,
+			filter.ENTRY_TYPE_OPEN_RANGE:        true,
+			filter.ENTRY_TYPE_DURATION:          true,
+			filter.ENTRY_TYPE_POSITIVE_DURATION: true,
+			filter.ENTRY_TYPE_NEGATIVE_DURATION: true,
 		}
-		t := service.EntryType(strings.ReplaceAll(strings.ToUpper(value), "-", "_"))
+		t := filter.EntryType(strings.ReplaceAll(strings.ToUpper(value), "-", "_"))
 		if ok := ts[t]; !ok {
 			return errors.New("`" + value + "` is not a valid entry type")
 		}

@@ -5,19 +5,18 @@ import (
 
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/filter"
 	"github.com/jotaen/klog/klog/service/period"
 )
 
 type FilterArgs struct {
 	// General filters
-	Date      klog.Date         `name:"date" placeholder:"DATE" group:"Filter" help:"Entries at this date. DATE has to be in format YYYY-MM-DD or YYYY/MM/DD. E.g., '2024-01-31' or '2024/01/31'."`
-	Since     klog.Date         `name:"since" placeholder:"DATE" group:"Filter" help:"Entries since this date (inclusive)."`
-	Until     klog.Date         `name:"until" placeholder:"DATE" group:"Filter" help:"Entries until this date (inclusive)."`
-	Period    period.Period     `name:"period" placeholder:"PERIOD" group:"Filter" help:"Entries within a calendar period. PERIOD has to be in format YYYY, YYYY-MM, YYYY-Www or YYYY-Qq. E.g., '2024', '2024-04', '2022-W21' or '2024-Q1'."`
-	Tags      []klog.Tag        `name:"tag" placeholder:"TAG" group:"Filter" help:"Entries that match these tags (either in the record summary or the entry summary). You can omit the leading '#'."`
-	EntryType service.EntryType `name:"entry-type" placeholder:"TYPE" group:"Filter" help:"Entries of this type. TYPE can be 'range', 'open-range', 'duration', 'duration-positive' or 'duration-negative'."`
+	Date      klog.Date        `name:"date" placeholder:"DATE" group:"Filter" help:"Entries at this date. DATE has to be in format YYYY-MM-DD or YYYY/MM/DD. E.g., '2024-01-31' or '2024/01/31'."`
+	Since     klog.Date        `name:"since" placeholder:"DATE" group:"Filter" help:"Entries since this date (inclusive)."`
+	Until     klog.Date        `name:"until" placeholder:"DATE" group:"Filter" help:"Entries until this date (inclusive)."`
+	Period    period.Period    `name:"period" placeholder:"PERIOD" group:"Filter" help:"Entries within a calendar period. PERIOD has to be in format YYYY, YYYY-MM, YYYY-Www or YYYY-Qq. E.g., '2024', '2024-04', '2022-W21' or '2024-Q1'."`
+	Tags      []klog.Tag       `name:"tag" placeholder:"TAG" group:"Filter" help:"Entries that match these tags (either in the record summary or the entry summary). You can omit the leading '#'."`
+	EntryType filter.EntryType `name:"entry-type" placeholder:"TYPE" group:"Filter" help:"Entries of this type. TYPE can be 'range', 'open-range', 'duration', 'duration-positive' or 'duration-negative'."`
 
 	// Filter shortcuts:
 	// The two `XXX` ones are dummy entries just for the help output, they also aren’t available
@@ -41,43 +40,26 @@ type FilterArgs struct {
 }
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.Record, app.Error) {
-	if args.Filter != "" {
-		predicate, err := filter.Parse(args.Filter)
-		if err != nil {
-			return nil, app.NewErrorWithCode(
-				app.GENERAL_ERROR,
-				"Malformed filter query",
-				err.Error(),
-				err,
-			)
-		}
-		rs = filter.Filter(predicate, rs)
-		return rs, nil
-	}
+	var predicates = []filter.Predicate{}
+
+	// Closed date-range filters:
 	today := klog.NewDateFromGo(now)
-	qry := service.FilterQry{
-		BeforeOrEqual: args.Until,
-		AfterOrEqual:  args.Since,
-		Tags:          args.Tags,
-		AtDate:        args.Date,
-	}
-	if args.Period != nil {
-		qry.BeforeOrEqual = args.Period.Until()
-		qry.AfterOrEqual = args.Period.Since()
-	}
-	if args.Today {
-		qry.AtDate = today
-	}
-	if args.Yesterday {
-		qry.AtDate = today.PlusDays(-1)
-	}
-	if args.Tomorrow {
-		qry.AtDate = today.PlusDays(+1)
-	}
-	if args.EntryType != "" {
-		qry.EntryType = args.EntryType
-	}
-	shortcutPeriod := func() period.Period {
+	dateRange := func() period.Period {
+		if args.Date != nil {
+			return period.NewPeriod(args.Date, args.Date)
+		}
+		if args.Today {
+			return period.NewPeriod(today, today)
+		}
+		if args.Yesterday {
+			return period.NewPeriod(today.PlusDays(-1), today.PlusDays(-1))
+		}
+		if args.Tomorrow {
+			return period.NewPeriod(today.PlusDays(+1), today.PlusDays(+1))
+		}
+		if args.Period != nil {
+			return args.Period
+		}
 		if args.ThisWeek {
 			return period.NewWeekFromDate(today).Period()
 		}
@@ -104,9 +86,56 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.R
 		}
 		return nil
 	}()
-	if shortcutPeriod != nil {
-		qry.AfterOrEqual = shortcutPeriod.Since()
-		qry.BeforeOrEqual = shortcutPeriod.Until()
+	if dateRange != nil {
+		predicates = append(predicates, filter.IsInDateRange{
+			From: dateRange.Since(),
+			To:   dateRange.Until(),
+		})
 	}
-	return service.Filter(rs, qry), nil
+
+	// Open date-range filters:
+	if args.Since != nil {
+		predicates = append(predicates, filter.IsInDateRange{
+			From: args.Since,
+		})
+	}
+	if args.Until != nil {
+		predicates = append(predicates, filter.IsInDateRange{
+			To: args.Until,
+		})
+	}
+
+	// Tag filters:
+	for _, t := range args.Tags {
+		predicates = append(predicates, filter.HasTag{
+			Tag: t,
+		})
+	}
+
+	// Entry-type filters:
+	if args.EntryType != "" {
+		predicates = append(predicates, filter.IsEntryType{
+			Type: args.EntryType,
+		})
+	}
+
+	// Filter expression:
+	if args.Filter != "" {
+		filterPredicate, err := filter.Parse(args.Filter)
+		if err != nil {
+			return nil, app.NewErrorWithCode(
+				app.GENERAL_ERROR,
+				"Malformed filter query",
+				err.Error(),
+				err,
+			)
+		}
+		predicates = append(predicates, filterPredicate)
+	}
+
+	// Apply filters, if applicable:
+	if len(predicates) > 0 {
+		rs = filter.Filter(filter.And{Predicates: predicates}, rs)
+	}
+	return rs, nil
 }

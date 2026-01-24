@@ -13,6 +13,7 @@ import (
 	"github.com/jotaen/klog/klog/app/cli"
 	"github.com/jotaen/klog/klog/app/cli/prettify"
 	"github.com/jotaen/klog/klog/service"
+	"github.com/jotaen/klog/klog/service/filter"
 	"github.com/jotaen/klog/klog/service/period"
 	tf "github.com/jotaen/klog/lib/terminalformat"
 	kongcompletion "github.com/jotaen/kong-completion"
@@ -58,7 +59,7 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 			return kong.TypeMapper(reflect.TypeOf(&s).Elem(), entrySummaryDecoder())
 		}(),
 		func() kong.Option {
-			t := service.ENTRY_TYPE_DURATION
+			t := filter.ENTRY_TYPE_DURATION
 			return kong.TypeMapper(reflect.TypeOf(&t).Elem(), entryTypeDecoder())
 		}(),
 		kong.ConfigureHelp(kong.HelpOptions{
