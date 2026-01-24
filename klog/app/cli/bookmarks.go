@@ -66,7 +66,7 @@ func (opt *BookmarksList) Run(ctx app.Context) app.Error {
 type BookmarksInfo struct {
 	Dir  bool   `name:"dir" type:"string" help:"Display the directory"`
 	File bool   `name:"file" type:"string" help:"Display the file name"`
-	Name string `arg:"" name:"bookmark" type:"string" predictor:"bookmark" help:"The path of the bookmark"`
+	Name string `arg:"" name:"bookmark" type:"string" completion-predictor:"bookmark" help:"The path of the bookmark"`
 }
 
 func (opt *BookmarksInfo) Run(ctx app.Context) error {
@@ -94,7 +94,7 @@ func (opt *BookmarksInfo) Run(ctx app.Context) error {
 }
 
 type BookmarksSet struct {
-	File   string `arg:"" type:"string" predictor:"file" help:".klg target file"`
+	File   string `arg:"" type:"string" completion-predictor:"file" help:".klg target file"`
 	Name   string `arg:"" name:"bookmark" type:"string" optional:"1" help:"The name of the bookmark."`
 	Create bool   `name:"create" short:"c" help:"Create the target file"`
 	Force  bool   `name:"force" help:"Force to set, even if target file does not exist or is invalid"`
@@ -157,7 +157,7 @@ func (opt *BookmarksSet) Run(ctx app.Context) error {
 
 type BookmarksUnset struct {
 	// The name is not optional here, to avoid accidental invocations
-	Name string `arg:"" name:"bookmark" type:"string" predictor:"bookmark" help:"The name of the bookmark"`
+	Name string `arg:"" name:"bookmark" type:"string" completion-predictor:"bookmark" help:"The name of the bookmark"`
 	args.QuietArgs
 }
 

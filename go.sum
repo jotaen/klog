@@ -21,8 +21,8 @@ github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUq
 github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
 github.com/jotaen/genie v0.0.3 h1:YyyEn4PMnmVwu9BYm3qCCW6mzlMzw6hNeAKzUmAP0HY=
 github.com/jotaen/genie v0.0.3/go.mod h1:5v0pWbZ+yHWL8QIfTq1PSuUuoGQ1enQZ4XTtV/PnJos=
-github.com/jotaen/kong-completion v0.0.7 h1:l2UrG51q0gWD8Ph0CykBvGOb1YlXDc789AQnWkq+U9M=
-github.com/jotaen/kong-completion v0.0.7/go.mod h1:dtitX9zCkffI5AON0IKsqHOFEEaL/S2AudgzJfCVFA4=
+github.com/jotaen/kong-completion v0.0.11 h1:ZRyQt+IwjcAObbiyxJZ3YR7r/o/f6HYidTK1+7YNtnE=
+github.com/jotaen/kong-completion v0.0.11/go.mod h1:dyIG20e3qq128SUBtF8jzI7YtkfzjWMlgbqkAJd6xHQ=
 github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 h1:Z9n2FFNUXsshfwJMBgNA0RU6/i7WVaAegv3PtuIHPMs=
 github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51/go.mod h1:CzGEWj7cYgsdH8dAjBGEr58BoE7ScuLd+fwFZ44+/x8=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

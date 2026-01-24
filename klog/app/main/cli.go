@@ -11,7 +11,6 @@ import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli"
-	arglib "github.com/jotaen/klog/klog/app/cli/args"
 	"github.com/jotaen/klog/klog/app/cli/prettify"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
@@ -89,7 +88,6 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 	kongcompletion.Register(
 		kongApp,
 		kongcompletion.WithPredictors(CompletionPredictors(ctx)),
-		kongcompletion.WithFlagOverrides(arglib.FilterArgsCompletionOverrides),
 	)
 
 	kongCtx, cErr := kongApp.Parse(args)
