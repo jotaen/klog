@@ -8,7 +8,6 @@ import (
 	"github.com/alecthomas/kong"
 	klog "github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/service"
-	"github.com/jotaen/klog/klog/service/filter"
 	"github.com/jotaen/klog/klog/service/period"
 )
 
@@ -168,24 +167,6 @@ func entrySummaryDecoder() kong.MapperFunc {
 			return errors.New("An entry summary cannot contain blank lines")
 		}
 		target.Set(reflect.ValueOf(summary))
-		return nil
-	}
-}
-
-func entryTypeDecoder() kong.MapperFunc {
-	return func(ctx *kong.DecodeContext, target reflect.Value) error {
-		var value string
-		if err := ctx.Scan.PopValueInto("entryType", &value); err != nil {
-			return err
-		}
-		if value == "" {
-			return errors.New("Please provide a valid entry type")
-		}
-		t, err := filter.NewEntryTypeFromString(value)
-		if err != nil {
-			return err
-		}
-		target.Set(reflect.ValueOf(t))
 		return nil
 	}
 }
