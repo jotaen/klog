@@ -1,9 +1,5 @@
 package filter
 
-import (
-	"math"
-)
-
 type ParseError interface {
 	error
 	Original() error
@@ -36,8 +32,4 @@ func (e parseError) Query() string {
 
 func (e parseError) Position() (int, int) {
 	return e.position, e.length
-}
-
-func max(x int, y int) int {
-	return int(math.Max(float64(x), float64(y)))
 }
