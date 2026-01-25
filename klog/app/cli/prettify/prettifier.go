@@ -69,7 +69,7 @@ func PrettifyFilterError(e filter.ParseError, styler tf.Styler) error {
 	pos, length := e.Position()
 	length = max(length, 1)
 	relevantQueryFragment, newStart := tf.TextSubstrWithContext(e.Query(), pos, length, 10, 20)
-	return errors.New(fmt.Sprintf(
+	return fmt.Errorf(
 		"%s\n\n%s\n%s%s%s\nCursor positions %d-%d in query.",
 		Reflower.Reflow(e.Original().Error(), ""),
 		relevantQueryFragment,
@@ -78,7 +78,7 @@ func PrettifyFilterError(e filter.ParseError, styler tf.Styler) error {
 		strings.Repeat("—", max(0, len(relevantQueryFragment)-(newStart+length))),
 		pos,
 		pos+length,
-	))
+	)
 }
 
 // PrettifyWarning formats a warning about a record.

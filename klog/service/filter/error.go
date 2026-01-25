@@ -1,7 +1,6 @@
 package filter
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -24,7 +23,7 @@ func NewParseError() ParseError {
 }
 
 func (e parseError) Error() string {
-	return fmt.Sprintf("filter error")
+	return "Illegal filter expression"
 }
 
 func (e parseError) Original() error {
