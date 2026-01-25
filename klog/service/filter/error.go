@@ -3,15 +3,13 @@ package filter
 import (
 	"fmt"
 	"math"
-	"strings"
-
-	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
 type ParseError interface {
 	error
 	Original() error
 	Position() (int, int)
+	Query() string
 }
 
 type parseError struct {
@@ -21,23 +19,20 @@ type parseError struct {
 	query    string
 }
 
+func NewParseError() ParseError {
+	return parseError{}
+}
+
 func (e parseError) Error() string {
-	errorLength := max(e.length, 1)
-	relevantQueryFragment, newStart := tf.TextSubstrWithContext(e.query, e.position, errorLength, 10, 20)
-	return fmt.Sprintf(
-		"%s\n\n%s\n%s%s%s\nCursor positions %d-%d in query.",
-		e.err,
-		relevantQueryFragment,
-		strings.Repeat("—", max(0, newStart)),
-		strings.Repeat("^", max(0, errorLength)),
-		strings.Repeat("—", max(0, len(relevantQueryFragment)-(newStart+errorLength))),
-		e.position,
-		e.position+errorLength,
-	)
+	return fmt.Sprintf("filter error")
 }
 
 func (e parseError) Original() error {
 	return e.err
+}
+
+func (e parseError) Query() string {
+	return e.query
 }
 
 func (e parseError) Position() (int, int) {

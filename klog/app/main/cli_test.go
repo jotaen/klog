@@ -72,6 +72,15 @@ func TestPrintAppErrors(t *testing.T) {
 				assert.True(t, strings.Contains(out, "Error: Manipulation failed"), out)
 				assert.True(t, strings.Contains(out, "There is already an open range in this record"), out)
 			}},
+		invocation{
+			args: []string{"print", "--filter", "(#foo", "valid.klg"},
+			test: func(t *testing.T, code int, out string) {
+				assert.Equal(t, 1, code)
+				assert.True(t, strings.Contains(out, "Missing closing parenthesis"), out)
+				assert.True(t, strings.Contains(out, "(#foo"), out)
+				assert.True(t, strings.Contains(out, "^————"), out)
+				assert.True(t, strings.Contains(out, "Cursor positions 0-1 in query."), out)
+			}},
 	)
 }
 

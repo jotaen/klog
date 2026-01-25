@@ -181,16 +181,9 @@ func entryTypeDecoder() kong.MapperFunc {
 		if value == "" {
 			return errors.New("Please provide a valid entry type")
 		}
-		ts := map[filter.EntryType]bool{
-			filter.ENTRY_TYPE_RANGE:             true,
-			filter.ENTRY_TYPE_OPEN_RANGE:        true,
-			filter.ENTRY_TYPE_DURATION:          true,
-			filter.ENTRY_TYPE_POSITIVE_DURATION: true,
-			filter.ENTRY_TYPE_NEGATIVE_DURATION: true,
-		}
-		t := filter.EntryType(strings.ReplaceAll(strings.ToUpper(value), "-", "_"))
-		if ok := ts[t]; !ok {
-			return errors.New("`" + value + "` is not a valid entry type")
+		t, err := filter.NewEntryTypeFromString(value)
+		if err != nil {
+			return err
 		}
 		target.Set(reflect.ValueOf(t))
 		return nil

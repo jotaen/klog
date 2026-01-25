@@ -32,8 +32,8 @@ Examples:
         All entries at either 2025-04-20 or 2020-04-21.
     2025-04 && !#work
         All entries in April 2025 that don’t match tag #work.
-    2025-04-15...2025-05-30 && (#gym || #run)
-        All entries since 2025-04-15 until 2025-05-30 (inclusive), that match either tags #gym or #run.
+    ...2025-05-30 && (#gym || #run)
+        All entries until 2025-05-30 (inclusive), that match either tags #gym or #run.
 
 Operators:
     (  )
@@ -61,10 +61,11 @@ Operands:
     YYYY-MM-DD...YYYY-MM-DD
     YYYY-MM-DD...
     ...YYYY-MM-DD
-        Entries within that date range.
+        Entries within that date range (inclusive), or since or until a certain date (inclusive).
         Examples:
             2025-04-30...2025-05-14
-            2025-04-30...
+            2025-06-19...
+            ...2025-08-30
     #tag
     #tag=value
         Entries matching that a tag. Note that tags can either be specified in the entry summary or in the record summary. In the latter case, the entry “inherits” the record tags.

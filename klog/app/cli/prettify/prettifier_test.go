@@ -43,9 +43,8 @@ func TestReflowsLongMessages(t *testing.T) {
 [SYNTAX ERROR] in line 2
     Foo bar
         ^^^
-    Some Title: A verbose description with details, potentially spanning
-    multiple lines with a comprehensive text and tremendously helpful
-    information.
+    Some Title: A verbose description with details, potentially spanning multiple lines
+    with a comprehensive text and tremendously helpful information.
     But
     it
     respects

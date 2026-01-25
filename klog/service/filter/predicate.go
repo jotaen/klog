@@ -1,7 +1,7 @@
 package filter
 
 import (
-	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/jotaen/klog/klog"
@@ -101,7 +101,7 @@ func NewEntryTypeFromString(val string) (EntryType, error) {
 			return t, nil
 		}
 	}
-	return EntryType(""), errors.New("Illegal entry type")
+	return EntryType(""), fmt.Errorf("%s is not a valid entry type", val)
 }
 
 type IsEntryType struct {
