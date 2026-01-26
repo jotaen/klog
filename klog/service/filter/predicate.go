@@ -83,8 +83,8 @@ type EntryType string
 
 const (
 	ENTRY_TYPE_DURATION          = EntryType("duration")
-	ENTRY_TYPE_POSITIVE_DURATION = EntryType("duration-positive")
-	ENTRY_TYPE_NEGATIVE_DURATION = EntryType("duration-negative")
+	ENTRY_TYPE_DURATION_POSITIVE = EntryType("duration-positive")
+	ENTRY_TYPE_DURATION_NEGATIVE = EntryType("duration-negative")
 	ENTRY_TYPE_RANGE             = EntryType("range")
 	ENTRY_TYPE_OPEN_RANGE        = EntryType("open-range")
 )
@@ -92,8 +92,8 @@ const (
 func NewEntryTypeFromString(val string) (EntryType, error) {
 	for _, t := range []EntryType{
 		ENTRY_TYPE_DURATION,
-		ENTRY_TYPE_POSITIVE_DURATION,
-		ENTRY_TYPE_NEGATIVE_DURATION,
+		ENTRY_TYPE_DURATION_POSITIVE,
+		ENTRY_TYPE_DURATION_NEGATIVE,
 		ENTRY_TYPE_RANGE,
 		ENTRY_TYPE_OPEN_RANGE,
 	} {
@@ -115,10 +115,10 @@ func (t IsEntryType) Matches(e queriedEntry) bool {
 		if t.Type == ENTRY_TYPE_DURATION {
 			return true
 		}
-		if t.Type == ENTRY_TYPE_POSITIVE_DURATION && e.entry.Duration().InMinutes() >= 0 {
+		if t.Type == ENTRY_TYPE_DURATION_POSITIVE && e.entry.Duration().InMinutes() >= 0 {
 			return true
 		}
-		if t.Type == ENTRY_TYPE_NEGATIVE_DURATION && e.entry.Duration().InMinutes() < 0 {
+		if t.Type == ENTRY_TYPE_DURATION_NEGATIVE && e.entry.Duration().InMinutes() < 0 {
 			return true
 		}
 		return false

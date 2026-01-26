@@ -10,8 +10,16 @@ import (
 
 type et struct { // “Error Test”
 	input string
+	kind  error
 	pos   int
 	len   int
+}
+
+func checkError(t *testing.T, expected et, actual ParseError) {
+	assert.ErrorIs(t, actual.Original(), expected.kind)
+	pos, len := actual.Position()
+	assert.Equal(t, expected.pos, pos)
+	assert.Equal(t, expected.len, len)
 }
 
 func TestAtDate(t *testing.T) {
@@ -113,27 +121,53 @@ func TestNestedGrouping(t *testing.T) {
 }
 
 func TestClosedDateRange(t *testing.T) {
-	p, err := Parse("2020-03-06...2020-04-22")
-	require.Nil(t, err)
-	assert.Equal(t,
-		IsInDateRange{klog.Ɀ_Date_(2020, 3, 6), klog.Ɀ_Date_(2020, 4, 22)},
-		p)
+	for _, tt := range []struct {
+		input string
+		from  klog.Date
+		to    klog.Date
+	}{
+		{"2020-03-06...2020-04-22", klog.Ɀ_Date_(2020, 3, 6), klog.Ɀ_Date_(2020, 4, 22)},
+		{"2020-Q1...2020-Q2", klog.Ɀ_Date_(2020, 1, 1), klog.Ɀ_Date_(2020, 6, 30)},
+		{"2020-04-17...2021", klog.Ɀ_Date_(2020, 4, 17), klog.Ɀ_Date_(2021, 12, 31)},
+	} {
+		p, err := Parse(tt.input)
+		require.Nil(t, err)
+		assert.Equal(t,
+			IsInDateRange{tt.from, tt.to},
+			p)
+	}
 }
 
 func TestOpenDateRangeSince(t *testing.T) {
-	p, err := Parse("2020-03-01...")
-	require.Nil(t, err)
-	assert.Equal(t,
-		IsInDateRange{klog.Ɀ_Date_(2020, 3, 1), nil},
-		p)
+	for _, tt := range []struct {
+		input string
+		from  klog.Date
+	}{
+		{"2020-03-01...", klog.Ɀ_Date_(2020, 3, 1)},
+		{"2020-W23...", klog.Ɀ_Date_(2020, 6, 1)},
+	} {
+		p, err := Parse(tt.input)
+		require.Nil(t, err)
+		assert.Equal(t,
+			IsInDateRange{tt.from, nil},
+			p)
+	}
 }
 
 func TestOpenDateRangeUntil(t *testing.T) {
-	p, err := Parse("...2020-03-01")
-	require.Nil(t, err)
-	assert.Equal(t,
-		IsInDateRange{nil, klog.Ɀ_Date_(2020, 3, 1)},
-		p)
+	for _, tt := range []struct {
+		input string
+		to    klog.Date
+	}{
+		{"...2020-03-01", klog.Ɀ_Date_(2020, 3, 1)},
+		{"...2020-W23", klog.Ɀ_Date_(2020, 6, 7)},
+	} {
+		p, err := Parse(tt.input)
+		require.Nil(t, err)
+		assert.Equal(t,
+			IsInDateRange{nil, tt.to},
+			p)
+	}
 }
 
 func TestPeriod(t *testing.T) {
@@ -159,36 +193,32 @@ func TestTags(t *testing.T) {
 		}}, p)
 }
 
-func TestOpeningBracketMismatch(t *testing.T) {
-	for _, tt := range []et{
-		{"(2020-01", 0, 0},
-		{"((2020-01", 0, 0},
-		{"(2020-01-01 && (2020-02-02 || 2020-03-03", 0, 0},
-	} {
-		t.Run(tt.input, func(t *testing.T) {
-			p, err := Parse(tt.input)
-			require.Nil(t, p)
-			require.ErrorIs(t, err.Original(), errUnbalancedBrackets)
-			pos, len := err.Position()
-			assert.Equal(t, tt.pos, pos)
-			assert.Equal(t, tt.len, len)
-		})
-	}
+func TestEntryType(t *testing.T) {
+	p, err := Parse("type:duration || type:range || type:open-range || type:duration-positive || type:duration-negative")
+	require.Nil(t, err)
+	assert.Equal(t,
+		Or{[]Predicate{
+			IsEntryType{ENTRY_TYPE_DURATION},
+			IsEntryType{ENTRY_TYPE_RANGE},
+			IsEntryType{ENTRY_TYPE_OPEN_RANGE},
+			IsEntryType{ENTRY_TYPE_DURATION_POSITIVE},
+			IsEntryType{ENTRY_TYPE_DURATION_NEGATIVE},
+		}}, p)
 }
 
-func TestClosingBracketMismatch(t *testing.T) {
+func TestBracketMismatch(t *testing.T) {
 	for _, tt := range []et{
-		{"(2020-01-01))", 0, 13},
-		{"2020-01-01)", 0, 11},
-		{"(2020-01-01 && (2020-02-02))) || 2020-03-03", 0, 43},
+		{"(2020-01", errUnbalancedBrackets, 0, 0},
+		{"((2020-01", errUnbalancedBrackets, 0, 0},
+		{"(2020-01-01 && (2020-02-02 || 2020-03-03", errUnbalancedBrackets, 0, 0},
+		{"(2020-01-01))", errUnbalancedBrackets, 0, 13},
+		{"2020-01-01)", errUnbalancedBrackets, 0, 11},
+		{"(2020-01-01 && (2020-02-02))) || 2020-03-03", errUnbalancedBrackets, 0, 43},
 	} {
 		t.Run(tt.input, func(t *testing.T) {
 			p, err := Parse(tt.input)
 			require.Nil(t, p)
-			require.ErrorIs(t, err.Original(), errUnbalancedBrackets)
-			pos, len := err.Position()
-			assert.Equal(t, tt.pos, pos)
-			assert.Equal(t, tt.len, len)
+			checkError(t, tt, err)
 		})
 	}
 }
@@ -234,6 +264,46 @@ func TestOperatorOperandSequence(t *testing.T) {
 			p, err := Parse(tt)
 			require.ErrorIs(t, err.Original(), errOperatorOperand)
 			require.Nil(t, p)
+		})
+	}
+}
+
+func TestTokenizeError(t *testing.T) {
+	p, err := Parse("2020-03-01(")
+	require.Nil(t, p)
+	require.Error(t, err)
+}
+
+func TestOperandOperatorSequenceExpectedError(t *testing.T) {
+	for _, tt := range []et{
+		{"2020-01-01 2020-02-02", ErrOperatorExpected, 11, 10},
+		{"#foo type:open-range", ErrOperatorExpected, 5, 15},
+		{"2020-01-01 && || #foo", ErrOperandExpected, 14, 2},
+		{"2020-01-01 && (&& #foo)", ErrOperandExpected, 15, 2},
+		{"2020-01-01 &&", ErrOperandExpected, 12, 1},
+		{"2020-01-01 && ()", ErrOperandExpected, 15, 1},
+	} {
+		t.Run(tt.input, func(t *testing.T) {
+			p, err := Parse(tt.input)
+			require.Nil(t, p)
+			checkError(t, tt, err)
+		})
+	}
+}
+
+func TestMalformedOperandError(t *testing.T) {
+	for _, tt := range []et{
+		{"2020-13-35", ErrIllegalTokenValue, 0, 10},
+		{"2020-13-35...2020-Q7", ErrIllegalTokenValue, 0, 20},
+		{"2020-01-02...2020-01-01", ErrIllegalTokenValue, 0, 23},
+		{"2020-Q7", ErrIllegalTokenValue, 0, 7},
+		{"type:foo", ErrIllegalTokenValue, 0, 8},
+		{"foo", ErrUnrecognisedToken, 0, 1},
+	} {
+		t.Run(tt.input, func(t *testing.T) {
+			p, err := Parse(tt.input)
+			require.Nil(t, p)
+			checkError(t, tt, err)
 		})
 	}
 }

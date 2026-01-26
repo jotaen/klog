@@ -96,7 +96,7 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 			date, err := klog.NewDateFromString(tk.value)
 			if err != nil {
 				return nil, parseError{
-					err:      err,
+					err:      ErrIllegalTokenValue,
 					position: tk.position,
 					length:   len(tk.value),
 				}
@@ -113,6 +113,7 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 				if v == "" {
 					continue
 				}
+				// Try whether bound is period:
 				prd, err := period.NewPeriodFromPatternString(v)
 				if err == nil {
 					if i == 0 {
@@ -122,13 +123,15 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 					}
 					continue
 				}
+				// Try whether bound is date:
 				date, err := klog.NewDateFromString(v)
 				if err == nil {
 					dateBoundaries[i] = date
 					continue
 				}
+				// Otherwise, yield error:
 				return nil, parseError{
-					err:      err,
+					err:      ErrIllegalTokenValue,
 					position: tk.position,
 					length:   len(tk.value),
 				}
@@ -151,7 +154,7 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 			prd, err := period.NewPeriodFromPatternString(tk.value)
 			if err != nil {
 				return nil, parseError{
-					err:      err,
+					err:      ErrIllegalTokenValue,
 					position: tk.position,
 					length:   len(tk.value),
 				}
@@ -180,7 +183,7 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 			et, err := NewEntryTypeFromString(strings.TrimLeft(tk.value, "type:"))
 			if err != nil {
 				return nil, parseError{
-					err:      err,
+					err:      ErrIllegalTokenValue,
 					position: tk.position,
 					length:   len(tk.value),
 				}
@@ -194,7 +197,7 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 			tag, err := klog.NewTagFromString(tk.value)
 			if err != nil {
 				return nil, parseError{
-					err:      err,
+					err:      ErrIllegalTokenValue,
 					position: tk.position,
 					length:   len(tk.value),
 				}
@@ -202,6 +205,7 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 			g.append(HasTag{tag})
 
 		default:
+			// This should never happen.
 			panic("Unrecognized token")
 		}
 	}

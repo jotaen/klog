@@ -114,6 +114,11 @@ func TestFailsOnMissingWhitespace(t *testing.T) {
 		"2020-Q4||",
 		"2020-Q4( 2020-01-01 )",
 		"2020-Q4!( 2020-01-01 )",
+
+		"type:duration&&",
+		"type:duration||",
+		"type:duration( 2020-01-01 )",
+		"type:duration!( 2020-01-01 )",
 	} {
 		t.Run(txt, func(t *testing.T) {
 			p, err := tokenise(txt)

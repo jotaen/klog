@@ -131,13 +131,13 @@ func TestQueryWithEntryTypes(t *testing.T) {
 		assert.Equal(t, klog.NewDuration(0, 1545), service.Total(rs...))
 	}
 	{
-		rs := Filter(IsEntryType{ENTRY_TYPE_NEGATIVE_DURATION}, sampleRecordsForQuerying())
+		rs := Filter(IsEntryType{ENTRY_TYPE_DURATION_NEGATIVE}, sampleRecordsForQuerying())
 		require.Len(t, rs, 1)
 		assert.Equal(t, 1, rs[0].Date().Day())
 		assert.Equal(t, klog.NewDuration(0, -30), service.Total(rs...))
 	}
 	{
-		rs := Filter(IsEntryType{ENTRY_TYPE_POSITIVE_DURATION}, sampleRecordsForQuerying())
+		rs := Filter(IsEntryType{ENTRY_TYPE_DURATION_POSITIVE}, sampleRecordsForQuerying())
 		require.Len(t, rs, 4)
 		assert.Equal(t, klog.NewDuration(0, 1575), service.Total(rs...))
 	}
