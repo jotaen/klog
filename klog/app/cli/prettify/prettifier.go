@@ -11,7 +11,7 @@ import (
 	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
-const LINE_LENGTH = 90
+const LINE_LENGTH = 80
 
 var Reflower = tf.NewReflower(LINE_LENGTH)
 

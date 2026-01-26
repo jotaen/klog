@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/alecthomas/kong"
-	klog "github.com/jotaen/klog/klog"
+	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/period"
 )
