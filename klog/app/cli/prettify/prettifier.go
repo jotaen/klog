@@ -10,7 +10,9 @@ import (
 	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
-var Reflower = tf.NewReflower(80)
+const LINE_LENGTH = 80
+
+var Reflower = tf.NewReflower(LINE_LENGTH)
 
 // PrettifyAppError prints app errors including details.
 func PrettifyAppError(err app.Error, isDebug bool) error {
