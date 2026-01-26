@@ -10,13 +10,11 @@ import (
 )
 
 type FilterArgs struct {
-	// General filters:
-	Date      klog.Date         `name:"date" placeholder:"DATE" group:"Filter" help:"Records at this date. DATE has to be in format YYYY-MM-DD or YYYY/MM/DD. E.g., '2024-01-31' or '2024/01/31'."`
-	Since     klog.Date         `name:"since" placeholder:"DATE" group:"Filter" help:"Records since this date (inclusive)."`
-	Until     klog.Date         `name:"until" placeholder:"DATE" group:"Filter" help:"Records until this date (inclusive)."`
-	Period    period.Period     `name:"period" placeholder:"PERIOD" group:"Filter" help:"Records within a calendar period. PERIOD has to be in format YYYY, YYYY-MM, YYYY-Www or YYYY-Qq. E.g., '2024', '2024-04', '2022-W21' or '2024-Q1'."`
-	Tags      []klog.Tag        `name:"tag" placeholder:"TAG" group:"Filter" help:"Records (or entries) that match these tags. You can omit the leading '#'."`
-	EntryType service.EntryType `name:"entry-type" placeholder:"TYPE" group:"Filter" help:"Entries of this type. TYPE can be 'range', 'open-range', 'duration', 'duration-positive' or 'duration-negative'."`
+	// Date-related filters:
+	Date   klog.Date     `name:"date" placeholder:"DATE" group:"Filter" help:"Entries at this date. DATE has to be in format YYYY-MM-DD or YYYY/MM/DD. E.g., '2024-01-31' or '2024/01/31'."`
+	Since  klog.Date     `name:"since" placeholder:"DATE" group:"Filter" help:"Entries since this date (inclusive)."`
+	Until  klog.Date     `name:"until" placeholder:"DATE" group:"Filter" help:"Entries until this date (inclusive)."`
+	Period period.Period `name:"period" placeholder:"PERIOD" group:"Filter" help:"Entries within a calendar period. PERIOD has to be in format YYYY, YYYY-MM, YYYY-Www or YYYY-Qq. E.g., '2024', '2024-04', '2022-W21' or '2024-Q1'."`
 
 	// Filter shortcuts:
 	// The two `XXX` ones are dummy entries just for the help output, they also aren’t available
@@ -24,7 +22,6 @@ type FilterArgs struct {
 	// too verbose then), but they are still available for tab completion.
 	Today       bool `name:"today" group:"Filter" help:"Records at today’s date."`
 	Yesterday   bool `name:"yesterday" group:"Filter" help:"Records at yesterday’s date."`
-	Tomorrow    bool `name:"tomorrow" group:"Filter" help:"Records at tomorrow’s date."`
 	ThisXXX     bool `name:"this-***" group:"Filter" help:"Records of this week/month/quarter/year, e.g. '--this-week' or '--this-quarter'." completion-enabled:"false"`
 	LastXXX     bool `name:"last-***" group:"Filter" help:"Records of last week/month/quarter/year, e.g. '--last-month' or '--last-year'." completion-enabled:"false"`
 	ThisWeek    bool `hidden:"" name:"this-week" group:"Filter" completion-enabled:"true"`
@@ -35,6 +32,10 @@ type FilterArgs struct {
 	LastQuarter bool `hidden:"" name:"last-quarter" group:"Filter" completion-enabled:"true"`
 	ThisYear    bool `hidden:"" name:"this-year" group:"Filter" completion-enabled:"true"`
 	LastYear    bool `hidden:"" name:"last-year" group:"Filter" completion-enabled:"true"`
+
+	// Other filters:
+	Tags      []klog.Tag        `name:"tag" placeholder:"TAG" group:"Filter" help:"Entries that match these tags (either in the record summary or the entry summary). You can omit the leading '#'."`
+	EntryType service.EntryType `name:"entry-type" placeholder:"TYPE" group:"Filter" help:"Entries of this type. TYPE can be 'range', 'open-range', 'duration', 'duration-positive' or 'duration-negative'."`
 }
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.Record, app.Error) {
@@ -54,9 +55,6 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.R
 	}
 	if args.Yesterday {
 		qry.AtDate = today.PlusDays(-1)
-	}
-	if args.Tomorrow {
-		qry.AtDate = today.PlusDays(+1)
 	}
 	if args.EntryType != "" {
 		qry.EntryType = args.EntryType

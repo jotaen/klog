@@ -11,9 +11,6 @@ type Reflower struct {
 
 // NewReflower creates a new Reflower with the given maximum line length.
 func NewReflower(maxWidth int) *Reflower {
-	if maxWidth <= 0 {
-		maxWidth = 80
-	}
 	return &Reflower{maxWidth: maxWidth}
 }
 

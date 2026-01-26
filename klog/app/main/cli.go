@@ -64,7 +64,7 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact:             true,
 			NoExpandSubcommands: true,
-			WrapUpperBound:      80,
+			WrapUpperBound:      prettify.LINE_LENGTH,
 		}),
 	)
 	if nErr != nil {
@@ -97,19 +97,20 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 	kongCtx.BindTo(ctx, (*app.Context)(nil))
 
 	rErr := kongCtx.Run()
-	parserErrors := app.NewParserErrors(nil)
-	appError := app.NewError("", "", nil)
-
-	switch {
-	case rErr == nil:
+	if rErr == nil {
 		return 0, nil
-	case errors.As(rErr, &parserErrors):
-		return parserErrors.Code().ToInt(), prettify.PrettifyParsingError(parserErrors, styler)
-	case errors.As(rErr, &appError):
-		return appError.Code().ToInt(), prettify.PrettifyAppError(appError, config.IsDebug.Value())
-	default:
-		// This is just a fallback clause; this code branch is not expected to be
-		// invoked in practice.
-		return app.GENERAL_ERROR.ToInt(), errors.New("Error: " + rErr.Error())
 	}
+
+	appError := app.NewError("", "", nil)
+	if errors.As(rErr, &appError) {
+		parserErrors := app.NewParserErrors(nil)
+		switch {
+		case errors.As(appError, &parserErrors):
+			return parserErrors.Code().ToInt(), prettify.PrettifyParsingError(parserErrors, styler)
+		}
+		return appError.Code().ToInt(), prettify.PrettifyAppError(appError, config.IsDebug.Value())
+	}
+
+	// This is just a fallback, which is not expected to occur in practice.
+	return app.GENERAL_ERROR.ToInt(), errors.New("Error: " + rErr.Error())
 }
