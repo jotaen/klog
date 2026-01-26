@@ -5,11 +5,11 @@ import (
 
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/command"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/reconciling"
 	"github.com/jotaen/klog/klog/parser/txt"
+	"github.com/jotaen/klog/lib/shellcmd"
+	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
 func NewTestingContext() TestingContext {
@@ -30,7 +30,7 @@ func NewTestingContext() TestingContext {
 		editorsAuto:    nil,
 		editorExplicit: "",
 		fileExplorers:  nil,
-		execute: func(_ command.Command) app.Error {
+		execute: func(_ shellcmd.Command) app.Error {
 			return nil
 		},
 		config: &config,
@@ -52,13 +52,13 @@ func (ctx TestingContext) _SetNow(Y int, M int, D int, h int, m int) TestingCont
 	return ctx
 }
 
-func (ctx TestingContext) _SetEditors(auto []command.Command, explicit string) TestingContext {
+func (ctx TestingContext) _SetEditors(auto []shellcmd.Command, explicit string) TestingContext {
 	ctx.editorsAuto = auto
 	ctx.editorExplicit = explicit
 	return ctx
 }
 
-func (ctx TestingContext) _SetFileExplorers(cs []command.Command) TestingContext {
+func (ctx TestingContext) _SetFileExplorers(cs []shellcmd.Command) TestingContext {
 	ctx.fileExplorers = cs
 	return ctx
 }
@@ -72,7 +72,7 @@ func (ctx TestingContext) _SetFileConfig(configFile string) TestingContext {
 	return ctx
 }
 
-func (ctx TestingContext) _SetExecute(execute func(command.Command) app.Error) TestingContext {
+func (ctx TestingContext) _SetExecute(execute func(shellcmd.Command) app.Error) TestingContext {
 	ctx.execute = execute
 	return ctx
 }
@@ -99,10 +99,10 @@ type TestingContext struct {
 	styler         tf.Styler
 	serialiser     app.TextSerialiser
 	bookmarks      app.BookmarksCollection
-	editorsAuto    []command.Command
+	editorsAuto    []shellcmd.Command
 	editorExplicit string
-	fileExplorers  []command.Command
-	execute        func(command.Command) app.Error
+	fileExplorers  []shellcmd.Command
+	execute        func(shellcmd.Command) app.Error
 	config         *app.Config
 }
 
@@ -168,15 +168,15 @@ func (ctx *TestingContext) ManipulateBookmarks(_ func(app.BookmarksCollection) a
 	return nil
 }
 
-func (ctx *TestingContext) Execute(cmd command.Command) app.Error {
+func (ctx *TestingContext) Execute(cmd shellcmd.Command) app.Error {
 	return ctx.execute(cmd)
 }
 
-func (ctx *TestingContext) Editors() (string, []command.Command) {
+func (ctx *TestingContext) Editors() (string, []shellcmd.Command) {
 	return ctx.editorExplicit, ctx.editorsAuto
 }
 
-func (ctx *TestingContext) FileExplorers() []command.Command {
+func (ctx *TestingContext) FileExplorers() []shellcmd.Command {
 	return ctx.fileExplorers
 }
 

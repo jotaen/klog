@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/args"
 )
 
 type Bookmarks struct {
@@ -66,7 +66,7 @@ func (opt *BookmarksList) Run(ctx app.Context) app.Error {
 type BookmarksInfo struct {
 	Dir  bool   `name:"dir" type:"string" help:"Display the directory"`
 	File bool   `name:"file" type:"string" help:"Display the file name"`
-	Name string `arg:"" name:"bookmark" type:"string" predictor:"bookmark" help:"The path of the bookmark"`
+	Name string `arg:"" name:"bookmark" type:"string" completion-predictor:"bookmark" help:"The path of the bookmark"`
 }
 
 func (opt *BookmarksInfo) Run(ctx app.Context) error {
@@ -94,11 +94,11 @@ func (opt *BookmarksInfo) Run(ctx app.Context) error {
 }
 
 type BookmarksSet struct {
-	File   string `arg:"" type:"string" predictor:"file" help:".klg target file"`
+	File   string `arg:"" type:"string" completion-predictor:"file" help:".klg target file"`
 	Name   string `arg:"" name:"bookmark" type:"string" optional:"1" help:"The name of the bookmark."`
 	Create bool   `name:"create" short:"c" help:"Create the target file"`
 	Force  bool   `name:"force" help:"Force to set, even if target file does not exist or is invalid"`
-	util.QuietArgs
+	args.QuietArgs
 }
 
 func (opt *BookmarksSet) Run(ctx app.Context) error {
@@ -157,8 +157,8 @@ func (opt *BookmarksSet) Run(ctx app.Context) error {
 
 type BookmarksUnset struct {
 	// The name is not optional here, to avoid accidental invocations
-	Name string `arg:"" name:"bookmark" type:"string" predictor:"bookmark" help:"The name of the bookmark"`
-	util.QuietArgs
+	Name string `arg:"" name:"bookmark" type:"string" completion-predictor:"bookmark" help:"The name of the bookmark"`
+	args.QuietArgs
 }
 
 func (opt *BookmarksUnset) Run(ctx app.Context) error {
@@ -186,7 +186,7 @@ func (opt *BookmarksUnset) Run(ctx app.Context) error {
 
 type BookmarksClear struct {
 	Yes bool `name:"yes" short:"y" help:"Skip confirmation"`
-	util.QuietArgs
+	args.QuietArgs
 }
 
 func (opt *BookmarksClear) Run(ctx app.Context) error {

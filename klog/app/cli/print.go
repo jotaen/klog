@@ -5,19 +5,19 @@ import (
 
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/args"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/service"
+	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
 type Print struct {
 	WithTotals bool `name:"with-totals" help:"Amend output with evaluated total times."`
-	util.FilterArgs
-	util.SortArgs
-	util.WarnArgs
-	util.NoStyleArgs
-	util.InputFilesArgs
+	args.FilterArgs
+	args.SortArgs
+	args.WarnArgs
+	args.NoStyleArgs
+	args.InputFilesArgs
 }
 
 func (opt *Print) Help() string {

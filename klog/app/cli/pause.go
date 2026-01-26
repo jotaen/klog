@@ -2,23 +2,25 @@ package cli
 
 import (
 	"fmt"
-	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
-	"github.com/jotaen/klog/klog/app/cli/util"
-	"github.com/jotaen/klog/klog/parser"
-	"github.com/jotaen/klog/klog/parser/reconciling"
 	"strings"
 	gotime "time"
+
+	"github.com/jotaen/klog/klog"
+	"github.com/jotaen/klog/klog/app"
+	"github.com/jotaen/klog/klog/app/cli/args"
+	"github.com/jotaen/klog/klog/app/cli/helper"
+	"github.com/jotaen/klog/klog/parser"
+	"github.com/jotaen/klog/klog/parser/reconciling"
+	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
 type Pause struct {
 	Summary      klog.EntrySummary `name:"summary" short:"s" placeholder:"TEXT" help:"Summary text for the pause entry."`
 	NoAppendTags bool              `name:"no-tags" help:"Do not automatically take over (append) tags from open range."`
 	Extend       bool              `name:"extend" short:"e" help:"Extend latest pause, instead of adding a new pause entry."`
-	util.NoStyleArgs
-	util.WarnArgs
-	util.OutputFileArgs
+	args.NoStyleArgs
+	args.WarnArgs
+	args.OutputFileArgs
 }
 
 func (opt *Pause) Help() string {
@@ -77,7 +79,7 @@ func (opt *Pause) Run(ctx app.Context) app.Error {
 	// afterwards.
 	start := ctx.Now()
 	minsCaptured := 0 // The amount of minutes that have already been written into the file.
-	return util.WithRepeat(ctx.Print, 500*gotime.Millisecond, func(counter int64) app.Error {
+	return helper.WithRepeat(ctx.Print, 500*gotime.Millisecond, func(counter int64) app.Error {
 		uncapturedIncrement := diffInMinutes(ctx.Now(), start) - minsCaptured
 		ctx.Debug(func() {
 			ctx.Print(fmt.Sprintf("Started: %s\n", start))

@@ -1,9 +1,10 @@
 package klog
 
 import (
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleInputFiles(t *testing.T) {
@@ -291,7 +292,7 @@ func TestDecodesRounding(t *testing.T) {
 func TestDecodesTags(t *testing.T) {
 	(&Env{
 		files: map[string]string{
-			"test.klg": "2020-01-01\n#foo\n\n2020-01-02\n\t1h #bar=1",
+			"test.klg": "2020-01-01\n#foo\n\t2h\n\n2020-01-02\n\t1h #bar=1",
 		},
 	}).execute(t,
 		invocation{
@@ -355,7 +356,7 @@ func TestDecodesRecordSummary(t *testing.T) {
 			args: []string{"create", "--summary", "Foo\n Bar", "test.klg"},
 			test: func(t *testing.T, code int, out string) {
 				assert.Equal(t, 1, code)
-				assert.True(t, strings.Contains(out, "A record summary cannot contain blank lines"), out)
+				assert.True(t, strings.Contains(out, "none of its lines can start with whitespace characters"), out)
 			}},
 	)
 }

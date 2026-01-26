@@ -1,13 +1,14 @@
 package klog
 
 import (
-	"github.com/jotaen/klog/klog/app"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
-	"github.com/stretchr/testify/require"
 	"io"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/jotaen/klog/klog/app"
+	tf "github.com/jotaen/klog/lib/terminalformat"
+	"github.com/stretchr/testify/require"
 )
 
 type Env struct {
@@ -51,12 +52,15 @@ func (e *Env) execute(t *testing.T, is ...invocation) {
 		_ = w.Close()
 
 		t.Run(strings.Join(invoke.args, "__"), func(t *testing.T) {
-			if runErr != nil {
-				require.NotEqual(t, 0, code, "App returned error, but exit code was 0")
-			} else {
-				out, _ := io.ReadAll(r)
-				invoke.test(t, code, tf.StripAllAnsiSequences(string(out)))
-			}
+			out := func() string {
+				if runErr != nil {
+					require.NotEqual(t, 0, code, "App returned error, but exit code was 0")
+					return runErr.Error()
+				}
+				buffer, _ := io.ReadAll(r)
+				return string(buffer)
+			}()
+			invoke.test(t, code, tf.StripAllAnsiSequences(out))
 		})
 	}
 

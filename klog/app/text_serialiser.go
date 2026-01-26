@@ -1,11 +1,12 @@
 package app
 
 import (
-	"github.com/jotaen/klog/klog"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
-	"github.com/jotaen/klog/klog/parser"
 	"strconv"
 	"strings"
+
+	"github.com/jotaen/klog/klog"
+	"github.com/jotaen/klog/klog/parser"
+	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
 // TextSerialiser is a specialised parser.Serialiser implementation for the terminal.

@@ -3,19 +3,19 @@
 package app
 
 import (
-	"github.com/jotaen/klog/klog/app/cli/command"
+	"github.com/jotaen/klog/lib/shellcmd"
 )
 
-var POTENTIAL_EDITORS = []command.Command{
-	command.New("vim", nil),
-	command.New("vi", nil),
-	command.New("nano", nil),
-	command.New("pico", nil),
-	command.New("open", []string{"-a", "TextEdit"}),
+var POTENTIAL_EDITORS = []shellcmd.Command{
+	shellcmd.New("vim", nil),
+	shellcmd.New("vi", nil),
+	shellcmd.New("nano", nil),
+	shellcmd.New("pico", nil),
+	shellcmd.New("open", []string{"-a", "TextEdit"}),
 }
 
-var POTENTIAL_FILE_EXLORERS = []command.Command{
-	command.New("open", nil),
+var POTENTIAL_FILE_EXLORERS = []shellcmd.Command{
+	shellcmd.New("open", nil),
 }
 
 var KLOG_CONFIG_FOLDER = []KlogFolder{

@@ -1,10 +1,11 @@
 package cli
 
 import (
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"testing"
+
+	"github.com/jotaen/klog/klog/app/cli/args"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestTotalOfEmptyInput(t *testing.T) {
@@ -24,7 +25,7 @@ func TestTotalOfInput(t *testing.T) {
 2150-11-10
 Open ranges are not considered
 	16:00 - ?
-`)._Run((&Total{WarnArgs: util.WarnArgs{NoWarn: true}}).Run)
+`)._Run((&Total{WarnArgs: args.WarnArgs{NoWarn: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, "\nTotal: 2h\n(In 3 records)\n", state.printBuffer)
 }
@@ -36,7 +37,7 @@ func TestTotalWithDiffing(t *testing.T) {
 
 2018-11-09 (7h45m!)
 	8:00 - 16:00
-`)._Run((&Total{DiffArgs: util.DiffArgs{Diff: true}}).Run)
+`)._Run((&Total{DiffArgs: args.DiffArgs{Diff: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, "\nTotal: 16h30m\nShould: 15h45m!\nDiff: +45m\n(In 2 records)\n", state.printBuffer)
 }
@@ -48,7 +49,7 @@ func TestTotalWithNow(t *testing.T) {
 
 2018-11-09 (7h45m!)
 	8:00 - ?
-`)._SetNow(2018, 11, 9, 8, 30)._Run((&Total{NowArgs: util.NowArgs{Now: true}}).Run)
+`)._SetNow(2018, 11, 9, 8, 30)._Run((&Total{NowArgs: args.NowArgs{Now: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, "\nTotal: 9h\n(In 2 records)\n", state.printBuffer)
 }
@@ -60,7 +61,7 @@ func TestTotalWithNowUncloseable(t *testing.T) {
 
 2018-11-09 (7h45m!)
 	8:00 - ?
-`)._SetNow(2018, 13, 9, 8, 30)._Run((&Total{NowArgs: util.NowArgs{Now: true}}).Run)
+`)._SetNow(2018, 13, 9, 8, 30)._Run((&Total{NowArgs: args.NowArgs{Now: true}}).Run)
 	require.Error(t, err)
 }
 
@@ -68,7 +69,7 @@ func TestTotalAsDecimal(t *testing.T) {
 	state, err := NewTestingContext()._SetRecords(`
 2018-11-08 (8h!)
 	8h30m
-`)._SetNow(2018, 11, 9, 8, 30)._Run((&Total{DecimalArgs: util.DecimalArgs{Decimal: true}}).Run)
+`)._SetNow(2018, 11, 9, 8, 30)._Run((&Total{DecimalArgs: args.DecimalArgs{Decimal: true}}).Run)
 	require.Nil(t, err)
 	assert.Equal(t, "\nTotal: 510\n(In 1 record)\n", state.printBuffer)
 }

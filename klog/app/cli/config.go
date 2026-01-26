@@ -5,13 +5,14 @@ import (
 	"strings"
 
 	"github.com/jotaen/klog/klog/app"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/args"
+	"github.com/jotaen/klog/klog/app/cli/prettify"
+	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
 type Config struct {
 	Location bool `name:"location" help:"Print the location of the config folder."`
-	util.NoStyleArgs
+	args.NoStyleArgs
 }
 
 func (opt *Config) Help() string {
@@ -46,11 +47,15 @@ func (opt *Config) Run(ctx app.Context) app.Error {
 
 	styler, _ := ctx.Serialise()
 	for i, e := range app.CONFIG_FILE_ENTRIES {
-		ctx.Print(styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(util.Reflower.Reflow(e.Help.Summary, []string{"# "})))
+		ctx.Print(styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(prettify.Reflower.Reflow(e.Help.Summary, "# ")))
 		ctx.Print("\n")
-		ctx.Print(styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(util.Reflower.Reflow("Value: "+e.Help.Value, []string{"# - ", "#   "})))
+		description := prettify.Reflower.Reflow("Value: "+e.Help.Value, "#   ")
+		description = strings.Replace(description, "#  ", "# -", 1)
+		ctx.Print(styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(description))
 		ctx.Print("\n")
-		ctx.Print(styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(util.Reflower.Reflow("Default: "+e.Help.Default, []string{"# - ", "#   "})))
+		defaultHint := prettify.Reflower.Reflow("Default: "+e.Help.Default, "#   ")
+		defaultHint = strings.Replace(defaultHint, "#  ", "# -", 1)
+		ctx.Print(styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(defaultHint))
 		ctx.Print("\n")
 		ctx.Print(styler.Props(tf.StyleProps{Color: tf.RED}).Format(e.Name))
 		ctx.Print(" = ")

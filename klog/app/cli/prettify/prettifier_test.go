@@ -1,12 +1,13 @@
-package util
+package prettify
 
 import (
 	"errors"
-	"github.com/jotaen/klog/klog/app"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
-	"github.com/jotaen/klog/klog/parser/txt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/jotaen/klog/klog/app"
+	"github.com/jotaen/klog/klog/parser/txt"
+	tf "github.com/jotaen/klog/lib/terminalformat"
+	"github.com/stretchr/testify/assert"
 )
 
 var styler = tf.NewStyler(tf.COLOUR_THEME_NO_COLOUR)
@@ -42,8 +43,9 @@ func TestReflowsLongMessages(t *testing.T) {
 [SYNTAX ERROR] in line 2
     Foo bar
         ^^^
-    Some Title: A verbose description with details, potentially spanning multiple
-    lines with a comprehensive text and tremendously helpful information.
+    Some Title: A verbose description with details, potentially spanning
+    multiple lines with a comprehensive text and tremendously helpful
+    information.
     But
     it
     respects

@@ -2,10 +2,11 @@ package report
 
 import (
 	"fmt"
+
 	"github.com/jotaen/klog/klog"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/prettify"
 	"github.com/jotaen/klog/klog/service/period"
+	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
 type dayAggregator struct {
@@ -46,11 +47,11 @@ func (a *dayAggregator) OnRowPrefix(table *tf.Table, date klog.Date) {
 	// Month
 	if date.Month() != a.m {
 		a.m = date.Month()
-		table.CellR(util.PrettyMonth(a.m)[:3])
+		table.CellR(prettify.PrettyMonth(a.m)[:3])
 	} else {
 		table.Skip(1)
 	}
 
 	// Day
-	table.CellR(util.PrettyDay(date.Weekday())[:3]).CellR(fmt.Sprintf("%2v.", date.Day()))
+	table.CellR(prettify.PrettyDay(date.Weekday())[:3]).CellR(fmt.Sprintf("%2v.", date.Day()))
 }

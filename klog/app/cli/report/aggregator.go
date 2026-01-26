@@ -5,8 +5,8 @@ package report
 
 import (
 	"github.com/jotaen/klog/klog"
-	tf "github.com/jotaen/klog/klog/app/cli/terminalformat"
 	"github.com/jotaen/klog/klog/service/period"
+	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
 type Aggregator interface {

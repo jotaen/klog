@@ -1,12 +1,13 @@
 package cli
 
 import (
+	"testing"
+
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/args"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestStartWithAutoTime(t *testing.T) {
@@ -27,8 +28,8 @@ func TestStartWithExplicitDateAndAutoTimeYesterday(t *testing.T) {
 1920-02-02
 	9:00-12:00
 `)._SetNow(1920, 2, 3, 23, 35)._Run((&Start{
-		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
-			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
+		AtDateAndTimeArgs: args.AtDateAndTimeArgs{
+			AtDateArgs: args.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
 		},
 	}).Run)
 	require.Nil(t, err)
@@ -44,7 +45,7 @@ func TestStartWithExplicitTime(t *testing.T) {
 1920-02-02
 	9:00-12:00
 `)._SetNow(1920, 2, 2, 23, 0)._Run((&Start{
-		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
+		AtDateAndTimeArgs: args.AtDateAndTimeArgs{
 			Time: klog.Ɀ_Time_(15, 24),
 		},
 	}).Run)
@@ -61,8 +62,8 @@ func TestStartWithExplicitDateAndTime(t *testing.T) {
 1920-02-02
 	9:00-12:00
 `)._SetNow(1920, 9, 28, 12, 16)._Run((&Start{
-		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
-			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
+		AtDateAndTimeArgs: args.AtDateAndTimeArgs{
+			AtDateArgs: args.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
 			Time:       klog.Ɀ_Time_(15, 24),
 		},
 	}).Run)
@@ -79,8 +80,8 @@ func TestStartFailsIfDateIsInPastAndNoTimeIsGiven(t *testing.T) {
 1920-02-02
 	9:00-???
 `)._SetNow(1920, 9, 28, 12, 15)._Run((&Start{
-		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
-			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
+		AtDateAndTimeArgs: args.AtDateAndTimeArgs{
+			AtDateArgs: args.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
 		},
 	}).Run)
 	require.Error(t, err)
@@ -93,8 +94,8 @@ func TestStartFailsIfAlreadyStarted(t *testing.T) {
 1920-02-02
 	9:00-???
 `)._Run((&Start{
-		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
-			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
+		AtDateAndTimeArgs: args.AtDateAndTimeArgs{
+			AtDateArgs: args.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
 			Time:       klog.Ɀ_Time_(12, 35),
 		},
 	}).Run)
@@ -108,10 +109,10 @@ func TestStartWithSummary(t *testing.T) {
 1920-02-02
 	9:00-12:00
 `)._SetNow(1920, 2, 2, 15, 24)._Run((&Start{
-		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
-			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
+		AtDateAndTimeArgs: args.AtDateAndTimeArgs{
+			AtDateArgs: args.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
 		},
-		SummaryArgs: util.SummaryArgs{
+		SummaryArgs: args.SummaryArgs{
 			SummaryText: klog.Ɀ_EntrySummary_("Started something"),
 		},
 	}).Run)
@@ -207,7 +208,7 @@ time_convention = 24h
 `)._SetFileConfig(`
 time_convention = 12h
 `)._SetNow(1920, 2, 2, 8, 12)._Run((&Start{
-			AtDateAndTimeArgs: util.AtDateAndTimeArgs{
+			AtDateAndTimeArgs: args.AtDateAndTimeArgs{
 				Time: klog.Ɀ_Time_(9, 44),
 			},
 		}).Run)
@@ -226,7 +227,7 @@ func TestStartWithRounding(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 2005-05-05
 `)._SetNow(2005, 5, 5, 8, 12)._Run((&Start{
-			AtDateAndTimeArgs: util.AtDateAndTimeArgs{Round: r5},
+			AtDateAndTimeArgs: args.AtDateAndTimeArgs{Round: r5},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `
@@ -255,7 +256,7 @@ default_rounding = 15m
 `)._SetNow(2005, 5, 5, 8, 12)._SetFileConfig(`
 default_rounding = 60m
 `)._Run((&Start{
-			AtDateAndTimeArgs: util.AtDateAndTimeArgs{Round: r5},
+			AtDateAndTimeArgs: args.AtDateAndTimeArgs{Round: r5},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `
@@ -269,7 +270,7 @@ func TestStartWithResume(t *testing.T) {
 	t.Run("No previous entry, no previous record -> Empty entry summary", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`1623-12-13
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			SummaryArgs: util.SummaryArgs{
+			SummaryArgs: args.SummaryArgs{
 				Resume: true,
 			},
 		}).Run)
@@ -285,7 +286,7 @@ func TestStartWithResume(t *testing.T) {
     14:00 - 15:00 Did something
     10m Some activity
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			SummaryArgs: util.SummaryArgs{
+			SummaryArgs: args.SummaryArgs{
 				Resume: true,
 			},
 		}).Run)
@@ -304,7 +305,7 @@ func TestStartWithResume(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1623-12-12
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			SummaryArgs: util.SummaryArgs{
+			SummaryArgs: args.SummaryArgs{
 				Resume: true,
 			},
 		}).Run)
@@ -321,7 +322,7 @@ func TestStartWithResume(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`1623-12-13
     8:13 - 9:44
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			SummaryArgs: util.SummaryArgs{
+			SummaryArgs: args.SummaryArgs{
 				Resume: true,
 			},
 		}).Run)
@@ -336,7 +337,7 @@ func TestStartWithResume(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`1623-12-13
     8:13 - 9:44 Work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			SummaryArgs: util.SummaryArgs{
+			SummaryArgs: args.SummaryArgs{
 				Resume: true,
 			},
 		}).Run)
@@ -352,7 +353,7 @@ func TestStartWithResume(t *testing.T) {
     8:13 - 9:44 Work
     9:51 - 11:22 More work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			SummaryArgs: util.SummaryArgs{
+			SummaryArgs: args.SummaryArgs{
 				Resume: true,
 			},
 		}).Run)
@@ -369,7 +370,7 @@ func TestStartWithResume(t *testing.T) {
     8:13 - 9:44
         Work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			SummaryArgs: util.SummaryArgs{
+			SummaryArgs: args.SummaryArgs{
 				Resume: true,
 			},
 		}).Run)
@@ -387,7 +388,7 @@ func TestStartWithResume(t *testing.T) {
     8:13 - 9:44
         Work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			SummaryArgs: util.SummaryArgs{
+			SummaryArgs: args.SummaryArgs{
 				Resume:      true,
 				SummaryText: klog.Ɀ_EntrySummary_("Test"),
 			},
@@ -400,7 +401,7 @@ func TestStartWithResume(t *testing.T) {
     8:13 - 9:44
         Work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			SummaryArgs: util.SummaryArgs{
+			SummaryArgs: args.SummaryArgs{
 				Resume:    true,
 				ResumeNth: 1,
 			},
@@ -417,7 +418,7 @@ func TestStartWithResumeNth(t *testing.T) {
     2h Bar
     3h Asdf
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-				SummaryArgs: util.SummaryArgs{
+				SummaryArgs: args.SummaryArgs{
 					ResumeNth: nth,
 				},
 			}).Run)
@@ -438,7 +439,7 @@ func TestStartWithResumeNth(t *testing.T) {
     2h Bar
     3h Asdf
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-				SummaryArgs: util.SummaryArgs{
+				SummaryArgs: args.SummaryArgs{
 					ResumeNth: nth,
 				},
 			}).Run)
@@ -459,7 +460,7 @@ func TestStartWithResumeNth(t *testing.T) {
     2h Bar
     3h
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-				SummaryArgs: util.SummaryArgs{
+				SummaryArgs: args.SummaryArgs{
 					ResumeNth: nth,
 				},
 			}).Run)
@@ -480,7 +481,7 @@ func TestStartWithResumeNth(t *testing.T) {
     2h Bar
     3h Asdf
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-				SummaryArgs: util.SummaryArgs{
+				SummaryArgs: args.SummaryArgs{
 					ResumeNth: nth,
 				},
 			}).Run)
@@ -496,7 +497,7 @@ func TestStartWithResumeNth(t *testing.T) {
 
 1623-12-13
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			SummaryArgs: util.SummaryArgs{
+			SummaryArgs: args.SummaryArgs{
 				ResumeNth: -1,
 			},
 		}).Run)
@@ -508,7 +509,7 @@ func TestStartWithResumeNth(t *testing.T) {
     8:13 - 9:44
         Work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			SummaryArgs: util.SummaryArgs{
+			SummaryArgs: args.SummaryArgs{
 				ResumeNth:   1,
 				SummaryText: klog.Ɀ_EntrySummary_("Test"),
 			},
@@ -521,7 +522,7 @@ func TestStartWithResumeNth(t *testing.T) {
     8:13 - 9:44
         Work
 `)._SetNow(1623, 12, 13, 12, 49)._Run((&Start{
-			SummaryArgs: util.SummaryArgs{
+			SummaryArgs: args.SummaryArgs{
 				Resume:    true,
 				ResumeNth: 1,
 			},

@@ -1,12 +1,13 @@
 package cli
 
 import (
+	"testing"
+
 	"github.com/jotaen/klog/klog"
-	"github.com/jotaen/klog/klog/app/cli/util"
+	"github.com/jotaen/klog/klog/app/cli/args"
 	"github.com/jotaen/klog/klog/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestSwitch(t *testing.T) {
@@ -14,8 +15,8 @@ func TestSwitch(t *testing.T) {
 1920-02-02
 	11:22-?
 `)._SetNow(1920, 2, 2, 15, 24)._Run((&Switch{
-		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
-			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
+		AtDateAndTimeArgs: args.AtDateAndTimeArgs{
+			AtDateArgs: args.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
 		},
 	}).Run)
 	require.Nil(t, err)
@@ -35,10 +36,10 @@ func TestSwitchWithSummaries(t *testing.T) {
 1920-02-03
 Next day
 `)._SetNow(1920, 2, 2, 15, 24)._Run((&Switch{
-		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
-			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
+		AtDateAndTimeArgs: args.AtDateAndTimeArgs{
+			AtDateArgs: args.AtDateArgs{Date: klog.Ɀ_Date_(1920, 2, 2)},
 		},
-		SummaryArgs: util.SummaryArgs{
+		SummaryArgs: args.SummaryArgs{
 			SummaryText: klog.Ɀ_EntrySummary_("Start", "over"),
 		},
 	}).Run)
@@ -61,7 +62,7 @@ func TestSwitchWithResume(t *testing.T) {
 	8:00 - 9:00 First
 	9:00 - ? Second
 `)._SetNow(1920, 2, 3, 9, 31)._Run((&Switch{
-		SummaryArgs: util.SummaryArgs{
+		SummaryArgs: args.SummaryArgs{
 			Resume: true,
 		},
 	}).Run)
@@ -80,7 +81,7 @@ func TestSwitchWithResumeNth(t *testing.T) {
 	8:00 - 9:00 First
 	9:00 - ? Second
 `)._SetNow(1920, 2, 3, 9, 31)._Run((&Switch{
-		SummaryArgs: util.SummaryArgs{
+		SummaryArgs: args.SummaryArgs{
 			ResumeNth: 1,
 		},
 	}).Run)
@@ -99,7 +100,7 @@ func TestSwitchCannotResumeAndSummary(t *testing.T) {
 	8:00 - 9:00 First
 	9:00 - ? Second
 `)._SetNow(1920, 2, 3, 9, 31)._Run((&Switch{
-		SummaryArgs: util.SummaryArgs{
+		SummaryArgs: args.SummaryArgs{
 			Resume:      true,
 			SummaryText: klog.Ɀ_EntrySummary_("Foo"),
 		},
@@ -145,7 +146,7 @@ time_convention = 24h
 `)._SetFileConfig(`
 time_convention = 12h
 `)._SetNow(1920, 2, 2, 14, 49)._Run((&Switch{
-			AtDateAndTimeArgs: util.AtDateAndTimeArgs{Time: klog.Ɀ_Time_(14, 49)},
+			AtDateAndTimeArgs: args.AtDateAndTimeArgs{Time: klog.Ɀ_Time_(14, 49)},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `
@@ -161,8 +162,8 @@ func TestSwitchFailsIfNoRecentRecord(t *testing.T) {
 1623-12-12
 	15:00-?
 `)._Run((&Switch{
-		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
-			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1624, 02, 1)},
+		AtDateAndTimeArgs: args.AtDateAndTimeArgs{
+			AtDateArgs: args.AtDateArgs{Date: klog.Ɀ_Date_(1624, 02, 1)},
 			Time:       klog.Ɀ_Time_(16, 00),
 		},
 	}).Run)
@@ -176,8 +177,8 @@ func TestSwitchFailsIfNoOpenRange(t *testing.T) {
 1623-12-12
 	15:00-16:00
 `)._Run((&Switch{
-		AtDateAndTimeArgs: util.AtDateAndTimeArgs{
-			AtDateArgs: util.AtDateArgs{Date: klog.Ɀ_Date_(1623, 12, 12)},
+		AtDateAndTimeArgs: args.AtDateAndTimeArgs{
+			AtDateArgs: args.AtDateArgs{Date: klog.Ɀ_Date_(1623, 12, 12)},
 			Time:       klog.Ɀ_Time_(16, 00),
 		},
 	}).Run)
@@ -194,7 +195,7 @@ func TestSwitchWithRounding(t *testing.T) {
 2005-05-05
     8:10 - ?
 `)._SetNow(2005, 5, 5, 11, 24)._Run((&Switch{
-			AtDateAndTimeArgs: util.AtDateAndTimeArgs{Round: r15},
+			AtDateAndTimeArgs: args.AtDateAndTimeArgs{Round: r15},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `
@@ -227,7 +228,7 @@ default_rounding = 30m
 `)._SetNow(2005, 5, 5, 11, 24)._SetFileConfig(`
 default_rounding = 30m
 `)._Run((&Switch{
-			AtDateAndTimeArgs: util.AtDateAndTimeArgs{Round: r5},
+			AtDateAndTimeArgs: args.AtDateAndTimeArgs{Round: r5},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `
