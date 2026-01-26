@@ -1,7 +1,7 @@
 # Changelog
 **Summary of changes of the command line tool**
 
-# v7.0 (2026-02-06)
+## v7.0 (2026-02-06)
 - **[ 🥳🥳🥳 ]** klog is 5 years old today – happy birthday!
 - **[ BREAKING ]** Remove `klog info config-folder` command and introduce
   `klog config --location` instead. (See also `klog config --help`.)
