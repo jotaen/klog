@@ -6,6 +6,8 @@
 
 set -e
 
+THIS_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+
 echo 'Print help text...'
 klog --help 1>/dev/null
 
@@ -20,19 +22,19 @@ Did #something
 
 echo 'Evaluate sample file...'
 klog total "${FILE}" 1>/dev/null
+[[ "$(klog total --no-style "${FILE}" | head -n 1)" == "Total: 2h" ]] || exit 1
 
 echo 'Check version...'
 ACTUAL_VERSION="$(klog version --no-check --quiet)"
+EXPECTED_VERSION="$1"
 [[ "${ACTUAL_VERSION}" == "${EXPECTED_VERSION}" ]] || exit 1
 
 echo 'Check build hash...'
 ACTUAL_BUILD_HASH="$(klog version --no-check | grep -oE '\[[abcdef0123456789]{7}]')"
+EXPECTED_BUILD_HASH="$2"
 [[ "${ACTUAL_BUILD_HASH}" == "[${EXPECTED_BUILD_HASH::7}]" ]] || exit 1
 
-echo 'Check embedded spec file...'
-ACTUAL_SPEC="$(klog info spec)"
-[[ "${ACTUAL_SPEC}" == "$(cat "${EXPECTED_SPEC_PATH}")" ]] || exit 1
-
 echo 'Check embedded license file...'
-ACTUAL_LICENSE="$(klog info license)"
-[[ "${ACTUAL_LICENSE}" == "$(cat "${EXPECTED_LICENSE_PATH}")" ]] || exit 1
+ACTUAL_LICENSE="$(klog info --license)"
+EXPECTED_LICENSE="$(cat "${THIS_DIR}/../LICENSE.txt")"
+[[ "${ACTUAL_LICENSE}" == "${EXPECTED_LICENSE}" ]] || exit 1

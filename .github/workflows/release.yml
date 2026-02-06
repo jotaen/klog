@@ -74,14 +74,9 @@ jobs:
           run::build ${{ github.event.inputs.release_id }} ${{ github.sha }}
       - name: Smoke test
         if: ${{ matrix.name == 'linux' }}
-        env:
-          EXPECTED_VERSION: ${{ github.event.inputs.release_id }}
-          EXPECTED_BUILD_HASH: ${{ github.sha }}
-          EXPECTED_SPEC_PATH: Specification.md
-          EXPECTED_LICENSE_PATH: LICENSE.txt
         run: |
           sudo cp out/klog /usr/bin/klog
-          ./.github/smoke-test.sh
+          ./.github/smoke-test.sh ${{ github.event.inputs.release_id }} ${{ github.sha }}
       - name: Bundle
         run: |
           if [[ "${{ matrix.binary_name }}" != "klog" ]]; then
