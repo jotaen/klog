@@ -2,19 +2,19 @@
 **Summary of changes of the command line tool**
 
 ## v7.0 (2026-02-06)
-- **[ 🥳🥳🥳 ]** klog is 5 years old today – happy birthday!
-- **[ BREAKING ]** Remove `klog info config-folder` command and introduce
-  `klog config --location` instead. (See also `klog config --help`.)
-- **[ BREAKING ]** Remove filter flags:
-  - `--before` and `--after` (there still are `--since` and `--until`)
-  - `--tomorrow`
-  - `--entry-type` (use `--filter 'type:...'` instead)
-- **[ BREAKING ]** If the `config.ini` contains and `editor` entry **and**
-  the `$EDITOR` environment variable is specified, the config file now takes
-  precedence over the environment variable.
+- **[ META ]** klog is 5 years old today – happy birthday! 🥳
 - **[ FEATURE ]** Introduce `--filter` flag for applying generic and more complex
   filter expressions, e.g. `klog total --filter '2025-Q4 && (#gym || #running)'`.
   Run `klog info --filtering` to learn more.
+- **[ BREAKING ]** Remove `klog info config-folder` command and introduce
+  `klog config --location` instead. (See also `klog config --help`.)
+- **[ BREAKING ]** Remove filter flags:
+  - `--before` and `--after` (note: you can still use `--since` and `--until`)
+  - `--entry-type` (use `--filter 'type:...'` instead)
+  - `--tomorrow`
+- **[ BREAKING ]** If the `config.ini` contains an `editor` entry **and**
+  the `$EDITOR` environment variable is specified, the config file now takes
+  precedence over the environment variable.
 
 ## v6.6 (2025-07-01)
 - **[ FEATURE ]** Add `--chart` (`-c`) flag to `klog report` command, which
