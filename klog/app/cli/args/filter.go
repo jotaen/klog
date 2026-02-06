@@ -42,50 +42,51 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.R
 	var predicates = []filter.Predicate{}
 
 	// Closed date-range filters:
-	today := klog.NewDateFromGo(now)
-	dateRange := func() period.Period {
+	dateRanges := func() []period.Period {
+		today := klog.NewDateFromGo(now)
+		var res []period.Period
 		if args.Date != nil {
-			return period.NewPeriod(args.Date, args.Date)
+			res = append(res, period.NewPeriod(args.Date, args.Date))
 		}
 		if args.Today {
-			return period.NewPeriod(today, today)
+			res = append(res, period.NewPeriod(today, today))
 		}
 		if args.Yesterday {
-			return period.NewPeriod(today.PlusDays(-1), today.PlusDays(-1))
+			res = append(res, period.NewPeriod(today.PlusDays(-1), today.PlusDays(-1)))
 		}
 		if args.Period != nil {
-			return args.Period
+			res = append(res, args.Period)
 		}
 		if args.ThisWeek {
-			return period.NewWeekFromDate(today).Period()
+			res = append(res, period.NewWeekFromDate(today).Period())
 		}
 		if args.LastWeek {
-			return period.NewWeekFromDate(today).Previous().Period()
+			res = append(res, period.NewWeekFromDate(today).Previous().Period())
 		}
 		if args.ThisMonth {
-			return period.NewMonthFromDate(today).Period()
+			res = append(res, period.NewMonthFromDate(today).Period())
 		}
 		if args.LastMonth {
-			return period.NewMonthFromDate(today).Previous().Period()
+			res = append(res, period.NewMonthFromDate(today).Previous().Period())
 		}
 		if args.ThisQuarter {
-			return period.NewQuarterFromDate(today).Period()
+			res = append(res, period.NewQuarterFromDate(today).Period())
 		}
 		if args.LastQuarter {
-			return period.NewQuarterFromDate(today).Previous().Period()
+			res = append(res, period.NewQuarterFromDate(today).Previous().Period())
 		}
 		if args.ThisYear {
-			return period.NewYearFromDate(today).Period()
+			res = append(res, period.NewYearFromDate(today).Period())
 		}
 		if args.LastYear {
-			return period.NewYearFromDate(today).Previous().Period()
+			res = append(res, period.NewYearFromDate(today).Previous().Period())
 		}
-		return nil
+		return res
 	}()
-	if dateRange != nil {
+	for _, d := range dateRanges {
 		predicates = append(predicates, filter.IsInDateRange{
-			From: dateRange.Since(),
-			To:   dateRange.Until(),
+			From: d.Since(),
+			To:   d.Until(),
 		})
 	}
 
