@@ -7,6 +7,7 @@ import (
 
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/service"
+	"github.com/jotaen/klog/klog/service/filter"
 	tf "github.com/jotaen/klog/lib/terminalformat"
 )
 
@@ -61,6 +62,23 @@ func PrettifyParsingError(err app.ParserErrors, styler tf.Styler) error {
 		) + "\n"
 	}
 	return errors.New(message)
+}
+
+// PrettifyFilterError formats errors about malformed filter expressions.
+func PrettifyFilterError(e filter.ParseError, styler tf.Styler) error {
+	pos, length := e.Position()
+	length = max(length, 1)
+	relevantQueryFragment, newStart := tf.TextSubstrWithContext(e.Query(), pos, length, 20, 30)
+	return fmt.Errorf(
+		"%s\n\n%s\n%s%s%s\nCursor positions %d-%d in query.",
+		Reflower.Reflow(e.Original().Error(), ""),
+		relevantQueryFragment,
+		strings.Repeat("—", max(0, newStart)),
+		strings.Repeat("^", max(0, length)),
+		strings.Repeat("—", max(0, len(relevantQueryFragment)-(newStart+length))),
+		pos,
+		pos+length,
+	)
 }
 
 // PrettifyWarning formats a warning about a record.
