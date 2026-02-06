@@ -72,6 +72,15 @@ func TestPrintAppErrors(t *testing.T) {
 				assert.True(t, strings.Contains(out, "Error: Manipulation failed"), out)
 				assert.True(t, strings.Contains(out, "There is already an open range in this record"), out)
 			}},
+		invocation{
+			args: []string{"print", "--filter", "2020-01 #foo", "valid.klg"},
+			test: func(t *testing.T, code int, out string) {
+				assert.Equal(t, 1, code)
+				assert.True(t, strings.Contains(out, "Missing operator"), out)
+				assert.True(t, strings.Contains(out, "2020-01 #foo"), out)
+				assert.True(t, strings.Contains(out, "————————^^^^"), out)
+				assert.True(t, strings.Contains(out, "Cursor positions 8-12 in query"), out)
+			}},
 	)
 }
 
@@ -357,63 +366,6 @@ func TestDecodesRecordSummary(t *testing.T) {
 			test: func(t *testing.T, code int, out string) {
 				assert.Equal(t, 1, code)
 				assert.True(t, strings.Contains(out, "none of its lines can start with whitespace characters"), out)
-			}},
-	)
-}
-
-func TestDecodesEntryType(t *testing.T) {
-	(&Env{
-		files: map[string]string{
-			"test.klg": "2020-01-01\n\t1h\n\t9:00-12:00",
-		},
-	}).execute(t,
-		invocation{
-			args: []string{"total", "--entry-type", "duration", "test.klg"},
-			test: func(t *testing.T, code int, out string) {
-				assert.Equal(t, 0, code)
-				assert.True(t, strings.Contains(out, "1h"), out)
-			}},
-		invocation{
-			args: []string{"total", "--entry-type", "DURATION", "test.klg"},
-			test: func(t *testing.T, code int, out string) {
-				assert.Equal(t, 0, code)
-				assert.True(t, strings.Contains(out, "1h"), out)
-			}},
-		invocation{
-			args: []string{"total", "--entry-type", "duration-positive", "test.klg"},
-			test: func(t *testing.T, code int, out string) {
-				assert.Equal(t, 0, code)
-				assert.True(t, strings.Contains(out, "1h"), out)
-			}},
-		invocation{
-			args: []string{"total", "--entry-type", "duration-negative", "test.klg"},
-			test: func(t *testing.T, code int, out string) {
-				assert.Equal(t, 0, code)
-				assert.True(t, strings.Contains(out, "0m"), out)
-			}},
-		invocation{
-			args: []string{"total", "--entry-type", "open_range", "test.klg"},
-			test: func(t *testing.T, code int, out string) {
-				assert.Equal(t, 0, code)
-				assert.True(t, strings.Contains(out, "0m"), out)
-			}},
-		invocation{
-			args: []string{"total", "--entry-type", "open-range", "test.klg"},
-			test: func(t *testing.T, code int, out string) {
-				assert.Equal(t, 0, code)
-				assert.True(t, strings.Contains(out, "0m"), out)
-			}},
-		invocation{
-			args: []string{"total", "--entry-type", "range", "test.klg"},
-			test: func(t *testing.T, code int, out string) {
-				assert.Equal(t, 0, code)
-				assert.True(t, strings.Contains(out, "3h"), out)
-			}},
-		invocation{
-			args: []string{"total", "--entry-type", "asdf", "test.klg"},
-			test: func(t *testing.T, code int, out string) {
-				assert.Equal(t, 1, code)
-				assert.True(t, strings.Contains(out, "is not a valid entry type"), out)
 			}},
 	)
 }

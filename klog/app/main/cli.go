@@ -13,6 +13,7 @@ import (
 	"github.com/jotaen/klog/klog/app/cli"
 	"github.com/jotaen/klog/klog/app/cli/prettify"
 	"github.com/jotaen/klog/klog/service"
+	"github.com/jotaen/klog/klog/service/filter"
 	"github.com/jotaen/klog/klog/service/period"
 	tf "github.com/jotaen/klog/lib/terminalformat"
 	kongcompletion "github.com/jotaen/kong-completion"
@@ -57,10 +58,6 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 			s, _ := klog.NewEntrySummary("test")
 			return kong.TypeMapper(reflect.TypeOf(&s).Elem(), entrySummaryDecoder())
 		}(),
-		func() kong.Option {
-			t := service.ENTRY_TYPE_DURATION
-			return kong.TypeMapper(reflect.TypeOf(&t).Elem(), entryTypeDecoder())
-		}(),
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact:             true,
 			NoExpandSubcommands: true,
@@ -104,9 +101,12 @@ func Run(homeDir app.File, meta app.Meta, config app.Config, args []string) (int
 	appError := app.NewError("", "", nil)
 	if errors.As(rErr, &appError) {
 		parserErrors := app.NewParserErrors(nil)
+		filterError := filter.NewParseError()
 		switch {
 		case errors.As(appError, &parserErrors):
 			return parserErrors.Code().ToInt(), prettify.PrettifyParsingError(parserErrors, styler)
+		case errors.As(appError.Original(), &filterError):
+			return app.GENERAL_ERROR.ToInt(), prettify.PrettifyFilterError(filterError, styler)
 		}
 		return appError.Code().ToInt(), prettify.PrettifyAppError(appError, config.IsDebug.Value())
 	}
