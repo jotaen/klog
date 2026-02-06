@@ -25,14 +25,14 @@ func (opt *Info) Run(ctx app.Context) app.Error {
 
     klog total --filter='2025-04 && #work' mytimes.klg
 
-Wrap the filter expression in single quotes to avoid undesired shell word splitting or substitution. Filter expressions consist of operands for matching the data that shall be included in the filter result. Operands can be combined via logical operators and grouped via parentheses.
+This would evaluate all entries in April 2025 that match the tag #work. Wrap the filter expression in single quotes to avoid undesired shell word splitting or substitution. Filter expressions consist of operands for matching the data that shall be included in the filter result. Operands can be combined via logical operators and grouped via parentheses.
 
 Examples:
     2025-04-20 || 2020-04-21
         All entries at either 2025-04-20 or 2020-04-21.
     2025-04 && !#work
         All entries in April 2025 that don’t match tag #work.
-    ...2025-05-30 && (#gym || #run)
+    (#gym || #run) && ...2025-05-30
         All entries until 2025-05-30 (inclusive), that match either tags #gym or #run.
 
 Operators:
@@ -61,28 +61,28 @@ Operands:
     YYYY-MM-DD...YYYY-MM-DD
     YYYY-MM-DD...
     ...YYYY-MM-DD
-        Entries within that date range (inclusive), or since or until a certain date (inclusive).
+        Entries within that date range (inclusive), or since / until a certain date (inclusive).
         Examples:
             2025-04-30...2025-05-14
             2025-06-19...
             ...2025-08-30
     #tag
     #tag=value
-        Entries matching that a tag. Note that tags can either be specified in the entry summary or in the record summary. In the latter case, the entry “inherits” the record tags.
+        Entries matching that a tag.
         Examples: #work || #project=467 || #project='#312'
     type:xxx
         Entries of that type, where xxx can be either:
         range, open-range, duration, duration-positive, duration-negative
         Example: type:duration
 `, nil
-		} else {
-			return "", app.NewErrorWithCode(
-				app.GENERAL_ERROR,
-				"No flag specified",
-				"Run with `--help` for more info",
-				nil,
-			)
 		}
+
+		return "", app.NewErrorWithCode(
+			app.GENERAL_ERROR,
+			"No flag specified",
+			"Run with `--help` for more info",
+			nil,
+		)
 	}()
 
 	if err != nil {
