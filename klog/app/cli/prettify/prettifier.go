@@ -68,7 +68,7 @@ func PrettifyParsingError(err app.ParserErrors, styler tf.Styler) error {
 func PrettifyFilterError(e filter.ParseError, styler tf.Styler) error {
 	pos, length := e.Position()
 	length = max(length, 1)
-	relevantQueryFragment, newStart := tf.TextSubstrWithContext(e.Query(), pos, length, 10, 20)
+	relevantQueryFragment, newStart := tf.TextSubstrWithContext(e.Query(), pos, length, 20, 30)
 	return fmt.Errorf(
 		"%s\n\n%s\n%s%s%s\nCursor positions %d-%d in query.",
 		Reflower.Reflow(e.Original().Error(), ""),
