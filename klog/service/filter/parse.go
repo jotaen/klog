@@ -30,7 +30,7 @@ func Parse(filterQuery string) (Predicate, ParseError) {
 		tp := newTokenParser(
 			append(tokens, token{tokenCloseBracket, ")", len(filterQuery) - 1}),
 		)
-		p, pErr := parseGroup(&tp)
+		p, pErr := parseGroup(&tp, filterQuery)
 		if pErr != nil {
 			return nil, pErr
 		}
@@ -54,7 +54,7 @@ func Parse(filterQuery string) (Predicate, ParseError) {
 	return p, nil
 }
 
-func parseGroup(tp *tokenParser) (Predicate, ParseError) {
+func parseGroup(tp *tokenParser, filterQuery string) (Predicate, ParseError) {
 	g := newPredicateGroup()
 
 	if pErr := tp.checkNextIsOperand(); pErr != nil {
@@ -67,6 +67,7 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 			return nil, parseError{
 				err:      ErrUnbalancedCloseBracket,
 				position: 0,
+				length:   len(filterQuery),
 			}
 		}
 
@@ -76,7 +77,7 @@ func parseGroup(tp *tokenParser) (Predicate, ParseError) {
 			if pErr := tp.checkNextIsOperand(); pErr != nil {
 				return nil, pErr
 			}
-			p, pErr := parseGroup(tp)
+			p, pErr := parseGroup(tp, filterQuery)
 			if pErr != nil {
 				return nil, pErr
 			}

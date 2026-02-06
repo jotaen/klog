@@ -208,9 +208,9 @@ func TestEntryType(t *testing.T) {
 
 func TestBracketMismatch(t *testing.T) {
 	for _, tt := range []et{
-		{"(2020-01", errUnbalancedBrackets, 0, 0},
-		{"((2020-01", errUnbalancedBrackets, 0, 0},
-		{"(2020-01-01 && (2020-02-02 || 2020-03-03", errUnbalancedBrackets, 0, 0},
+		{"(2020-01", errUnbalancedBrackets, 0, 8},
+		{"((2020-01", errUnbalancedBrackets, 0, 9},
+		{"(2020-01-01 && (2020-02-02 || 2020-03-03", errUnbalancedBrackets, 0, 40},
 		{"(2020-01-01))", errUnbalancedBrackets, 0, 13},
 		{"2020-01-01)", errUnbalancedBrackets, 0, 11},
 		{"(2020-01-01 && (2020-02-02))) || 2020-03-03", errUnbalancedBrackets, 0, 43},
