@@ -24,12 +24,12 @@ jobs:
           body: |
             Download the klog binary here:
 
-            - [**MacOS** Intel](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac-intel.zip)
-            - [**MacOS** M1 (ARM)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac-arm.zip)
             - [**Linux**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-linux.zip)
+            - [**MacOS** (ARM)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac-arm.zip)
+            - [**MacOS** (Intel)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac-intel.zip)
             - [**Windows**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-windows.zip)
 
-            Consult the [changelog](https://github.com/jotaen/klog/blob/main/CHANGELOG.md) to learn what’s new.
+            Check the [changelog](https://github.com/jotaen/klog/blob/main/CHANGELOG.md) to learn what’s new.
 
             See the [documentation website](https://klog.jotaen.net#get-klog) for install instructions, or to explore other install options.
 
