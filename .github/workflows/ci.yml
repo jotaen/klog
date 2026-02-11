@@ -1,7 +1,7 @@
 name: CI
 on: [push, pull_request]
 env:
-  GO_VERSION: '1.25'
+  GO_VERSION: '1.26'
   STATIC_CHECK_VERSION: '2025.1.1'
   COUNT_LOC_DOCKER_IMAGE: 'aldanial/cloc:2.06'
 jobs:

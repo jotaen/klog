@@ -6,7 +6,7 @@ on:
         description: 'Release id (tag name)'
         required: true
 env:
-  GO_VERSION: '1.25'
+  GO_VERSION: '1.26'
 jobs:
   create_release:
     name: Create release draft
