@@ -23,8 +23,6 @@ klog is a plain-text file format and a command line tool for time tracking.
 If you have questions, feedback, feature ideas, or want to report something that’s not working properly,
 feel invited to [start a discussion](https://github.com/jotaen/klog/discussions).
 
-If you’d like to contribute code, please discuss your intended change beforehand. Please refrain from submitting pull requests proactively.
-
 ## About
 
 klog was created by [Jan Heuermann](https://www.jotaen.net).
