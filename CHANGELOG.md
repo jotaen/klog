@@ -3,6 +3,9 @@
 
 ## v7.1 (YYYY-MM-DD)
 - **[ FEATURE ]** Include warnings in `klog json` subcommand.
+- **[ FEATURE ]** When using `klog report --fill` and combining this with a periodic
+  date filter such as `--this-week`, `--last-month` or `--period 2021-05`, fill
+  up the entire requested period, rather than just the gaps in between.
 - **[ FEATURE ]** Display warning when using `--diff` together with entry-level
   filtering, as that may yield nonsensical results.
 - **[ FIX ]** Restore previous behaviour of filtering empty records
