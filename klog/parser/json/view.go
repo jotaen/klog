@@ -1,10 +1,14 @@
 package json
 
 // Envelop is the top level data structure of the JSON output.
-// It contains two nodes, `records` and `errors`, one of which is always `null`.
+// It contains three nodes:
+// - `records`: is `null` if there are errors
+// - `warnings`: only if applicable and only unless there are errors
+// - `errors`: only unless there are records
 type Envelop struct {
-	Records []RecordView `json:"records"`
-	Errors  []ErrorView  `json:"errors"`
+	Records  []RecordView `json:"records"`
+	Warnings []string     `json:"warnings"`
+	Errors   []ErrorView  `json:"errors"`
 }
 
 // RecordView is the JSON representation of a record.

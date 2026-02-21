@@ -13,14 +13,17 @@ type WarnArgs struct {
 
 func (args *WarnArgs) PrintWarnings(ctx app.Context, records []klog.Record, additionalWarnings []string) {
 	styler, _ := ctx.Serialise()
-	if args.NoWarn {
-		return
+	warnings := args.GatherWarnings(ctx, records, additionalWarnings)
+	for _, w := range warnings {
+		ctx.Print(prettify.PrettifyWarning(w, styler))
 	}
-	for _, msg := range additionalWarnings {
-		ctx.Print(prettify.PrettifyGeneralWarning(msg, styler))
+}
+
+func (args *WarnArgs) GatherWarnings(ctx app.Context, records []klog.Record, additionalWarnings []string) []string {
+	if args.NoWarn {
+		return nil
 	}
 	disabledCheckers := ctx.Config().NoWarnings.UnwrapOr(service.NewDisabledCheckers())
-	service.CheckForWarnings(func(w service.Warning) {
-		ctx.Print(prettify.PrettifyWarning(w, styler))
-	}, ctx.Now(), records, disabledCheckers)
+	dataWarnings := service.CheckForWarnings(ctx.Now(), records, disabledCheckers)
+	return append(dataWarnings, additionalWarnings...)
 }

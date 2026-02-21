@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/jotaen/klog/klog/app"
-	"github.com/jotaen/klog/klog/service"
 	"github.com/jotaen/klog/klog/service/filter"
 	tf "github.com/jotaen/klog/lib/terminalformat"
 )
@@ -82,12 +81,7 @@ func PrettifyFilterError(e filter.ParseError, styler tf.Styler) error {
 }
 
 // PrettifyWarning formats a warning about a record.
-func PrettifyWarning(w service.Warning, styler tf.Styler) string {
-	return PrettifyGeneralWarning(w.Date().ToString()+": "+w.Warning(), styler)
-}
-
-// PrettifyGeneralWarning formats a general warning message.
-func PrettifyGeneralWarning(message string, styler tf.Styler) string {
+func PrettifyWarning(message string, styler tf.Styler) string {
 	result := ""
 	result += styler.Props(tf.StyleProps{Background: tf.YELLOW, Color: tf.YELLOW}).Format("[")
 	result += styler.Props(tf.StyleProps{Background: tf.YELLOW, Color: tf.TEXT_INVERSE}).Format("WARNING")
