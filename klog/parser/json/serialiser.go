@@ -6,27 +6,30 @@ package json
 import (
 	"bytes"
 	"encoding/json"
+	"sort"
+	"strings"
+
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/jotaen/klog/klog/parser/txt"
 	"github.com/jotaen/klog/klog/service"
-	"sort"
-	"strings"
 )
 
 // ToJson serialises records into their JSON representation. The output
 // structure is RecordView at the top level.
-func ToJson(rs []klog.Record, errs []txt.Error, prettyPrint bool) string {
+func ToJson(rs []klog.Record, errs []txt.Error, warnings []string, prettyPrint bool) string {
 	envelop := func() Envelop {
 		if errs == nil {
 			return Envelop{
-				Records: toRecordViews(rs),
-				Errors:  nil,
+				Records:  toRecordViews(rs),
+				Warnings: warnings,
+				Errors:   nil,
 			}
 		} else {
 			return Envelop{
-				Records: nil,
-				Errors:  toErrorViews(errs),
+				Records:  nil,
+				Warnings: nil,
+				Errors:   toErrorViews(errs),
 			}
 		}
 	}()

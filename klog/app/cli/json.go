@@ -4,6 +4,7 @@ import (
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/args"
 	"github.com/jotaen/klog/klog/parser/json"
+	"github.com/jotaen/klog/klog/service"
 )
 
 type Json struct {
@@ -11,16 +12,21 @@ type Json struct {
 	args.NowArgs
 	args.FilterArgs
 	args.SortArgs
+	args.WarnArgs
 	args.InputFilesArgs
 }
 
 func (opt *Json) Help() string {
 	return `
-The output structure is a JSON object which contains two properties at the top level: 'records' and 'errors'.
-If the file is valid, 'records' is an array containing a JSON object for each record, and 'errors' is 'null'.
-If the file has syntax errors, 'records' is 'null', and 'errors' contains an array of error objects.
+The output structure is a JSON object which contains three properties at the top level: 'records', 'warnings' and 'errors':
 
-The structure of the 'record' and 'error' objects is always uniform and should be self-explanatory.
+- If the file is valid, 'records' is an array containing a JSON object for each record, and 'errors' is 'null'.
+
+- If the file is valid, but contains potential problems, 'warnings' is an array of strings with the respective messages.
+
+- If the file has syntax errors, 'records' and 'warnings' are 'null', and 'errors' contains an array of error objects.
+
+The 'record', 'warnings' and 'error' data structures are always uniform and should be self-explanatory.
 You can best explore it by running the command with the --pretty flag.
 `
 }
@@ -30,7 +36,7 @@ func (opt *Json) Run(ctx app.Context) app.Error {
 	if err != nil {
 		parserErrs, isParserErr := err.(app.ParserErrors)
 		if isParserErr {
-			ctx.Print(json.ToJson(nil, parserErrs.All(), opt.Pretty) + "\n")
+			ctx.Print(json.ToJson(nil, parserErrs.All(), nil, opt.Pretty) + "\n")
 			return nil
 		}
 		return err
@@ -45,6 +51,7 @@ func (opt *Json) Run(ctx app.Context) app.Error {
 		return fErr
 	}
 	records = opt.ApplySort(records)
-	ctx.Print(json.ToJson(records, nil, opt.Pretty) + "\n")
+	warnings := opt.GatherWarnings(ctx, records, []service.UsageWarning{opt.GetWarning()})
+	ctx.Print(json.ToJson(records, nil, warnings, opt.Pretty) + "\n")
 	return nil
 }

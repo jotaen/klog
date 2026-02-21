@@ -7,12 +7,6 @@ import (
 	"github.com/jotaen/klog/klog"
 )
 
-// Warning contains information for helping locate an issue within the data.
-type Warning struct {
-	date   klog.Date
-	origin checker
-}
-
 // UsageWarning contains information for avoiding potential usage issues.
 type UsageWarning struct {
 	Name    string
@@ -29,16 +23,6 @@ var (
 		Message: "Combining --diff and filtering at entry-level may not yield sensible results",
 	}
 )
-
-// Date is the date of the record that the warning refers to.
-func (w Warning) Date() klog.Date {
-	return w.date
-}
-
-// Warning is a short description of the problem.
-func (w Warning) Warning() string {
-	return w.origin.Message()
-}
 
 type checker interface {
 	Warn(klog.Record) klog.Date
@@ -66,7 +50,7 @@ func NewDisabledCheckers() DisabledCheckers {
 // strict validation, but the main purpose is to help users spot accidental mistakes users
 // might have made. The checks are limited to record-level, because otherwise it would
 // need to make assumptions on how records are organised within or across files.
-func CheckForWarnings(onWarn func(Warning), reference gotime.Time, rs []klog.Record, disabledCheckers DisabledCheckers) {
+func CheckForWarnings(reference gotime.Time, rs []klog.Record, disabledCheckers DisabledCheckers) []string {
 	now := NewDateTimeFromGo(reference)
 	sortedRs := Sort(rs, false)
 	checkers := []checker{
@@ -75,6 +59,7 @@ func CheckForWarnings(onWarn func(Warning), reference gotime.Time, rs []klog.Rec
 		&overlappingTimeRangesChecker{},
 		&moreThan24HoursChecker{},
 	}
+	var warnings []string
 	for _, r := range sortedRs {
 		for _, c := range checkers {
 			if disabledCheckers[c.Name()] {
@@ -82,13 +67,11 @@ func CheckForWarnings(onWarn func(Warning), reference gotime.Time, rs []klog.Rec
 			}
 			d := c.Warn(r)
 			if d != nil {
-				onWarn(Warning{
-					date:   d,
-					origin: c,
-				})
+				warnings = append(warnings, d.ToString()+": "+c.Message())
 			}
 		}
 	}
+	return warnings
 }
 
 type unclosedOpenRangeChecker struct {
