@@ -3,6 +3,10 @@
 
 ## v7.1 (YYYY-MM-DD)
 - **[ FEATURE ]** Include warnings in `klog json` subcommand.
+- **[ FEATURE ]** Display warning when using `--diff` together with entry-level
+  filtering, as that may yield nonsensical results.
+- **[ FIX ]** Restore previous behaviour of filtering empty records
+  (i.e., when records don’t contain any entries).
 
 ## v7.0 (2026-02-06)
 - **[ META ]** klog is 5 years old today – happy birthday! 🥳
