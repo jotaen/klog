@@ -68,7 +68,7 @@ func (opt *Report) Run(ctx app.Context) app.Error {
 		singlePeriod := opt.FilterArgs.SinglePeriodRequested()
 		if singlePeriod != nil {
 			dates = allDatesRange(singlePeriod.Since(), singlePeriod.Until())
-		} else if len(records) > 0 {
+		} else {
 			dates = allDatesRange(records[0].Date(), records[len(records)-1].Date())
 		}
 	}
