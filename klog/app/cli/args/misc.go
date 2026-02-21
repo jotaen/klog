@@ -13,6 +13,16 @@ type DiffArgs struct {
 	Diff bool `name:"diff" short:"d" help:"Show difference between actual and should-total time."`
 }
 
+// GetWarning returns a warning if the user applied entry-level filtering (partial
+// records) *and* requested to compute the should-total diff, as that may yield
+// nonsensical results.
+func (args *DiffArgs) GetWarning(filterArgs FilterArgs) service.UsageWarning {
+	if args.Diff && filterArgs.hasPartialRecordsWithShouldTotal {
+		return service.DiffEntryFilteringWarning
+	}
+	return service.UsageWarning{}
+}
+
 type NoStyleArgs struct {
 	NoStyle bool `name:"no-style" help:"Do not style or colour the values."`
 }

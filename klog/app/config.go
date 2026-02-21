@@ -239,7 +239,14 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 		Name: "no_warnings",
 		Help: Help{
 			Summary: "Whether klog should suppress certain warnings when processing files.",
-			Value:   "The config property must be one (or several comma-separated) of: `UNCLOSED_OPEN_RANGE` (for unclosed open ranges in past records), `FUTURE_ENTRIES` (for records/entries in the future), `OVERLAPPING_RANGES` (for time ranges that overlap), `MORE_THAN_24H` (if there is a record with more than 24h total). Multiple values must be separated by a comma, e.g.: `UNCLOSED_OPEN_RANGE, MORE_THAN_24H`.",
+			Value: "The config property must be one or several (comma-separated) of: " +
+				"`UNCLOSED_OPEN_RANGE` (for unclosed open ranges in past records), " +
+				"`FUTURE_ENTRIES` (for records/entries in the future), " +
+				"`OVERLAPPING_RANGES` (for time ranges that overlap), " +
+				"`MORE_THAN_24H` (if there is a record with more than 24h total), " +
+				"`POINTLESS_NOW` (when using --now without any open ranges), " +
+				"`ENTRY_FILTERED_DIFFING` (when combining --diff and entry-level filtering). " +
+				"Multiple values must be separated by a comma, e.g.: `UNCLOSED_OPEN_RANGE, MORE_THAN_24H`.",
 			Default: "If absent/empty, klog prints all available warnings.",
 		},
 		read: func(value string, config *Config) error {

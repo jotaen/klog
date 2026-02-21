@@ -7,6 +7,23 @@ import (
 	"github.com/jotaen/klog/klog"
 )
 
+// UsageWarning contains information for avoiding potential usage issues.
+type UsageWarning struct {
+	Name    string
+	Message string
+}
+
+var (
+	PointlessNowWarning = UsageWarning{
+		Name:    "POINTLESS_NOW",
+		Message: "You specified --now, but there was no open-ended time range",
+	}
+	DiffEntryFilteringWarning = UsageWarning{
+		Name:    "ENTRY_FILTERED_DIFFING",
+		Message: "Combining --diff and filtering at entry-level may yield nonsensical results",
+	}
+)
+
 type checker interface {
 	Warn(klog.Record) klog.Date
 	Message() string
@@ -23,6 +40,8 @@ func NewDisabledCheckers() DisabledCheckers {
 		(&futureEntriesChecker{}).Name():         false,
 		(&overlappingTimeRangesChecker{}).Name(): false,
 		(&moreThan24HoursChecker{}).Name():       false,
+		PointlessNowWarning.Name:                 false,
+		DiffEntryFilteringWarning.Name:           false,
 	}
 }
 

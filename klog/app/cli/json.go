@@ -4,6 +4,7 @@ import (
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/args"
 	"github.com/jotaen/klog/klog/parser/json"
+	"github.com/jotaen/klog/klog/service"
 )
 
 type Json struct {
@@ -50,7 +51,7 @@ func (opt *Json) Run(ctx app.Context) app.Error {
 		return fErr
 	}
 	records = opt.ApplySort(records)
-	warnings := opt.GatherWarnings(ctx, records, opt.GetNowWarnings())
+	warnings := opt.GatherWarnings(ctx, records, []service.UsageWarning{opt.GetWarning()})
 	ctx.Print(json.ToJson(records, nil, warnings, opt.Pretty) + "\n")
 	return nil
 }
