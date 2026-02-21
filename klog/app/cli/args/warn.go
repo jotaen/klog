@@ -11,7 +11,7 @@ type WarnArgs struct {
 	NoWarn bool `name:"no-warn" help:"Suppress warnings about potential mistakes or logical errors."`
 }
 
-func (args *WarnArgs) PrintWarnings(ctx app.Context, records []klog.Record, additionalWarnings []string) {
+func (args *WarnArgs) PrintWarnings(ctx app.Context, records []klog.Record, additionalWarnings []service.UsageWarning) {
 	styler, _ := ctx.Serialise()
 	warnings := args.GatherWarnings(ctx, records, additionalWarnings)
 	for _, w := range warnings {
@@ -19,11 +19,16 @@ func (args *WarnArgs) PrintWarnings(ctx app.Context, records []klog.Record, addi
 	}
 }
 
-func (args *WarnArgs) GatherWarnings(ctx app.Context, records []klog.Record, additionalWarnings []string) []string {
+func (args *WarnArgs) GatherWarnings(ctx app.Context, records []klog.Record, additionalWarnings []service.UsageWarning) []string {
 	if args.NoWarn {
 		return nil
 	}
 	disabledCheckers := ctx.Config().NoWarnings.UnwrapOr(service.NewDisabledCheckers())
-	dataWarnings := service.CheckForWarnings(ctx.Now(), records, disabledCheckers)
-	return append(dataWarnings, additionalWarnings...)
+	warnings := service.CheckForWarnings(ctx.Now(), records, disabledCheckers)
+	for _, warn := range additionalWarnings {
+		if warn != (service.UsageWarning{}) && !disabledCheckers[warn.Name] {
+			warnings = append(warnings, warn.Message)
+		}
+	}
+	return warnings
 }

@@ -59,6 +59,6 @@ func (opt *Total) Run(ctx app.Context) app.Error {
 		return "s"
 	}()))
 
-	opt.WarnArgs.PrintWarnings(ctx, records, opt.GetNowWarnings())
+	opt.WarnArgs.PrintWarnings(ctx, records, []service.UsageWarning{opt.NowArgs.GetWarning(), opt.DiffArgs.GetWarning(opt.FilterArgs)})
 	return nil
 }

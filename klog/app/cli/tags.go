@@ -94,6 +94,6 @@ func (opt *Tags) Run(ctx app.Context) app.Error {
 		}
 	}
 	table.Collect(ctx.Print)
-	opt.WarnArgs.PrintWarnings(ctx, records, opt.GetNowWarnings())
+	opt.WarnArgs.PrintWarnings(ctx, records, []service.UsageWarning{opt.NowArgs.GetWarning()})
 	return nil
 }

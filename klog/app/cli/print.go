@@ -23,9 +23,10 @@ type Print struct {
 func (opt *Print) Help() string {
 	return `
 Outputs data on the terminal, by default with syntax-highlighting turned on.
-Note that the output doesn’t resemble the file byte by byte, but the command may apply some minor clean-ups of the formatting.
+Note that the output doesn’t resemble the file verbatim, but it may apply some minor formatting.
 
-If run with filter flags, it only outputs those entries that match the filter clauses.
+If run with filter flags, it only outputs those entries that match the filter clauses. E.g., when filtering for a tag that only appears particular entries, it will exclude all other entries from that record.
+
 You can optionally also sort the records, or print out the total times for each record and entry.
 `
 }
