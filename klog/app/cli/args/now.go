@@ -36,7 +36,7 @@ func (args *NowArgs) HadOpenRange() bool {
 
 func (args *NowArgs) GetNowWarnings() []string {
 	if args.Now && !args.hadOpenRange {
-		return []string{"You specified --now, but there was no open-ended time range."}
+		return []string{"You specified --now, but there was no open-ended time range"}
 	}
 	return nil
 }

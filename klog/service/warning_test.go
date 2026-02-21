@@ -1,6 +1,7 @@
 package service
 
 import (
+	"strings"
 	"testing"
 	gotime "time"
 
@@ -8,22 +9,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func countWarningsOfKind(c checker, ws []Warning) int {
+func countWarningsOfKind(c checker, ws []string) int {
 	count := 0
 	for _, w := range ws {
-		if w.Warning() == c.Message() {
+		if strings.HasSuffix(w, c.Message()) {
 			count++
 		}
 	}
 	return count
 }
 
-func collectWarnings(reference gotime.Time, rs []klog.Record) []Warning {
-	var ws []Warning
-	CheckForWarnings(func(w Warning) {
-		ws = append(ws, w)
-	}, reference, rs, NewDisabledCheckers())
-	return ws
+func collectWarnings(reference gotime.Time, rs []klog.Record) []string {
+	return CheckForWarnings(reference, rs, NewDisabledCheckers())
 }
 
 func TestNoWarnForOpenRanges(t *testing.T) {
@@ -79,8 +76,8 @@ func TestOpenRangeWarningWhenUnclosedOpenRangeBeforeTodayRegardlessOfOrder(t *te
 	}
 	ws := collectWarnings(timestamp, rs)
 	assert.Equal(t, 2, countWarningsOfKind(&unclosedOpenRangeChecker{}, ws))
-	assert.Equal(t, today.PlusDays(-1), ws[0].Date())
-	assert.Equal(t, today.PlusDays(-2), ws[1].Date())
+	assert.Equal(t, today.PlusDays(-1).ToString(), ws[0][0:10])
+	assert.Equal(t, today.PlusDays(-2).ToString(), ws[1][0:10])
 }
 
 func TestNoWarningForFutureEntries(t *testing.T) {
@@ -313,11 +310,7 @@ func TestNoWarningsWithDisabledCheckers(t *testing.T) {
 			}(),
 		}
 
-		var ws []Warning
-		CheckForWarnings(func(w Warning) {
-			ws = append(ws, w)
-		}, timestamp, rs, x.dc)
-
+		ws := CheckForWarnings(timestamp, rs, x.dc)
 		assert.Len(t, ws, x.exp)
 	}
 }
