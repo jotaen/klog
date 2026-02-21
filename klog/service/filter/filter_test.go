@@ -12,26 +12,27 @@ import (
 func sampleRecordsForQuerying() []klog.Record {
 	rs, _, err := parser.NewSerialParser().Parse(`
 1999-12-30
-Hello World #foo
+Hello World #foo #first
 
 1999-12-31
-	5h #bar     [300]
+	5h #bar       [300]
 
 2000-01-01
-#foo
-	1:30-1:45   [14]             
-	6h #bar     [360]
-	-30m        [-30]
+#foo #third
+	1:30-1:45     [15]             
+	6h #bar       [360]
+	-30m          [-30]
 
 2000-01-02
-#foo
-	7h          [420]
+#foo #fourth
+	7h #xyz       [420]
 
 2000-01-03
-#foo=a
-	4h #bar=1   [240]
-	3h #bar=2   [180]
-	12:00-?     [0]
+#foo=a #fifth
+	12:00-16:00   [240]
+		#bar=1
+	3h #bar=2     [180]
+	12:00-?       [0]
 `)
 	if err != nil {
 		panic(err)
@@ -166,7 +167,7 @@ func TestQueryWithEntryTypes(t *testing.T) {
 			{klog.Ɀ_Date_(1999, 12, 31), []int{300}},
 			{klog.Ɀ_Date_(2000, 1, 1), []int{360, -30}},
 			{klog.Ɀ_Date_(2000, 1, 2), []int{420}},
-			{klog.Ɀ_Date_(2000, 1, 3), []int{240, 180}},
+			{klog.Ɀ_Date_(2000, 1, 3), []int{180}},
 		}, rs)
 	}
 	{
@@ -183,7 +184,7 @@ func TestQueryWithEntryTypes(t *testing.T) {
 			{klog.Ɀ_Date_(1999, 12, 31), []int{300}},
 			{klog.Ɀ_Date_(2000, 1, 1), []int{360}},
 			{klog.Ɀ_Date_(2000, 1, 2), []int{420}},
-			{klog.Ɀ_Date_(2000, 1, 3), []int{240, 180}},
+			{klog.Ɀ_Date_(2000, 1, 3), []int{180}},
 		}, rs)
 	}
 	{
@@ -191,6 +192,7 @@ func TestQueryWithEntryTypes(t *testing.T) {
 		assert.True(t, hprws)
 		assertResult(t, []expect{
 			{klog.Ɀ_Date_(2000, 1, 1), []int{15}},
+			{klog.Ɀ_Date_(2000, 1, 3), []int{240}},
 		}, rs)
 	}
 	{
@@ -198,6 +200,38 @@ func TestQueryWithEntryTypes(t *testing.T) {
 		assert.True(t, hprws)
 		assertResult(t, []expect{
 			{klog.Ɀ_Date_(2000, 1, 3), []int{0}},
+		}, rs)
+	}
+}
+
+func TestComplexFilterQueries(t *testing.T) {
+	{
+		rs, hprws := Filter(Or{[]Predicate{
+			IsInDateRange{From: klog.Ɀ_Date_(2000, 1, 2), To: nil},
+			HasTag{klog.NewTagOrPanic("first", "")},
+			And{[]Predicate{
+				Not{HasTag{klog.NewTagOrPanic("something", "1")}},
+				IsEntryType{ENTRY_TYPE_RANGE},
+			}},
+		}}, sampleRecordsForQuerying())
+		assert.True(t, hprws)
+		assertResult(t, []expect{
+			{klog.Ɀ_Date_(1999, 12, 30), []int{}},
+			{klog.Ɀ_Date_(2000, 1, 1), []int{15}},
+			{klog.Ɀ_Date_(2000, 1, 2), []int{420}},
+			{klog.Ɀ_Date_(2000, 1, 3), []int{240, 180, 0}},
+		}, rs)
+	}
+	{
+		rs, hprws := Filter(And{[]Predicate{
+			IsInDateRange{From: klog.Ɀ_Date_(2000, 1, 1), To: klog.Ɀ_Date_(2000, 1, 3)},
+			HasTag{klog.NewTagOrPanic("bar", "")},
+			Not{HasTag{klog.NewTagOrPanic("third", "")}},
+			IsEntryType{ENTRY_TYPE_RANGE},
+		}}, sampleRecordsForQuerying())
+		assert.True(t, hprws)
+		assertResult(t, []expect{
+			{klog.Ɀ_Date_(2000, 1, 3), []int{240}},
 		}, rs)
 	}
 }
