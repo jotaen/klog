@@ -25,7 +25,7 @@ The output structure is a JSON object which contains three properties at the top
 
 - If the file has syntax errors, 'records' and 'warnings' are 'null', and 'errors' contains an array of error objects.
 
-The structure of the 'record', 'warnings' and 'error' data structures is always uniform and should be self-explanatory.
+The 'record', 'warnings' and 'error' data structures are always uniform and should be self-explanatory.
 You can best explore it by running the command with the --pretty flag.
 `
 }

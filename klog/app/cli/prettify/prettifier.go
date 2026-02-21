@@ -80,7 +80,7 @@ func PrettifyFilterError(e filter.ParseError, styler tf.Styler) error {
 	)
 }
 
-// PrettifyWarning formats a warning about a record.
+// PrettifyWarning formats a warning message.
 func PrettifyWarning(message string, styler tf.Styler) string {
 	result := ""
 	result += styler.Props(tf.StyleProps{Background: tf.YELLOW, Color: tf.YELLOW}).Format("[")
