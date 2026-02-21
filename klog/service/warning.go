@@ -20,7 +20,7 @@ var (
 	}
 	DiffEntryFilteringWarning = UsageWarning{
 		Name:    "DIFF_ENTRY_FILTERING",
-		Message: "Combining --diff and filtering at entry-level may not yield sensible results",
+		Message: "Combining --diff and filtering at entry-level may yield nonsensical results",
 	}
 )
 
