@@ -1,6 +1,9 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## v7.1 (YYYY-MM-DD)
+- **[ FEATURE ]** Include warnings in `klog json` subcommand.
+
 ## v7.0 (2026-02-06)
 - **[ META ]** klog is 5 years old today – happy birthday! 🥳
 - **[ FEATURE ]** Introduce `--filter` flag for applying generic and more complex
