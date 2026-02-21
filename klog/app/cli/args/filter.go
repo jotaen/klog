@@ -36,6 +36,8 @@ type FilterArgs struct {
 	// General filters:
 	Tags   []klog.Tag `name:"tag" placeholder:"TAG" group:"Filter" help:"Entries that match these tags (either in the record summary or the entry summary). You can omit the leading '#'."`
 	Filter string     `name:"filter" placeholder:"EXPR" group:"Filter" help:"Entries that match this filter expression. Run 'klog info --filtering' to learn how expressions works."`
+
+	hasPartialRecordsWithShouldTotal bool // Field only for internal use
 }
 
 func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.Record, app.Error) {
@@ -125,7 +127,10 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.R
 
 	// Apply filters, if applicable:
 	if len(predicates) > 0 {
-		rs = filter.Filter(filter.And{Predicates: predicates}, rs)
+		hasPartialRecordsWithShouldTotal := false
+		rs, hasPartialRecordsWithShouldTotal = filter.Filter(filter.And{Predicates: predicates}, rs)
+		args.hasPartialRecordsWithShouldTotal = hasPartialRecordsWithShouldTotal
+
 	}
 	return rs, nil
 }

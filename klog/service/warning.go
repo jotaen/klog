@@ -7,11 +7,28 @@ import (
 	"github.com/jotaen/klog/klog"
 )
 
-// Warning contains information for helping locate an issue.
+// Warning contains information for helping locate an issue within the data.
 type Warning struct {
 	date   klog.Date
 	origin checker
 }
+
+// UsageWarning contains information for avoiding potential usage issues.
+type UsageWarning struct {
+	Name    string
+	Message string
+}
+
+var (
+	PointlessNowWarning = UsageWarning{
+		Name:    "POINTLESS_NOW",
+		Message: "You specified --now, but there was no open-ended time range",
+	}
+	DiffEntryFilteringWarning = UsageWarning{
+		Name:    "DIFF_ENTRY_FILTERING",
+		Message: "Combining --diff and filtering at entry-level may not yield sensible results",
+	}
+)
 
 // Date is the date of the record that the warning refers to.
 func (w Warning) Date() klog.Date {
@@ -39,6 +56,8 @@ func NewDisabledCheckers() DisabledCheckers {
 		(&futureEntriesChecker{}).Name():         false,
 		(&overlappingTimeRangesChecker{}).Name(): false,
 		(&moreThan24HoursChecker{}).Name():       false,
+		PointlessNowWarning.Name:                 false,
+		DiffEntryFilteringWarning.Name:           false,
 	}
 }
 

@@ -14,6 +14,7 @@ type queriedEntry struct {
 
 type Predicate interface {
 	Matches(queriedEntry) bool
+	MatchesEmptyRecord(klog.Record) bool
 }
 
 type IsInDateRange struct {
@@ -22,17 +23,21 @@ type IsInDateRange struct {
 }
 
 func (i IsInDateRange) Matches(e queriedEntry) bool {
+	return i.MatchesEmptyRecord(e.parent)
+}
+
+func (i IsInDateRange) MatchesEmptyRecord(r klog.Record) bool {
 	isAfter := func() bool {
 		if i.From == nil {
 			return true
 		}
-		return e.parent.Date().IsAfterOrEqual(i.From)
+		return r.Date().IsAfterOrEqual(i.From)
 	}()
 	isBefore := func() bool {
 		if i.To == nil {
 			return true
 		}
-		return i.To.IsAfterOrEqual(e.parent.Date())
+		return i.To.IsAfterOrEqual(r.Date())
 	}()
 	return isAfter && isBefore
 }
@@ -42,7 +47,11 @@ type HasTag struct {
 }
 
 func (h HasTag) Matches(e queriedEntry) bool {
-	return e.parent.Summary().Tags().Contains(h.Tag) || e.entry.Summary().Tags().Contains(h.Tag)
+	return h.MatchesEmptyRecord(e.parent) || e.entry.Summary().Tags().Contains(h.Tag)
+}
+
+func (h HasTag) MatchesEmptyRecord(r klog.Record) bool {
+	return r.Summary().Tags().Contains(h.Tag)
 }
 
 type And struct {
@@ -52,6 +61,15 @@ type And struct {
 func (a And) Matches(e queriedEntry) bool {
 	for _, p := range a.Predicates {
 		if !p.Matches(e) {
+			return false
+		}
+	}
+	return true
+}
+
+func (a And) MatchesEmptyRecord(r klog.Record) bool {
+	for _, p := range a.Predicates {
+		if !p.MatchesEmptyRecord(r) {
 			return false
 		}
 	}
@@ -71,12 +89,25 @@ func (o Or) Matches(e queriedEntry) bool {
 	return false
 }
 
+func (o Or) MatchesEmptyRecord(r klog.Record) bool {
+	for _, p := range o.Predicates {
+		if p.MatchesEmptyRecord(r) {
+			return true
+		}
+	}
+	return false
+}
+
 type Not struct {
 	Predicate Predicate
 }
 
 func (n Not) Matches(e queriedEntry) bool {
 	return !n.Predicate.Matches(e)
+}
+
+func (n Not) MatchesEmptyRecord(r klog.Record) bool {
+	return !n.Predicate.MatchesEmptyRecord(r)
 }
 
 type EntryType string
@@ -125,4 +156,8 @@ func (t IsEntryType) Matches(e queriedEntry) bool {
 	}, func(openRange klog.OpenRange) bool {
 		return t.Type == ENTRY_TYPE_OPEN_RANGE
 	})
+}
+
+func (t IsEntryType) MatchesEmptyRecord(r klog.Record) bool {
+	return false
 }

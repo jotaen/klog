@@ -34,9 +34,9 @@ func (args *NowArgs) HadOpenRange() bool {
 	return args.hadOpenRange
 }
 
-func (args *NowArgs) GetNowWarnings() []string {
+func (args *NowArgs) GetWarning() service.UsageWarning {
 	if args.Now && !args.hadOpenRange {
-		return []string{"You specified --now, but there was no open-ended time range."}
+		return service.PointlessNowWarning
 	}
-	return nil
+	return service.UsageWarning{}
 }
