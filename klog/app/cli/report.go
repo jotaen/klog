@@ -65,7 +65,12 @@ func (opt *Report) Run(ctx app.Context) app.Error {
 	aggregator := opt.aggregator()
 	recordGroups, dates := groupByDate(aggregator.DateHash, records)
 	if opt.Fill {
-		dates = allDatesRange(records[0].Date(), records[len(records)-1].Date())
+		singlePeriod := opt.FilterArgs.SinglePeriodRequested()
+		if singlePeriod != nil {
+			dates = allDatesRange(singlePeriod.Since(), singlePeriod.Until())
+		} else {
+			dates = allDatesRange(records[0].Date(), records[len(records)-1].Date())
+		}
 	}
 
 	// Table setup
