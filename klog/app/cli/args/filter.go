@@ -127,9 +127,9 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.R
 
 	// Apply filters, if applicable:
 	if len(predicates) > 0 {
-		hasPartialRecordsWithShouldTotal := false
-		rs, hasPartialRecordsWithShouldTotal = filter.Filter(filter.And{Predicates: predicates}, rs)
-		args.hasPartialRecordsWithShouldTotal = hasPartialRecordsWithShouldTotal
+		hprws := false
+		rs, hprws = filter.Filter(filter.And{Predicates: predicates}, rs)
+		args.hasPartialRecordsWithShouldTotal = hprws
 
 	}
 	return rs, nil

@@ -7,23 +7,22 @@ import (
 	"github.com/jotaen/klog/klog"
 )
 
-type queriedEntry struct {
-	parent klog.Record
-	entry  klog.Entry
-}
-
+// Predicate is the generic base type for all predicates.
 type Predicate interface {
-	Matches(queriedEntry) bool
+	// Matches returns true if the record’s entry satisfies the predicate.
+	Matches(klog.Record, klog.Entry) bool
+	// MatchesEmptyRecord returns true if an empty record (without any entries)
+	// satisfies the predicate.
 	MatchesEmptyRecord(klog.Record) bool
 }
 
 type IsInDateRange struct {
-	From klog.Date
-	To   klog.Date
+	From klog.Date // May be nil to denote open range.
+	To   klog.Date // May be nil to denote open range.
 }
 
-func (i IsInDateRange) Matches(e queriedEntry) bool {
-	return i.MatchesEmptyRecord(e.parent)
+func (i IsInDateRange) Matches(r klog.Record, e klog.Entry) bool {
+	return i.MatchesEmptyRecord(r)
 }
 
 func (i IsInDateRange) MatchesEmptyRecord(r klog.Record) bool {
@@ -46,8 +45,8 @@ type HasTag struct {
 	Tag klog.Tag
 }
 
-func (h HasTag) Matches(e queriedEntry) bool {
-	return h.MatchesEmptyRecord(e.parent) || e.entry.Summary().Tags().Contains(h.Tag)
+func (h HasTag) Matches(r klog.Record, e klog.Entry) bool {
+	return h.MatchesEmptyRecord(r) || e.Summary().Tags().Contains(h.Tag)
 }
 
 func (h HasTag) MatchesEmptyRecord(r klog.Record) bool {
@@ -58,9 +57,9 @@ type And struct {
 	Predicates []Predicate
 }
 
-func (a And) Matches(e queriedEntry) bool {
+func (a And) Matches(r klog.Record, e klog.Entry) bool {
 	for _, p := range a.Predicates {
-		if !p.Matches(e) {
+		if !p.Matches(r, e) {
 			return false
 		}
 	}
@@ -80,9 +79,9 @@ type Or struct {
 	Predicates []Predicate
 }
 
-func (o Or) Matches(e queriedEntry) bool {
+func (o Or) Matches(r klog.Record, e klog.Entry) bool {
 	for _, p := range o.Predicates {
-		if p.Matches(e) {
+		if p.Matches(r, e) {
 			return true
 		}
 	}
@@ -102,8 +101,8 @@ type Not struct {
 	Predicate Predicate
 }
 
-func (n Not) Matches(e queriedEntry) bool {
-	return !n.Predicate.Matches(e)
+func (n Not) Matches(r klog.Record, e klog.Entry) bool {
+	return !n.Predicate.Matches(r, e)
 }
 
 func (n Not) MatchesEmptyRecord(r klog.Record) bool {
@@ -139,17 +138,17 @@ type IsEntryType struct {
 	Type EntryType
 }
 
-func (t IsEntryType) Matches(e queriedEntry) bool {
-	return klog.Unbox[bool](&e.entry, func(r klog.Range) bool {
+func (t IsEntryType) Matches(r klog.Record, e klog.Entry) bool {
+	return klog.Unbox[bool](&e, func(r klog.Range) bool {
 		return t.Type == ENTRY_TYPE_RANGE
 	}, func(duration klog.Duration) bool {
 		if t.Type == ENTRY_TYPE_DURATION {
 			return true
 		}
-		if t.Type == ENTRY_TYPE_DURATION_POSITIVE && e.entry.Duration().InMinutes() >= 0 {
+		if t.Type == ENTRY_TYPE_DURATION_POSITIVE && e.Duration().InMinutes() >= 0 {
 			return true
 		}
-		if t.Type == ENTRY_TYPE_DURATION_NEGATIVE && e.entry.Duration().InMinutes() < 0 {
+		if t.Type == ENTRY_TYPE_DURATION_NEGATIVE && e.Duration().InMinutes() < 0 {
 			return true
 		}
 		return false
