@@ -282,6 +282,29 @@ func TestYearReport(t *testing.T) {
 `, state.printBuffer)
 }
 
+func TestPeriodicalReportWithFill(t *testing.T) {
+	state, err := NewTestingContext()._SetNow(2018, 8, 24, 0, 0)._SetRecords(`
+2018-04-02 (8h!)
+	8h
+
+2018-08-10 (5h30m!)
+	2h
+
+2018-08-23 (2h!)
+	5h20m
+`)._Run((&Report{AggregateBy: "quarter", DiffArgs: args.DiffArgs{Diff: true}, Fill: true, FilterArgs: args.FilterArgs{ThisYear: true}}).Run)
+	require.Nil(t, err)
+	assert.Equal(t, `
+           Total    Should     Diff
+2018 Q1                            
+     Q2       8h       8h!       0m
+     Q3    7h20m    7h30m!     -10m
+     Q4                            
+        ======== ========= ========
+          15h20m   15h30m!     -10m
+`, state.printBuffer)
+}
+
 func TestReportWithChart(t *testing.T) {
 	t.Run("Daily (default) aggregation", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
