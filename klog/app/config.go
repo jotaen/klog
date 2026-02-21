@@ -245,7 +245,7 @@ var CONFIG_FILE_ENTRIES = []ConfigFileEntries[any]{
 				"`OVERLAPPING_RANGES` (for time ranges that overlap), " +
 				"`MORE_THAN_24H` (if there is a record with more than 24h total), " +
 				"`POINTLESS_NOW` (when using --now without any open ranges), " +
-				"`DIFF_ENTRY_FILTERING` (for combining --diff and entry-level filtering). " +
+				"`ENTRY_FILTERED_DIFFING` (when combining --diff and entry-level filtering). " +
 				"Multiple values must be separated by a comma, e.g.: `UNCLOSED_OPEN_RANGE, MORE_THAN_24H`.",
 			Default: "If absent/empty, klog prints all available warnings.",
 		},

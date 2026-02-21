@@ -6,9 +6,9 @@ import (
 
 // Filter goes through a list of records and only keeps those that match the
 // given predicate. The records may be returned partially, keeping only those
-// entries that match the predicate. The second return value indicates whether
-// there are partial records with ShouldTotal set, as this may yield nonsensical
-// results in a subsequent evaluation.
+// entries that match the predicate.
+// The second return value indicates whether there are partial records with a
+// should-total set, as this may yield nonsensical results in a subsequent evaluation.
 func Filter(p Predicate, rs []klog.Record) ([]klog.Record, bool) {
 	var res []klog.Record
 	hasPartialRecordsWithShouldTotal := false

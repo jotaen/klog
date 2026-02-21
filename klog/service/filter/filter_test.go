@@ -11,6 +11,9 @@ import (
 
 func sampleRecordsForQuerying() []klog.Record {
 	rs, _, err := parser.NewSerialParser().Parse(`
+1999-12-29
+No tags here
+
 1999-12-30
 Hello World #foo #first
 
@@ -62,6 +65,7 @@ func TestQueryWithNoClauses(t *testing.T) {
 	rs, hprws := Filter(And{}, sampleRecordsForQuerying())
 	assert.False(t, hprws)
 	assertResult(t, []expect{
+		{klog.Ɀ_Date_(1999, 12, 29), []int{}},
 		{klog.Ɀ_Date_(1999, 12, 30), []int{}},
 		{klog.Ɀ_Date_(1999, 12, 31), []int{300}},
 		{klog.Ɀ_Date_(2000, 1, 1), []int{15, 360, -30}},
@@ -101,19 +105,10 @@ func TestQueryWithBefore(t *testing.T) {
 	}, sampleRecordsForQuerying())
 	assert.False(t, hprws)
 	assertResult(t, []expect{
+		{klog.Ɀ_Date_(1999, 12, 29), []int{}},
 		{klog.Ɀ_Date_(1999, 12, 30), []int{}},
 		{klog.Ɀ_Date_(1999, 12, 31), []int{300}},
 		{klog.Ɀ_Date_(2000, 1, 1), []int{15, 360, -30}},
-	}, rs)
-}
-
-func TestQueryWithTagOnEntries(t *testing.T) {
-	rs, hprws := Filter(HasTag{klog.NewTagOrPanic("bar", "")}, sampleRecordsForQuerying())
-	assert.True(t, hprws)
-	assertResult(t, []expect{
-		{klog.Ɀ_Date_(1999, 12, 31), []int{300}},
-		{klog.Ɀ_Date_(2000, 1, 1), []int{360}},
-		{klog.Ɀ_Date_(2000, 1, 3), []int{240, 180}},
 	}, rs)
 }
 
@@ -125,6 +120,16 @@ func TestQueryWithTagOnOverallSummary(t *testing.T) {
 		{klog.Ɀ_Date_(2000, 1, 1), []int{15, 360, -30}},
 		{klog.Ɀ_Date_(2000, 1, 2), []int{420}},
 		{klog.Ɀ_Date_(2000, 1, 3), []int{240, 180, 0}},
+	}, rs)
+}
+
+func TestQueryWithTagOnEntries(t *testing.T) {
+	rs, hprws := Filter(HasTag{klog.NewTagOrPanic("bar", "")}, sampleRecordsForQuerying())
+	assert.True(t, hprws)
+	assertResult(t, []expect{
+		{klog.Ɀ_Date_(1999, 12, 31), []int{300}},
+		{klog.Ɀ_Date_(2000, 1, 1), []int{360}},
+		{klog.Ɀ_Date_(2000, 1, 3), []int{240, 180}},
 	}, rs)
 }
 

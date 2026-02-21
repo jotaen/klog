@@ -19,7 +19,7 @@ var (
 		Message: "You specified --now, but there was no open-ended time range",
 	}
 	DiffEntryFilteringWarning = UsageWarning{
-		Name:    "DIFF_ENTRY_FILTERING",
+		Name:    "ENTRY_FILTERED_DIFFING",
 		Message: "Combining --diff and filtering at entry-level may yield nonsensical results",
 	}
 )
