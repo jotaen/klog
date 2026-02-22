@@ -140,7 +140,7 @@ func (args *FilterArgs) ApplyFilter(now gotime.Time, rs []klog.Record) ([]klog.R
 }
 
 // SinglePeriodRequested returns the corresponding period if a single short-hand
-// filter (such as --this-month or --last-week) was used.
+// periodic filter (such as --this-month, --period) was used.
 func (args *FilterArgs) SinglePeriodRequested() period.Period {
 	return args.singleShortHandFilter
 }

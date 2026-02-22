@@ -83,6 +83,15 @@ func TestQueryWithNoMatches(t *testing.T) {
 	assertResult(t, []expect{}, rs)
 }
 
+func TestQueryAgainstEmptyInput(t *testing.T) {
+	rs, hprws := Filter(IsInDateRange{
+		From: klog.Ɀ_Date_(2002, 1, 1),
+		To:   klog.Ɀ_Date_(2002, 1, 1),
+	}, nil)
+	assert.False(t, hprws)
+	assertResult(t, []expect{}, rs)
+}
+
 func TestQueryWithAtDate(t *testing.T) {
 	rs, hprws := Filter(IsInDateRange{
 		From: klog.Ɀ_Date_(2000, 1, 2),

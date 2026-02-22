@@ -27,6 +27,8 @@ func (opt *Info) Run(ctx app.Context) app.Error {
 
 This would evaluate all records and entries in April 2025 that match the tag #work. Wrap the filter expression in single quotes to avoid undesired shell word splitting or substitution. Filter expressions consist of operands for matching the data that shall be included in the filter result. Operands can be combined via logical operators and grouped via parentheses.
 
+Filters can match at record-level and/or at entry-level. It only keeps the data that satisfies the filter condition. For entry-level filters, this means that all non-matching entries are stripped from the record.
+
 Examples:
     2025-04-20 || 2020-04-21
         All entries at either 2025-04-20 or 2020-04-21.
