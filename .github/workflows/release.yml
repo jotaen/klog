@@ -82,12 +82,11 @@ jobs:
           if [[ "${{ matrix.binary_name }}" != "klog" ]]; then
             mv ./out/klog ./out/${{ matrix.binary_name }}
           fi
-          cp ./.github/install_${{ matrix.go_os }}.md ./INSTALL.md
-          zip -j klog-${{ matrix.name }}.zip ./out/${{ matrix.binary_name }} ./INSTALL.md ./LICENSE.txt
+          zip -j klog-${{ matrix.name }}.zip ./out/${{ matrix.binary_name }} ./LICENSE.txt
       - name: Upload binaries
         uses: actions/upload-release-asset@v1 # https://github.com/actions/upload-release-asset
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Automatically provided
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
           asset_path: ./klog-${{ matrix.name }}.zip
