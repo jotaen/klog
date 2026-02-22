@@ -18,7 +18,7 @@ var (
 		Name:    "POINTLESS_NOW",
 		Message: "You specified --now, but there was no open-ended time range",
 	}
-	DiffEntryFilteringWarning = UsageWarning{
+	EntryFilteredDiffWarning = UsageWarning{
 		Name:    "ENTRY_FILTERED_DIFFING",
 		Message: "Combining --diff and filtering at entry-level may yield nonsensical results",
 	}
@@ -41,7 +41,7 @@ func NewDisabledCheckers() DisabledCheckers {
 		(&overlappingTimeRangesChecker{}).Name(): false,
 		(&moreThan24HoursChecker{}).Name():       false,
 		PointlessNowWarning.Name:                 false,
-		DiffEntryFilteringWarning.Name:           false,
+		EntryFilteredDiffWarning.Name:            false,
 	}
 }
 

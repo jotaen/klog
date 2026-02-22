@@ -18,7 +18,7 @@ type DiffArgs struct {
 // nonsensical results.
 func (args *DiffArgs) GetWarning(filterArgs FilterArgs) service.UsageWarning {
 	if args.Diff && filterArgs.hasPartialRecordsWithShouldTotal {
-		return service.DiffEntryFilteringWarning
+		return service.EntryFilteredDiffWarning
 	}
 	return service.UsageWarning{}
 }

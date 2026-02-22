@@ -7,7 +7,8 @@ import (
 	"github.com/jotaen/klog/klog"
 )
 
-// Predicate is the generic base type for all predicates.
+// Predicate is the generic base type for all predicates. The caller is responsible for
+// selecting the applicable match function (it’s meant to be either/or).
 type Predicate interface {
 	// Matches returns true if the record’s entry satisfies the predicate.
 	Matches(klog.Record, klog.Entry) bool

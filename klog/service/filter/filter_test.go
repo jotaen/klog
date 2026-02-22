@@ -74,6 +74,24 @@ func TestQueryWithNoClauses(t *testing.T) {
 	}, rs)
 }
 
+func TestQueryWithNoMatches(t *testing.T) {
+	rs, hprws := Filter(IsInDateRange{
+		From: klog.Ɀ_Date_(2002, 1, 1),
+		To:   klog.Ɀ_Date_(2002, 1, 1),
+	}, sampleRecordsForQuerying())
+	assert.False(t, hprws)
+	assertResult(t, []expect{}, rs)
+}
+
+func TestQueryAgainstEmptyInput(t *testing.T) {
+	rs, hprws := Filter(IsInDateRange{
+		From: klog.Ɀ_Date_(2002, 1, 1),
+		To:   klog.Ɀ_Date_(2002, 1, 1),
+	}, nil)
+	assert.False(t, hprws)
+	assertResult(t, []expect{}, rs)
+}
+
 func TestQueryWithAtDate(t *testing.T) {
 	rs, hprws := Filter(IsInDateRange{
 		From: klog.Ɀ_Date_(2000, 1, 2),
@@ -237,6 +255,21 @@ func TestComplexFilterQueries(t *testing.T) {
 		assert.True(t, hprws)
 		assertResult(t, []expect{
 			{klog.Ɀ_Date_(2000, 1, 3), []int{240}},
+		}, rs)
+	}
+	{
+		rs, hprws := Filter(Not{Or{[]Predicate{
+			IsInDateRange{From: klog.Ɀ_Date_(1999, 12, 30), To: klog.Ɀ_Date_(2000, 1, 1)},
+			HasTag{klog.NewTagOrPanic("xyz", "")},
+			And{[]Predicate{
+				IsEntryType{ENTRY_TYPE_DURATION_POSITIVE},
+				HasTag{klog.NewTagOrPanic("bar", "")},
+			}},
+		}}}, sampleRecordsForQuerying())
+		assert.True(t, hprws)
+		assertResult(t, []expect{
+			{klog.Ɀ_Date_(1999, 12, 29), []int{}},
+			{klog.Ɀ_Date_(2000, 1, 3), []int{240, 0}},
 		}, rs)
 	}
 }
