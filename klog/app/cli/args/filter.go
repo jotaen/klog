@@ -11,10 +11,10 @@ import (
 
 type FilterArgs struct {
 	// Date-related filters:
-	Date   klog.Date     `name:"date" placeholder:"DATE" group:"Filter Flags:" help:"Entries at this date. DATE has to be in format YYYY-MM-DD or YYYY/MM/DD. E.g., '2024-01-31' or '2024/01/31'."`
-	Since  klog.Date     `name:"since" placeholder:"DATE" group:"Filter Flags:" help:"Entries since this date (inclusive)."`
-	Until  klog.Date     `name:"until" placeholder:"DATE" group:"Filter Flags:" help:"Entries until this date (inclusive)."`
-	Period period.Period `name:"period" placeholder:"PERIOD" group:"Filter Flags:" help:"Entries within a calendar period. PERIOD has to be in format YYYY, YYYY-MM, YYYY-Www or YYYY-Qq. E.g., '2024', '2024-04', '2022-W21' or '2024-Q1'."`
+	Date   klog.Date     `name:"date" placeholder:"DATE" group:"Filter Flags:" help:"Records at this date. DATE has to be in format YYYY-MM-DD or YYYY/MM/DD. E.g., '2024-01-31' or '2024/01/31'."`
+	Since  klog.Date     `name:"since" placeholder:"DATE" group:"Filter Flags:" help:"Records since this date (inclusive)."`
+	Until  klog.Date     `name:"until" placeholder:"DATE" group:"Filter Flags:" help:"Records until this date (inclusive)."`
+	Period period.Period `name:"period" placeholder:"PERIOD" group:"Filter Flags:" help:"Records within a calendar period. PERIOD has to be in format YYYY, YYYY-MM, YYYY-Www or YYYY-Qq. E.g., '2024', '2024-04', '2022-W21' or '2024-Q1'."`
 
 	// Filter shortcuts:
 	// The two `XXX` ones are dummy entries just for the help output, they also aren’t available
@@ -34,8 +34,8 @@ type FilterArgs struct {
 	LastYear    bool `hidden:"" name:"last-year" group:"Filter Flags:" completion-enabled:"true"`
 
 	// General filters:
-	Tags   []klog.Tag `name:"tag" placeholder:"TAG" group:"Filter Flags:" help:"Entries that match these tags (either in the record summary or the entry summary). You can omit the leading '#'."`
-	Filter string     `name:"filter" placeholder:"EXPR" group:"Filter Flags:" help:"Entries that match this filter expression. Run 'klog info --filtering' to learn how expressions works."`
+	Tags   []klog.Tag `name:"tag" placeholder:"TAG" group:"Filter Flags:" help:"Records or entries that match these tags (either in the record summary or the entry summary). You can omit the leading '#'."`
+	Filter string     `name:"filter" placeholder:"EXPR" group:"Filter Flags:" help:"Records or entries that match this filter expression. Run 'klog info --filtering' to learn how expressions works."`
 
 	hasPartialRecordsWithShouldTotal bool          // Field only for internal use
 	singleShortHandFilter            period.Period // Field only for internal use

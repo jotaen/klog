@@ -25,7 +25,7 @@ func (opt *Info) Run(ctx app.Context) app.Error {
 
     klog total --filter='2025-04 && #work' mytimes.klg
 
-This would evaluate all entries in April 2025 that match the tag #work. Wrap the filter expression in single quotes to avoid undesired shell word splitting or substitution. Filter expressions consist of operands for matching the data that shall be included in the filter result. Operands can be combined via logical operators and grouped via parentheses.
+This would evaluate all records and entries in April 2025 that match the tag #work. Wrap the filter expression in single quotes to avoid undesired shell word splitting or substitution. Filter expressions consist of operands for matching the data that shall be included in the filter result. Operands can be combined via logical operators and grouped via parentheses.
 
 Examples:
     2025-04-20 || 2020-04-21
