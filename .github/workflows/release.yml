@@ -24,10 +24,12 @@ jobs:
           body: |
             Download the klog binary here:
 
-            - [**Linux**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-linux.zip)
-            - [**MacOS** (ARM)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac-arm.zip)
-            - [**MacOS** (Intel)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac-intel.zip)
-            - [**Windows**](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-windows.zip)
+            - [**Linux** (ARM 64-bit)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-linux-arm64.zip)
+            - [**Linux** (AMD/Intel 64-bit)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-linux-amd64.zip)
+            - [**MacOS** (ARM 64-bit)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac-arm64.zip)
+            - [**MacOS** (AMD/Intel 64-bit)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-mac-amd64.zip)
+            - [**Windows** (ARM 64-bit)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-windows-arm64.zip)
+            - [**Windows** (AMD/Intel 64-bit)](https://github.com/jotaen/klog/releases/download/${{ github.event.inputs.release_id }}/klog-windows-amd64.zip)
 
             Check the [changelog](https://github.com/jotaen/klog/blob/main/CHANGELOG.md) to learn what’s new.
 
@@ -43,20 +45,28 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: linux
+          - name: linux-amd64
             go_os: linux
             go_arch: amd64
             binary_name: klog
-          - name: mac-intel
+          - name: linux-arm64
+            go_os: linux
+            go_arch: arm64
+            binary_name: klog
+          - name: mac-amd64
             go_os: darwin
             go_arch: amd64
             binary_name: klog
-          - name: mac-arm
+          - name: mac-arm64
             go_os: darwin
             go_arch: arm64
             binary_name: klog
-          - name: windows
+          - name: windows-amd64
             go_os: windows
+            go_arch: amd64
+            binary_name: klog.exe
+          - name: windows
+            go_os: windows-arm64
             go_arch: amd64
             binary_name: klog.exe
     runs-on: ubuntu-latest
