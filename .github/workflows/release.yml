@@ -45,28 +45,28 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: linux-amd64
-            go_os: linux
-            go_arch: amd64
-            binary_name: klog
           - name: linux-arm64
             go_os: linux
             go_arch: arm64
             binary_name: klog
-          - name: mac-amd64
-            go_os: darwin
+          - name: linux-amd64
+            go_os: linux
             go_arch: amd64
             binary_name: klog
           - name: mac-arm64
             go_os: darwin
             go_arch: arm64
             binary_name: klog
+          - name: mac-amd64
+            go_os: darwin
+            go_arch: amd64
+            binary_name: klog
+          - name: windows-arm64
+            go_os: windows
+            go_arch: arm64
+            binary_name: klog.exe
           - name: windows-amd64
             go_os: windows
-            go_arch: amd64
-            binary_name: klog.exe
-          - name: windows
-            go_os: windows-arm64
             go_arch: amd64
             binary_name: klog.exe
     runs-on: ubuntu-latest
