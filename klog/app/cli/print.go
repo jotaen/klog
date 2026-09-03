@@ -15,6 +15,7 @@ type Print struct {
 	WithTotals bool `name:"with-totals" help:"Amend output with evaluated total times."`
 	args.FilterArgs
 	args.SortArgs
+	args.NowArgs
 	args.WarnArgs
 	args.NoStyleArgs
 	args.InputFilesArgs
@@ -26,6 +27,10 @@ Outputs data on the terminal, by default with syntax-highlighting turned on.
 Note that the output doesn’t resemble the file verbatim, but it may apply some minor formatting.
 
 You can optionally also sort the records, or print out the total times for each record and entry.
+
+Open-ended time ranges (e.g., '8:00 - ?') are printed as they are, and they count as '0m' in the totals.
+With the '--now' flag, they are printed as if they were closed “right now”, and their elapsed time is factored into the totals.
+In the totals column, such an entry duration is put in parentheses, e.g. '(2h17m)'.
 `
 }
 
@@ -45,23 +50,61 @@ func (opt *Print) Run(ctx app.Context) app.Error {
 		return nil
 	}
 	records = opt.ApplySort(records)
+	closedByNow := map[klog.Record]int{}
+	if opt.Now {
+		closedByNow = openEntryIndices(records)
+	}
+	nErr := opt.ApplyNow(now, records...)
+	if nErr != nil {
+		return nErr
+	}
 	serialisedRecords := parser.SerialiseRecords(serialser, records...)
 	output := func() string {
 		if opt.WithTotals {
-			return printWithDurations(styler, serialisedRecords)
+			return printWithDurations(styler, serialisedRecords, closedByNow)
 		}
 		return "\n" + serialisedRecords.ToString()
 	}()
 	ctx.Print(output + "\n")
 
-	opt.WarnArgs.PrintWarnings(ctx, records, nil)
+	opt.WarnArgs.PrintWarnings(ctx, records, []service.UsageWarning{opt.NowArgs.GetWarning()})
 	return nil
 }
 
-func printWithDurations(styler tf.Styler, ls parser.Lines) string {
+// openEntryIndices maps every record that has an open-ended time range to
+// the index of that entry. Records without an open range are not included.
+func openEntryIndices(rs []klog.Record) map[klog.Record]int {
+	result := map[klog.Record]int{}
+	for _, r := range rs {
+		for entryI, e := range r.Entries() {
+			isOpen := klog.Unbox[bool](&e,
+				func(klog.Range) bool { return false },
+				func(klog.Duration) bool { return false },
+				func(klog.OpenRange) bool { return true },
+			)
+			if isOpen {
+				result[r] = entryI
+				break
+			}
+		}
+	}
+	return result
+}
+
+// printWithDurations prefixes each line with its total duration. `closedByNow`
+// denotes the entries whose open range was closed via `--now`; their duration
+// is put in parentheses, as it depends on the current time.
+func printWithDurations(styler tf.Styler, ls parser.Lines, closedByNow map[klog.Record]int) string {
 	type Prefix struct {
-		d     klog.Duration
-		isSub bool
+		d           klog.Duration
+		isSub       bool
+		closedByNow bool
+	}
+	text := func(p *Prefix) string {
+		if p.closedByNow {
+			return "(" + p.d.ToString() + ")"
+		}
+		return p.d.ToString()
 	}
 	var prefixes []*Prefix
 	maxColumnLength := 0
@@ -76,18 +119,19 @@ func printWithDurations(styler tf.Styler, ls parser.Lines) string {
 			}
 			if previousRecord == nil {
 				previousRecord = l.Record
-				return &Prefix{service.Total(l.Record), false}
+				return &Prefix{service.Total(l.Record), false, false}
 			}
 			if l.EntryI != -1 && l.EntryI != previousEntry {
 				previousEntry = l.EntryI
-				return &Prefix{l.Record.Entries()[l.EntryI].Duration(), true}
+				openI, hasOpen := closedByNow[l.Record]
+				return &Prefix{l.Record.Entries()[l.EntryI].Duration(), true, hasOpen && openI == l.EntryI}
 			} else {
 				return nil
 			}
 		}()
 		prefixes = append(prefixes, prefix)
-		if prefix != nil && len(prefix.d.ToString()) > maxColumnLength {
-			maxColumnLength = len(prefix.d.ToString())
+		if prefix != nil && len(text(prefix)) > maxColumnLength {
+			maxColumnLength = len(text(prefix))
 		}
 	}
 
@@ -102,12 +146,12 @@ func printWithDurations(styler tf.Styler, ls parser.Lines) string {
 			if p == nil {
 				return strings.Repeat(" ", maxColumnLength+1)
 			}
-			length := len(p.d.ToString())
+			length := len(text(p))
 			value := ""
 			if p.isSub {
-				value += styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(p.d.ToString())
+				value += styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(text(p))
 			} else {
-				value += styler.Props(tf.StyleProps{IsUnderlined: true}).Format(p.d.ToString())
+				value += styler.Props(tf.StyleProps{IsUnderlined: true}).Format(text(p))
 			}
 			return strings.Repeat(" ", maxColumnLength-length+1) + value
 		}()
