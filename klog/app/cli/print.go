@@ -28,9 +28,9 @@ Note that the output doesn’t resemble the file verbatim, but it may apply some
 
 You can optionally also sort the records, or print out the total times for each record and entry.
 
-Open-ended time ranges (e.g., '8:00 - ?') are printed as they are, and they count as '0m' in the totals.
+Open-ended time ranges (e.g., '8:00 - ?') are printed as they are, and they count as '0m' in the totals when using the '--with-totals' flag.
 With the '--now' flag, they are printed as if they were closed “right now”, and their elapsed time is factored into the totals.
-In the totals column, such an entry duration is put in parentheses, e.g. '(2h17m)'.
+In the totals column, the provisional durations are marked with an asterisk, e.g. '2h17m*'.
 `
 }
 
@@ -50,18 +50,14 @@ func (opt *Print) Run(ctx app.Context) app.Error {
 		return nil
 	}
 	records = opt.ApplySort(records)
-	closedByNow := map[klog.Record]int{}
-	if opt.Now {
-		closedByNow = openEntryIndices(records)
-	}
-	nErr := opt.ApplyNow(now, records...)
+	closedEntries, nErr := opt.ApplyNow(now, records...)
 	if nErr != nil {
 		return nErr
 	}
 	serialisedRecords := parser.SerialiseRecords(serialser, records...)
 	output := func() string {
 		if opt.WithTotals {
-			return printWithDurations(styler, serialisedRecords, closedByNow)
+			return printWithDurations(styler, serialisedRecords, closedEntries)
 		}
 		return "\n" + serialisedRecords.ToString()
 	}()
@@ -71,40 +67,13 @@ func (opt *Print) Run(ctx app.Context) app.Error {
 	return nil
 }
 
-// openEntryIndices maps every record that has an open-ended time range to
-// the index of that entry. Records without an open range are not included.
-func openEntryIndices(rs []klog.Record) map[klog.Record]int {
-	result := map[klog.Record]int{}
-	for _, r := range rs {
-		for entryI, e := range r.Entries() {
-			isOpen := klog.Unbox[bool](&e,
-				func(klog.Range) bool { return false },
-				func(klog.Duration) bool { return false },
-				func(klog.OpenRange) bool { return true },
-			)
-			if isOpen {
-				result[r] = entryI
-				break
-			}
-		}
-	}
-	return result
-}
-
-// printWithDurations prefixes each line with its total duration. `closedByNow`
-// denotes the entries whose open range was closed via `--now`; their duration
-// is put in parentheses, as it depends on the current time.
-func printWithDurations(styler tf.Styler, ls parser.Lines, closedByNow map[klog.Record]int) string {
+// printWithDurations prefixes each line with its total duration. `closedEntries`
+// denotes the entries whose open range was closed via `--now`; the auto-closed durations
+// are suffixed with an asterisk, to indicate that they are provisional.
+func printWithDurations(styler tf.Styler, ls parser.Lines, closedEntries map[klog.Record]int) string {
 	type Prefix struct {
-		d           klog.Duration
-		isSub       bool
-		closedByNow bool
-	}
-	text := func(p *Prefix) string {
-		if p.closedByNow {
-			return "(" + p.d.ToString() + ")"
-		}
-		return p.d.ToString()
+		text  string
+		isSub bool
 	}
 	var prefixes []*Prefix
 	maxColumnLength := 0
@@ -119,19 +88,39 @@ func printWithDurations(styler tf.Styler, ls parser.Lines, closedByNow map[klog.
 			}
 			if previousRecord == nil {
 				previousRecord = l.Record
-				return &Prefix{service.Total(l.Record), false, false}
+				return &Prefix{
+					text: func() string {
+						suffix := ""
+						_, hasAutoClosedEntry := closedEntries[l.Record]
+						if hasAutoClosedEntry {
+							suffix = "*"
+						}
+						return service.Total(l.Record).ToString() + suffix
+					}(),
+					isSub: false,
+				}
 			}
 			if l.EntryI != -1 && l.EntryI != previousEntry {
 				previousEntry = l.EntryI
-				openI, hasOpen := closedByNow[l.Record]
-				return &Prefix{l.Record.Entries()[l.EntryI].Duration(), true, hasOpen && openI == l.EntryI}
+				return &Prefix{
+					text: func() string {
+						openI, hasAutoClosedEntry := closedEntries[l.Record]
+						entryTotal := l.Record.Entries()[l.EntryI].Duration()
+						suffix := ""
+						if hasAutoClosedEntry && openI == l.EntryI {
+							suffix = "*"
+						}
+						return entryTotal.ToString() + suffix
+					}(),
+					isSub: true,
+				}
 			} else {
 				return nil
 			}
 		}()
 		prefixes = append(prefixes, prefix)
-		if prefix != nil && len(text(prefix)) > maxColumnLength {
-			maxColumnLength = len(text(prefix))
+		if prefix != nil && len(prefix.text) > maxColumnLength {
+			maxColumnLength = len(prefix.text)
 		}
 	}
 
@@ -146,12 +135,12 @@ func printWithDurations(styler tf.Styler, ls parser.Lines, closedByNow map[klog.
 			if p == nil {
 				return strings.Repeat(" ", maxColumnLength+1)
 			}
-			length := len(text(p))
+			length := len(p.text)
 			value := ""
 			if p.isSub {
-				value += styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(text(p))
+				value += styler.Props(tf.StyleProps{Color: tf.TEXT_SUBDUED}).Format(p.text)
 			} else {
-				value += styler.Props(tf.StyleProps{IsUnderlined: true}).Format(text(p))
+				value += styler.Props(tf.StyleProps{IsUnderlined: true}).Format(p.text)
 			}
 			return strings.Repeat(" ", maxColumnLength-length+1) + value
 		}()

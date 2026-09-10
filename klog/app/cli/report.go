@@ -57,7 +57,7 @@ func (opt *Report) Run(ctx app.Context) app.Error {
 	if len(records) == 0 {
 		return nil
 	}
-	nErr := opt.ApplyNow(now, records...)
+	_, nErr := opt.ApplyNow(now, records...)
 	if nErr != nil {
 		return nErr
 	}

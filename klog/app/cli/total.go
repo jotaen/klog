@@ -40,7 +40,7 @@ func (opt *Total) Run(ctx app.Context) app.Error {
 	if fErr != nil {
 		return fErr
 	}
-	nErr := opt.ApplyNow(now, records...)
+	_, nErr := opt.ApplyNow(now, records...)
 	if nErr != nil {
 		return nErr
 	}

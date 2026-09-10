@@ -80,7 +80,7 @@ func TestPrintOutRecordsInChronologicalOrder(t *testing.T) {
 	assert.Equal(t, "\n2018-02-01\n\n2018-01-31\n\n2018-01-30\n\n", stateSortedDesc.printBuffer)
 }
 
-func TestPrintRecordsWithDurations(t *testing.T) {
+func TestPrintRecordsWithTotals(t *testing.T) {
 	state, err := NewTestingContext()._SetNow(2018, 02, 07, 19, 00)._SetRecords(`
 2018-01-31
 Hello #world
@@ -125,6 +125,10 @@ Test test test
 
 func TestPrintRecordsWithNow(t *testing.T) {
 	records := `
+2018-02-05
+No open entry
+    5h
+
 2018-02-06
 	22:00 - ? Late shift
 
@@ -133,12 +137,17 @@ func TestPrintRecordsWithNow(t *testing.T) {
 	18:00 - ? I just
 		started something
 `
-	{
+
+	t.Run("without --with-totals", func(t *testing.T) {
 		state, err := NewTestingContext()._SetNow(2018, 02, 07, 19, 00)._SetRecords(records)._Run((&Print{
 			NowArgs: args.NowArgs{Now: true},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `
+2018-02-05
+No open entry
+    5h
+
 2018-02-06
     22:00 - 19:00> Late shift
 
@@ -148,24 +157,29 @@ func TestPrintRecordsWithNow(t *testing.T) {
         started something
 
 `, state.printBuffer)
-	}
-	{
+	})
+
+	t.Run("together with --with-totals", func(t *testing.T) {
 		state, err := NewTestingContext()._SetNow(2018, 02, 07, 19, 00)._SetRecords(records)._Run((&Print{
 			WithTotals: true,
 			NowArgs:    args.NowArgs{Now: true},
 		}).Run)
 		require.Nil(t, err)
 		assert.Equal(t, `
-   21h  |  2018-02-06
- (21h)  |      22:00 - 19:00> Late shift
+     5h  |  2018-02-05
+         |  No open entry
+     5h  |      5h
 
- 1h35m  |  2018-02-07
-   35m  |      35m
-  (1h)  |      18:00 - 19:00 I just
-        |          started something
+   21h*  |  2018-02-06
+   21h*  |      22:00 - 19:00> Late shift
+
+ 1h35m*  |  2018-02-07
+    35m  |      35m
+    1h*  |      18:00 - 19:00 I just
+         |          started something
 
 `, state.printBuffer)
-	}
+	})
 }
 
 func TestPrintWithNowWarnsIfNoOpenRange(t *testing.T) {

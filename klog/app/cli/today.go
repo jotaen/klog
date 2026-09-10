@@ -66,7 +66,7 @@ func handle(opt *Today, ctx app.Context) app.Error {
 		return err
 	}
 	now := ctx.Now()
-	nErr := opt.ApplyNow(now, records...)
+	_, nErr := opt.ApplyNow(now, records...)
 	if nErr != nil {
 		return nErr
 	}
