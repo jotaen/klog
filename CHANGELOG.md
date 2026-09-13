@@ -1,6 +1,10 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## vX.X (XXXX-XX-XX)
+- **[ FEATURE ]** Support `--now` flag on `klog print` subcommand
+  (primarily useful in conjunction with the `--with-totals` flag).
+
 ## v7.1 (2026-02-22)
 - **[ FEATURE ]** Include warnings in JSON output of `klog json` subcommand.
 - **[ FEATURE ]** When using `klog report --fill` and combining this with a periodic
