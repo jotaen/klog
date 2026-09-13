@@ -9,35 +9,35 @@ import (
 )
 
 type NowArgs struct {
-	Now          bool `name:"now" short:"n" help:"Assume open ranges to be closed at this moment."`
-	hadOpenRange bool // Field only for internal use
+	Now           bool                `name:"now" short:"n" help:"Assume open ranges to be closed at this moment."`
+	closedEntries map[klog.Record]int // Field only for internal use
 }
 
-func (args *NowArgs) ApplyNow(reference gotime.Time, rs ...klog.Record) app.Error {
+func (args *NowArgs) ApplyNow(reference gotime.Time, rs ...klog.Record) (map[klog.Record]int, app.Error) {
 	if args.Now {
-		hasClosedAnyRange, err := service.CloseOpenRanges(reference, rs...)
+		closedEntries, err := service.CloseOpenRanges(reference, rs...)
 		if err != nil {
-			return app.NewErrorWithCode(
+			return nil, app.NewErrorWithCode(
 				app.LOGICAL_ERROR,
 				"Cannot apply --now flag",
 				"There are records with uncloseable time ranges",
 				err,
 			)
 		}
-		args.hadOpenRange = hasClosedAnyRange
-		return nil
+		args.closedEntries = closedEntries
+		return closedEntries, nil
 	}
-	return nil
+	return nil, nil
 }
 
 func (args *NowArgs) HadOpenRange() bool {
-	return args.hadOpenRange
+	return len(args.closedEntries) > 0
 }
 
 // GetWarning warns the user that they specified the --now flag but there actually
 // weren’t any closable ranges in the data.
 func (args *NowArgs) GetWarning() service.UsageWarning {
-	if args.Now && !args.hadOpenRange {
+	if args.Now && !args.HadOpenRange() {
 		return service.PointlessNowWarning
 	}
 	return service.UsageWarning{}
