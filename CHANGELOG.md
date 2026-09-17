@@ -2,6 +2,10 @@
 **Summary of changes of the command line tool**
 
 ## vX.X (XXXX-XX-XX)
+- **[ NOTICE ]** The naming scheme of the zipped release artifacts have changed,
+  it’s now: `klog-${OS}-${ARCH}64.zip`, e.g.: `klog-linux-amd64.zip`. (The binary
+  inside the zip archive is still named `klog` / `klog.exe`, just as before.)
+  There are now also ARM64 builds for both Linux and Windows available.
 - **[ FEATURE ]** Support `--now` flag on `klog print` subcommand
   (primarily useful in conjunction with the `--with-totals` flag).
 
