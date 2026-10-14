@@ -8,6 +8,8 @@
   There are now also ARM64 builds for both Linux and Windows available.
 - **[ FEATURE ]** Support `--now` flag on `klog print` subcommand
   (primarily useful in conjunction with the `--with-totals` flag).
+- **[ FIX ]** Tab completion now works reliable for file paths containing spaces
+  or other special characters.
 
 ## v7.1 (2026-02-22)
 - **[ FEATURE ]** Include warnings in JSON output of `klog json` subcommand.
