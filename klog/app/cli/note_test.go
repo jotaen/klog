@@ -180,6 +180,17 @@ func TestNoteFallsBackToYesterday(t *testing.T) {
 `, state.writtenFileContents)
 }
 
+func TestNoteDoesNotFallBackToYesterdayIfDateSpecified(t *testing.T) {
+	_, err := NewTestingContext()._SetRecords(`
+1920-02-02
+	22:00-?
+`)._SetNow(1920, 2, 3, 1, 10)._Run((&Note{
+		Text: klog.Ɀ_EntrySummary_("Still working"),
+		Date: klog.Ɀ_Date_(1920, 2, 3),
+	}).Run)
+	require.Error(t, err)
+}
+
 func TestNoteFailsWithoutOpenRange(t *testing.T) {
 	_, err := NewTestingContext()._SetRecords(`
 1920-02-02
