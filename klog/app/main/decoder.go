@@ -148,7 +148,7 @@ func entrySummaryDecoder() kong.MapperFunc {
 			return err
 		}
 		if value == "" {
-			return errors.New("Please provide a valid record summary")
+			return errors.New("Please provide a valid entry summary")
 		}
 		// Normalize potential double-escaping (from CLI)
 		value = strings.ReplaceAll(value, "\\n", "\n")
