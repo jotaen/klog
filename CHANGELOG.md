@@ -6,6 +6,8 @@
   it’s now: `klog-${OS}-${ARCH}64.zip`, e.g.: `klog-linux-amd64.zip`. (The binary
   inside the zip archive is still named `klog` / `klog.exe`, just as before.)
   There are now also ARM64 builds for both Linux and Windows available.
+- **[ FEATURE ]** Add new `klog note` subcommand for appending text to existing
+  entry summaries. (See `klog note --help` to learn more.)
 - **[ FEATURE ]** Support `--now` flag on `klog print` subcommand
   (primarily useful in conjunction with the `--with-totals` flag).
 - **[ FIX ]** Tab completion now works reliable for file paths containing spaces
