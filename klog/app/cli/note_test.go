@@ -97,7 +97,7 @@ func TestNoteAddsNewLineToOpenRange(t *testing.T) {
 `, state.writtenFileContents)
 	})
 
-	t.Run("existing multline summary", func(t *testing.T) {
+	t.Run("existing multiline summary", func(t *testing.T) {
 		state, err := NewTestingContext()._SetRecords(`
 1920-02-02
 	9:00-? Working
