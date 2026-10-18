@@ -10,8 +10,8 @@ import (
 
 type Note struct {
 	Text       klog.EntrySummary `arg:"" required:"" placeholder:"TEXT" help:"The text to add."`
-	Entry      int               `name:"entry" short:"e" placeholder:"INT" help:"Target the nth entry instead of the open time range. If INT is positive, it counts from the start (beginning with '1'); if negative, it counts from the end (beginning with '-1')."`
-	AppendMode string            `name:"append-mode" short:"a" placeholder:"MODE" help:"How to add the text. MODE can be 'inline' (default) or 'newline'." enum:"inline,newline" default:"inline"`
+	Entry      int               `name:"entry" short:"e" placeholder:"INT" help:"Target the nth entry instead of the open time range. If INT is positive, it counts from the start (beginning with '1'); if negative, it counts from the end (beginning with '-1'). If absent, it tries to find and target the open-ended entry."`
+	AppendMode string            `name:"append-mode" short:"a" placeholder:"MODE" help:"How to add the text: MODE can be 'inline' (default) or 'newline'." enum:"inline,newline" default:"inline"`
 	args.AtDateArgs
 	args.NoStyleArgs
 	args.WarnArgs
@@ -20,14 +20,13 @@ type Note struct {
 
 func (opt *Note) Help() string {
 	return `
-Adds text to the summary of an entry.
-By default, it targets the open time range (e.g. '18:00 - ?'). You can target any other entry via '--entry'.
+By default, it targets the open time range (e.g. '18:00 - ?'). Alternatively, you can choose any entry via '--entry'.
 
-With '--append-mode=inline' (the default), the text is appended to the last line of the summary.
-With '--append-mode=newline', it is added as a new line underneath the summary.
-Tags in the text become tags of the entry.
+The '--append-mode' flag controls how the text is added:
+  - '--append-mode=inline' (default) adds the text to the last line of the summary, delimited by a space character.
+  - '--append-mode=newline' adds the text as separate line underneath the summary.
 
-By default, it targets the record at today’s date, or yesterday’s if there is no record today.
+By default, the command targets the record at today’s date, or yesterday’s if there is no record today.
 You can otherwise specify a date with '--date'.
 `
 }
@@ -37,6 +36,7 @@ func (opt *Note) Run(ctx app.Context) app.Error {
 	date := opt.AtDate(ctx.Now())
 	creators := []reconciling.Creator{reconciling.NewReconcilerAtRecord(date)}
 	if opt.Date == nil {
+		// If no date had been specified explicitly, try to fall back to yesterday’s record.
 		creators = append(creators, reconciling.NewReconcilerAtRecord(date.PlusDays(-1)))
 	}
 	summary := opt.Text

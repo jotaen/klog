@@ -34,9 +34,9 @@ type Cli struct {
 	Start  Start  `cmd:"" name:"start" group:"Manipulate Files" aliases:"in" help:"Start a new open time range."`
 	Stop   Stop   `cmd:"" name:"stop" group:"Manipulate Files" aliases:"out" help:"Close the open time range."`
 	Pause  Pause  `cmd:"" name:"pause" group:"Manipulate Files" help:"Pause the open time range."`
-	Note   Note   `cmd:"" name:"note" group:"Manipulate Files" help:"Add text to an entry’s summary."`
 	Switch Switch `cmd:"" name:"switch" group:"Manipulate Files" help:"Close open range and starts a new one."`
 	Create Create `cmd:"" name:"create" group:"Manipulate Files" help:"Create a new, empty record."`
+	Note   Note   `cmd:"" name:"note" group:"Manipulate Files" help:"Append text to an existing entry summary."`
 
 	// Manage Files
 	Bookmarks Bookmarks `cmd:"" name:"bookmarks" group:"Manage Files" aliases:"bk" help:"Named aliases for often-used files."`

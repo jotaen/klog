@@ -1,11 +1,13 @@
 package reconciling
 
 import (
+	"strconv"
+	"testing"
+
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/parser"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestReconcilerAppendsToOpenRangeSummary(t *testing.T) {
@@ -56,11 +58,23 @@ func TestReconcilerAppendsToNthEntrySummary(t *testing.T) {
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2018, 1, 1))(rs, bs)
 	require.NotNil(t, reconciler)
-	require.Nil(t, reconciler.AppendToNthEntry(2, klog.Ɀ_EntrySummary_("entry")))
-	require.Nil(t, reconciler.AppendToNthEntry(-3, klog.Ɀ_EntrySummary_("", "more")))
 
-	result := assertResult(t, reconciler)
-	assert.Equal(t, `
+	t.Run("Add 1st line", func(t *testing.T) {
+		require.Nil(t, reconciler.AppendToNthEntry(2, klog.Ɀ_EntrySummary_("entry")))
+		result := assertResult(t, reconciler)
+		assert.Equal(t, `
+2018-01-01
+    8:00 - 9:00 First
+        continued
+    2h Second entry
+    1h Third
+`, result.AllSerialised)
+	})
+
+	t.Run("Add 2nd lines", func(t *testing.T) {
+		require.Nil(t, reconciler.AppendToNthEntry(-3, klog.Ɀ_EntrySummary_("", "more")))
+		result := assertResult(t, reconciler)
+		assert.Equal(t, `
 2018-01-01
     8:00 - 9:00 First
         continued
@@ -68,6 +82,7 @@ func TestReconcilerAppendsToNthEntrySummary(t *testing.T) {
     2h Second entry
     1h Third
 `, result.AllSerialised)
+	})
 }
 
 func TestReconcilerAppendToNthEntryFailsForMissingEntry(t *testing.T) {
@@ -78,7 +93,9 @@ func TestReconcilerAppendToNthEntryFailsForMissingEntry(t *testing.T) {
 	rs, bs, _ := parser.NewSerialParser().Parse(original)
 	reconciler := NewReconcilerAtRecord(klog.Ɀ_Date_(2018, 1, 1))(rs, bs)
 	require.NotNil(t, reconciler)
-	for _, nth := range []int{0, 2, -2} {
-		require.Error(t, reconciler.AppendToNthEntry(nth, klog.Ɀ_EntrySummary_("Text")))
+	for _, nth := range []int{0, 2, 20, -2, -20} {
+		t.Run("For entry nr: "+strconv.Itoa(nth), func(t *testing.T) {
+			require.Error(t, reconciler.AppendToNthEntry(nth, klog.Ɀ_EntrySummary_("Text")))
+		})
 	}
 }
