@@ -71,7 +71,7 @@ jobs:
             binary_name: klog.exe
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
       - uses: actions/setup-go@v2
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -83,7 +83,7 @@ jobs:
           source ./run.sh
           run::build ${{ github.event.inputs.release_id }} ${{ github.sha }} "$(git log -1 --format=%cI)"
       - name: Smoke test
-        if: ${{ matrix.name == 'linux' }}
+        if: ${{ matrix.name == 'linux-amd64' }}
         run: |
           sudo cp out/klog /usr/bin/klog
           ./.github/smoke-test.sh ${{ github.event.inputs.release_id }} ${{ github.sha }} "$(date +%F)"
