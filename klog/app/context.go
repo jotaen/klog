@@ -87,22 +87,6 @@ type Context interface {
 	Config() Config
 }
 
-// Meta holds miscellaneous information about the klog binary.
-type Meta struct {
-
-	// Specification contains the file format specification in full text.
-	Specification string
-
-	// License contains the license text.
-	License string
-
-	// Version contains the release version, e.g. `v2.7`.
-	Version string
-
-	// SrcHash contains the hash of the sources that the binary was built from.
-	SrcHash string
-}
-
 // NewContext creates a new Context object.
 func NewContext(klogFolder File, meta Meta, styler tf.Styler, cfg Config) Context {
 	parserEngine := parser.NewSerialParser()

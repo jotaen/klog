@@ -45,7 +45,7 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 		return nil
 	}
 	ctx.Print("Command line tool: " + ctx.Meta().Version)
-	ctx.Print("  [" + ctx.Meta().SrcHash + "]\n")
+	ctx.Print(fmt.Sprintf("  [%s, %s]\n", ctx.Meta().SrcHash, ctx.Meta().BuildDate))
 	ctx.Print("File format: version " + klog.SPEC_VERSION + "\n")
 
 	if opt.NoCheck {
@@ -75,7 +75,7 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 	if v.Version() == ctx.Meta().Version && ctx.Meta().SrcHash == v.SrcHash() {
 		ctx.Print("You already have the latest version!\n")
 	} else {
-		ctx.Print(fmt.Sprintf("New version available: %s  [%s]\n", v.Version(), v.SrcHash()))
+		ctx.Print(fmt.Sprintf("New version available: %s  [%s, %s]\n", v.Version(), v.SrcHash(), v.BuildDate()))
 		downloadLinkPath := ""
 		if v.DownloadLinkPath() != "" {
 			downloadLinkPath = "/" + v.DownloadLinkPath()
@@ -88,6 +88,7 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 type versionInfo interface {
 	Version() string
 	SrcHash() string
+	BuildDate() string
 	DownloadLinkPath() string
 	IsValid() bool
 }
@@ -138,10 +139,11 @@ func fetchVersionInfo(origins []versionChecker) (*versionChecker, versionInfo) {
 	return nil, nil
 }
 
-// versionFromJotaen checks the version from klog.jotaen.net
+// versionFromJotaen checks the version via klog.jotaen.net
 type versionFromJotaen struct {
 	Version_          string `json:"version"`
 	BuildHash_        string `json:"src_hash"`
+	ReleaseDate_      string `json:"release_date"`
 	DownloadLinkPath_ string `json:"download_link_path"`
 }
 
@@ -156,11 +158,13 @@ func (v *versionFromJotaen) DownloadLinkPath() string { return v.DownloadLinkPat
 func (v *versionFromJotaen) IsValid() bool {
 	return strings.HasPrefix(v.Version_, "v") && len(v.BuildHash_) >= 7
 }
+func (v *versionFromJotaen) BuildDate() string { return v.ReleaseDate_ }
 
-// versionFromGithub checks the version from github.com
+// versionFromGithub checks the version via github.com
 type versionFromGithub struct {
 	Tag        string `json:"tag_name"`
 	CommitHash string `json:"target_commitish"`
+	CreatedAt  string `json:"created_at"` // Refers to the build date, not the publishing date.
 }
 
 func (v *versionFromGithub) Version() string { return v.Tag }
@@ -175,4 +179,11 @@ func (v *versionFromGithub) DownloadLinkPath() string {
 }
 func (v *versionFromGithub) IsValid() bool {
 	return strings.HasPrefix(v.Tag, "v") && len(v.CommitHash) >= 7
+}
+func (v *versionFromGithub) BuildDate() string {
+	t, err := time.Parse(time.RFC3339, v.CreatedAt)
+	if err != nil {
+		return "????-??-??"
+	}
+	return t.UTC().Format(time.DateOnly)
 }
