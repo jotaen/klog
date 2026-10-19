@@ -7,15 +7,17 @@ run::install() {
 }
 
 # Compile to ./out/klog
-# Takes two positional arguments:
-# - The version (e.g.: v1.2)
-# - The build hash (7 chars hex)
+# Takes three positional arguments:
+# - Version string (e.g.: v1.2)
+# - Build hash (7 chars hex)
+# - Build date (formatted YYYY-MM-DD)
 run::build() {
 	go build \
 	  -ldflags "\
 	    -s -w \
-	    -X 'main.BinaryVersion=${1:-v?.?}' \
-	    -X 'main.BinaryBuildHash=${2:-???????}' \
+	    -X 'main.BinaryVersion=$1' \
+	    -X 'main.BinaryBuildHash=$2' \
+	    -X 'main.BinaryBuildDate=$3' \
 	    " \
 	  -o ./out/klog \
 	  klog.go
