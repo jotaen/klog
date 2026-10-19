@@ -6,6 +6,10 @@
   it’s now: `klog-${OS}-${ARCH}64.zip`, e.g.: `klog-linux-amd64.zip`. (The binary
   inside the zip archive is still named `klog` / `klog.exe`, just as before.)
   There are now also ARM64 builds for both Linux and Windows available.
+- **[ NOTICE ]** There is a new Go build flag `BinaryBuildDate`, which renders the
+  build date in the `klog version` subcommand. This is purely for informational
+  reasons. The value needs to be formatted `YYYY-MM-DD`, e.g. `2026-10-26`. If not 
+  specified, it displays a placeholder value (`????-??-??`).
 - **[ FEATURE ]** Add new `klog note` subcommand for appending text to existing
   entry summaries. (See `klog note --help` to learn more.)
 - **[ FEATURE ]** Support `--now` flag on `klog print` subcommand
