@@ -17,9 +17,27 @@ var specification string
 //go:embed LICENSE.txt
 var license string
 
-var BinaryVersion string   // Set via build flag
-var BinaryBuildHash string // Set via build flag
-var BinaryBuildDate string // Set via build flag
+// BinaryVersion is the version identifier that is embedded in the binary.
+// It should be provided via a compile/build flag. The value must start with a
+// `v`, followed by 2 dot-separated integers; e.g., `v2.12`. Optionally, there
+// can be a dot- or hyphen-separated suffix (containing arbitrary characters),
+// e.g., `v12.9-alpha` or `v8.1.0-alpha_2*`. If the build flag is absent, a value
+// of `v?.?` is used.
+var BinaryVersion string
+
+// BinaryBuildHash is a computed hash of the underlying sources of the build.
+// It should be provided via a compile/build flag. This is usually the git commit
+// hash, e.g. `7ab819c`. The value must consist of at least 7 hexadecimal digits.
+// Longer values are truncated; the value will also be normalised to lower-case. If
+// the build flag is absent, a value of `???????` is used.
+var BinaryBuildHash string
+
+// BinaryBuildDate denotes the date that the build refers to. It should be provided
+// via a compile/build flag. This should be the date of the latest commit, or
+// alternatively the date at which the build occurred. It must be a valid calendar
+// date, formatted `YYYY-MM-DD`; e.g. `2026-10-26`. If the build flag is absent, a
+// value of `????-??-??` is used.
+var BinaryBuildDate string
 
 func main() {
 
