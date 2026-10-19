@@ -1,7 +1,7 @@
 # Changelog
 **Summary of changes of the command line tool**
 
-## vX.X (XXXX-XX-XX)
+## v7.2 (2026-10-26)
 - **[ NOTICE ]** The naming scheme of the zipped release artifacts have changed,
   it’s now: `klog-${OS}-${ARCH}64.zip`, e.g.: `klog-linux-amd64.zip`. (The binary
   inside the zip archive is still named `klog` / `klog.exe`, just as before.)
