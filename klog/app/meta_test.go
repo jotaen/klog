@@ -1,6 +1,7 @@
 package app
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -74,7 +75,7 @@ func TestAcceptsValidSrcHash(t *testing.T) {
 	} {
 		t.Run(in, func(t *testing.T) {
 			m := NewMeta("Specification", "License", "v1.2", in, "2000-12-31")
-			assert.Equal(t, in[:7], m.SrcHash)
+			assert.Equal(t, strings.ToLower(in[:7]), m.SrcHash)
 		})
 	}
 }

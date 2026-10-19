@@ -45,7 +45,7 @@ func NewMeta(specification string, license string, version string, srcHash strin
 			if !pattern.MatchString(srcHash) {
 				return "???????"
 			}
-			return srcHash[:7]
+			return strings.ToLower(srcHash[:7])
 		}(),
 		BuildDate: func() string {
 			buildDate = strings.TrimSpace(buildDate)

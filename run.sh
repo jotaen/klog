@@ -1,4 +1,5 @@
 #!/bin/bash
+# Use this script with https://run.jotaen.net
 
 # Install all dependencies
 run::install() {
@@ -7,7 +8,7 @@ run::install() {
 }
 
 # Compile to ./out/klog
-# Takes three positional arguments:
+# Takes three positional arguments (see `klog.go` file):
 # - Version string (e.g.: v1.2)
 # - Build hash (7 chars hex)
 # - Build date (formatted YYYY-MM-DD)
