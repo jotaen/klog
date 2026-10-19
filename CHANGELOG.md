@@ -1,6 +1,25 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## v7.2 (2026-10-26)
+- **[ NOTICE ]** Some (potentially build-breaking!) updates around the build process:
+  - The naming scheme of the zipped release artifacts have changed,
+    it’s now: `klog-${OS}-${ARCH}64.zip`, e.g.: `klog-linux-amd64.zip`. (The binary
+    inside the zip archive is still named `klog` / `klog.exe`, just as before.)
+    There are now also ARM64 builds for both Linux and Windows available.
+  - There is a new Go build flag `BinaryBuildDate`, which embeds and renders the
+    build date in the `klog version` subcommand.
+  - All 3 Go build flags (`BinaryVersion`, `BinaryBuildHash`, `BinaryBuildDate`)
+    now undergo some basic validation – see `klog.go` to learn more. Malformed or
+    absent values don’t break the build, but are gracefully substituted by placeholder
+    values, e.g. `v?.?`.
+- **[ FEATURE ]** Add new `klog note` subcommand for appending text to existing
+  entry summaries. (See `klog note --help` to learn more.)
+- **[ FEATURE ]** Support `--now` flag on `klog print` subcommand
+  (primarily useful in conjunction with the `--with-totals` flag).
+- **[ FIX ]** Tab completion now works reliable for file paths containing spaces
+  or other special characters.
+
 ## v7.1 (2026-02-22)
 - **[ FEATURE ]** Include warnings in JSON output of `klog json` subcommand.
 - **[ FEATURE ]** When using `klog report --fill` and combining this with a periodic
