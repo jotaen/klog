@@ -30,9 +30,20 @@ EXPECTED_VERSION="$1"
 [[ "${ACTUAL_VERSION}" == "${EXPECTED_VERSION}" ]] || exit 1
 
 echo 'Check build hash...'
-ACTUAL_BUILD_HASH="$(klog version --no-check | grep -oE '\[[abcdef0123456789]{7}]')"
+ACTUAL_BUILD_HASH="$(klog version --no-check | grep -oE '[abcdef0123456789]{7}')"
 EXPECTED_BUILD_HASH="$2"
-[[ "${ACTUAL_BUILD_HASH}" == "[${EXPECTED_BUILD_HASH::7}]" ]] || exit 1
+[[ "${ACTUAL_BUILD_HASH}" == "${EXPECTED_BUILD_HASH::7}" ]] || exit 1
+
+echo 'Check build date...'
+ACTUAL_BUILD_DATE="$(klog version --no-check | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')"
+EXPECTED_BUILD_DATE="$3"
+[[ "${ACTUAL_BUILD_DATE}" == "${EXPECTED_BUILD_DATE}" ]] || exit 1
+
+echo 'Check embedded spec file...'
+ACTUAL_SPEC="$(klog info --spec)"
+EXPECTED_SPEC="$(cat "${THIS_DIR}/../Specification.md")"
+cmp -s <(tr -d '[:space:]' <<<"${ACTUAL_SPEC}") \
+       <(tr -d '[:space:]' <<<"${EXPECTED_SPEC}") || exit 1
 
 echo 'Check embedded license file...'
 ACTUAL_LICENSE="$(klog info --license)"

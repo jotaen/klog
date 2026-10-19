@@ -19,11 +19,9 @@ var license string
 
 var BinaryVersion string   // Set via build flag
 var BinaryBuildHash string // Set via build flag
+var BinaryBuildDate string // Set via build flag
 
 func main() {
-	if len(BinaryBuildHash) > 7 {
-		BinaryBuildHash = BinaryBuildHash[:7]
-	}
 
 	klogFolder := func() app.File {
 		f, err := determineKlogConfigFolder()
@@ -49,12 +47,12 @@ func main() {
 		return c
 	}()
 
-	code, err := klog.Run(klogFolder, app.Meta{
-		Specification: specification,
-		License:       license,
-		Version:       BinaryVersion,
-		SrcHash:       BinaryBuildHash,
-	}, config, os.Args[1:])
+	code, err := klog.Run(
+		klogFolder,
+		app.NewMeta(specification, license, BinaryVersion, BinaryBuildHash, BinaryBuildDate),
+		config,
+		os.Args[1:],
+	)
 	if err != nil {
 		fail(err, code)
 	}
