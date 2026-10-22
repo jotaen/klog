@@ -25,10 +25,13 @@ type BuildInfo struct {
 	SrcHash string
 
 	// Date is the date at which the binary was built, e.g. `2026-10-19`.
+	// This is a purely informational value.
 	Date string
 }
 
-func (b BuildInfo) IsOk() bool {
+// IsDetermined checks whether the build info contains the required meaningful values to
+// determine the build version. That is at least version and hash; date is optional.
+func (b BuildInfo) IsDetermined() bool {
 	return b.Version != "v?.?" && b.SrcHash != "???????"
 }
 

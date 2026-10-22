@@ -2,18 +2,21 @@ package cli
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/args"
+	"github.com/jotaen/klog/klog/app/cli/prettify"
 )
 
 type Version struct {
-	NoCheck bool `name:"no-check" help:"Don’t check online for updates."` // used for the smoke test
+	NoCheck bool `name:"no-check" help:"Don’t check online for updates."` // used e.g. for the smoke test or other automated contexts
 	args.QuietArgs
 }
 
@@ -30,25 +33,26 @@ type versionFetcher interface {
 	decode() app.BuildInfo
 }
 
-var versionFetchers = []versionFetcher{
-	&versionFromJotaen{},
-	&versionFromGithub{},
-}
-
 func (opt *Version) Run(ctx app.Context) app.Error {
 	buildInfo := ctx.Meta().BuildInfo
-	if !buildInfo.IsOk() {
-		return app.NewError(
-			"Cannot check version",
-			"There is no version information embedded in your binary. Please check manually for updates on "+KLOG_WEBSITE_URL,
-			nil,
-		)
-	}
 
 	if opt.Quiet {
+		if !buildInfo.IsDetermined() {
+			return app.NewError(
+				"Version unknown",
+				"There is no version information embedded into your binary.",
+				nil,
+			)
+		}
 		ctx.Print(buildInfo.Version + "\n")
 		return nil
 	}
+
+	if !buildInfo.IsDetermined() {
+		styler, _ := ctx.Serialise()
+		ctx.Print(prettify.PrettifyWarning("There is no version information embedded in your klog binary\n", styler))
+	}
+
 	ctx.Print("Command line tool: " + buildInfo.Version)
 	ctx.Print(fmt.Sprintf("  [%s, %s]\n", buildInfo.SrcHash, buildInfo.Date))
 	ctx.Print("File format: version " + klog.SPEC_VERSION + "\n")
@@ -63,20 +67,35 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 		ctx.Print(".")
 	}, stopTicker)
 
-	fetchUrl, latestRelease := fetchVersionInfo(versionFetchers)
+	isOk, latestRelease := func() (bool, app.BuildInfo) {
+		for _, fetcher := range []versionFetcher{
+			&versionFromJotaen{},
+			&versionFromGithub{},
+		} {
+			ctx.Debug(func() {
+				ctx.Print(" [Fetching from: " + fetcher.url() + "] ")
+			})
+			lr, err := fetchVersionInfo(fetcher)
+			if err != nil {
+				ctx.Debug(func() {
+					ctx.Print(" [Error: " + err.Error() + "] ")
+				})
+				continue
+			}
+			return true, lr
+		}
+		return false, app.NewBuildInfo("", "", "")
+	}()
+
 	close(stopTicker)
 	ctx.Print("\n")
-	if fetchUrl == "" {
+	if !isOk {
 		return app.NewError(
 			"Failed to retrieve version information.",
 			"Please try again later, or check manually at "+KLOG_WEBSITE_URL,
 			nil,
 		)
 	}
-
-	ctx.Debug(func() {
-		ctx.Print("Fetched from: " + fetchUrl + "\n")
-	})
 
 	if latestRelease.Version == buildInfo.Version && latestRelease.SrcHash == buildInfo.SrcHash {
 		ctx.Print("You already have the latest version!\n")
@@ -100,31 +119,35 @@ func progressTicker(onTick func(), stop chan bool) {
 	}
 }
 
-// fetchVersionInfo requests version info from the origins by trying them
-// one after the other. It returns the first response that succeeds.
-func fetchVersionInfo(fetcher []versionFetcher) (string, app.BuildInfo) {
-	for _, origin := range fetcher {
-		req, err := http.NewRequest(http.MethodGet, origin.url(), nil)
-		if err != nil {
-			continue
-		}
-		res, err := (&http.Client{
-			Timeout: time.Second * 5,
-		}).Do(req)
-		if err != nil {
-			continue
-		}
-		body, err := io.ReadAll(res.Body)
-		if err != nil {
-			continue
-		}
-		err = json.Unmarshal(body, &origin)
-		if err != nil {
-			continue
-		}
-		return origin.url(), origin.decode()
+func fetchVersionInfo(fetcher versionFetcher) (app.BuildInfo, error) {
+	req, err := http.NewRequest(http.MethodGet, fetcher.url(), nil)
+	if err != nil {
+		return app.BuildInfo{}, err
 	}
-	return "", app.NewBuildInfo("", "", "")
+	res, err := (&http.Client{
+		Timeout: time.Second * 5,
+	}).Do(req)
+	if err != nil {
+		return app.BuildInfo{}, err
+	}
+	if res.StatusCode != http.StatusOK {
+		_ = res.Body.Close()
+		return app.BuildInfo{}, errors.New("HTTP-call resulted in status code " + strconv.Itoa(res.StatusCode))
+	}
+	body, err := io.ReadAll(io.LimitReader(res.Body, 512*1024))
+	_ = res.Body.Close()
+	if err != nil {
+		return app.BuildInfo{}, err
+	}
+	err = json.Unmarshal(body, &fetcher)
+	if err != nil {
+		return app.BuildInfo{}, err
+	}
+	buildInfo := fetcher.decode()
+	if !buildInfo.IsDetermined() {
+		return app.BuildInfo{}, errors.New("Invalid build info data retrieved")
+	}
+	return buildInfo, nil
 }
 
 // versionFromJotaen checks the version via klog.jotaen.net
