@@ -129,7 +129,7 @@ func (ctx *TestingContext) Meta() app.Meta {
 		BuildInfo: app.BuildInfo{
 			Version: "v0.0",
 			SrcHash: "abc1234",
-			Date:    "0001-01-01T00:00:00Z",
+			Date:    "0001-01-01",
 		},
 	}
 }
