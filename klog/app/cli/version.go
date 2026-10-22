@@ -2,9 +2,11 @@ package cli
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/jotaen/klog/klog"
@@ -29,11 +31,6 @@ const KLOG_WEBSITE_URL = "https://klog.jotaen.net"
 type versionFetcher interface {
 	url() string
 	decode() app.BuildInfo
-}
-
-var versionFetchers = []versionFetcher{
-	&versionFromJotaen{},
-	&versionFromGithub{},
 }
 
 func (opt *Version) Run(ctx app.Context) app.Error {
@@ -70,20 +67,34 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 		ctx.Print(".")
 	}, stopTicker)
 
-	fetchUrl, latestRelease := fetchVersionInfo(versionFetchers)
+	isOk, latestRelease := func() (bool, app.BuildInfo) {
+		for _, fetcher := range []versionFetcher{
+			&versionFromJotaen{},
+			&versionFromGithub{},
+		} {
+			ctx.Debug(func() {
+				ctx.Print(" [Fetching from: " + fetcher.url() + "] ")
+			})
+			err, lr := fetchVersionInfo(fetcher)
+			if err == nil {
+				return true, lr
+			}
+			ctx.Debug(func() {
+				ctx.Print(" [Error: " + err.Error() + "] ")
+			})
+		}
+		return false, app.NewBuildInfo("", "", "")
+	}()
+
 	close(stopTicker)
 	ctx.Print("\n")
-	if fetchUrl == "" {
+	if !isOk {
 		return app.NewError(
 			"Failed to retrieve version information.",
 			"Please try again later, or check manually at "+KLOG_WEBSITE_URL,
 			nil,
 		)
 	}
-
-	ctx.Debug(func() {
-		ctx.Print("Fetched from: " + fetchUrl + "\n")
-	})
 
 	if latestRelease.Version == buildInfo.Version && latestRelease.SrcHash == buildInfo.SrcHash {
 		ctx.Print("You already have the latest version!\n")
@@ -107,42 +118,35 @@ func progressTicker(onTick func(), stop chan bool) {
 	}
 }
 
-// fetchVersionInfo requests version info from the origins by trying them
-// one after the other. It returns the first response that succeeds.
-func fetchVersionInfo(fetcher []versionFetcher) (string, app.BuildInfo) {
-	for _, origin := range fetcher {
-		req, err := http.NewRequest(http.MethodGet, origin.url(), nil)
-		if err != nil {
-			continue
-		}
-		res, err := (&http.Client{
-			Timeout: time.Second * 5,
-		}).Do(req)
-		if err != nil {
-			continue
-		}
-		if res.StatusCode != http.StatusOK {
-			_ = res.Body.Close()
-			continue
-		}
-		body, err := io.ReadAll(io.LimitReader(res.Body, 64*1024))
-		_ = res.Body.Close()
-		if err != nil {
-			continue
-		}
-		err = json.Unmarshal(body, &origin)
-		if err != nil {
-			// Skip if JSON cannot be decoded.
-			continue
-		}
-		buildInfo := origin.decode()
-		if !buildInfo.IsDetermined() {
-			// Skip if build info data isn’t legit.
-			continue
-		}
-		return origin.url(), buildInfo
+func fetchVersionInfo(fetcher versionFetcher) (error, app.BuildInfo) {
+	req, err := http.NewRequest(http.MethodGet, fetcher.url(), nil)
+	if err != nil {
+		return err, app.BuildInfo{}
 	}
-	return "", app.NewBuildInfo("", "", "")
+	res, err := (&http.Client{
+		Timeout: time.Second * 5,
+	}).Do(req)
+	if err != nil {
+		return err, app.BuildInfo{}
+	}
+	if res.StatusCode != http.StatusOK {
+		_ = res.Body.Close()
+		return errors.New("URL resulted in a non-200 status code (" + strconv.Itoa(res.StatusCode) + ")"), app.BuildInfo{}
+	}
+	body, err := io.ReadAll(io.LimitReader(res.Body, 64*1024))
+	_ = res.Body.Close()
+	if err != nil {
+		return err, app.BuildInfo{}
+	}
+	err = json.Unmarshal(body, &fetcher)
+	if err != nil {
+		return err, app.BuildInfo{}
+	}
+	buildInfo := fetcher.decode()
+	if !buildInfo.IsDetermined() {
+		return errors.New("Invalid build info"), app.BuildInfo{}
+	}
+	return nil, buildInfo
 }
 
 // versionFromJotaen checks the version via klog.jotaen.net
