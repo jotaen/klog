@@ -35,6 +35,7 @@ func TestAcceptsValidVersion(t *testing.T) {
 		"v2.5910",
 		"v28372.5910",
 		"v5.23-alpha",
+		"v5.23-veryLongButStillOkVeryLongButStillOkVeryLongButStillOkVeryLongButStillOkVeryLongButStillOkVeryLongBu",
 		"v5.23.42-alpha",
 		"v5.23.42-alpha_SOMETHING.-_",
 	} {
@@ -62,6 +63,9 @@ func TestRejectsInvalidVersion(t *testing.T) {
 		"v1.22alpha",
 		"v1.22-something#",
 		"v1.22-something?",
+		"v1.22-tooLongTooLongTooLongTooLongTooLongTooLongTooLongTooLongTooLongTooLongTooLongTooLongTooLongTooLongToo",
+		"v1.2\x1b[2K",
+		"v1.2\nfoo",
 	} {
 		t.Run(in, func(t *testing.T) {
 			expected := "v?.?"
@@ -102,6 +106,8 @@ func TestRejectsInvalidSrcHash(t *testing.T) {
 		"123456g",
 		"abcdefghijklmnopqrst",
 		"&^@!#@(*#&!*@&",
+		"1234567\x1b[2K",
+		"1234567\nfoo",
 	} {
 		t.Run(in, func(t *testing.T) {
 			expected := "???????"
@@ -142,6 +148,8 @@ func TestRejectsInvalidBuildDate(t *testing.T) {
 		"2000 12 31",
 		"2000/12/31",
 		"abcd-ef-gh",
+		"0001-\x1b[2K",
+		"0001-01-\n",
 	} {
 		t.Run(in, func(t *testing.T) {
 			expected := "????-??-??"

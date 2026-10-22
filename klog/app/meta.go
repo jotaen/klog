@@ -47,7 +47,7 @@ func NewBuildInfo(version string, srcHash string, buildDate string) BuildInfo {
 	return BuildInfo{
 		Version: func() string {
 			version = strings.TrimSpace(version)
-			pattern := regexp.MustCompile(`^v\d+\.\d+([.-][a-zA-Z0-9.\-_]+)?$`)
+			pattern := regexp.MustCompile(`^v\d+\.\d+([.-][a-zA-Z0-9.\-_]{1,100})?$`)
 			if !pattern.MatchString(version) {
 				return "v?.?"
 			}
