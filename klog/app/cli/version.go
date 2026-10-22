@@ -132,7 +132,7 @@ func fetchVersionInfo(fetcher versionFetcher) (app.BuildInfo, error) {
 	}
 	if res.StatusCode != http.StatusOK {
 		_ = res.Body.Close()
-		return errors.New("URL resulted in a non-200 status code (" + strconv.Itoa(res.StatusCode) + ")"), app.BuildInfo{}
+		return app.BuildInfo{}, errors.New("HTTP-call resulted in status code " + strconv.Itoa(res.StatusCode))
 	}
 	body, err := io.ReadAll(io.LimitReader(res.Body, 512*1024))
 	_ = res.Body.Close()
@@ -145,7 +145,7 @@ func fetchVersionInfo(fetcher versionFetcher) (app.BuildInfo, error) {
 	}
 	buildInfo := fetcher.decode()
 	if !buildInfo.IsDetermined() {
-		return app.BuildInfo{}, errors.New("Invalid build info")
+		return app.BuildInfo{}, errors.New("Invalid build info data retrieved")
 	}
 	return buildInfo, nil
 }
