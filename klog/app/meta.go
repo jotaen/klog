@@ -14,27 +14,40 @@ type Meta struct {
 	// License contains the license text.
 	License string
 
+	BuildInfo
+}
+
+type BuildInfo struct {
 	// Version contains the release version, e.g. `v2.7`.
 	Version string
 
 	// SrcHash contains the hash of the sources that the binary was built from.
 	SrcHash string
 
-	// BuildDate is the date at which the binary was built, e.g. `2026-10-19`.
-	BuildDate string
+	// Date is the date at which the binary was built, e.g. `2026-10-19`.
+	Date string
 }
 
 // NewMeta creates a meta info object from input strings. For invalid values, it
 // replaces them with ?-placeholders instead of failing. The validation is mostly
 // structural, not logical.
 func NewMeta(specification string, license string, version string, srcHash string, buildDate string) Meta {
+	_, metaVersion := NewBuildInfo(version, srcHash, buildDate)
 	return Meta{
 		Specification: specification,
 		License:       license,
+		BuildInfo:     metaVersion,
+	}
+}
+
+func NewBuildInfo(version string, srcHash string, buildDate string) (bool, BuildInfo) {
+	isValid := true
+	v := BuildInfo{
 		Version: func() string {
 			version = strings.TrimSpace(version)
-			pattern := regexp.MustCompile(`^v\d+\.\d+([.-].+)?$`)
+			pattern := regexp.MustCompile(`^v\d+\.\d+([.-][a-zA-Z0-9.\-_]+)?$`)
 			if !pattern.MatchString(version) {
+				isValid = false
 				return "v?.?"
 			}
 			return version
@@ -43,17 +56,20 @@ func NewMeta(specification string, license string, version string, srcHash strin
 			srcHash = strings.TrimSpace(srcHash)
 			pattern := regexp.MustCompile(`^[a-fA-F0-9]{7,}$`)
 			if !pattern.MatchString(srcHash) {
+				isValid = false
 				return "???????"
 			}
 			return strings.ToLower(srcHash[:7])
 		}(),
-		BuildDate: func() string {
+		Date: func() string {
 			buildDate = strings.TrimSpace(buildDate)
 			pattern := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}(T.*)?$`)
 			if !pattern.MatchString(buildDate) {
+				isValid = false
 				return "????-??-??"
 			}
 			return buildDate[:10]
 		}(),
 	}
+	return isValid, v
 }
