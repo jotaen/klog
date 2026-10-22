@@ -76,11 +76,7 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 		ctx.Print("You already have the latest version!\n")
 	} else {
 		ctx.Print(fmt.Sprintf("New version available: %s  [%s, %s]\n", v.Version(), v.SrcHash(), v.BuildDate()))
-		downloadLinkPath := ""
-		if v.DownloadLinkPath() != "" {
-			downloadLinkPath = "/" + v.DownloadLinkPath()
-		}
-		ctx.Print("See: " + KLOG_WEBSITE_URL + downloadLinkPath + "\n")
+		ctx.Print("See: " + KLOG_WEBSITE_URL + "\n")
 	}
 	return nil
 }
@@ -89,7 +85,6 @@ type versionInfo interface {
 	Version() string
 	SrcHash() string
 	BuildDate() string
-	DownloadLinkPath() string
 	IsValid() bool
 }
 
@@ -141,10 +136,9 @@ func fetchVersionInfo(origins []versionChecker) (*versionChecker, versionInfo) {
 
 // versionFromJotaen checks the version via klog.jotaen.net
 type versionFromJotaen struct {
-	Version_          string `json:"version"`
-	BuildHash_        string `json:"src_hash"`
-	ReleaseDate_      string `json:"release_date"`
-	DownloadLinkPath_ string `json:"download_link_path"`
+	Version_     string `json:"version"`
+	BuildHash_   string `json:"src_hash"`
+	ReleaseDate_ string `json:"release_date"`
 }
 
 func (v *versionFromJotaen) Version() string { return v.Version_ }
@@ -154,7 +148,6 @@ func (v *versionFromJotaen) SrcHash() string {
 	}
 	return v.BuildHash_[:7]
 }
-func (v *versionFromJotaen) DownloadLinkPath() string { return v.DownloadLinkPath_ }
 func (v *versionFromJotaen) IsValid() bool {
 	return strings.HasPrefix(v.Version_, "v") && len(v.BuildHash_) >= 7
 }
@@ -173,9 +166,6 @@ func (v *versionFromGithub) SrcHash() string {
 		return v.CommitHash
 	}
 	return v.CommitHash[:7]
-}
-func (v *versionFromGithub) DownloadLinkPath() string {
-	return ""
 }
 func (v *versionFromGithub) IsValid() bool {
 	return strings.HasPrefix(v.Tag, "v") && len(v.CommitHash) >= 7
