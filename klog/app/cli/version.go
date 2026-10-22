@@ -133,7 +133,7 @@ func fetchVersionInfo(fetcher versionFetcher) (error, app.BuildInfo) {
 		_ = res.Body.Close()
 		return errors.New("URL resulted in a non-200 status code (" + strconv.Itoa(res.StatusCode) + ")"), app.BuildInfo{}
 	}
-	body, err := io.ReadAll(io.LimitReader(res.Body, 64*1024))
+	body, err := io.ReadAll(io.LimitReader(res.Body, 512*1024))
 	_ = res.Body.Close()
 	if err != nil {
 		return err, app.BuildInfo{}
