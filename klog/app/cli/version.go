@@ -75,13 +75,14 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 			ctx.Debug(func() {
 				ctx.Print(" [Fetching from: " + fetcher.url() + "] ")
 			})
-			err, lr := fetchVersionInfo(fetcher)
-			if err == nil {
-				return true, lr
+			lr, err := fetchVersionInfo(fetcher)
+			if err != nil {
+				ctx.Debug(func() {
+					ctx.Print(" [Error: " + err.Error() + "] ")
+				})
+				continue
 			}
-			ctx.Debug(func() {
-				ctx.Print(" [Error: " + err.Error() + "] ")
-			})
+			return true, lr
 		}
 		return false, app.NewBuildInfo("", "", "")
 	}()
@@ -118,16 +119,16 @@ func progressTicker(onTick func(), stop chan bool) {
 	}
 }
 
-func fetchVersionInfo(fetcher versionFetcher) (error, app.BuildInfo) {
+func fetchVersionInfo(fetcher versionFetcher) (app.BuildInfo, error) {
 	req, err := http.NewRequest(http.MethodGet, fetcher.url(), nil)
 	if err != nil {
-		return err, app.BuildInfo{}
+		return app.BuildInfo{}, err
 	}
 	res, err := (&http.Client{
 		Timeout: time.Second * 5,
 	}).Do(req)
 	if err != nil {
-		return err, app.BuildInfo{}
+		return app.BuildInfo{}, err
 	}
 	if res.StatusCode != http.StatusOK {
 		_ = res.Body.Close()
@@ -136,17 +137,17 @@ func fetchVersionInfo(fetcher versionFetcher) (error, app.BuildInfo) {
 	body, err := io.ReadAll(io.LimitReader(res.Body, 512*1024))
 	_ = res.Body.Close()
 	if err != nil {
-		return err, app.BuildInfo{}
+		return app.BuildInfo{}, err
 	}
 	err = json.Unmarshal(body, &fetcher)
 	if err != nil {
-		return err, app.BuildInfo{}
+		return app.BuildInfo{}, err
 	}
 	buildInfo := fetcher.decode()
 	if !buildInfo.IsDetermined() {
-		return errors.New("Invalid build info"), app.BuildInfo{}
+		return app.BuildInfo{}, errors.New("Invalid build info")
 	}
-	return nil, buildInfo
+	return buildInfo, nil
 }
 
 // versionFromJotaen checks the version via klog.jotaen.net
