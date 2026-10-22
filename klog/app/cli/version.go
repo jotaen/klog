@@ -13,7 +13,7 @@ import (
 )
 
 type Version struct {
-	NoCheck bool `name:"no-check" help:"Don’t check online for updates."` // used for the smoke test
+	NoCheck bool `name:"no-check" help:"Don’t check online for updates."` // used e.g. for the smoke test or other automated contexts
 	args.QuietArgs
 }
 
@@ -37,10 +37,10 @@ var versionFetchers = []versionFetcher{
 
 func (opt *Version) Run(ctx app.Context) app.Error {
 	buildInfo := ctx.Meta().BuildInfo
-	if !buildInfo.IsOk() {
+	if !buildInfo.IsDetermined() {
 		return app.NewError(
-			"Cannot check version",
-			"There is no version information embedded in your binary. Please check manually for updates on "+KLOG_WEBSITE_URL,
+			"Version unknown",
+			"There is no version information embedded into your binary.",
 			nil,
 		)
 	}
@@ -49,6 +49,7 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 		ctx.Print(buildInfo.Version + "\n")
 		return nil
 	}
+
 	ctx.Print("Command line tool: " + buildInfo.Version)
 	ctx.Print(fmt.Sprintf("  [%s, %s]\n", buildInfo.SrcHash, buildInfo.Date))
 	ctx.Print("File format: version " + klog.SPEC_VERSION + "\n")
@@ -114,15 +115,26 @@ func fetchVersionInfo(fetcher []versionFetcher) (string, app.BuildInfo) {
 		if err != nil {
 			continue
 		}
-		body, err := io.ReadAll(res.Body)
+		if res.StatusCode != http.StatusOK {
+			_ = res.Body.Close()
+			continue
+		}
+		body, err := io.ReadAll(io.LimitReader(res.Body, 64*1024))
+		_ = res.Body.Close()
 		if err != nil {
 			continue
 		}
 		err = json.Unmarshal(body, &origin)
 		if err != nil {
+			// Skip if JSON cannot be decoded.
 			continue
 		}
-		return origin.url(), origin.decode()
+		buildInfo := origin.decode()
+		if !buildInfo.IsDetermined() {
+			// Skip if build info data isn’t legit.
+			continue
+		}
+		return origin.url(), buildInfo
 	}
 	return "", app.NewBuildInfo("", "", "")
 }

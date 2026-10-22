@@ -44,7 +44,7 @@ func TestAcceptsValidVersion(t *testing.T) {
 			m := NewMeta("Specification", "License", in, "1234abc", "2000-12-31")
 			assert.Equal(t, expected, m.BuildInfo.Version)
 			mv := NewBuildInfo(in, "1234abc", "2000-12-31")
-			assert.True(t, mv.IsOk())
+			assert.True(t, mv.IsDetermined())
 			assert.Equal(t, expected, mv.Version)
 		})
 	}
@@ -72,7 +72,7 @@ func TestRejectsInvalidVersion(t *testing.T) {
 			m := NewMeta("Specification", "License", in, "1234abc", "2000-12-31")
 			assert.Equal(t, expected, m.BuildInfo.Version)
 			mv := NewBuildInfo(in, "1234abc", "2000-12-31")
-			assert.False(t, mv.IsOk())
+			assert.False(t, mv.IsDetermined())
 			assert.Equal(t, expected, mv.Version)
 		})
 	}
@@ -92,7 +92,7 @@ func TestAcceptsValidSrcHash(t *testing.T) {
 			m := NewMeta("Specification", "License", "v1.2", in, "2000-12-31")
 			assert.Equal(t, expected, m.BuildInfo.SrcHash)
 			mv := NewBuildInfo("v1.2", in, "2000-12-31")
-			assert.True(t, mv.IsOk())
+			assert.True(t, mv.IsDetermined())
 			assert.Equal(t, expected, mv.SrcHash)
 		})
 	}
@@ -114,7 +114,7 @@ func TestRejectsInvalidSrcHash(t *testing.T) {
 			m := NewMeta("Specification", "License", "v1.2", in, "2000-12-31")
 			assert.Equal(t, expected, m.BuildInfo.SrcHash)
 			mv := NewBuildInfo("v1.2", in, "2000-12-31")
-			assert.False(t, mv.IsOk())
+			assert.False(t, mv.IsDetermined())
 			assert.Equal(t, expected, mv.SrcHash)
 		})
 	}
@@ -134,7 +134,7 @@ func TestAcceptsValidBuildDate(t *testing.T) {
 			m := NewMeta("Specification", "License", "v1.2", "1234567", in)
 			assert.Equal(t, expected, m.BuildInfo.Date)
 			mv := NewBuildInfo("v1.2", "1234567", in)
-			assert.True(t, mv.IsOk())
+			assert.True(t, mv.IsDetermined())
 			assert.Equal(t, expected, mv.Date)
 		})
 	}
@@ -156,7 +156,7 @@ func TestRejectsInvalidBuildDate(t *testing.T) {
 			m := NewMeta("Specification", "License", "v1.2", "1234567", in)
 			assert.Equal(t, expected, m.BuildInfo.Date)
 			mv := NewBuildInfo("v1.2", "1234567", in)
-			assert.True(t, mv.IsOk()) // `true` is correct, since the date is only informational.
+			assert.True(t, mv.IsDetermined()) // `true` is correct, since the date is only informational.
 			assert.Equal(t, expected, mv.Date)
 		})
 	}
