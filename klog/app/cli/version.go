@@ -27,7 +27,7 @@ const KLOG_WEBSITE_URL = "https://klog.jotaen.net"
 
 type versionFetcher interface {
 	url() string
-	decode() (bool, app.BuildInfo)
+	decode() app.BuildInfo
 }
 
 var versionFetchers = []versionFetcher{
@@ -36,7 +36,8 @@ var versionFetchers = []versionFetcher{
 }
 
 func (opt *Version) Run(ctx app.Context) app.Error {
-	if ctx.Meta().Version == "" {
+	buildInfo := ctx.Meta().BuildInfo
+	if !buildInfo.IsOk() {
 		return app.NewError(
 			"Cannot check version",
 			"There is no version information embedded in your binary. Please check manually for updates on "+KLOG_WEBSITE_URL,
@@ -45,11 +46,11 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 	}
 
 	if opt.Quiet {
-		ctx.Print(ctx.Meta().Version + "\n")
+		ctx.Print(buildInfo.Version + "\n")
 		return nil
 	}
-	ctx.Print("Command line tool: " + ctx.Meta().Version)
-	ctx.Print(fmt.Sprintf("  [%s, %s]\n", ctx.Meta().SrcHash, ctx.Meta().Date))
+	ctx.Print("Command line tool: " + buildInfo.Version)
+	ctx.Print(fmt.Sprintf("  [%s, %s]\n", buildInfo.SrcHash, buildInfo.Date))
 	ctx.Print("File format: version " + klog.SPEC_VERSION + "\n")
 
 	if opt.NoCheck {
@@ -77,7 +78,7 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 		ctx.Print("Fetched from: " + fetchUrl + "\n")
 	})
 
-	if latestRelease.Version == ctx.Meta().Version && latestRelease.SrcHash == ctx.Meta().SrcHash {
+	if latestRelease.Version == buildInfo.Version && latestRelease.SrcHash == buildInfo.SrcHash {
 		ctx.Print("You already have the latest version!\n")
 	} else {
 		ctx.Print(fmt.Sprintf("New version available: %s  [%s, %s]\n", latestRelease.Version, latestRelease.SrcHash, latestRelease.Date))
@@ -121,14 +122,9 @@ func fetchVersionInfo(fetcher []versionFetcher) (string, app.BuildInfo) {
 		if err != nil {
 			continue
 		}
-		isValid, buildInfo := origin.decode()
-		if !isValid {
-			continue
-		}
-		return origin.url(), buildInfo
+		return origin.url(), origin.decode()
 	}
-	_, dummyBuildInfo := app.NewBuildInfo("", "", "")
-	return "", dummyBuildInfo
+	return "", app.NewBuildInfo("", "", "")
 }
 
 // versionFromJotaen checks the version via klog.jotaen.net
@@ -141,7 +137,7 @@ type versionFromJotaen struct {
 func (v *versionFromJotaen) url() string {
 	return "https://klog.jotaen.net/versions/latest.json"
 }
-func (v *versionFromJotaen) decode() (bool, app.BuildInfo) {
+func (v *versionFromJotaen) decode() app.BuildInfo {
 	return app.NewBuildInfo(v.Version_, v.BuildHash_, v.ReleaseDate_)
 }
 
@@ -155,6 +151,6 @@ type versionFromGithub struct {
 func (v *versionFromGithub) url() string {
 	return "https://api.github.com/repos/jotaen/klog/releases/latest"
 }
-func (v *versionFromGithub) decode() (bool, app.BuildInfo) {
+func (v *versionFromGithub) decode() app.BuildInfo {
 	return app.NewBuildInfo(v.Tag, v.CommitHash, v.CreatedAt)
 }

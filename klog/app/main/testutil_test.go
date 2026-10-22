@@ -45,8 +45,11 @@ func (e *Env) execute(t *testing.T, is ...invocation) {
 		code, runErr := Run(app.NewFileOrPanic(tmpDir), app.Meta{
 			Specification: "[Specification text]",
 			License:       "[License text]",
-			Version:       "v0.0",
-			SrcHash:       "abc1234",
+			BuildInfo: app.BuildInfo{
+				Version: "v0.0",
+				SrcHash: "abc1234",
+				Date:    "0001-01-01",
+			},
 		}, config, invoke.args)
 
 		_ = w.Close()

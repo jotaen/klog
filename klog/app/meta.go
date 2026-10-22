@@ -14,7 +14,7 @@ type Meta struct {
 	// License contains the license text.
 	License string
 
-	BuildInfo
+	BuildInfo BuildInfo
 }
 
 type BuildInfo struct {
@@ -28,26 +28,27 @@ type BuildInfo struct {
 	Date string
 }
 
+func (b BuildInfo) IsOk() bool {
+	return b.Version != "v?.?" && b.SrcHash != "???????"
+}
+
 // NewMeta creates a meta info object from input strings. For invalid values, it
 // replaces them with ?-placeholders instead of failing. The validation is mostly
 // structural, not logical.
 func NewMeta(specification string, license string, version string, srcHash string, buildDate string) Meta {
-	_, metaVersion := NewBuildInfo(version, srcHash, buildDate)
 	return Meta{
 		Specification: specification,
 		License:       license,
-		BuildInfo:     metaVersion,
+		BuildInfo:     NewBuildInfo(version, srcHash, buildDate),
 	}
 }
 
-func NewBuildInfo(version string, srcHash string, buildDate string) (bool, BuildInfo) {
-	isValid := true
-	v := BuildInfo{
+func NewBuildInfo(version string, srcHash string, buildDate string) BuildInfo {
+	return BuildInfo{
 		Version: func() string {
 			version = strings.TrimSpace(version)
 			pattern := regexp.MustCompile(`^v\d+\.\d+([.-][a-zA-Z0-9.\-_]+)?$`)
 			if !pattern.MatchString(version) {
-				isValid = false
 				return "v?.?"
 			}
 			return version
@@ -56,7 +57,6 @@ func NewBuildInfo(version string, srcHash string, buildDate string) (bool, Build
 			srcHash = strings.TrimSpace(srcHash)
 			pattern := regexp.MustCompile(`^[a-fA-F0-9]{7,}$`)
 			if !pattern.MatchString(srcHash) {
-				isValid = false
 				return "???????"
 			}
 			return strings.ToLower(srcHash[:7])
@@ -65,11 +65,9 @@ func NewBuildInfo(version string, srcHash string, buildDate string) (bool, Build
 			buildDate = strings.TrimSpace(buildDate)
 			pattern := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}(T.*)?$`)
 			if !pattern.MatchString(buildDate) {
-				isValid = false
 				return "????-??-??"
 			}
 			return buildDate[:10]
 		}(),
 	}
-	return isValid, v
 }
