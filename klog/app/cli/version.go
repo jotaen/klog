@@ -10,6 +10,7 @@ import (
 	"github.com/jotaen/klog/klog"
 	"github.com/jotaen/klog/klog/app"
 	"github.com/jotaen/klog/klog/app/cli/args"
+	"github.com/jotaen/klog/klog/app/cli/prettify"
 )
 
 type Version struct {
@@ -37,17 +38,22 @@ var versionFetchers = []versionFetcher{
 
 func (opt *Version) Run(ctx app.Context) app.Error {
 	buildInfo := ctx.Meta().BuildInfo
-	if !buildInfo.IsDetermined() {
-		return app.NewError(
-			"Version unknown",
-			"There is no version information embedded into your binary.",
-			nil,
-		)
-	}
 
 	if opt.Quiet {
+		if !buildInfo.IsDetermined() {
+			return app.NewError(
+				"Version unknown",
+				"There is no version information embedded into your binary.",
+				nil,
+			)
+		}
 		ctx.Print(buildInfo.Version + "\n")
 		return nil
+	}
+
+	if !buildInfo.IsDetermined() {
+		styler, _ := ctx.Serialise()
+		ctx.Print(prettify.PrettifyWarning("There is no version information embedded in your klog binary\n", styler))
 	}
 
 	ctx.Print("Command line tool: " + buildInfo.Version)
