@@ -108,12 +108,12 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 
 func progressTicker(onTick func(), stop chan bool) {
 	ticker := time.NewTicker(500 * time.Millisecond)
+	defer ticker.Stop()
 	for i := 1; i <= 20; i++ {
 		select {
 		case <-ticker.C:
 			onTick()
 		case <-stop:
-			ticker.Stop()
 			return
 		}
 	}
@@ -130,16 +130,15 @@ func fetchVersionInfo(fetcher versionFetcher) (app.BuildInfo, error) {
 	if err != nil {
 		return app.BuildInfo{}, err
 	}
+	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		_ = res.Body.Close()
 		return app.BuildInfo{}, errors.New("HTTP-call resulted in status code " + strconv.Itoa(res.StatusCode))
 	}
 	body, err := io.ReadAll(io.LimitReader(res.Body, 512*1024))
-	_ = res.Body.Close()
 	if err != nil {
 		return app.BuildInfo{}, err
 	}
-	err = json.Unmarshal(body, &fetcher)
+	err = json.Unmarshal(body, fetcher)
 	if err != nil {
 		return app.BuildInfo{}, err
 	}
