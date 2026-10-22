@@ -14,14 +14,22 @@ type Meta struct {
 	// License contains the license text.
 	License string
 
+	BuildInfo BuildInfo
+}
+
+type BuildInfo struct {
 	// Version contains the release version, e.g. `v2.7`.
 	Version string
 
 	// SrcHash contains the hash of the sources that the binary was built from.
 	SrcHash string
 
-	// BuildDate is the date at which the binary was built, e.g. `2026-10-19`.
-	BuildDate string
+	// Date is the date at which the binary was built, e.g. `2026-10-19`.
+	Date string
+}
+
+func (b BuildInfo) IsOk() bool {
+	return b.Version != "v?.?" && b.SrcHash != "???????"
 }
 
 // NewMeta creates a meta info object from input strings. For invalid values, it
@@ -31,9 +39,15 @@ func NewMeta(specification string, license string, version string, srcHash strin
 	return Meta{
 		Specification: specification,
 		License:       license,
+		BuildInfo:     NewBuildInfo(version, srcHash, buildDate),
+	}
+}
+
+func NewBuildInfo(version string, srcHash string, buildDate string) BuildInfo {
+	return BuildInfo{
 		Version: func() string {
 			version = strings.TrimSpace(version)
-			pattern := regexp.MustCompile(`^v\d+\.\d+([.-].+)?$`)
+			pattern := regexp.MustCompile(`^v\d+\.\d+([.-][a-zA-Z0-9.\-_]{1,100})?$`)
 			if !pattern.MatchString(version) {
 				return "v?.?"
 			}
@@ -47,7 +61,7 @@ func NewMeta(specification string, license string, version string, srcHash strin
 			}
 			return strings.ToLower(srcHash[:7])
 		}(),
-		BuildDate: func() string {
+		Date: func() string {
 			buildDate = strings.TrimSpace(buildDate)
 			pattern := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}(T.*)?$`)
 			if !pattern.MatchString(buildDate) {

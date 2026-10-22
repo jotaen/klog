@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/jotaen/klog/klog"
@@ -26,13 +25,19 @@ If you don’t use a package manager for managing your klog installation, you ca
 
 const KLOG_WEBSITE_URL = "https://klog.jotaen.net"
 
-var versionCheckers = []versionChecker{
-	{"https://klog.jotaen.net/versions/latest.json", &versionFromJotaen{}},
-	{"https://api.github.com/repos/jotaen/klog/releases/latest", &versionFromGithub{}},
+type versionFetcher interface {
+	url() string
+	decode() app.BuildInfo
+}
+
+var versionFetchers = []versionFetcher{
+	&versionFromJotaen{},
+	&versionFromGithub{},
 }
 
 func (opt *Version) Run(ctx app.Context) app.Error {
-	if ctx.Meta().Version == "" {
+	buildInfo := ctx.Meta().BuildInfo
+	if !buildInfo.IsOk() {
 		return app.NewError(
 			"Cannot check version",
 			"There is no version information embedded in your binary. Please check manually for updates on "+KLOG_WEBSITE_URL,
@@ -41,11 +46,11 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 	}
 
 	if opt.Quiet {
-		ctx.Print(ctx.Meta().Version + "\n")
+		ctx.Print(buildInfo.Version + "\n")
 		return nil
 	}
-	ctx.Print("Command line tool: " + ctx.Meta().Version)
-	ctx.Print(fmt.Sprintf("  [%s, %s]\n", ctx.Meta().SrcHash, ctx.Meta().BuildDate))
+	ctx.Print("Command line tool: " + buildInfo.Version)
+	ctx.Print(fmt.Sprintf("  [%s, %s]\n", buildInfo.SrcHash, buildInfo.Date))
 	ctx.Print("File format: version " + klog.SPEC_VERSION + "\n")
 
 	if opt.NoCheck {
@@ -58,10 +63,10 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 		ctx.Print(".")
 	}, stopTicker)
 
-	origin, v := fetchVersionInfo(versionCheckers)
+	fetchUrl, latestRelease := fetchVersionInfo(versionFetchers)
 	close(stopTicker)
 	ctx.Print("\n")
-	if v == nil {
+	if fetchUrl == "" {
 		return app.NewError(
 			"Failed to retrieve version information.",
 			"Please try again later, or check manually at "+KLOG_WEBSITE_URL,
@@ -70,32 +75,16 @@ func (opt *Version) Run(ctx app.Context) app.Error {
 	}
 
 	ctx.Debug(func() {
-		ctx.Print("Fetched from: " + origin.url + "\n")
+		ctx.Print("Fetched from: " + fetchUrl + "\n")
 	})
-	if v.Version() == ctx.Meta().Version && ctx.Meta().SrcHash == v.SrcHash() {
+
+	if latestRelease.Version == buildInfo.Version && latestRelease.SrcHash == buildInfo.SrcHash {
 		ctx.Print("You already have the latest version!\n")
 	} else {
-		ctx.Print(fmt.Sprintf("New version available: %s  [%s, %s]\n", v.Version(), v.SrcHash(), v.BuildDate()))
-		downloadLinkPath := ""
-		if v.DownloadLinkPath() != "" {
-			downloadLinkPath = "/" + v.DownloadLinkPath()
-		}
-		ctx.Print("See: " + KLOG_WEBSITE_URL + downloadLinkPath + "\n")
+		ctx.Print(fmt.Sprintf("New version available: %s  [%s, %s]\n", latestRelease.Version, latestRelease.SrcHash, latestRelease.Date))
+		ctx.Print("See: " + KLOG_WEBSITE_URL + "\n")
 	}
 	return nil
-}
-
-type versionInfo interface {
-	Version() string
-	SrcHash() string
-	BuildDate() string
-	DownloadLinkPath() string
-	IsValid() bool
-}
-
-type versionChecker struct {
-	url       string
-	structure versionInfo
 }
 
 func progressTicker(onTick func(), stop chan bool) {
@@ -113,9 +102,9 @@ func progressTicker(onTick func(), stop chan bool) {
 
 // fetchVersionInfo requests version info from the origins by trying them
 // one after the other. It returns the first response that succeeds.
-func fetchVersionInfo(origins []versionChecker) (*versionChecker, versionInfo) {
-	for _, origin := range origins {
-		req, err := http.NewRequest(http.MethodGet, origin.url, nil)
+func fetchVersionInfo(fetcher []versionFetcher) (string, app.BuildInfo) {
+	for _, origin := range fetcher {
+		req, err := http.NewRequest(http.MethodGet, origin.url(), nil)
 		if err != nil {
 			continue
 		}
@@ -129,36 +118,28 @@ func fetchVersionInfo(origins []versionChecker) (*versionChecker, versionInfo) {
 		if err != nil {
 			continue
 		}
-		v := origin.structure
-		err = json.Unmarshal(body, &v)
-		if err != nil || !v.IsValid() {
+		err = json.Unmarshal(body, &origin)
+		if err != nil {
 			continue
 		}
-		return &origin, v
+		return origin.url(), origin.decode()
 	}
-	return nil, nil
+	return "", app.NewBuildInfo("", "", "")
 }
 
 // versionFromJotaen checks the version via klog.jotaen.net
 type versionFromJotaen struct {
-	Version_          string `json:"version"`
-	BuildHash_        string `json:"src_hash"`
-	ReleaseDate_      string `json:"release_date"`
-	DownloadLinkPath_ string `json:"download_link_path"`
+	Version_     string `json:"version"`
+	BuildHash_   string `json:"src_hash"`
+	ReleaseDate_ string `json:"release_date"`
 }
 
-func (v *versionFromJotaen) Version() string { return v.Version_ }
-func (v *versionFromJotaen) SrcHash() string {
-	if len(v.BuildHash_) < 7 {
-		return ""
-	}
-	return v.BuildHash_[:7]
+func (v *versionFromJotaen) url() string {
+	return "https://klog.jotaen.net/versions/latest.json"
 }
-func (v *versionFromJotaen) DownloadLinkPath() string { return v.DownloadLinkPath_ }
-func (v *versionFromJotaen) IsValid() bool {
-	return strings.HasPrefix(v.Version_, "v") && len(v.BuildHash_) >= 7
+func (v *versionFromJotaen) decode() app.BuildInfo {
+	return app.NewBuildInfo(v.Version_, v.BuildHash_, v.ReleaseDate_)
 }
-func (v *versionFromJotaen) BuildDate() string { return v.ReleaseDate_ }
 
 // versionFromGithub checks the version via github.com
 type versionFromGithub struct {
@@ -167,23 +148,9 @@ type versionFromGithub struct {
 	CreatedAt  string `json:"created_at"` // Refers to the build date, not the publishing date.
 }
 
-func (v *versionFromGithub) Version() string { return v.Tag }
-func (v *versionFromGithub) SrcHash() string {
-	if len(v.CommitHash) < 7 {
-		return v.CommitHash
-	}
-	return v.CommitHash[:7]
+func (v *versionFromGithub) url() string {
+	return "https://api.github.com/repos/jotaen/klog/releases/latest"
 }
-func (v *versionFromGithub) DownloadLinkPath() string {
-	return ""
-}
-func (v *versionFromGithub) IsValid() bool {
-	return strings.HasPrefix(v.Tag, "v") && len(v.CommitHash) >= 7
-}
-func (v *versionFromGithub) BuildDate() string {
-	t, err := time.Parse(time.RFC3339, v.CreatedAt)
-	if err != nil {
-		return "????-??-??"
-	}
-	return t.UTC().Format(time.DateOnly)
+func (v *versionFromGithub) decode() app.BuildInfo {
+	return app.NewBuildInfo(v.Tag, v.CommitHash, v.CreatedAt)
 }

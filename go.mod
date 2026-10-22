@@ -1,6 +1,6 @@
 module github.com/jotaen/klog
 
-go 1.27
+go 1.27.3
 
 require (
 	cloud.google.com/go v0.123.0

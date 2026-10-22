@@ -11,18 +11,18 @@ func TestCreateMeta(t *testing.T) {
 	m := NewMeta("Specification", "License", "v1.0", "1234abc", "2000-12-31")
 	assert.Equal(t, "Specification", m.Specification)
 	assert.Equal(t, "License", m.License)
-	assert.Equal(t, "v1.0", m.Version)
-	assert.Equal(t, "1234abc", m.SrcHash)
-	assert.Equal(t, "2000-12-31", m.BuildDate)
+	assert.Equal(t, "v1.0", m.BuildInfo.Version)
+	assert.Equal(t, "1234abc", m.BuildInfo.SrcHash)
+	assert.Equal(t, "2000-12-31", m.BuildInfo.Date)
 }
 
 func TestCreateMetaTrimsWhiteSpace(t *testing.T) {
 	m := NewMeta("Specification", "License", "   v1.0   ", "  1234abc  ", " 2000-12-31 ")
 	assert.Equal(t, "Specification", m.Specification)
 	assert.Equal(t, "License", m.License)
-	assert.Equal(t, "v1.0", m.Version)
-	assert.Equal(t, "1234abc", m.SrcHash)
-	assert.Equal(t, "2000-12-31", m.BuildDate)
+	assert.Equal(t, "v1.0", m.BuildInfo.Version)
+	assert.Equal(t, "1234abc", m.BuildInfo.SrcHash)
+	assert.Equal(t, "2000-12-31", m.BuildInfo.Date)
 }
 
 func TestAcceptsValidVersion(t *testing.T) {
@@ -35,12 +35,17 @@ func TestAcceptsValidVersion(t *testing.T) {
 		"v2.5910",
 		"v28372.5910",
 		"v5.23-alpha",
+		"v5.23-veryLongButStillOkVeryLongButStillOkVeryLongButStillOkVeryLongButStillOkVeryLongButStillOkVeryLongBu",
 		"v5.23.42-alpha",
-		"v5.23.42-alpha_SOMETHING&$^%!*@&#",
+		"v5.23.42-alpha_SOMETHING.-_",
 	} {
 		t.Run(in, func(t *testing.T) {
+			expected := in
 			m := NewMeta("Specification", "License", in, "1234abc", "2000-12-31")
-			assert.Equal(t, in, m.Version)
+			assert.Equal(t, expected, m.BuildInfo.Version)
+			mv := NewBuildInfo(in, "1234abc", "2000-12-31")
+			assert.True(t, mv.IsOk())
+			assert.Equal(t, expected, mv.Version)
 		})
 	}
 }
@@ -56,10 +61,19 @@ func TestRejectsInvalidVersion(t *testing.T) {
 		"v1.2-",
 		"v.12",
 		"v1.22alpha",
+		"v1.22-something#",
+		"v1.22-something?",
+		"v1.22-tooLongTooLongTooLongTooLongTooLongTooLongTooLongTooLongTooLongTooLongTooLongTooLongTooLongTooLongToo",
+		"v1.2\x1b[2K",
+		"v1.2\nfoo",
 	} {
 		t.Run(in, func(t *testing.T) {
+			expected := "v?.?"
 			m := NewMeta("Specification", "License", in, "1234abc", "2000-12-31")
-			assert.Equal(t, "v?.?", m.Version)
+			assert.Equal(t, expected, m.BuildInfo.Version)
+			mv := NewBuildInfo(in, "1234abc", "2000-12-31")
+			assert.False(t, mv.IsOk())
+			assert.Equal(t, expected, mv.Version)
 		})
 	}
 }
@@ -74,8 +88,12 @@ func TestAcceptsValidSrcHash(t *testing.T) {
 		"7a4f7b6b0749adb164aa6ac67dee9ba6556f261e",
 	} {
 		t.Run(in, func(t *testing.T) {
+			expected := strings.ToLower(in[:7])
 			m := NewMeta("Specification", "License", "v1.2", in, "2000-12-31")
-			assert.Equal(t, strings.ToLower(in[:7]), m.SrcHash)
+			assert.Equal(t, expected, m.BuildInfo.SrcHash)
+			mv := NewBuildInfo("v1.2", in, "2000-12-31")
+			assert.True(t, mv.IsOk())
+			assert.Equal(t, expected, mv.SrcHash)
 		})
 	}
 }
@@ -88,10 +106,16 @@ func TestRejectsInvalidSrcHash(t *testing.T) {
 		"123456g",
 		"abcdefghijklmnopqrst",
 		"&^@!#@(*#&!*@&",
+		"1234567\x1b[2K",
+		"1234567\nfoo",
 	} {
 		t.Run(in, func(t *testing.T) {
+			expected := "???????"
 			m := NewMeta("Specification", "License", "v1.2", in, "2000-12-31")
-			assert.Equal(t, "???????", m.SrcHash)
+			assert.Equal(t, expected, m.BuildInfo.SrcHash)
+			mv := NewBuildInfo("v1.2", in, "2000-12-31")
+			assert.False(t, mv.IsOk())
+			assert.Equal(t, expected, mv.SrcHash)
 		})
 	}
 }
@@ -106,8 +130,12 @@ func TestAcceptsValidBuildDate(t *testing.T) {
 		"2000-12-31Tanything",
 	} {
 		t.Run(in, func(t *testing.T) {
+			expected := in[:10]
 			m := NewMeta("Specification", "License", "v1.2", "1234567", in)
-			assert.Equal(t, in[:10], m.BuildDate)
+			assert.Equal(t, expected, m.BuildInfo.Date)
+			mv := NewBuildInfo("v1.2", "1234567", in)
+			assert.True(t, mv.IsOk())
+			assert.Equal(t, expected, mv.Date)
 		})
 	}
 }
@@ -120,10 +148,16 @@ func TestRejectsInvalidBuildDate(t *testing.T) {
 		"2000 12 31",
 		"2000/12/31",
 		"abcd-ef-gh",
+		"0001-\x1b[2K",
+		"0001-01-\n",
 	} {
 		t.Run(in, func(t *testing.T) {
+			expected := "????-??-??"
 			m := NewMeta("Specification", "License", "v1.2", "1234567", in)
-			assert.Equal(t, "????-??-??", m.BuildDate)
+			assert.Equal(t, expected, m.BuildInfo.Date)
+			mv := NewBuildInfo("v1.2", "1234567", in)
+			assert.True(t, mv.IsOk()) // `true` is correct, since the date is only informational.
+			assert.Equal(t, expected, mv.Date)
 		})
 	}
 }
