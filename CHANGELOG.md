@@ -1,6 +1,8 @@
 # Changelog
 **Summary of changes of the command line tool**
 
+## vX.X (XXXX-XX-XX)
+
 ## v7.2 (2026-10-26)
 - **[ NOTICE ]** Some (potentially build-breaking!) updates around the build process:
   - The naming scheme of the zipped release artifacts have changed,
