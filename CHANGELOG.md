@@ -2,6 +2,8 @@
 **Summary of changes of the command line tool**
 
 ## vX.X (XXXX-XX-XX)
+- **[ FIX ]** Resolve flickering issue in certain terminals when using commands that
+  support `--follow` mode.
 
 ## v7.2 (2026-10-26)
 - **[ NOTICE ]** Some (potentially build-breaking!) updates around the build process:
